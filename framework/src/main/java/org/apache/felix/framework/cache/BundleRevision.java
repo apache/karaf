@@ -139,5 +139,5 @@ public abstract class BundleRevision
      * </p>
      * @throws Exception if any error occurs.
     **/
-    public abstract void dispose() throws Exception;
+    protected abstract void close() throws Exception;
 }

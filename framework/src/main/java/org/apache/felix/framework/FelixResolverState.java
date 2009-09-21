@@ -468,9 +468,6 @@ public class FelixResolverState implements Resolver.ResolverState
             // of its dependent modules.
             ((ModuleImpl) module).setWires(null);
         }
-
-        // Close the module's content.
-        ((ModuleImpl) module).close();
     }
 
     /**

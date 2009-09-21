@@ -24,10 +24,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.util.JarFileX;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IContent;
@@ -48,6 +48,7 @@ class JarRevision extends BundleRevision
     private static final transient String BUNDLE_JAR_FILE = "bundle.jar";
 
     private File m_bundleFile = null;
+    private final JarFileX m_jarFile;
 
     public JarRevision(
         Logger logger, Map configMap, File revisionRootDir,
@@ -77,13 +78,9 @@ class JarRevision extends BundleRevision
 
         // Save and process the bundle JAR.
         initialize(byReference, is);
-    }
 
-    public synchronized Map getManifestHeader() throws Exception
-    {
-        // Get the embedded resource.
-        JarFile jarFile = null;
-
+        // Open shared copy of the JAR file.
+        JarFileX jarFile = null;
         try
         {
             // Open bundle JAR file.
@@ -93,27 +90,32 @@ class JarRevision extends BundleRevision
             {
                 throw new IOException("No JAR file found.");
             }
-            // Get manifest.
-            Manifest mf = jarFile.getManifest();
-            // Create a case insensitive map of manifest attributes.
-            return new StringMap(mf.getMainAttributes(), false);
+            m_jarFile = jarFile;
         }
-        finally
+        catch (Exception ex)
         {
             if (jarFile != null) jarFile.close();
+            throw ex;
         }
+    }
+
+    public Map getManifestHeader() throws Exception
+    {
+        // Get the embedded resource.
+        Manifest mf = m_jarFile.getManifest();
+        // Create a case insensitive map of manifest attributes.
+        return new StringMap(mf.getMainAttributes(), false);
     }
 
     public synchronized IContent getContent() throws Exception
     {
-        return new JarContent(getLogger(), getConfig(), this, getRevisionRootDir(), m_bundleFile);
+        return new JarContent(getLogger(), getConfig(), this, getRevisionRootDir(),
+            m_bundleFile, m_jarFile);
     }
 
-    public void dispose() throws Exception
+    protected void close() throws Exception
     {
-        // Nothing to dispose of, since we don't maintain any state outside
-        // of the revision directory, which will be automatically deleted
-        // by the parent bundle archive.
+        m_jarFile.close();
     }
 
     //
@@ -125,49 +127,45 @@ class JarRevision extends BundleRevision
     {
         try
         {
-            // If the revision directory exists, then we don't
-            // need to initialize since it has already been done.
-            if (BundleCache.getSecureAction().fileExists(getRevisionRootDir()))
+            // If the revision directory does not exist, then create it.
+            if (!BundleCache.getSecureAction().fileExists(getRevisionRootDir()))
             {
-                return;
-            }
-
-            // Create revision directory.
-            if (!BundleCache.getSecureAction().mkdir(getRevisionRootDir()))
-            {
-                getLogger().log(
-                    Logger.LOG_ERROR,
-                    getClass().getName() + ": Unable to create revision directory.");
-                throw new IOException("Unable to create archive directory.");
-            }
-
-            if (!byReference)
-            {
-                if (is == null)
+                if (!BundleCache.getSecureAction().mkdir(getRevisionRootDir()))
                 {
-                    // Do it the manual way to have a chance to
-                    // set request properties such as proxy auth.
-                    URL url = new URL(getLocation());
-                    URLConnection conn = url.openConnection();
-
-                    // Support for http proxy authentication.
-                    String auth = BundleCache.getSecureAction()
-                        .getSystemProperty("http.proxyAuth", null);
-                    if ((auth != null) && (auth.length() > 0))
-                    {
-                        if ("http".equals(url.getProtocol()) ||
-                            "https".equals(url.getProtocol()))
-                        {
-                            String base64 = Util.base64Encode(auth);
-                            conn.setRequestProperty(
-                                "Proxy-Authorization", "Basic " + base64);
-                        }
-                    }
-                    is = BundleCache.getSecureAction().getURLConnectionInputStream(conn);
+                    getLogger().log(
+                        Logger.LOG_ERROR,
+                        getClass().getName() + ": Unable to create revision directory.");
+                    throw new IOException("Unable to create archive directory.");
                 }
 
-                // Save the bundle jar file.
-                BundleCache.copyStreamToFile(is, m_bundleFile);
+                if (!byReference)
+                {
+                    if (is == null)
+                    {
+                        // Do it the manual way to have a chance to
+                        // set request properties such as proxy auth.
+                        URL url = new URL(getLocation());
+                        URLConnection conn = url.openConnection();
+
+                        // Support for http proxy authentication.
+                        String auth = BundleCache.getSecureAction()
+                            .getSystemProperty("http.proxyAuth", null);
+                        if ((auth != null) && (auth.length() > 0))
+                        {
+                            if ("http".equals(url.getProtocol()) ||
+                                "https".equals(url.getProtocol()))
+                            {
+                                String base64 = Util.base64Encode(auth);
+                                conn.setRequestProperty(
+                                    "Proxy-Authorization", "Basic " + base64);
+                            }
+                        }
+                        is = BundleCache.getSecureAction().getURLConnectionInputStream(conn);
+                    }
+
+                    // Save the bundle jar file.
+                    BundleCache.copyStreamToFile(is, m_bundleFile);
+                }
             }
         }
         finally

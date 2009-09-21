@@ -23,7 +23,6 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.security.*;
 import java.util.Hashtable;
-import java.util.jar.JarFile;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -541,33 +540,6 @@ public class SecureAction
         }
     }
 
-    public JarFile getJarURLConnectionJAR(JarURLConnection connection)
-        throws IOException
-    {
-        if (System.getSecurityManager() != null)
-        {
-            try
-            {
-                Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.GET_JARURLCONNECTION_JAR_ACTION, connection);
-                return (JarFile) AccessController.doPrivileged(actions,
-                    m_acc);
-            }
-            catch (PrivilegedActionException ex)
-            {
-                if (ex.getException() instanceof IOException)
-                {
-                    throw (IOException) ex.getException();
-                }
-                throw (RuntimeException) ex.getException();
-            }
-        }
-        else
-        {
-            return connection.getJarFile();
-        }
-    }
-
     public JarFileX openJAR(File file) throws IOException
     {
         if (System.getSecurityManager() != null)
@@ -1045,7 +1017,6 @@ public class SecureAction
         public static final int GET_FIELD_ACTION = 15;
         public static final int GET_FILE_INPUT_ACTION = 16;
         public static final int GET_FILE_OUTPUT_ACTION = 17;
-        public static final int GET_JARURLCONNECTION_JAR_ACTION = 18;
         public static final int GET_METHOD_ACTION = 19;
         public static final int GET_POLICY_ACTION = 20;
         public static final int GET_PROPERTY_ACTION = 21;
@@ -1256,10 +1227,6 @@ public class SecureAction
             else if (action == OPEN_URLCONNECTION_ACTION)
             {
                 return ((URL) arg1).openConnection();
-            }
-            else if (action == GET_JARURLCONNECTION_JAR_ACTION)
-            {
-                return ((JarURLConnection) arg1).getJarFile();
             }
             else if (action == ADD_EXTENSION_URL)
             {

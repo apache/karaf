@@ -99,9 +99,9 @@ class DirectoryRevision extends BundleRevision
         return new DirectoryContent(getLogger(), getConfig(), this, getRevisionRootDir(), m_refDir);
     }
 
-    public void dispose() throws Exception
+    protected void close() throws Exception
     {
-        // Nothing to dispose of, since we don't maintain any state outside
+        // Nothing to close since we don't maintain any state outside
         // of the revision directory, which will be automatically deleted
         // by the parent bundle archive.
     }

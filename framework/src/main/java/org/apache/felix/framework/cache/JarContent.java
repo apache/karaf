@@ -23,7 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -46,16 +45,20 @@ public class JarContent implements IContent
     private final Object m_revisionLock;
     private final File m_rootDir;
     private final File m_file;
-    private JarFileX m_jarFile = null;
+    private final JarFileX m_jarFile;
+    private final boolean m_isJarFileOwner;
     private int m_libCount = 0;
 
-    public JarContent(Logger logger, Map configMap, Object revisionLock, File rootDir, File file)
+    public JarContent(Logger logger, Map configMap, Object revisionLock, File rootDir,
+        File file, JarFileX jarFile)
     {
         m_logger = logger;
         m_configMap = configMap;
         m_revisionLock = revisionLock;
         m_rootDir = rootDir;
         m_file = file;
+        m_jarFile = (jarFile == null) ? openJarFile(m_file) : jarFile;
+        m_isJarFileOwner = (jarFile == null);
     }
 
     protected void finalize()
@@ -63,11 +66,11 @@ public class JarContent implements IContent
         close();
     }
 
-    public synchronized void close()
+    public void close()
     {
         try
         {
-            if (m_jarFile != null)
+            if (m_isJarFileOwner)
             {
                 m_jarFile.close();
             }
@@ -76,20 +79,12 @@ public class JarContent implements IContent
         {
             m_logger.log(
                 Logger.LOG_ERROR,
-                "JarContent: Unable to open JAR file.", ex);
+                "JarContent: Unable to close JAR file.", ex);
         }
-
-        m_jarFile = null;
     }
 
-    public synchronized boolean hasEntry(String name) throws IllegalStateException
+    public boolean hasEntry(String name) throws IllegalStateException
     {
-        // Open JAR file if not already opened.
-        if (m_jarFile == null)
-        {
-            openJarFile();
-        }
-
         try
         {
             ZipEntry ze = m_jarFile.getEntry(name);
@@ -104,14 +99,8 @@ public class JarContent implements IContent
         }
     }
 
-    public synchronized Enumeration getEntries()
+    public Enumeration getEntries()
     {
-        // Open JAR file if not already opened.
-        if (m_jarFile == null)
-        {
-            openJarFile();
-        }
-
         // Wrap entries enumeration to filter non-matching entries.
         Enumeration e = new EntriesEnumeration(m_jarFile.entries());
 
@@ -119,14 +108,8 @@ public class JarContent implements IContent
         return (e.hasMoreElements()) ? e : null;
     }
 
-    public synchronized byte[] getEntryAsBytes(String name) throws IllegalStateException
+    public byte[] getEntryAsBytes(String name) throws IllegalStateException
     {
-        // Open JAR file if not already opened.
-        if (m_jarFile == null)
-        {
-            openJarFile();
-        }
-
         // Get the embedded resource.
         InputStream is = null;
         ByteArrayOutputStream baos = null;
@@ -179,15 +162,9 @@ public class JarContent implements IContent
         }
     }
 
-    public synchronized InputStream getEntryAsStream(String name)
+    public InputStream getEntryAsStream(String name)
         throws IllegalStateException, IOException
     {
-        // Open JAR file if not already opened.
-        if (m_jarFile == null)
-        {
-            openJarFile();
-        }
-
         // Get the embedded resource.
         InputStream is = null;
 
@@ -212,20 +189,14 @@ public class JarContent implements IContent
         return is;
     }
 
-    public synchronized IContent getEntryAsContent(String entryName)
+    public IContent getEntryAsContent(String entryName)
     {
-        // Open JAR file if not already opened.
-        if (m_jarFile == null)
-        {
-            openJarFile();
-
-        }
-
         // If the entry name refers to the content itself, then
         // just return it immediately.
         if (entryName.equals(FelixConstants.CLASS_PATH_DOT))
         {
-            return new JarContent(m_logger, m_configMap, m_revisionLock, m_rootDir, m_file);
+            return new JarContent(m_logger, m_configMap, m_revisionLock,
+                m_rootDir, m_file, m_jarFile);
         }
 
         // Remove any leading slash.
@@ -291,7 +262,7 @@ public class JarContent implements IContent
             }
             return new JarContent(
                 m_logger, m_configMap, m_revisionLock,
-                extractJar.getParentFile(), extractJar);
+                extractJar.getParentFile(), extractJar, null);
         }
 
         // The entry could not be found, so return null.
@@ -299,16 +270,10 @@ public class JarContent implements IContent
     }
 
 // TODO: This will need to consider security.
-    public synchronized String getEntryAsNativeLibrary(String entryName)
+    public String getEntryAsNativeLibrary(String entryName)
     {
         // Return result.
         String result = null;
-
-        // Open JAR file if not already opened.
-        if (m_jarFile == null)
-        {
-            openJarFile();
-        }
 
         // Remove any leading slash.
         entryName = (entryName.startsWith("/")) ? entryName.substring(1) : entryName;
@@ -374,10 +339,13 @@ public class JarContent implements IContent
                                     props.setProperty("abspath", libFile.toString());
                                     command = Util.substVars(command, "command", null, props);
                                     Process p = BundleCache.getSecureAction().exec(command);
-                                    // We have to make sure we read stdout and stderr because otherwise
-                                    // we will block on certain unbuffered os's (like eg. windows)
-                                    Thread stdOut = new Thread(new DevNullRunnable(p.getInputStream()));
-                                    Thread stdErr = new Thread(new DevNullRunnable(p.getErrorStream()));
+                                    // We have to make sure we read stdout and stderr because
+                                    // otherwise we will block on certain unbuffered os's
+                                    // (like eg. windows)
+                                    Thread stdOut = new Thread(
+                                        new DevNullRunnable(p.getInputStream()));
+                                    Thread stdErr = new Thread(
+                                        new DevNullRunnable(p.getErrorStream()));
                                     stdOut.setDaemon(true);
                                     stdErr.setDaemon(true);
                                     stdOut.start();
@@ -426,24 +394,9 @@ public class JarContent implements IContent
         return "JAR " + m_file.getPath();
     }
 
-    public synchronized File getFile()
+    public File getFile()
     {
         return m_file;
-    }
-
-    private void openJarFile() throws RuntimeException
-    {
-        if (m_jarFile == null)
-        {
-            try
-            {
-                m_jarFile = BundleCache.getSecureAction().openJAR(m_file, false);
-            }
-            catch (IOException ex)
-            {
-                throw new RuntimeException("Unable to open JAR file, probably deleted: " + ex.getMessage());
-            }
-        }
     }
 
     /**
@@ -506,6 +459,19 @@ public class JarContent implements IContent
             {
                 if (is != null) is.close();
             }
+        }
+    }
+
+    private static JarFileX openJarFile(File file) throws RuntimeException
+    {
+        try
+        {
+            return BundleCache.getSecureAction().openJAR(file, false);
+        }
+        catch (IOException ex)
+        {
+            throw new RuntimeException(
+                "Unable to open JAR file, probably deleted: " + ex.getMessage());
         }
     }
 

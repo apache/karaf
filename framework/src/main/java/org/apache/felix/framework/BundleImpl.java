@@ -44,9 +44,6 @@ class BundleImpl implements Bundle
     private final Map m_cachedHeaders = new HashMap();
     private long m_cachedHeadersTimestamp;
 
-    // Indicates whether the bundle has been updated/uninstalled
-    // and is waiting to be refreshed.
-    private boolean m_removalPending = false;
     // Indicates whether the bundle is stale, meaning that it has
     // been refreshed and completely removed from the framework.
     private boolean m_stale = false;
@@ -92,7 +89,41 @@ class BundleImpl implements Bundle
         return __m_felix;
     }
 
-    synchronized void dispose()
+    BundleArchive getArchive()
+    {
+        return m_archive;
+    }
+
+    synchronized void close()
+    {
+        closeModules();
+        // System bundle has no archive associated with it.
+        if (m_archive != null)
+        {
+            try
+            {
+                m_archive.close();
+            }
+            catch (Exception ex)
+            {
+                getFramework().getLogger().log(
+                    Logger.LOG_ERROR,
+                    "Unable to close archive revisions.", ex);
+            }
+        }
+    }
+
+    synchronized void closeAndDelete() throws Exception
+    {
+        // Mark the bundle as stale, since it is being deleted.
+        m_stale = true;
+        // Close all modules.
+        closeModules();
+        // Delete bundle archive, which will close revisions.
+        m_archive.closeAndDelete();
+    }
+
+    private void closeModules()
     {
         // Remove the bundle's associated modules from the resolver state
         // and close them.
@@ -113,7 +144,7 @@ class BundleImpl implements Bundle
         else
         {
             // Dispose of the current modules.
-            dispose();
+            closeModules();
 
             // Now we will purge all old revisions, only keeping the newest one.
             m_archive.purge();
@@ -127,7 +158,6 @@ class BundleImpl implements Bundle
             m_stale = false;
             m_cachedHeaders.clear();
             m_cachedHeadersTimestamp = 0;
-            m_removalPending = false;
         }
     }
 
@@ -804,11 +834,6 @@ class BundleImpl implements Bundle
         return m_stale;
     }
 
-    synchronized void setStale()
-    {
-        m_stale = true;
-    }
-
     synchronized boolean isExtension()
     {
         for (int i = (m_modules.length - 1); i > -1; i--)
@@ -962,12 +987,7 @@ class BundleImpl implements Bundle
 
     synchronized boolean isRemovalPending()
     {
-        return m_removalPending;
-    }
-
-    synchronized void setRemovalPending(boolean removalPending)
-    {
-        m_removalPending = removalPending;
+        return (m_state == Bundle.UNINSTALLED) || (m_modules.length > 1)  || m_stale;
     }
 
     //

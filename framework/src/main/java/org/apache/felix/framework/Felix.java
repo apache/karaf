@@ -94,9 +94,6 @@ public class Felix extends BundleImpl implements Framework
     // Framework's active start level.
     private volatile int m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
 
-    // Local file system cache.
-    private BundleCache m_cache = null;
-
     // System bundle activator list.
     List m_activatorList = null;
 
@@ -490,6 +487,7 @@ public class Felix extends BundleImpl implements Framework
 
                 // Create the bundle cache, if necessary, so that we can reload any
                 // installed bundles.
+/* TODO: CACHE - FIX
                 m_cache = (BundleCache) m_configMutableMap.get(
                     FelixConstants.FRAMEWORK_BUNDLECACHE_IMPL);
                 if (m_cache == null)
@@ -504,18 +502,18 @@ public class Felix extends BundleImpl implements Framework
                            throw new BundleException("Error creating bundle cache.", ex);
                        }
                 }
-
+*/
                 // If this is the first time init is called, check to see if
                 // we need to flush the bundle cache.
                 if (getState() == Bundle.INSTALLED)
                 {
-                    String flush = (String) m_configMap.get(Constants.FRAMEWORK_STORAGE_CLEAN);
-                    if ((flush != null)
-                        && flush.equalsIgnoreCase(Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT))
+                    String clean = (String) m_configMap.get(Constants.FRAMEWORK_STORAGE_CLEAN);
+                    if ((clean != null)
+                        && clean.equalsIgnoreCase(Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT))
                     {
                         try
                         {
-                            m_cache.flush();
+                            BundleCache.delete(m_logger, m_configMap);
                         }
                         catch (Exception ex)
                         {
@@ -555,7 +553,7 @@ public class Felix extends BundleImpl implements Framework
                 // First get cached bundle identifiers.
                 try
                 {
-                    archives = m_cache.getArchives();
+                    archives = BundleCache.getArchives(m_logger, m_configMap);
                 }
                 catch (Exception ex)
                 {
@@ -580,13 +578,14 @@ public class Felix extends BundleImpl implements Framework
                         // it now.
                         if (archives[i].getPersistentState() == Bundle.UNINSTALLED)
                         {
-                            m_cache.remove(archives[i]);
+                            archives[i].closeAndDelete();
                         }
                         // Otherwise re-install the cached bundle.
                         else
                         {
                             // Install the cached bundle.
-                            installBundle(archives[i].getId(), archives[i].getLocation(), null);
+                            installBundle(
+                                archives[i].getId(), archives[i].getLocation(), archives[i], null);
                         }
                     }
                     catch (Exception ex)
@@ -1903,9 +1902,6 @@ ex.printStackTrace();
 
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
 
-                // Mark the bundle as removal pending.
-                bundle.setRemovalPending(true);
-
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
 
                 // Acquire global lock to check if we should auto-refresh.
@@ -2196,9 +2192,6 @@ ex.printStackTrace();
                 // Set the bundle's persistent state to uninstalled.
                 bundle.setPersistentStateUninstalled();
 
-                // Mark the bundle as removal pending.
-                bundle.setRemovalPending(true);
-
                 // Put bundle in uninstalled bundle array.
                 rememberUninstalledBundle(bundle);
             }
@@ -2279,10 +2272,10 @@ ex.printStackTrace();
     Bundle installBundle(String location, InputStream is)
         throws BundleException
     {
-        return installBundle(-1, location, is);
+        return installBundle(-1, location, null, is);
     }
 
-    private Bundle installBundle(long id, String location, InputStream is)
+    private Bundle installBundle(long id, String location, BundleArchive ba, InputStream is)
         throws BundleException
     {
         BundleImpl bundle = null;
@@ -2308,7 +2301,7 @@ ex.printStackTrace();
             }
 
             // Determine if this is a new or existing bundle.
-            boolean isNew = (id < 0);
+            boolean isNew = (ba == null);
 
             // If the bundle is new we must cache its JAR file.
             if (isNew)
@@ -2319,7 +2312,7 @@ ex.printStackTrace();
                 try
                 {
                     // Add the bundle to the cache.
-                    m_cache.create(id, location, is);
+                    ba = BundleCache.create(m_logger, m_configMap, id, location, is);
                 }
                 catch (Exception ex)
                 {
@@ -2349,9 +2342,9 @@ ex.printStackTrace();
                 // due to an error or system crash.
                 try
                 {
-                    if (m_cache.getArchive(id).getRevisionCount() > 1)
+                    if (ba.getRevisionCount() > 1)
                     {
-                        m_cache.getArchive(id).purge();
+                        ba.purge();
                     }
                 }
                 catch (Exception ex)
@@ -2364,8 +2357,6 @@ ex.printStackTrace();
 
             try
             {
-                BundleArchive archive = m_cache.getArchive(id);
-
                 // Acquire the global lock to create the bundle,
                 // since this impacts the global state.
                 boolean locked = acquireGlobalLock();
@@ -2376,7 +2367,7 @@ ex.printStackTrace();
                 }
                 try
                 {
-                    bundle = new BundleImpl(this, archive);
+                    bundle = new BundleImpl(this, ba);
                 }
                 finally
                 {
@@ -2407,7 +2398,14 @@ ex.printStackTrace();
                 {
                     try
                     {
-                        m_cache.remove(m_cache.getArchive(id));
+                        if (bundle != null)
+                        {
+                            bundle.closeAndDelete();
+                        }
+                        else if (ba != null)
+                        {
+                            ba.closeAndDelete();
+                        }
                     }
                     catch (Exception ex1)
                     {
@@ -2415,11 +2413,6 @@ ex.printStackTrace();
                             Logger.LOG_ERROR,
                             "Could not remove from cache.", ex1);
                     }
-                }
-
-                if (bundle != null)
-                {
-                    bundle.setRemovalPending(true);
                 }
 
                 if ((System.getSecurityManager() != null) &&
@@ -2899,10 +2892,10 @@ ex.printStackTrace();
         {
             if (bundle == this)
             {
-                return m_cache.getSystemBundleDataFile(s);
+                return BundleCache.getSystemBundleDataFile(m_logger, m_configMap, s);
             }
 
-            return m_cache.getArchive(bundle.getBundleId()).getDataFile(s);
+            return bundle.getArchive().getDataFile(s);
         }
         catch (Exception ex)
         {
@@ -3557,17 +3550,6 @@ ex.printStackTrace();
         }
     }
 
-    private void garbageCollectBundle(BundleImpl bundle) throws Exception
-    {
-        // CONCURRENCY NOTE: There is no reason to lock this bundle,
-        // because this method is only called during shutdown or a
-        // refresh operation and these are already guarded by locks.
-
-        // Remove the bundle from memory and the cache.
-        bundle.dispose();
-        m_cache.remove(m_cache.getArchive(bundle.getBundleId()));
-    }
-
     //
     // Event-related methods.
     //
@@ -3694,7 +3676,8 @@ ex.printStackTrace();
             BufferedReader br = null;
             try
             {
-                File file = m_cache.getSystemBundleDataFile("bundle.id");
+                File file = BundleCache.getSystemBundleDataFile(
+                    m_logger, m_configMap, "bundle.id");
                 is = m_secureAction.getFileInputStream(file);
                 br = new BufferedReader(new InputStreamReader(is));
                 return Long.parseLong(br.readLine());
@@ -3747,7 +3730,8 @@ ex.printStackTrace();
             BufferedWriter bw = null;
             try
             {
-                File file = m_cache.getSystemBundleDataFile("bundle.id");
+                File file = BundleCache.getSystemBundleDataFile(
+                    m_logger, m_configMap, "bundle.id");
                 os = m_secureAction.getFileOutputStream(file);
                 bw = new BufferedWriter(new OutputStreamWriter(os));
                 String s = Long.toString(m_nextId);
@@ -4176,14 +4160,14 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
                 }
             }
 
-            // Garbage collect uninstalled bundles.
+            // Delete uninstalled bundles.
             for (int i = 0;
                 (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
                 i++)
             {
                 try
                 {
-                    garbageCollectBundle(m_uninstalledBundles[i]);
+                    m_uninstalledBundles[i].closeAndDelete();
                 }
                 catch (Exception ex)
                 {
@@ -4198,7 +4182,7 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             bundles = getBundles();
             for (int i = 0; i < bundles.length; i++)
             {
-                ((BundleImpl) bundles[i]).dispose();
+                ((BundleImpl) bundles[i]).close();
             }
 
             // Stop all system bundle activators.
@@ -4281,14 +4265,11 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
         {
             try
             {
-                // Mark the bundle as stale.
-                m_bundle.setStale();
-
-                // Remove or purge the bundle depending on its
+                // Delete or refresh the bundle depending on its
                 // current state.
                 if (m_bundle.getState() == Bundle.UNINSTALLED)
                 {
-                    garbageCollectBundle(m_bundle);
+                    m_bundle.closeAndDelete();
                     m_bundle = null;
                 }
                 else

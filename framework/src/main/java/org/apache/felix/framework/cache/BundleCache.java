@@ -80,87 +80,93 @@ public class BundleCache
     protected static transient final String CACHE_ROOTDIR_DEFAULT = ".";
     protected static transient final String BUNDLE_DIR_PREFIX = "bundle";
 
-    private final Logger m_logger;
-    private final Map m_configMap;
-    private File m_cacheDir = null;
-    private BundleArchive[] m_archives = null;
-
-    private static SecureAction m_secureAction = new SecureAction();
-
-    public BundleCache(Logger logger, Map configMap)
-        throws Exception
-    {
-        m_logger = logger;
-        m_configMap = configMap;
-        initialize();
-    }
+    private static final SecureAction m_secureAction = new SecureAction();
 
     /* package */ static SecureAction getSecureAction()
     {
         return m_secureAction;
     }
 
-    public synchronized void flush() throws Exception
+    public static void delete(Logger logger, Map configMap) throws Exception
     {
-        // Dispose of all existing archives.
-        for (int i = 0; (m_archives != null) && (i < m_archives.length); i++)
-        {
-            m_archives[i].dispose();
-        }
         // Delete the cache directory.
-        deleteDirectoryTree(m_cacheDir);
-        // Reinitialize the cache.
-        initialize();
+        File cacheDir = determineCacheDir(configMap);
+        deleteDirectoryTree(cacheDir);
     }
 
-    public synchronized BundleArchive[] getArchives()
+    public static BundleArchive[] getArchives(Logger logger, Map configMap)
         throws Exception
     {
-        return m_archives;
-    }
-
-    public synchronized BundleArchive getArchive(long id)
-        throws Exception
-    {
-        for (int i = 0; i < m_archives.length; i++)
+        // Get buffer size value.
+        try
         {
-            if (m_archives[i].getId() == id)
+            String sBufSize = (String) configMap.get(CACHE_BUFSIZE_PROP);
+            if (sBufSize != null)
             {
-                return m_archives[i];
+                BUFSIZE = Integer.parseInt(sBufSize);
             }
         }
-        return null;
-    }
-
-    public synchronized int getArchiveIndex(BundleArchive ba)
-    {
-        for (int i = 0; i < m_archives.length; i++)
+        catch (NumberFormatException ne)
         {
-            if (m_archives[i] == ba)
+            // Use the default value.
+        }
+
+        // Create the cache directory, if it does not exist.
+        File cacheDir = determineCacheDir(configMap);
+        if (!getSecureAction().fileExists(cacheDir))
+        {
+            if (!getSecureAction().mkdirs(cacheDir))
             {
-                return i;
+                logger.log(
+                    Logger.LOG_ERROR,
+                    "Unable to create cache directory: " + cacheDir);
+                throw new RuntimeException("Unable to create cache directory.");
             }
         }
-        return -1;
+
+        // Create the existing bundle archives in the directory, if any exist.
+        List archiveList = new ArrayList();
+        File[] children = getSecureAction().listDirectory(cacheDir);
+        for (int i = 0; (children != null) && (i < children.length); i++)
+        {
+            // Ignore directories that aren't bundle directories or
+            // is the system bundle directory.
+            if (children[i].getName().startsWith(BUNDLE_DIR_PREFIX) &&
+                !children[i].getName().equals(BUNDLE_DIR_PREFIX + Long.toString(0)))
+            {
+                // Recreate the bundle archive.
+                try
+                {
+                    archiveList.add(new BundleArchive(logger, configMap, children[i]));
+                }
+                catch (Exception ex)
+                {
+                    // Log and ignore.
+                    logger.log(Logger.LOG_ERROR,
+                        "Error creating archive.", ex);
+                }
+            }
+        }
+
+        return (BundleArchive[])
+            archiveList.toArray(new BundleArchive[archiveList.size()]);
     }
 
-    public synchronized BundleArchive create(
+    public static BundleArchive create(Logger logger, Map configMap,
         long id, String location, InputStream is)
         throws Exception
     {
+        File cacheDir = determineCacheDir(configMap);
+
         // Construct archive root directory.
         File archiveRootDir =
-            new File(m_cacheDir, BUNDLE_DIR_PREFIX + Long.toString(id));
+            new File(cacheDir, BUNDLE_DIR_PREFIX + Long.toString(id));
 
         try
         {
             // Create the archive and add it to the list of archives.
             BundleArchive ba =
-                new BundleArchive(m_logger, m_configMap, archiveRootDir, id, location, is);
-            BundleArchive[] tmp = new BundleArchive[m_archives.length + 1];
-            System.arraycopy(m_archives, 0, tmp, 0, m_archives.length);
-            tmp[m_archives.length] = ba;
-            m_archives = tmp;
+                new BundleArchive(logger, configMap, archiveRootDir, id, location, is);
             return ba;
         }
         catch (Exception ex)
@@ -169,38 +175,13 @@ public class BundleCache
             {
                 if (!BundleCache.deleteDirectoryTree(archiveRootDir))
                 {
-                    m_logger.log(
+                    logger.log(
                         Logger.LOG_ERROR,
-                        getClass().getName()
-                            + ": Unable to delete the archive directory - "
+                        "Unable to delete the archive directory: "
                             + archiveRootDir);
                 }
             }
             throw ex;
-        }
-    }
-
-    public synchronized void remove(BundleArchive ba)
-        throws Exception
-    {
-        if (ba != null)
-        {
-            // Remove the archive.
-            ba.dispose();
-            // Remove the archive from the cache.
-            int idx = getArchiveIndex(ba);
-            if (idx >= 0)
-            {
-                BundleArchive[] tmp =
-                    new BundleArchive[m_archives.length - 1];
-                System.arraycopy(m_archives, 0, tmp, 0, idx);
-                if (idx < tmp.length)
-                {
-                    System.arraycopy(m_archives, idx + 1, tmp, idx,
-                        tmp.length - idx);
-                }
-                m_archives = tmp;
-            }
         }
     }
 
@@ -212,10 +193,11 @@ public class BundleCache
      * @return a <tt>File</tt> object corresponding to the specified file name.
      * @throws Exception if any error occurs.
     **/
-    public synchronized File getSystemBundleDataFile(String fileName) throws Exception
+    public static File getSystemBundleDataFile(Logger logger, Map configMap, String fileName)
+        throws Exception
     {
         // Make sure system bundle directory exists.
-        File sbDir = new File(m_cacheDir, BUNDLE_DIR_PREFIX + Long.toString(0));
+        File sbDir = new File(determineCacheDir(configMap), BUNDLE_DIR_PREFIX + Long.toString(0));
 
         // If the system bundle directory exists, then we don't
         // need to initialize since it has already been done.
@@ -224,9 +206,9 @@ public class BundleCache
             // Create system bundle directory, if it does not exist.
             if (!getSecureAction().mkdirs(sbDir))
             {
-                m_logger.log(
+                logger.log(
                     Logger.LOG_ERROR,
-                    getClass().getName() + ": Unable to create system bundle directory.");
+                    "Unable to create system bundle directory.");
                 throw new IOException("Unable to create system bundle directory.");
             }
         }
@@ -250,7 +232,7 @@ public class BundleCache
      * @param is the input stream to copy.
      * @param outputFile the file to which the input stream should be copied.
     **/
-    protected static void copyStreamToFile(InputStream is, File outputFile)
+    static void copyStreamToFile(InputStream is, File outputFile)
         throws IOException
     {
         OutputStream os = null;
@@ -273,7 +255,7 @@ public class BundleCache
         }
     }
 
-    protected static boolean deleteDirectoryTree(File target)
+    static boolean deleteDirectoryTree(File target)
     {
         if (!deleteDirectoryTreeRecursive(target))
         {
@@ -287,6 +269,40 @@ public class BundleCache
             return deleteDirectoryTreeRecursive(target);
         }
         return true;
+    }
+
+    //
+    // Private methods.
+    //
+
+    private static File determineCacheDir(Map configMap)
+    {
+        File cacheDir;
+
+        // Check to see if the cache directory is specified in the storage
+        // configuration property.
+        String cacheDirStr = (String) configMap.get(Constants.FRAMEWORK_STORAGE);
+        // Get the cache root directory for relative paths; the default is ".".
+        String rootDirStr = (String) configMap.get(CACHE_ROOTDIR_PROP);
+        rootDirStr = (rootDirStr == null) ? CACHE_ROOTDIR_DEFAULT : rootDirStr;
+        if (cacheDirStr != null)
+        {
+            // If the specified cache directory is relative, then use the
+            // root directory to calculate the absolute path.
+            cacheDir = new File(cacheDirStr);
+            if (!cacheDir.isAbsolute())
+            {
+                cacheDir = new File(rootDirStr, cacheDirStr);
+            }
+        }
+        else
+        {
+            // If no cache directory was specified, then use the default name
+            // in the root directory.
+            cacheDir = new File(rootDirStr, CACHE_DIR_NAME);
+        }
+
+        return cacheDir;
     }
 
     private static boolean deleteDirectoryTreeRecursive(File target)
@@ -306,90 +322,5 @@ public class BundleCache
         }
 
         return getSecureAction().deleteFile(target);
-    }
-
-    //
-    // Private methods.
-    //
-
-    private void initialize() throws Exception
-    {
-        // Get buffer size value.
-        try
-        {
-            String sBufSize = (String) m_configMap.get(CACHE_BUFSIZE_PROP);
-            if (sBufSize != null)
-            {
-                BUFSIZE = Integer.parseInt(sBufSize);
-            }
-        }
-        catch (NumberFormatException ne)
-        {
-            // Use the default value.
-        }
-
-        // Check to see if the cache directory is specified in the storage
-        // configuration property.
-        String cacheDirStr = (String) m_configMap.get(Constants.FRAMEWORK_STORAGE);
-        // Get the cache root directory for relative paths; the default is ".".
-        String rootDirStr = (String) m_configMap.get(CACHE_ROOTDIR_PROP);
-        rootDirStr = (rootDirStr == null) ? CACHE_ROOTDIR_DEFAULT : rootDirStr;
-        if (cacheDirStr != null)
-        {
-            // If the specified cache directory is relative, then use the
-            // root directory to calculate the absolute path.
-            m_cacheDir = new File(cacheDirStr);
-            if (!m_cacheDir.isAbsolute())
-            {
-                m_cacheDir = new File(rootDirStr, cacheDirStr);
-            }
-        }
-        else
-        {
-            // If no cache directory was specified, then use the default name
-            // in the root directory.
-            m_cacheDir = new File(rootDirStr, CACHE_DIR_NAME);
-        }
-
-        // Create the cache directory, if it does not exist.
-        if (!getSecureAction().fileExists(m_cacheDir))
-        {
-            if (!getSecureAction().mkdirs(m_cacheDir))
-            {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    getClass().getName() + ": Unable to create cache directory: "
-                        + m_cacheDir);
-                throw new RuntimeException("Unable to create cache directory.");
-            }
-        }
-
-        // Create the existing bundle archives in the profile directory,
-        // if any exist.
-        List archiveList = new ArrayList();
-        File[] children = getSecureAction().listDirectory(m_cacheDir);
-        for (int i = 0; (children != null) && (i < children.length); i++)
-        {
-            // Ignore directories that aren't bundle directories or
-            // is the system bundle directory.
-            if (children[i].getName().startsWith(BUNDLE_DIR_PREFIX) &&
-                !children[i].getName().equals(BUNDLE_DIR_PREFIX + Long.toString(0)))
-            {
-                // Recreate the bundle archive.
-                try
-                {
-                    archiveList.add(new BundleArchive(m_logger, m_configMap, children[i]));
-                }
-                catch (Exception ex)
-                {
-                    // Log and ignore.
-                    m_logger.log(Logger.LOG_ERROR,
-                        getClass().getName() + ": Error creating archive.", ex);
-                }
-            }
-        }
-
-        m_archives = (BundleArchive[])
-            archiveList.toArray(new BundleArchive[archiveList.size()]);
     }
 }

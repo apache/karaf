@@ -174,7 +174,7 @@ public class DirectoryContent implements IContent
                     }
                 }
             }
-            return new JarContent(m_logger, m_configMap, m_revisionLock, extractDir, file);
+            return new JarContent(m_logger, m_configMap, m_revisionLock, extractDir, file, null);
         }
 
         // The entry could not be found, so return null.

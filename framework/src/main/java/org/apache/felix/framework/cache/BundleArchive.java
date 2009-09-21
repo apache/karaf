@@ -562,9 +562,11 @@ public class BundleArchive
     {
         // Do some sanity checking.
         if ((fileName.length() > 0) && (fileName.charAt(0) == File.separatorChar))
-            throw new IllegalArgumentException("The data file path must be relative, not absolute.");
+            throw new IllegalArgumentException(
+                "The data file path must be relative, not absolute.");
         else if (fileName.indexOf("..") >= 0)
-            throw new IllegalArgumentException("The data file path cannot contain a reference to the \"..\" directory.");
+            throw new IllegalArgumentException(
+                "The data file path cannot contain a reference to the \"..\" directory.");
 
         // Get bundle data directory.
         File dataDir = new File(m_archiveRootDir, DATA_DIRECTORY);
@@ -672,7 +674,7 @@ public class BundleArchive
 
         try
         {
-            m_revisions[m_revisions.length - 1].dispose();
+            m_revisions[m_revisions.length - 1].close();
         }
         catch(Exception ex)
         {
@@ -736,6 +738,51 @@ public class BundleArchive
         }
     }
 
+    public synchronized void close()
+    {
+        // Get the current revision count.
+        int count = getRevisionCount();
+        for (int i = 0; i < count; i++)
+        {
+            // Dispose of the revision, but this might be null in certain
+            // circumstances, such as if this bundle archive was created
+            // for an existing bundle that was updated, but not refreshed
+            // due to a system crash; see the constructor code for details.
+            if (m_revisions[i] != null)
+            {
+                try
+                {
+                    m_revisions[i].close();
+                }
+                catch (Exception ex)
+                {
+                    m_logger.log(
+                        Logger.LOG_ERROR,
+                            "Unable to close revision - "
+                            + m_revisions[i].getRevisionRootDir(), ex);
+                }
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * This method closes any revisions and deletes the bundle archive directory.
+     * </p>
+     * @throws Exception if any error occurs.
+    **/
+    public synchronized void closeAndDelete()
+    {
+        // Close the revisions and delete the archive directory.
+        close();
+        if (!BundleCache.deleteDirectoryTree(m_archiveRootDir))
+        {
+            m_logger.log(
+                Logger.LOG_ERROR,
+                "Unable to delete archive directory - " + m_archiveRootDir);
+        }
+    }
+
     /**
      * <p>
      * This method removes all old revisions associated with the archive
@@ -745,34 +792,21 @@ public class BundleArchive
     **/
     public synchronized void purge() throws Exception
     {
-        // Get the current refresh count.
+        // Close the revisions and then delete all but the current revision.
+        // We don't delete it the current revision, because we want to rename it
+        // to the new refresh level.
+        close();
         long refreshCount = getRefreshCount();
-        // Get the current revision count.
         int count = getRevisionCount();
-
-        // Dispose and delete all but the current revision.
         File revisionDir = null;
         for (int i = 0; i < count - 1; i++)
         {
-            // Dispose of the revision, but this might be null in certain
-            // circumstances, such as if this bundle archive was created
-            // for an existing bundle that was updated, but not refreshed
-            // due to a system crash; see the constructor code for details.
-            if (m_revisions[i] != null)
-            {
-                m_revisions[i].dispose();
-            }
             revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY + refreshCount + "." + i);
             if (BundleCache.getSecureAction().fileExists(revisionDir))
             {
                 BundleCache.deleteDirectoryTree(revisionDir);
             }
         }
-
-        // We still need to dispose the current revision, but we
-        // don't want to delete it, because we want to rename it
-        // to the new refresh level.
-        m_revisions[count - 1].dispose();
 
         // Save the current revision location for use later when
         // we recreate the revision.
@@ -793,24 +827,6 @@ public class BundleArchive
         BundleRevision revision = createRevisionFromLocation(location, null);
         // Create new revision array.
         m_revisions = new BundleRevision[] { revision };
-    }
-
-    /**
-     * <p>
-     * This method disposes removes the bundle archive directory.
-     * </p>
-     * @throws Exception if any error occurs.
-    **/
-    /* package */ void dispose() throws Exception
-    {
-        if (!BundleCache.deleteDirectoryTree(m_archiveRootDir))
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                getClass().getName()
-                    + ": Unable to delete archive directory - "
-                    + m_archiveRootDir);
-        }
     }
 
     /**
