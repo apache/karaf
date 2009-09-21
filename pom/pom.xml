@@ -106,12 +106,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
-            <configuration>
-              <descriptorRefs>
-                <descriptorRef>bin</descriptorRef>
-                <descriptorRef>project</descriptorRef>
-              </descriptorRefs>
-            </configuration>
             <executions>
               <execution>
                 <id>make-assembly</id>
@@ -120,6 +114,10 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
+                  <descriptorRefs>
+                    <descriptorRef>bin</descriptorRef>
+                    <descriptorRef>project</descriptorRef>
+                  </descriptorRefs>
                   <!-- we don't want to attach all the assemblies, such as bz2 -->
                   <attach>false</attach>
                 </configuration>
