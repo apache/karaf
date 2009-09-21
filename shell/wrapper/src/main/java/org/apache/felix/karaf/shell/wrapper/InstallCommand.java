@@ -70,14 +70,22 @@ public class InstallCommand extends OsgiCommandSupport
 			props.put("${startType}", getStartType());
 			
 			String os = System.getProperty("os.name", "Unknown");
-			File serviceFile=null;
+			File serviceFile = null;
+			File wrapperConf = null;
 			if( os.startsWith("Win") ) {
 				mkdir(bin);
+
 				copyResourceTo(new File(bin, name+"-wrapper.exe"), "windows/karaf-wrapper.exe", false);
+
 				serviceFile = new File(bin,name+"-service.bat");
+
+				wrapperConf = new File(etc,name+"-wrapper.conf");
+				copyFilteredResourceTo(wrapperConf, "windows/karaf-wrapper.conf", props);
+
 				copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props);
+
 				mkdir(lib);
-				copyResourceTo(new File(bin, "wrapper.dll"), "windows/wrapper.dll", false);								
+				copyResourceTo(new File(lib, "wrapper.dll"), "windows/wrapper.dll", false);								
 			} else if( os.startsWith("Mac OS X") ) {
 				mkdir(bin);
 				
@@ -89,6 +97,9 @@ public class InstallCommand extends OsgiCommandSupport
 				copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
 				chmod(serviceFile, "a+x");
 				
+				wrapperConf = new File(etc,name+"-wrapper.conf");
+				copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
 				mkdir(lib);
 				copyResourceTo(new File(lib, "libwrapper.jnilib"), "macosx/libwrapper.jnilib", false);
 				
@@ -105,6 +116,9 @@ public class InstallCommand extends OsgiCommandSupport
 				copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
 				chmod(serviceFile, "a+x");
 				
+				wrapperConf = new File(etc,name+"-wrapper.conf");
+				copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
 				mkdir(lib);
 				copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
 				
@@ -119,8 +133,6 @@ public class InstallCommand extends OsgiCommandSupport
 			mkdir(lib);
 			copyResourceTo(new File(lib, "karaf-wrapper.jar"), "all/karaf-wrapper.jar", false);
 			mkdir(etc);
-			File wrapperConf = new File(etc,name+"-wrapper.conf");
-			copyFilteredResourceTo(wrapperConf, "all/karaf-wrapper.conf", props);
 
 			System.out.println("");
 			System.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file:");
