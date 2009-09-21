@@ -20,6 +20,25 @@ The OSGi Alliance (http://www.osgi.org/).
 Copyright (c) OSGi Alliance (2000, 2009).
 Licensed under the Apache License 2.0.
 
+This product uses software developed at
+OPS4J (http://www.ops4j.org/).
+Licensed under the Apache License 2.0.
+
+This product uses software developed at
+FUSE Source (http://www.fusesource.org/).
+Licensed under the Apache License 2.0.
+
+This product uses software developed at
+JLine (http://jline.sourceforge.net).
+Licensed under the BSD License.
+
+This product uses software developed at
+SLF4J (http://www.slf4j.org/).
+Licensed under the MIT License.
+
+This product includes software from http://www.json.org.
+Copyright (c) 2002 JSON.org
+
 
 III. License Summary
 - Apache License 2.0
