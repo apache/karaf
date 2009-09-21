@@ -98,13 +98,17 @@ public class LogServlet extends BaseWebConsolePlugin
             jw.key( "data" );
             jw.array();
 
-            int index = 0;
-            for ( Enumeration logEntries = logReaderService.getLog(); logEntries.hasMoreElements() && index < MAX_LOGS; )
+            if ( logReaderService != null )
             {
-                LogEntry nextLog = ( LogEntry ) logEntries.nextElement();
-                if ( nextLog.getLevel() <= minLogLevel )
+                int index = 0;
+                for ( Enumeration logEntries = logReaderService.getLog(); logEntries.hasMoreElements()
+                    && index < MAX_LOGS; )
                 {
-                    logJson( jw, nextLog, index++ );
+                    LogEntry nextLog = ( LogEntry ) logEntries.nextElement();
+                    if ( nextLog.getLevel() <= minLogLevel )
+                    {
+                        logJson( jw, nextLog, index++ );
+                    }
                 }
             }
 
