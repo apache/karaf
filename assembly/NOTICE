@@ -42,10 +42,14 @@ This product uses software written by
 Antony Lesuisse.
 Licensed under Public Domain.
 
+This product includes software from http://www.json.org.
+Copyright (c) 2002 JSON.org
+
 
 III. License Summary
 - Apache License 2.0
 - Eclipse Public License 1.0
-- Public Domain
+- BSD License
+- MIT License
 
 
