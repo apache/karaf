@@ -12,17 +12,11 @@
 }
 
 #divcfgprttabs ul li {
-    display: inline; 
+    display: inline-block; 
     background: #fff;
-    height: 21px;
-    margin: 0 2px 0 0 ;
-    border: 1px solid #999;
-    float: left;
-    padding: 1px 1px 0 1px
 }
 
 #divcfgprttabs ul li.tabactive {
-    border-bottom-color: white;
 }
 
 #divcfgprttabs ul li a {
@@ -37,6 +31,8 @@
 }
 
 #divcfgprttabs ul li a.tabactive {
+    background-color: #6181A9;
+    color: white;
 }
 
 #divcfgprttabs ul li a:hover {
@@ -46,7 +42,6 @@
 
 .menu {
     background: none;
-    height: 23px;
     margin-bottom: 0;
     padding-left: 0;
 }
