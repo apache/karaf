@@ -38,6 +38,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 import java.util.concurrent.CountDownLatch;
+import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 
 import org.apache.felix.karaf.main.Utils;
 import org.osgi.framework.Bundle;
@@ -112,6 +114,11 @@ public class Main {
     public static final String PROPERTY_CONVERT_TO_MAVEN_URL = "karaf.maven.convert";
 
     /**
+     * ConfigAdmin properties directory
+     */
+    public static final String PROPERTY_CM_DIRECTORY = "karaf.cm.dir";
+
+    /**
      * If a lock should be used before starting the runtime
      */
     public static final String PROPERTY_USE_LOCK = "karaf.lock";
@@ -140,6 +147,7 @@ public class Main {
     private int lockStartLevel = 1;
     private int lockDelay = 1000;
     private boolean exiting = false;
+    private boolean cmProcessed;
 
     public Main(String[] args) {
         this.args = args;
@@ -456,6 +464,7 @@ public class Main {
                                 Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
                                 if (b != null) {
                                     b.start();
+                                    checkCmProperties(b);
                                 }
                             }
                             catch (Exception ex) {
@@ -466,6 +475,59 @@ public class Main {
                     while (location != null);
                 }
             }
+        }
+    }
+
+    /**
+     * TODO: remove this hack when FELIX-1628 is properly implemented
+     * Hack for FELIX-1626.
+     * FileInstall has some delay before installing the configurations which can cause some problems
+     *
+     * @param b
+     */
+    private void checkCmProperties(final Bundle b) {
+        final String cmDir = (String) configProps.get(PROPERTY_CM_DIRECTORY);
+        if (cmProcessed || cmDir == null) {
+            return;
+        }
+        try {
+            // Try to load fileinstall internal classes.
+            // Those are not exported, so this mean if the load succeeds, we have the fileinstall bundle
+            final Class ciClass = b.loadClass("org.apache.felix.fileinstall.internal.ConfigInstaller");
+            final Class fiClass = b.loadClass("org.apache.felix.fileinstall.internal.FileInstall");
+            // If we have been able to load the classes, start a thread that will wait until
+            // fileinstall is correctly configured using config admin and push all configs.
+            new Thread() {
+                public void run() {
+                    for (int i = 0; !cmProcessed && i < 100; i++) {
+                        try {
+                            Thread.sleep(50);
+                            Method mth = fiClass.getDeclaredMethod("getConfigurationAdmin", long.class);
+                            mth.setAccessible(true);
+                            if (mth.invoke(null, 0) != null) {
+                                Constructor cns = ciClass.getDeclaredConstructor(BundleContext.class);
+                                cns.setAccessible(true);
+                                Object ci = cns.newInstance(b.getBundleContext());
+                                mth = ciClass.getDeclaredMethod("setConfig", File.class);
+                                mth.setAccessible(true);
+                                cmProcessed = true;
+//                                System.err.println("Found ready FileInstall");
+                                for (File f : new File(cmDir).listFiles()) {
+                                    if (f.getName().endsWith(".cfg")) {
+//                                        System.err.println("Processing: " + f.getName());
+                                        mth.invoke(ci, f);
+                                    }
+                                }
+                            }
+                        } catch (Throwable t) {
+                            if (cmProcessed) {
+                                t.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }.start();
+        } catch (Throwable t) {
         }
     }
 
