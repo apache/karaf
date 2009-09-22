@@ -29,7 +29,7 @@
   <artifactId>felix-parent</artifactId>
   <packaging>pom</packaging>
   <name>Apache Felix</name>
-  <version>1.2.1</version>
+  <version>1.2.2-SNAPSHOT</version>
   <url>http://felix.apache.org/</url>
   <inceptionYear>2006</inceptionYear>
   <description>Apache Felix is an OSGi implementation.</description>
@@ -57,9 +57,9 @@
   </mailingLists>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/felix-parent-1.2.1</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/felix-parent-1.2.1</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/felix-parent-1.2.1</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk</connection>
+    <developerConnection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/felix/trunk/?root=Apache-SVN</url>
   </scm>
 
   <profiles>
