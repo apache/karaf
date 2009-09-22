@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 <!--
@@ -24,7 +23,7 @@
   <parent>
     <groupId>org.apache.felix.karaf.demos</groupId>
     <artifactId>demos</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <groupId>org.apache.felix.karaf.demos</groupId>
@@ -101,7 +100,7 @@
             <!-- enable easy connection to JConsole -->
             <systemProperty>
               <name>com.sun.management.jmxremote</name>
-              <value></value>
+              <value />
             </systemProperty>
           </systemProperties>
           <scanIntervalSeconds>10</scanIntervalSeconds>
@@ -147,7 +146,7 @@
                   <configuration>
                       <tasks>
                           <move todir="${project.build.directory}/karaf/WEB-INF/karaf">
-                              <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-felix-karaf-${pom.version}"/>
+                              <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-felix-karaf-${pom.version}" />
                           </move>
                       </tasks>
                   </configuration>
