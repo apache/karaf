@@ -3,6 +3,10 @@
 #divcfgprttabs {
 }
 
+.divcfgprttabshidden {
+    display: none;
+}
+
 #divcfgprttabs ul { 
     list-style: none;
 }
@@ -67,4 +71,9 @@
     /* don't let this area make the display wider */
     width: 100px;
     overflow: visible;
+}
+
+.space div {
+    font-family: monospace;
+    white-space: pre;
 }

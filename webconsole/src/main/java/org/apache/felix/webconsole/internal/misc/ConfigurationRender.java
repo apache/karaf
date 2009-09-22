@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
+import org.apache.felix.webconsole.internal.Util;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -143,7 +144,16 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         pw.println( "<link href='" + appRoot + "/res/ui/configurationrender.css' rel='stylesheet' type='text/css'>" );
         pw.println( "<script src='" + appRoot + "/res/ui/tw-1.1.js' language='JavaScript'></script>" );
 
-        pw.println( "<script>$(document).ready(function(){ $('#cfgprttabs').tabworld() });</script>" );
+        Util.startScript( pw );
+        pw.println( "    $(document).ready(function(){" );
+        //                   set up the tabs (still hidden)
+        pw.println( "        $('#cfgprttabs').tabworld({speed:0});" );
+        //                   show the finished tabs
+        pw.println( "        $('#divcfgprttabs').removeClass('divcfgprttabshidden');" );
+        //                   hide the "please wait" message
+        pw.println( "        $('#divcfgprttabswait').addClass('divcfgprttabshidden');" );
+        pw.println( "    });" );
+        Util.endScript( pw );
 
         final Date currentTime = new Date();
         synchronized ( DISPLAY_DATE_FORMAT )
@@ -158,8 +168,11 @@ public class ConfigurationRender extends BaseWebConsolePlugin
                 + ".zip'>[ZIP]</a></p>" );
         }
 
-        pw.println( "<div id='divcfgprttabs'>" );
+        // display some information while the data is loading
+        pw.println( "<div id='divcfgprttabswait'>Loading status information. Please wait....</div>" );
 
+        // load the data (hidden to begin with)
+        pw.println( "<div id='divcfgprttabs' class='divcfgprttabshidden'>" );
         pw.println( "<ul id='cfgprttabs'>" );
 
         printConfigurationStatus( pw );
@@ -358,16 +371,24 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     private void printPreferences( PrintWriter pw, Preferences prefs ) throws BackingStoreException
     {
 
-        String[] children = prefs.childrenNames();
-        for ( int i = 0; i < children.length; i++ )
-        {
-            this.printPreferences( pw, prefs.node( children[i] ) );
-        }
+        final String[] children = prefs.childrenNames();
+        final String[] keys = prefs.keys();
 
-        String[] keys = prefs.keys();
-        for ( int i = 0; i < keys.length; i++ )
+        if ( children.length == 0 && keys.length == 0 )
         {
-            this.infoLine( pw, null, prefs.absolutePath() + "/" + keys[i], prefs.get( keys[i], null ) );
+            pw.println( "No Preferences available" );
+        }
+        else
+        {
+            for ( int i = 0; i < children.length; i++ )
+            {
+                this.printPreferences( pw, prefs.node( children[i] ) );
+            }
+
+            for ( int i = 0; i < keys.length; i++ )
+            {
+                this.infoLine( pw, null, prefs.absolutePath() + "/" + keys[i], prefs.get( keys[i], null ) );
+            }
         }
 
         pw.println();
@@ -648,6 +669,10 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     private static class HtmlConfigurationWriter extends ConfigurationWriter
     {
 
+        // whether or not to filter "<" signs in the output
+        private boolean doFilter;
+
+
         HtmlConfigurationWriter( Writer delegatee )
         {
             super( delegatee );
@@ -658,15 +683,76 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         {
             println( "<li>" );
             println( title );
-            println( "<q><pre>" );
+            println( "<q>" );
+            doFilter = true;
         }
 
 
         public void end()
         {
-            println( "</pre>" );
+            doFilter = false;
             println( "</q>" );
             println( "</li>" );
+        }
+
+
+        // write the character unmodified unless filtering is enabled and
+        // the character is a "<" in which case &lt; is written
+        public void write( final int character )
+        {
+            if ( doFilter && character == '<' )
+            {
+                super.write( "&lt;" );
+            }
+            else
+            {
+                super.write( character );
+            }
+        }
+
+
+        // write the characters unmodified unless filtering is enabled in
+        // which case the writeFiltered(String) method is called for filtering
+        public void write( final char[] chars, final int off, final int len )
+        {
+            if ( doFilter )
+            {
+                writeFiltered( new String( chars, off, len ) );
+            }
+            else
+            {
+                super.write( chars, off, len );
+            }
+        }
+
+
+        // write the string unmodified unless filtering is enabled in
+        // which case the writeFiltered(String) method is called for filtering
+        public void write( final String string, final int off, final int len )
+        {
+            if ( doFilter )
+            {
+                writeFiltered( string.substring( off, len ) );
+            }
+            else
+            {
+                super.write( string, off, len );
+            }
+        }
+
+
+        // helper method filter the string for "<" before writing
+        private void writeFiltered( final String string )
+        {
+            if ( string.indexOf( '<' ) >= 0 )
+            {
+                super.write( string.replaceAll( "<", "&lt;" ) );
+            }
+            else
+            {
+                // no filtering needed write as is
+                super.write( string, 0, string.length() );
+            }
         }
     }
 

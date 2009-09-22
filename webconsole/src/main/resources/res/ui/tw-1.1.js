@@ -91,7 +91,11 @@
 		$("."+opts.tabactive+">a").addClass(opts.tabactive);
 		
 			// The real action! Also detirmine transition
-			 if(opts.transition=="slide"){
+			 if(!opts.speed){
+                $('#'+ncon+':visible').hide();
+                $('#'+nbound).find("div").show();
+                $('#'+nbound).show();
+			 }else if(opts.transition=="slide"){
 				 $('#'+ncon+':visible').slideUp(opts.speed, function(){	
 					$('#'+nbound).find("div").show();
 					$('#'+nbound).slideDown(opts.speed);
