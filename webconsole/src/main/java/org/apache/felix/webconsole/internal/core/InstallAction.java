@@ -304,7 +304,7 @@ public class InstallAction extends BaseManagementPlugin implements Action
 
     private void updateBackground( final Bundle bundle, final File bundleFile, final boolean refreshPackages )
     {
-        Thread t = new InstallHelper( this, "Background Update" + bundle.getSymbolicName() + " ("
+        Thread t = new InstallHelper( this, "Background Update " + bundle.getSymbolicName() + " ("
             + bundle.getBundleId() + ")", bundleFile, refreshPackages )
         {
 
