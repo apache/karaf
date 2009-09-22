@@ -696,6 +696,22 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         }
 
 
+        // IE has an issue with white-space:pre in our case so, we write
+        // <br/> instead of [CR]LF to get the line break. This also works
+        // in other browsers.
+        public void println()
+        {
+            if ( doFilter )
+            {
+                super.write( "<br/>", 0, 5 );
+            }
+            else
+            {
+                super.println();
+            }
+        }
+
+
         // write the character unmodified unless filtering is enabled and
         // the character is a "<" in which case &lt; is written
         public void write( final int character )
