@@ -19,12 +19,9 @@
 
 package org.apache.felix.sigil.config;
 
-
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 // taken from Newton Launcher
 
@@ -57,85 +54,87 @@ public class BldUtil
      *      with word as the message.
      * </pre>
      */
-    public static String expand( String s, Properties p )
+    public static String expand(String s, Properties p)
     {
         // regex to match property references e.g. ${name}
         // TODO this is very simplistic, so strings to be expanded should not
         // contain $ or }, except where substitution is expected.
         // Update: propRef regex now allows substitutions to contain $,
         // e.g. where a Windows ${user.name} is $Admin or similar.
-        final Pattern propRef = Pattern.compile( "\\$\\{(((\\$[^\\{\\}])|[^\\$\\}])+\\$?)\\}" );
-        final Pattern backslash = Pattern.compile( "\\\\" );
-        final Pattern dollar = Pattern.compile( "\\$" );
+        final Pattern propRef = Pattern.compile("\\$\\{(((\\$[^\\{\\}])|[^\\$\\}])+\\$?)\\}");
+        final Pattern backslash = Pattern.compile("\\\\");
+        final Pattern dollar = Pattern.compile("\\$");
 
-        if ( s == null )
+        if (s == null)
         {
             return null;
         }
 
-        if ( s.indexOf( "${" ) == -1 )
+        if (s.indexOf("${") == -1)
         { // shortcut if no expansions
             return s;
         }
 
-        for ( int i = 0; i < 20; i++ )
+        for (int i = 0; i < 20; i++)
         { // avoids self-referencing expansions
             // System.out.println("XXX expand[" + i + "] = [" + s + "]");
-            Matcher matcher = propRef.matcher( s );
+            Matcher matcher = propRef.matcher(s);
 
-            if ( !matcher.find() )
+            if (!matcher.find())
             {
                 // replace unmatched items
-                s = s.replaceAll( "\\Q??[\\E", "\\${" );
-                s = s.replaceAll( "\\Q??]\\E", "}" );
+                s = s.replaceAll("\\Q??[\\E", "\\${");
+                s = s.replaceAll("\\Q??]\\E", "}");
                 // debug("expanded: " + s);
-                if ( s.indexOf( "${" ) != -1 )
+                if (s.indexOf("${") != -1)
                 {
-                    throw new RuntimeException( "Can't expand: " + s );
+                    throw new RuntimeException("Can't expand: " + s);
                 }
                 return s;
             }
 
-            String key = matcher.group( 1 );
-            String[] keydef = key.split( ":[=+-?@]", 2 );
+            String key = matcher.group(1);
+            String[] keydef = key.split(":[=+-?@]", 2);
             String replace;
 
-            if ( keydef.length != 2 )
+            if (keydef.length != 2)
             {
-                replace = key.length() == 0 ? null : p.getProperty( key );
+                replace = key.length() == 0 ? null : p.getProperty(key);
             }
             else
             {
-                replace = keydef[0].length() == 0 ? null : p.getProperty( keydef[0] );
+                replace = keydef[0].length() == 0 ? null : p.getProperty(keydef[0]);
 
-                if ( replace != null && ( replace.length() == 0 || replace.indexOf( "${" ) != -1 ) )
+                if (replace != null
+                    && (replace.length() == 0 || replace.indexOf("${") != -1))
                 {
                     // don't want unexpanded replacement, as it may stop ${...:-default}
                     replace = null;
                 }
 
-                if ( key.indexOf( ":+" ) != -1 )
+                if (key.indexOf(":+") != -1)
                 {
-                    replace = ( ( replace == null ) ? "" : keydef[1] );
+                    replace = ((replace == null) ? "" : keydef[1]);
                 }
-                else if ( replace == null )
+                else if (replace == null)
                 {
                     replace = keydef[1];
 
-                    if ( key.indexOf( ":?" ) != -1 )
+                    if (key.indexOf(":?") != -1)
                     {
-                        String msg = "${" + keydef[0] + ":?" + keydef[1] + "} property not set";
-                        throw new RuntimeException( msg );
+                        String msg = "${" + keydef[0] + ":?" + keydef[1]
+                            + "} property not set";
+                        throw new RuntimeException(msg);
                     }
 
-                    if ( key.indexOf( ":=" ) != -1 )
+                    if (key.indexOf(":=") != -1)
                     {
-                        p.setProperty( keydef[0], keydef[1] );
+                        p.setProperty(keydef[0], keydef[1]);
                     }
                 }
             }
 
-            if ( replace == null )
+            if (replace == null)
             {
                 // TODO: this is a hack to avoid looping on unmatched references
                 // should really leave unchanged and process rest of string.
@@ -155,18 +154,17 @@ public class BldUtil
             // to
             // escape literal characters in the replacement string.
             // escape any \ or $ in replacement string
-            replace = backslash.matcher( replace ).replaceAll( "\\\\\\\\" );
-            replace = dollar.matcher( replace ).replaceAll( "\\\\\\$" );
+            replace = backslash.matcher(replace).replaceAll("\\\\\\\\");
+            replace = dollar.matcher(replace).replaceAll("\\\\\\$");
 
-            s = s.replaceAll( "\\Q${" + key + "}\\E", replace );
+            s = s.replaceAll("\\Q${" + key + "}\\E", replace);
         }
 
-        throw new RuntimeException( "expand: loop expanding: " + s );
+        throw new RuntimeException("expand: loop expanding: " + s);
     }
 
-
-    public static String expand( String s )
+    public static String expand(String s)
     {
-        return expand( s, BldProperties.global() );
-    }    
+        return expand(s, BldProperties.global());
+    }
 }

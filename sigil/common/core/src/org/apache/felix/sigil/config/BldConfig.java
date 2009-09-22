@@ -19,7 +19,6 @@
 
 package org.apache.felix.sigil.config;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -94,9 +93,9 @@ public class BldConfig
     {
     }
 
-    public BldConfig(Properties p, File basedir) throws IOException
+    public BldConfig(Properties p) throws IOException
     {
-        merge(p, basedir);
+        merge(p);
     }
 
     public void setDefault(BldConfig dflt)
@@ -392,7 +391,7 @@ public class BldConfig
      * @param p
      * @throws IOException 
      */
-    public void merge(Properties p, File basedir) throws IOException
+    public void merge(Properties p) throws IOException
     {
         if (p.isEmpty())
             return;
@@ -436,12 +435,6 @@ public class BldConfig
 
             String[] keys = key.split(SUBKEY_SEP, 2);
             String value = p.getProperty(key);
-
-            // expand ${.} and ${..} relative to file
-            if (value.contains("${.}"))
-                value = value.replace("${.}", basedir.getPath());
-            else if (value.contains("${..}"))
-                value = value.replace("${..}", basedir.getParent());
 
             if (keys.length > 1)
             {
@@ -522,7 +515,7 @@ public class BldConfig
             {
                 if (bundleKeys.contains(subKey))
                 {
-                    BldConfig config2 = new BldConfig(props, basedir);
+                    BldConfig config2 = new BldConfig(props);
                     Properties unkProps = config2.getUnknown();
 
                     if (config2.map.containsKey(M_IMPORTS))

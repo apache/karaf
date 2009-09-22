@@ -19,86 +19,55 @@
 
 package org.apache.felix.sigil.config;
 
-
+import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
-
 
 public class BldProperties extends Properties
 {
     private static final long serialVersionUID = 1L;
-    private static final Map<String, String> env = System.getenv();
-    private static final Properties sys = System.getProperties();
+    private static final BldProperties global = new BldProperties(null);
+    private static final Properties sysEnv;
 
-    private final BldProject project;
-    private String dot;
-    private String dotdot;
-
-    private static final BldProperties global = new BldProperties();
-
-
-    private BldProperties()
+    static
     {
-        this.project = null;
+        Properties env = new Properties();
+        env.putAll(System.getenv());
+        sysEnv = new Properties(env);
+        sysEnv.putAll(System.getProperties());
+        // Note: these are System properties, NOT Ant properties.
     }
 
-
-    BldProperties( BldProject project ) throws NullPointerException
+    private final Properties mySysEnv;
+    
+    BldProperties(File baseDir)
     {
-        if ( project == null )
+        mySysEnv = new Properties(sysEnv);
+        
+        try
         {
-            throw new NullPointerException();
-        }
-        this.project = project;
-    }
-
-
-    public String getProperty( String key, String defaultValue )
-    {
-        if ( project != null )
-        {
-            try
+            if (baseDir != null)
             {
-                if ( ".".equals( key ) )
-                {
-                    if ( dot == null )
-                    {
-                        dot = project.resolve( "." ).getCanonicalPath();
-                    }
-                    return dot;
-                }
-                else if ( "..".equals( key ) )
-                {
-                    if ( dotdot == null )
-                    {
-                        dotdot = project.resolve( ".." ).getCanonicalPath();
-                    }
-                    return dotdot;
-                }
-            }
-            catch ( IOException e )
-            {
-                throw new IllegalStateException( e );
+                mySysEnv.setProperty(".", baseDir.getCanonicalPath());
+                mySysEnv.setProperty("..", baseDir.getParentFile().getCanonicalPath());
             }
         }
-
-        String val = sys.getProperty( key, env.get( key ) );
-
-        if ( val == null )
+        catch (IOException e)
         {
-            val = defaultValue;
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-
-        return val;
     }
 
-
-    public String getProperty( String key )
+    public String getProperty(String key, String defaultValue)
     {
-        return getProperty( key, null );
+        return mySysEnv.getProperty(key, defaultValue);
     }
 
+    public String getProperty(String key)
+    {
+        return mySysEnv.getProperty(key);
+    }
 
     public static Properties global()
     {

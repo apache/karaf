@@ -67,7 +67,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
     private BldConfig config;
     private BldConverter convert;
     private BundleModelElement requirements;
-    private File baseDir;
+    private final File baseDir;
     private URI loc;
     private Properties packageDefaults;
     private TreeSet<String> packageWildDefaults;
@@ -87,7 +87,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
     {
         // allow System property overrides, e.g.
         // ANT_OPTS='-Dsigil.option\;addMissingImports=false' ant
-        config.merge(getOverrides(), null);
+        config.merge(getOverrides());
 
         InputStream in = null;
         try
@@ -100,7 +100,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
 
             Properties p = new Properties();
             p.load(bis);
-            config.merge(p, baseDir);
+            config.merge(p);
 
             Properties unknown = config.getUnknown();
             if (!unknown.isEmpty())
@@ -158,15 +158,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
 
         if (defaults != null)
         {
-            defaults = BldUtil.expand(defaults, new Properties()
-            {
-                private static final long serialVersionUID = 1L;
-
-                public String getProperty(String name)
-                {
-                    return System.getenv(name);
-                }
-            });
+            defaults = BldUtil.expand(defaults, new BldProperties(base));
         }
         else
         {
@@ -184,6 +176,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
             {
                 File file = new File(base, defaults).getCanonicalFile();
                 URL url = file.toURL();
+                BldProperties bp = new BldProperties(file.getParentFile());
 
                 if (dflt == null)
                 {
@@ -197,9 +190,19 @@ public class BldProject implements IBldProject, IRepositoryConfig
                 }
 
                 Properties p = new Properties();
-                // FIXME stream not closed
-                p.load(url.openStream());
-                dflt.merge(p, file.getParentFile());
+                InputStream stream = url.openStream();
+                p.load(stream);
+                stream.close();
+
+                // expand variables in defaults
+                for (Object k : p.keySet())
+                {
+                    String key = (String) k;
+                    String value = p.getProperty(key);
+                    p.setProperty(key, BldUtil.expand(value, bp));
+                }
+
+                dflt.merge(p);
 
                 ignore = false;
                 loadDefaults(p, file.getParentFile(), dflt);
@@ -618,6 +621,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
     public Map<String, Properties> getRepositoryConfig()
     {
         HashMap<String, Properties> map = new HashMap<String, Properties>();
+        BldProperties bp = new BldProperties(baseDir);
 
         for (String name : config.getList(null, BldConfig.C_REPOSITORIES))
         {
@@ -627,14 +631,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
             {
                 String key = (String) k;
                 String value = repo.getProperty(key);
-
-                String expand = BldUtil.expand(value, new BldProperties(this));
-
-                if (!value.equals(expand))
-                {
-                    value = expand;
-                    repo.setProperty(key, value);
-                }
+                repo.setProperty(key, BldUtil.expand(value, bp));
             }
 
             map.put(name, repo);
