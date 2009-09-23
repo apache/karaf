@@ -424,34 +424,44 @@ class ServiceRegistrationImpl implements ServiceRegistration
             IModule requesterModule = ((BundleImpl) requester).getCurrentModule();
             // Get package wiring from service requester.
             IWire requesterWire = Util.getWire(requesterModule, pkgName);
-
-            // There are three situations that may occur here:
-            //   1. The requester does not have a wire for the package.
-            //   2. The provider does not have a wire for the package.
-            //   3. Both have a wire for the package.
-            // For case 1, we do not filter the service reference since we
-            // assume that the bundle is using reflection or that it won't
-            // use that class at all since it does not import it. For
-            // case 2, we have to try to load the class from the class
-            // loader of the service object and then compare the class
-            // loaders to determine if we should filter the service
-            // refernce. In case 3, we simply compare the exporting
-            // modules from the package wiring to determine if we need
-            // to filter the service reference.
-
-            // Case 1: Always include service reference.
-            if (requesterWire == null)
-            {
-                return allow;
-            }
-
             // Get package wiring from service provider.
             IModule providerModule = ((BundleImpl) m_bundle).getCurrentModule();
             IWire providerWire = Util.getWire(providerModule, pkgName);
 
-            // Case 2: Only include service reference if the service
+
+            // There are four situations that may occur here:
+            //   1. Neither the requester, nor provider have a wire for
+            //      the package.
+            //   2. The requester does not have a wire for the package.
+            //   3. The provider does not have a wire for the package.
+            //   4. Both have a wire for the package.
+            // For case 1, we return true if the providing module is the same
+            // as the requesting module, otherwise we return false.
+            // For case 2, we do not filter the service reference since we
+            // assume that the requesting bundle is using reflection or that
+            // it won't use that class at all since it does not import it.
+            // For case 3, we have to try to load the class from the class
+            // loader of the service object and then compare the class
+            // loaders to determine if we should filter the service
+            // reference. In case 4, we simply compare the exporting
+            // modules from the package wiring to determine if we need
+            // to filter the service reference.
+
+            // Case 1: Only include if modules are equals.
+            if ((requesterWire == null) && (providerWire == null))
+            {
+                allow = requesterModule.equals(providerModule);
+            }
+
+            // Case 2: Always include service reference.
+            else if (requesterWire == null)
+            {
+                allow = true;
+            }
+
+            // Case 3: Only include service reference if the service
             // object uses the same class as the requester.
-            if (providerWire == null)
+            else if (providerWire == null)
             {
                 // If the provider is not the exporter of the requester's package,
                 // then try to use the service registration to see if the requester's
@@ -481,7 +491,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
                     allow = providerModule == requesterWire.getExporter();
                 }
             }
-            // Case 3: Include service reference if the wires have the
+            // Case 4: Include service reference if the wires have the
             // same source module.
             else
             {
