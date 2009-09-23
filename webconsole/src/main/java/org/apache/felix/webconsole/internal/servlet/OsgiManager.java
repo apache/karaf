@@ -116,10 +116,13 @@ public class OsgiManager extends GenericServlet
     static final String DEFAULT_MANAGER_ROOT = "/system/console";
 
     static final String[] PLUGIN_CLASSES =
-        { "org.apache.felix.webconsole.internal.compendium.ComponentConfigurationPrinter",
+        {
+            "org.apache.felix.webconsole.internal.compendium.ComponentConfigurationPrinter",
             "org.apache.felix.webconsole.internal.compendium.ComponentsServlet",
             "org.apache.felix.webconsole.internal.compendium.ConfigManager",
+            "org.apache.felix.webconsole.internal.compendium.ConfigurationAdminConfigurationPrinter",
             "org.apache.felix.webconsole.internal.compendium.LogServlet",
+            "org.apache.felix.webconsole.internal.compendium.PreferencesConfigurationPrinter",
             "org.apache.felix.webconsole.internal.core.BundlesServlet",
             "org.apache.felix.webconsole.internal.core.InstallAction",
             "org.apache.felix.webconsole.internal.core.SetStartLevelAction",
@@ -132,7 +135,8 @@ public class OsgiManager extends GenericServlet
             "org.apache.felix.webconsole.internal.obr.InstallFromRepoAction",
             "org.apache.felix.webconsole.internal.obr.RefreshRepoAction",
             "org.apache.felix.webconsole.internal.system.GCAction",
-            "org.apache.felix.webconsole.internal.system.VMStatPlugin" };
+            "org.apache.felix.webconsole.internal.system.VMStatPlugin"
+        };
 
     private BundleContext bundleContext;
 

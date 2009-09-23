@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
@@ -51,11 +50,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.service.prefs.Preferences;
-import org.osgi.service.prefs.PreferencesService;
 import org.osgi.util.tracker.ServiceTracker;
 
 
@@ -188,8 +182,6 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     {
         this.printSystemProperties( pw );
         this.printServices( pw );
-        this.printPreferences( pw );
-        this.printConfigurations( pw );
         this.printThreads( pw );
 
         for ( Iterator cpi = getConfigurationPrinters().iterator(); cpi.hasNext(); )
@@ -238,7 +230,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         for ( Iterator ki = keys.iterator(); ki.hasNext(); )
         {
             Object key = ki.next();
-            this.infoLine( pw, null, ( String ) key, props.get( key ) );
+            infoLine( pw, null, ( String ) key, props.get( key ) );
         }
 
         pw.end();
@@ -266,7 +258,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     //            SortedSet keys = new TreeSet(props.keySet());
     //            for (Iterator ki = keys.iterator(); ki.hasNext();) {
     //                Object key = ki.next();
-    //                this.infoLine(pw, null, (String) key, props.get(key));
+    //                infoLine(pw, null, (String) key, props.get(key));
     //            }
     //
     //        } else {
@@ -301,16 +293,16 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         {
             ServiceReference sr = ( ServiceReference ) si.next();
 
-            this.infoLine( pw, null, String.valueOf( sr.getProperty( Constants.SERVICE_ID ) ), sr
+            infoLine( pw, null, String.valueOf( sr.getProperty( Constants.SERVICE_ID ) ), sr
                 .getProperty( Constants.OBJECTCLASS ) );
-            this.infoLine( pw, "  ", "Bundle", this.getBundleString( sr.getBundle() ) );
+            infoLine( pw, "  ", "Bundle", this.getBundleString( sr.getBundle() ) );
 
             Bundle[] users = sr.getUsingBundles();
             if ( users != null && users.length > 0 )
             {
                 for ( int i = 0; i < users.length; i++ )
                 {
-                    this.infoLine( pw, "  ", "Using Bundle", this.getBundleString( users[i] ) );
+                    infoLine( pw, "  ", "Using Bundle", this.getBundleString( users[i] ) );
                 }
             }
 
@@ -320,123 +312,11 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             {
                 if ( !Constants.SERVICE_ID.equals( keys[i] ) && !Constants.OBJECTCLASS.equals( keys[i] ) )
                 {
-                    this.infoLine( pw, "  ", keys[i], sr.getProperty( keys[i] ) );
+                    infoLine( pw, "  ", keys[i], sr.getProperty( keys[i] ) );
                 }
             }
 
             pw.println();
-        }
-
-        pw.end();
-    }
-
-
-    private void printPreferences( ConfigurationWriter pw )
-    {
-        pw.title( "Preferences" );
-
-        ServiceReference sr = getBundleContext().getServiceReference( PreferencesService.class.getName() );
-        if ( sr == null )
-        {
-            pw.println( "  Preferences Service not registered" );
-        }
-        else
-        {
-            PreferencesService ps = ( PreferencesService ) getBundleContext().getService( sr );
-            try
-            {
-                this.printPreferences( pw, ps.getSystemPreferences() );
-
-                String[] users = ps.getUsers();
-                for ( int i = 0; users != null && i < users.length; i++ )
-                {
-                    pw.println( "*** User Preferences " + users[i] + ":" );
-                    this.printPreferences( pw, ps.getUserPreferences( users[i] ) );
-                }
-            }
-            catch ( BackingStoreException bse )
-            {
-                // todo or not :-)
-            }
-            finally
-            {
-                getBundleContext().ungetService( sr );
-            }
-        }
-
-        pw.end();
-    }
-
-
-    private void printPreferences( PrintWriter pw, Preferences prefs ) throws BackingStoreException
-    {
-
-        final String[] children = prefs.childrenNames();
-        final String[] keys = prefs.keys();
-
-        if ( children.length == 0 && keys.length == 0 )
-        {
-            pw.println( "No Preferences available" );
-        }
-        else
-        {
-            for ( int i = 0; i < children.length; i++ )
-            {
-                this.printPreferences( pw, prefs.node( children[i] ) );
-            }
-
-            for ( int i = 0; i < keys.length; i++ )
-            {
-                this.infoLine( pw, null, prefs.absolutePath() + "/" + keys[i], prefs.get( keys[i], null ) );
-            }
-        }
-
-        pw.println();
-    }
-
-
-    private void printConfigurations( ConfigurationWriter pw )
-    {
-        pw.title(  "Configurations" );
-
-        ServiceReference sr = getBundleContext().getServiceReference( ConfigurationAdmin.class.getName() );
-        if ( sr == null )
-        {
-            pw.println( "  Configuration Admin Service not registered" );
-        }
-        else
-        {
-
-            ConfigurationAdmin ca = ( ConfigurationAdmin ) getBundleContext().getService( sr );
-            try
-            {
-                Configuration[] configs = ca.listConfigurations( null );
-                if ( configs != null && configs.length > 0 )
-                {
-                    SortedMap sm = new TreeMap();
-                    for ( int i = 0; i < configs.length; i++ )
-                    {
-                        sm.put( configs[i].getPid(), configs[i] );
-                    }
-
-                    for ( Iterator mi = sm.values().iterator(); mi.hasNext(); )
-                    {
-                        this.printConfiguration( pw, ( Configuration ) mi.next() );
-                    }
-                }
-                else
-                {
-                    pw.println( "  No Configurations available" );
-                }
-            }
-            catch ( Exception e )
-            {
-                // todo or not :-)
-            }
-            finally
-            {
-                getBundleContext().ungetService( sr );
-            }
         }
 
         pw.end();
@@ -451,39 +331,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     }
 
 
-    private void printConfiguration( PrintWriter pw, Configuration config )
-    {
-        this.infoLine( pw, "", "PID", config.getPid() );
-
-        if ( config.getFactoryPid() != null )
-        {
-            this.infoLine( pw, "  ", "Factory PID", config.getFactoryPid() );
-        }
-
-        String loc = ( config.getBundleLocation() != null ) ? config.getBundleLocation() : "Unbound";
-        this.infoLine( pw, "  ", "BundleLocation", loc );
-
-        Dictionary props = config.getProperties();
-        if ( props != null )
-        {
-            SortedSet keys = new TreeSet();
-            for ( Enumeration ke = props.keys(); ke.hasMoreElements(); )
-            {
-                keys.add( ke.nextElement() );
-            }
-
-            for ( Iterator ki = keys.iterator(); ki.hasNext(); )
-            {
-                String key = ( String ) ki.next();
-                this.infoLine( pw, "  ", key, props.get( key ) );
-            }
-        }
-
-        pw.println();
-    }
-
-
-    private void infoLine( PrintWriter pw, String indent, String label, Object value )
+    public static void infoLine( PrintWriter pw, String indent, String label, Object value )
     {
         if ( indent != null )
         {
@@ -496,13 +344,13 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             pw.print( '=' );
         }
 
-        this.printObject( pw, value );
+        printObject( pw, value );
 
         pw.println();
     }
 
 
-    private void printObject( PrintWriter pw, Object value )
+    private static void printObject( PrintWriter pw, Object value )
     {
         if ( value == null )
         {
@@ -510,7 +358,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         }
         else if ( value.getClass().isArray() )
         {
-            this.printArray( pw, ( Object[] ) value );
+            printArray( pw, ( Object[] ) value );
         }
         else
         {
@@ -519,7 +367,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     }
 
 
-    private void printArray( PrintWriter pw, Object[] values )
+    private static void printArray( PrintWriter pw, Object[] values )
     {
         pw.print( '[' );
         if ( values != null && values.length > 0 )
@@ -530,7 +378,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
                 {
                     pw.print( ", " );
                 }
-                this.printObject( pw, values[i] );
+                printObject( pw, values[i] );
             }
         }
         pw.print( ']' );

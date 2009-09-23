@@ -87,6 +87,10 @@
                                     org/apache/felix/bundlerepository/Util.class|
                                     org/apache/felix/bundlerepository/VersionRange.class,
                             
+                            <!-- ServiceTracker -->
+                            org.osgi.compendium;
+                                inline=org/osgi/util/tracker/*,
+                                
                             <!-- Required for JSON data transfer -->
                             json,
                             

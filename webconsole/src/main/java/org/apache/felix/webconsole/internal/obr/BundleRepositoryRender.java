@@ -417,7 +417,7 @@ public class BundleRepositoryRender extends BaseWebConsolePlugin
 
     protected RepositoryAdmin getRepositoryAdmin()
     {
-        return ( RepositoryAdmin ) getService( RepositoryAdmin.class.getName() );
+        return ( RepositoryAdmin ) getService( "org.osgi.service.obr.RepositoryAdmin" );
     }
 
 }

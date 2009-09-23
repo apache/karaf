@@ -30,27 +30,14 @@ import java.util.TreeSet;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
-import org.apache.felix.webconsole.ConfigurationPrinter;
-import org.osgi.framework.BundleContext;
+import org.apache.felix.webconsole.internal.AbstractConfigurationPrinter;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
 
 
-public class ComponentConfigurationPrinter extends AbstractScrPlugin implements ConfigurationPrinter
+public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
 {
-
-    private ServiceRegistration registration;
-
-
-    public void activate( BundleContext bundleContext )
-    {
-        super.activate( bundleContext );
-
-        registration = bundleContext.registerService( ConfigurationPrinter.SERVICE, this, null );
-    }
-
 
     public String getTitle()
     {
@@ -60,39 +47,48 @@ public class ComponentConfigurationPrinter extends AbstractScrPlugin implements 
 
     public void printConfiguration( PrintWriter pw )
     {
-        ScrService scrService = getScrService();
-        if ( scrService != null )
+        ServiceReference sr = getBundleContext().getServiceReference( "org.apache.felix.scr.ScrService" );
+        if ( sr == null )
         {
-            Component[] components = scrService.getComponents();
-
-            if ( components == null || components.length == 0 )
-            {
-
-                pw.println( "  No Components Registered" );
-
-            }
-            else
-            {
-
-                // order components by id
-                TreeMap componentMap = new TreeMap();
-                for ( int i = 0; i < components.length; i++ )
-                {
-                    Component component = components[i];
-                    componentMap.put( new Long( component.getId() ), component );
-                }
-
-                // render components
-                for ( Iterator ci = componentMap.values().iterator(); ci.hasNext(); )
-                {
-                    Component component = ( Component ) ci.next();
-                    component( pw, component );
-                }
-            }
+            pw.println( "  Apache Felix Declarative Service not installed" );
         }
         else
         {
-            pw.println( "  Apache Felix Declarative Service not installed" );
+            ScrService scrService = ( ScrService ) getBundleContext().getService( sr );
+            try
+            {
+                printComponents( pw, scrService.getComponents() );
+            }
+            finally
+            {
+                getBundleContext().ungetService( sr );
+            }
+        }
+    }
+
+
+    public void printComponents( final PrintWriter pw, final Component[] components )
+    {
+        if ( components == null || components.length == 0 )
+        {
+            pw.println( "  No Components Registered" );
+        }
+        else
+        {
+            // order components by id
+            TreeMap componentMap = new TreeMap();
+            for ( int i = 0; i < components.length; i++ )
+            {
+                Component component = components[i];
+                componentMap.put( new Long( component.getId() ), component );
+            }
+
+            // render components
+            for ( Iterator ci = componentMap.values().iterator(); ci.hasNext(); )
+            {
+                Component component = ( Component ) ci.next();
+                component( pw, component );
+            }
         }
     }
 
