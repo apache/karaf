@@ -260,7 +260,7 @@ public class Main
         String enableHook = configProps.getProperty(SHUTDOWN_HOOK_PROP);
         if ((enableHook == null) || !enableHook.equalsIgnoreCase("false"))
         {
-            Runtime.getRuntime().addShutdownHook(new Thread() {
+            Runtime.getRuntime().addShutdownHook(new Thread("Felix Shutdown Hook") {
                 public void run()
                 {
                     try
