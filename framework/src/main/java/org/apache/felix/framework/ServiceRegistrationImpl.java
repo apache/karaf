@@ -437,15 +437,15 @@ class ServiceRegistrationImpl implements ServiceRegistration
             //   4. Both have a wire for the package.
             // For case 1, we return true if the providing module is the same
             // as the requesting module, otherwise we return false.
-            // For case 2, we do not filter the service reference since we
-            // assume that the requesting bundle is using reflection or that
-            // it won't use that class at all since it does not import it.
-            // For case 3, we have to try to load the class from the class
-            // loader of the service object and then compare the class
-            // loaders to determine if we should filter the service
-            // reference. In case 4, we simply compare the exporting
-            // modules from the package wiring to determine if we need
-            // to filter the service reference.
+            // For case 2, we only filter the service reference if the requester
+            // has private acess to the class and its not the same class as the
+            // registering bundle's class; for other situations we assume the
+            // requester is doing some sort of reflection-based lookup. For
+            // case 3, we have to try to load the class from the class loader
+            // of the service object and then compare the class loaders to
+            // determine if we should filter the service reference. For case 4,
+            // we simply compare the exporting modules from the package wiring
+            // to determine if we need to filter the service reference.
 
             // Case 1: Only include if modules are equals.
             if ((requesterWire == null) && (providerWire == null))
@@ -456,7 +456,15 @@ class ServiceRegistrationImpl implements ServiceRegistration
             // Case 2: Always include service reference.
             else if (requesterWire == null)
             {
-                allow = true;
+                try
+                {
+                    Class requestClass = requesterModule.getClassByDelegation(className);
+                    allow = getRegistration().isClassAccessible(requestClass);
+                }
+                catch (Exception ex)
+                {
+                    allow = true;
+                }
             }
 
             // Case 3: Only include service reference if the service
