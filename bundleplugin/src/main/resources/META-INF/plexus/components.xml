@@ -54,7 +54,7 @@
       <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
       <configuration>
         <type>bundle</type>
-        <includesDependencies>true</includesDependencies>
+        <includesDependencies>false</includesDependencies>
         <language>java</language>
         <extension>jar</extension>
         <addedToClasspath>true</addedToClasspath>
