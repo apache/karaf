@@ -71,8 +71,10 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
 	    for( var p in dataEntry.properties ) {
 	    	var c1 = td(null, null, [text(p)]);
 	    	$(c1).css("border", "0px none");
+            $(c1).css("padding", "0 4px 0 0");
 	    	var c2 = td(null, null, [text(dataEntry.properties[p])]);
 	    	$(c2).css("border", "0px none");
+            $(c2).css("padding", "0 0 0 4px");
 	    	bodyE.appendChild(tr(null, null, [ c1, c2 ]));
 	    }
 	    propE = tableE;
