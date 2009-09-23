@@ -1440,8 +1440,10 @@ public class ModuleImpl implements IModule
                     // then delegate to the parent class loader; otherwise,
                     // break out of loop and return null.
                     boolean delegate = true;
-                    for (ClassLoader cl = classes[i].getClassLoader(); cl != null; cl = cl.getClass().getClassLoader())
+                    ClassLoader last = null;
+                    for (ClassLoader cl = classes[i].getClassLoader(); (cl != null) && (last != cl); cl = cl.getClass().getClassLoader())
                     {
+                        last = cl;
                         if (ModuleClassLoader.class.isInstance(cl))
                         {
                             delegate = false;
