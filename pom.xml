@@ -121,6 +121,7 @@
         <module>wireadmin</module>
         <module>prefs</module>
         <module>webconsole</module>
+        <module>webconsole-plugins/event</module>
         <module>fileinstall</module>
 
         <module>ipojo</module>
