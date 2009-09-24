@@ -21,11 +21,7 @@ package org.apache.felix.webconsole.internal;
 
 import java.io.IOException;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -118,6 +114,22 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
         plugin.init( config );
     }
 
+    /**
+     * Detects whether this request is intended to have the headers and
+     * footers of this plugin be rendered or not. The decision is taken based
+     * on whether and what extension the request URI has: If the request URI
+     * has no extension or the the extension is <code>.html</code>, the request
+     * is assumed to be rendered with header and footer. Otherwise the
+     * headers and footers are omitted and the
+     * {@link #renderContent(HttpServletRequest, HttpServletResponse)}
+     * method is called without any decorations and without setting any
+     * response headers.
+     */
+    protected boolean isHtmlRequest( final HttpServletRequest request )
+    {
+        final String requestUri = request.getRequestURI();
+        return requestUri.endsWith( ".html" ) || requestUri.lastIndexOf( '.' ) < 0;
+    }
 
     /**
      * Directly refer to the plugin's service method unless the request method

@@ -32,6 +32,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.apache.felix.webconsole.internal.WebConsolePluginAdapter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
@@ -128,19 +129,13 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
     /**
      * Detects whether this request is intended to have the headers and
-     * footers of this plugin be rendered or not. The decision is taken based
-     * on whether and what extension the request URI has: If the request URI
-     * has no extension or the the extension is <code>.html</code>, the request
-     * is assumed to be rendered with header and footer. Otherwise the
-     * headers and footers are omitted and the
-     * {@link #renderContent(HttpServletRequest, HttpServletResponse)}
-     * method is called without any decorations and without setting any
-     * response headers.
+     * footers of this plugin be rendered or not. This method always returns
+     * <code>true</true> but has been overwritten in the
+     * {@link WebConsolePluginAdapter} for the plugins.
      */
     protected boolean isHtmlRequest( final HttpServletRequest request )
     {
-        final String requestUri = request.getRequestURI();
-        return requestUri.endsWith( ".html" ) || requestUri.lastIndexOf( '.' ) < 0;
+        return true;
     }
 
 
