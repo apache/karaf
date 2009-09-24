@@ -101,20 +101,46 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     {
         if ( !spoolResource( request, response ) )
         {
-            // start the html response, write the header, open body and main div
-            PrintWriter pw = startResponse( request, response );
+            // detect if this is an html request
+            if ( isHtmlRequest(request) )
+            {
+                // start the html response, write the header, open body and main div
+                PrintWriter pw = startResponse( request, response );
 
-            // render top navigation
-            renderTopNavigation( request, pw );
+                // render top navigation
+                renderTopNavigation( request, pw );
 
-            // wrap content in a separate div
-            pw.println( "<div id='content'>" );
-            renderContent( request, response );
-            pw.println( "</div>" );
+                // wrap content in a separate div
+                pw.println( "<div id='content'>" );
+                renderContent( request, response );
+                pw.println( "</div>" );
 
-            // close the main div, body, and html
-            endResponse( pw );
+                // close the main div, body, and html
+                endResponse( pw );
+            }
+            else
+            {
+                renderContent( request, response );
+            }
         }
+    }
+
+
+    /**
+     * Detects whether this request is intended to have the headers and
+     * footers of this plugin be rendered or not. The decision is taken based
+     * on whether and what extension the request URI has: If the request URI
+     * has no extension or the the extension is <code>.html</code>, the request
+     * is assumed to be rendered with header and footer. Otherwise the
+     * headers and footers are omitted and the
+     * {@link #renderContent(HttpServletRequest, HttpServletResponse)}
+     * method is called without any decorations and without setting any
+     * response headers.
+     */
+    protected boolean isHtmlRequest( final HttpServletRequest request )
+    {
+        final String requestUri = request.getRequestURI();
+        return requestUri.endsWith( ".html" ) || requestUri.lastIndexOf( '.' ) < 0;
     }
 
 
