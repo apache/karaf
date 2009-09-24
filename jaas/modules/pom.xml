@@ -67,6 +67,11 @@
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.geronimo.blueprint</groupId>
+            <artifactId>geronimo-blueprint</artifactId>
+        </dependency>        
     </dependencies>
 
     <build>
