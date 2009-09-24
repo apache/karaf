@@ -131,6 +131,7 @@ public final class JettyService
         context.addServlet(new ServletHolder(this.dispatcher), "/*");
 
         this.server.start();
+        SystemLogger.info("Started jetty " + Server.getVersion() + " at port " + this.config.getHttpPort());
     }
 
     private void initializeHttp()

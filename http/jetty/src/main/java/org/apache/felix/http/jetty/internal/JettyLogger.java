@@ -57,17 +57,25 @@ public final class JettyLogger
 
     public void debug(String msg, Throwable cause)
     {
-        SystemLogger.debug(msg);
+        if (this.debugEnabled) {
+            SystemLogger.debug(msg);
+        }
     }
 
     public void debug(String msg, Object arg0, Object arg1)
     {
-        SystemLogger.debug(format(msg, arg0, arg1));
+        if (this.debugEnabled) {
+            SystemLogger.debug(format(msg, arg0, arg1));
+        }
     }
 
     public void info(String msg, Object arg0, Object arg1)
     {
-        SystemLogger.info(format(msg, arg0, arg1));
+        // Classify all info messages as debug messages.
+        // Jetty uses way to much verbose info messages.
+        if (this.debugEnabled) {
+            SystemLogger.info(format(msg, arg0, arg1));
+        }
     }
 
     public void warn(String msg, Throwable cause)
