@@ -18,7 +18,8 @@ package org.apache.felix.http.whiteboard.internal.manager;
 
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.HttpContext;
-import org.apache.felix.http.whiteboard.internal.util.SystemLogger;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
+
 import javax.servlet.Servlet;
 
 public final class ServletMapping
@@ -39,7 +40,7 @@ public final class ServletMapping
         try {
             httpService.registerServlet(this.alias, this.servlet, getInitParams(), getContext());
         } catch (Exception e) {
-            SystemLogger.get().error("Failed to register servlet", e);
+            SystemLogger.error("Failed to register servlet", e);
         }
     }
 

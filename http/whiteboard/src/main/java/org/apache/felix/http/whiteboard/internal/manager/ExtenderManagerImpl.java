@@ -22,7 +22,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.apache.felix.http.api.ExtHttpService;
-import org.apache.felix.http.whiteboard.internal.util.SystemLogger;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
 
 import javax.servlet.Servlet;
 import javax.servlet.Filter;
@@ -141,9 +141,9 @@ public final class ExtenderManagerImpl
     {
         this.httpService = service;
         if (this.httpService instanceof ExtHttpService) {
-            SystemLogger.get().info("Detected extended HttpService. Filters enabled.");
+            SystemLogger.info("Detected extended HttpService. Filters enabled.");
         } else {
-            SystemLogger.get().info("Standard HttpService. Filters disabled.");
+            SystemLogger.info("Standard HttpService. Filters disabled.");
         }
 
         registerAll();

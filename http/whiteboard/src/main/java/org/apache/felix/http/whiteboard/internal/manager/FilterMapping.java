@@ -19,7 +19,8 @@ package org.apache.felix.http.whiteboard.internal.manager;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.HttpContext;
 import org.apache.felix.http.api.ExtHttpService;
-import org.apache.felix.http.whiteboard.internal.util.SystemLogger;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
+
 import javax.servlet.Filter;
 
 public final class FilterMapping
@@ -49,7 +50,7 @@ public final class FilterMapping
         try {
             httpService.registerFilter(this.filter, this.pattern, getInitParams(), ranking, getContext());
         } catch (Exception e) {
-            SystemLogger.get().error("Failed to register filter", e);
+            SystemLogger.error("Failed to register filter", e);
         }
     }
 

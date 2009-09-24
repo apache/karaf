@@ -22,7 +22,7 @@ import org.apache.felix.http.base.internal.context.ExtServletContext;
 import org.apache.felix.http.base.internal.handler.HandlerRegistry;
 import org.apache.felix.http.base.internal.handler.FilterHandler;
 import org.apache.felix.http.base.internal.handler.ServletHandler;
-import org.apache.felix.http.base.internal.util.SystemLogger;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.framework.Bundle;
@@ -42,13 +42,13 @@ public final class HttpServiceImpl
     private final HashSet<Filter> localFilters;
     private final ServletContextManager contextManager;
 
-    public HttpServiceImpl(ServletContext context, HandlerRegistry handlerRegistry, Bundle bundle)
+    public HttpServiceImpl(Bundle bundle, ServletContext context, HandlerRegistry handlerRegistry)
     {
         this.bundle = bundle;
         this.handlerRegistry = handlerRegistry;
         this.localServlets = new HashSet<Servlet>();
         this.localFilters = new HashSet<Filter>();
-        this.contextManager = new ServletContextManager(bundle, context);
+        this.contextManager = new ServletContextManager(this.bundle, context);
     }
 
     private ExtServletContext getServletContext(HttpContext context)
@@ -109,7 +109,7 @@ public final class HttpServiceImpl
             Servlet servlet = new ResourceServlet(name);
             registerServlet(alias, servlet, null, context);
         } catch (ServletException e) {
-            SystemLogger.get().error("Failed to register resources", e);
+            SystemLogger.error("Failed to register resources", e);
         }
     }
 

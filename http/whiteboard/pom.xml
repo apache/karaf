@@ -42,6 +42,7 @@
                             org.apache.felix.http.whiteboard.internal.WhiteboardActivator
                         </Bundle-Activator>
                         <Private-Package>
+                            org.apache.felix.http.base.*,
                             org.apache.felix.http.whiteboard.*
                         </Private-Package>
                         <Import-Package>
@@ -72,6 +73,12 @@
             <version>${pom.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>org.apache.felix.http.base</artifactId>
+            <version>${pom.version}</version>
+            <scope>provided</scope>
+        </dependency>        
     </dependencies>
 
 </project>

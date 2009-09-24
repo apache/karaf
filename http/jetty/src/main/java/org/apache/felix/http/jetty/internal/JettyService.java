@@ -29,8 +29,9 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.*;
 import org.mortbay.log.Log;
 import org.mortbay.log.StdErrLog;
-import org.apache.felix.http.base.internal.util.SystemLogger;
 import org.apache.felix.http.base.internal.DispatcherServlet;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
+
 import java.util.Properties;
 import java.util.Dictionary;
 
@@ -99,7 +100,7 @@ public final class JettyService
         try {
             initializeJetty();
         } catch (Exception e) {
-            SystemLogger.get().error("Exception while initializing Jetty.", e);
+            SystemLogger.error("Exception while initializing Jetty.", e);
         }
     }
 
@@ -108,7 +109,7 @@ public final class JettyService
         try {
             this.server.stop();
         } catch (Exception e) {
-            SystemLogger.get().error("Exception while stopping Jetty.", e);
+            SystemLogger.error("Exception while stopping Jetty.", e);
         }
     }
 

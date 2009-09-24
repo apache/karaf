@@ -18,24 +18,20 @@ package org.apache.felix.http.bridge.internal;
 
 import javax.servlet.http.HttpServlet;
 import java.util.Hashtable;
-import org.apache.felix.http.base.internal.AbstractActivator;
+import org.apache.felix.http.base.internal.AbstractHttpActivator;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
 
 public final class BridgeActivator
-    extends AbstractActivator
+    extends AbstractHttpActivator
 {
     @Override
     protected void doStart()
         throws Exception
     {
+        super.doStart();
         Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put("http.felix.dispatcher", getDispatcherServlet().getClass().getName());
         getBundleContext().registerService(HttpServlet.class.getName(), getDispatcherServlet(), props);
-    }
-
-    @Override
-    protected void doStop()
-        throws Exception
-    {
-        // Do nothing
+        SystemLogger.info("Started bridged http service");
     }
 }

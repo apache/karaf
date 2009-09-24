@@ -14,27 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.http.jetty.internal;
+package org.apache.felix.http.base.internal;
 
-import org.apache.felix.http.base.internal.AbstractHttpActivator;
-
-public final class JettyActivator
-    extends AbstractHttpActivator 
+public abstract class AbstractHttpActivator
+    extends AbstractActivator
 {
-    private JettyService jetty;
+    private DispatcherServlet dispatcher;
+    private HttpServiceController controller;
+
+    protected final DispatcherServlet getDispatcherServlet()
+    {
+        return this.dispatcher;
+    }
+
+    protected final HttpServiceController getHttpServiceController()
+    {
+        return this.controller;
+    }
 
     protected void doStart()
         throws Exception
     {
-        super.doStart();
-        this.jetty = new JettyService(getBundleContext(), getDispatcherServlet());
-        this.jetty.start();
+        this.controller = new HttpServiceController(getBundleContext());
+        this.dispatcher = new DispatcherServlet(this.controller);
     }
 
     protected void doStop()
         throws Exception
     {
-        this.jetty.stop();
-        super.doStop();
+        this.controller.unregister();
+        this.dispatcher.destroy();
     }
 }

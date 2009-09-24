@@ -19,7 +19,7 @@ package org.apache.felix.http.base.internal.context;
 import org.osgi.service.http.HttpContext;
 import org.osgi.framework.Bundle;
 import org.apache.felix.http.base.internal.util.MimeTypes;
-import org.apache.felix.http.base.internal.util.SystemLogger;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.RequestDispatcher;
@@ -178,17 +178,17 @@ public final class ServletContextImpl
 
     public void log(String message)
     {
-        SystemLogger.get().info(message);
+        SystemLogger.info(message);
     }
 
     public void log(Exception cause, String message)
     {
-        SystemLogger.get().error(message, cause);
+        SystemLogger.error(message, cause);
     }
 
     public void log(String message, Throwable cause)
     {
-        SystemLogger.get().error(message, cause);
+        SystemLogger.error(message, cause);
     }
 
     public String getServletContextName()

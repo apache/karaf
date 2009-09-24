@@ -18,7 +18,7 @@ package org.apache.felix.http.whiteboard.internal.manager;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
-import org.apache.felix.http.whiteboard.internal.util.SystemLogger;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
 import java.util.HashMap;
 
 public final class HttpContextManager
@@ -46,9 +46,9 @@ public final class HttpContextManager
             context = new DefaultHttpContext(bundle);
             this.idMap.put(id, context);
             this.contextMap.put(context, id);
-            SystemLogger.get().debug("Added context with id [" + contextId + "]");
+            SystemLogger.debug("Added context with id [" + contextId + "]");
         } else {
-            SystemLogger.get().debug("Reusing context with id [" + contextId + "]");            
+            SystemLogger.debug("Reusing context with id [" + contextId + "]");            
         }
 
         return context;

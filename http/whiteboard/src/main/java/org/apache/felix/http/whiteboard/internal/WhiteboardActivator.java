@@ -16,8 +16,6 @@
  */
 package org.apache.felix.http.whiteboard.internal;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.apache.felix.http.whiteboard.internal.tracker.FilterTracker;
 import org.apache.felix.http.whiteboard.internal.tracker.HttpContextTracker;
@@ -25,11 +23,11 @@ import org.apache.felix.http.whiteboard.internal.tracker.ServletTracker;
 import org.apache.felix.http.whiteboard.internal.tracker.HttpServiceTracker;
 import org.apache.felix.http.whiteboard.internal.manager.ExtenderManagerImpl;
 import org.apache.felix.http.whiteboard.internal.manager.ExtenderManager;
-import org.apache.felix.http.whiteboard.internal.util.SystemLogger;
+import org.apache.felix.http.base.internal.AbstractActivator;
 import java.util.ArrayList;
 
 public final class WhiteboardActivator
-    implements BundleActivator
+    extends AbstractActivator
 {
     private final ArrayList<ServiceTracker> trackers;
     private ExtenderManager manager;
@@ -39,15 +37,14 @@ public final class WhiteboardActivator
         this.trackers = new ArrayList<ServiceTracker>();
     }
 
-    public void start(BundleContext context)
+    protected void doStart()
         throws Exception
     {
-        SystemLogger.get().open(context);
         this.manager = new ExtenderManagerImpl();
-        addTracker(new HttpContextTracker(context, this.manager));
-        addTracker(new FilterTracker(context, this.manager));
-        addTracker(new ServletTracker(context, this.manager));
-        addTracker(new HttpServiceTracker(context, this.manager));
+        addTracker(new HttpContextTracker(getBundleContext(), this.manager));
+        addTracker(new FilterTracker(getBundleContext(), this.manager));
+        addTracker(new ServletTracker(getBundleContext(), this.manager));
+        addTracker(new HttpServiceTracker(getBundleContext(), this.manager));
     }
 
     private void addTracker(ServiceTracker tracker)
@@ -56,7 +53,7 @@ public final class WhiteboardActivator
         tracker.open();
     }
 
-    public void stop(BundleContext context)
+    protected void doStop()
         throws Exception
     {
         for (ServiceTracker tracker : this.trackers) {
@@ -65,6 +62,5 @@ public final class WhiteboardActivator
 
         this.trackers.clear();
         this.manager.unregisterAll();
-        SystemLogger.get().close();
     }
 }

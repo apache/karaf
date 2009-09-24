@@ -18,7 +18,6 @@ package org.apache.felix.http.base.internal.context;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
-
 import javax.servlet.ServletContext;
 import java.util.Map;
 import java.util.HashMap;

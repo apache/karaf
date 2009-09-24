@@ -17,8 +17,7 @@
 package org.apache.felix.http.jetty.internal;
 
 import org.mortbay.log.Logger;
-import org.apache.felix.http.base.internal.util.SystemLogger;
-
+import org.apache.felix.http.base.internal.logger.SystemLogger;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -65,27 +64,27 @@ public final class JettyLogger
 
     public void debug(String msg, Throwable cause)
     {
-        SystemLogger.get().debug(msg);
+        SystemLogger.debug(msg);
     }
 
     public void debug(String msg, Object arg0, Object arg1)
     {
-        SystemLogger.get().debug(format(msg, arg0, arg1));
+        SystemLogger.debug(format(msg, arg0, arg1));
     }
 
     public void info(String msg, Object arg0, Object arg1)
     {
-        SystemLogger.get().info(format(msg, arg0, arg1));
+        SystemLogger.info(format(msg, arg0, arg1));
     }
 
     public void warn(String msg, Throwable cause)
     {
-        SystemLogger.get().warning(msg, cause);
+        SystemLogger.warning(msg, cause);
     }
 
     public void warn( String msg, Object arg0, Object arg1 )
     {
-        SystemLogger.get().warning(format(msg, arg0, arg1), null);
+        SystemLogger.warning(format(msg, arg0, arg1), null);
     }
 
     public String toString()

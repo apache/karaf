@@ -20,7 +20,6 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceRegistration;
 import org.apache.felix.http.base.internal.handler.HandlerRegistry;
-
 import javax.servlet.ServletContext;
 
 public final class HttpServiceFactory
@@ -37,7 +36,7 @@ public final class HttpServiceFactory
 
     public Object getService(Bundle bundle, ServiceRegistration reg)
     {
-        return new HttpServiceImpl(this.context, this.handlerRegistry, bundle);
+        return new HttpServiceImpl(bundle, this.context, this.handlerRegistry);
     }
 
     public void ungetService(Bundle bundle, ServiceRegistration reg, Object service)

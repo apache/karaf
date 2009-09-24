@@ -27,7 +27,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <name>Apache Felix Http Bridge</name>
+    <name>Apache Felix Http Bundle</name>
     <artifactId>org.apache.felix.http.bundle</artifactId>
     <packaging>bundle</packaging>
 
