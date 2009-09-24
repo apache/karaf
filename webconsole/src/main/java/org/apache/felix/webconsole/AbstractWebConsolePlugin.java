@@ -668,7 +668,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
             final String cssRef = cssRefs[i];
             if ( cssRef.startsWith( "/" ) )
             {
-                buf.append( appRoot ).append( '/' );
+                buf.append( appRoot );
             }
 
             buf.append( cssRef ).append( "' rel='stylesheet' type='text/css'>" );
