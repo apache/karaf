@@ -143,7 +143,7 @@ public final class ExtenderManagerImpl
         if (this.httpService instanceof ExtHttpService) {
             SystemLogger.info("Detected extended HttpService. Filters enabled.");
         } else {
-            SystemLogger.info("Standard HttpService. Filters disabled.");
+            SystemLogger.info("Detected standard HttpService. Filters disabled.");
         }
 
         registerAll();

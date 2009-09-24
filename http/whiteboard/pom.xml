@@ -42,12 +42,14 @@
                             org.apache.felix.http.whiteboard.internal.WhiteboardActivator
                         </Bundle-Activator>
                         <Private-Package>
+                            org.apache.felix.http.api,
                             org.apache.felix.http.base.*,
                             org.apache.felix.http.whiteboard.*
                         </Private-Package>
                         <Import-Package>
                             javax.servlet.*,
                             org.osgi.service.http.*,
+                            org.apache.felix.http.api;resolution:=optional,
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
