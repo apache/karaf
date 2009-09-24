@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONException;
@@ -48,6 +49,10 @@ import org.osgi.service.component.ComponentContext;
 public class LicenseServlet extends AbstractWebConsolePlugin implements OsgiManagerPlugin
 {
 
+    private static final String[] CSS_REFS =
+        { "res/ui/license.css" };
+
+
     public String getLabel()
     {
         return "licenses";
@@ -60,13 +65,18 @@ public class LicenseServlet extends AbstractWebConsolePlugin implements OsgiMana
     }
 
 
+    protected String[] getCssReferences()
+    {
+        return CSS_REFS;
+    }
+
+
     protected void renderContent( HttpServletRequest req, HttpServletResponse res ) throws IOException
     {
         PrintWriter pw = res.getWriter();
 
-        String appRoot = req.getContextPath() + req.getServletPath();
-        pw.println( "<link href='" + appRoot + "/res/ui/license.css' rel='stylesheet' type='text/css'>" );
-        pw.println( "<script src='" + appRoot + "/res/ui/license.js' language='JavaScript'></script>" );
+        final String appRoot = ( String ) req.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
+        Util.script( pw, appRoot, "license.js" );
 
         Bundle[] bundles = getBundleContext().getBundles();
         Util.sort( bundles );

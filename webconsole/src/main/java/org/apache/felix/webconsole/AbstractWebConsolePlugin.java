@@ -167,6 +167,25 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         IOException;
 
 
+    /**
+     * Returns a list of CSS reference paths or <code>null</code> if no
+     * additional CSS files are provided by the plugin.
+     * <p>
+     * The result is an array of strings which are used as the value of
+     * the <code>href</code> attribute of the <code>&lt;link&gt;</code> elements
+     * placed in the head section of the HTML generated. If the reference is
+     * a relative path, it is turned into an absolute path by prepending the
+     * value of the {@link WebConsoleConstants#ATTR_APP_ROOT} request attribute.
+     *
+     * @return The list of additional CSS files to reference in the head
+     *      section or <code>null</code> if no such CSS files are required.
+     */
+    protected String[] getCssReferences()
+    {
+        return null;
+    }
+
+
     protected BundleContext getBundleContext()
     {
         return bundleContext;
@@ -373,12 +392,14 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         response.setCharacterEncoding( "utf-8" );
         response.setContentType( "text/html" );
 
-        PrintWriter pw = response.getWriter();
+        final PrintWriter pw = response.getWriter();
+
+        final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
 
         String header = MessageFormat.format( getHeader(), new Object[]
-            { adminTitle, getTitle(), ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT ), getLabel(),
-                brandingPlugin.getFavIcon(), brandingPlugin.getMainStyleSheet(), brandingPlugin.getProductURL(),
-                brandingPlugin.getProductName(), brandingPlugin.getProductImage() } );
+            { adminTitle, getTitle(), appRoot, getLabel(), brandingPlugin.getFavIcon(),
+                brandingPlugin.getMainStyleSheet(), brandingPlugin.getProductURL(), brandingPlugin.getProductName(),
+                brandingPlugin.getProductImage(), getCssLinks( appRoot ) } );
         pw.println( header );
 
         return pw;
@@ -574,10 +595,12 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         //  2 application root path (ATTR_APP_ROOT)
         //  3 console plugin label (from the URI)
         //  4 branding favourite icon (BrandingPlugin.getFavIcon())
-        //  5 branding favourite icon (BrandingPlugin.getMainStyleSheet())
-        //  6 branding favourite icon (BrandingPlugin.getProductURL())
-        //  7 branding favourite icon (BrandingPlugin.getProductName())
-        //  8 branding favourite icon (BrandingPlugin.getProductImage())
+        //  5 branding main style sheet (BrandingPlugin.getMainStyleSheet())
+        //  6 branding product URL (BrandingPlugin.getProductURL())
+        //  7 branding product name (BrandingPlugin.getProductName())
+        //  8 branding product image (BrandingPlugin.getProductImage())
+        //  9 additional HTML code to be inserted into the <head> section
+        //    (for example plugin provided CSS links)
 
         final String header = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
 
@@ -589,6 +612,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
         + "    <link href=\"{2}/res/ui/admin.css\" rel=\"stylesheet\" type=\"text/css\">"
         + "    <link href=\"{2}{5}\" rel=\"stylesheet\" type=\"text/css\">"
+        + "    {9}"
 
         + "    <script language=\"JavaScript\">"
         + "      appRoot = \"{2}\";"
@@ -623,5 +647,33 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
             + "  </body>"
             + "</html>";
         return footer;
+    }
+
+
+    private String getCssLinks( final String appRoot )
+    {
+        // get the CSS references and return nothing if there are none
+        final String[] cssRefs = getCssReferences();
+        if ( cssRefs == null )
+        {
+            return "";
+        }
+
+        // build the CSS links from the references
+        final StringBuffer buf = new StringBuffer();
+        for ( int i = 0; i < cssRefs.length; i++ )
+        {
+            buf.append( "<link href='" );
+
+            final String cssRef = cssRefs[i];
+            if ( cssRef.startsWith( "/" ) )
+            {
+                buf.append( appRoot ).append( '/' );
+            }
+
+            buf.append( cssRef ).append( "' rel='stylesheet' type='text/css'>" );
+        }
+
+        return buf.toString();
     }
 }

@@ -32,9 +32,9 @@ public interface WebConsoleConstants
      * The URI address label under which the OSGi Manager plugin is called by
      * the OSGi Manager (value is "felix.webconsole.label").
      * <p>
-     * Only {@link #SERVICE_NAME} services with this service registration
-     * property set to a non-empty String values are accepted by the OSGi
-     * Manager as a plugin.
+     * This service registration property must be set to a single non-empty
+     * String value. Otherwise the {@link #SERVICE_NAME Servlet} services will
+     * be ignored by the Felix Web Console and not be used as a plugin.
      */
     public static final String PLUGIN_LABEL = "felix.webconsole.label";
 
@@ -42,13 +42,33 @@ public interface WebConsoleConstants
      * The title under which the OSGi Manager plugin is called by
      * the OSGi Manager (value is "felix.webconsole.label").
      * <p>
-     * Only {@link #SERVICE_NAME} services with this service registration
-     * property set to a non-empty String values are accepted by the OSGi
-     * Manager as a plugin.
+     * For {@link #SERVICE_NAME Servlet} services not extending the
+     * {@link AbstractWebConsolePlugin} this property is required for the
+     * service to be used as a plugin. Otherwise the service is just ignored
+     * by the Felix Web Console.
      *
      * @since 2.0.0
      */
     public static final String PLUGIN_TITLE = "felix.webconsole.title";
+
+    /**
+     * The name of the service registration properties providing references
+     * to addition CSS files that should be loaded when rendering the header
+     * for a registered plugin.
+     * <p>
+     * This property is expected to be a single string value, array of string
+     * values or a Collection (or Vector) of string values.
+     * <p>
+     * This service registration property is only used for plugins registered
+     * as {@link #SERVICE_NAME} services which do not extend the
+     * {@link AbstractWebConsolePlugin}. Extensions of the
+     * {@link AbstractWebConsolePlugin} should overwrite the
+     * {@link AbstractWebConsolePlugin#getCssReferences()} method to provide
+     * additional CSS resources.
+     *
+     * @since 2.0.0
+     */
+    public static final String PLUGIN_CSS_REFERENCES = "felix.webconsole.css";
 
     /**
      * The name of the request attribute providing the absolute path of the

@@ -31,13 +31,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.shell.ShellService;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
+import org.apache.felix.webconsole.internal.Util;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 
 public class ShellServlet extends AbstractWebConsolePlugin implements OsgiManagerPlugin
 {
+    private static final String[] CSS_REFS =
+        { "res/ui/shell.css" };
+
     private ServiceTracker shellTracker;
 
 
@@ -109,14 +114,18 @@ public class ShellServlet extends AbstractWebConsolePlugin implements OsgiManage
     }
 
 
-    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
-        IOException
+    protected String[] getCssReferences()
+    {
+        return CSS_REFS;
+    }
+
+
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         PrintWriter pw = response.getWriter();
 
-        String appRoot = request.getContextPath() + request.getServletPath();
-        pw.println( "<link href=\"" + appRoot + "/res/ui/shell.css\" rel=\"stylesheet\" type=\"text/css\" />" );
-        pw.println( "<script src=\"" + appRoot + "/res/ui/shell.js\" type=\"text/javascript\"></script>" );
+        final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
+        Util.script( pw, appRoot, "shell.js" );
 
         pw.println( "<br />" );
 

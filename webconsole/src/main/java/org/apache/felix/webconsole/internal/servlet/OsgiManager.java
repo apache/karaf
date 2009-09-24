@@ -516,7 +516,7 @@ public class OsgiManager extends GenericServlet
                         if ( title instanceof String )
                         {
                             WebConsolePluginAdapter pluginAdapter = new WebConsolePluginAdapter( ( String ) label,
-                                ( String ) title, ( Servlet ) operation );
+                                ( String ) title, ( Servlet ) operation, reference );
 
                             // ensure the AbstractWebConsolePlugin is correctly setup
                             Bundle pluginBundle = reference.getBundle();

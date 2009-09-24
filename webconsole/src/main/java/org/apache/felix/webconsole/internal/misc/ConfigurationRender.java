@@ -60,6 +60,9 @@ public class ConfigurationRender extends BaseWebConsolePlugin
 
     public static final String TITLE = "Configuration Status";
 
+    private static final String[] CSS_REFS =
+        { "res/ui/configurationrender.css" };
+
     /**
      * Formatter pattern to generate a relative path for the generation
      * of the plain text or zip file representation of the status. The file
@@ -129,14 +132,19 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     }
 
 
+    protected String[] getCssReferences()
+    {
+        return CSS_REFS;
+    }
+
+
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
 
         ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
 
         String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
-        pw.println( "<link href='" + appRoot + "/res/ui/configurationrender.css' rel='stylesheet' type='text/css'>" );
-        pw.println( "<script src='" + appRoot + "/res/ui/tw-1.1.js' language='JavaScript'></script>" );
+        Util.script( pw, appRoot, "tw-1.1.js" );
 
         Util.startScript( pw );
         pw.println( "    $(document).ready(function(){" );

@@ -20,12 +20,17 @@ package org.apache.felix.webconsole.internal;
 
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
+import org.osgi.framework.ServiceReference;
 
 
 /**
@@ -49,12 +54,16 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     // the actual plugin to forward rendering requests to
     private final Servlet plugin;
 
+    // the CSS references (null if none)
+    private final String[] cssReferences;
 
-    public WebConsolePluginAdapter( String label, String title, Servlet plugin )
+
+    public WebConsolePluginAdapter( String label, String title, Servlet plugin, ServiceReference serviceReference )
     {
         this.label = label;
         this.title = title;
         this.plugin = plugin;
+        this.cssReferences = toStringArray( serviceReference.getProperty( WebConsoleConstants.PLUGIN_CSS_REFERENCES ) );
     }
 
 
@@ -75,6 +84,17 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     public String getTitle()
     {
         return title;
+    }
+
+
+    /**
+     * Returns the CSS references from the
+     * {@link WebConsoleConstants#PLUGIN_CSS_REFERENCES felix.webconsole.css}
+     * service registration property of the plugin.
+     */
+    protected String[] getCssReferences()
+    {
+        return cssReferences;
     }
 
 
@@ -160,5 +180,46 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     {
         plugin.destroy();
         super.destroy();
+    }
+
+
+    //---------- internal
+
+    private String[] toStringArray( final Object value )
+    {
+        if ( value instanceof String )
+        {
+            return new String[]
+                { ( String ) value };
+        }
+        else if ( value != null )
+        {
+            final Collection cssListColl;
+            if ( value.getClass().isArray() )
+            {
+                cssListColl = Arrays.asList( ( Object[] ) value );
+            }
+            else if ( value instanceof Collection )
+            {
+                cssListColl = ( Collection ) value;
+            }
+            else
+            {
+                cssListColl = null;
+            }
+
+            if ( cssListColl != null && !cssListColl.isEmpty() )
+            {
+                String[] entries = new String[cssListColl.size()];
+                int i = 0;
+                for ( Iterator cli = cssListColl.iterator(); cli.hasNext(); i++ )
+                {
+                    entries[i] = String.valueOf( cli.next() );
+                }
+                return entries;
+            }
+        }
+
+        return null;
     }
 }
