@@ -24,6 +24,8 @@ import org.apache.felix.http.whiteboard.internal.tracker.HttpServiceTracker;
 import org.apache.felix.http.whiteboard.internal.manager.ExtenderManagerImpl;
 import org.apache.felix.http.whiteboard.internal.manager.ExtenderManager;
 import org.apache.felix.http.base.internal.AbstractActivator;
+import org.apache.felix.http.base.internal.logger.SystemLogger;
+
 import java.util.ArrayList;
 
 public final class WhiteboardActivator
@@ -45,6 +47,7 @@ public final class WhiteboardActivator
         addTracker(new FilterTracker(getBundleContext(), this.manager));
         addTracker(new ServletTracker(getBundleContext(), this.manager));
         addTracker(new HttpServiceTracker(getBundleContext(), this.manager));
+        SystemLogger.info("Http service whiteboard started");
     }
 
     private void addTracker(ServiceTracker tracker)
