@@ -347,6 +347,14 @@ public abstract class Util {
     {
         if ( av instanceof AnnotationFieldRef )
         {
+            // during prescan of AnnotationTagProviderManager#hasScrPluginAnnotation this method is called without desc attribute
+            // avoid NPE in this case and just skip value resolving
+            // FELIX-1629
+            if ( desc == null)
+            {
+                return null;
+            }
+
             // getField throws AIOOBE
             // return ((AnnotationFieldRef)av).getField().getInitializationExpression();
             final String s = av.getParameterValue().toString().trim();
