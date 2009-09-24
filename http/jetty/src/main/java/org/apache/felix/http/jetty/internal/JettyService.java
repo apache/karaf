@@ -28,7 +28,6 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.*;
 import org.mortbay.log.Log;
-import org.mortbay.log.StdErrLog;
 import org.apache.felix.http.base.internal.DispatcherServlet;
 import org.apache.felix.http.base.internal.logger.SystemLogger;
 
@@ -59,14 +58,14 @@ public final class JettyService
     public void start()
         throws Exception
     {
-        this.running = true;
-        this.thread = new Thread(this, "Jetty HTTP Service");
-        this.thread.start();
+        JettyLogger.init();
 
         Properties props = new Properties();
         props.put(Constants.SERVICE_PID, PID);
-
         this.configServiceReg = this.context.registerService(ManagedService.class.getName(), this, props);
+
+        this.thread = new Thread(this, "Jetty HTTP Service");
+        this.thread.start();
     }
 
     public void stop()
@@ -85,12 +84,12 @@ public final class JettyService
             // Do nothing
         }
     }
-    
+
     public void updated(Dictionary props)
         throws ConfigurationException
     {
         this.config.update(props);
-        if (this.thread != null) {
+        if (this.running && (this.thread != null)) {
             this.thread.interrupt();
         }
     }
@@ -111,16 +110,6 @@ public final class JettyService
         } catch (Exception e) {
             SystemLogger.error("Exception while stopping Jetty.", e);
         }
-    }
-
-    protected void initializeJettyLogger()
-    {
-        Log.setLog(new JettyLogger());
-    }
-
-    private void destroyJettyLogger()
-    {
-        Log.setLog(new StdErrLog());
     }
 
     private void initializeJetty()
@@ -193,10 +182,10 @@ public final class JettyService
 
     public void run()
     {
+        this.running = true;
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
         while (this.running) {
-            initializeJettyLogger();
             startJetty();
 
             synchronized (this) {
@@ -208,7 +197,6 @@ public final class JettyService
             }
 
             stopJetty();
-            destroyJettyLogger();
         }
     }
 }

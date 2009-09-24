@@ -17,16 +17,14 @@
 package org.apache.felix.http.jetty.internal;
 
 import org.mortbay.log.Logger;
+import org.mortbay.log.Log;
 import org.apache.felix.http.base.internal.logger.SystemLogger;
-import java.util.Map;
-import java.util.HashMap;
+import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
 
 public final class JettyLogger
     implements Logger
 {
-    private final static Map<String, Logger> LOGGERS =
-        new HashMap<String, Logger>();
-
     private final String name;
     private boolean debugEnabled;
 
@@ -40,15 +38,10 @@ public final class JettyLogger
         this.name = name;
     }
 
-    public org.mortbay.log.Logger getLogger(String name)
+    public Logger getLogger(String name)
     {
-        Logger logger = LOGGERS.get(name);
-        if (logger == null) {
-            logger = new JettyLogger(name);
-            logger.setDebugEnabled(isDebugEnabled());
-            LOGGERS.put(name, logger);
-        }
-
+        JettyLogger logger = new JettyLogger(name);
+        logger.setDebugEnabled(this.debugEnabled);
         return logger;
     }
 
@@ -106,5 +99,17 @@ public final class JettyLogger
         }
 
         return msg;
+    }
+
+    public static void init()
+    {
+        PrintStream out = System.err;
+
+        try {
+            System.setErr(new PrintStream(new ByteArrayOutputStream()));
+            Log.setLog(new JettyLogger());
+        } finally {
+            System.setErr(out);
+        }
     }
 }
