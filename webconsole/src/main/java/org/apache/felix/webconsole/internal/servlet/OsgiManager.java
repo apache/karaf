@@ -18,37 +18,16 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.Action;
-import org.apache.felix.webconsole.BrandingPlugin;
-import org.apache.felix.webconsole.WebConsoleConstants;
-import org.apache.felix.webconsole.internal.Logger;
-import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
-import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.WebConsolePluginAdapter;
+import org.apache.felix.webconsole.*;
+import org.apache.felix.webconsole.internal.*;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
@@ -127,7 +106,6 @@ public class OsgiManager extends GenericServlet
             "org.apache.felix.webconsole.internal.core.InstallAction",
             "org.apache.felix.webconsole.internal.core.SetStartLevelAction",
             "org.apache.felix.webconsole.internal.deppack.DepPackServlet",
-            "org.apache.felix.webconsole.internal.misc.EventAdminServlet",
             "org.apache.felix.webconsole.internal.misc.LicenseServlet",
             "org.apache.felix.webconsole.internal.misc.ConfigurationRender",
             "org.apache.felix.webconsole.internal.misc.ShellServlet",
