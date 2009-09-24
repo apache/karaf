@@ -56,9 +56,11 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     var id = dataEntry.id;
     var topic = dataEntry.topic;
     var properties = dataEntry.properties;
-
-    parent.appendChild( td( null, null, [ text( printDate(dataEntry.received) ) ] ) );
-    parent.appendChild( td( null, null, [ text( topic ) ] ) );
+    var styleClass = dataEntry.category;
+    if ( styleClass.length == 0 ) styleClass = null; else styleClass = "event" + styleClass;
+    
+    parent.appendChild( td( styleClass, null, [ text( printDate(dataEntry.received) ) ] ) );
+    parent.appendChild( td( styleClass, null, [ text( topic ) ] ) );
 
     var propE;
     if ( dataEntry.info ) {
@@ -69,10 +71,10 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
 	    tableE.appendChild(bodyE);
 	
 	    for( var p in dataEntry.properties ) {
-	    	var c1 = td(null, null, [text(p)]);
+	    	var c1 = td(styleClass, null, [text(p)]);
 	    	$(c1).css("border", "0px none");
             $(c1).css("padding", "0 4px 0 0");
-	    	var c2 = td(null, null, [text(dataEntry.properties[p])]);
+	    	var c2 = td(styleClass, null, [text(dataEntry.properties[p])]);
 	    	$(c2).css("border", "0px none");
             $(c2).css("padding", "0 0 0 4px");
 	    	bodyE.appendChild(tr(null, null, [ c1, c2 ]));
@@ -80,7 +82,7 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
 	    propE = tableE;
     }
     
-    parent.appendChild( td( null, null, [propE] ) );
+    parent.appendChild( td( styleClass, null, [propE] ) );
 }
 
 /* displays a date in the user's local timezone */

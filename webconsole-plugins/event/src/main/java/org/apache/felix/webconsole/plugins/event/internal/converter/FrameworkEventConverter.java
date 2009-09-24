@@ -62,6 +62,6 @@ public class FrameworkEventConverter {
                 return null; // IGNORE
         }
 
-        return new EventInfo(topic.toString(), buffer.toString());
+        return new EventInfo(topic.toString(), buffer.toString(), "framework");
     }
 }

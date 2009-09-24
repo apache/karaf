@@ -39,19 +39,24 @@ public class EventInfo {
     /** Properties. */
     public final Map properties;
 
-    public EventInfo( final String topic, final String info )
+    /** The event class. */
+    public final String category;
+
+    public EventInfo( final String topic, final String info, final String category )
     {
         this.topic = topic;
         this.info = info;
         this.received = System.currentTimeMillis();
         this.properties = null;
+        this.category = category;
     }
 
-    public EventInfo( final String topic, final String info, final Map props )
+    public EventInfo( final String topic, final String info, final String category, final Map props )
     {
         this.topic = topic;
         this.info = info;
         this.received = System.currentTimeMillis();
         this.properties = props;
+        this.category = category;
     }
 }

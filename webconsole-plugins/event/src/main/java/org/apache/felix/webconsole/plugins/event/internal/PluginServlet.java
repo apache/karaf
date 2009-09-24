@@ -19,6 +19,7 @@ package org.apache.felix.webconsole.plugins.event.internal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -99,6 +100,15 @@ public class PluginServlet extends HttpServlet
         }
         statusLine.append( "." );
 
+        // Compute scale: startTime is 0, lastTimestamp is 100%
+        final long startTime = this.collector.getStartTime();
+        long endTime = (events.size() == 0 ? startTime : ((EventInfo)events.get(events.size() - 1)).received);
+        if ( endTime == startTime )
+        {
+            endTime = startTime + 10;
+        }
+        final float scale = 100.0f / (endTime - startTime);
+
         JSONWriter jw = new JSONWriter( pw );
         try
         {
@@ -114,7 +124,7 @@ public class PluginServlet extends HttpServlet
             // display list in reverse order
             for ( int index = events.size() - 1; index >= 0; index-- )
             {
-                eventJson( jw, ( EventInfo ) events.get( index ), index );
+                eventJson( jw, ( EventInfo ) events.get( index ), index, startTime, scale );
             }
 
             jw.endArray();
@@ -157,7 +167,7 @@ public class PluginServlet extends HttpServlet
         final PrintWriter pw = response.getWriter();
 
         final String appRoot = ( String ) request.getAttribute( "felix.webconsole.appRoot" );
-        pw.println( "<script src='" + appRoot + "/res/ui/" + "events.js" + "' language='JavaScript'></script>" );
+        pw.println( "<script src='" + appRoot + "/events/res/ui/" + "events.js" + "' language='JavaScript'></script>" );
 
         pw.println( "<div id='plugin_content'/>");
 
@@ -168,12 +178,30 @@ public class PluginServlet extends HttpServlet
         pw.println( "</script>" );
     }
 
-
-    private void eventJson( JSONWriter jw, EventInfo info, int index ) throws JSONException
+    public URL getResource(String path)
     {
+        if ( "/events/res/ui/events.js".equals(path) )
+        {
+            return this.getClass().getResource("/res/ui/events.js");
+        }
+        return null;
+    }
+
+    private void eventJson( JSONWriter jw, EventInfo info, int index, final long start, final float scale )
+    throws JSONException
+    {
+        final long msec = info.received - start;
+
+        // Compute color bar size and make sure the bar is visible
+        final int percent = Math.max((int)((msec) * scale), 2);
+
         jw.object();
         jw.key( "id" );
         jw.value( String.valueOf( index ) );
+        jw.key( "width" );
+        jw.value( percent );
+        jw.key( "category" );
+        jw.value( info.category == null ? "" : info.category );
         jw.key( "received" );
         jw.value( info.received );
         jw.key( "topic" );

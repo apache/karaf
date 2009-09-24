@@ -27,20 +27,23 @@ public class EventCollector
     private static final String PROPERTY_MAX_SIZE = "max.size";
     private static final int DEFAULT_MAX_SIZE = 250;
 
-    private List eventInfos = new ArrayList();
+    private List eventInfos;
+
+    private long startTime;
 
     private int maxSize;
 
     public EventCollector(final Dictionary props)
     {
-        updateConfiguration(props);
+        this.clear();
+        this.updateConfiguration(props);
     }
 
     public void add(final EventInfo info)
     {
         if ( info != null )
         {
-            synchronized ( this.eventInfos )
+            synchronized ( this )
             {
                 this.eventInfos.add( info );
                 if ( eventInfos.size() > this.maxSize )
@@ -53,9 +56,10 @@ public class EventCollector
 
     public void clear()
     {
-        synchronized ( this.eventInfos )
+        synchronized ( this )
         {
             this.eventInfos = new ArrayList();
+            this.startTime = System.currentTimeMillis();
         }
     }
 
@@ -64,7 +68,7 @@ public class EventCollector
      */
     public List getEvents()
     {
-        synchronized ( this.eventInfos )
+        synchronized ( this )
         {
             return new ArrayList(eventInfos);
         }
@@ -73,12 +77,18 @@ public class EventCollector
     public void updateConfiguration( final Dictionary props)
     {
         this.maxSize = OsgiUtil.toInteger(props, PROPERTY_MAX_SIZE, DEFAULT_MAX_SIZE);
-        synchronized ( this.eventInfos ) {
+        synchronized ( this )
+        {
             while ( eventInfos.size() > this.maxSize )
             {
                 eventInfos.remove( 0 );
             }
 
         }
+    }
+
+    public long getStartTime()
+    {
+        return this.startTime;
     }
 }

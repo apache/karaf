@@ -72,7 +72,7 @@ public class EventHandler implements org.osgi.service.event.EventHandler
                     props.put(names[i], event.getProperty(names[i]));
                 }
             }
-            collector.add(new EventInfo(event.getTopic(), null, props));
+            collector.add(new EventInfo(event.getTopic(), null, null, props));
         }
     }
 }
