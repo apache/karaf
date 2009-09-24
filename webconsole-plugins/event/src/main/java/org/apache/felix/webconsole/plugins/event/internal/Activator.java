@@ -60,6 +60,7 @@ public class Activator implements BundleActivator
         props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
         props.put( "felix.webconsole.label", "events");
         props.put( "felix.webconsole.title", "Events");
+        props.put( "felix.webconsole.css", "/events/res/ui/events.css");
         this.pluginRegistration = context.registerService(Servlet.class.getName(),
                                 plugin,
                                 props);

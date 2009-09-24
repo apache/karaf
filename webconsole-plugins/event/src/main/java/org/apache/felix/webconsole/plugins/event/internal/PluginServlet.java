@@ -180,9 +180,9 @@ public class PluginServlet extends HttpServlet
 
     public URL getResource(String path)
     {
-        if ( "/events/res/ui/events.js".equals(path) )
+        if ( path.startsWith("/events/res/ui/") )
         {
-            return this.getClass().getResource("/res/ui/events.js");
+            return this.getClass().getResource(path.substring(7));
         }
         return null;
     }
