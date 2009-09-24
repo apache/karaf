@@ -138,8 +138,8 @@ public class Console implements Runnable
 
     protected void welcome() {
         Properties props = new Properties();
-        loadProps(props, "/org/apache/felix/karaf/shell/console/branding.properties");
-        loadProps(props, "/org/apache/felix/karaf/branding/branding.properties");
+        loadProps(props, "org/apache/felix/karaf/shell/console/branding.properties");
+        loadProps(props, "org/apache/felix/karaf/branding/branding.properties");
         String welcome = props.getProperty("welcome");
         if (welcome != null && welcome.length() > 0) {
             session.getConsole().println(welcome);
