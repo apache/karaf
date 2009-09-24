@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="org.apache.felix.webconsole.plugins.event.internal.PluginServlet" name="%plugin.name" description="%plugin.description">
+        <AD id="max.size" type="Integer" default="250" name="%max.size.name" description="%max.size.description"/>
+    </OCD>
+    <Designate pid="org.apache.felix.webconsole.plugins.event.internal.PluginServlet">
+        <Object ocdref="org.apache.felix.webconsole.plugins.event.internal.PluginServlet"/>
+    </Designate>
+</metatype:MetaData>
