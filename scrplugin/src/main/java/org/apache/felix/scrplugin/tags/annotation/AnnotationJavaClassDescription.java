@@ -24,7 +24,7 @@ import org.apache.felix.scrplugin.tags.*;
 import org.apache.felix.scrplugin.tags.qdox.QDoxJavaClassDescription;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import com.thoughtworks.qdox.model.JavaSource;
+import com.thoughtworks.qdox.model.JavaClass;
 
 /**
  * Reading class description based on java annotations. This extends
@@ -38,8 +38,8 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
      * @param source QDox source
      * @param manager description manager
      */
-    public AnnotationJavaClassDescription(Class<?> clazz, JavaSource source, JavaClassDescriptorManager manager) {
-        super(clazz, source, manager);
+    public AnnotationJavaClassDescription(Class<?> clazz, JavaClass javaClass, JavaClassDescriptorManager manager) {
+        super(clazz, javaClass, manager);
     }
 
     /**

@@ -388,10 +388,10 @@ public class JavaClassDescriptorManager {
      * @return All contained java class descriptions.
      */
     public JavaClassDescription[] getSourceDescriptions() throws MojoExecutionException {
-        final JavaClassDescription[] descs = new JavaClassDescription[this.sources.length];
-        for(int i=0; i<this.sources.length; i++) {
-            final String className = this.sources[i].getClasses()[0].getFullyQualifiedName();
-            descs[i] = this.getJavaClassDescription(className);
+        final JavaClass[] javaClasses = getJavaClassesFromSources();
+        final JavaClassDescription[] descs = new JavaClassDescription[javaClasses.length];
+        for(int i=0; i<javaClasses.length; i++) {
+            descs[i] = this.getJavaClassDescription(javaClasses[i].getFullyQualifiedName());
         }
         return descs;
     }
@@ -408,18 +408,19 @@ public class JavaClassDescriptorManager {
         if ( result == null ) {
             this.log.debug("Searching description for: " + className);
             int index = 0;
-            while ( result == null && index < this.sources.length) {
-                final JavaClass javaClass = this.sources[index].getClasses()[0];
+            final JavaClass[] javaClasses = getJavaClassesFromSources();
+            while ( result == null && index < javaClasses.length) {
+                final JavaClass javaClass = javaClasses[index];
                 if ( javaClass.getFullyQualifiedName().equals(className) ) {
                     try {
                         // check for java annotation descriptions - fallback to QDox if none found
                         Class<?> clazz = this.classloader.loadClass(className);
                         if (this.processAnnotations && getAnnotationTagProviderManager().hasScrPluginAnnotation(javaClass)) {
                             this.log.debug("Found java annotation description for: " + className);
-                            result = new AnnotationJavaClassDescription(clazz, this.sources[index], this);
+                            result = new AnnotationJavaClassDescription(clazz, javaClasses[index], this);
                         } else if ( this.parseJavadocs ) {
                             this.log.debug("Found qdox description for: " + className);
-                            result = new QDoxJavaClassDescription(clazz, this.sources[index], this);
+                            result = new QDoxJavaClassDescription(clazz, javaClasses[index], this);
                         }
                     } catch (ClassNotFoundException e) {
                         throw new MojoExecutionException("Unable to load class " + className);
@@ -440,4 +441,24 @@ public class JavaClassDescriptorManager {
         }
         return result;
     }
+    
+    /**
+     * Get a list of all {@link JavaClass} definitions four all source files (including nested/inner classes)
+     * @return List of {@link JavaClass} definitions
+     */
+    private JavaClass[] getJavaClassesFromSources() {
+        final List<JavaClass> classes = new ArrayList<JavaClass>();
+        for(int i=0; i<this.sources.length; i++) {
+            for(int j=0; j<this.sources[i].getClasses().length; j++) {
+                final JavaClass clazz = this.sources[i].getClasses()[j];
+                classes.add(clazz);
+                for (int k=0; k<clazz.getNestedClasses().length; k++) {
+                    final JavaClass nestedClass = clazz.getNestedClasses()[k];
+                    classes.add(nestedClass);
+                }
+            }
+        }
+        return classes.toArray(new JavaClass[classes.size()]);
+    }
+    
 }
