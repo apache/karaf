@@ -50,6 +50,10 @@ public class EventCollector
                 {
                     eventInfos.remove( 0 );
                 }
+                if ( this.eventInfos.size() == 1 )
+                {
+                    this.startTime = info.received;
+                }
             }
         }
     }

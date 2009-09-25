@@ -76,14 +76,6 @@ public class PluginServlet extends HttpServlet
         List events = this.collector.getEvents();
 
         StringBuffer statusLine = new StringBuffer();
-        if ( this.eventAdminAvailable )
-        {
-            statusLine.append("Event Admin service is available. ");
-        }
-        else
-        {
-            statusLine.append("Event Admin service is not available. ");
-        }
         statusLine.append( events.size() );
         statusLine.append( " Event");
         if ( events.size() != 1 )
@@ -98,16 +90,22 @@ public class PluginServlet extends HttpServlet
             d.setTime( ( ( EventInfo ) events.get( 0 ) ).received );
             statusLine.append( d );
         }
-        statusLine.append( "." );
+        statusLine.append( ". (Event admin: " );
+        if ( !this.eventAdminAvailable )
+        {
+            statusLine.append("un");
+        }
+        statusLine.append("available; Config admin: ");
+        if ( !this.configAdminAvailable )
+        {
+            statusLine.append("un");
+        }
+        statusLine.append("available)");
 
         // Compute scale: startTime is 0, lastTimestamp is 100%
         final long startTime = this.collector.getStartTime();
-        long endTime = (events.size() == 0 ? startTime : ((EventInfo)events.get(events.size() - 1)).received);
-        if ( endTime == startTime )
-        {
-            endTime = startTime + 10;
-        }
-        final float scale = 100.0f / (endTime - startTime);
+        final long endTime = (events.size() == 0 ? startTime : ((EventInfo)events.get(events.size() - 1)).received);
+        final float scale = (endTime == startTime ? 100.0f : 100.0f / (endTime - startTime));
 
         JSONWriter jw = new JSONWriter( pw );
         try
@@ -193,11 +191,13 @@ public class PluginServlet extends HttpServlet
         final long msec = info.received - start;
 
         // Compute color bar size and make sure the bar is visible
-        final int percent = Math.max((int)((msec) * scale), 2);
+        final int percent = Math.max((int)(msec * scale), 2);
 
         jw.object();
         jw.key( "id" );
         jw.value( String.valueOf( index ) );
+        jw.key( "offset" );
+        jw.value( msec );
         jw.key( "width" );
         jw.value( percent );
         jw.key( "category" );
@@ -260,5 +260,10 @@ public class PluginServlet extends HttpServlet
     public void setEventAdminAvailable(final boolean flag)
     {
         this.eventAdminAvailable = flag;
+    }
+
+    public void setConfigAdminAvailable(final boolean flag)
+    {
+        this.configAdminAvailable = flag;
     }
 }

@@ -47,7 +47,7 @@ function renderData( eventData )  {
     $("#plugin_table").trigger("update");
     if ( view == 1 ) {
 		$("#timeline").remove();
-		$("div.table").append( "<div id='timeline'></div>" );
+		$("div.table").append( "<div id='timeline' width='100%'></div>" );
         for ( var idx in eventData.data ) {
             entryTimeline( eventData.data[idx] );
         }
@@ -61,13 +61,13 @@ function entry( /* Object */ dataEntry ) {
 }
 
 function entryTimeline( /* Object */ dataEntry ) {
-	var txt = "<div class='event" + dataEntry.category + "' style='width:" + dataEntry.width + "%;'>";
-	txt = txt + "<b>" + dataEntry.topic + "</b> ";
+	var txt = "<div class='event" + dataEntry.category + "' style='overflow:visible;white-space:nowrap;width:" + dataEntry.width + "%;'>";
+	txt = txt + "<b>" + dataEntry.offset + "</b>&nbsp;<b>" + dataEntry.topic + "</b>";
 	if ( dataEntry.info ) {
-	    txt = txt + dataEntry.info;
+	    txt = txt + "&nbsp;:&nbsp;" + dataEntry.info;
 	}
     txt = txt + "</div>";
-	$("#timeline").append(txt);	
+	$("#timeline").prepend(txt);	
 }
 
 function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {

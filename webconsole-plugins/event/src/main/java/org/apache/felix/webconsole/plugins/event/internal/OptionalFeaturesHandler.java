@@ -166,6 +166,7 @@ public class OptionalFeaturesHandler
         {
             this.unbindConfigAdmin(this.configAdminReference);
         }
+        this.plugin.setConfigAdminAvailable(true);
         this.configAdminReference = ref;
         this.configListenerRegistration = ConfigurationListener.create(this.bundleContext, this.plugin);
     }
@@ -175,6 +176,7 @@ public class OptionalFeaturesHandler
         if ( this.configAdminReference == ref )
         {
             this.configAdminReference = null;
+            this.plugin.setConfigAdminAvailable(false);
             if ( this.configListenerRegistration != null )
             {
                 this.configListenerRegistration.unregister();
