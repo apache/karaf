@@ -19,10 +19,10 @@ package org.apache.felix.karaf.shell.admin.internal.commands;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "admin", name = "stop", description = "Stop an existing instance.")
+@Command(scope = "admin", name = "stop", description = "Stops an existing container instance.")
 public class StopCommand extends AdminCommandSupport {
 
-    @Argument(index=0, required=true, description="The instance name")
+    @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
     protected Object doExecute() throws Exception {

@@ -28,10 +28,10 @@ import org.apache.felix.karaf.features.Repository;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "features", name = "list", description = "List existing features.")
+@Command(scope = "features", name = "list", description = "Lists all existing features available from the defined repositories.")
 public class ListFeaturesCommand extends FeaturesCommandSupport {
 
-    @Option(name = "-i", aliases={"--installed"}, description="Display the list of installed features")
+    @Option(name = "-i", aliases={"--installed"}, description="Display a list of all installed features only", required = false, multiValued = false)
     boolean installed;
 
     private static final String STATE = "State";

@@ -20,12 +20,12 @@ import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "features", name = "install", description = "Install a feature.")
+@Command(scope = "features", name = "install", description = "Installs a feature with the specified name and version.")
 public class InstallFeatureCommand extends FeaturesCommandSupport {
 
-    @Argument(required = true, description = "The name of the feature")
+    @Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
     String name;
-    @Argument(description = "The version of the feature", index = 1)
+    @Argument(index = 1, name = "version", description = "The version of the feature", required = false, multiValued = false)
     String version;
 
     protected void doExecute(FeaturesService admin) throws Exception {

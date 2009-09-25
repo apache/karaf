@@ -23,10 +23,10 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.karaf.features.FeaturesService;
 
-@Command(scope = "features", name = "removeUrl", description = "Remove a list of repository URLs from the features service.")
+@Command(scope = "features", name = "removeUrl", description = "Removes the given list of repository URLs from the features service.")
 public class RemoveUrlCommand extends FeaturesCommandSupport {
 
-    @Argument(required = true, multiValued = true, description = "Repository URLs")
+    @Argument(index = 0, name = "urls", description = "One or more repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
     protected void doExecute(FeaturesService admin) throws Exception {

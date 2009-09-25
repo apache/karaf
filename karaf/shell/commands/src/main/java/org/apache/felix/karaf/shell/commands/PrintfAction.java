@@ -25,10 +25,10 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "shell", name = "printf", description = "Format and print arguments")
 public class PrintfAction extends OsgiCommandSupport {
 
-    @Argument(index=0, required=true)
+    @Argument(index = 0, name = "format", description = "The format pattern to use", required = true, multiValued = false)
     private String format;
 
-    @Argument(index=1, multiValued=true, required=true)
+    @Argument(index = 1, name = "arguments", description = "The arguments for the given format pattern", required = true, multiValued = true)
     private Collection<Object> arguments = null;
 
     protected Object doExecute() throws Exception {

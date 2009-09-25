@@ -19,13 +19,13 @@ package org.apache.felix.karaf.shell.admin.internal.commands;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "admin", name = "change-port", description = "Change the port of an existing instance.")
+@Command(scope = "admin", name = "change-port", description = "Changes the port of an existing container instance.")
 public class ChangePortCommand extends AdminCommandSupport {
 
-    @Argument(index=0, required=true, description="The instance name")
+    @Argument(index = 0, name = "name", description="The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
-    @Argument(index=1, required=true, description="The new port")
+    @Argument(index = 1, name = "port", description = "The new port to set", required = true, multiValued = false)
     private int port = 0;
 
     protected Object doExecute() throws Exception {

@@ -33,12 +33,11 @@ import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Command;
 import org.fusesource.jansi.Ansi;
 
-@Command(scope = "shell", name = "info", description = "Print Karaf informations")
+@Command(scope = "shell", name = "info", description = "Prints system informations")
 public class InfoAction extends OsgiCommandSupport {
 
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
-
 
     protected Object doExecute() throws Exception {
         int maxNameLen;

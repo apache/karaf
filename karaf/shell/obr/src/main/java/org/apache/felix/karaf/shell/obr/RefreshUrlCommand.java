@@ -24,12 +24,11 @@ import org.osgi.service.obr.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "refreshUrl", description = "Reload the repositories to obtain a fresh list of bundles.")
+@Command(scope = "obr", name = "refreshUrl", description = "Reloads the repositories to obtain a fresh list of bundles.")
 public class RefreshUrlCommand extends ObrCommandSupport {
 
-    @Argument(required = false, multiValued = true, description = "Repository URLs (leave empty for all)")
+    @Argument(index = 0, name = "urls", description = "Repository URLs to refresh (leave empty for all)", required = false, multiValued = true)
     List<String> urls;
-
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
 		if (urls != null || urls.isEmpty()) {

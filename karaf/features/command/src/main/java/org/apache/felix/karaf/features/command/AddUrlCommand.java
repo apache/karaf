@@ -23,10 +23,10 @@ import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "features", name = "addUrl", description = "Add a list of repository URLs to the features service.")
+@Command(scope = "features", name = "addUrl", description = "Adds a list of repository URLs to the features service.")
 public class AddUrlCommand extends FeaturesCommandSupport {
 
-    @Argument(required = true, multiValued = true, description = "Repository URLs")
+    @Argument(index = 0, name = "urls", description = "One or more repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
     protected void doExecute(FeaturesService admin) throws Exception {

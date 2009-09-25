@@ -86,7 +86,7 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
         {
             options = new HashSet<Option>(options);
             options.add(HELP);
-            if (command != null && (command.description() != null) || command.name() != null)
+            if (command != null && (command.description() != null || command.name() != null))
             {
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));
                 out.print("\t");
@@ -98,47 +98,41 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
                 out.println(command.description());
                 out.println();
             }
-            String syntax = "";
+            StringBuffer syntax = new StringBuffer();
             if (command != null)
             {
-                syntax += command.scope() + ":" + command.name();
+                syntax.append(String.format("%s:%s", command.scope(), command.name()));
             }
             if (options.size() > 0)
             {
-                syntax += " [options]";
+                syntax.append(" [options]");
             }
             if (arguments.size() > 0)
             {
-                if (arguments.size() > 0) {
-                    syntax += " ";
-                }
+            	syntax.append(' ');
                 for (Argument argument : arguments)
                 {
-                    if (argument.required())
+                    if (!argument.required())
                     {
-                        syntax += "[" + argument.name() + "]";
+                        syntax.append(String.format("[%s] ", argument.name()));
                     }
                     else
                     {
-                        syntax += argument.name();
+                        syntax.append(String.format("%s ", argument.name()));
                     }
                 }
             }
 
             out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("SYNTAX").a(Ansi.Attribute.RESET));
             out.print("\t");
-            out.println(syntax);
+            out.println(syntax.toString());
             out.println();
             if (arguments.size() > 0)
             {
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("ARGUMENTS").a(Ansi.Attribute.RESET));
                 for (Argument argument : arguments)
                 {
-                    out.print("\t");
-                    out.print(argument.name());
-                    out.print("\t");
-                    out.print(argument.description());
-                    out.println();
+                    out.println(String.format("\t%-15s%s", argument.name(), argument.description()));
                 }
                 out.println();
             }
@@ -154,9 +148,7 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
                     }
                     out.print("\t");
                     out.println(opt);
-                    out.print("\t\t");
-                    out.print(option.description());
-                    out.println();
+                    out.println(String.format("\t%-15s%s", "", option.description()));
                 }
                 out.println();
             }

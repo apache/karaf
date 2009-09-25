@@ -23,10 +23,10 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.obr.RepositoryAdmin;
 
-@Command(scope = "obr", name = "removeUrl", description = "Remove a list of repository URLs from the OBR service.")
+@Command(scope = "obr", name = "removeUrl", description = "Removes a list of repository URLs from the OBR service.")
 public class RemoveUrlCommand extends ObrCommandSupport {
 
-    @Argument(required = true, multiValued = true, description = "Repository URLs")
+    @Argument(index = 0, name = "urls", description = "Repository URLs to remove from OBR service", required = true, multiValued = true)
     List<String> urls;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

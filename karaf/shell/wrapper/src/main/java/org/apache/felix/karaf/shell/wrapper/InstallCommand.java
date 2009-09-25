@@ -36,20 +36,19 @@ import org.fusesource.jansi.Ansi;
  *
  * @version $Rev: 603634 $ $Date: 2007-12-12 16:07:16 +0100 (Wed, 12 Dec 2007) $
  */
-@Command(scope = "wrapper", name = "install", description = "Install Karaf as a system service in the OS.")
+@Command(scope = "wrapper", name = "install", description = "Install the container as a system service in the OS.")
 public class InstallCommand extends OsgiCommandSupport
 {
-	
-    @Option(name="-n", aliases={"--name"}, description="The service name that will be used when installing the service.")
+    @Option(name="-n", aliases={"--name"}, description="The service name that will be used when installing the service. (Default: karaf)", required = false, multiValued = false)
     private String name="karaf";
 
-    @Option(name="-d", aliases={"--display"}, description="The display name of the service.")
+    @Option(name="-d", aliases={"--display"}, description="The display name of the service.", required = false, multiValued = false)
     private String displayName;
 
-    @Option(name="-D", aliases={"--description"}, description="The description of the service.")
+    @Option(name="-D", aliases={"--description"}, description="The description of the service.", required = false, multiValued = false)
     private String description="";
 
-    @Option(name="-s", aliases={"--start-type"}, description="Mode in which the service is installed.  AUTO_START or DEMAND_START")
+    @Option(name="-s", aliases={"--start-type"}, description="Mode in which the service is installed. AUTO_START or DEMAND_START (Default: AUTO_START)", required = false, multiValued = false)
     private String startType="AUTO_START";
 
     protected Object doExecute() throws Exception {

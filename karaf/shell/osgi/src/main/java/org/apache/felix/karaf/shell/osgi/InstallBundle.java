@@ -27,13 +27,13 @@ import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-@Command(scope = "osgi", name = "install", description = "Install bundle(s)")
+@Command(scope = "osgi", name = "install", description = "Installs one or more bundles")
 public class InstallBundle extends OsgiCommandSupport {
 
-    @Argument(required = true, multiValued = true, description = "Bundle URLs")
+    @Argument(index = 0, name = "urls", description = "Bundle URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
-    @Option(name = "-s", aliases={"--start"}, description="Start the bundles after installation")
+    @Option(name = "-s", aliases={"--start"}, description="Starts the bundles after installation", required = false, multiValued = false)
     boolean start;
 
     protected Object doExecute() throws Exception {

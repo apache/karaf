@@ -21,10 +21,10 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.ServiceReference;
 
-@Command(scope = "osgi", name = "start-level", description = "Get or set the start level")
+@Command(scope = "osgi", name = "start-level", description = "Get or set the system start level")
 public class StartLevel extends OsgiCommandSupport {
 
-    @Argument(required = false, index = 0)
+    @Argument(index = 0, name = "level", description = "The new system start level to set", required = false, multiValued = false)
     Integer level;
 
     protected Object doExecute() throws Exception {

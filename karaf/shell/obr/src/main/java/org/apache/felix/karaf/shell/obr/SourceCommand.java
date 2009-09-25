@@ -28,13 +28,13 @@ import org.osgi.service.obr.Resource;
 @Command(scope = "obr", name = "source", description = "Download the sources for an OBR bundle.")
 public class SourceCommand extends ObrCommandSupport {
 
-    @Option(name = "-x", description = "Extract")
+    @Option(name = "-x", aliases = {}, description = "Extract the archive", required = false, multiValued = false)
     boolean extract;
 
-    @Argument(required = true, index = 0, description = "Local directory")
+    @Argument(index = 0, name = "folder", description = "Local folder for storing sources", required = true, multiValued = false)
     String localDir;
 
-    @Argument(required = true, index = 1, multiValued = true, description = "List of bundles")
+    @Argument(index = 1, name = "bundles", description = "List of bundles to download the sources for", required = true, multiValued = true)
     List<String> bundles;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

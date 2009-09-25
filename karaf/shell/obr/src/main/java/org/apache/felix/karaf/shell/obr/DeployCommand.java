@@ -22,10 +22,10 @@ import org.osgi.service.obr.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "deploy", description = "Deploy a list of bundles using OBR")
+@Command(scope = "obr", name = "deploy", description = "Deploys a list of bundles using OBR service")
 public class DeployCommand extends ObrCommandSupport {
 
-    @Argument(required = true, multiValued = true, description = "List of bundles")
+    @Argument(index = 0, name = "bundles", description = "List of bundle names to deploy (separated by whitespaces)", required = true, multiValued = true)
     protected List<String> bundles;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

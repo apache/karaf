@@ -22,16 +22,16 @@ import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "admin", name = "connect", description = "Connect to an existing instance.")
+@Command(scope = "admin", name = "connect", description = "Connects to an existing container instance.")
 public class ConnectCommand extends AdminCommandSupport {
 
-    @Argument(index=0, name="INSTANCE", required=true, description="The instance name")
+    @Argument(index = 0, name="name", description="The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
-    @Option(name="-u", aliases={"--username"}, description="Remote user name")
+    @Option(name="-u", aliases={"--username"}, description="Remote user name (Default: karaf)", required = false, multiValued = false)
     private String username = "karaf";
 
-    @Option(name="-p", aliases={"--password"}, description="Remote user password")
+    @Option(name="-p", aliases={"--password"}, description="Remote user password (Default: karaf)", required = false, multiValued = false)
     private String password = "karaf";
 
     protected Object doExecute() throws Exception {

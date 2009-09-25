@@ -31,10 +31,10 @@ import org.apache.felix.gogo.commands.Command;
 /**
  * Get the log level for a given logger
  */
-@Command(scope = "log", name = "get", description = "Show log level.")
+@Command(scope = "log", name = "get", description = "Shows the currently set log level.")
 public class GetLogLevel extends OsgiCommandSupport {
 
-    @Argument(required = false, name = "LOGGER", description = "Logger name, ALL or ROOT (default)")
+    @Argument(index = 0, name = "logger", description = "The name of the logger, ALL or ROOT (default)", required = false, multiValued = false)
     String logger;
 
     static final String CONFIGURATION_PID  = "org.ops4j.pax.logging";

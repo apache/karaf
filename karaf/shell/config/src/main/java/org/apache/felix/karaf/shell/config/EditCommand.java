@@ -27,10 +27,10 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @Command(scope = "config", name = "edit", description = "Create or edit a configuration.")
 public class EditCommand extends ConfigCommandSupport {
 
-    @Argument(required = true, description = "PID of the configuration")
+    @Argument(index = 0, name = "pid", description = "PID of the configuration", required = true, multiValued = false)
     String pid;
 
-    @Option(name = "--force", description = "Force the edition of this config, even if another one was under edition")
+    @Option(name = "--force", aliases = {}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)
     boolean force;
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

@@ -23,10 +23,10 @@ import org.apache.felix.karaf.shell.admin.Instance;
 /**
  * List available instances
  */
-@Command(scope = "admin", name = "list", description = "List existing instances.")
+@Command(scope = "admin", name = "list", description = "List all existing container instances.")
 public class ListCommand extends AdminCommandSupport {
 
-    @Option(name = "-l", aliases = { "--location" }, description = "Display instances location")
+    @Option(name = "-l", aliases = { "--location" }, description = "Displays the location of the container instances", required = false, multiValued = false)
     boolean location;
 
     protected Object doExecute() throws Exception {

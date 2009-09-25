@@ -30,10 +30,10 @@ import org.osgi.service.packageadmin.PackageAdmin;
 @Command(scope = "packages", name = "exports", description = "Display exported packages")
 public class ExportsCommand extends PackageCommandSupport {
 
-    @Option(name = "-i", aliases = { "--imports"}, description = "List bundles importing the packages")
+    @Option(name = "-i", aliases = { "--imports"}, description = "List bundles importing the specified packages")
     boolean imports;
 
-    @Argument(required = false, multiValued = true, description = "bundle ids")
+    @Argument(index = 0, name = "ids", description = "The IDs of bundles to check", required = false, multiValued = true)
     List<Long> ids;
 
     protected void doExecute(PackageAdmin admin) throws Exception {

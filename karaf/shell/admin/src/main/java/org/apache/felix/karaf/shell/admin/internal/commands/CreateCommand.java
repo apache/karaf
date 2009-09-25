@@ -26,16 +26,16 @@ import org.apache.felix.gogo.commands.Command;
  *
  * @version $Rev: 679826 $ $Date: 2008-07-25 17:00:12 +0200 (Fri, 25 Jul 2008) $
  */
-@Command(scope = "admin", name = "create", description = "Create a new instance.")
+@Command(scope = "admin", name = "create", description = "Creates a new container instance.")
 public class CreateCommand extends AdminCommandSupport
 {
-    @Option(name = "-p", aliases = { "--port"}, description = "Port number for remote shell connection")
+    @Option(name = "-p", aliases = { "--port"}, description = "Port number for remote shell connection", required = false, multiValued = false)
     private int port = 0;
 
-    @Option(name = "-l", aliases = { "--location"}, description = "Location of the new instance on the file system")
+    @Option(name = "-l", aliases = { "--location"}, description = "Location of the new container instance in the file system", required = false, multiValued = false)
     private String location;
 
-    @Argument(index=0, required=true, description="Name of the new Karaf instance")
+    @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
     private String instance = null;
 
     protected Object doExecute() throws Exception {

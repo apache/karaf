@@ -26,16 +26,16 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.command.Function;
 
-@Command(scope = "osgi", name = "ls", description = "List services")
+@Command(scope = "osgi", name = "ls", description = "Lists OSGi services")
 public class ListServices extends OsgiCommandSupport {
 
-    @Option(name = "-a", description = "Show all")
+    @Option(name = "-a", aliases = {}, description = "Shows all services", required = false, multiValued = false)
     boolean showAll;
 
-    @Option(name = "-u", description = "Show in use")
+    @Option(name = "-u", aliases = {}, description = "Shows services which are in use", required = false, multiValued = false)
     boolean inUse;
 
-    @Argument(required = false, multiValued = true, description = "Bundles ids")
+    @Argument(index = 0, name = "ids", description = "Show only services for the given bundle ids", required = false, multiValued = true)
     List<Long> ids;
 
     protected Object doExecute() throws Exception {

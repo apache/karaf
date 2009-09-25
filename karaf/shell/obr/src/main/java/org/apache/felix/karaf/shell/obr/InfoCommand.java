@@ -29,10 +29,10 @@ import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Requirement;
 import org.osgi.service.obr.Resource;
 
-@Command(scope = "obr", name = "info", description = "Print informations about OBR bundles")
+@Command(scope = "obr", name = "info", description = "Prints information about OBR bundles")
 public class InfoCommand extends ObrCommandSupport {
 
-    @Argument(required = true, multiValued = true)
+    @Argument(index = 0, name = "bundles", description = "Specify bundles to query for information (separated by whitespaces)", required = true, multiValued = true)
     List<String> bundles;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
