@@ -318,10 +318,6 @@
       <delete dir="${dist.dir}"/>
     </target>
 
-  <condition property="ivy.home" value="${env.SIGIL_HOME}">
-    <isset property="env.SIGIL_HOME" />
-  </condition>
-
   <property name="sigil.home" value="${cache.dir}/ant" />
   <property name="sigil.jar.dir" value="${sigil.home}/lib" />
   <property name="ivy.jar.file" value="${sigil.jar.dir}/ivy.jar" />
