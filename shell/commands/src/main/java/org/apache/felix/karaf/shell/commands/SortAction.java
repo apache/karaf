@@ -44,31 +44,31 @@ import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
  *
  * @version $Rev: 722776 $ $Date: 2008-12-03 05:59:59 +0100 (Wed, 03 Dec 2008) $
  */
-@Command(scope = "shell", name = "sort", description = "Write sorted concatenation of all FILE(s) to standard output.")
+@Command(scope = "shell", name = "sort", description = "Write sorted concatenation of all files to standard output.")
 public class SortAction extends OsgiCommandSupport {
 
-    @Option(name = "-f", aliases = { "-ignore-case" }, description = "fold lower case to upper case characters")
+    @Option(name = "-f", aliases = { "-ignore-case" }, description = "fold lower case to upper case characters", required = false, multiValued = false)
     private boolean caseInsensitive;
 
-    @Option(name = "-r", aliases = { "--reverse" }, description = "reverse the result of comparisons")
+    @Option(name = "-r", aliases = { "--reverse" }, description = "reverse the result of comparisons", required = false, multiValued = false)
     private boolean reverse;
 
-    @Option(name = "-u", aliases = { "--unique" }, description = "output only the first of an equal run")
+    @Option(name = "-u", aliases = { "--unique" }, description = "output only the first of an equal run", required = false, multiValued = false)
     private boolean unique;
 
-    @Option(name = "-t", aliases = { "--field-separator" }, description = "use SEP instead of non-blank to blank transition")
+    @Option(name = "-t", aliases = { "--field-separator" }, description = "use SEP instead of non-blank to blank transition", required = false, multiValued = false)
     private String separator;
 
-    @Option(name = "-b", aliases = { "--ignore-leading-blanks" }, description = "ignore leading blanks")
+    @Option(name = "-b", aliases = { "--ignore-leading-blanks" }, description = "ignore leading blanks", required = false, multiValued = false)
     private boolean ignoreBlanks;
 
-    @Option(name = "-k", aliases = { "--key" }, multiValued = true)
+    @Option(name = "-k", aliases = { "--key" }, description = "Fields to use for sorting separated by whitespaces", required = false, multiValued = true)
     private List<String> sortFields;
 
-    @Option(name = "-n", aliases = { "--numeric-sort" }, description = "compare according to string numerical value")
+    @Option(name = "-n", aliases = { "--numeric-sort" }, description = "compare according to string numerical value", required = false, multiValued = false)
     private boolean numeric;
 
-    @Argument(index = 0, required = false, multiValued = true)
+    @Argument(index = 0, name = "files", description = "A list of files separated by whitespaces", required = false, multiValued = true)
     private List<String> paths;
 
 

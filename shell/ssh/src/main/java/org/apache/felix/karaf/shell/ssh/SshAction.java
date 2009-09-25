@@ -41,22 +41,22 @@ import org.osgi.service.blueprint.container.BlueprintContainer;
  *
  * @version $Rev: 721244 $ $Date: 2008-11-27 18:19:56 +0100 (Thu, 27 Nov 2008) $
  */
-@Command(scope = "ssh", name = "ssh", description = "Connect to a remote SSH server")
+@Command(scope = "ssh", name = "ssh", description = "Connects to a remote SSH server")
 public class SshAction
     extends OsgiCommandSupport implements BlueprintContainerAware
 {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(name="-l", aliases={"--username"}, description = "Username")
+    @Option(name="-l", aliases={"--username"}, description = "The user name for remote login", required = false, multiValued = false)
     private String username;
 
-    @Option(name="-P", aliases={"--password"}, description = "Password")
+    @Option(name="-P", aliases={"--password"}, description = "The password for remote login", required = false, multiValued = false)
     private String password;
 
-    @Argument(required=true, description = "Host")
+    @Argument(index = 0, name = "hostname", description = "The host name to connect to via SSH", required = true, multiValued = false)
     private String hostname;
 
-    @Option(name="-p", aliases={"--port"}, description = "Port")
+    @Option(name="-p", aliases={"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
     private int port = 22;
 
     private BlueprintContainer container;

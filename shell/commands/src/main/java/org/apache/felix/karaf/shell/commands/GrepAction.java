@@ -29,30 +29,30 @@ import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 
 
-@Command(scope = "shell", name="grep", description="Print lines matching a pattern")
+@Command(scope = "shell", name="grep", description="Prints lines matching the given pattern")
 public class GrepAction extends OsgiCommandSupport {
 
-    @Argument(name = "PATTERN", required = true, description = "Regular expression")
+    @Argument(index = 0, name = "pattern", description = "Regular expression", required = true, multiValued = false)
     private String regex;
 
-    @Option(name="-n", aliases = { "--line-number" }, description="Prefix each line of output with the line number within its input file.")
+    @Option(name = "-n", aliases = { "--line-number" }, description = "Prefixes each line of output with the line number within its input file.", required = false, multiValued = false)
     private boolean lineNumber;
 
-    @Option(name = "-v", aliases = { "--invert-match" }, description = "Invert the sense of matching, to select non-matching lines.")
+    @Option(name = "-v", aliases = { "--invert-match" }, description = "Inverts the sense of matching, to select non-matching lines.", required = false, multiValued = false)
     private boolean invertMatch;
 
-    @Option(name = "-w", aliases = { "--word-regexp" }, description = "Select only those lines containing matches that form whole " +
+    @Option(name = "-w", aliases = { "--word-regexp" }, description = "Selects only those lines containing matches that form whole " +
                                                                       "words.  The test is that the matching substring must either be " +
                                                                       "at  the beginning of the line, or preceded by a non-word constituent " +
                                                                       "character.  Similarly, it must be either at the end of " +
                                                                       "the line or followed by a non-word constituent character.  " +
-                                                                      "Word-constituent characters are letters, digits, and the underscore.")
+                                                                      "Word-constituent characters are letters, digits, and the underscore.", required = false, multiValued = false)
     private boolean wordRegexp;
 
-    @Option(name = "-x", aliases = { "--line-regexp" }, description = "Select only those matches that exactly match the whole line.")
+    @Option(name = "-x", aliases = { "--line-regexp" }, description = "Selects only those matches that exactly match the whole line.", required = false, multiValued = false)
     private boolean lineRegexp;
 
-    @Option(name = "-i", aliases = { "--ignore-case" }, description = "Ignore case distinctions in both the PATTERN and the input files.")
+    @Option(name = "-i", aliases = { "--ignore-case" }, description = "Ignores case distinctions in both the PATTERN and the input files.", required = false, multiValued = false)
     private boolean ignoreCase;
 
     protected Object doExecute() throws Exception {

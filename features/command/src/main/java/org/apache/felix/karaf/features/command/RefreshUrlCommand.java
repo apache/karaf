@@ -25,10 +25,10 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Repository;
 
-@Command(scope = "features", name = "refreshUrl", description = "Reload the repositories to obtain a fresh list of features.")
+@Command(scope = "features", name = "refreshUrl", description = "Reloads the list of available features from the repositories.")
 public class RefreshUrlCommand extends FeaturesCommandSupport {
 
-    @Argument(required = false, multiValued = true, description = "Repository URLs (leave empty for all)")
+    @Argument(index = 0, name = "urls", description = "Repository URLs to reload (leave empty for all)", required = false, multiValued = true)
     List<String> urls;
 
     protected void doExecute(FeaturesService admin) throws Exception {

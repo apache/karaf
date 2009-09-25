@@ -23,10 +23,10 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-@Command(scope = "osgi", name = "refresh", description = "Refresh bundle(s)")
+@Command(scope = "osgi", name = "refresh", description = "Refresh a bundle")
 public class RefreshBundle extends OsgiCommandSupport {
 
-    @Argument(required = false)
+    @Argument(index = 0, name = "id", description = "The ID of the bundle to refresh", required = false, multiValued = false)
     Long id;
 
     protected Object doExecute() throws Exception {

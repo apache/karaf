@@ -25,7 +25,7 @@ import org.osgi.service.startlevel.StartLevel;
 @Command(scope = "osgi", name = "bundle-level", description = "Get or set the start level of a given bundle")
 public class BundleLevel extends BundleCommand {
 
-    @Argument(required = false, index = 1)
+    @Argument(index = 1, name = "startLevel", description = "The bundles new start level", required = false, multiValued = false)
     Integer level;
 
     protected void doExecute(Bundle bundle) throws Exception {

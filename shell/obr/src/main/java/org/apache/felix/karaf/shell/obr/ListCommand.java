@@ -24,10 +24,10 @@ import org.osgi.service.obr.Resource;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "list", description = "List OBR bundles")
+@Command(scope = "obr", name = "list", description = "Lists OBR bundles")
 public class ListCommand extends ObrCommandSupport {
 
-    @Argument(required = false, multiValued = true)
+    @Argument(index = 0, name = "args", description = "The arguments", required = false, multiValued = true)
     List<String> args;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

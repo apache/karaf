@@ -23,10 +23,10 @@ import org.osgi.framework.Bundle;
 
 public abstract class BundleCommand extends OsgiCommandSupport {
 
-    @Argument(required = true, index = 0)
+    @Argument(index = 0, name = "id", description = "The bundle ID", required = true, multiValued  = false)
     long id;
 
-    @Option(name = "--force")
+    @Option(name = "--force", aliases = {}, description = "Forces the command to execute", required = false, multiValued = false)
     boolean force;
 
     protected Object doExecute() throws Exception {

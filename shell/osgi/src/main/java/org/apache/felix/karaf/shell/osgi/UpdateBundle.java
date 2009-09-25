@@ -26,7 +26,7 @@ import org.osgi.framework.Bundle;
 @Command(scope = "osgi", name = "update", description = "Update bundle")
 public class UpdateBundle extends BundleCommand {
 
-	@Argument(required = false, description = "Bundle location", index=1)
+	@Argument(index = 1, name = "location", description = "The bundles update location", required = false, multiValued = false)
 	String location;
 
 	protected void doExecute(Bundle bundle) throws Exception {

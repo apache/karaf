@@ -27,16 +27,16 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
-@Command(scope = "osgi", name = "list", description = "List bundles")
+@Command(scope = "osgi", name = "list", description = "Lists all installed bundles")
 public class ListBundles extends OsgiCommandSupport {
 
-    @Option(name = "-l", description = "Show locations")
+    @Option(name = "-l", aliases = {}, description = "Show the locations", required = false, multiValued = false)
     boolean showLoc;
 
-    @Option(name = "-s", description = "Show symbolic name")
+    @Option(name = "-s", description = "Shows the symbolic name", required = false, multiValued = false)
     boolean showSymbolic;
 
-    @Option(name = "-u", description = "Show update")
+    @Option(name = "-u", description = "Shows the update locations", required = false, multiValued = false)
     boolean showUpdate;
 
     private List<BundleStateListener.Factory> bundleStateListenerFactories;

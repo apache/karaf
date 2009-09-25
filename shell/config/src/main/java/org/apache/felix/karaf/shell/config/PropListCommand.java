@@ -22,7 +22,7 @@ import java.util.Enumeration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "config", name = "proplist", description = "List properties from the edited configuration.")
+@Command(scope = "config", name = "proplist", description = "Lists properties from the currently edited configuration.")
 public class PropListCommand extends ConfigCommandSupport {
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

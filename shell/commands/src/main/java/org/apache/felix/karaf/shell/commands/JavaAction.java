@@ -36,13 +36,13 @@ import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
 @Command(scope = "shell", name = "java", description = "Execute a Java standard application")
 public class JavaAction extends OsgiCommandSupport {
 
-    @Option(name="-m", aliases={"--method"}, description="Invoke a named method")
+    @Option(name = "-m", aliases = {"--method"}, description = "Invoke a named method", required = false, multiValued = false)
     private String methodName = "main";
 
-    @Argument(index=0, name = "className", description="The name of the class to invoke", required=true)
+    @Argument(index = 0, name = "className", description="The name of the class to invoke", required = true, multiValued = false)
     private String className;
 
-    @Argument(index=1, name = "args", description="Arguments to pass to the METHOD of CLASSNAME")
+    @Argument(index = 1, name = "arguments", description="Arguments to pass to the method of the given class", required = false, multiValued = false)
     private List<String> args;
 
     protected Object doExecute() throws Exception {

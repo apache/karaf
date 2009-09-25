@@ -20,13 +20,13 @@ import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "admin", name = "start", description = "Start an existing instance.")
+@Command(scope = "admin", name = "start", description = "Starts an existing container instance.")
 public class StartCommand extends AdminCommandSupport {
 
-    @Option(name = "-o", aliases = { "--java-opts"}, description = "Java options when launching the instance")
+    @Option(name = "-o", aliases = { "--java-opts"}, description = "Java options when launching the instance", required = false, multiValued = false)
     private String javaOpts;
 
-    @Argument(index=0, required=true, description="The instance name")
+    @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
     protected Object doExecute() throws Exception {

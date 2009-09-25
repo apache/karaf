@@ -28,13 +28,13 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Set the log level for a given logger
  */
-@Command(scope = "log", name = "set", description = "Set the log level.")
+@Command(scope = "log", name = "set", description = "Sets the log level.")
 public class SetLogLevel extends OsgiCommandSupport {
 
-    @Argument(index = 0, required = true, name = "LEVEL", description = "Level (TRACE, DEBUG, INFO, WARN, ERROR or - to unset")
+    @Argument(index = 0, name = "level", description = "The log level to set (TRACE, DEBUG, INFO, WARN, ERROR or - to unset)", required = true, multiValued = false)
     String level;
 
-    @Argument(index = 1, required = false, name = "LOGGER", description = "Logger name or ROOT (default)")
+    @Argument(index = 1, name = "logger", description = "Logger name or ROOT (default)", required = false, multiValued = false)
     String logger;
 
     static final String CONFIGURATION_PID  = "org.ops4j.pax.logging";

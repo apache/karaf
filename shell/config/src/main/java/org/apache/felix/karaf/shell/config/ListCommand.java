@@ -24,10 +24,10 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "config", name = "list", description = "List existing configurations.")
+@Command(scope = "config", name = "list", description = "Lists existing configurations.")
 public class ListCommand extends ConfigCommandSupport {
 
-    @Argument(required = false, description = "LDAP query")
+    @Argument(index = 0, name = "query", description = "Specify a LDAP query", required = false, multiValued = false)
     String query;
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

@@ -26,17 +26,16 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 /**
  * Displays the last log entries
  */
-@Command(scope = "log", name = "display", description = "Display log entries.")
+@Command(scope = "log", name = "display", description = "Displays log entries.")
 public class DisplayLog extends OsgiCommandSupport {
 
-    @Option(name = "-n", description="Number of entries to display")
+    @Option(name = "-n", aliases = {}, description="Number of entries to display", required = false, multiValued = false)
     protected int entries;
 
-    @Option(name = "-p", description="Output formatting pattern")
+    @Option(name = "-p", aliases = {}, description="Pattern for formatting the output", required = false, multiValued = false)
     protected String overridenPattern;
 
     protected String pattern;
-
     protected LruList events;
 
     public LruList getEvents() {

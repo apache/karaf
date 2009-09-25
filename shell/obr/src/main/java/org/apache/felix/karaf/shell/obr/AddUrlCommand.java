@@ -23,10 +23,10 @@ import org.osgi.service.obr.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "addUrl", description = "Add a list of repository URLs to the OBR service.")
+@Command(scope = "obr", name = "addUrl", description = "Adds a list of repository URLs to the OBR service.")
 public class AddUrlCommand extends ObrCommandSupport {
 
-    @Argument(required = true, multiValued = true, description = "Repository URLs")
+    @Argument(index = 0, name = "urls", description = "Repository URLs to add to the OBR service separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

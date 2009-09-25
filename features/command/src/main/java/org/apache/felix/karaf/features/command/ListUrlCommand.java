@@ -18,8 +18,9 @@ package org.apache.felix.karaf.features.command;
 
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Repository;
+import org.apache.felix.gogo.commands.Command;
 
-
+@Command(scope = "features", name = "listUrl", description = "Displays a list of all defined repository URLs.")
 public class ListUrlCommand extends FeaturesCommandSupport {
 
     protected void doExecute(FeaturesService admin) throws Exception {

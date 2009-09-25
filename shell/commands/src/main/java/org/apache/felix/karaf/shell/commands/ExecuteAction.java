@@ -28,10 +28,10 @@ import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
  *
  * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
  */
-@Command(scope = "shell", name = "exec", description = "Execute system processes")
+@Command(scope = "shell", name = "exec", description = "Executes system processes")
 public class ExecuteAction extends OsgiCommandSupport {
 
-    @Argument(description = "Arguments", required = true, multiValued = true)
+    @Argument(index = 0, name = "command", description = "Execution command with arguments", required = true, multiValued = true)
     private List<String> args;
 
     protected Object doExecute() throws Exception {
