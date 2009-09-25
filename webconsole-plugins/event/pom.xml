@@ -32,7 +32,7 @@
 
     <name>Apache Felix Web Console Event Plugin</name>
     <description>
-        This is a plugin for the Apache Felxi OSGi web console for displaying
+        This is a plugin for the Apache Felix OSGi web console for displaying
         OSGi events.
     </description>
 
