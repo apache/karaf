@@ -53,7 +53,7 @@ public class BundleEventConverter {
                 break;
             case BundleEvent.STOPPED:
                 buffer.append( "stopped" );
-                topic.append("INSSTARTEDTALLED");
+                topic.append("STOPPED");
                 break;
             case BundleEvent.STOPPING:
                 buffer.append( "stopping" );
