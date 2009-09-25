@@ -58,16 +58,16 @@ public class DeployerThread extends Thread
             if ( obrResolver.resolve() )
             {
 
-                logResource( "Installing Requested Resources", obrResolver.getAddedResources() );
-                logResource( "Installing Required Resources", obrResolver.getRequiredResources() );
-                logResource( "Installing Optional Resources", obrResolver.getOptionalResources() );
+                logResource( logger, "Installing Requested Resources", obrResolver.getAddedResources() );
+                logResource( logger, "Installing Required Resources", obrResolver.getRequiredResources() );
+                logResource( logger, "Installing Optional Resources", obrResolver.getOptionalResources() );
 
                 obrResolver.deploy( startBundles );
             }
             else
             {
-                logRequirements( "Cannot Install requested bundles due to unsatisfied requirements", obrResolver
-                    .getUnsatisfiedRequirements() );
+                logRequirements( logger, "Cannot Install requested bundles due to unsatisfied requirements",
+                    obrResolver.getUnsatisfiedRequirements() );
             }
         }
         catch ( Exception ie )
@@ -78,7 +78,7 @@ public class DeployerThread extends Thread
     }
 
 
-    private void logResource( String message, Resource[] res )
+    public static void logResource( Logger logger, String message, Resource[] res )
     {
         if ( res != null && res.length > 0 )
         {
@@ -92,7 +92,7 @@ public class DeployerThread extends Thread
     }
 
 
-    private void logRequirements( String message, Requirement[] req )
+    public static void logRequirements( Logger logger, String message, Requirement[] req )
     {
         logger.log( LogService.LOG_ERROR, message );
         for ( int i = 0; req != null && i < req.length; i++ )

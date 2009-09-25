@@ -29,6 +29,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.Action;
 import org.apache.felix.webconsole.internal.BaseManagementPlugin;
+import org.apache.felix.webconsole.internal.Logger;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -273,28 +274,26 @@ public class InstallAction extends BaseManagementPlugin implements Action
         final boolean doStart, final boolean refreshPackages )
     {
 
-        Thread t = new InstallHelper( this, "Background Install " + bundleFile, bundleFile, refreshPackages )
+        Thread t = new InstallHelper( getBundleContext(), bundleFile, location, startlevel, doStart, refreshPackages )
         {
-
-            protected Bundle doRun( InputStream bundleStream ) throws BundleException
+            protected Logger getLog()
             {
-                Bundle bundle = getBundleContext().installBundle( location, bundleStream );
+                return InstallAction.this.getLog();
+            }
 
-                if ( startlevel > 0 )
+
+            protected Object getService( String serviceName )
+            {
+                if ( serviceName.equals( PackageAdmin.class.getName() ) )
                 {
-                    StartLevel sl = getStartLevel();
-                    if ( sl != null )
-                    {
-                        sl.setBundleStartLevel( bundle, startlevel );
-                    }
+                    return InstallAction.this.getPackageAdmin();
+                }
+                else if ( serviceName.equals( StartLevel.class.getName() ) )
+                {
+                    return InstallAction.this.getStartLevel();
                 }
 
-                if ( doStart )
-                {
-                    bundle.start();
-                }
-
-                return bundle;
+                return null;
             }
         };
 
@@ -304,108 +303,25 @@ public class InstallAction extends BaseManagementPlugin implements Action
 
     private void updateBackground( final Bundle bundle, final File bundleFile, final boolean refreshPackages )
     {
-        Thread t = new InstallHelper( this, "Background Update " + bundle.getSymbolicName() + " ("
-            + bundle.getBundleId() + ")", bundleFile, refreshPackages )
+        Thread t = new UpdateHelper( bundle, bundleFile, refreshPackages )
         {
-
-            protected Bundle doRun( InputStream bundleStream ) throws BundleException
+            protected Logger getLog()
             {
-                bundle.update( bundleStream );
-                return bundle;
+                return InstallAction.this.getLog();
+            }
+
+
+            protected Object getService( String serviceName )
+            {
+                if ( serviceName.equals( PackageAdmin.class.getName() ) )
+                {
+                    return InstallAction.this.getPackageAdmin();
+                }
+
+                return null;
             }
         };
 
         t.start();
-    }
-
-    private static abstract class InstallHelper extends Thread
-    {
-
-        private final InstallAction installAction;
-
-        private final File bundleFile;
-
-        private final boolean refreshPackages;
-
-
-        InstallHelper( InstallAction installAction, String name, File bundleFile, boolean refreshPackages )
-        {
-            super( name );
-            setDaemon( true );
-
-            this.installAction = installAction;
-            this.bundleFile = bundleFile;
-            this.refreshPackages = refreshPackages;
-        }
-
-
-        protected abstract Bundle doRun( InputStream bundleStream ) throws BundleException;
-
-
-        public void run()
-        {
-            // wait some time for the request to settle
-            sleepSilently( 500L );
-
-            // now deploy the resolved bundles
-            InputStream bundleStream = null;
-            try
-            {
-                // we need the package admin before we call the bundle
-                // installation or update, since we might be updating
-                // our selves in which case the bundle context will be
-                // invalid by the time we want to call the update
-                PackageAdmin pa = ( refreshPackages ) ? installAction.getPackageAdmin() : null;
-
-                bundleStream = new FileInputStream( bundleFile );
-                Bundle bundle = doRun( bundleStream );
-
-                if ( pa != null )
-                {
-                    // wait for asynchronous bundle start tasks to finish
-                    sleepSilently( 2000L );
-
-                    pa.refreshPackages( new Bundle[]
-                        { bundle } );
-                }
-            }
-            catch ( IOException ioe )
-            {
-                installAction.getLog().log( LogService.LOG_ERROR, "Cannot install or update bundle from " + bundleFile,
-                    ioe );
-            }
-            catch ( BundleException be )
-            {
-                installAction.getLog().log( LogService.LOG_ERROR, "Cannot install or update bundle from " + bundleFile,
-                    be );
-            }
-            finally
-            {
-                if ( bundleStream != null )
-                {
-                    try
-                    {
-                        bundleStream.close();
-                    }
-                    catch ( IOException ignore )
-                    {
-                    }
-                }
-                bundleFile.delete();
-            }
-        }
-
-
-        protected void sleepSilently( long msecs )
-        {
-            try
-            {
-                sleep( msecs );
-            }
-            catch ( InterruptedException ie )
-            {
-                // don't care
-            }
-        }
     }
 }

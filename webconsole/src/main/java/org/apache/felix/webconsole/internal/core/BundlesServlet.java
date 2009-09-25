@@ -46,6 +46,7 @@ import org.apache.felix.bundlerepository.R4Package;
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
+import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -283,6 +284,12 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             {
                 // refresh bundle wiring
                 refresh( bundle );
+                success = true;
+            }
+            else if ( "update".equals( action ) )
+            {
+                // update the bundle
+                update( bundle );
                 success = true;
             }
             else if ( "uninstall".equals( action ) )
@@ -573,6 +580,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 action( jw, hasStop( bundle ), "stop", "Stop", "stop" );
             }
             action( jw, true, "refresh", "Refresh Package Imports", "refresh" );
+            action( jw, true, "update", "Update", "update" );
             action( jw, hasUninstall( bundle ), "uninstall", "Uninstall", "delete" );
         }
         jw.endArray();
@@ -1177,6 +1185,26 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     {
         getPackageAdmin().refreshPackages( new Bundle[]
             { bundle } );
+    }
+
+
+    private void update( final Bundle bundle )
+    {
+        Thread t = new UpdateHelper( bundle, false )
+        {
+            protected Logger getLog()
+            {
+                return BundlesServlet.this.getLog();
+            }
+
+
+            protected Object getService( String serviceName )
+            {
+                return BundlesServlet.this.getService( serviceName );
+            }
+        };
+
+        t.start();
     }
 
     private final class RequestInfo
