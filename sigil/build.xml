@@ -36,7 +36,7 @@
 
   <target name="dist" depends="build, site" />
 
-  <target name="clean" depends="clean-list, clean-site" />
+  <target name="clean" depends="clean-list, clean-site, clean-tmp" />
 
   <target name="build" depends="init, build-list" />
 
@@ -77,5 +77,14 @@
 
   <target name="clean-site">
     <delete dir="${site.dir}" />
+  </target>
+
+  <target name="clean-tmp">
+    <echo>${cache.dir}</echo>
+    <delete includeemptydirs="true">
+     <fileset dir="${cache.dir}" includes="all/org.apache-felix.sigil*"/>
+     <fileset dir="${cache.dir}" includes="all/org.apache/felix.sigil*"/>
+     <fileset dir="${cache.dir}" includes="all/resolved-org.apache-felix.sigil*"/>
+    </delete>
   </target>
 </project>
