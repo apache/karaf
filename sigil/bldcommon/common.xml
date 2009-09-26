@@ -25,7 +25,8 @@
     <property file="${common.dir}/sigil-defaults.properties" prefix="default."/>
     <property file="${common.dir}/build.properties"/>
 
-    <echo>${cache.dir}</echo>
+    <echo>cache=${cache.dir}</echo>
+    <echo>buildVersion=${buildVersion}</echo>
     <!-- =====================================================
          stuff intended to be over-ridden is prefixed with my.
          =====================================================-->
