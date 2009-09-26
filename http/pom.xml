@@ -70,6 +70,9 @@
         <module>proxy</module>
         <module>whiteboard</module>
         <module>bundle</module>
+        <module>samples/filter</module>
+        <module>samples/bridge</module>
+        <module>samples/whiteboard</module>
     </modules>
 
     <dependencies>
@@ -117,16 +120,5 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <profiles>
-        <profile>
-            <id>samples</id>
-            <modules>
-                <module>samples/filter</module>
-                <module>samples/bridge</module>
-                <module>samples/whiteboard</module>
-            </modules>
-        </profile>
-    </profiles>
 
 </project>
