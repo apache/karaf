@@ -93,15 +93,14 @@ public class BldRepositoryManager extends AbstractRepositoryManager
             }
 
             int level = Integer.parseInt(repo.getProperty(
-                IRepositoryConfig.REPOSITORY_LEVEL, IBundleRepository.NORMAL_PRIORITY
-                    + ""));
+                IRepositoryConfig.REPOSITORY_LEVEL, Integer.toString(IBundleRepository.NORMAL_PRIORITY)));
 
             try
             {
                 IRepositoryProvider instance = (IRepositoryProvider) (Class.forName(provider).newInstance());
                 IBundleRepository repository = instance.createRepository(name, repo);
                 addRepository(repository, level);
-                Log.verbose("added repository: " + repository);
+                Log.verbose("added repository: " + repository + " : " + level);
             }
             catch (Exception e)
             {
