@@ -561,8 +561,10 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected Set<Long> readValue(String val) {
         Set<Long> set = new HashSet<Long>();
-        for (String str : val.split(",")) {
-            set.add(Long.parseLong(str));
+        if (val != null && val.length() != 0) {
+        	for (String str : val.split(",")) {
+        		set.add(Long.parseLong(str));
+        	}
         }
         return set;
     }
