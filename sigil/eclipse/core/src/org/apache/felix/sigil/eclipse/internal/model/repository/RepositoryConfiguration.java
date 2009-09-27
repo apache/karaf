@@ -172,9 +172,11 @@ public class RepositoryConfiguration implements IRepositoryConfiguration
         {   
             IRepositoryModel rep = findRepository( s );
             if ( rep == null ) {
-                throw new IllegalStateException( "Missing repository for " + s );
+                SigilCore.error( "Missing repository for " + s );
             }
-            reps.add( rep );
+            else {
+                reps.add( rep );
+            }
         }
         return new RepositorySet( reps );
     }
