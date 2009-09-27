@@ -22,7 +22,7 @@ package org.apache.felix.sigil.core;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Set;
+import java.util.Collection;
 
 import junit.framework.TestCase;
 
@@ -40,7 +40,10 @@ public class ConfigTest extends TestCase
 
     static final URI base = URI.create( "test/ConfigTest/sigil.properties" );
 
-
+    static {
+        System.setProperty( "bar.version", "2.0.0" );        
+    }
+    
     public ConfigTest( String name )
     {
         super( name );
@@ -54,14 +57,6 @@ public class ConfigTest extends TestCase
         ISigilBundle bundle = project.getDefaultBundle();
         IBundleModelElement info = bundle.getBundleInfo();
 
-        checkImports( info.getImports() );
-
-        //IBundleModelElement requirements = project.getRequirements();
-    }
-
-
-    private void checkImports( Set<IPackageImport> imports )
-    {
         PackageImport foo = new PackageImport();
         foo.setPackageName( "foo" );
         foo.setVersions( VersionRange.parseVersionRange( "1.0.0" ) );
@@ -72,9 +67,37 @@ public class ConfigTest extends TestCase
         baz.setPackageName( "baz" );
         baz.setVersions( VersionRange.parseVersionRange( "[3.0.0, 4.0.0)" ) );
 
+        Collection<IPackageImport> imports = info.getImports();
+        
         assertTrue( foo.toString(), imports.contains( foo ) );
         assertTrue( bar.toString(), imports.contains( bar ) );
         assertTrue( baz.toString(), imports.contains( baz ) );
+        //IBundleModelElement requirements = project.getRequirements();
+    }
+    
+    public void testInherited() throws IOException {
+        
+        IBldProject project = BldFactory.getProject( base.resolve( "inheritance/foo/sigil.properties" ) );
+
+        ISigilBundle bundle = project.getDefaultBundle();
+        IBundleModelElement info = bundle.getBundleInfo();
+
+        Collection<IPackageImport> imports = info.getImports();
+        assertEquals( 1, imports.size() );
+        IPackageImport i = imports.iterator().next();
+        assertEquals( "org.bar", i.getPackageName() );
+        assertEquals( VersionRange.parseVersionRange("2.0.0"), i.getVersions() );
+        
+//        project = BldFactory.getProject( base.resolve( "inheritance/foo/sigil.properties" ), true );
+//
+//        bundle = project.getDefaultBundle();
+//        info = bundle.getBundleInfo();
+//
+//        imports = info.getImports();
+//        assertEquals( 1, imports.size() );
+//        i = imports.iterator().next();
+//        assertEquals( "org.bar", i.getPackageName() );
+//        assertEquals( VersionRange.parseVersionRange("2.0.0"), i.getVersions() );
     }
 
 }
