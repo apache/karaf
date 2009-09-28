@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.manipulation.annotations;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -532,6 +533,12 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             } catch (Exception e) {
                 // TODO GSA change this to a logger ?
                 System.err.println("[warning] Cannot convert " + m_value + " to iPOJO Elements.");
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    System.err.println("[warning] Cannot close correctly the value input stream");
+                }
             }
         }
 
