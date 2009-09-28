@@ -26,9 +26,6 @@ import java.util.Map.Entry;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
-import org.json.JSONException;
-import org.json.JSONWriter;
-
 /**
  * The Event Plugin
  */
@@ -107,34 +104,28 @@ public class PluginServlet extends HttpServlet
         final long endTime = (events.size() == 0 ? startTime : ((EventInfo)events.get(events.size() - 1)).received);
         final float scale = (endTime == startTime ? 100.0f : 100.0f / (endTime - startTime));
 
-        JSONWriter jw = new JSONWriter( pw );
-        try
+        pw.write("{");
+
+        jsonKey( pw, "status" );
+        jsonValue( pw, statusLine.toString() );
+        pw.write(',');
+        jsonKey( pw, "data" );
+
+        pw.write('[');
+
+        // display list in reverse order
+        for ( int index = events.size() - 1; index >= 0; index-- )
         {
-            jw.object();
-
-            jw.key( "status" );
-            jw.value( statusLine );
-
-            jw.key( "data" );
-
-            jw.array();
-
-            // display list in reverse order
-            for ( int index = events.size() - 1; index >= 0; index-- )
+            eventJson( pw, ( EventInfo ) events.get( index ), index, startTime, scale );
+            if ( index > 0 )
             {
-                eventJson( jw, ( EventInfo ) events.get( index ), index, startTime, scale );
+                pw.write(',');
             }
-
-            jw.endArray();
-
-            jw.endObject();
-
-        }
-        catch ( JSONException je )
-        {
-            throw new IOException( je.toString() );
         }
 
+        pw.write(']');
+
+        pw.write("}");
     }
 
 
@@ -185,41 +176,128 @@ public class PluginServlet extends HttpServlet
         return null;
     }
 
-    private void eventJson( JSONWriter jw, EventInfo info, int index, final long start, final float scale )
-    throws JSONException
+    private void jsonValue( final PrintWriter pw, final String v)
+    throws IOException
+    {
+        if (v == null || v.length() == 0)
+        {
+            pw.write("\"\"");
+            return;
+        }
+
+        pw.write('"');
+        char previousChar = 0;
+        char c;
+
+        for (int i = 0; i < v.length(); i += 1)
+        {
+            c = v.charAt(i);
+            switch (c)
+            {
+                case '\\':
+                case '"':
+                    pw.write('\\');
+                    pw.write(c);
+                    break;
+                case '/':
+                    if (previousChar == '<')
+                    {
+                        pw.write('\\');
+                    }
+                    pw.write(c);
+                    break;
+                case '\b':
+                    pw.write("\\b");
+                    break;
+                case '\t':
+                    pw.write("\\t");
+                    break;
+                case '\n':
+                    pw.write("\\n");
+                    break;
+                case '\f':
+                    pw.write("\\f");
+                    break;
+                case '\r':
+                    pw.write("\\r");
+                    break;
+                default:
+                    if (c < ' ')
+                    {
+                        final String hexValue = "000" + Integer.toHexString(c);
+                        pw.write("\\u");
+                        pw.write(hexValue.substring(hexValue.length() - 4));
+                    }
+                    else
+                    {
+                        pw.write(c);
+                    }
+            }
+            previousChar = c;
+        }
+        pw.write('"');
+    }
+
+    private void jsonValue( final PrintWriter pw, final long l)
+    {
+        pw.write(Long.toString(l));
+    }
+
+    private void jsonKey( final PrintWriter pw, String key)
+    throws IOException
+    {
+        jsonValue( pw, key);
+        pw.write(':');
+    }
+
+    private void eventJson( PrintWriter jw, EventInfo info, int index, final long start, final float scale )
+    throws IOException
     {
         final long msec = info.received - start;
 
         // Compute color bar size and make sure the bar is visible
         final int percent = Math.max((int)(msec * scale), 2);
 
-        jw.object();
-        jw.key( "id" );
-        jw.value( String.valueOf( index ) );
-        jw.key( "offset" );
-        jw.value( msec );
-        jw.key( "width" );
-        jw.value( percent );
-        jw.key( "category" );
-        jw.value( info.category == null ? "" : info.category );
-        jw.key( "received" );
-        jw.value( info.received );
-        jw.key( "topic" );
-        jw.value( info.topic );
+        jw.write("{");
+        jsonKey(jw, "id" );
+        jsonValue(jw, String.valueOf( index ) );
+        jw.write(',');
+        jsonKey(jw, "offset" );
+        jsonValue(jw, msec );
+        jw.write(',');
+        jsonKey(jw, "width" );
+        jsonValue(jw, percent );
+        jw.write(',');
+        jsonKey(jw, "category" );
+        jsonValue(jw, info.category );
+        jw.write(',');
+        jsonKey(jw, "received" );
+        jsonValue(jw, info.received );
+        jw.write(',');
+        jsonKey(jw, "topic" );
+        jsonValue(jw, info.topic );
         if ( info.info != null )
         {
-            jw.key( "info" );
-            jw.value( info.info );
+            jw.write(',');
+            jsonKey(jw, "info" );
+            jsonValue(jw, info.info );
         }
-        jw.key( "properties" );
-        jw.object();
+        jw.write(',');
+        jsonKey(jw, "properties" );
+        jw.write("{");
         if ( info.properties != null && info.properties.size() > 0 )
         {
             final Iterator i = info.properties.entrySet().iterator();
+            boolean first = true;
             while ( i.hasNext() )
             {
                 final Map.Entry current = (Entry) i.next();
-                jw.key( current.getKey().toString() );
+                if ( !first)
+                {
+                    jw.write(',');
+                }
+                first = false;
+                jsonKey(jw, current.getKey().toString() );
                 final Object value = current.getValue();
                 if ( value.getClass().isArray() )
                 {
@@ -234,17 +312,17 @@ public class PluginServlet extends HttpServlet
                         b.append(arr[m].toString());
                     }
                     b.append(']');
-                    jw.value(b.toString());
+                    jsonValue(jw, b.toString());
                 }
                 else
                 {
-                    jw.value(value.toString());
+                    jsonValue(jw, value.toString());
                 }
             }
         }
-        jw.endObject();
+        jw.write("}");
 
-        jw.endObject();
+        jw.write("}");
     }
 
     public void updateConfiguration( Dictionary dict)
