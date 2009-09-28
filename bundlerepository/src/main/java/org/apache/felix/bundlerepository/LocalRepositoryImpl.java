@@ -291,7 +291,13 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
                 String key = (String) keys.nextElement();
                 if (key.equalsIgnoreCase(Constants.BUNDLE_SYMBOLICNAME))
                 {
-                    put(Resource.SYMBOLIC_NAME, (String) dict.get(key));
+                    String sn = (String) dict.get(key);
+                    sn = sn.trim();
+                    int index = sn.indexOf(";singleton:=true");
+                    if (index != -1) {
+                        sn = sn.substring(0, index);
+                    }
+                    put(Resource.SYMBOLIC_NAME, sn);    
                 }
                 else if (key.equalsIgnoreCase(Constants.BUNDLE_NAME))
                 {
