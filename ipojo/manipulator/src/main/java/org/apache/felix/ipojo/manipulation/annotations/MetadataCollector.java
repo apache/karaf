@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,10 +18,16 @@
  */
 package org.apache.felix.ipojo.manipulation.annotations;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -31,6 +37,10 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
 
 /**
  * Collect metadata from classes by parsing annotation.
@@ -47,7 +57,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
     /**
      * Root element of computed metadata.
      */
-    private Element m_elem = new Element("component", "");
+    private Element m_elem = null;
 
     /**
      * True if the visited class is a component type declaration (i.e. contains the @component annotation).
@@ -66,6 +76,11 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
      * Stored element are added under referred element.
      */
     private Map m_elements = new HashMap();
+
+    /**
+     * XML document parser.
+     */
+    private DocumentBuilder m_builder;
 
     public Element getElem() {
         return m_elem;
@@ -106,14 +121,29 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         // @Component
         if (desc.equals("Lorg/apache/felix/ipojo/annotations/Component;")) {
             // It is a component
+            m_elem =  new Element("component", "");
             m_containsAnnotation = true;
             m_elem.addAttribute(new Attribute("className", m_className.replace('/', '.')));
             return new ComponentVisitor();
         }
 
+        // @Handler
+        if (desc.equals("Lorg/apache/felix/ipojo/annotations/Handler;")) {
+            // It is a handler, change the root element
+            m_elem = new Element("handler", "");
+            m_containsAnnotation = true;
+            m_elem.addAttribute(new Attribute("classname", m_className.replace('/', '.')));
+            return new HandlerVisitor();
+        }
+
         // @Provides
         if (desc.equals("Lorg/apache/felix/ipojo/annotations/Provides;")) {
             return new ProvidesVisitor();
+        }
+
+        // @HandlerDeclaration
+        if (desc.equals("Lorg/apache/felix/ipojo/annotations/HandlerDeclaration;")) {
+            return new HandlerDeclarationVisitor();
         }
 
         if (CustomAnnotationVisitor.isCustomAnnotation(desc)) {
@@ -188,6 +218,32 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
 
     protected Map getElements() {
         return m_elements;
+    }
+
+    /**
+     * Creates a 'fresh' document builder.
+     * @return a new document builder is not already created, else reset
+     * the created one, and return it.
+     */
+    protected DocumentBuilder getFreshDocumentBuilder() {
+        if (m_builder == null) {
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            try {
+                m_builder = factory.newDocumentBuilder();
+            } catch (ParserConfigurationException e) {
+                // TODO GSA is this acceptable to throw a RuntimeException here ?
+                e.printStackTrace();
+            }
+
+            return m_builder;
+        }
+
+        // The builder has to be reseted
+        m_builder.reset();
+
+        return m_builder;
     }
 
     /**
@@ -407,4 +463,115 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             }
         }
     }
+
+    /**
+     * Parses the @Handler annotation.
+     */
+    private class HandlerVisitor extends EmptyVisitor implements AnnotationVisitor {
+
+        /**
+         * Visit @handler annotation attributes.
+         * @param arg0 : annotation attribute name
+         * @param arg1 : annotation attribute value
+         * @see org.objectweb.asm.commons.EmptyVisitor#visit(java.lang.String, java.lang.Object)
+         */
+        public void visit(String arg0, Object arg1) {
+            if (arg0.equals("name")) {
+                m_elem.addAttribute(new Attribute("name", arg1.toString()));
+                return;
+            }
+            if (arg0.equals("namespace")) {
+                m_elem.addAttribute(new Attribute("namespace", arg1.toString()));
+                return;
+            }
+            if (arg0.equals("level")) {
+                m_elem.addAttribute(new Attribute("level", arg1.toString()));
+                return;
+            }
+            if (arg0.equals("architecture")) {
+                m_elem.addAttribute(new Attribute("architecture", arg1.toString()));
+                return;
+            }
+        }
+    }
+
+    /**
+     * Parse the @HandlerDeclaration annotation.
+     */
+    private class HandlerDeclarationVisitor extends EmptyVisitor implements AnnotationVisitor {
+
+        /**
+         * XML accepted by the handler.
+         */
+        private String m_value;
+
+        /**
+         * Parses the value attribute.
+         * @param arg0 'value'
+         * @param arg1 the value
+         * @see org.objectweb.asm.commons.EmptyVisitor#visit(java.lang.String, java.lang.Object)
+         */
+        public void visit(String arg0, Object arg1) {
+            // there is only a 'value' attribute
+            this.m_value = (String) arg1;
+        }
+
+        /**
+         * End of the visit.
+         * Builds the XML document.
+         * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
+         */
+        public void visitEnd() {
+            // The value is an XML document
+            DocumentBuilder builder = getFreshDocumentBuilder();
+            InputStream is = new ByteArrayInputStream(m_value.getBytes());
+            Document document = null;
+            try {
+                document = builder.parse(is);
+                convertDOMElements(m_elem, document.getDocumentElement());
+            } catch (Exception e) {
+                // TODO GSA change this to a logger ?
+                System.err.println("[warning] Cannot convert " + m_value + " to iPOJO Elements.");
+            }
+        }
+
+        /**
+         * Converts recursively the given XML Element into an iPOJO Element.
+         * @param root iPOJO root Element
+         * @param xmlElement DOM Element to be converted
+         */
+        private void convertDOMElements(final Element root,
+                                        final org.w3c.dom.Element xmlElement) {
+
+            // Create an equivalent iPOJO element
+            Element converted = new Element(xmlElement.getLocalName(), xmlElement.getNamespaceURI());
+
+            // Convert attributes if any
+            if (xmlElement.hasAttributes()) {
+                NamedNodeMap attributes = xmlElement.getAttributes();
+                for (int i = 0; i < attributes.getLength(); i++) {
+                    Attr attr = (Attr) attributes.item(i);
+                    converted.addAttribute(new Attribute(attr.getName(),
+                                                         attr.getNamespaceURI(),
+                                                         attr.getValue()));
+                }
+            }
+
+            // Convert child elements if any
+            if (xmlElement.hasChildNodes()) {
+                NodeList childs = xmlElement.getChildNodes();
+                for (int i = 0; i < childs.getLength(); i++) {
+
+                    // Recursive call
+                    convertDOMElements(converted, (org.w3c.dom.Element) childs.item(i));
+                }
+            }
+
+            // Add converted element as a root's child
+            root.addElement(converted);
+        }
+
+
+    }
 }
+

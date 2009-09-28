@@ -24,6 +24,7 @@
             </goals>
             <configuration>
               <hideOutputs>true</hideOutputs>
+              <logService>false</logService>
               <configuration>
               <org.osgi.http.port>8083</org.osgi.http.port>
               </configuration>
@@ -239,12 +240,7 @@
       <scope>test</scope>
     </dependency>
   <!--  Utility bundles -->
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.configadmin</artifactId>
-      <version>1.2.2</version>
-      <scope>test</scope>
-    </dependency>
+   
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.handler.whiteboard</artifactId>
@@ -285,6 +281,12 @@
       <groupId>ipojo.tests</groupId>
       <artifactId>tests.core.configadmin</artifactId>
       <version>${ipojo.version}</version>
+      <scope>test</scope>
+    </dependency>
+     <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configadmin</artifactId>
+      <version>1.2.4</version>
       <scope>test</scope>
     </dependency>
     </dependencies>

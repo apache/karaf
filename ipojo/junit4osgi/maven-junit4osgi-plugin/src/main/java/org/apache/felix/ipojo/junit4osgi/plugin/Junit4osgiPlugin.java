@@ -47,6 +47,7 @@ import org.apache.maven.project.MavenProject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -211,27 +212,29 @@ public class Junit4osgiPlugin extends AbstractMojo {
         felixConf.put("org.osgi.framework.storage.clean", "onFirstInit");
         felixConf.put("ipojo.log.level", "WARNING");
         // Use a boot delagation to share classes between the host and the embedded Felix.
-        // The junit.framework package is boot delegated to execute tests
-        // The log service package is also boot delegated as the host publish a log service
         // The cobertura package is used during code coverage collection
-        felixConf.put("org.osgi.framework.bootdelegation", "junit.framework, org.osgi.service.log, net.sourceforge.cobertura.coveragedata"); 
+        //felixConf.put("org.osgi.framework.bootdelegation", "net.sourceforge.cobertura.coveragedata"); 
+        felixConf.put("org.osgi.framework.system.packages.extra", "org.osgi.service.log;version=1.3, junit.framework;version=1.3");
+
+        //felixConf.put("org.osgi.framework.system.packages.extra", "org.osgi.service.log, junit.framework");
         
         felixConf.put("org.osgi.framework.storage", m_targetDir.getAbsolutePath() + "/felix-cache"); 
         
-        
+        felixConf.put(Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK);
+
         if (configuration != null) {
             felixConf.putAll(configuration);
             // Check boot delegation
-            String bd = (String) felixConf.get("org.osgi.framework.bootdelegation");
-            if (bd.indexOf("junit.framework") == -1) {
-                bd.concat(", junit.framework");
-            }
-            if (bd.indexOf("org.osgi.service.log") == -1) {
-                bd.concat(", org.osgi.service.log");
-            }
-            if (bd.indexOf("net.sourceforge.cobertura.coveragedata") == -1) {
-                bd.concat(", net.sourceforge.cobertura.coveragedata");
-            }
+//            String bd = (String) felixConf.get("org.osgi.framework.bootdelegation");
+////            if (bd.indexOf("junit.framework") == -1) {
+////                bd.concat(", junit.framework");
+////            }
+////            if (bd.indexOf("org.osgi.service.log") == -1) {
+////                bd.concat(", org.osgi.service.log");
+////            }
+//            if (bd.indexOf("net.sourceforge.cobertura.coveragedata") == -1) {
+//                bd.concat(", net.sourceforge.cobertura.coveragedata");
+//            }
         }
         
         System.out.println("");
