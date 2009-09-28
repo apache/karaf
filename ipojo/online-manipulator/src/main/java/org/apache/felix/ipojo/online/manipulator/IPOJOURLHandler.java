@@ -74,8 +74,10 @@ public class IPOJOURLHandler extends org.osgi.service.url.AbstractURLStreamHandl
      */
     public void stop() {
         File[] files = m_temp.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            files[i].delete();
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                files[i].delete();
+            }
         }
         m_temp.delete();
     }
