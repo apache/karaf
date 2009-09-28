@@ -29,7 +29,7 @@
 
     <name>Apache Felix Http Whiteboard</name>
     <artifactId>org.apache.felix.http.whiteboard</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <build>
         <plugins>
@@ -73,14 +73,12 @@
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.api</artifactId>
             <version>${pom.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.base</artifactId>
             <version>${pom.version}</version>
-            <scope>provided</scope>
-        </dependency>        
+        </dependency>
     </dependencies>
 
 </project>

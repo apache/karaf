@@ -48,26 +48,12 @@
                     <execution>
                         <id>copy-bundles</id>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.http.bundle</artifactId>
-                                    <version>${pom.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.http.samples.filter</artifactId>
-                                    <version>${pom.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.webconsole</artifactId>
-                                    <version>1.2.8</version>
-                                </artifactItem>
-                            </artifactItems>
+                            <includeArtifactIds>
+                                org.apache.felix.http.bundle,org.apache.felix.http.samples.filter,org.apache.felix.webconsole
+                            </includeArtifactIds>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>
                                 ${project.build.directory}/bundles
@@ -125,6 +111,24 @@
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.proxy</artifactId>
             <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>org.apache.felix.http.bundle</artifactId>
+            <version>${pom.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>org.apache.felix.http.samples.filter</artifactId>
+            <version>${pom.version}</version>            
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>org.apache.felix.webconsole</artifactId>
+            <version>1.2.8</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

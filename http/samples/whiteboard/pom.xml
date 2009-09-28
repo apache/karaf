@@ -29,7 +29,7 @@
 
     <name>Apache Felix Http Samples - Whiteboard</name>
     <artifactId>org.apache.felix.http.samples.whiteboard</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <build>
         <plugins>

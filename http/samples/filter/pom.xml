@@ -29,7 +29,7 @@
 
     <name>Apache Felix Http Samples - Filter</name>
     <artifactId>org.apache.felix.http.samples.filter</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <build>
         <plugins>
@@ -81,7 +81,6 @@
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.api</artifactId>
             <version>${pom.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 

@@ -29,7 +29,7 @@
 
     <name>Apache Felix Http Jetty</name>
     <artifactId>org.apache.felix.http.jetty</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <build>
         <plugins>
@@ -94,13 +94,11 @@
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.api</artifactId>
             <version>${pom.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.base</artifactId>
             <version>${pom.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 

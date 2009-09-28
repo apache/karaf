@@ -28,11 +28,16 @@
         <relativePath>../pom/pom.xml</relativePath>
     </parent>
 
+    <groupId>org.apache.felix</groupId>
     <artifactId>org.apache.felix.http</artifactId>
     <packaging>pom</packaging>
     <name>Apache Felix Http</name>
     <version>2.0.0-SNAPSHOT</version>
 
+    <prerequisites>
+        <maven>2.0.7</maven>
+    </prerequisites>
+�
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -47,19 +52,31 @@
                         <compilerVersion>1.5</compilerVersion>
                     </configuration>
                 </plugin>
+            </plugins>
+        <pluginManagement>
+            <plugins>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.0.0</version>
-                    <extensions>true</extensions>
+                    <version>2.0.1</version>
+                    <executions>
+                      <execution>
+                        <id>bundle</id>
+                        <phase>package</phase>
+                        <goals>
+                          <goal>bundle</goal>
+                        </goals>
+                      </execution>
+                    </executions>
                     <configuration>
                         <instructions>
                             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                             <Bundle-Version>${pom.version}</Bundle-Version>
-                        </instructions>
+                        </instructions>                        
                     </configuration>
                 </plugin>
             </plugins>
+        </pluginManagement>
     </build>
 
     <modules>
@@ -118,6 +135,48 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <!--dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>org.apache.felix.http.api</artifactId>
+                <version>${pom.version}</version>
+                <type>bundle</type>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>org.apache.felix.http.base</artifactId>
+                <version>${pom.version}</version>
+                <type>bundle</type>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>org.apache.felix.http.bridge</artifactId>
+                <version>${pom.version}</version>
+                <type>bundle</type>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>org.apache.felix.http.jetty</artifactId>
+                <version>${pom.version}</version>
+                <type>bundle</type>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>org.apache.felix.http.proxy</artifactId>
+                <version>${pom.version}</version>
+                <type>bundle</type>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>org.apache.felix.http.whiteboard</artifactId>
+                <version>${pom.version}</version>
+                <type>bundle</type>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>org.apache.felix.http.bundle</artifactId>
+                <version>${pom.version}</version>
+                <type>bundle</type>
+            </dependency-->
         </dependencies>
     </dependencyManagement>
     

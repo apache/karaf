@@ -29,7 +29,7 @@
 
     <name>Apache Felix Http Bridge</name>
     <artifactId>org.apache.felix.http.bridge</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <build>
         <plugins>
@@ -74,13 +74,11 @@
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.api</artifactId>
             <version>${pom.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.base</artifactId>
             <version>${pom.version}</version>
-            <!-- TEMP FIX <scope>provided</scope>-->
         </dependency>
     </dependencies>
 
