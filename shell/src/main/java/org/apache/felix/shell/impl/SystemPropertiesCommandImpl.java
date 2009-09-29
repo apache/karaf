@@ -29,6 +29,7 @@ import org.apache.felix.shell.Command;
  * Usage:
  * sysprop                 -> displays all the system properties
  * sysprop [key]           -> displays the [key] property 
+ * sysprop -r [key]        -> removes the [key] property
  * sysprop [key] [value]   -> set the property [key] to [value]
  */
 public class SystemPropertiesCommandImpl implements Command
@@ -45,17 +46,22 @@ public class SystemPropertiesCommandImpl implements Command
         else
         {
             st.nextToken();
-            String propertyKey = st.nextToken();
+            String secondArgument = st.nextToken();
 
             if (tokens == 2)
             {
-                out.println(propertyKey + "=" + System.getProperty(propertyKey));
+                out.println(secondArgument + "=" + System.getProperty(secondArgument));
             }
-            else
+            else if (tokens == 3)
             {
-                String value = st.nextToken();
-                System.setProperty(propertyKey, value);
-                out.println("Set " + propertyKey + "=" + value);
+                if ("-r".equals(secondArgument))
+                    removeProperty(st.nextToken());
+                else
+                {
+                    String value = st.nextToken();
+                    System.setProperty(secondArgument, value);
+                    out.println("Set " + secondArgument + "=" + value);
+                }
             }
         }
     }
@@ -70,6 +76,11 @@ public class SystemPropertiesCommandImpl implements Command
         }
     }
 
+    private void removeProperty(String key)
+    {
+        System.getProperties().remove(key);
+    }
+
     public String getName()
     {
         return "sysprop";
@@ -77,11 +88,11 @@ public class SystemPropertiesCommandImpl implements Command
 
     public String getShortDescription()
     {
-        return "Display, set and modify system properties";
+        return "Display, set, modify and remove system properties";
     }
 
     public String getUsage()
     {
-        return "sysprop [<key>] [<value>]";
+        return "sysprop [-r] [<key>] [<value>]";
     }
 }
