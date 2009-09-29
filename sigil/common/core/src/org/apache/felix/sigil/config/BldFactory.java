@@ -19,7 +19,6 @@
 
 package org.apache.felix.sigil.config;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -27,29 +26,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-
 public class BldFactory
 {
     private static Map<URI, BldProject> projects = new HashMap<URI, BldProject>();
 
-
-    public static IBldProject getProject( URI uri ) throws IOException
+    public static IBldProject getProject(URI uri) throws IOException
     {
-        return getProject( uri, false );
+        return load(uri, false, null);
     }
 
-
-    public static IBldProject getProject( URI uri, boolean ignoreCache ) throws IOException
+    public static IBldProject getProject(URI uri, Properties overrides) throws IOException
     {
-        return load( uri, ignoreCache );
+        return load(uri, false, overrides);
     }
 
-
-    public static IRepositoryConfig getConfig( URI uri ) throws IOException
+    public static IBldProject getProject(URI uri, boolean ignoreCache) throws IOException
     {
-        return load( uri, false );
+        return load(uri, ignoreCache, null);
     }
 
+    public static IRepositoryConfig getConfig(URI uri) throws IOException
+    {
+        return load(uri, false, null);
+    }
 
     /**
      * creates a new project file, initialised with defaults.
@@ -58,36 +57,35 @@ public class BldFactory
      * @return
      * @throws IOException
      */
-    public static IBldProject newProject( URI uri, String defaults ) throws IOException
+    public static IBldProject newProject(URI uri, String defaults) throws IOException
     {
-        BldProject project = new BldProject( uri );
+        BldProject project = new BldProject(uri, null);
         Properties p = new Properties();
-        if ( defaults != null )
-            p.setProperty( BldConfig.S_DEFAULTS, defaults );
-        project.loadDefaults( p );
+        if (defaults != null)
+            p.setProperty(BldConfig.S_DEFAULTS, defaults);
+        project.loadDefaults(p);
         return project;
     }
 
-
-    private static BldProject load( URI uri, boolean ignoreCache ) throws IOException
+    private static BldProject load(URI uri, boolean ignoreCache, Properties overrides) throws IOException
     {
         BldProject p = null;
-        if ( !ignoreCache )
+        if (!ignoreCache)
         {
-            p = projects.get( uri );
+            p = projects.get(uri);
         }
 
-        if ( p == null )
+        if (p == null)
         {
-            p = new BldProject( uri );
+            p = new BldProject(uri, overrides);
             p.load();
-            projects.put( uri, p );
+            projects.put(uri, p);
 
-            if ( Boolean.getBoolean( "org.apache.felix.sigil.config.test" ) )
+            if (Boolean.getBoolean("org.apache.felix.sigil.config.test"))
             {
-                File path = new File( uri.getPath() + ".tmp" );
-                System.out.println( "XXX: config.test writing: " + path );
-                p.saveAs( path );
+                File path = new File(uri.getPath() + ".tmp");
+                System.out.println("XXX: config.test writing: " + path);
+                p.saveAs(path);
             }
         }
         return p;

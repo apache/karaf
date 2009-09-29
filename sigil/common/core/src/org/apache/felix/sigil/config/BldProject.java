@@ -61,8 +61,9 @@ public class BldProject implements IBldProject, IRepositoryConfig
     private static final int MAX_HEADER = 10240;
     // cache to avoid loading the same default config for each project
     private static Map<URL, BldConfig> defaultsCache = new HashMap<URL, BldConfig>();
-    private static Properties overrides;
+    private static Properties sysOverrides;
 
+    private Properties bldOverrides;
     private List<String> sourcePkgs;
     private BldConfig config;
     private BldConverter convert;
@@ -73,7 +74,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
     private TreeSet<String> packageWildDefaults;
     private long lastModified;
 
-    /* package */BldProject(URI relLoc)
+    /* package */BldProject(URI relLoc, Properties overrides)
     {
         config = new BldConfig();
         convert = new BldConverter(config);
@@ -81,6 +82,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
         File f = new File(loc);
         lastModified = f.lastModified();
         baseDir = f.getParentFile();
+        bldOverrides = overrides;
     }
 
     /* package */void load() throws IOException
@@ -158,7 +160,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
 
         if (defaults != null)
         {
-            defaults = BldUtil.expand(defaults, new BldProperties(base));
+            defaults = BldUtil.expand(defaults, new BldProperties(base, bldOverrides));
         }
         else
         {
@@ -176,7 +178,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
             {
                 File file = new File(base, defaults).getCanonicalFile();
                 URL url = file.toURL();
-                BldProperties bp = new BldProperties(file.getParentFile());
+                BldProperties bp = new BldProperties(file.getParentFile(), bldOverrides);
 
                 if (dflt == null)
                 {
@@ -230,9 +232,9 @@ public class BldProject implements IBldProject, IRepositoryConfig
 
     private static Properties getOverrides()
     {
-        if (overrides == null)
+        if (sysOverrides == null)
         {
-            overrides = new Properties();
+            sysOverrides = new Properties();
             Properties sysProps = System.getProperties();
 
             for (Object okey : sysProps.keySet())
@@ -240,13 +242,13 @@ public class BldProject implements IBldProject, IRepositoryConfig
                 String key = (String) okey;
                 if (key.startsWith(OVERRIDE_PREFIX))
                 {
-                    overrides.setProperty(key.substring(OVERRIDE_PREFIX.length()),
+                    sysOverrides.setProperty(key.substring(OVERRIDE_PREFIX.length()),
                         sysProps.getProperty(key));
                 }
             }
         }
 
-        return overrides;
+        return sysOverrides;
     }
 
     private void readHeader(InputStream in) throws IOException
@@ -621,7 +623,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
     public Map<String, Properties> getRepositoryConfig()
     {
         HashMap<String, Properties> map = new HashMap<String, Properties>();
-        BldProperties bp = new BldProperties(baseDir);
+        BldProperties bp = new BldProperties(baseDir, bldOverrides);
 
         for (String name : config.getList(null, BldConfig.C_REPOSITORIES))
         {

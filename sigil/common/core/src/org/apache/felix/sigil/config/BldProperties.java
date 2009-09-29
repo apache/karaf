@@ -26,7 +26,7 @@ import java.util.Properties;
 public class BldProperties extends Properties
 {
     private static final long serialVersionUID = 1L;
-    private static final BldProperties global = new BldProperties(null);
+    private static final BldProperties global = new BldProperties(null, null);
     private static final Properties sysEnv;
 
     static
@@ -40,9 +40,14 @@ public class BldProperties extends Properties
 
     private final Properties mySysEnv;
     
-    BldProperties(File baseDir)
+    BldProperties(File baseDir, Properties overrides)
     {
         mySysEnv = new Properties(sysEnv);
+        
+        if (overrides != null)
+        {
+            mySysEnv.putAll(overrides);
+        }
         
         try
         {
