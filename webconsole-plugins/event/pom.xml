@@ -28,7 +28,7 @@
 
     <artifactId>org.apache.felix.webconsole.plugins.event</artifactId>
     <packaging>bundle</packaging>
-    <version>0.9.0</version>
+    <version>0.9.1-SNAPSHOT</version>
 
     <name>Apache Felix Web Console Event Plugin</name>
     <description>
@@ -37,9 +37,9 @@
     </description>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/felix/releases/org.apache.felix.webconsole.plugins.event-0.9.0</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.webconsole.plugins.event-0.9.0</developerConnection>
-        <url>http://svn.apache.org/viewvc/felix/releases/org.apache.felix.webconsole.plugins.event-0.9.0</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/webconsole-plugins/event</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/webconsole-plugins/event</developerConnection>
+        <url>http://svn.apache.org/viewvc/felix/trunk/webconsole-plugins/event</url>
     </scm>
 
     <build>
