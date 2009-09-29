@@ -34,6 +34,8 @@ import org.apache.felix.shell.Command;
  */
 public class SystemPropertiesCommandImpl implements Command
 {
+    private static final String REMOVE_PROP_SWITCH = "-r";
+
     public void execute(String line, PrintStream out, PrintStream err)
     {
         StringTokenizer st = new StringTokenizer(line);
@@ -54,8 +56,10 @@ public class SystemPropertiesCommandImpl implements Command
             }
             else if (tokens == 3)
             {
-                if ("-r".equals(secondArgument))
+                if (REMOVE_PROP_SWITCH.equals(secondArgument))
+                {
                     removeProperty(st.nextToken());
+                }
                 else
                 {
                     String value = st.nextToken();
