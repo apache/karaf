@@ -22,8 +22,8 @@ package org.apache.felix.sigil.ivy;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.TreeSet;
 
 public class FindUtil
 {
@@ -48,7 +48,7 @@ public class FindUtil
 
         String[] patterns = regex.split("/");
 
-        ArrayList<File> list = new ArrayList<File>();
+        TreeSet<File> list = new TreeSet<File>();
         File root = new File(slash == -1 ? "." : pattern.substring(0, slash));
 
         if (root.isDirectory())
