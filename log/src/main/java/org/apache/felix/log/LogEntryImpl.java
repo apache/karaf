@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -35,23 +35,18 @@ import org.osgi.service.log.LogEntry;
  * @see org.osgi.service.log.LogReaderService#getLog()
  * @see org.osgi.service.log.LogListener
  */
-final class LogEntryImpl implements LogEntry {
-
+final class LogEntryImpl implements LogEntry
+{
     /** The bundle that created the LogEntry object. */
     private final Bundle m_bundle;
-
     /** The exception associated with this LogEntry object. */
     private final Throwable m_exception;
-
     /** The severity level of this LogEntry object. */
     private final int m_level;
-
     /** The message associated with this LogEntry object. */
     private final String m_message;
-
     /** The service reference associated with this LogEntry object. */
     private final ServiceReference m_serviceReference;
-
     /** The system time in milliseconds when this LogEntry object was created. */
     private final long m_time;
 
@@ -64,10 +59,11 @@ final class LogEntryImpl implements LogEntry {
      * @param exception the exception to associate with this LogEntry object
      */
     LogEntryImpl(final Bundle bundle,
-            final ServiceReference sr,
-            final int level,
-            final String message,
-            final Throwable exception) {
+        final ServiceReference sr,
+        final int level,
+        final String message,
+        final Throwable exception)
+    {
         this.m_bundle = bundle;
         this.m_exception = LogException.getException(exception);
         this.m_level = level;
@@ -81,7 +77,8 @@ final class LogEntryImpl implements LogEntry {
      * @return the bundle that created this LogEntry object;<code>null</code> if no
      * bundle is associated with this LogEntry object
      */
-    public Bundle getBundle() {
+    public Bundle getBundle()
+    {
         return m_bundle;
     }
 
@@ -92,7 +89,8 @@ final class LogEntryImpl implements LogEntry {
      * this LogEntry object; <code>null</code> if no {@link ServiceReference} object
      * was provided
      */
-    public ServiceReference getServiceReference() {
+    public ServiceReference getServiceReference()
+    {
         return m_serviceReference;
     }
 
@@ -107,7 +105,8 @@ final class LogEntryImpl implements LogEntry {
      * @see org.osgi.service.LogService#LOG_INFO
      * @see org.osgi.service.LogService#LOG_DEBUG
      */
-    public int getLevel() {
+    public int getLevel()
+    {
         return m_level;
     }
 
@@ -115,7 +114,8 @@ final class LogEntryImpl implements LogEntry {
      * Returns the human readable message associated with this LogEntry object.
      * @return a string containing the message associated with this LogEntry object
      */
-    public String getMessage() {
+    public String getMessage()
+    {
         return m_message;
     }
 
@@ -132,7 +132,8 @@ final class LogEntryImpl implements LogEntry {
      * @return throwable object of the exception associated with this LogEntry;
      * <code>null</code> if no exception is associated with this LogEntry object
      */
-    public Throwable getException() {
+    public Throwable getException()
+    {
         return m_exception;
     }
 
@@ -142,7 +143,8 @@ final class LogEntryImpl implements LogEntry {
      * @return the system time in milliseconds when this LogEntry object was created
      * @see System#currentTimeMillis()
      */
-    public long getTime() {
+    public long getTime()
+    {
         return m_time;
     }
 }

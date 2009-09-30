@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -26,10 +26,10 @@ import org.osgi.service.log.LogEntry;
  * Implementation of the {@link Enumeration} interface for a linked list of
  * {@link LogNode} entries.
  */
-final class LogNodeEnumeration implements Enumeration {
+final class LogNodeEnumeration implements Enumeration
+{
     /** The next node. */
     private LogNode m_next;
-
     /** The last node. */
     private final LogNode m_last;
 
@@ -38,7 +38,8 @@ final class LogNodeEnumeration implements Enumeration {
      * @param start the first node to return
      * @param end the last node to return
      */
-    LogNodeEnumeration(final LogNode start, final LogNode end) {
+    LogNodeEnumeration(final LogNode start, final LogNode end)
+    {
         m_next = start;
         m_last = end;
     }
@@ -47,7 +48,8 @@ final class LogNodeEnumeration implements Enumeration {
      * Determines whether there are any more elements to return.
      * @return <code>true</code> if there are more elements; <code>false</code> otherwise
      */
-    public boolean hasMoreElements() {
+    public boolean hasMoreElements()
+    {
         return m_next != null;
     }
 
@@ -55,13 +57,17 @@ final class LogNodeEnumeration implements Enumeration {
      * Returns the current element and moves onto the next element.
      * @return the current element
      */
-    public Object nextElement() {
+    public Object nextElement()
+    {
         LogEntry result = null;
 
-        if (m_next == m_last) {
+        if (m_next == m_last)
+        {
             result = m_next.getEntry();
             m_next = null;
-        } else if (m_next != null) {
+        }
+        else if (m_next != null)
+        {
             result = m_next.getEntry();
             m_next = m_next.getNextNode();
         }

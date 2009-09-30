@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -32,14 +32,12 @@ import org.osgi.service.log.LogListener;
  * {@link org.osgi.service.log.LogReaderService#addLogListener(LogListener)}
  * method.
  */
-final class LogListenerThread extends Thread {
-
+final class LogListenerThread extends Thread
+{
     /** Whether the thread is stopping or not. */
     private boolean m_stopping = false;
-
     /** The stack of entries waiting to be delivered to the log listeners. **/
     private final Stack m_entriesToDeliver = new Stack();
-
     /** The list of listeners. */
     private final List m_listeners = new Vector();
 
@@ -47,8 +45,10 @@ final class LogListenerThread extends Thread {
      * Add an entry to the list of messages to deliver.
      * @param entry the log entry to deliver
      */
-    void addEntry(final LogEntry entry) {
-        synchronized (m_entriesToDeliver) {
+    void addEntry(final LogEntry entry)
+    {
+        synchronized (m_entriesToDeliver)
+        {
             m_entriesToDeliver.add(entry);
             m_entriesToDeliver.notifyAll();
         }
@@ -58,8 +58,10 @@ final class LogListenerThread extends Thread {
      * Add a listener to the list of listeners that are subscribed.
      * @param listener the listener to add to the list of subscribed listeners
      */
-    void addListener(final LogListener listener) {
-        synchronized (m_listeners) {
+    void addListener(final LogListener listener)
+    {
+        synchronized (m_listeners)
+        {
             m_listeners.add(listener);
         }
     }
@@ -68,8 +70,10 @@ final class LogListenerThread extends Thread {
      * Remove a listener from the list of listeners that are subscribed.
      * @param listener the listener to remove from the list of subscribed listeners
      */
-    void removeListener(final LogListener listener) {
-        synchronized (m_listeners) {
+    void removeListener(final LogListener listener)
+    {
+        synchronized (m_listeners)
+        {
             m_listeners.remove(listener);
         }
     }
@@ -78,17 +82,20 @@ final class LogListenerThread extends Thread {
      * Returns the number of listeners that are currently registered.
      * @return the number of listeners that are currently registered
      */
-    int getListenerCount() {
+    int getListenerCount()
+    {
         return m_listeners.size();
     }
 
     /**
      * Stop the thread.  This will happen asynchronously.
      */
-    void shutdown() {
+    void shutdown()
+    {
         m_stopping = true;
 
-        synchronized (m_entriesToDeliver) {
+        synchronized (m_entriesToDeliver)
+        {
             m_entriesToDeliver.notifyAll();
         }
     }
@@ -97,37 +104,51 @@ final class LogListenerThread extends Thread {
      * The main method of the thread: waits for new messages to be receieved
      * and then delivers them to any registered log listeners.
      */
-    public void run() {
+    public void run()
+    {
         boolean stop = false;
 
-        for (; !stop;) {
-            synchronized (m_entriesToDeliver) {
-                if (!m_entriesToDeliver.isEmpty()) {
+        for (; !stop;)
+        {
+            synchronized (m_entriesToDeliver)
+            {
+                if (!m_entriesToDeliver.isEmpty())
+                {
                     LogEntry entry = (LogEntry) m_entriesToDeliver.pop();
 
-                    synchronized (m_listeners) {
+                    synchronized (m_listeners)
+                    {
                         Iterator listenerIt = m_listeners.iterator();
-                        while (listenerIt.hasNext()) {
-                            try {
+                        while (listenerIt.hasNext())
+                        {
+                            try
+                            {
                                 LogListener listener = (LogListener) listenerIt.next();
                                 listener.logged(entry);
-                            } catch (Throwable t) {
+                            }
+                            catch (Throwable t)
+                            {
                                 // catch and discard any exceptions thrown by the listener
                             }
                         }
                     }
                 }
 
-                if (m_entriesToDeliver.isEmpty()) {
-                    try {
+                if (m_entriesToDeliver.isEmpty())
+                {
+                    try
+                    {
                         m_entriesToDeliver.wait();
-                    } catch (InterruptedException e) {
+                    }
+                    catch (InterruptedException e)
+                    {
                         // do nothing
                     }
                 }
             }
 
-            if (m_stopping) {
+            if (m_stopping)
+            {
                 stop = true;
             }
         }

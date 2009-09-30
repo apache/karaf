@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -26,7 +26,8 @@ import org.osgi.framework.ServiceRegistration;
  * {@link ServiceFactory} implementation for {@link LogService}.  Associates
  * an individual {@link LogService} with a {@link Bundle}.
  */
-final class LogServiceFactory implements ServiceFactory {
+final class LogServiceFactory implements ServiceFactory
+{
     /** The log to associate the service implementations with. */
     private final Log m_log;
 
@@ -34,7 +35,8 @@ final class LogServiceFactory implements ServiceFactory {
      * Create a new instance.
      * @param log the log to associate the service implementations with.,
      */
-    LogServiceFactory(final Log log) {
+    LogServiceFactory(final Log log)
+    {
         m_log = log;
     }
 
@@ -45,7 +47,8 @@ final class LogServiceFactory implements ServiceFactory {
      * @return the log service implementation for the specified bundle
      */
     public Object getService(final Bundle bundle,
-            final ServiceRegistration registration) {
+        final ServiceRegistration registration)
+    {
         return new LogServiceImpl(m_log, bundle);
     }
 
@@ -57,8 +60,9 @@ final class LogServiceFactory implements ServiceFactory {
      * @param service the service to release
      */
     public void ungetService(final Bundle bundle,
-            final ServiceRegistration registration,
-            final Object service) {
+        final ServiceRegistration registration,
+        final Object service)
+    {
         // do nothing
     }
 }

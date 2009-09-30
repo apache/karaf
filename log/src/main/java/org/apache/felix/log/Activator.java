@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -45,19 +45,16 @@ import org.osgi.service.log.LogService;
  *       the historic log information. The default value is false.</dd>
  * </dl>
  */
-public final class Activator implements BundleActivator {
+public final class Activator implements BundleActivator
+{
     /** The name of the property that defines the maximum size of the log. */
     private static final String MAX_SIZE_PROPERTY = "org.apache.felix.log.maxSize";
-
     /** The default value for the maximum size property. */
     private static final int DEFAULT_MAX_SIZE = 100;
-
     /** The name of the property that defines whether debug messages are stored. */
     private static final String STORE_DEBUG_PROPERTY = "org.apache.felix.log.storeDebug";
-
     /** The default value for the store debug property. */
     private static final boolean DEFAULT_STORE_DEBUG = false;
-
     /** The log. */
     private Log m_log;
 
@@ -66,14 +63,19 @@ public final class Activator implements BundleActivator {
      * @param context the bundle context (used to look up a property)
      * @return the maximum size for the log
      */
-    private static int getMaxSize(final BundleContext context) {
+    private static int getMaxSize(final BundleContext context)
+    {
         int maxSize = DEFAULT_MAX_SIZE;
 
         String maxSizePropValue = context.getProperty(MAX_SIZE_PROPERTY);
-        if (maxSizePropValue != null) {
-            try {
+        if (maxSizePropValue != null)
+        {
+            try
+            {
                 maxSize = Integer.parseInt(maxSizePropValue);
-            } catch (NumberFormatException e) {
+            }
+            catch (NumberFormatException e)
+            {
                 // the property value is invalid - ignore
             }
         }
@@ -86,11 +88,13 @@ public final class Activator implements BundleActivator {
      * @param context the bundle context (used to look up a property)
      * @return whether or not to store debug messages
      */
-    private static boolean getStoreDebug(final BundleContext context) {
+    private static boolean getStoreDebug(final BundleContext context)
+    {
         boolean storeDebug = DEFAULT_STORE_DEBUG;
 
         String storeDebugPropValue = context.getProperty(STORE_DEBUG_PROPERTY);
-        if (storeDebugPropValue != null) {
+        if (storeDebugPropValue != null)
+        {
             storeDebug = Boolean.valueOf(storeDebugPropValue).booleanValue();
         }
 
@@ -103,7 +107,8 @@ public final class Activator implements BundleActivator {
      * @param context the bundle context
      * @throws Exception if an error occurs
      */
-    public void start(final BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception
+    {
         // create the log instance
         m_log = new Log(getMaxSize(context), getStoreDebug(context));
 
@@ -114,10 +119,10 @@ public final class Activator implements BundleActivator {
 
         // register the services with the framework
         context.registerService(LogService.class.getName(),
-                new LogServiceFactory(m_log), null);
+            new LogServiceFactory(m_log), null);
 
         context.registerService(LogReaderService.class.getName(),
-                new LogReaderServiceFactory(m_log), null);
+            new LogReaderServiceFactory(m_log), null);
     }
 
     /**
@@ -125,7 +130,8 @@ public final class Activator implements BundleActivator {
      * @param context the bundle context
      * @throws Exception if an error occurs
      */
-    public void stop(final BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception
+    {
         // close the log
         m_log.close();
     }

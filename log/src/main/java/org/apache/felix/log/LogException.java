@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -26,13 +26,12 @@ package org.apache.felix.log;
  * class name) and the stack trace of both the exception thrown and any
  * embedded exceptions.
  */
-final class LogException extends Exception {
+final class LogException extends Exception
+{
     /** The class name of the original exception. */
     private final String m_className;
-
     /** The message from the original exception. */
     private final String m_message;
-
     /** The localized message from the original exception. */
     private final String m_localizedMessage;
 
@@ -40,14 +39,16 @@ final class LogException extends Exception {
      * Create a new instance.
      * @param exception the original exception.
      */
-    private LogException(final Throwable exception) {
+    private LogException(final Throwable exception)
+    {
         m_className = exception.getClass().getName();
         m_message = exception.getMessage();
         m_localizedMessage = exception.getLocalizedMessage();
         setStackTrace(exception.getStackTrace());
 
         Throwable cause = exception.getCause();
-        if (cause != null) {
+        if (cause != null)
+        {
             cause = getException(cause);
             initCause(cause);
         }
@@ -59,7 +60,8 @@ final class LogException extends Exception {
      * message of the original exception.
      * @return the message associated with the exception
      */
-    public String getMessage() {
+    public String getMessage()
+    {
         return m_className + ": " + m_message;
     }
 
@@ -69,7 +71,8 @@ final class LogException extends Exception {
      * followed by the localized message of the original exception.
      * @return the localized message associated with the exception
      */
-    public String getLocalizedMessage() {
+    public String getLocalizedMessage()
+    {
         return m_className + ": " + m_localizedMessage;
     }
 
@@ -81,15 +84,19 @@ final class LogException extends Exception {
      * @param exception the exception that was originally thrown.
      * @return the exception to store in the {@link LogEntry}
      */
-    static Throwable getException(final Throwable exception) {
+    static Throwable getException(final Throwable exception)
+    {
         Throwable result = null;
 
-        if (exception != null) {
+        if (exception != null)
+        {
             String className = exception.getClass().getName();
-            if (exception.getCause() == null
-                    && className.startsWith(JAVA_PACKAGE_PREFIX)) {
+            if (exception.getCause() == null && className.startsWith(JAVA_PACKAGE_PREFIX))
+            {
                 result = exception;
-            } else {
+            }
+            else
+            {
                 result = new LogException(exception);
             }
         }

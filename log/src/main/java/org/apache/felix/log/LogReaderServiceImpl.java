@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -36,11 +36,10 @@ import org.osgi.service.log.LogReaderService;
  * notifications about {@link org.osgi.service.log.LogEntry} objects when they are created
  * through the {@link org.osgi.service.log.LogService}.
  */
-final class LogReaderServiceImpl implements LogReaderService {
-
+final class LogReaderServiceImpl implements LogReaderService
+{
     /** The log implementation. */
     private final Log m_log;
-
     /** The listeners associated with this service. */
     private final List m_listeners = new Vector();
 
@@ -48,7 +47,8 @@ final class LogReaderServiceImpl implements LogReaderService {
      * Create a new instance.
      * @param log the log implementation
      */
-    LogReaderServiceImpl(final Log log) {
+    LogReaderServiceImpl(final Log log)
+    {
         this.m_log = log;
     }
 
@@ -66,7 +66,8 @@ final class LogReaderServiceImpl implements LogReaderService {
      * object for the message each time a message is logged.
      * @param listener the listener object to subscribe
      */
-    public synchronized void addLogListener(final LogListener listener) {
+    public synchronized void addLogListener(final LogListener listener)
+    {
         m_listeners.add(listener);
         m_log.addListener(listener);
     }
@@ -75,7 +76,8 @@ final class LogReaderServiceImpl implements LogReaderService {
      * This method is used to unsubscribe from the Log Reader Service.
      * @param listener the listener object to unsubscribe
      */
-    public synchronized void removeLogListener(final LogListener listener) {
+    public synchronized void removeLogListener(final LogListener listener)
+    {
         m_listeners.remove(listener);
         m_log.removeListener(listener);
     }
@@ -85,16 +87,19 @@ final class LogReaderServiceImpl implements LogReaderService {
      * entry first.
      * @return an enumeration of the {@link LogEntry} objects that have been stored
      */
-    public Enumeration getLog() {
+    public Enumeration getLog()
+    {
         return m_log.getEntries();
     }
 
     /**
      * Remove all log listeners registered through this service.
      */
-    synchronized void removeAllLogListeners() {
+    synchronized void removeAllLogListeners()
+    {
         Iterator listenerIt = m_listeners.iterator();
-        while (listenerIt.hasNext()) {
+        while (listenerIt.hasNext())
+        {
             LogListener listener = (LogListener) listenerIt.next();
             m_log.removeListener(listener);
         }

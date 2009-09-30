@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -25,11 +25,10 @@ import org.osgi.service.log.LogService;
 /**
  * Implementation of the OSGi {@link LogService}.
  */
-final class LogServiceImpl implements LogService {
-
+final class LogServiceImpl implements LogService
+{
     /** The log implementation. */
     private final Log m_log;
-
     /** The bundle associated with this implementation. */
     private final Bundle m_bundle;
 
@@ -38,7 +37,8 @@ final class LogServiceImpl implements LogService {
      * @param log the log implementation
      * @param bundle the bundle associated with this implementation
      */
-    LogServiceImpl(final Log log, final Bundle bundle) {
+    LogServiceImpl(final Log log, final Bundle bundle)
+    {
         this.m_log = log;
         this.m_bundle = bundle;
     }
@@ -48,7 +48,8 @@ final class LogServiceImpl implements LogService {
      * @param level the level to log the message at
      * @param message the message to log
      */
-    public void log(final int level, final String message) {
+    public void log(final int level, final String message)
+    {
         log(null, level, message, null);
     }
 
@@ -60,8 +61,9 @@ final class LogServiceImpl implements LogService {
      * @param exception the exception to log
      */
     public void log(final int level,
-            final String message,
-            final Throwable exception) {
+        final String message,
+        final Throwable exception)
+    {
         log(null, level, message, exception);
     }
 
@@ -73,8 +75,9 @@ final class LogServiceImpl implements LogService {
      * @param message the message to log
      */
     public void log(final ServiceReference sr,
-            final int level,
-            final String message) {
+        final int level,
+        final String message)
+    {
         log(sr, level, message, null);
     }
 
@@ -87,13 +90,14 @@ final class LogServiceImpl implements LogService {
      * @param exception the exception to log
      */
     public void log(final ServiceReference sr,
-            final int level,
-            final String message,
-            final Throwable exception) {
+        final int level,
+        final String message,
+        final Throwable exception)
+    {
         m_log.addEntry(new LogEntryImpl((sr != null) ? sr.getBundle() : m_bundle,
-                sr,
-                level,
-                message,
-                exception));
+            sr,
+            level,
+            message,
+            exception));
     }
 }

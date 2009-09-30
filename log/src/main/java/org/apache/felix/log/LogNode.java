@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,13 +23,12 @@ import org.osgi.service.log.LogEntry;
 /**
  * The class used as a doubly linked list node in the log.
  */
-final class LogNode {
+final class LogNode
+{
     /** The previous node. */
     private LogNode m_previous;
-
     /** The next node. */
     private LogNode m_next;
-
     /** The log entry. */
     private final LogEntry m_entry;
 
@@ -37,7 +36,8 @@ final class LogNode {
      * Create a new instance.
      * @param entry the log entry.
      */
-    LogNode(final LogEntry entry) {
+    LogNode(final LogEntry entry)
+    {
         m_entry = entry;
     }
 
@@ -45,7 +45,8 @@ final class LogNode {
      * Returns the associated entry.
      * @return the associated entry
      */
-    LogEntry getEntry() {
+    LogEntry getEntry()
+    {
         return m_entry;
     }
 
@@ -53,7 +54,8 @@ final class LogNode {
      * Get the next node.
      * @return the next node
      */
-    LogNode getNextNode() {
+    LogNode getNextNode()
+    {
         return m_next;
     }
 
@@ -61,7 +63,8 @@ final class LogNode {
      * Set the next node.
      * @param next the next node
      */
-    void setNextNode(final LogNode next) {
+    void setNextNode(final LogNode next)
+    {
         m_next = next;
     }
 
@@ -69,7 +72,8 @@ final class LogNode {
      * Get the previous node.
      * @return the previous node
      */
-    LogNode getPreviousNode() {
+    LogNode getPreviousNode()
+    {
         return m_previous;
     }
 
@@ -77,7 +81,8 @@ final class LogNode {
      * Set the previous node.
      * @param previous the previous node
      */
-    void setPreviousNode(final LogNode previous) {
+    void setPreviousNode(final LogNode previous)
+    {
         m_previous = previous;
     }
 }

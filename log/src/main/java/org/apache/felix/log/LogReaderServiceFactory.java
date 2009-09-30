@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -26,7 +26,8 @@ import org.osgi.framework.ServiceRegistration;
  * {@link ServiceFactory} implementation for {@link LogReaderService}.  Associates
  * an individual {@link LogReaderService} with a {@link Bundle}.
  */
-final class LogReaderServiceFactory implements ServiceFactory {
+final class LogReaderServiceFactory implements ServiceFactory
+{
     /** The log to associate the service implementations with. */
     private final Log m_log;
 
@@ -34,7 +35,8 @@ final class LogReaderServiceFactory implements ServiceFactory {
      * Create a new instance.
      * @param log the log to associate the service implementations with.,
      */
-    LogReaderServiceFactory(final Log log) {
+    LogReaderServiceFactory(final Log log)
+    {
         m_log = log;
     }
 
@@ -45,7 +47,8 @@ final class LogReaderServiceFactory implements ServiceFactory {
      * @return the log reader service implementation for the specified bundle
      */
     public Object getService(final Bundle bundle,
-            final ServiceRegistration registration) {
+        final ServiceRegistration registration)
+    {
         return new LogReaderServiceImpl(m_log);
     }
 
@@ -57,8 +60,9 @@ final class LogReaderServiceFactory implements ServiceFactory {
      * @param service the service to release
      */
     public void ungetService(final Bundle bundle,
-            final ServiceRegistration registration,
-            final Object service) {
+        final ServiceRegistration registration,
+        final Object service)
+    {
         ((LogReaderServiceImpl) service).removeAllLogListeners();
     }
 }
