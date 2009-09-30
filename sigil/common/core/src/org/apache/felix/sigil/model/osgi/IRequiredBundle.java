@@ -37,10 +37,4 @@ public interface IRequiredBundle extends IModelElement, IRequirementModelElement
 
 
     void setVersions( VersionRange versions );
-
-
-    boolean isOptional();
-
-
-    void setOptional( boolean optional );
 }

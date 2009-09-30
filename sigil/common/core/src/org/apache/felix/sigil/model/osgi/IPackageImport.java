@@ -27,15 +27,6 @@ public interface IPackageImport extends IPackageModelElement, IVersionRangeModel
     Comparable<IPackageImport>
 {
     /**
-     * indicates whether the OSGi attribute "resolution=optional" is specified.
-     */
-    boolean isOptional();
-
-
-    void setOptional( boolean optional );
-
-
-    /**
      * indicates whether import is needed at compile-time.
      * Default true. Used in conjunction with OSGiHeader.ALWAYS,
      * to add an OSGI import, without creating a dependency.
