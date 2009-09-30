@@ -36,7 +36,7 @@
     <prerequisites>
         <maven>2.0.7</maven>
     </prerequisites>
-ï
+ï¿½
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -116,17 +116,17 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.osgi.core</artifactId>
-                <version>1.2.0</version>
+                <version>1.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.osgi.foundation</artifactId>
-                <version>1.2.0</version>
+                <version>1.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.osgi.compendium</artifactId>
-                <version>1.2.0</version>
+                <version>1.0.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.felix</groupId>
