@@ -39,10 +39,11 @@ import java.util.jar.Manifest;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.config.BldFactory;
-import org.apache.felix.sigil.core.internal.model.osgi.RequiredBundle;
 import org.apache.felix.sigil.model.IModelElement;
+import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
+import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.apache.felix.sigil.repository.IResolution;
 import org.apache.felix.sigil.repository.ResolutionException;
 import org.apache.ivy.core.module.descriptor.Artifact;
@@ -247,7 +248,7 @@ public class SigilResolver extends BasicResolver implements IBldResolver
             range = "[" + revision + "," + revision + "]";
         }
 
-        RequiredBundle bundle = new RequiredBundle();
+        IRequiredBundle bundle = ModelElementFactory.getInstance().newModelElement(IRequiredBundle.class);
         bundle.setSymbolicName( id.getName() );
         bundle.setVersions( VersionRange.parseVersionRange( range ) );
 

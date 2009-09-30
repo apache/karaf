@@ -25,15 +25,16 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.config.BldFactory;
 import org.apache.felix.sigil.config.IBldProject;
 import org.apache.felix.sigil.config.IBldProject.IBldBundle;
-import org.apache.felix.sigil.core.internal.model.eclipse.SigilBundle;
-import org.apache.felix.sigil.core.internal.model.osgi.BundleModelElement;
 import org.apache.felix.sigil.core.licence.ILicensePolicy;
+import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
@@ -41,8 +42,8 @@ import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.apache.felix.sigil.repository.AbstractBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryVisitor;
+import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
-import org.apache.ivy.core.module.id.ModuleRevisionId;
 
 import org.osgi.framework.Version;
 
@@ -246,7 +247,7 @@ public class ProjectRepository extends AbstractBundleRepository
 
         for (IBldBundle bb : project.getBundles())
         {
-            IBundleModelElement info = new BundleModelElement();
+            IBundleModelElement info = ModelElementFactory.getInstance().newModelElement(IBundleModelElement.class);
 
             for (IPackageExport pexport : bb.getExports())
             {
@@ -272,77 +273,27 @@ public class ProjectRepository extends AbstractBundleRepository
             Version version = new Version(bb.getVersion());
             info.setVersion(version);
 
-            ProjectBundle pb = new ProjectBundle();
+            ISigilBundle pb = ModelElementFactory.getInstance().newModelElement(ISigilBundle.class);
             pb.setBundleInfo(info);
-            pb.setId(bb.getId());
-
+            
+            Map<Object, Object> meta = new HashMap<Object, Object>();
             ModuleDescriptor md = SigilParser.instance().parseDescriptor(uri.toURL());
+            if ( !bb.getId().equals( md.getModuleRevisionId().getName() ) )
+            { // non-default artifact
+                for ( Artifact a : md.getAllArtifacts() ) {
+                    if ( a.getName().equals( bb.getId() ) ) {
+                        meta.put(Artifact.class, a);
+                        break;
+                    }
+                }
+            }
 
-            ModuleRevisionId mrid = md.getModuleRevisionId();
-            pb.setModule(mrid.getName());
-            pb.setOrg(mrid.getOrganisation());
-            // XXX: should revision be configurable?
-            pb.setRevision("latest." + md.getStatus());
-
+            meta.put(ModuleDescriptor.class, md);
+            pb.setMeta(meta);
+            
             list.add(pb);
             Log.debug("ProjectRepository: added " + pb);
             Log.debug("ProjectRepository: exports " + bb.getExports());
         }
     }
-
-    public static class ProjectBundle extends SigilBundle
-    {
-        private String id;
-        private String module;
-        private String org;
-        private String revision;
-
-        @Override
-        public String toString()
-        {
-            return "ProjectBundle[" + org + "@" + module + (id == null ? "" : "$" + id)
-                + "#" + revision + "]";
-        }
-
-        public String getModule()
-        {
-            return module;
-        }
-
-        public void setModule(String module)
-        {
-            this.module = module;
-        }
-
-        public String getId()
-        {
-            return id;
-        }
-
-        public void setId(String id)
-        {
-            this.id = id;
-        }
-
-        public String getRevision()
-        {
-            return revision;
-        }
-
-        public void setRevision(String rev)
-        {
-            this.revision = rev;
-        }
-
-        public String getOrg()
-        {
-            return org;
-        }
-
-        public void setOrg(String org)
-        {
-            this.org = org;
-        }
-    }
-
 }

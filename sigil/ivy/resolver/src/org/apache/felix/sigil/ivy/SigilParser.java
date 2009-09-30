@@ -537,23 +537,24 @@ public class SigilParser implements ModuleDescriptorParser
                     continue;
                 }
 
-                if ( bundle instanceof ProjectRepository.ProjectBundle )
+                ModuleDescriptor bmd = (ModuleDescriptor) bundle.getMeta().get(ModuleDescriptor.class);
+                if ( bmd != null )
                 {
-                    ProjectRepository.ProjectBundle pb = ( ProjectRepository.ProjectBundle ) bundle;
-                    String org = pb.getOrg();
+                    ModuleRevisionId bmrid = bmd.getModuleRevisionId();
+                    String org = bmrid.getOrganisation();
                     if ( org == null )
                         org = masterMrid.getOrganisation();
-                    String id = pb.getId();
-                    String module = pb.getModule();
-                    String rev = pb.getRevision();
+                    String module = bmrid.getName();
+                    String rev = "latest." + bmd.getStatus();
 
                     mrid = ModuleRevisionId.newInstance( org, module, rev );
+                    
                     dd = new SigilDependencyDescriptor( md, mrid, force, changing, transitive );
 
-                    if ( !id.equals( module ) )
-                    { // non-default artifact
-                        dd.addDependencyArtifact( module, new DefaultDependencyArtifactDescriptor( dd, id, "jar",
-                            "jar", null, null ) );
+                    Artifact artifact = (Artifact) bundle.getMeta().get(Artifact.class);
+                    if ( artifact != null ) {
+                        dd.addDependencyArtifact( mrid.getName(), new DefaultDependencyArtifactDescriptor( dd, artifact.getName(), "jar",
+                            "jar", null, null ) );                        
                     }
                 }
                 else
