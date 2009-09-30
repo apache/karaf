@@ -72,6 +72,14 @@
                             </directory>
                             <targetPath>WEB-INF/bundles</targetPath>
                         </resource>
+                        <resource>
+                            <directory>.</directory>
+                            <targetPath>META-INF</targetPath>
+                            <includes>
+                                <include>LICENSE</include>
+                                <include>NOTICE</include>
+                            </includes>
+                        </resource>
                     </webResources>
                 </configuration>
             </plugin>
