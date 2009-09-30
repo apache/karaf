@@ -468,50 +468,83 @@ public class BundleResolver implements IBundleResolver
 
             try
             {
-                int[] priorities = repositoryManager.getPriorityLevels();
-
-                outer: for ( int i = 0; i < priorities.length; i++ )
+                if ( !findInContext( requirement, ctx ) ) 
                 {
-                    List<ISigilBundle> providers = findProvidersAtPriority( priorities[i], requirement, ctx );
-
-                    if ( !providers.isEmpty() && !ctx.monitor.isCanceled() )
-                    {
-                        if ( providers.size() > 1 )
-                        {
-                            Collections.sort( providers, new BundleOrderComparator( requirement ) );
-                        }
-
-                        for ( ISigilBundle provider : providers )
-                        {
-                            // reset validity - if there's another provider it can still be solved
-                            ctx.setValid( true );
-                            if ( ctx.resolution.addProvider( requirement, provider ) )
-                            {
-                                if ( ctx.config.isDependents() )
-                                {
-                                    resolveElement( provider, ctx );
-                                }
-
-                                if ( ctx.isValid() )
-                                {
-                                    break outer;
-                                }
-                                else
-                                {
-                                    ctx.resolution.removeProvider( requirement, provider );
-                                }
-                            }
-                            else
-                            {
-                                break outer;
-                            }
-                        }
-                    }
+                    findInRepositories( requirement, ctx );
                 }
             }
             finally
             {
                 ctx.endRequirement( requirement );
+            }
+        }
+    }
+
+
+    private boolean findInContext(final IRequirementModelElement requirement,
+        final ResolutionContext ctx)
+    {
+        for ( final ISigilBundle b : ctx.resolution.providees.keySet() ) 
+        {
+            b.visit( new IModelWalker() 
+            {
+                public boolean visit(IModelElement element)
+                {
+                    if ( requirement.accepts(element) ) {
+                        ctx.resolution.addProvider( requirement, b );
+                        return false;
+                    }
+                    return !ctx.monitor.isCanceled();
+                }
+                
+            });
+        }
+        
+        return ctx.resolution.getProvider(requirement) != null;
+    }
+
+
+    private void findInRepositories(IRequirementModelElement requirement,
+        ResolutionContext ctx) throws ResolutionException
+    {
+        int[] priorities = repositoryManager.getPriorityLevels();
+
+        outer: for ( int i = 0; i < priorities.length; i++ )
+        {
+            List<ISigilBundle> providers = findProvidersAtPriority( priorities[i], requirement, ctx );
+
+            if ( !providers.isEmpty() && !ctx.monitor.isCanceled() )
+            {
+                if ( providers.size() > 1 )
+                {
+                    Collections.sort( providers, new BundleOrderComparator( requirement ) );
+                }
+
+                for ( ISigilBundle provider : providers )
+                {
+                    // reset validity - if there's another provider it can still be solved
+                    ctx.setValid( true );
+                    if ( ctx.resolution.addProvider( requirement, provider ) )
+                    {
+                        if ( ctx.config.isDependents() )
+                        {
+                            resolveElement( provider, ctx );
+                        }
+
+                        if ( ctx.isValid() )
+                        {
+                            break outer;
+                        }
+                        else
+                        {
+                            ctx.resolution.removeProvider( requirement, provider );
+                        }
+                    }
+                    else
+                    {
+                        break outer;
+                    }
+                }
             }
         }
     }
