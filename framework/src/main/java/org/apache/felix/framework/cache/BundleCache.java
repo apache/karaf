@@ -82,25 +82,34 @@ public class BundleCache
 
     private static final SecureAction m_secureAction = new SecureAction();
 
+    private final Logger m_logger;
+    private final Map m_configMap;
+
+    public BundleCache(Logger logger, Map configMap)
+    {
+        m_logger = logger;
+        m_configMap = configMap;
+    }
+
     /* package */ static SecureAction getSecureAction()
     {
         return m_secureAction;
     }
 
-    public static void delete(Logger logger, Map configMap) throws Exception
+    public synchronized void delete() throws Exception
     {
         // Delete the cache directory.
-        File cacheDir = determineCacheDir(configMap);
+        File cacheDir = determineCacheDir(m_configMap);
         deleteDirectoryTree(cacheDir);
     }
 
-    public static BundleArchive[] getArchives(Logger logger, Map configMap)
+    public BundleArchive[] getArchives()
         throws Exception
     {
         // Get buffer size value.
         try
         {
-            String sBufSize = (String) configMap.get(CACHE_BUFSIZE_PROP);
+            String sBufSize = (String) m_configMap.get(CACHE_BUFSIZE_PROP);
             if (sBufSize != null)
             {
                 BUFSIZE = Integer.parseInt(sBufSize);
@@ -112,12 +121,12 @@ public class BundleCache
         }
 
         // Create the cache directory, if it does not exist.
-        File cacheDir = determineCacheDir(configMap);
+        File cacheDir = determineCacheDir(m_configMap);
         if (!getSecureAction().fileExists(cacheDir))
         {
             if (!getSecureAction().mkdirs(cacheDir))
             {
-                logger.log(
+                m_logger.log(
                     Logger.LOG_ERROR,
                     "Unable to create cache directory: " + cacheDir);
                 throw new RuntimeException("Unable to create cache directory.");
@@ -137,12 +146,12 @@ public class BundleCache
                 // Recreate the bundle archive.
                 try
                 {
-                    archiveList.add(new BundleArchive(logger, configMap, children[i]));
+                    archiveList.add(new BundleArchive(m_logger, m_configMap, children[i]));
                 }
                 catch (Exception ex)
                 {
                     // Log and ignore.
-                    logger.log(Logger.LOG_ERROR,
+                    m_logger.log(Logger.LOG_ERROR,
                         "Error creating archive.", ex);
                 }
             }
@@ -152,11 +161,10 @@ public class BundleCache
             archiveList.toArray(new BundleArchive[archiveList.size()]);
     }
 
-    public static BundleArchive create(Logger logger, Map configMap,
-        long id, String location, InputStream is)
+    public BundleArchive create(long id, String location, InputStream is)
         throws Exception
     {
-        File cacheDir = determineCacheDir(configMap);
+        File cacheDir = determineCacheDir(m_configMap);
 
         // Construct archive root directory.
         File archiveRootDir =
@@ -166,7 +174,7 @@ public class BundleCache
         {
             // Create the archive and add it to the list of archives.
             BundleArchive ba =
-                new BundleArchive(logger, configMap, archiveRootDir, id, location, is);
+                new BundleArchive(m_logger, m_configMap, archiveRootDir, id, location, is);
             return ba;
         }
         catch (Exception ex)
@@ -175,7 +183,7 @@ public class BundleCache
             {
                 if (!BundleCache.deleteDirectoryTree(archiveRootDir))
                 {
-                    logger.log(
+                    m_logger.log(
                         Logger.LOG_ERROR,
                         "Unable to delete the archive directory: "
                             + archiveRootDir);
@@ -193,11 +201,11 @@ public class BundleCache
      * @return a <tt>File</tt> object corresponding to the specified file name.
      * @throws Exception if any error occurs.
     **/
-    public static File getSystemBundleDataFile(Logger logger, Map configMap, String fileName)
+    public File getSystemBundleDataFile(String fileName)
         throws Exception
     {
         // Make sure system bundle directory exists.
-        File sbDir = new File(determineCacheDir(configMap), BUNDLE_DIR_PREFIX + Long.toString(0));
+        File sbDir = new File(determineCacheDir(m_configMap), BUNDLE_DIR_PREFIX + Long.toString(0));
 
         // If the system bundle directory exists, then we don't
         // need to initialize since it has already been done.
@@ -206,7 +214,7 @@ public class BundleCache
             // Create system bundle directory, if it does not exist.
             if (!getSecureAction().mkdirs(sbDir))
             {
-                logger.log(
+                m_logger.log(
                     Logger.LOG_ERROR,
                     "Unable to create system bundle directory.");
                 throw new IOException("Unable to create system bundle directory.");

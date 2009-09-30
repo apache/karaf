@@ -94,6 +94,9 @@ public class Felix extends BundleImpl implements Framework
     // Framework's active start level.
     private volatile int m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
 
+    // Local bundle cache.
+    private BundleCache m_cache = null;
+
     // System bundle activator list.
     List m_activatorList = null;
 
@@ -487,7 +490,6 @@ public class Felix extends BundleImpl implements Framework
 
                 // Create the bundle cache, if necessary, so that we can reload any
                 // installed bundles.
-/* TODO: CACHE - FIX
                 m_cache = (BundleCache) m_configMutableMap.get(
                     FelixConstants.FRAMEWORK_BUNDLECACHE_IMPL);
                 if (m_cache == null)
@@ -502,7 +504,7 @@ public class Felix extends BundleImpl implements Framework
                            throw new BundleException("Error creating bundle cache.", ex);
                        }
                 }
-*/
+
                 // If this is the first time init is called, check to see if
                 // we need to flush the bundle cache.
                 if (getState() == Bundle.INSTALLED)
@@ -513,7 +515,7 @@ public class Felix extends BundleImpl implements Framework
                     {
                         try
                         {
-                            BundleCache.delete(m_logger, m_configMap);
+                            m_cache.delete();
                         }
                         catch (Exception ex)
                         {
@@ -553,7 +555,7 @@ public class Felix extends BundleImpl implements Framework
                 // First get cached bundle identifiers.
                 try
                 {
-                    archives = BundleCache.getArchives(m_logger, m_configMap);
+                    archives = m_cache.getArchives();
                 }
                 catch (Exception ex)
                 {
@@ -2312,7 +2314,7 @@ ex.printStackTrace();
                 try
                 {
                     // Add the bundle to the cache.
-                    ba = BundleCache.create(m_logger, m_configMap, id, location, is);
+                    ba = m_cache.create(id, location, is);
                 }
                 catch (Exception ex)
                 {
@@ -2892,7 +2894,7 @@ ex.printStackTrace();
         {
             if (bundle == this)
             {
-                return BundleCache.getSystemBundleDataFile(m_logger, m_configMap, s);
+                return m_cache.getSystemBundleDataFile(s);
             }
 
             return bundle.getArchive().getDataFile(s);
@@ -3676,8 +3678,7 @@ ex.printStackTrace();
             BufferedReader br = null;
             try
             {
-                File file = BundleCache.getSystemBundleDataFile(
-                    m_logger, m_configMap, "bundle.id");
+                File file = m_cache.getSystemBundleDataFile("bundle.id");
                 is = m_secureAction.getFileInputStream(file);
                 br = new BufferedReader(new InputStreamReader(is));
                 return Long.parseLong(br.readLine());
@@ -3730,8 +3731,7 @@ ex.printStackTrace();
             BufferedWriter bw = null;
             try
             {
-                File file = BundleCache.getSystemBundleDataFile(
-                    m_logger, m_configMap, "bundle.id");
+                File file = m_cache.getSystemBundleDataFile("bundle.id");
                 os = m_secureAction.getFileOutputStream(file);
                 bw = new BufferedWriter(new OutputStreamWriter(os));
                 String s = Long.toString(m_nextId);
