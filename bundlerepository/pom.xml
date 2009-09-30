@@ -46,10 +46,15 @@
       <version>2.2.2</version>
     </dependency>
     <dependency>
-        <groupId>${pom.groupId}</groupId>
+        <groupId>org.osgi</groupId>
         <artifactId>org.osgi.compendium</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>4.0.0</version>
         <optional>true</optional>
+    </dependency>
+    <dependency>
+       <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.core</artifactId>
+        <version>4.1.0</version>
     </dependency>
   </dependencies>
   <build>
