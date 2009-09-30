@@ -30,6 +30,10 @@ import org.osgi.service.startlevel.StartLevel;
 
 public class PsCommandImpl implements Command
 {
+    private static final String LOCATION_SWITCH = "-l";
+    private static final String SYMBOLIC_NAME_SWITCH = "-s";
+    private static final String UPDATE_LOCATION_SWITCH = "-u";
+
     protected final BundleContext m_context;
 
     public PsCommandImpl(BundleContext context)
@@ -44,7 +48,9 @@ public class PsCommandImpl implements Command
 
     public String getUsage()
     {
-        return "ps [-l | -s | -u]";
+        return "ps [" + LOCATION_SWITCH
+            + " | " + SYMBOLIC_NAME_SWITCH
+            + " | " + UPDATE_LOCATION_SWITCH + "]";
     }
 
     public String getShortDescription()
@@ -83,15 +89,15 @@ public class PsCommandImpl implements Command
             while (st.hasMoreTokens())
             {
                 String token = st.nextToken().trim();
-                if (token.equals("-l"))
+                if (token.equals(LOCATION_SWITCH))
                 {
                     showLoc = true;
                 }
-                else if (token.equals("-s"))
+                else if (token.equals(SYMBOLIC_NAME_SWITCH))
                 {
                     showSymbolic = true;
                 }
-                else if (token.equals("-u"))
+                else if (token.equals(UPDATE_LOCATION_SWITCH))
                 {
                     showUpdate = true;
                 }

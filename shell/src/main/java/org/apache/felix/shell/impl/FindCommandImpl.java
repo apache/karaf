@@ -26,6 +26,8 @@ import java.util.StringTokenizer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.startlevel.StartLevel;
 
 /**
  * Shell command to display a list of bundles whose
@@ -49,6 +51,20 @@ public class FindCommandImpl extends PsCommandImpl
             return;
         }
 
+        // Get start level service.
+        ServiceReference ref = m_context.getServiceReference(
+            org.osgi.service.startlevel.StartLevel.class.getName());
+        StartLevel sl = null;
+        if (ref != null)
+        {
+            sl = (StartLevel) m_context.getService(ref);
+        }
+
+        if (sl == null)
+        {
+            out.println("StartLevel service is unavailable.");
+        }
+
         st.nextToken();
         String pattern = st.nextToken();
 
@@ -68,7 +84,7 @@ public class FindCommandImpl extends PsCommandImpl
 
         if (found.size() > 0)
         {
-            printBundleList((Bundle[]) found.toArray(new Bundle[found.size()]), null, out, false, false, false);
+            printBundleList((Bundle[]) found.toArray(new Bundle[found.size()]), sl, out, false, false, false);
         }
         else
         {
