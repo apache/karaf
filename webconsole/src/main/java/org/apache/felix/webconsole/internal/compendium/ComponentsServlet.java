@@ -444,7 +444,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
             case Component.STATE_ENABLED:
                 return "enabled";
             case Component.STATE_UNSATISFIED:
-                return "unsatisifed";
+                return "unsatisfied";
             case Component.STATE_ACTIVATING:
                 return "activating";
             case Component.STATE_ACTIVE:
