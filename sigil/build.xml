@@ -34,7 +34,8 @@
     <subant buildpath="bldcommon/prepare" target="resolve" />
   </target>
 
-  <target name="dist" depends="build, site" />
+  <!--target name="dist" depends="build, site" /-->
+  <target name="dist" depends="build" />
 
   <target name="clean" depends="clean-list, clean-site, clean-tmp" />
 
@@ -83,8 +84,13 @@
     <echo>${cache.dir}</echo>
     <delete includeemptydirs="true">
      <fileset dir="${cache.dir}" includes="all/org.apache-felix.sigil*"/>
-     <fileset dir="${cache.dir}" includes="all/org.apache/felix.sigil*"/>
+     <fileset dir="${cache.dir}" includes="all/org.apache/felix.sigil*/**"/>
      <fileset dir="${cache.dir}" includes="all/resolved-org.apache-felix.sigil*"/>
+    </delete>
+    <delete includeemptydirs="true">
+     <dirset dir="${cache.dir}">
+       <include name="all/org.apache/felix.sigil*"/>
+     </dirset>
     </delete>
   </target>
 </project>
