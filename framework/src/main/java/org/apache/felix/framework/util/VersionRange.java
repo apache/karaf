@@ -22,14 +22,14 @@ import org.osgi.framework.Version;
 
 public class VersionRange
 {
-    private Version m_low = null;
-    private boolean m_isLowInclusive = false;
-    private Version m_high = null;
-    private boolean m_isHighInclusive = false;
-    private String m_toString = null;
+    private final Version m_low;
+    private final boolean m_isLowInclusive;
+    private final Version m_high;
+    private final boolean m_isHighInclusive;
     public static final VersionRange infiniteRange = new VersionRange(Version.emptyVersion, true, null, true);
 
-    public VersionRange(Version low, boolean isLowInclusive,
+    public VersionRange(
+        Version low, boolean isLowInclusive,
         Version high, boolean isHighInclusive)
     {
         m_low = low;
@@ -140,23 +140,19 @@ public class VersionRange
 
     public String toString()
     {
-        if (m_toString == null)
+        if (m_high != null)
         {
-            if (m_high != null)
-            {
-                StringBuffer sb = new StringBuffer();
-                sb.append(m_isLowInclusive ? '[' : '(');
-                sb.append(m_low.toString());
-                sb.append(',');
-                sb.append(m_high.toString());
-                sb.append(m_isHighInclusive ? ']' : ')');
-                m_toString = sb.toString();
-            }
-            else
-            {
-                m_toString = m_low.toString();
-            }
+            StringBuffer sb = new StringBuffer();
+            sb.append(m_isLowInclusive ? '[' : '(');
+            sb.append(m_low.toString());
+            sb.append(',');
+            sb.append(m_high.toString());
+            sb.append(m_isHighInclusive ? ']' : ')');
+            return sb.toString();
         }
-        return m_toString;
+        else
+        {
+            return m_low.toString();
+        }
     }
 }
