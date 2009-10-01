@@ -31,7 +31,7 @@ public class Activator extends AbstractUIPlugin
 {
 
     // The plug-in ID
-    public static final String PLUGIN_ID = "org.cauldron.sigil.obr";
+    public static final String PLUGIN_ID = "org.apache.felix.sigil.eclipse.obr";
 
     // The shared instance
     private static Activator plugin;

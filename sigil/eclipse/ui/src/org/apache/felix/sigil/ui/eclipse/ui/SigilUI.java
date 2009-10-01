@@ -45,7 +45,7 @@ public class SigilUI extends AbstractUIPlugin
 {
 
     // The plug-in ID
-    public static final String PLUGIN_ID = "org.cauldron.sigil.ui";
+    public static final String PLUGIN_ID = "org.apache.felix.sigil.eclipse.ui";
 
     public static final String REPOSITORY_WIZARD_EXTENSION_POINT_ID = "org.apache.felix.sigil.ui.repositorywizard";
 

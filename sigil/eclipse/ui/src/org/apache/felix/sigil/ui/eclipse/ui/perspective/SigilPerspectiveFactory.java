@@ -103,9 +103,7 @@ public class SigilPerspectiveFactory implements IPerspectiveFactory
         layout.addNewWizardShortcut( "org.eclipse.ui.wizards.new.file" );//$NON-NLS-1$
         layout.addNewWizardShortcut( "org.eclipse.ui.editors.wizards.UntitledTextFileWizard" );//$NON-NLS-1$
 
-        layout.addNewWizardShortcut( "org.cauldron.sigil.editors.newCompositeWizard" );
-        layout.addNewWizardShortcut( "org.cauldron.sigil.editors.newSystemWizard" );
-        layout.addNewWizardShortcut( "org.cauldron.sigil.editors.newProjectWizard" );
+        layout.addNewWizardShortcut( "org.apache.felix.sigil.editors.newProjectWizard" );
     }
 
 }
