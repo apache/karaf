@@ -34,8 +34,7 @@
     <subant buildpath="bldcommon/prepare" target="resolve" />
   </target>
 
-  <!--target name="dist" depends="build, site" /-->
-  <target name="dist" depends="build" />
+  <target name="dist" depends="build, site" />
 
   <target name="clean" depends="clean-list, clean-site, clean-tmp" />
 
@@ -61,12 +60,8 @@
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.search" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.ui" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.utils" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="sigil" module="com.springsource.org.apache.commons.lang" revision="2.4.0" inline="true" pattern="${site.dir}/plugins/[artifact]_[revision].[ext]" transitive="false"/>
 
-    <!-- extras -->
-    <ivy:retrieve organisation="biz.aQute" module="bndlib" revision="0.0.312" inline="true" pattern="${site.dir}/extras/[artifact]_[revision].[ext]" transitive="false"/>
-
-    <ivy:retrieve organisation="sigil" module="com.springsource.org.apache.commons.lang" revision="2.4.0" inline="true" pattern="${site.dir}/extras/[artifact]_[revision].[ext]" transitive="false"/>
-    
     <!-- ivy -->
     <ivy:retrieve organisation="org.apache" module="felix.sigil.ivy.resolver" revision="latest.integration" inline="true" pattern="${site.dir}/ivy/[artifact].[ext]" transitive="false"/>
 

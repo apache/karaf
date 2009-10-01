@@ -77,6 +77,13 @@ limitations under the License.
    </requires>
 
    <plugin
+         id="com.springsource.org.apache.commons.lang"
+         download-size="0"
+         install-size="0"
+         version="2.4.0"
+         unpack="false"/>
+         
+   <plugin
          id="org.apache.felix.sigil.common.core"
          download-size="0"
          install-size="0"
