@@ -32,9 +32,11 @@ import org.osgi.service.command.Function;
 import org.osgi.service.threadio.ThreadIO;
 import org.osgi.util.tracker.ServiceTracker;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Activator implements BundleActivator
 {
@@ -45,6 +47,8 @@ public class Activator implements BundleActivator
     private ServiceRegistration threadioRegistration;
     private ServiceTracker converterTracker;
     private ServiceTracker commandTracker;
+    private ServiceTracker felixTracker;
+    private Map<ServiceReference, ServiceRegistration> regs = new HashMap<ServiceReference, ServiceRegistration>();
 
     public void start(final BundleContext context) throws Exception
     {
@@ -76,6 +80,7 @@ public class Activator implements BundleActivator
             }
         };
         converterTracker.open();
+        
         commandTracker = new ServiceTracker(context, context.createFilter("(&(osgi.command.scope=*)(osgi.command.function=*))"), null) {
             @Override
             public Object addingService(ServiceReference reference)
@@ -116,6 +121,32 @@ public class Activator implements BundleActivator
             }
         };
         commandTracker.open();
+        
+        felixTracker = new ServiceTracker(context, FelixCommandAdaptor.FELIX_COMMAND, null) {
+            @Override
+            public Object addingService(ServiceReference ref) {
+                Object felixCommand = super.addingService(ref);
+                try {
+                    FelixCommandAdaptor adaptor = new FelixCommandAdaptor(felixCommand);
+                    regs.put(ref, context.registerService(FelixCommandAdaptor.class.getName(), adaptor,
+                            adaptor.getAttributes()));
+                    return felixCommand;
+                } catch (Exception e) {
+                    System.err.println("felixcmd: " + e);
+                    return null;
+                }
+            }
+
+            @Override
+            public void removedService(ServiceReference reference, Object service) {
+                ServiceRegistration reg = regs.remove(reference);
+                if (reg != null)
+                    reg.unregister();
+                super.removedService(reference, service);
+            }
+        };
+        felixTracker.open();
+        
         threadioRegistration = context.registerService(ThreadIO.class.getName(), threadio, new Hashtable());
         shellRegistration = context.registerService(CommandProcessor.class.getName(), shell, new Hashtable());
     }
@@ -135,5 +166,6 @@ public class Activator implements BundleActivator
         threadio.stop();
         converterTracker.close();
         commandTracker.close();
+        felixTracker.close();
     }
 }
