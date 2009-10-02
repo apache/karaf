@@ -18,7 +18,7 @@
  */
 package org.apache.felix.scrplugin.tags;
 
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.felix.scrplugin.SCRDescriptorException;
 
 /**
  * <code>JavaClassDescription.java</code>...
@@ -41,18 +41,18 @@ public interface JavaClassDescription {
      * @param name
      * @param inherited If true, parent classes are searched as well.
      * @return An array of tags or the empty array.
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
     JavaTag[] getTagsByName(String name, boolean inherited)
-    throws MojoExecutionException;
+    throws SCRDescriptorException;
 
     /**
      * Get the description for the parent class.
      * @return The description or <code>null</code> if this class is the
      *         Object class.
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
-    JavaClassDescription getSuperClass() throws MojoExecutionException;
+    JavaClassDescription getSuperClass() throws SCRDescriptorException;
 
     /**
      * Get the name of the described class.
@@ -70,29 +70,29 @@ public interface JavaClassDescription {
      * Get the field with the name.
      * @param name The name of the field
      * @return The field with the name or null.
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
-    JavaField getFieldByName(String name) throws MojoExecutionException;
+    JavaField getFieldByName(String name) throws SCRDescriptorException;
 
-    JavaField getExternalFieldByName(String name) throws MojoExecutionException;
+    JavaField getExternalFieldByName(String name) throws SCRDescriptorException;
 
     /**
      * Returns an array of the implemented interfaces of this class.
      * @return An array containing the interfaces or an empty array
      *         if this class does not implement any interface.
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
-    JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException;
+    JavaClassDescription[] getImplementedInterfaces() throws SCRDescriptorException;
 
     /**
      * Search for a method with the given signature.
      * @param name
      * @param parameters
      * @return A descriptor for the method or <code>null</code>
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
     JavaMethod getMethodBySignature(String name, String[] parameters)
-    throws MojoExecutionException;
+    throws SCRDescriptorException;
 
     /**
      * Is this class public?
@@ -122,9 +122,9 @@ public interface JavaClassDescription {
      * Is this class of the type?
      * @param type
      * @return True if this class is of the type.
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
-    boolean isA(String type) throws MojoExecutionException;
+    boolean isA(String type) throws SCRDescriptorException;
 
     /**
      * Search for the class.
@@ -132,8 +132,8 @@ public interface JavaClassDescription {
      * of the class are searched.
      * @param referencedName
      * @return The java class description or null
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
     JavaClassDescription getReferencedClass(String referencedName)
-    throws MojoExecutionException;
+    throws SCRDescriptorException;
 }

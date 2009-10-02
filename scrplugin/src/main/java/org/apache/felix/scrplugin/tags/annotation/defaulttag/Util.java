@@ -20,11 +20,16 @@ package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
 import java.util.List;
 
-import org.apache.felix.scrplugin.tags.*;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.tags.ClassUtil;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaField;
 
 import com.thoughtworks.qdox.model.Annotation;
-import com.thoughtworks.qdox.model.annotation.*;
+import com.thoughtworks.qdox.model.annotation.AnnotationConstant;
+import com.thoughtworks.qdox.model.annotation.AnnotationFieldRef;
+import com.thoughtworks.qdox.model.annotation.AnnotationValue;
+import com.thoughtworks.qdox.model.annotation.AnnotationValueList;
 
 /**
  * Helper class for getting values from annotations.
@@ -378,7 +383,7 @@ public abstract class Util {
                 }
                 throw new IllegalArgumentException("Something is wrong.");
             }
-            catch (MojoExecutionException mee)
+            catch (SCRDescriptorException mee)
             {
                 throw new IllegalArgumentException(mee);
             }

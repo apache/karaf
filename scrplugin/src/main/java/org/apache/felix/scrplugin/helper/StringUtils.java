@@ -16,13 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin.tags;
-
-import org.apache.felix.scrplugin.SCRDescriptorException;
+package org.apache.felix.scrplugin.helper;
 
 
-public interface ModifiableJavaClassDescription {
+public class StringUtils
+{
 
-    void addMethods(String propertyName, String className, boolean createBind, boolean createUnbind)
-    throws SCRDescriptorException;
+    public static String[] split( String value, String sep )
+    {
+        return value.split( sep );
+    }
+
+
+    public static boolean isEmpty( final String string )
+    {
+        return string == null || string.length() == 0;
+    }
+
+
+    public static String leftPad( final String base, final int width, final String pad )
+    {
+        StringBuilder builder = new StringBuilder( width );
+
+        int missing = width - base.length();
+        while ( missing > 0 )
+        {
+            builder.append( pad );
+            missing -= pad.length();
+        }
+
+        builder.append( base );
+
+        return builder.toString();
+    }
 }

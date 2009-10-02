@@ -21,11 +21,11 @@ package org.apache.felix.scrplugin.tags.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.scrplugin.SCRDescriptorFailureException;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.annotation.defaulttag.DefaultAnnotationTagProvider;
 import org.apache.felix.scrplugin.tags.annotation.sling.SlingAnnotationTagProvider;
-import org.apache.maven.plugin.MojoFailureException;
 
 import com.thoughtworks.qdox.model.Annotation;
 import com.thoughtworks.qdox.model.JavaClass;
@@ -49,7 +49,7 @@ public class AnnotationTagProviderManager {
      *            {@link AnnotationTagProvider} interface.
      * @throws MojoFailureException
      */
-    public AnnotationTagProviderManager(String[] annotationTagProviderClasses) throws MojoFailureException {
+    public AnnotationTagProviderManager(String[] annotationTagProviderClasses) throws SCRDescriptorFailureException {
 
         // always add provider supporting built-in SCR default properties
         annotationTagProviders.add(new DefaultAnnotationTagProvider());
@@ -62,17 +62,17 @@ public class AnnotationTagProviderManager {
                 try {
                     annotationTagProviders.add((AnnotationTagProvider) clazz.newInstance());
                 } catch (ClassCastException e) {
-                    throw new MojoFailureException("Class '" + clazz.getName() + "' "
+                    throw new SCRDescriptorFailureException("Class '" + clazz.getName() + "' "
                             + "does not implement interface '" + AnnotationTagProvider.class.getName() + "'.");
                 } catch (InstantiationException e) {
-                    throw new MojoFailureException("Unable to instantiate class '" + clazz.getName() + "': "
+                    throw new SCRDescriptorFailureException("Unable to instantiate class '" + clazz.getName() + "': "
                             + e.getMessage());
                 } catch (IllegalAccessException e) {
-                    throw new MojoFailureException("Illegal access to class '" + clazz.getName() + "': "
+                    throw new SCRDescriptorFailureException("Illegal access to class '" + clazz.getName() + "': "
                             + e.getMessage());
                 }
             } catch (ClassNotFoundException ex) {
-                throw new MojoFailureException("Annotation provider class '" + annotationTagProviderClasses[i]
+                throw new SCRDescriptorFailureException("Annotation provider class '" + annotationTagProviderClasses[i]
                         + "' not found.");
             }
         }

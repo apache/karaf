@@ -25,8 +25,12 @@ import java.util.Map;
 
 import javax.xml.transform.TransformerException;
 
-import org.apache.felix.scrplugin.om.metatype.*;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
+import org.apache.felix.scrplugin.om.metatype.Designate;
+import org.apache.felix.scrplugin.om.metatype.MTObject;
+import org.apache.felix.scrplugin.om.metatype.MetaData;
+import org.apache.felix.scrplugin.om.metatype.OCD;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -65,15 +69,15 @@ public class MetaTypeIO {
     protected static final String OPTION_ELEMENT_QNAME = OPTION_ELEMENT;
 
     public static void write(MetaData metaData, File file)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         try {
             generateXML(metaData, IOUtils.getSerializer(file));
         } catch (TransformerException e) {
-            throw new MojoExecutionException("Unable to write xml to " + file, e);
+            throw new SCRDescriptorException("Unable to write xml to " + file, e);
         } catch (SAXException e) {
-            throw new MojoExecutionException("Unable to generate xml for " + file, e);
+            throw new SCRDescriptorException("Unable to generate xml for " + file, e);
         } catch (IOException e) {
-            throw new MojoExecutionException("Unable to write xml to " + file, e);
+            throw new SCRDescriptorException("Unable to write xml to " + file, e);
         }
     }
 

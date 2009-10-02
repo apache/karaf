@@ -19,10 +19,12 @@
 package org.apache.felix.scrplugin.om;
 
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.IssueLog;
-import org.apache.felix.scrplugin.tags.*;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.helper.IssueLog;
+import org.apache.felix.scrplugin.helper.StringUtils;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaMethod;
+import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**
  * <code>Reference.java</code>...
@@ -149,7 +151,7 @@ public class Reference extends AbstractObject {
     public void validate(final int specVersion,
                          final boolean componentIsAbstract,
                          final IssueLog iLog)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         // if this reference is already checked, return immediately
         if ( this.checked ) {
             return;
@@ -225,7 +227,7 @@ public class Reference extends AbstractObject {
                                     final String   methodName,
                                     final boolean  componentIsAbstract,
                                     final IssueLog iLog)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final JavaMethod method = this.findMethod(specVersion, methodName);
         if (method == null) {
             if ( !componentIsAbstract ) {
@@ -251,7 +253,7 @@ public class Reference extends AbstractObject {
 
     public JavaMethod findMethod(final int    specVersion,
                                  final String methodName)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final String[] sig = new String[]{ TYPE_SERVICE_REFERENCE };
         final String[] sig2 = new String[]{ this.getInterfacename() };
         final String[] sig3 = new String[]{ this.getInterfacename(), TYPE_MAP};

@@ -19,7 +19,7 @@
 package org.apache.felix.scrplugin.om;
 
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.IssueLog;
+import org.apache.felix.scrplugin.helper.IssueLog;
 import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**

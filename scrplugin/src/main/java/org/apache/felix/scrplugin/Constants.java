@@ -21,9 +21,11 @@ package org.apache.felix.scrplugin;
 import java.io.File;
 
 /**
- * Constants
+ * The <code>Constants</code> interface provides use full constants for various
+ * values used for processing SCR annotations and JavaDoc tags into SCR
+ * descriptors.
  */
-public class Constants {
+public interface Constants {
 
     /** Version 1.0 (R4.1) */
     public static final int VERSION_1_0 = 0;
@@ -31,6 +33,11 @@ public class Constants {
     /** Version 1.1 (R4.2) */
     public static final int VERSION_1_1 = 1;
 
+    /**
+     * The name of the Bundle manifest header providing the list of service
+     * component descriptor files.
+     */
+    public static final String SERVICE_COMPONENT = "Service-Component";
 
     public static final String COMPONENT = "scr.component";
 
@@ -144,8 +151,8 @@ public class Constants {
 
     public static final String ABSTRACT_DESCRIPTOR_FILENAME = "scrinfo.xml";
 
-    public static final String ABSTRACT_DESCRIPTOR_RELATIVE_PATH = "OSGI-INF" + File.separator + "scr-plugin" + File.separator + ABSTRACT_DESCRIPTOR_FILENAME;
-
     public static final String ABSTRACT_DESCRIPTOR_ARCHIV_PATH = "OSGI-INF/scr-plugin/" + ABSTRACT_DESCRIPTOR_FILENAME;
 
+    public static final String ABSTRACT_DESCRIPTOR_RELATIVE_PATH = ABSTRACT_DESCRIPTOR_ARCHIV_PATH.replace( '/',
+        File.separatorChar );
 }

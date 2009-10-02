@@ -16,13 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin.tags;
-
-import org.apache.felix.scrplugin.SCRDescriptorException;
+package org.apache.felix.scrplugin;
 
 
-public interface ModifiableJavaClassDescription {
+public class SCRDescriptorFailureException extends Exception
+{
 
-    void addMethods(String propertyName, String className, boolean createBind, boolean createUnbind)
-    throws SCRDescriptorException;
+    private static final long serialVersionUID = 1L;
+
+
+    public SCRDescriptorFailureException( String message )
+    {
+        super( message );
+    }
+
+
+    public SCRDescriptorFailureException( String message, Throwable cause )
+    {
+        super( message, cause );
+    }
 }

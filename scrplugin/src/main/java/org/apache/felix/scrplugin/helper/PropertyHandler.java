@@ -16,18 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin;
+package org.apache.felix.scrplugin.helper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.felix.scrplugin.Constants;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.SCRDescriptorGenerator;
 import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.om.Property;
 import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
 import org.apache.felix.scrplugin.om.metatype.OCD;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.plexus.util.StringUtils;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
@@ -62,7 +67,7 @@ public class PropertyHandler {
                                    String    name,
                                    JavaField javaField,
                                    final IssueLog iLog)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final Property prop = new Property(tag);
         prop.setName(name);
         prop.setType(tag.getNamedParameter(Constants.PROPERTY_TYPE));
@@ -109,7 +114,7 @@ public class PropertyHandler {
 
         // property is private if explicitly marked or a well known
         // service property such as service.pid
-        final boolean isPrivate = SCRDescriptorMojo.getBoolean(tag,
+        final boolean isPrivate = SCRDescriptorGenerator.getBoolean(tag,
             Constants.PROPERTY_PRIVATE, false)
             || name.equals(org.osgi.framework.Constants.SERVICE_PID)
             || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
@@ -200,7 +205,7 @@ public class PropertyHandler {
      * @return The name of the property or the defaultName
      */
     protected String getPropertyName(JavaTag tag, JavaField field)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         // check name property
         String name = tag.getNamedParameter(Constants.PROPERTY_NAME);
 
@@ -211,10 +216,10 @@ public class PropertyHandler {
                 final JavaField refField = this.getReferencedField(tag, name);
                 final String[] values = refField.getInitializationExpression();
                 if ( values == null || values.length == 0 ) {
-                    throw new MojoExecutionException("Referenced field for " + name + " has no values for a property name.");
+                    throw new SCRDescriptorException("Referenced field for " + name + " has no values for a property name.");
                 }
                 if ( values.length > 1 ) {
-                    throw new MojoExecutionException("Referenced field " + name + " has more than one value for a property name.");
+                    throw new SCRDescriptorException("Referenced field " + name + " has more than one value for a property name.");
                 }
                 name = values[0];
             }
@@ -238,7 +243,7 @@ public class PropertyHandler {
     }
 
     protected void setPropertyValueRef(final JavaTag tag, Property property, String valueRef)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final String[] values = this.getPropertyValueRef(tag, property, valueRef);
         if ( values != null && values.length == 1 ) {
             property.setValue(values[0]);
@@ -248,7 +253,7 @@ public class PropertyHandler {
     }
 
     protected JavaField getReferencedField(final JavaTag tag, String ref)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         int classSep = ref.lastIndexOf('.');
         JavaField field = null;
         if ( classSep == -1 ) {
@@ -259,13 +264,13 @@ public class PropertyHandler {
             field = tag.getJavaClassDescription().getExternalFieldByName(ref);
         }
         if ( field == null ) {
-            throw new MojoExecutionException("Property references unknown field " + ref + " in class " + tag.getJavaClassDescription().getName());
+            throw new SCRDescriptorException("Property references unknown field " + ref + " in class " + tag.getJavaClassDescription().getName());
         }
         return field;
     }
 
     protected String[] getPropertyValueRef(final JavaTag tag, Property prop, String valueRef)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final JavaField field = this.getReferencedField(tag, valueRef);
 
         // determine type (if not set explicitly)
@@ -300,12 +305,12 @@ public class PropertyHandler {
      * @param property The tag.
      * @param field
      * @param isInspectedClass
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
     public void testProperty(JavaTag   property,
                              JavaField field,
                              boolean   isInspectedClass)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final String propName = this.getPropertyName(property, field);
 
         if ( propName != null ) {
@@ -313,18 +318,18 @@ public class PropertyHandler {
                 // if the current class is the class we are currently inspecting, we
                 // have found a duplicate definition
                 if ( isInspectedClass ) {
-                    throw new MojoExecutionException("Duplicate definition for property " + propName + " in class " + property.getJavaClassDescription().getName());
+                    throw new SCRDescriptorException("Duplicate definition for property " + propName + " in class " + property.getJavaClassDescription().getName());
                 }
             } else {
                 properties.put(propName, new PropertyDescription(property, field));
             }
         } else {
-            throw new MojoExecutionException("Property has no name " + property.getSourceLocation());
+            throw new SCRDescriptorException("Property has no name " + property.getSourceLocation());
         }
     }
 
     public void handleField(JavaField javaField, boolean isInspectedClass)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final JavaTag tag = javaField.getTagByName(Constants.PROPERTY);
         if (tag != null) {
             this.testProperty(tag, javaField, isInspectedClass);
@@ -335,11 +340,11 @@ public class PropertyHandler {
      * Process all found properties for the component.
      * @param globalProperties Global properties are set on all components.
      * @param iLog The issue log.
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
     public void processProperties(final Map<String, String> globalProperties,
                                   final IssueLog iLog)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final Iterator<Map.Entry<String, PropertyDescription>> propIter = properties.entrySet().iterator();
         while ( propIter.hasNext() ) {
             final Map.Entry<String, PropertyDescription> entry = propIter.next();

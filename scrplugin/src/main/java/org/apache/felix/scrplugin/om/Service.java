@@ -18,10 +18,12 @@
  */
 package org.apache.felix.scrplugin.om;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import org.apache.felix.scrplugin.IssueLog;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.helper.IssueLog;
 
 /**
  * <code>Service</code>...
@@ -92,7 +94,7 @@ public class Service {
      * warnings can be added to the warnings list.
      */
     public void validate(final int specVersion, final IssueLog iLog)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         for(final Interface interf : this.getInterfaces()) {
             interf.validate(specVersion, iLog);
         }

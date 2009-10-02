@@ -18,12 +18,14 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.sling;
 
-import java.util.*;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.felix.scrplugin.Constants;
+import org.apache.felix.scrplugin.helper.StringUtils;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.annotation.defaulttag.AbstractTag;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Description of a java tag for components.

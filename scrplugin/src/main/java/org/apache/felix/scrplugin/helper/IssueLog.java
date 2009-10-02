@@ -16,12 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin;
+package org.apache.felix.scrplugin.helper;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import org.apache.maven.plugin.logging.Log;
 
 /**
  * Utility class for handling errors and warnings
@@ -54,19 +53,11 @@ public class IssueLog {
         warnings.add(e);
     }
 
-    public void log(final Log log) {
-        // now log warnings and errors (warnings first)
-        // in strict mode everything is an error!
-        for(String warn : warnings) {
-            if ( strictMode ) {
-                log.error(warn);
-            } else {
-                log.warn(warn);
-            }
-        }
-        for(String err : errors) {
-            log.error(err);
-        }
+    public Iterator<String> getWarnings() {
+        return warnings.iterator();
+    }
 
+    public Iterator<String> getErrors() {
+        return errors.iterator();
     }
 }

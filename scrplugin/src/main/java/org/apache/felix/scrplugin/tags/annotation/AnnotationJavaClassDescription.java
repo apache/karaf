@@ -18,11 +18,15 @@
  */
 package org.apache.felix.scrplugin.tags.annotation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import org.apache.felix.scrplugin.tags.*;
+import org.apache.felix.scrplugin.JavaClassDescriptorManager;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.tags.JavaField;
+import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.qdox.QDoxJavaClassDescription;
-import org.apache.maven.plugin.MojoExecutionException;
 
 import com.thoughtworks.qdox.model.JavaClass;
 
@@ -62,7 +66,7 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
      * @see JavaClassDescription#getTagsByName(String, boolean)
      */
     @Override
-    public JavaTag[] getTagsByName(String name, boolean inherited) throws MojoExecutionException {
+    public JavaTag[] getTagsByName(String name, boolean inherited) throws SCRDescriptorException {
 
         List<JavaTag> tags = new ArrayList<JavaTag>();
         for(com.thoughtworks.qdox.model.Annotation annotation : this.javaClass.getAnnotations()) {
@@ -104,7 +108,7 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
      * @see JavaClassDescription#getFieldByName(String)
      */
     @Override
-    public JavaField getFieldByName(String name) throws MojoExecutionException {
+    public JavaField getFieldByName(String name) throws SCRDescriptorException {
         final com.thoughtworks.qdox.model.JavaField field = this.javaClass.getFieldByName(name);
         if (field != null) {
             return new AnnotationJavaField(field, this);

@@ -18,10 +18,10 @@
  */
 package org.apache.felix.scrplugin.om;
 
-import org.apache.felix.scrplugin.IssueLog;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.helper.IssueLog;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.JavaTag;
-import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * <code>Interface.java</code>...
@@ -59,7 +59,7 @@ public class Interface extends AbstractObject {
      * warnings can be added to the warnings list.
      */
     public void validate(final int specVersion, final IssueLog iLog)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final JavaClassDescription javaClass = this.tag.getJavaClassDescription();
         if (javaClass == null) {
             iLog.addError(this.getMessage("Must be declared in a Java class"));

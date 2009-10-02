@@ -49,11 +49,10 @@ public class IOUtils {
      * @throws IOException
      * @throws TransformerException
      */
-    public static final void parse(File file, ContentHandler handler)
-    throws IOException, TransformerException {
+    public static final void parse(InputStream file, ContentHandler handler)
+    throws TransformerException {
         final Transformer transformer = FACTORY.newTransformer();
-        transformer.transform(new StreamSource(new FileReader(file)),
-                new SAXResult(handler));
+        transformer.transform( new StreamSource( file ), new SAXResult( handler ) );
     }
 
     public static ContentHandler getSerializer(File file)

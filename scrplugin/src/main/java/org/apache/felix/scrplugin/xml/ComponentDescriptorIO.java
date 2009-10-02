@@ -20,14 +20,23 @@ package org.apache.felix.scrplugin.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.StringTokenizer;
 
 import javax.xml.transform.TransformerException;
 
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.om.*;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.xml.sax.*;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.om.Component;
+import org.apache.felix.scrplugin.om.Components;
+import org.apache.felix.scrplugin.om.Implementation;
+import org.apache.felix.scrplugin.om.Interface;
+import org.apache.felix.scrplugin.om.Property;
+import org.apache.felix.scrplugin.om.Reference;
+import org.apache.felix.scrplugin.om.Service;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -104,16 +113,14 @@ public class ComponentDescriptorIO {
 
     private static final String INTERFACE_QNAME = INTERFACE;
 
-    public static Components read(File file)
-    throws MojoExecutionException {
+    public static Components read(InputStream file)
+    throws SCRDescriptorException {
         try {
             final XmlHandler xmlHandler = new XmlHandler();
             IOUtils.parse(file, xmlHandler);
             return xmlHandler.components;
         } catch (TransformerException e) {
-            throw new MojoExecutionException("Unable to read xml from " + file, e);
-        } catch (IOException e) {
-            throw new MojoExecutionException("Unable to read xml from " + file, e);
+            throw new SCRDescriptorException("Unable to read xml from " + file, e);
         }
     }
 
@@ -121,18 +128,18 @@ public class ComponentDescriptorIO {
      * Write the component descriptors to the file.
      * @param components
      * @param file
-     * @throws MojoExecutionException
+     * @throws SCRDescriptorException
      */
     public static void write(Components components, File file, boolean isScrPrivateFile)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         try {
             generateXML(components, IOUtils.getSerializer(file), isScrPrivateFile);
         } catch (TransformerException e) {
-            throw new MojoExecutionException("Unable to write xml to " + file, e);
+            throw new SCRDescriptorException("Unable to write xml to " + file, e);
         } catch (SAXException e) {
-            throw new MojoExecutionException("Unable to generate xml for " + file, e);
+            throw new SCRDescriptorException("Unable to generate xml for " + file, e);
         } catch (IOException e) {
-            throw new MojoExecutionException("Unable to write xml to " + file, e);
+            throw new SCRDescriptorException("Unable to write xml to " + file, e);
         }
     }
 
@@ -428,25 +435,36 @@ public class ComponentDescriptorIO {
                     impl.setClassname(attributes.getValue("class"));
 
                 } else if (localName.equals(PROPERTY)) {
-                    final Property prop = new Property();
 
-                    prop.setName(attributes.getValue("name"));
-                    prop.setType(attributes.getValue("type"));
+                    // read the property, unless it is the service.pid
+                    // property which must not be inherited
+                    final String propName = attributes.getValue( "name" );
+                    if ( !org.osgi.framework.Constants.SERVICE_PID.equals( propName ) )
+                    {
+                        final Property prop = new Property();
 
-                    if ( attributes.getValue("value") != null) {
-                        prop.setValue(attributes.getValue("value"));
-                        this.currentComponent.addProperty(prop);
-                    } else {
-                        // hold the property pending as we have a multi value
-                        this.pendingProperty = prop;
-                    }
-                    // check for abstract properties
-                    prop.setLabel(attributes.getValue("label"));
-                    prop.setDescription(attributes.getValue("description"));
-                    prop.setCardinality(attributes.getValue("cardinality"));
-                    final String pValue = attributes.getValue("private");
-                    if ( pValue != null ) {
-                        prop.setPrivate(Boolean.valueOf(pValue).booleanValue());
+                        prop.setName( propName );
+                        prop.setType( attributes.getValue( "type" ) );
+
+                        if ( attributes.getValue( "value" ) != null )
+                        {
+                            prop.setValue( attributes.getValue( "value" ) );
+                            this.currentComponent.addProperty( prop );
+                        }
+                        else
+                        {
+                            // hold the property pending as we have a multi value
+                            this.pendingProperty = prop;
+                        }
+                        // check for abstract properties
+                        prop.setLabel( attributes.getValue( "label" ) );
+                        prop.setDescription( attributes.getValue( "description" ) );
+                        prop.setCardinality( attributes.getValue( "cardinality" ) );
+                        final String pValue = attributes.getValue( "private" );
+                        if ( pValue != null )
+                        {
+                            prop.setPrivate( Boolean.valueOf( pValue ).booleanValue() );
+                        }
                     }
 
                 } else if (localName.equals("properties")) {

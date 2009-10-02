@@ -18,18 +18,32 @@
  */
 package org.apache.felix.scrplugin.tags.qdox;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import org.apache.felix.scrplugin.tags.*;
+import org.apache.felix.scrplugin.JavaClassDescriptorManager;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaMethod;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.objectweb.asm.*;
+import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription;
+import org.objectweb.asm.ClassAdapter;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
-import com.thoughtworks.qdox.model.*;
+import com.thoughtworks.qdox.model.DocletTag;
+import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaParameter;
+import com.thoughtworks.qdox.model.JavaSource;
 import com.thoughtworks.qdox.model.Type;
 
 /**
@@ -55,7 +69,7 @@ public class QDoxJavaClassDescription
     /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getSuperClass()
      */
-    public JavaClassDescription getSuperClass() throws MojoExecutionException {
+    public JavaClassDescription getSuperClass() throws SCRDescriptorException {
         final JavaClass parent = this.javaClass.getSuperJavaClass();
         if ( parent != null ) {
             return this.manager.getJavaClassDescription(parent.getFullyQualifiedName());
@@ -85,7 +99,7 @@ public class QDoxJavaClassDescription
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagsByName(java.lang.String, boolean)
      */
     public JavaTag[] getTagsByName(String name, boolean inherited)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final DocletTag[] tags = this.javaClass.getTagsByName(name, false);
         JavaTag[] javaTags;
         if ( tags == null || tags.length == 0 ) {
@@ -126,7 +140,7 @@ public class QDoxJavaClassDescription
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getFieldByName(java.lang.String)
      */
     public JavaField getFieldByName(String name)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final com.thoughtworks.qdox.model.JavaField field = this.javaClass.getFieldByName(name);
         if ( field != null ) {
             return new QDoxJavaField(field, this);
@@ -141,7 +155,7 @@ public class QDoxJavaClassDescription
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getExternalFieldByName(java.lang.String)
      */
     public JavaField getExternalFieldByName(String name)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         int lastDot = name.lastIndexOf('.');
         // if there is no dot, this should be a static import
         if ( lastDot == -1 ) {
@@ -216,7 +230,7 @@ public class QDoxJavaClassDescription
         }
         try {
             return this.manager.getJavaClassDescription(className);
-        } catch (MojoExecutionException mee) {
+        } catch (SCRDescriptorException mee) {
             return null;
         }
     }
@@ -225,7 +239,7 @@ public class QDoxJavaClassDescription
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
      */
     public JavaClassDescription[] getImplementedInterfaces()
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final JavaClass[] interfaces = this.javaClass.getImplementedInterfaces();
         if ( interfaces == null || interfaces.length == 0 ) {
             return JavaClassDescription.EMPTY_RESULT;
@@ -241,7 +255,7 @@ public class QDoxJavaClassDescription
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getMethodBySignature(java.lang.String, java.lang.String[])
      */
     public JavaMethod getMethodBySignature(String name, String[] parameters)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         Type[] types = null;
         if ( parameters == null || parameters.length == 0 ) {
             types = new Type[0];
@@ -279,7 +293,7 @@ public class QDoxJavaClassDescription
     /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isA(java.lang.String)
      */
-    public boolean isA(String type) throws MojoExecutionException {
+    public boolean isA(String type) throws SCRDescriptorException {
         final Type qType = new Type(type);
         if ( this.javaClass.isA(type) ) {
             return true;
@@ -326,9 +340,9 @@ public class QDoxJavaClassDescription
                            final String className,
                            final boolean createBind,
                            final boolean createUnbind)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         // now do byte code manipulation
-        final String targetDirectory = this.manager.getProject().getBuild().getOutputDirectory();
+        final String targetDirectory = this.manager.getOutputDirectory();
         final String fileName = targetDirectory + File.separatorChar +  this.getName().replace('.', File.separatorChar) + ".class";
         final ClassNode cn = new ClassNode();
         try {
@@ -375,7 +389,7 @@ public class QDoxJavaClassDescription
             fos.write(writer.toByteArray());
             fos.close();
         } catch (Exception e) {
-            throw new MojoExecutionException("Unable to add methods to " + this.getName(), e);
+            throw new SCRDescriptorException("Unable to add methods to " + this.getName(), e);
         }
     }
 

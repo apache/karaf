@@ -21,7 +21,7 @@ package org.apache.felix.scrplugin.tags;
 
 import java.util.Comparator;
 
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.felix.scrplugin.SCRDescriptorException;
 
 
 /**
@@ -88,7 +88,7 @@ public class JavaClassDescriptionInheritanceComparator implements Comparator<Jav
                 return 1;
             }
         }
-        catch ( MojoExecutionException mee )
+        catch ( SCRDescriptorException mee )
         {
             // what shall we do ??
         }

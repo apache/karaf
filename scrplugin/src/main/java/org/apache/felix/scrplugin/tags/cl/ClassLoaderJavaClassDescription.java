@@ -18,13 +18,21 @@
  */
 package org.apache.felix.scrplugin.tags.cl;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.felix.scrplugin.Constants;
+import org.apache.felix.scrplugin.JavaClassDescriptorManager;
+import org.apache.felix.scrplugin.SCRDescriptorException;
 import org.apache.felix.scrplugin.om.Component;
-import org.apache.felix.scrplugin.tags.*;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaField;
+import org.apache.felix.scrplugin.tags.JavaMethod;
+import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**
  * <code>ClassLoaderJavaClassDescription.java</code>...
@@ -61,7 +69,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getFieldByName(java.lang.String)
      */
-    public JavaField getFieldByName(String name) throws MojoExecutionException {
+    public JavaField getFieldByName(String name) throws SCRDescriptorException {
         Field field = null;
         try {
             field = this.clazz.getField(name);
@@ -83,22 +91,22 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getExternalFieldByName(java.lang.String)
      */
     public JavaField getExternalFieldByName(String name)
-    throws MojoExecutionException {
-        throw new MojoExecutionException("getExternalFieldByName not supported for this class.");
+    throws SCRDescriptorException {
+        throw new SCRDescriptorException("getExternalFieldByName not supported for this class.");
     }
 
     /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getReferencedClass(java.lang.String)
      */
     public JavaClassDescription getReferencedClass(String referencedName)
-    throws MojoExecutionException {
-        throw new MojoExecutionException("getReferencedClass not supported for this class.");
+    throws SCRDescriptorException {
+        throw new SCRDescriptorException("getReferencedClass not supported for this class.");
     }
 
     /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
      */
-    public JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException {
+    public JavaClassDescription[] getImplementedInterfaces() throws SCRDescriptorException {
         Class<?>[] implemented = clazz.getInterfaces();
         if (implemented.length == 0) {
             return JavaClassDescription.EMPTY_RESULT;
@@ -115,7 +123,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getMethodBySignature(java.lang.String, java.lang.String[])
      */
     public JavaMethod getMethodBySignature(String name, String[] parameters)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         Class<?>[] classParameters = null;
         if ( parameters != null ) {
             classParameters = new Class[parameters.length];
@@ -133,7 +141,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         } catch (NoClassDefFoundError ncdfe) {
             // if this occurs it usually means that a problem with the maven
             // scopes exists.
-            throw new MojoExecutionException("Class loading error. This error usually occurs if you have a " +
+            throw new SCRDescriptorException("Class loading error. This error usually occurs if you have a " +
                     "service inheriting from a class coming from another bundle and that class using a " +
                     "third library and all dependencies are specified with scope 'provided'.", ncdfe);
         } catch (NoSuchMethodException e) {
@@ -166,7 +174,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getSuperClass()
      */
-    public JavaClassDescription getSuperClass() throws MojoExecutionException {
+    public JavaClassDescription getSuperClass() throws SCRDescriptorException {
         if ( this.clazz.getSuperclass() != null ) {
             return this.manager.getJavaClassDescription(this.clazz.getSuperclass().getName());
         }
@@ -186,7 +194,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagsByName(java.lang.String, boolean)
      */
     public JavaTag[] getTagsByName(String name, boolean inherited)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         JavaTag[] javaTags = EMPTY_TAGS;
         if ( this.component != null ) {
             if ( Constants.SERVICE.equals(name) ) {

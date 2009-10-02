@@ -22,9 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.IssueLog;
-import org.apache.felix.scrplugin.tags.*;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.felix.scrplugin.SCRDescriptorException;
+import org.apache.felix.scrplugin.helper.IssueLog;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaMethod;
+import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**
  * <code>Component</code>
@@ -255,7 +257,7 @@ public class Component extends AbstractObject {
      * warnings can be added to the warnings list.
      */
     public void validate(final int specVersion, final IssueLog iLog)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         final int currentIssueCount = iLog.getNumberOfErrors();
 
         // nothing to check if this is ignored
@@ -374,7 +376,7 @@ public class Component extends AbstractObject {
                                         final String methodName,
                                         final boolean isActivate,
                                         final IssueLog iLog)
-    throws MojoExecutionException {
+    throws SCRDescriptorException {
         // first candidate is (de)activate(ComponentContext)
         JavaMethod method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_COMPONENT_CONTEXT});
         if ( method == null ) {
