@@ -442,9 +442,10 @@ class ServiceRegistrationImpl implements ServiceRegistration
             // the exporting modules from the package wiring to determine if we
             // need to filter the service reference.
 
-            // Case 1: Always include service reference.
-            if (requesterWire == null)
+            // Case r=null && p = null
+            if ((requesterWire == null) && (providerWire == null))
             {
+                // if r has no access then true, otherwise service registration must have same class as r
                 try
                 {
                     Class requestClass = requesterModule.getClassByDelegation(className);
@@ -455,11 +456,43 @@ class ServiceRegistrationImpl implements ServiceRegistration
                     allow = true;
                 }
             }
-
-            // Case 2: Only include service reference if the provider and
-            // requester are using the same class.
-            else if (providerWire == null)
+            else if ((requesterWire == null) && (providerWire != null))
             {
+                // r = null && p != null && p == r
+                if (providerWire.getExporter().equals(requesterModule))
+                {
+                    allow = true;
+                }
+                // otherwise (r = null && p != null && p != r)
+                else
+                {
+                    // if r has no access true or if r's class is same as provider wire's class true (otherwise still possibly check registration's class)
+                    try
+                    {
+                        Class requestClass = requesterModule.getClassByDelegation(className);
+                        try
+                        {
+                            allow = providerWire.getClass(className) == requestClass;
+                        }
+                        catch (Exception ex)
+                        {
+                            allow = false;
+                        }
+                        if (!allow)
+                        {
+                            allow = getRegistration().isClassAccessible(requestClass);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        allow = true;
+                    }
+                }
+            }
+            else if ((requesterWire != null) && (providerWire == null))
+            {
+                // Only include service reference if the provider and
+                // requester are using the same class.
                 // If the provider is the exporter of the requester's package, then check
                 // if the requester is wired to the latest version of the provider, if so
                 // then allow else don't (the provider has been updated but not refreshed).
@@ -488,10 +521,10 @@ class ServiceRegistrationImpl implements ServiceRegistration
                     }
                 }
             }
-            // Case 3: Include service reference if the wires have the
-            // same source module.
             else
             {
+                // Include service reference if the wires have the
+                // same source module.
                 allow = providerWire.getExporter().equals(requesterWire.getExporter());
             }
 
