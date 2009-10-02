@@ -58,7 +58,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     private Set<IPath> sourcePaths;
     private Set<String> classpath;
     private Set<String> packages;
-    private Set<String> dlPackages;
     private IPath location;
 
     private IPath sourcePathLocation;
@@ -73,7 +72,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
         sourcePaths = new HashSet<IPath>();
         classpath = new HashSet<String>();
         packages = new HashSet<String>();
-        dlPackages = new HashSet<String>();
     }
 
 
@@ -388,24 +386,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     public boolean removePackage( String pkg )
     {
         return packages.remove( pkg );
-    }
-
-
-    public Set<String> getDownloadPackages()
-    {
-        return dlPackages;
-    }
-
-
-    public void addDownloadPackage( String pkg )
-    {
-        dlPackages.add( pkg );
-    }
-
-
-    public boolean removeDownloadPackage( String pkg )
-    {
-        return dlPackages.remove( pkg );
     }
 
 
