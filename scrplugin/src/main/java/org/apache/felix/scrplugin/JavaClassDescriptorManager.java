@@ -18,6 +18,7 @@
  */
 package org.apache.felix.scrplugin;
 
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,10 +36,16 @@ import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
 import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaSource;
 
+
 /**
- * The <code>JavaClassDescriptorManager</code>
+ * The <code>JavaClassDescriptorManager</code> must be implemented to provide
+ * access to the java sources to be scanned for descriptor annotations and
+ * JavaDoc tags, the descriptors of components from the class path and the
+ * location of the generated class files to be able to add the bind and unbind
+ * methods.
  */
-public abstract class JavaClassDescriptorManager {
+public abstract class JavaClassDescriptorManager
+{
 
     /** The maven log. */
     protected final Log log;
@@ -60,6 +67,7 @@ public abstract class JavaClassDescriptorManager {
     /** Process Annotations? */
     private final boolean processAnnotations;
 
+
     /**
      * Construct a new manager.
      * @param log
@@ -71,40 +79,77 @@ public abstract class JavaClassDescriptorManager {
      * @throws SCRDescriptorFailureException
      * @throws SCRDescriptorException
      */
-    public JavaClassDescriptorManager(final Log          log,
-                                      final ClassLoader        classLoader,
-                                      final String[]     annotationTagProviders,
-                                      final boolean      parseJavadocs,
-                                      final boolean      processAnnotations)
-    throws SCRDescriptorFailureException {
+    public JavaClassDescriptorManager( final Log log, final ClassLoader classLoader,
+        final String[] annotationTagProviders, final boolean parseJavadocs, final boolean processAnnotations )
+        throws SCRDescriptorFailureException
+    {
         this.processAnnotations = processAnnotations;
         this.parseJavadocs = parseJavadocs;
         this.log = log;
-        this.annotationTagProviderManager = new AnnotationTagProviderManager(annotationTagProviders);
+        this.annotationTagProviderManager = new AnnotationTagProviderManager( annotationTagProviders );
         this.classloader = classLoader;
         ClassUtil.classLoader = this.classloader;
     }
 
+
+    /**
+     * Returns the QDox JavaSource instances representing the source files
+     * for which the Declarative Services and Metatype descriptors have to be
+     * generated.
+     *
+     * @throws SCRDescriptorException May be thrown if an error occurrs gathering
+     *      the java sources.
+     */
+    protected abstract JavaSource[] getSources() throws SCRDescriptorException;
+
+
+    /**
+     * Returns a map of component descriptors which may be extended by the java
+     * sources returned by the {@link #getSources()} method.
+     *
+     * @throws SCRDescriptorException May be thrown if an error occurrs gethering
+     *      the component descriptors.
+     */
+    protected abstract Map<String, Component> getComponentDescriptors() throws SCRDescriptorException;
+
+
+    /**
+     * Returns the absolute filesystem path to the directory where the classes
+     * compiled from the java source files (see {@link #getSources()}) have been
+     * placed.
+     * <p>
+     * This method is called to find the class files to which bind and unbind
+     * methods are to be added.
+     */
+    public abstract String getOutputDirectory();
+
+
     /**
      * Return the log.
      */
-    public Log getLog() {
+    public Log getLog()
+    {
         return this.log;
     }
+
 
     /**
      * Return the class laoder.
      */
-    public ClassLoader getClassLoader() {
+    public ClassLoader getClassLoader()
+    {
         return this.classloader;
     }
+
 
     /**
      * @return Annotation tag provider manager
      */
-    public AnnotationTagProviderManager getAnnotationTagProviderManager() {
+    public AnnotationTagProviderManager getAnnotationTagProviderManager()
+    {
         return this.annotationTagProviderManager;
     }
+
 
     /**
      * Returns <code>true</code> if this class descriptor manager is parsing
@@ -115,6 +160,7 @@ public abstract class JavaClassDescriptorManager {
         return parseJavadocs;
     }
 
+
     /**
      * Returns <code>true</code> if this class descriptor manager is parsing
      * Java 5 annotations.
@@ -124,31 +170,36 @@ public abstract class JavaClassDescriptorManager {
         return processAnnotations;
     }
 
-    protected Components parseServiceComponentDescriptor(InputStream file)
-    throws SCRDescriptorException {
-        final Components list = ComponentDescriptorIO.read(file);
-        return list;
-    }
 
     /**
-     * Get the absolute path to the target directory where the class files are
-     * compiled to.
+     * Parses the descriptors read from the given input stream. This method
+     * may be called by the {@link #getComponentDescriptors()} method to parse
+     * the descriptors gathered in an implementation dependent way.
+     *
+     * @throws SCRDescriptorException If an error occurrs reading the descriptors
+     *      from the stream.
      */
-    public abstract String getOutputDirectory();
+    protected Components parseServiceComponentDescriptor( InputStream file ) throws SCRDescriptorException
+    {
+        return ComponentDescriptorIO.read( file );
+    }
 
 
     /**
      * Return all source descriptions of this project.
      * @return All contained java class descriptions.
      */
-    public JavaClassDescription[] getSourceDescriptions() throws SCRDescriptorException {
+    public JavaClassDescription[] getSourceDescriptions() throws SCRDescriptorException
+    {
         final JavaClass[] javaClasses = getJavaClassesFromSources();
         final JavaClassDescription[] descs = new JavaClassDescription[javaClasses.length];
-        for(int i=0; i<javaClasses.length; i++) {
-            descs[i] = this.getJavaClassDescription(javaClasses[i].getFullyQualifiedName());
+        for ( int i = 0; i < javaClasses.length; i++ )
+        {
+            descs[i] = this.getJavaClassDescription( javaClasses[i].getFullyQualifiedName() );
         }
         return descs;
     }
+
 
     /**
      * Get a java class description for the class.
@@ -156,69 +207,86 @@ public abstract class JavaClassDescriptorManager {
      * @return The java class description.
      * @throws SCRDescriptorException
      */
-    public JavaClassDescription getJavaClassDescription(String className)
-    throws SCRDescriptorException {
-        JavaClassDescription result = this.javaClassDescriptions.get(className);
-        if ( result == null ) {
-            this.log.debug("Searching description for: " + className);
+    public JavaClassDescription getJavaClassDescription( String className ) throws SCRDescriptorException
+    {
+        JavaClassDescription result = this.javaClassDescriptions.get( className );
+        if ( result == null )
+        {
+            this.log.debug( "Searching description for: " + className );
             int index = 0;
             final JavaClass[] javaClasses = getJavaClassesFromSources();
-            while ( result == null && index < javaClasses.length) {
+            while ( result == null && index < javaClasses.length )
+            {
                 final JavaClass javaClass = javaClasses[index];
-                if ( javaClass.getFullyQualifiedName().equals(className) ) {
-                    try {
+                if ( javaClass.getFullyQualifiedName().equals( className ) )
+                {
+                    try
+                    {
                         // check for java annotation descriptions - fallback to QDox if none found
-                        Class<?> clazz = this.classloader.loadClass(className);
-                        if (this.processAnnotations && getAnnotationTagProviderManager().hasScrPluginAnnotation(javaClass)) {
-                            this.log.debug("Found java annotation description for: " + className);
-                            result = new AnnotationJavaClassDescription(clazz, javaClasses[index], this);
-                        } else if ( this.parseJavadocs ) {
-                            this.log.debug("Found qdox description for: " + className);
-                            result = new QDoxJavaClassDescription(clazz, javaClasses[index], this);
+                        Class<?> clazz = this.classloader.loadClass( className );
+                        if ( this.processAnnotations
+                            && getAnnotationTagProviderManager().hasScrPluginAnnotation( javaClass ) )
+                        {
+                            this.log.debug( "Found java annotation description for: " + className );
+                            result = new AnnotationJavaClassDescription( clazz, javaClasses[index], this );
                         }
-                    } catch (ClassNotFoundException e) {
-                        throw new SCRDescriptorException("Unable to load class " + className);
+                        else if ( this.parseJavadocs )
+                        {
+                            this.log.debug( "Found qdox description for: " + className );
+                            result = new QDoxJavaClassDescription( clazz, javaClasses[index], this );
+                        }
                     }
-                } else {
+                    catch ( ClassNotFoundException e )
+                    {
+                        throw new SCRDescriptorException( "Unable to load class " + className );
+                    }
+                }
+                else
+                {
                     index++;
                 }
             }
-            if ( result == null ) {
-                try {
-                    this.log.debug("Generating classloader description for: " + className);
-                    result = new ClassLoaderJavaClassDescription(this.classloader.loadClass(className), this.getComponentDescriptors().get(className), this);
-                } catch (ClassNotFoundException e) {
-                    throw new SCRDescriptorException("Unable to load class " + className);
+            if ( result == null )
+            {
+                try
+                {
+                    this.log.debug( "Generating classloader description for: " + className );
+                    result = new ClassLoaderJavaClassDescription( this.classloader.loadClass( className ), this
+                        .getComponentDescriptors().get( className ), this );
+                }
+                catch ( ClassNotFoundException e )
+                {
+                    throw new SCRDescriptorException( "Unable to load class " + className );
                 }
             }
-            this.javaClassDescriptions.put(className, result);
+            this.javaClassDescriptions.put( className, result );
         }
         return result;
     }
-
-
-    protected abstract JavaSource[] getSources() throws SCRDescriptorException;
-    protected abstract Map<String, Component> getComponentDescriptors() throws SCRDescriptorException;
 
 
     /**
      * Get a list of all {@link JavaClass} definitions four all source files (including nested/inner classes)
      * @return List of {@link JavaClass} definitions
      */
-    private JavaClass[] getJavaClassesFromSources() throws SCRDescriptorException {
+    private JavaClass[] getJavaClassesFromSources() throws SCRDescriptorException
+    {
         final JavaSource[] sources = this.getSources();
         final List<JavaClass> classes = new ArrayList<JavaClass>();
-        for(int i=0; i<sources.length; i++) {
-            for(int j=0; j<sources[i].getClasses().length; j++) {
+        for ( int i = 0; i < sources.length; i++ )
+        {
+            for ( int j = 0; j < sources[i].getClasses().length; j++ )
+            {
                 final JavaClass clazz = sources[i].getClasses()[j];
-                classes.add(clazz);
-                for (int k=0; k<clazz.getNestedClasses().length; k++) {
+                classes.add( clazz );
+                for ( int k = 0; k < clazz.getNestedClasses().length; k++ )
+                {
                     final JavaClass nestedClass = clazz.getNestedClasses()[k];
-                    classes.add(nestedClass);
+                    classes.add( nestedClass );
                 }
             }
         }
-        return classes.toArray(new JavaClass[classes.size()]);
+        return classes.toArray( new JavaClass[classes.size()] );
     }
 
 }

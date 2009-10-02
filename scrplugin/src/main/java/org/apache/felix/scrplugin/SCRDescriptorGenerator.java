@@ -51,11 +51,19 @@ import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
 import org.apache.felix.scrplugin.xml.MetaTypeIO;
 import org.osgi.service.metatype.MetaTypeService;
 
+
 /**
  * The <code>SCRDescriptorGenerator</code> class does the hard work of
  * generating the SCR descriptors. This class is being instantiated and
  * configured by clients and the {@link #execute()} method called to generate
  * the descriptor files.
+ * <p>
+ * When using this class carefully consider calling <i>all</i> setter methods
+ * to properly configure the generator. All setter method document, which
+ * default value is assumed for the respective property if the setter is
+ * not called.
+ * <p>
+ * Instances of this class are not thread save and should not be reused.
  */
 public class SCRDescriptorGenerator
 {
@@ -79,14 +87,22 @@ public class SCRDescriptorGenerator
     private String specVersion = null;
 
 
+    /**
+     * Create an instance of this generator using the given {@link Log}
+     * instance of logging.
+     */
     public SCRDescriptorGenerator( Log logger )
     {
         this.logger = logger;
     }
 
 
-    //---------- property setup (write-only for now)
-
+    /**
+     * Sets the directory where the descriptor files will be created.
+     * <p>
+     * This field has no default value and this setter <b>must</b> called prior
+     * to calling {@link #execute()}.
+     */
     public void setOutputDirectory( File outputDirectory )
     {
         this.outputDirectory = outputDirectory;
@@ -94,51 +110,122 @@ public class SCRDescriptorGenerator
 
 
     /**
-     * Sets the class path used for resolving tags and annotations. The first
-     * entry in the class path is assumed to be the build target location.
+     * Sets the {@link JavaClassDescriptorManager} instance used to access
+     * existing descriptors and to parse JavaDoc tags as well as interpret
+     * the SCR annotations.
+     * <p>
+     * This field has no default value and this setter <b>must</b> called prior
+     * to calling {@link #execute()}.
      */
     public void setDescriptorManager( JavaClassDescriptorManager descriptorManager )
     {
         this.descriptorManager = descriptorManager;
     }
 
+
+    /**
+     * Sets the name of the SCR declaration descriptor file. This file will be
+     * created in the <i>OSGI-INF</i> directory below the
+     * {@link #setOutputDirectory(File) output directory}.
+     * <p>
+     * This file will be overwritten if already existing. If no descriptors
+     * are created the file is actually removed.
+     * <p>
+     * The default value of this property is <code>serviceComponents.xml</code>.
+     */
     public void setFinalName( String finalName )
     {
         this.finalName = finalName;
     }
 
 
+    /**
+     * Sets the name of the file taking the Metatype Service descriptors. This
+     * file will be created in the <i>OSGI-INF/metatype</i> directory below the
+     * {@link #setOutputDirectory(File) output directory}.
+     * <p>
+     * This file will be overwritten if already existing. If no descriptors
+     * are created the file is actually removed.
+     * <p>
+     * The default value of this property is <code>metatype.xml</code>.
+     */
     public void setMetaTypeName( String metaTypeName )
     {
         this.metaTypeName = metaTypeName;
     }
 
 
+    /**
+     * Defines whether bind and unbind methods are automatically created by
+     * the SCR descriptor generator.
+     * <p>
+     * The generator uses the ASM library to create the method byte codes
+     * directly inside the class files. If bind and unbind methods are not
+     * to be created, the generator fails if such methods are missing.
+     * <p>
+     * The default value of this property is <code>true</code>.
+     */
     public void setGenerateAccessors( boolean generateAccessors )
     {
         this.generateAccessors = generateAccessors;
     }
 
 
+    /**
+     * Defines whether warnings should be considered as errors and thus cause
+     * the generation process to fail.
+     * <p>
+     * The default value of this property is <code>false</code>.
+     */
     public void setStrictMode( boolean strictMode )
     {
         this.strictMode = strictMode;
     }
 
 
+    /**
+     * Sets global properties to be set for each descriptor. If a descriptor
+     * provides properties of the same name, the descriptor properties are preferred
+     * over the properties provided here.
+     * <p>
+     * The are no default global properties.
+     */
     public void setProperties( Map<String, String> properties )
     {
         this.properties = new HashMap<String, String>( properties );
     }
 
 
+    /**
+     * Sets the Declarative Services specification version number to be forced
+     * on the declarations.
+     * <p>
+     * Supported values for this property are <code>null</code> to autodetect
+     * the specification version, <code>1.0</code> to force 1.0 descriptors and
+     * <code>1.1</code> to force 1.1 descriptors. If 1.0 descriptors are forced
+     * the generation fails if a descriptor requires 1.1 functionality.
+     * <p>
+     * The default is to generate the descriptor version according to the
+     * capabilities used by the descriptors. If no 1.1 capabilities, such as
+     * <code>configuration-policy</code>, are used, version 1.0 is used,
+     * otherwise a 1.1 descriptor is generated.
+     */
     public void setSpecVersion( String specVersion )
     {
         this.specVersion = specVersion;
     }
 
-    //---------- descriptor generation
 
+    /**
+     * Actually generates the Declarative Services and Metatype descriptors
+     * scanning the java sources provided by the
+     * {@link #setDescriptorManager(JavaClassDescriptorManager) descriptor manager}.
+     *
+     * @return <code>true</code> if descriptors have been generated.
+     *
+     * @throws SCRDescriptorException
+     * @throws SCRDescriptorFailureException
+     */
     public boolean execute() throws SCRDescriptorException, SCRDescriptorFailureException
     {
         this.logger.debug( "Starting SCRDescriptorMojo...." );
