@@ -44,74 +44,60 @@
 	</scm>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>1.0.0</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>1.0.0</version>
-			<scope>compile</scope>
-			<exclusions>
-			  <!-- exclude foundation jar, conflicts with JDK 1.5 library classes -->
-			  <exclusion>
-			    <groupId>org.apache.felix</groupId>
-			    <artifactId>org.osgi.foundation</artifactId>
-			  </exclusion>
-			</exclusions>
-		</dependency>
-		
-		<dependency>
-		    <groupId>asm</groupId>
-		    <artifactId>asm-all</artifactId>
-		    <version>3.1</version>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>2.0.7</version>
+        </dependency>
 
-		<dependency>
-		    <groupId>commons-io</groupId>
-		    <artifactId>commons-io</artifactId>
-		    <version>1.4</version>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-archiver</artifactId>
+            <version>2.2</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-plugin-api</artifactId>
-			<version>2.0.7</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-archiver</artifactId>
-			<version>2.2</version>
-		</dependency>
-
+        <!-- JavaDoc Tags -->
 		<dependency>
 			<groupId>com.thoughtworks.qdox</groupId>
 			<artifactId>qdox</artifactId>
 			<version>1.9.1</version>
 		</dependency>
 
-    <!-- Logging support -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.4.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.4.3</version>
-        </dependency>
-        
+        <!-- SCR Annotations -->
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
 			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
-		
+        
+        <!-- Sling Servlet SCR Annotation -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- bind/unbind method generation -->
+        <dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm-all</artifactId>
+            <version>3.1</version>
+        </dependency>
+
+        <!-- OSGi APIs -->		
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.0.0</version>           
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <version>4.0.0</version>
+            <scope>compile</scope>
+        </dependency>
 	</dependencies>
 	
 	<build>
