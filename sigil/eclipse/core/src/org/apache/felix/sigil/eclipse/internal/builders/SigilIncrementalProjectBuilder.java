@@ -201,7 +201,9 @@ public class SigilIncrementalProjectBuilder extends IncrementalProjectBuilder
                         logerror( err );
                     }
                 }
-                throw SigilCore.newCoreException( "Failed to create: " + id + ": " + e, e );
+                // FELIX-1690 - error is already logged no need to throw error as this
+                // results in noisy error dialog box
+                //throw SigilCore.newCoreException( "Failed to create: " + id + ": " + e, e );
             }
             finally
             {
