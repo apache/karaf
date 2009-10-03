@@ -63,8 +63,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     private IPath sourcePathLocation;
     private IPath licencePathLocation;
     private IPath sourceRootPath;
-    private String bundleHost;
-
 
     public SigilBundle()
     {
@@ -333,19 +331,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     {
         this.licencePathLocation = licencePathLocation;
     }
-
-
-    public String getFragmentHost()
-    {
-        return bundleHost;
-    }
-
-
-    public void setFragmentHost( String symbolicName )
-    {
-        this.bundleHost = symbolicName;
-    }
-
 
     public String getElementName()
     {
