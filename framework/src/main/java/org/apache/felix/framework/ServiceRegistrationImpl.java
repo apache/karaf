@@ -428,24 +428,30 @@ class ServiceRegistrationImpl implements ServiceRegistration
             IModule providerModule = ((BundleImpl) m_bundle).getCurrentModule();
             IWire providerWire = Util.getWire(providerModule, pkgName);
 
-            // There are three situations that may occur here:
-            //   1. The requester does not have a wire for the package.
-            //   2. The provider does not have a wire for the package.
-            //   3. Both have a wire for the package.
-            // For case 1, we only filter the service reference if the requester
-            // has private acess to the class and its not the same class as the
-            // registering bundle's class; otherwise we assume the requester is
-            // doing some sort of reflection-based lookup and allow access.
-            // For case 2, the provider will not have a wire if it is exporting
-            // the package, so we need to determine if the requester is wired to
-            // it or somehow using the same class. For case 3, we simply compare
-            // the exporting modules from the package wiring to determine if we
-            // need to filter the service reference.
+            // There are four situations that may occur here:
+            //   1. Neither the requester, nor provider have wires for the package.
+            //   2. The requester does not have a wire for the package.
+            //   3. The provider does not have a wire for the package.
+            //   4. Both the requester and provider have a wire for the package.
+            // For case 1, if the requester does not have access to the class at
+            // all, we assume it is using reflection and do not filter. If the
+            // requester does have access to the class, then we make sure it is
+            // the same class as the service. For case 2, we do not filter if the
+            // requester is the exporter of the package to which the provider of
+            // the service is wired. Otherwise, as in case 1, if the requester
+            // does not have access to the class at all, we do not filter, but if
+            // it does have access we check if it is the same class accessible to
+            // the providing module. For case 3, the provider will not have a wire
+            // if it is exporting the package, so we determine if the requester
+            // is wired to it or somehow using the same class. For case 4, we
+            // simply compare the exporting modules from the package wiring to
+            // determine if we need to filter the service reference.
 
-            // Case r=null && p = null
+            // Case 1: Both requester and provider have no wire.
             if ((requesterWire == null) && (providerWire == null))
             {
-                // if r has no access then true, otherwise service registration must have same class as r
+                // If requester has no access then true, otherwise service
+                // registration must have same class as requester.
                 try
                 {
                     Class requestClass = requesterModule.getClassByDelegation(className);
@@ -453,46 +459,49 @@ class ServiceRegistrationImpl implements ServiceRegistration
                 }
                 catch (Exception ex)
                 {
+                    // Requester has no access to the class, so allow it, since
+                    // we assume the requester is using reflection.
                     allow = true;
                 }
             }
+            // Case 2: Requester has no wire, but provider does.
             else if ((requesterWire == null) && (providerWire != null))
             {
-                // r = null && p != null && p == r
+                // Allow if the requester is the exporter of the provider's wire.
                 if (providerWire.getExporter().equals(requesterModule))
                 {
                     allow = true;
                 }
-                // otherwise (r = null && p != null && p != r)
+                // Otherwise, check if the requester has access to the class and,
+                // if so, if it is the same class as the provider.
                 else
                 {
-                    // if r has no access true or if r's class is same as provider wire's class true (otherwise still possibly check registration's class)
                     try
                     {
+                        // Try to load class from requester.
                         Class requestClass = requesterModule.getClassByDelegation(className);
                         try
                         {
-                            allow = providerWire.getClass(className) == requestClass;
+                            // If requester has access to the class, verify it is the
+                            // same class as the provider.
+                            allow = (providerWire.getClass(className) == requestClass);
                         }
                         catch (Exception ex)
                         {
                             allow = false;
                         }
-                        if (!allow)
-                        {
-                            allow = getRegistration().isClassAccessible(requestClass);
-                        }
                     }
                     catch (Exception ex)
                     {
+                        // Requester has no access to the class, so allow it, since
+                        // we assume the requester is using reflection.
                         allow = true;
                     }
                 }
             }
+            // Case 3: Requester has a wire, but provider does not.
             else if ((requesterWire != null) && (providerWire == null))
             {
-                // Only include service reference if the provider and
-                // requester are using the same class.
                 // If the provider is the exporter of the requester's package, then check
                 // if the requester is wired to the latest version of the provider, if so
                 // then allow else don't (the provider has been updated but not refreshed).
@@ -521,6 +530,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
                     }
                 }
             }
+            // Case 4: Both requester and provider have a wire.
             else
             {
                 // Include service reference if the wires have the
