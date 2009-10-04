@@ -50,6 +50,6 @@ public class VersionCommandImpl implements Command
 
     public void execute(String s, PrintStream out, PrintStream err)
     {
-        out.println(m_context.getBundle(0).getHeaders(Constants.BUNDLE_VERSION));
+        out.println(m_context.getBundle(0).getHeaders().get(Constants.BUNDLE_VERSION));
     }
 }
