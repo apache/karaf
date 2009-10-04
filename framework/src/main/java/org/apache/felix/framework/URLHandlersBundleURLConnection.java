@@ -55,7 +55,7 @@ class URLHandlersBundleURLConnection extends URLConnection
             Object tmp = URLHandlers.getFrameworkFromContext();
             if (tmp instanceof Felix)
             {
-                m_framework = (Felix) framework;
+                m_framework = (Felix) tmp;
             }
         }
 

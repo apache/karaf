@@ -449,7 +449,8 @@ public class R4LibraryClause
     {
         value = value.toLowerCase();
 
-        if (value.startsWith("x86-64") || value.startsWith("amd64"))
+        if (value.startsWith("x86-64") || value.startsWith("amd64") || 
+            value.startsWith("em64") || value.startsWith("x86_64"))
         {
             return "x86-64";
         }
