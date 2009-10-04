@@ -22,6 +22,7 @@ import java.io.PrintStream;
 
 import org.apache.felix.shell.Command;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 public class VersionCommandImpl implements Command
 {
@@ -49,6 +50,6 @@ public class VersionCommandImpl implements Command
 
     public void execute(String s, PrintStream out, PrintStream err)
     {
-        out.println(m_context.getProperty("felix.version"));
+        out.println(m_context.getBundle(0).getHeaders(Constants.BUNDLE_VERSION));
     }
 }
