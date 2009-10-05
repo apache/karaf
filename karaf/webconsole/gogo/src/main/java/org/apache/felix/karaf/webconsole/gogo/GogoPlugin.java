@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.PrintStream;
 import java.io.InputStream;
+import java.util.concurrent.Callable;
 import java.util.zip.GZIPOutputStream;
 import java.util.List;
 import java.net.URL;
@@ -198,13 +199,20 @@ public class GogoPlugin extends AbstractResourceAwareWebConsolePlugin {
                 out = new PipedInputStream();
                 PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
 
+                final Callable<Boolean> printStackTraces = new Callable<Boolean>() {
+                    public Boolean call() {
+                        return Boolean.valueOf(bundleContext.getProperty(Console.PRINT_STACK_TRACES));
+                    }
+                };
+
                 console = new Console(commandProcessor,
                                       new PipedInputStream(in),
                                       pipedOut,
                                       pipedOut,
                                       new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
                                       new AggregateCompleter(completers),
-                                      null);
+                                      null,
+                                      printStackTraces);
                 CommandSession session = console.getSession();
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 session.put("USER", "karaf");
