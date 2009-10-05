@@ -22,7 +22,7 @@ You can either:
   * build the web app using "mvn package" and deploy the web application to your favorite web container
   * run the web app from the command line using the "mvn package jetty:run" command
   
-Once the web application is started, you can use the Apache ServiceMix Kernel client to connect to the running server:
-  cd [smx-kernel-install-dir]
-  java -jar lib/servicemix-client.jar
+Once the web application is started, you can use the Apache Felix Karaf client to connect to the running server:
+  cd [karaf-install-dir]
+  java -jar lib/karaf-client.jar
   
