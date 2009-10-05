@@ -466,7 +466,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
         {
             log(
                 LogService.LOG_ERROR,
-                "Updating the service references caused at least on reference to become unsatisifed, deactivating component",
+                "Updating the service references caused at least on reference to become unsatisfied, deactivating component",
                 null );
             return false;
         }

@@ -135,7 +135,7 @@ public class ComponentConfigurationTest extends ComponentTestBase
         deleteConfig( pid1 );
         delay();
 
-        // expect a single unsatisifed component
+        // expect a single unsatisfied component
         final Component[] configsDeleted = findComponentsByName( factoryPid );
         TestCase.assertNotNull( configsDeleted );
         TestCase.assertEquals( 1, configsDeleted.length );

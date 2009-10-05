@@ -790,7 +790,7 @@ public abstract class AbstractComponentManager implements Component
 
     /**
      * Activates this component if satisfied. If any of the dependencies is
-     * not met, the component is not activated and remains unsatisifed.
+     * not met, the component is not activated and remains unsatisfied.
      * <p>
      * This method schedules the activation for asynchronous execution.
      */
