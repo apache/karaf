@@ -40,6 +40,9 @@
         <command name="shell/info">
             <action class="org.apache.felix.karaf.shell.commands.InfoAction"/>
         </command>
+        <command name="shell/clear">
+            <action class="org.apache.felix.karaf.shell.commands.ClearAction"/>
+        </command>
         <command name="shell/java">
             <action class="org.apache.felix.karaf.shell.commands.JavaAction"/>
         </command>
