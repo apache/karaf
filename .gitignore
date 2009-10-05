@@ -1,0 +1,11 @@
+.checkstyle
+.classpath
+.pmd
+.project
+.ruleset
+.settings/
+target/
+*.iml
+*.iws
+*.ipr
+velocity.log
