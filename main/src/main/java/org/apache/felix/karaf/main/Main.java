@@ -132,6 +132,8 @@ public class Main {
 
     public static final String PROPERTY_LOCK_LEVEL = "karaf.lock.level";
 
+    public static final String DEFAULT_REPO = "karaf.default.repository";
+
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
     Logger LOG = Logger.getLogger(this.getClass().getName());
@@ -714,17 +716,10 @@ public class Main {
 
         try {
             File file = new File(new File(karafBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
-            configPropURL = file.toURL();
+            configPropURL = file.toURI().toURL();
 
             file = new File(new File(karafBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
-            startupPropURL = file.toURL();
-
-            if (karafBase.equals(karafHome)) {
-                bundleDirs.add(new File(karafHome, "system"));
-            } else {
-                bundleDirs.add(new File(karafBase, "system"));
-                bundleDirs.add(new File(karafHome, "system"));
-            }
+            startupPropURL = file.toURI().toURL();
 
         }
         catch (MalformedURLException ex) {
@@ -735,6 +730,15 @@ public class Main {
 
         Properties configProps = loadPropertiesFile(configPropURL);
         Properties startupProps = loadPropertiesFile(startupPropURL);
+
+        String defaultRepo = configProps.getProperty(DEFAULT_REPO, "system");
+
+        if (karafBase.equals(karafHome)) {
+            bundleDirs.add(new File(karafHome, defaultRepo));
+        } else {
+            bundleDirs.add(new File(karafBase, defaultRepo));
+            bundleDirs.add(new File(karafHome, defaultRepo));
+        }
 
         String locations = configProps.getProperty(BUNDLE_LOCATIONS);
 
