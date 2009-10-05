@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.felix.karaf.shell.console.Completer;
 import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
@@ -86,6 +87,11 @@ public class ShellFactoryImpl implements ShellFactory
 
         public void start(final Environment env) throws IOException {
             try {
+                final Callable<Boolean> printStackTraces = new Callable<Boolean>() {
+                    public Boolean call() {
+                        return Boolean.valueOf(System.getProperty(Console.PRINT_STACK_TRACES));
+                    }
+                };
                 Console console = new Console(commandProcessor,
                                               in,
                                               new PrintStream(out),
@@ -96,7 +102,8 @@ public class ShellFactoryImpl implements ShellFactory
                                                   public void run() {
                                                       destroy();
                                                   }
-                                              });
+                                              },
+                                              printStackTraces);
                 CommandSession session = console.getSession();
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 for (Map.Entry<String,String> e : env.getEnv().entrySet()) {

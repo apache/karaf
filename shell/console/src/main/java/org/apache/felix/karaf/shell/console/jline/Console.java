@@ -24,6 +24,7 @@ import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -32,7 +33,6 @@ import java.util.concurrent.BlockingQueue;
 import jline.ConsoleReader;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
-import jline.WindowsTerminal;
 import jline.AnsiWindowsTerminal;
 import org.apache.felix.karaf.shell.console.Completer;
 import org.osgi.service.command.CommandProcessor;
@@ -44,6 +44,7 @@ public class Console implements Runnable
 
     public static final String PROMPT = "PROMPT";
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}> ";
+    public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";
 
     private CommandSession session;
     private ConsoleReader reader;
@@ -57,6 +58,7 @@ public class Console implements Runnable
     private InputStream in;
     private PrintStream out;
     private PrintStream err;
+    private Callable<Boolean> printStackTraces;
 
     public Console(CommandProcessor processor,
                    InputStream in,
@@ -64,7 +66,8 @@ public class Console implements Runnable
                    PrintStream err,
                    Terminal term,
                    Completer completer,
-                   Runnable closeCallback) throws Exception
+                   Runnable closeCallback,
+                   Callable<Boolean> printStackTraces ) throws Exception
     {
         this.in = in;
         this.out = out;
@@ -75,6 +78,7 @@ public class Console implements Runnable
         this.session = processor.createSession(this.consoleInput, this.out, this.err);
         this.session.put("SCOPE", "shell:osgi:*");
         this.closeCallback = closeCallback;
+        this.printStackTraces = printStackTraces;
 
         reader = new ConsoleReader(this.consoleInput,
                                    new PrintWriter(this.out),
@@ -125,8 +129,16 @@ public class Console implements Runnable
             }
             catch (Throwable t)
             {
-                t.printStackTrace(session.getConsole());
-                //System.err.println("Exception: " + t.getMessage());
+                try {
+                    if ( printStackTraces.call()) {
+                        t.printStackTrace(session.getConsole());
+                    }
+                    else {
+                        session.getConsole().println(t.getMessage());
+                    }
+                } catch (Exception ignore) {
+                        // ignore
+                }
             }
         }
         //System.err.println("Exiting console...");

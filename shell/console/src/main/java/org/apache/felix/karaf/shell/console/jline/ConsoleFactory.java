@@ -23,6 +23,7 @@ import java.io.PrintStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.felix.karaf.shell.console.Completer;
 import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
@@ -81,13 +82,19 @@ public class ConsoleFactory {
                     }
                 }
             };
+            final Callable<Boolean> printStackTraces = new Callable<Boolean>() {
+                public Boolean call() {
+                    return Boolean.valueOf(bundleContext.getProperty(Console.PRINT_STACK_TRACES));
+                }
+            };
             this.console = new Console(commandProcessor,
                                        in,
                                        wrap(out),
                                        wrap(err),
                                        terminal,
                                        new AggregateCompleter(completers),
-                                       callback);
+                                       callback,
+                                       printStackTraces);
             CommandSession session = console.getSession();
             session.put("USER", "karaf");
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
