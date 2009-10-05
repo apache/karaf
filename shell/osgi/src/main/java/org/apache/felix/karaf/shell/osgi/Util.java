@@ -126,10 +126,17 @@ public class Util
             StartLevel sl = (StartLevel) bundleContext.getService(ref);
             if (sl != null) {
                 int level = sl.getBundleStartLevel(bundle);
-                if (level < 50)
-                    return true;
-                else
-                    return false;
+                int sbsl = 49;
+                final String sbslProp = bundleContext.getProperty( "karaf.systemBundlesStartLevel" );
+                if (sbslProp != null) {
+                    try {
+                       sbsl = Integer.valueOf( sbslProp );
+                    }
+                    catch( Exception ignore ) {
+                      // ignore
+                    }
+                }
+                return level <= sbsl;
             }
         }
         return false;
