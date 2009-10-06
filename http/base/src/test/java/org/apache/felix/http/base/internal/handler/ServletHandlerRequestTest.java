@@ -37,7 +37,7 @@ public class ServletHandlerRequestTest
 
         superReq = Mockito.mock(HttpServletRequest.class);
         Mockito.when(superReq.getContextPath()).thenReturn("/mycontext");
-        Mockito.when(superReq.getRequestURI()).thenReturn("/mycontext/myservlet/request/to/resource?param=value");
+        Mockito.when(superReq.getRequestURI()).thenReturn("/mycontext/myservlet/request/to/resource;jsession=123");
         this.req2 = new ServletHandlerRequest(superReq, "/myservlet");
     }
 

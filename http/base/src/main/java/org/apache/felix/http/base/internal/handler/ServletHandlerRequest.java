@@ -66,9 +66,9 @@ final class ServletHandlerRequest
         pathInfo = pathInfo.replaceAll("[/]{2,}", "/");
         pathInfo = pathInfo.substring(servletPathLength);
 
-        int qmarkPos = pathInfo.indexOf('?');
-        if (qmarkPos > 0) {
-            pathInfo = pathInfo.substring(0, qmarkPos);
+        int scPos = pathInfo.indexOf(';');
+        if (scPos > 0) {
+            pathInfo = pathInfo.substring(0, scPos);
         }
 
         if ("".equals(pathInfo) && servletPathLength != 0) {
