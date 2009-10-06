@@ -61,6 +61,15 @@ public interface Constants {
 
     public static final String COMPONENT_DS = "ds";
 
+    // Force the descriptor version (since 1.4.1)
+    public static final String COMPONENT_DS_SPEC_VERSION = "specVersion";
+
+    // Specification version identifier for SCR 1.0 (R 4.1)
+    public static final String COMPONENT_DS_SPEC_VERSION_10 = "1.0";
+
+    // Specification version identifier for SCR 1.1 (R 4.2)
+    public static final String COMPONENT_DS_SPEC_VERSION_11 = "1.1";
+
     public static final String COMPONENT_CREATE_PID = "create-pid";
 
     public static final String COMPONENT_SET_METATYPE_FACTORY_PID = "configurationFactory";

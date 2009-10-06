@@ -234,22 +234,16 @@ public class SCRDescriptorGenerator
         this.logger.debug( "..processing annotations: " + this.descriptorManager.isProcessAnnotations() );
 
         // check speck version configuration
-        int specVersion = Constants.VERSION_1_0;
-        if ( this.specVersion != null )
-        {
-            if ( this.specVersion.equals( "1.1" ) )
-            {
-                specVersion = Constants.VERSION_1_1;
-            }
-            else if ( !this.specVersion.equals( "1.0" ) )
-            {
-                throw new SCRDescriptorException( "Unknown configuration for spec version: " + this.specVersion );
-            }
-        }
-        else
+        int specVersion = toSpecVersionCode( this.specVersion );
+        if ( this.specVersion == null )
         {
             this.logger.debug( "..auto detecting spec version" );
         }
+        else
+        {
+            this.logger.debug( "..using spec version " + this.specVersion + " (" + specVersion + ")" );
+        }
+
         final IssueLog iLog = new IssueLog( this.strictMode );
 
         final MetaData metaData = new MetaData();
@@ -282,10 +276,10 @@ public class SCRDescriptorGenerator
                         // version, this is considered an error!
                         if ( this.specVersion != null )
                         {
-                            String v = "1.0";
+                            String v = Constants.COMPONENT_DS_SPEC_VERSION_10;
                             if ( comp.getSpecVersion() == Constants.VERSION_1_1 )
                             {
-                                v = "1.1";
+                                v = Constants.COMPONENT_DS_SPEC_VERSION_11;
                             }
                             iLog.addError( "Component " + comp + " requires spec version " + v
                                 + " but plugin is configured to use version " + this.specVersion );
@@ -568,6 +562,7 @@ public class SCRDescriptorGenerator
      * @param component
      */
     protected OCD doComponent( JavaTag tag, Component component, MetaData metaData, final IssueLog iLog )
+        throws SCRDescriptorException
     {
 
         // check if this is an abstract definition
@@ -591,6 +586,13 @@ public class SCRDescriptorGenerator
 
         component.setEnabled( Boolean.valueOf( getBoolean( tag, Constants.COMPONENT_ENABLED, true ) ) );
         component.setFactory( tag.getNamedParameter( Constants.COMPONENT_FACTORY ) );
+
+        // FELIX-1703: support explicit SCR version declaration
+        final String dsSpecVersion = tag.getNamedParameter( Constants.COMPONENT_DS_SPEC_VERSION );
+        if ( dsSpecVersion != null )
+        {
+            component.setSpecVersion( toSpecVersionCode( dsSpecVersion ) );
+        }
 
         // FELIX-593: immediate attribute does not default to true all the
         // times hence we only set it if declared in the tag
@@ -945,5 +947,37 @@ public class SCRDescriptorGenerator
         {
             log.error( errors.next() );
         }
+    }
+
+    /**
+     * Converts the specification version string to a specification version
+     * code. Currently the following conversions are supported:
+     * <table>
+     * <tr><td><code>null</code></td><td>0</td></tr>
+     * <tr><td>1.0</td><td>0</td></tr>
+     * <tr><td>1.1</td><td>1</td></tr>
+     * </table>
+     *
+     * @param specVersion The specification version to convert. This may be
+     *      <code>null</code> to assume the default version.
+     *
+     * @return The specification version code.
+     *
+     * @throws SCRDescriptorException if the <code>specVersion</code> parameter
+     *      is not a supported value.
+     */
+    private int toSpecVersionCode( String specVersion ) throws SCRDescriptorException
+    {
+        if ( specVersion == null || specVersion.equals( Constants.COMPONENT_DS_SPEC_VERSION_10 ) )
+        {
+            return Constants.VERSION_1_0;
+        }
+        else if ( specVersion.equals( Constants.COMPONENT_DS_SPEC_VERSION_11 ) )
+        {
+            return Constants.VERSION_1_1;
+        }
+
+        // unknown specVersion string
+        throw new SCRDescriptorException( "Unknown configuration for spec version: " + specVersion );
     }
 }
