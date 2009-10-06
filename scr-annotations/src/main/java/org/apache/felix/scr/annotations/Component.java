@@ -102,6 +102,21 @@ public @interface Component {
     boolean ds() default true;
 
     /**
+     * The version of the Declarative Services specification against which the
+     * component is written. Generally, the Maven SCR Plugin is able to
+     * automatically detect which specification version a Component is written
+     * against. There are some cases, though, where this is not easily or
+     * reliably possible. In these cases use this attribute to force the
+     * specification version.
+     * <p>
+     * Valid values currently are <code>1.0</code> and <code>1.1</code>. If
+     * an unsupported value is declared, a descriptor failure results.
+     *
+     * @since 1.0.1
+     */
+    String specVersion() default "1.0";
+
+    /**
      * Generated <code>service.pid</code> property by default, if none declared
      * explicitly.
      */
