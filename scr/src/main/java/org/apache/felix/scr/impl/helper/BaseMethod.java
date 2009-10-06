@@ -52,22 +52,32 @@ abstract class BaseMethod
 
     private Method m_method = null;
 
+    private final boolean m_methodRequired;
+
     private State m_state;
 
 
     protected BaseMethod( final AbstractComponentManager componentManager, final String methodName,
         final Class componentClass )
     {
+        this( componentManager, methodName, methodName != null, componentClass );
+    }
+
+
+    protected BaseMethod( final AbstractComponentManager componentManager, final String methodName,
+        final boolean methodRequired, final Class componentClass )
+    {
         m_componentManager = componentManager;
         m_methodName = methodName;
+        m_methodRequired = methodRequired;
         m_componentClass = componentClass;
         if ( m_methodName == null )
         {
-            m_state = new NotApplicable();
+            m_state = NotApplicable.INSTANCE;
         }
         else
         {
-            m_state = new NotResolved();
+            m_state = NotResolved.INSTANCE;
         }
     }
 
@@ -93,6 +103,34 @@ abstract class BaseMethod
     protected final Class getComponentClass()
     {
         return m_componentClass;
+    }
+
+
+    synchronized void setMethod( Method method )
+    {
+        this.m_method = method;
+
+        if ( method != null )
+        {
+            m_state = Resolved.INSTANCE;
+        }
+        else if ( m_methodRequired )
+        {
+            m_state = NotFound.INSTANCE;
+        }
+        else
+        {
+            // optional method not found, log as DEBUG and ignore
+            getComponentManager().log( LogService.LOG_DEBUG,
+                getMethodNamePrefix() + " method [" + getMethodName() + "] not found, ignoring", null );
+            m_state = NotApplicable.INSTANCE;
+        }
+    }
+
+
+    State getState()
+    {
+        return m_state;
     }
 
 
@@ -184,7 +222,7 @@ abstract class BaseMethod
             // 112.3.1 If the method is not is not declared protected or
             // public, SCR must log an error message with the log service,
             // if present, and ignore the method
-            getComponentManager().log( LogService.LOG_DEBUG, "Method " + m_methodName + " cannot be called", ex );
+            getComponentManager().log( LogService.LOG_DEBUG, "Method " + getMethodName() + " cannot be called", ex );
         }
         catch ( InvocationTargetException ex )
         {
@@ -369,70 +407,121 @@ abstract class BaseMethod
 
     public boolean invoke( final Object componentInstance, final Object rawParameter )
     {
-        return m_state.invoke( componentInstance, rawParameter );
+        return m_state.invoke( this, componentInstance, rawParameter );
+    }
+
+
+    public boolean methodExists()
+    {
+        return m_state.methodExists( this );
     }
 
     private static interface State
     {
 
-        boolean invoke( final Object componentInstance, final Object rawParameter );
+        boolean invoke( final BaseMethod baseMethod, final Object componentInstance, final Object rawParameter );
+
+
+        boolean methodExists( final BaseMethod baseMethod );
     }
 
     private static class NotApplicable implements State
     {
 
-        public boolean invoke( final Object componentInstance, final Object rawParameter )
+        private static final State INSTANCE = new NotApplicable();
+
+
+        public boolean invoke( final BaseMethod baseMethod, final Object componentInstance, final Object rawParameter )
+        {
+            return true;
+        }
+
+
+        public boolean methodExists( final BaseMethod baseMethod )
         {
             return true;
         }
     }
 
-    private class NotResolved implements State
+    private static class NotResolved implements State
     {
+        private static final State INSTANCE = new NotResolved();
 
-        public boolean invoke( final Object componentInstance, final Object rawParameter )
+
+        private void resolve( final BaseMethod baseMethod )
         {
-            getComponentManager().log( LogService.LOG_DEBUG,
-                "getting " + getMethodNamePrefix() + "bind: " + m_methodName, null );
+            baseMethod.getComponentManager().log( LogService.LOG_DEBUG,
+                "getting " + baseMethod.getMethodNamePrefix() + ": " + baseMethod.getMethodName(), null );
+
+            // resolve the method
+            Method method;
             try
             {
-                m_method = findMethod();
-                m_state = ( m_method == null ) ? ( State ) new NotFound() : new Resolved();
-                return m_state.invoke( componentInstance, rawParameter );
+                method = baseMethod.findMethod();
             }
             catch ( InvocationTargetException ex )
             {
-                m_state = new NotFound();
-                // We can safely ignore this one
-                getComponentManager().log( LogService.LOG_WARNING, getMethodName() + " cannot be found", ex.getTargetException() );
+                method = null;
+                baseMethod.getComponentManager().log( LogService.LOG_WARNING,
+                    baseMethod.getMethodName() + " cannot be found", ex.getTargetException() );
             }
-            return true;
+
+            baseMethod.setMethod( method );
+        }
+
+
+        public boolean invoke( final BaseMethod baseMethod, final Object componentInstance, final Object rawParameter )
+        {
+            resolve( baseMethod );
+            return baseMethod.getState().invoke( baseMethod, componentInstance, rawParameter );
+        }
+
+
+        public boolean methodExists( final BaseMethod baseMethod )
+        {
+            resolve( baseMethod );
+            return baseMethod.getState().methodExists( baseMethod );
         }
     }
 
-    private class NotFound implements State
+    private static class NotFound implements State
     {
+        private static final State INSTANCE = new NotFound();
 
-        public boolean invoke( final Object componentInstance, final Object rawParameter )
+
+        public boolean invoke( final BaseMethod baseMethod, final Object componentInstance, final Object rawParameter )
         {
             // 112.3.1 If the method is not found , SCR must log an error
             // message with the log service, if present, and ignore the
             // method
-            getComponentManager().log( LogService.LOG_ERROR,
-                getMethodNamePrefix() + "bind method [" + m_methodName + "] not found", null );
+            baseMethod.getComponentManager().log( LogService.LOG_ERROR,
+                baseMethod.getMethodNamePrefix() + " method [" + baseMethod.getMethodName() + "] not found", null );
+            return false;
+        }
+
+
+        public boolean methodExists( final BaseMethod baseMethod )
+        {
+            return false;
+        }
+    }
+
+    private static class Resolved implements State
+    {
+        private static final State INSTANCE = new Resolved();
+
+
+        public boolean invoke( final BaseMethod baseMethod, final Object componentInstance, final Object rawParameter )
+        {
+            baseMethod.getComponentManager().log( LogService.LOG_DEBUG,
+                "invoking " + baseMethod.getMethodNamePrefix() + ": " + baseMethod.getMethodName(), null );
+            return baseMethod.invokeMethod( componentInstance, rawParameter );
+        }
+
+
+        public boolean methodExists( final BaseMethod baseMethod )
+        {
             return true;
         }
     }
-
-    private class Resolved implements State
-    {
-
-        public boolean invoke( final Object componentInstance, final Object rawParameter )
-        {
-            getComponentManager().log( LogService.LOG_DEBUG,
-                "invoking " + getMethodNamePrefix() + "bind: " + m_methodName, null );
-            return invokeMethod( componentInstance, rawParameter );
-        }
-    }
-
 }

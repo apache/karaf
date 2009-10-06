@@ -28,10 +28,10 @@ import org.osgi.service.component.ComponentContext;
 
 public class ActivateMethod extends BaseMethod
 {
-
-    public ActivateMethod( final AbstractComponentManager componentManager, String methodName, Class componentClass )
+    public ActivateMethod( final AbstractComponentManager componentManager, final String methodName,
+        final boolean methodRequired, final Class componentClass )
     {
-        super( componentManager, methodName, componentClass );
+        super( componentManager, methodName, methodRequired, componentClass );
     }
 
 
@@ -128,6 +128,18 @@ public class ActivateMethod extends BaseMethod
         }
 
         return param;
+    }
+
+
+    protected String getMethodNamePrefix()
+    {
+        return "activate";
+    }
+
+
+    public boolean invoke( Object componentInstance, Object rawParameter )
+    {
+        return methodExists() && super.invoke( componentInstance, rawParameter );
     }
 
 

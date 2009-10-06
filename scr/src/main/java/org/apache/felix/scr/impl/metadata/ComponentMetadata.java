@@ -79,8 +79,14 @@ public class ComponentMetadata
     // 112.5.8 activate can be specified (since DS 1.1)
     private String m_activate = null;
 
+    // 112.5.8 whether activate has been specified
+    private boolean m_activateDeclared = false;
+
     // 112.5.12 deactivate can be specified (since DS 1.1)
     private String m_deactivate = null;
+
+    // 112.5.12 whether deactivate has been specified
+    private boolean m_deactivateDeclared = false;
 
     // 112.??.?? modified method (configuration update, since DS 1.1)
     private String m_modified = null;
@@ -234,6 +240,7 @@ public class ComponentMetadata
             return;
         }
         m_activate = activate;
+        m_activateDeclared = true;
     }
 
 
@@ -250,6 +257,7 @@ public class ComponentMetadata
             return;
         }
         m_deactivate = deactivate;
+        m_deactivateDeclared = true;
     }
 
 
@@ -448,6 +456,20 @@ public class ComponentMetadata
 
 
     /**
+     * Returns whether the activate method has been declared in the descriptor
+     * or not.
+     *
+     * @return whether the activate method has been declared in the descriptor
+     *      or not.
+     * @since 1.2.0 (DS 1.1)
+     */
+    public boolean isActivateDeclared()
+    {
+        return m_activateDeclared;
+    }
+
+
+    /**
      * Returns the name of the deactivate method
      *
      * @return the name of the deactivate method
@@ -456,6 +478,20 @@ public class ComponentMetadata
     public String getDeactivate()
     {
         return m_deactivate;
+    }
+
+
+    /**
+     * Returns whether the deactivate method has been declared in the descriptor
+     * or not.
+     *
+     * @return whether the deactivate method has been declared in the descriptor
+     *      or not.
+     * @since 1.2.0 (DS 1.1)
+     */
+    public boolean isDeactivateDeclared()
+    {
+        return m_deactivateDeclared;
     }
 
 
@@ -614,9 +650,11 @@ public class ComponentMetadata
         }
         else if ( m_namespaceCode < XmlHandler.DS_VERSION_1_1 )
         {
+            // DS 1.0 cannot declare the activate method, assume default and undeclared
             logger.log( LogService.LOG_WARNING,
                 "Ignoring activate method declaration, DS 1.1 or later namespace required", this, null );
             m_activate = "activate";
+            m_activateDeclared = false;
         }
 
         // 112.5.12 deactivate can be specified (since DS 1.1)
@@ -627,9 +665,11 @@ public class ComponentMetadata
         }
         else if ( m_namespaceCode < XmlHandler.DS_VERSION_1_1 )
         {
+            // DS 1.0 cannot declare the deactivate method, assume default and undeclared
             logger.log( LogService.LOG_WARNING,
                 "Ignoring deactivate method declaration, DS 1.1 or later namespace required", this, null );
             m_deactivate = "deactivate";
+            m_deactivateDeclared = false;
         }
 
         // 112.??.?? modified can be specified (since DS 1.1)

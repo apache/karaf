@@ -22,6 +22,7 @@ package org.apache.felix.scr;
 import java.util.Dictionary;
 
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.ComponentInstance;
 
 
 /**
@@ -188,6 +189,69 @@ public interface Component
      * references, <code>null</code> is returned.
      */
     Reference[] getReferences();
+
+
+    /**
+     * Returns the <code>org.osgi.service.component.ComponentInstance</code>
+     * representing this component or <code>null</code> if this component
+     * is not been activated yet.
+     */
+    ComponentInstance getComponentInstance();
+
+
+    /**
+     * Returns the name of the method to be called when the component is being
+     * activated.
+     * <p>
+     * This method never returns <code>null</code>, that is, if this method is
+     * not declared in the component descriptor this method returns the
+     * default value <i>activate</i>.
+     */
+    String getActivate();
+
+
+    /**
+     * Returns <code>true</code> if the name of the method to be called on
+     * component activation (see {@link #getActivate()} is declared in the
+     * component descriptor or not.
+     * <p>
+     * For a component declared in a Declarative Services 1.0 descriptor, this
+     * method always returns <code>false</code>.
+     */
+    boolean isActivateDeclared();
+
+
+    /**
+     * Returns the name of the method to be called when the component is being
+     * deactivated.
+     * <p>
+     * This method never returns <code>null</code>, that is, if this method is
+     * not declared in the component descriptor this method returns the
+     * default value <i>deactivate</i>.
+     */
+    String getDeactivate();
+
+
+    /**
+     * Returns <code>true</code> if the name of the method to be called on
+     * component deactivation (see {@link #getDeactivate()} is declared in the
+     * component descriptor or not.
+     * <p>
+     * For a component declared in a Declarative Services 1.0 descriptor, this
+     * method always returns <code>false</code>.
+     */
+    boolean isDeactivateDeclared();
+
+
+    /**
+     * Returns the name of the method to be called when the component
+     * configuration has been updated or <code>null</code> if such a method is
+     * not declared in the component descriptor.
+     * <p>
+     * For a component declared in a Declarative Services 1.0 descriptor, this
+     * method always returns <code>null</code>.
+     */
+    String getModified();
 
 
     /**

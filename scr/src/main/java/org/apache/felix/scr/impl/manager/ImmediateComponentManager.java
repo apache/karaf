@@ -155,7 +155,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
     }
 
 
-    ComponentInstance getComponentInstance()
+    public ComponentInstance getComponentInstance()
     {
         return m_componentContext;
     }
@@ -228,7 +228,8 @@ public class ImmediateComponentManager extends AbstractComponentManager
         // get the method
         if ( m_activateMethod == null)
         {
-            m_activateMethod = new ActivateMethod( this, getComponentMetadata().getActivate(), implementationObjectClass );
+            m_activateMethod = new ActivateMethod( this, getComponentMetadata().getActivate(), getComponentMetadata()
+                .isActivateDeclared(), implementationObjectClass );
         }
 
         // 4. Call the activate method, if present
@@ -258,8 +259,8 @@ public class ImmediateComponentManager extends AbstractComponentManager
         // get the method
         if ( m_deactivateMethod == null )
         {
-            m_deactivateMethod = new DeactivateMethod( this, getComponentMetadata().getDeactivate(), implementationObject
-                .getClass() );
+            m_deactivateMethod = new DeactivateMethod( this, getComponentMetadata().getDeactivate(),
+                getComponentMetadata().isDeactivateDeclared(), implementationObject.getClass() );
         }
 
         // 1. Call the deactivate method, if present

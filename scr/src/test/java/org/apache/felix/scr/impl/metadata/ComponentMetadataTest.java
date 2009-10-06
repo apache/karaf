@@ -279,11 +279,13 @@ public class ComponentMetadataTest extends TestCase
         final ComponentMetadata cm1 = createComponentMetadata( Boolean.TRUE, null );
         cm1.validate( logger );
         assertEquals( "Activate method name", "activate", cm1.getActivate() );
+        assertFalse( "Activate method expected to not be declared", cm1.isActivateDeclared() );
 
         final ComponentMetadata cm2 = createComponentMetadata( Boolean.TRUE, null );
         cm2.setActivate( "someMethod" );
         cm2.validate( logger );
         assertEquals( "Activate method name", "activate", cm2.getActivate() );
+        assertFalse( "Activate method expected to not be declared", cm2.isActivateDeclared() );
     }
 
 
@@ -292,11 +294,13 @@ public class ComponentMetadataTest extends TestCase
         final ComponentMetadata cm1 = createComponentMetadata11( Boolean.TRUE, null );
         cm1.validate( logger );
         assertEquals( "Activate method name", "activate", cm1.getActivate() );
+        assertFalse( "Activate method expected to not be declared", cm1.isActivateDeclared() );
 
         final ComponentMetadata cm2 = createComponentMetadata11( Boolean.TRUE, null );
         cm2.setActivate( "someMethod" );
         cm2.validate( logger );
         assertEquals( "Activate method name", "someMethod", cm2.getActivate() );
+        assertTrue( "Activate method expected to be declared", cm2.isActivateDeclared() );
     }
 
 
@@ -305,11 +309,13 @@ public class ComponentMetadataTest extends TestCase
         final ComponentMetadata cm1 = createComponentMetadata( Boolean.TRUE, null );
         cm1.validate( logger );
         assertEquals( "Deactivate method name", "deactivate", cm1.getDeactivate() );
+        assertFalse( "Deactivate method expected to not be declared", cm1.isDeactivateDeclared() );
 
         final ComponentMetadata cm2 = createComponentMetadata( Boolean.TRUE, null );
         cm2.setDeactivate( "someMethod" );
         cm2.validate( logger );
         assertEquals( "Deactivate method name", "deactivate", cm2.getDeactivate() );
+        assertFalse( "Deactivate method expected to not be declared", cm2.isDeactivateDeclared() );
     }
 
 
@@ -318,11 +324,13 @@ public class ComponentMetadataTest extends TestCase
         final ComponentMetadata cm1 = createComponentMetadata11( Boolean.TRUE, null );
         cm1.validate( logger );
         assertEquals( "Deactivate method name", "deactivate", cm1.getDeactivate() );
+        assertFalse( "Deactivate method expected to not be declared", cm1.isDeactivateDeclared() );
 
         final ComponentMetadata cm2 = createComponentMetadata11( Boolean.TRUE, null );
         cm2.setDeactivate( "someMethod" );
         cm2.validate( logger );
         assertEquals( "Deactivate method name", "someMethod", cm2.getDeactivate() );
+        assertTrue( "Deactivate method expected to be declared", cm2.isDeactivateDeclared() );
     }
 
 

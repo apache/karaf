@@ -466,7 +466,7 @@ public class BindMethod extends BaseMethod
                 if ( params[i] == null )
                 {
                     throw new IllegalStateException( "Dependency Manager: Service " + service.getReference()
-                        + " has already gone, not " + getMethodNamePrefix() + "binding" );
+                        + " has already gone, will not " + getMethodNamePrefix() );
                 }
             }
         }
@@ -477,7 +477,7 @@ public class BindMethod extends BaseMethod
 
     protected String getMethodNamePrefix()
     {
-        return "";
+        return "bind";
     }
 
     //---------- Service abstraction ------------------------------------

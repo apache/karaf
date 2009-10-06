@@ -25,14 +25,21 @@ import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 public class ModifiedMethod extends ActivateMethod
 {
 
-    public ModifiedMethod( final AbstractComponentManager componentManager, String methodName, Class componentClass )
+    public ModifiedMethod( final AbstractComponentManager componentManager, final String methodName,
+        final Class componentClass )
     {
-        super( componentManager, methodName, componentClass );
+        super( componentManager, methodName, methodName != null, componentClass );
     }
 
 
     protected boolean acceptEmpty()
     {
         return false;
+    }
+
+
+    protected String getMethodNamePrefix()
+    {
+        return "modified";
     }
 }

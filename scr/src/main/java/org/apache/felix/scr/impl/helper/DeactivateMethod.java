@@ -25,9 +25,10 @@ import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 public class DeactivateMethod extends ActivateMethod
 {
 
-    public DeactivateMethod( final AbstractComponentManager componentManager, String methodName, Class componentClass )
+    public DeactivateMethod( final AbstractComponentManager componentManager, final String methodName,
+        final boolean methodRequired, final Class componentClass )
     {
-        super( componentManager, methodName, componentClass );
+        super( componentManager, methodName, methodRequired, componentClass );
     }
 
 
@@ -41,5 +42,11 @@ public class DeactivateMethod extends ActivateMethod
 
         return new Class[]
             { COMPONENT_CONTEXT_CLASS };
+    }
+
+
+    protected String getMethodNamePrefix()
+    {
+        return "deactivate";
     }
 }

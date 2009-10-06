@@ -16,28 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.helper;
+package org.apache.felix.scr.integration.components;
 
 
-import org.apache.felix.scr.impl.manager.AbstractComponentManager;
+import java.util.Map;
 
 
-/**
- * Component method to be invoked on service unbinding.
- */
-public class UnbindMethod extends BindMethod
+public class ActivatorComponent
 {
 
-    public UnbindMethod( final AbstractComponentManager componentManager, final String methodName,
-        final Class componentClass, final String referenceName, final String referenceClassName )
+    public static final String FLAG_FAIL_ACTIVATE = "failActivate";
+
+    public static final String FLAG_FAIL_DEACTIVATE = "failDeactivate";
+
+
+    @SuppressWarnings("unused")
+    private void myActivate( Map<?, ?> configuration )
     {
-        super( componentManager, methodName, componentClass, referenceName, referenceClassName );
+        if ( configuration.containsKey( FLAG_FAIL_ACTIVATE ) )
+        {
+            throw new IllegalStateException( "myActivate fails" );
+        }
     }
 
 
-    protected String getMethodNamePrefix()
+    @SuppressWarnings("unused")
+    private void myDeactivate( Map<?, ?> configuration )
     {
-        return "unbind";
+        if ( configuration.containsKey( FLAG_FAIL_DEACTIVATE ) )
+        {
+            throw new IllegalStateException( "myDeactivate fails" );
+        }
     }
-
 }
