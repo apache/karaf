@@ -116,6 +116,18 @@ public interface Log
      * The error's stacktrace will be output when this error level is enabled.
      *
      * @param content
+     * @param location The location at which the error occurred
+     * @param lineNumber The line number at which the error occurred
+     */
+    void warn( String content, String location, int lineNumber );
+
+
+    /**
+     * Send a message (and accompanying exception) to the user in the <b>warn</b> error level.
+     * <br/>
+     * The error's stacktrace will be output when this error level is enabled.
+     *
+     * @param content
      * @param error
      */
     void warn( String content, Throwable error );
@@ -143,6 +155,18 @@ public interface Log
      * @param content
      */
     void error( String content );
+
+
+    /**
+     * Send a message (and accompanying exception) to the user in the <b>error</b> error level.
+     * <br/>
+     * The error's stacktrace will be output when this error level is enabled.
+     *
+     * @param content
+     * @param location The location at which the error occurred
+     * @param lineNumber The line number at which the error occurred
+     */
+    void error( String content, String location, int lineNumber );
 
 
     /**

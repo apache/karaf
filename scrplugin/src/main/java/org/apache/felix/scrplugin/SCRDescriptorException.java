@@ -18,16 +18,57 @@
  */
 package org.apache.felix.scrplugin;
 
+
+import org.apache.felix.scrplugin.tags.JavaTag;
+
+
 public class SCRDescriptorException extends Exception
 {
 
     private static final long serialVersionUID = 1L;
 
-    public SCRDescriptorException(String message) {
-        super(message);
+    private final String m_sourceLocation;
+
+    private final int m_lineNumber;
+
+
+    public SCRDescriptorException( final String message, final JavaTag tag )
+    {
+        this( message, tag.getSourceLocation(), tag.getLineNumber() );
     }
 
-    public SCRDescriptorException(String message, Throwable cause) {
-        super(message, cause);
+
+    public SCRDescriptorException( final String message, final String sourceLocation, final int lineNumber )
+    {
+        super( message );
+        this.m_sourceLocation = sourceLocation;
+        this.m_lineNumber = lineNumber;
+    }
+
+
+    public SCRDescriptorException( final String message, final JavaTag tag, final Throwable cause )
+    {
+        this( message, tag.getSourceLocation(), tag.getLineNumber(), cause );
+    }
+
+
+    public SCRDescriptorException( final String message, final String sourceLocation, final int lineNumber,
+        final Throwable cause )
+    {
+        super( message, cause );
+        this.m_sourceLocation = sourceLocation;
+        this.m_lineNumber = lineNumber;
+    }
+
+
+    public String getSourceLocation()
+    {
+        return m_sourceLocation;
+    }
+
+
+    public int getLineNumber()
+    {
+        return m_lineNumber;
     }
 }

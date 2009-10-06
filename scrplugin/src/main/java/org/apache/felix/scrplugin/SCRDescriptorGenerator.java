@@ -234,7 +234,7 @@ public class SCRDescriptorGenerator
         this.logger.debug( "..processing annotations: " + this.descriptorManager.isProcessAnnotations() );
 
         // check speck version configuration
-        int specVersion = toSpecVersionCode( this.specVersion );
+        int specVersion = toSpecVersionCode( this.specVersion, null );
         if ( this.specVersion == null )
         {
             this.logger.debug( "..auto detecting spec version" );
@@ -265,28 +265,36 @@ public class SCRDescriptorGenerator
                 if ( javaSources[i].getTagsByName( Constants.COMPONENT, false ).length > 1 )
                 {
                     iLog.addError( "Class " + javaSources[i].getName() + " has more than one " + Constants.COMPONENT
-                        + " tag." + " Merge the tags to a single tag." );
+                        + " tag." + " Merge the tags to a single tag.", tag.getSourceLocation(), tag.getLineNumber() );
                 }
                 else
                 {
-                    final Component comp = this.createComponent( javaSources[i], tag, metaData, iLog );
-                    if ( comp.getSpecVersion() > specVersion )
+                    try
                     {
-                        // if a spec version has been configured and a component requires a higher
-                        // version, this is considered an error!
-                        if ( this.specVersion != null )
+                        final Component comp = this.createComponent( javaSources[i], tag, metaData, iLog );
+                        if ( comp.getSpecVersion() > specVersion )
                         {
-                            String v = Constants.COMPONENT_DS_SPEC_VERSION_10;
-                            if ( comp.getSpecVersion() == Constants.VERSION_1_1 )
+                            // if a spec version has been configured and a component requires a higher
+                            // version, this is considered an error!
+                            if ( this.specVersion != null )
                             {
-                                v = Constants.COMPONENT_DS_SPEC_VERSION_11;
+                                String v = Constants.COMPONENT_DS_SPEC_VERSION_10;
+                                if ( comp.getSpecVersion() == Constants.VERSION_1_1 )
+                                {
+                                    v = Constants.COMPONENT_DS_SPEC_VERSION_11;
+                                }
+                                iLog.addError( "Component " + comp + " requires spec version " + v
+                                    + " but plugin is configured to use version " + this.specVersion, tag
+                                    .getSourceLocation(), tag.getLineNumber() );
                             }
-                            iLog.addError( "Component " + comp + " requires spec version " + v
-                                + " but plugin is configured to use version " + this.specVersion );
+                            specVersion = comp.getSpecVersion();
                         }
-                        specVersion = comp.getSpecVersion();
+                        scannedComponents.add( comp );
                     }
-                    scannedComponents.add( comp );
+                    catch ( SCRDescriptorException sde )
+                    {
+                        iLog.addError( sde.getMessage(), sde.getSourceLocation(), sde.getLineNumber() );
+                    }
                 }
             }
         }
@@ -366,7 +374,7 @@ public class SCRDescriptorGenerator
         }
 
         // log issues
-        logMessages( iLog );
+        iLog.logMessages( logger );
 
         // after checking all classes, throw if there were any failures
         if ( iLog.hasErrors() )
@@ -591,7 +599,7 @@ public class SCRDescriptorGenerator
         final String dsSpecVersion = tag.getNamedParameter( Constants.COMPONENT_DS_SPEC_VERSION );
         if ( dsSpecVersion != null )
         {
-            component.setSpecVersion( toSpecVersionCode( dsSpecVersion ) );
+            component.setSpecVersion( toSpecVersionCode( dsSpecVersion, tag ) );
         }
 
         // FELIX-593: immediate attribute does not default to true all the
@@ -664,7 +672,7 @@ public class SCRDescriptorGenerator
                 else
                 {
                     iLog.addWarning( "Component factory " + component.getName()
-                        + " should not set metatype factory pid." );
+                        + " should not set metatype factory pid.", tag.getSourceLocation(), tag.getLineNumber() );
                 }
             }
             // designate.object
@@ -716,7 +724,7 @@ public class SCRDescriptorGenerator
                     if ( serviceClass == null )
                     {
                         throw new SCRDescriptorException( "Interface '" + name + "' in class " + description.getName()
-                            + " does not point to a valid class/interface." );
+                            + " does not point to a valid class/interface.", services[i] );
                     }
                     interfaceName = serviceClass.getName();
                 }
@@ -778,7 +786,7 @@ public class SCRDescriptorGenerator
                 if ( isInspectedClass )
                 {
                     throw new SCRDescriptorException( "Duplicate definition for reference " + refName + " in class "
-                        + reference.getJavaClassDescription().getName() );
+                        + reference.getJavaClassDescription().getName(), reference );
                 }
             }
             else
@@ -794,7 +802,7 @@ public class SCRDescriptorGenerator
                     else
                     {
                         throw new SCRDescriptorException( "Interface missing for reference " + refName + " in class "
-                            + reference.getJavaClassDescription().getName() );
+                            + reference.getJavaClassDescription().getName(), reference );
                     }
                 }
                 else if ( isInspectedClass )
@@ -807,7 +815,7 @@ public class SCRDescriptorGenerator
                     {
                         throw new SCRDescriptorException( "Interface '" + type + "' in class "
                             + reference.getJavaClassDescription().getName()
-                            + " does not point to a valid class/interface." );
+                            + " does not point to a valid class/interface.", reference );
                     }
                     type = serviceClass.getName();
                 }
@@ -833,12 +841,12 @@ public class SCRDescriptorGenerator
             if ( values == null || values.length == 0 )
             {
                 throw new SCRDescriptorException( "Referenced field for " + name
-                    + " has no values for a reference name." );
+                    + " has no values for a reference name.", reference );
             }
             if ( values.length > 1 )
             {
                 throw new SCRDescriptorException( "Referenced field " + name
-                    + " has more than one value for a reference name." );
+                    + " has more than one value for a reference name.", reference );
             }
             name = values[0];
         }
@@ -863,7 +871,7 @@ public class SCRDescriptorGenerator
         if ( field == null )
         {
             throw new SCRDescriptorException( "Reference references unknown field " + ref + " in class "
-                + tag.getJavaClassDescription().getName() );
+                + tag.getJavaClassDescription().getName(), tag );
         }
         return field;
     }
@@ -923,31 +931,6 @@ public class SCRDescriptorGenerator
     }
 
 
-    private void logMessages( final IssueLog iLog )
-    {
-        final Log log = logger;
-
-        // now log warnings and errors (warnings first)
-        // in strict mode everything is an error!
-        final Iterator<String> warnings = iLog.getWarnings();
-        while ( warnings.hasNext() )
-        {
-            if ( strictMode )
-            {
-                log.error( warnings.next() );
-            }
-            else
-            {
-                log.warn( warnings.next() );
-            }
-        }
-
-        final Iterator<String> errors = iLog.getErrors();
-        while ( errors.hasNext() )
-        {
-            log.error( errors.next() );
-        }
-    }
 
     /**
      * Converts the specification version string to a specification version
@@ -966,7 +949,7 @@ public class SCRDescriptorGenerator
      * @throws SCRDescriptorException if the <code>specVersion</code> parameter
      *      is not a supported value.
      */
-    private int toSpecVersionCode( String specVersion ) throws SCRDescriptorException
+    private int toSpecVersionCode( String specVersion, JavaTag tag ) throws SCRDescriptorException
     {
         if ( specVersion == null || specVersion.equals( Constants.COMPONENT_DS_SPEC_VERSION_10 ) )
         {
@@ -978,6 +961,6 @@ public class SCRDescriptorGenerator
         }
 
         // unknown specVersion string
-        throw new SCRDescriptorException( "Unknown configuration for spec version: " + specVersion );
+        throw new SCRDescriptorException( "Unsupported or unknown DS spec version: " + specVersion, tag );
     }
 }

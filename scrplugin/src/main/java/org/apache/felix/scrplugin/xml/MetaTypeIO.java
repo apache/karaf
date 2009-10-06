@@ -73,11 +73,11 @@ public class MetaTypeIO {
         try {
             generateXML(metaData, IOUtils.getSerializer(file));
         } catch (TransformerException e) {
-            throw new SCRDescriptorException("Unable to write xml to " + file, e);
+            throw new SCRDescriptorException("Unable to write xml", file.toString(), 0, e);
         } catch (SAXException e) {
-            throw new SCRDescriptorException("Unable to generate xml for " + file, e);
+            throw new SCRDescriptorException("Unable to generate xml", file.toString(), 0, e);
         } catch (IOException e) {
-            throw new SCRDescriptorException("Unable to write xml to " + file, e);
+            throw new SCRDescriptorException("Unable to write xml", file.toString(), 0, e);
         }
     }
 

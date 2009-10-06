@@ -93,7 +93,7 @@ public class Property extends AbstractObject {
      */
     public void validate(final int specVersion, final IssueLog iLog) {
         if ( name == null || name.trim().length() == 0 ) {
-            iLog.addError(this.getMessage("Property name can not be empty."));
+            this.logError( iLog, "Property name can not be empty." );
         }
         if ( type != null ) {
             if ( !type.equals(Constants.PROPERTY_TYPE_BOOLEAN)
@@ -106,7 +106,7 @@ public class Property extends AbstractObject {
                  && !type.equals(Constants.PROPERTY_TYPE_LONG )
                  && !type.equals(Constants.PROPERTY_TYPE_STRING )
                  && !type.equals(Constants.PROPERTY_TYPE_SHORT ) ) {
-                iLog.addError(this.getMessage("Property " + name + " has unknown type: " + type));
+                this.logError( iLog, "Property " + name + " has unknown type: " + type );
             }
             // now check for old and new char
             if ( specVersion == Constants.VERSION_1_0 && type.equals(Constants.PROPERTY_TYPE_CHAR_1_1) ) {

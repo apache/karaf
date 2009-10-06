@@ -62,6 +62,16 @@ public class MavenLog implements Log
     }
 
 
+    public void error( String content, String location, int lineNumber )
+    {
+        if ( isErrorEnabled() )
+        {
+            final String message = formatMessage( content, location, lineNumber );
+            mavenLog.error( message );
+        }
+    }
+
+
     public void error( String content )
     {
         mavenLog.error( content );
@@ -122,6 +132,16 @@ public class MavenLog implements Log
     }
 
 
+    public void warn( String content, String location, int lineNumber )
+    {
+        if ( isWarnEnabled() )
+        {
+            final String message = formatMessage( content, location, lineNumber );
+            mavenLog.warn( message );
+        }
+    }
+
+
     public void warn( String content )
     {
         mavenLog.warn( content );
@@ -131,5 +151,11 @@ public class MavenLog implements Log
     public void warn( Throwable error )
     {
         mavenLog.warn( error );
+    }
+
+
+    private String formatMessage( String content, String location, int lineNumber )
+    {
+        return content + " at " + location + ":" + lineNumber;
     }
 }

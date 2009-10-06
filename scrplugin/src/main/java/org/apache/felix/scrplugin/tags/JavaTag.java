@@ -34,6 +34,8 @@ public interface JavaTag {
 
     String getSourceLocation();
 
+    int getLineNumber();
+
     JavaClassDescription getJavaClassDescription();
 
     JavaField getField();

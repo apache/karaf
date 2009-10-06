@@ -92,7 +92,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      */
     public JavaField getExternalFieldByName(String name)
     throws SCRDescriptorException {
-        throw new SCRDescriptorException("getExternalFieldByName not supported for this class.");
+        throw new SCRDescriptorException("getExternalFieldByName not supported for this class.", getName(), 0);
     }
 
     /**
@@ -100,7 +100,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      */
     public JavaClassDescription getReferencedClass(String referencedName)
     throws SCRDescriptorException {
-        throw new SCRDescriptorException("getReferencedClass not supported for this class.");
+        throw new SCRDescriptorException("getReferencedClass not supported for this class.", getName(), 0);
     }
 
     /**
@@ -143,7 +143,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
             // scopes exists.
             throw new SCRDescriptorException("Class loading error. This error usually occurs if you have a " +
                     "service inheriting from a class coming from another bundle and that class using a " +
-                    "third library and all dependencies are specified with scope 'provided'.", ncdfe);
+                    "third library and all dependencies are specified with scope 'provided'.", getName(), 0, ncdfe);
         } catch (NoSuchMethodException e) {
             // ignore this
         }

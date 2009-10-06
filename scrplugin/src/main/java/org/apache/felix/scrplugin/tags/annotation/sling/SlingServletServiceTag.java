@@ -27,6 +27,8 @@ import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.annotation.defaulttag.AbstractTag;
 
+import com.thoughtworks.qdox.model.Annotation;
+
 /**
  * Description of a java tag for components.
  */
@@ -35,8 +37,8 @@ public class SlingServletServiceTag extends AbstractTag {
     /**
      * @param desc Description
      */
-    public SlingServletServiceTag(JavaClassDescription desc) {
-        super(desc, null);
+    public SlingServletServiceTag(Annotation annotation, JavaClassDescription desc) {
+        super(annotation, desc, null);
     }
 
     @Override

@@ -43,7 +43,6 @@ import org.objectweb.asm.tree.ClassNode;
 import com.thoughtworks.qdox.model.DocletTag;
 import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaParameter;
-import com.thoughtworks.qdox.model.JavaSource;
 import com.thoughtworks.qdox.model.Type;
 
 /**
@@ -389,7 +388,7 @@ public class QDoxJavaClassDescription
             fos.write(writer.toByteArray());
             fos.close();
         } catch (Exception e) {
-            throw new SCRDescriptorException("Unable to add methods to " + this.getName(), e);
+            throw new SCRDescriptorException("Unable to add methods to " + this.getName(), className, 0, e);
         }
     }
 

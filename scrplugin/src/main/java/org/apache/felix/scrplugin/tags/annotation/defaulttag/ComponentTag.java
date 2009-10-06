@@ -35,15 +35,12 @@ public class ComponentTag extends AbstractTag {
 
     protected final Component annotation;
 
-    protected final Annotation sourceAnnotation;
-
     /**
      * @param annotation Annotation
      * @param desc Description
      */
     public ComponentTag(final Annotation annotation, final JavaClassDescription desc) {
-        super(desc, null);
-        this.sourceAnnotation = annotation;
+        super(annotation, desc, null);
         this.annotation = new Component() {
 
             public boolean componentAbstract() {

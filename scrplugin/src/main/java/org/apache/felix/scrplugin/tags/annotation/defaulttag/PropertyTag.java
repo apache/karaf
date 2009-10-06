@@ -40,7 +40,7 @@ public class PropertyTag extends AbstractTag {
      * @param desc Description
      */
     public PropertyTag(final Annotation annotation, final JavaClassDescription desc, JavaField field) {
-        super(desc, field);
+        super(annotation, desc, field);
         this.annotation = new Property() {
 
             public int cardinality() {

@@ -120,7 +120,7 @@ public class ComponentDescriptorIO {
             IOUtils.parse(file, xmlHandler);
             return xmlHandler.components;
         } catch (TransformerException e) {
-            throw new SCRDescriptorException("Unable to read xml from " + file, e);
+            throw new SCRDescriptorException( "Unable to read xml", "[stream]", 0, e );
         }
     }
 
@@ -135,11 +135,11 @@ public class ComponentDescriptorIO {
         try {
             generateXML(components, IOUtils.getSerializer(file), isScrPrivateFile);
         } catch (TransformerException e) {
-            throw new SCRDescriptorException("Unable to write xml to " + file, e);
+            throw new SCRDescriptorException("Unable to write xml", file.toString(), 0, e);
         } catch (SAXException e) {
-            throw new SCRDescriptorException("Unable to generate xml for " + file, e);
+            throw new SCRDescriptorException("Unable to generate xml", file.toString(), 0, e);
         } catch (IOException e) {
-            throw new SCRDescriptorException("Unable to write xml to " + file, e);
+            throw new SCRDescriptorException("Unable to write xml", file.toString(), 0, e);
         }
     }
 

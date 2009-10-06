@@ -40,7 +40,7 @@ public class ReferenceTag extends AbstractTag {
      * @param desc Description
      */
     public ReferenceTag(final Annotation annotation, final JavaClassDescription desc, JavaField field) {
-        super(desc, field);
+        super(annotation, desc, field);
 
         this.annotation = new Reference() {
 

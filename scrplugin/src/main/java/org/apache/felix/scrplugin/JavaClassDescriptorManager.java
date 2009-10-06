@@ -238,7 +238,7 @@ public abstract class JavaClassDescriptorManager
                     }
                     catch ( ClassNotFoundException e )
                     {
-                        throw new SCRDescriptorException( "Unable to load class " + className );
+                        throw new SCRDescriptorException( "Unable to load class", className, 0 );
                     }
                 }
                 else
@@ -256,7 +256,7 @@ public abstract class JavaClassDescriptorManager
                 }
                 catch ( ClassNotFoundException e )
                 {
-                    throw new SCRDescriptorException( "Unable to load class " + className );
+                    throw new SCRDescriptorException( "Unable to load class", className, 0);
                 }
             }
             this.javaClassDescriptions.put( className, result );

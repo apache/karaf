@@ -129,11 +129,11 @@ public class MavenJavaClassDescriptorManager extends JavaClassDescriptorManager
                             }
                             catch ( FileNotFoundException e )
                             {
-                                throw new SCRDescriptorException( "Unable to scan directory.", e );
+                                throw new SCRDescriptorException( "Unable to scan directory.", files[m], 0, e );
                             }
                             catch ( IOException e )
                             {
-                                throw new SCRDescriptorException( "Unable to scan directory.", e );
+                                throw new SCRDescriptorException( "Unable to scan directory.", files[m], 0, e );
                             }
                         }
                     }
@@ -224,8 +224,8 @@ public class MavenJavaClassDescriptorManager extends JavaClassDescriptorManager
                             }
                             catch ( IOException ioe )
                             {
-                                throw new SCRDescriptorException( "Unable to get manifest from artifact " + artifact,
-                                    ioe );
+                                throw new SCRDescriptorException( "Unable to get manifest from artifact", artifact
+                                    .toString(), 0, ioe );
                             }
                             this.log.debug( "Trying to get scrinfo from artifact " + artifact );
                             // now read the scr private file - components stored there overwrite components already
@@ -246,8 +246,8 @@ public class MavenJavaClassDescriptorManager extends JavaClassDescriptorManager
                             }
                             catch ( IOException ioe )
                             {
-                                throw new SCRDescriptorException( "Unable to get scrinfo from artifact " + artifact,
-                                    ioe );
+                                throw new SCRDescriptorException( "Unable to get scrinfo from artifact", artifact
+                                    .toString(), 0, ioe );
                             }
                             finally
                             {
@@ -319,7 +319,8 @@ public class MavenJavaClassDescriptorManager extends JavaClassDescriptorManager
         try {
             xml = this.getFile(artifact, entry);
             if ( xml == null ) {
-                throw new SCRDescriptorException("Artifact " + artifact + " does not contain declared service component descriptor " + entry);
+                throw new SCRDescriptorException( "Entry " + entry + " not contained in artifact", artifact.toString(),
+                    0 );
             }
             return this.parseServiceComponentDescriptor(xml);
         } catch (IOException mee) {

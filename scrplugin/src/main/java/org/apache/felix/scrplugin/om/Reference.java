@@ -160,12 +160,12 @@ public class Reference extends AbstractObject {
 
         // validate name
         if (StringUtils.isEmpty(this.name)) {
-            iLog.addError(this.getMessage("Reference has no name"));
+            this.logError( iLog, "Reference has no name" );
         }
 
         // validate interface
         if (StringUtils.isEmpty(this.interfacename)) {
-            iLog.addError(this.getMessage("Missing interface name"));
+            this.logError( iLog, "Missing interface name" );
         }
 
         // validate cardinality
@@ -173,14 +173,14 @@ public class Reference extends AbstractObject {
             this.cardinality = "1..1";
         } else if (!"0..1".equals(this.cardinality) && !"1..1".equals(this.cardinality)
             && !"0..n".equals(this.cardinality) && !"1..n".equals(this.cardinality)) {
-            iLog.addError(this.getMessage("Invalid Cardinality specification " + this.cardinality));
+            this.logError( iLog, "Invalid Cardinality specification " + this.cardinality );
         }
 
         // validate policy
         if (this.policy == null) {
             this.policy = "static";
         } else if (!"static".equals(this.policy) && !"dynamic".equals(this.policy)) {
-            iLog.addError(this.getMessage("Invalid Policy specification " + this.policy));
+            this.logError( iLog, "Invalid Policy specification " + this.policy );
         }
 
         // validate strategy
@@ -188,7 +188,7 @@ public class Reference extends AbstractObject {
             this.strategy = Constants.REFERENCE_STRATEGY_EVENT;
         } else if (!Constants.REFERENCE_STRATEGY_EVENT.equals(this.strategy)
                    && !Constants.REFERENCE_STRATEGY_LOOKUP.equals(this.strategy)) {
-            iLog.addError(this.getMessage("Invalid strategy type " + this.strategy));
+            this.logError( iLog, "Invalid strategy type " + this.strategy );
         }
 
         // validate bind and unbind methods
@@ -231,7 +231,7 @@ public class Reference extends AbstractObject {
         final JavaMethod method = this.findMethod(specVersion, methodName);
         if (method == null) {
             if ( !componentIsAbstract ) {
-                iLog.addError(this.getMessage("Missing method " + methodName + " for reference " + this.getName()));
+                this.logError( iLog, "Missing method " + methodName + " for reference " + this.getName() );
             }
             return null;
         }
@@ -239,9 +239,9 @@ public class Reference extends AbstractObject {
         // method needs to be protected for 1.0
         if ( specVersion == Constants.VERSION_1_0 ) {
             if (method.isPublic()) {
-                iLog.addWarning(this.getMessage("Method " + method.getName() + " should be declared protected"));
+                this.logWarn( iLog, "Method " + method.getName() + " should be declared protected" );
             } else if (!method.isProtected()) {
-                iLog.addError(this.getMessage("Method " + method.getName() + " has wrong qualifier, public or protected required"));
+                this.logError( iLog, "Method " + method.getName() + " has wrong qualifier, public or protected required" );
                 return null;
             }
         }

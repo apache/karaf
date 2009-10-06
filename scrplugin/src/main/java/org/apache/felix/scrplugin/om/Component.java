@@ -267,17 +267,17 @@ public class Component extends AbstractObject {
 
         final JavaClassDescription javaClass = this.tag.getJavaClassDescription();
         if (javaClass == null) {
-            iLog.addError(this.getMessage("Tag not declared in a Java Class"));
+            this.logError( iLog, "Tag not declared in a Java Class" );
         } else {
 
             // if the service is abstract, we do not validate everything
             if ( !this.isAbstract ) {
                 // ensure non-abstract, public class
                 if (!javaClass.isPublic()) {
-                    iLog.addError(this.getMessage("Class must be public: " + javaClass.getName()));
+                    this.logError( iLog, "Class must be public: " + javaClass.getName() );
                 }
                 if (javaClass.isAbstract() || javaClass.isInterface()) {
-                    iLog.addError(this.getMessage("Class must be concrete class (not abstract or interface) : " + javaClass.getName()));
+                    this.logError( iLog, "Class must be concrete class (not abstract or interface) : " + javaClass.getName() );
                 }
 
                 // no errors so far, let's continue
@@ -309,7 +309,7 @@ public class Component extends AbstractObject {
                         }
                     }
                     if (!constructorFound) {
-                        iLog.addError(this.getMessage("Class must have public default constructor: " + javaClass.getName()));
+                        this.logError( iLog, "Class must have public default constructor: " + javaClass.getName() );
                     }
 
                     // verify properties
@@ -321,7 +321,7 @@ public class Component extends AbstractObject {
                     boolean isServiceFactory = false;
                     if (this.getService() != null) {
                         if ( this.getService().getInterfaces().size() == 0 ) {
-                            iLog.addError(this.getMessage("Service interface information is missing for @scr.service tag"));
+                            this.logError( iLog, "Service interface information is missing for @scr.service tag" );
                         }
                         this.getService().validate(specVersion, iLog);
                         isServiceFactory = this.getService().isServicefactory();
@@ -329,12 +329,12 @@ public class Component extends AbstractObject {
 
                     // serviceFactory must not be true for immediate of component factory
                     if (isServiceFactory && this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
-                        iLog.addError(this.getMessage("Component must not be a ServiceFactory, if immediate and/or component factory: " + javaClass.getName()));
+                        this.logError( iLog, "Component must not be a ServiceFactory, if immediate and/or component factory: " + javaClass.getName() );
                     }
 
                     // immediate must not be true for component factory
                     if (this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
-                        iLog.addError(this.getMessage("Component must not be immediate if component factory: " + javaClass.getName()));
+                        this.logError( iLog, "Component must not be immediate if component factory: " + javaClass.getName() );
                     }
                 }
             }
@@ -352,7 +352,7 @@ public class Component extends AbstractObject {
                  && !Constants.COMPONENT_CONFIG_POLICY_IGNORE.equals(cp)
                  && !Constants.COMPONENT_CONFIG_POLICY_REQUIRE.equals(cp)
                  && !Constants.COMPONENT_CONFIG_POLICY_OPTIONAL.equals(cp) ) {
-                iLog.addError(this.getMessage("Component has an unknown value for configuration policy: " + cp));
+                this.logError( iLog, "Component has an unknown value for configuration policy: " + cp );
             }
 
         }
@@ -427,7 +427,8 @@ public class Component extends AbstractObject {
                                             found = methods[i];
                                         } else {
                                             // print warning
-                                            iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " occurs several times with different matching signature."));
+                                            this.logWarn( iLog, "Lifecycle method " + methods[i].getName()
+                                                + " occurs several times with different matching signature." );
                                         }
                                     }
                                 }
@@ -448,9 +449,11 @@ public class Component extends AbstractObject {
                 for(int i=0; i<methods.length; i++) {
                     if ( methodName.equals(methods[i].getName()) ) {
                         if ( methods[i].getParameters().length != 1 ) {
-                            iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong number of arguments"));
+                            this.logWarn( iLog, "Lifecycle method " + methods[i].getName()
+                                + " has wrong number of arguments" );
                         } else {
-                            iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong argument " + methods[i].getParameters()[0].getType()));
+                            this.logWarn( iLog, "Lifecycle method " + methods[i].getName() + " has wrong argument "
+                                + methods[i].getParameters()[0].getType() );
                         }
                     }
                 }
@@ -460,9 +463,10 @@ public class Component extends AbstractObject {
         if ( method != null && specVersion == Constants.VERSION_1_0) {
             // check protected
             if (method.isPublic()) {
-                iLog.addWarning(this.getMessage("Lifecycle method " + method.getName() + " should be declared protected"));
+                this.logWarn( iLog, "Lifecycle method " + method.getName() + " should be declared protected" );
             } else if (!method.isProtected()) {
-                iLog.addWarning(this.getMessage("Lifecycle method " + method.getName() + " has wrong qualifier, public or protected required"));
+                this.logWarn( iLog, "Lifecycle method " + method.getName()
+                    + " has wrong qualifier, public or protected required" );
             }
         }
     }

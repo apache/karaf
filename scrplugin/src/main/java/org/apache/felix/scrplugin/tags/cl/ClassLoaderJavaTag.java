@@ -166,4 +166,13 @@ public class ClassLoaderJavaTag implements JavaTag {
     public String getSourceLocation() {
         return "Compiled class: " + this.description.getName();
     }
+
+    /**
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getLineNumber()
+     */
+    public int getLineNumber()
+    {
+        // we don't know the exact line number of a tag in a compiled class
+        return 0;
+    }
 }

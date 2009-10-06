@@ -216,10 +216,10 @@ public class PropertyHandler {
                 final JavaField refField = this.getReferencedField(tag, name);
                 final String[] values = refField.getInitializationExpression();
                 if ( values == null || values.length == 0 ) {
-                    throw new SCRDescriptorException("Referenced field for " + name + " has no values for a property name.");
+                    throw new SCRDescriptorException("Referenced field for " + name + " has no values for a property name.", tag);
                 }
                 if ( values.length > 1 ) {
-                    throw new SCRDescriptorException("Referenced field " + name + " has more than one value for a property name.");
+                    throw new SCRDescriptorException("Referenced field " + name + " has more than one value for a property name.", tag);
                 }
                 name = values[0];
             }
@@ -264,7 +264,7 @@ public class PropertyHandler {
             field = tag.getJavaClassDescription().getExternalFieldByName(ref);
         }
         if ( field == null ) {
-            throw new SCRDescriptorException("Property references unknown field " + ref + " in class " + tag.getJavaClassDescription().getName());
+            throw new SCRDescriptorException("Property references unknown field " + ref + " in class " + tag.getJavaClassDescription().getName(), tag);
         }
         return field;
     }
@@ -318,13 +318,13 @@ public class PropertyHandler {
                 // if the current class is the class we are currently inspecting, we
                 // have found a duplicate definition
                 if ( isInspectedClass ) {
-                    throw new SCRDescriptorException("Duplicate definition for property " + propName + " in class " + property.getJavaClassDescription().getName());
+                    throw new SCRDescriptorException("Duplicate definition for property " + propName + " in class " + property.getJavaClassDescription().getName(), property);
                 }
             } else {
                 properties.put(propName, new PropertyDescription(property, field));
             }
         } else {
-            throw new SCRDescriptorException("Property has no name " + property.getSourceLocation());
+            throw new SCRDescriptorException("Property has no name", property);
         }
     }
 

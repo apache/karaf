@@ -42,44 +42,44 @@ public class SlingAnnotationTagProvider implements AnnotationTagProvider {
             // generate @Component tag if required
             boolean generateComponent = Util.getBooleanValue(annotation, "generateComponent", SlingServlet.class);
             if (generateComponent) {
-                tags.add(new SlingServletComponentTag(description));
+                tags.add(new SlingServletComponentTag(annotation, description));
             }
 
             // generate @Service tag if required
             boolean generateService = Util.getBooleanValue(annotation, "generateService", SlingServlet.class);
             if (generateService) {
-                tags.add(new SlingServletServiceTag(description));
+                tags.add(new SlingServletServiceTag(annotation, description));
             }
 
             // generate @Property tags
             // {@see org.apache.sling.servlets.resolver.internal.ServletResolverConstants.SLING_SERVLET_PATHS}
             String[] paths = Util.getStringValues(annotation, description, "paths");
             if (paths != null && paths.length != 0) {
-                tags.add(new SlingServletPropertyTag("sling.servlet.paths", paths, description));
+                tags.add(new SlingServletPropertyTag(annotation, "sling.servlet.paths", paths, description));
             }
 
             // {@see org.apache.sling.servlets.resolver.internal.ServletResolverConstants.SLING_SERVLET_RESOURCE_TYPES}
             String[] resourceTypes = Util.getStringValues(annotation, description, "resourceTypes");
             if (resourceTypes != null && resourceTypes.length != 0) {
-                tags.add(new SlingServletPropertyTag("sling.servlet.resourceTypes", resourceTypes, description));
+                tags.add(new SlingServletPropertyTag(annotation, "sling.servlet.resourceTypes", resourceTypes, description));
             }
 
             // {@see org.apache.sling.servlets.resolver.internal.ServletResolverConstants.SLING_SERVLET_SELECTORS}
             String[] selectors = Util.getStringValues(annotation, description, "selectors");
             if (selectors != null && selectors.length != 0) {
-                tags.add(new SlingServletPropertyTag("sling.servlet.selectors", selectors, description));
+                tags.add(new SlingServletPropertyTag(annotation, "sling.servlet.selectors", selectors, description));
             }
 
             // {@see org.apache.sling.servlets.resolver.internal.ServletResolverConstants.SLING_SERVLET_EXTENSIONS}
             String[] extensions = Util.getStringValues(annotation, description, "extensions");
             if (extensions != null && extensions.length != 0) {
-                tags.add(new SlingServletPropertyTag("sling.servlet.extensions", extensions, description));
+                tags.add(new SlingServletPropertyTag(annotation, "sling.servlet.extensions", extensions, description));
             }
 
             // {@see org.apache.sling.servlets.resolver.internal.ServletResolverConstants.SLING_SERVLET_METHODS}
             String[] methods = Util.getStringValues(annotation, description, "methods");
             if (methods != null && methods.length != 0) {
-                tags.add(new SlingServletPropertyTag("sling.servlet.methods", methods, description));
+                tags.add(new SlingServletPropertyTag(annotation, "sling.servlet.methods", methods, description));
             }
 
         }

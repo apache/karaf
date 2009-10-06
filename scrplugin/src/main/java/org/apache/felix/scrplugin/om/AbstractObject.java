@@ -18,6 +18,7 @@
  */
 package org.apache.felix.scrplugin.om;
 
+import org.apache.felix.scrplugin.helper.IssueLog;
 import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**
@@ -32,11 +33,12 @@ public abstract class AbstractObject {
         this.tag = tag;
     }
 
-    protected String getMessage(String message) {
-        if ( this.tag == null ) {
-            return message;
-        }
-        return "@" + this.tag.getName() + ": " + message + " (" + this.tag.getSourceLocation() + ")";
+    protected void logWarn(IssueLog iLog, String message) {
+        iLog.addWarning( "@" + this.tag.getName() + ": " + message, tag.getSourceLocation(), tag.getLineNumber() );
+    }
+
+    protected void logError(IssueLog iLog, String message) {
+        iLog.addError( "@" + this.tag.getName() + ": " + message, tag.getSourceLocation(), tag.getLineNumber() );
     }
 
     public JavaTag getJavaTag() {

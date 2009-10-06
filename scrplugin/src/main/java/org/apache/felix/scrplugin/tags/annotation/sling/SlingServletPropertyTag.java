@@ -27,6 +27,8 @@ import org.apache.felix.scrplugin.helper.StringUtils;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.annotation.defaulttag.AbstractTag;
 
+import com.thoughtworks.qdox.model.Annotation;
+
 /**
  * Description of a java tag for components.
  */
@@ -40,8 +42,8 @@ public class SlingServletPropertyTag extends AbstractTag {
      * @param values Property values
      * @param desc Description
      */
-    public SlingServletPropertyTag(String name, String[] values, JavaClassDescription desc) {
-        super(desc, null);
+    public SlingServletPropertyTag(Annotation annotation, String name, String[] values, JavaClassDescription desc) {
+        super(annotation, desc, null);
         this.name = name;
         this.values = values;
     }

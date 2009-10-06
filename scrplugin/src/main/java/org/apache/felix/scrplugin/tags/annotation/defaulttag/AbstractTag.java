@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.apache.felix.scrplugin.tags.*;
 
+import com.thoughtworks.qdox.model.Annotation;
+
 /**
  * Description of a java tag for components.
  */
@@ -31,13 +33,16 @@ public abstract class AbstractTag implements JavaTag {
 
     protected final JavaField field;
 
+    protected final Annotation sourceAnnotation;
+
     protected Map<String, String> parameters;
 
     /**
      * @param desc Description
      * @param field Field
      */
-    public AbstractTag(JavaClassDescription desc, JavaField field) {
+    public AbstractTag(Annotation sourceAnnotation, JavaClassDescription desc, JavaField field) {
+        this.sourceAnnotation = sourceAnnotation;
         this.description = desc;
         this.field = field;
     }
@@ -69,6 +74,13 @@ public abstract class AbstractTag implements JavaTag {
      */
     public String getSourceLocation() {
         return "Java annotations in " + this.description.getName();
+    }
+
+    /**
+     * @see JavaTag#getLineNumber()
+     */
+    public int getLineNumber() {
+        return sourceAnnotation.getLineNumber();
     }
 
     /**

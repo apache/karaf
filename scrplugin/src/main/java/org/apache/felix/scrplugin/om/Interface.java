@@ -62,12 +62,12 @@ public class Interface extends AbstractObject {
     throws SCRDescriptorException {
         final JavaClassDescription javaClass = this.tag.getJavaClassDescription();
         if (javaClass == null) {
-            iLog.addError(this.getMessage("Must be declared in a Java class"));
+            this.logError( iLog, "Must be declared in a Java class" );
         } else {
 
             if ( !javaClass.isA(this.getInterfacename()) ) {
                // interface not implemented
-                iLog.addError(this.getMessage("Class must implement provided interface " + this.getInterfacename()));
+                this.logError( iLog, "Class must implement provided interface " + this.getInterfacename() );
             }
         }
     }

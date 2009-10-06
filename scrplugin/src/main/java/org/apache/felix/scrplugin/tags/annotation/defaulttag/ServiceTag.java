@@ -40,7 +40,7 @@ public class ServiceTag extends AbstractTag {
      * @param desc Description
      */
     public ServiceTag(final Annotation annotation, JavaClassDescription desc) {
-        super(desc, null);
+        super(annotation, desc, null);
         this.annotation = new Service() {
 
             public boolean serviceFactory() {
