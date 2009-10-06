@@ -21,7 +21,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequestWrapper;
 import org.apache.felix.http.base.internal.context.ExtServletContext;
 import java.io.IOException;
 
@@ -89,7 +88,7 @@ public final class ServletHandler
                 res.sendError(HttpServletResponse.SC_FORBIDDEN);
             }
         } else {
-            this.servlet.service(new RequestWrapper(req), res);
+            this.servlet.service(new ServletHandlerRequest(req, this.alias), res);
         }
     }
 
@@ -97,47 +96,4 @@ public final class ServletHandler
     {
         return other.alias.length() - this.alias.length();
     }    
-
-    private final class RequestWrapper
-        extends HttpServletRequestWrapper
-    {
-        private String pathInfo;
-        private boolean pathInfoComputed = false;
-
-        public RequestWrapper(HttpServletRequest req)
-        {
-            super(req);
-        }
-
-        @Override
-        public String getPathInfo()
-        {
-            if (!this.pathInfoComputed) {
-                final int servletPathLength = getServletPath().length();
-                this.pathInfo = getRequestURI().substring(getContextPath().length()).replaceAll("[/]{2,}", "/")
-                    .substring(servletPathLength);
-
-                if ("".equals(this.pathInfo) && servletPathLength != 0) {
-                    this.pathInfo = null;
-                }
-
-                this.pathInfoComputed = true;
-            }
-
-            return this.pathInfo;
-        }
-
-        @Override
-        public String getPathTranslated()
-        {
-            final String info = getPathInfo();
-            return (null == info) ? null : getRealPath(info);
-        }
-
-        @Override
-        public String getServletPath()
-        {
-            return alias;
-        }
-    }
 }
