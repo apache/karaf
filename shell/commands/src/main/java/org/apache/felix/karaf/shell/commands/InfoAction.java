@@ -55,6 +55,8 @@ public class InfoAction extends OsgiCommandSupport {
         System.out.println("Karaf");
         printValue("Karaf home", maxNameLen, System.getProperty("karaf.home"));
         printValue("Karaf base", maxNameLen, System.getProperty("karaf.base"));
+        printValue("OSGi Framework", maxNameLen, bundleContext.getBundle(0).getSymbolicName() + " - " +
+            bundleContext.getBundle(0).getVersion());
         System.out.println();
 
         System.out.println("JVM");
