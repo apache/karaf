@@ -62,6 +62,10 @@ public class ComponentTag extends AbstractTag {
                 return Util.getBooleanValue(annotation, "ds", Component.class);
             }
 
+            public String specVersion() {
+                return Util.getStringValue( annotation, desc, "specVersion", Component.class );
+            }
+
             public boolean enabled() {
                 return Util.getBooleanValue(annotation, "enabled", Component.class);
             }
@@ -129,6 +133,7 @@ public class ComponentTag extends AbstractTag {
         map.put(Constants.COMPONENT_METATYPE, String.valueOf(this.annotation.metatype()));
         map.put(Constants.COMPONENT_ABSTRACT, String.valueOf(this.annotation.componentAbstract()));
         map.put(Constants.COMPONENT_DS, String.valueOf(this.annotation.ds()));
+        map.put(Constants.COMPONENT_DS_SPEC_VERSION, String.valueOf(this.annotation.specVersion()));
         map.put(Constants.COMPONENT_CREATE_PID, String.valueOf(this.annotation.createPid()));
 
         // version 1.1
