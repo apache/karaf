@@ -29,6 +29,7 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
 
 
@@ -153,6 +154,15 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
                 }
             }
         }
+    }
+
+    //---------- Component interface
+
+    public ComponentInstance getComponentInstance()
+    {
+        // TODO: should return the component instance corresponding to the
+        // bundle owning ScrService
+        return super.getComponentInstance();
     }
 
     private static class BundleComponentContext extends ComponentContextImpl

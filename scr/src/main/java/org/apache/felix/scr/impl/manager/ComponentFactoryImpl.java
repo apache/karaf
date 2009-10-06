@@ -199,6 +199,16 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         return this;
     }
 
+    //---------- Component interface
+
+
+    public ComponentInstance getComponentInstance()
+    {
+        // a ComponentFactory is not a real component and as such does
+        // not have a ComponentInstance
+        return null;
+    }
+
 
     //---------- ComponentHolder interface
 

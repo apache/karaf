@@ -595,6 +595,38 @@ public abstract class AbstractComponentManager implements Component
         return m_componentMetadata.isEnabled();
     }
 
+
+    public String getActivate()
+    {
+        return m_componentMetadata.getActivate();
+    }
+
+
+    public boolean isActivateDeclared()
+    {
+        return m_componentMetadata.isActivateDeclared();
+    }
+
+
+    public String getDeactivate()
+    {
+        return m_componentMetadata.getDeactivate();
+    }
+
+
+    public boolean isDeactivateDeclared()
+    {
+        return m_componentMetadata.isDeactivateDeclared();
+    }
+
+
+    public String getModified()
+    {
+        return m_componentMetadata.getModified();
+
+    }
+
+
     public boolean isServiceFactory()
     {
         return m_componentMetadata.getServiceMetadata() != null
