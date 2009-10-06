@@ -21,12 +21,14 @@ package org.apache.felix.karaf.shell.commands;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
+import org.fusesource.jansi.Ansi;
 
 
 @Command(scope = "shell", name="grep", description="Prints lines matching the given pattern")
@@ -69,16 +71,30 @@ public class GrepAction extends OsgiCommandSupport {
             regexp = regexp.toUpperCase();
         }
         Pattern p = Pattern.compile(regexp);
+        Pattern p2 = Pattern.compile(regex);
         try {
             int lineno = 1;
             String line;
             Reader r = new InputStreamReader(System.in);
             while ((line = readLine(r)) != null) {
-                if (p.matcher(ignoreCase ? line.toUpperCase() : line).matches() ^ invertMatch) {
+                String pattern = ignoreCase ? line.toUpperCase() : line;
+                if (p.matcher(pattern).matches() ^ invertMatch) {
+
                     if (lineNumber) {
                         System.out.print(String.format("%6d  ", lineno++));
                     }
-                    System.out.println(line);
+
+                    Matcher matcher2 = p2.matcher(pattern);
+                    StringBuffer sb = new StringBuffer();
+                    while (matcher2.find()) {
+                        matcher2.appendReplacement(sb, Ansi.ansi()
+                            .bg(Ansi.Color.YELLOW)
+                            .fg(Ansi.Color.BLACK)
+                            .a(matcher2.group())
+                            .reset().toString());
+                    }
+                    matcher2.appendTail(sb);
+                    System.out.println(sb.toString());
                     lineno++;
                 }
             }
