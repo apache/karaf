@@ -17,7 +17,8 @@
  * under the License.
  */
 package org.apache.felix.dependencymanager;
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Properties;
 
@@ -31,19 +32,19 @@ import org.osgi.service.cm.ManagedService;
  * Configuration dependency that can track the availability of a (valid) configuration.
  * To use it, specify a PID for the configuration. The dependency is always required,
  * because if it is not, it does not make sense to use the dependency manager. In that
- * scenario, simply register your service as a <code>ManagedService(Factory></code> and
+ * scenario, simply register your service as a <code>ManagedService(Factory)</code> and
  * handle everything yourself. Also, only managed services are supported, not factories.
  * There are a couple of things you need to be aware of when implementing the
  * <code>updated(Dictionary)</code> method:
- * <li>
- * <ul>Make sure it throws a <code>ConfigurationException</code> when you get a
+ * <ul>
+ * <li>Make sure it throws a <code>ConfigurationException</code> when you get a
  * configuration that is invalid. In this case, the dependency will not change:
  * if it was not available, it will still not be. If it was available, it will
  * remain available and implicitly assume you keep working with your old
- * configuration.</ul>
- * <ul>This method will be called before all required dependencies are available.
- * Make sure you do not depend on these to parse your settings.</ul>
- * </li>
+ * configuration.</li>
+ * <li>This method will be called before all required dependencies are available.
+ * Make sure you do not depend on these to parse your settings.</li>
+ * </ul>
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -54,11 +55,12 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 	private volatile Service m_service;
 	private Dictionary m_settings;
 	private boolean m_propagate;
-    private final Logger m_logger;
+	private final Logger m_logger;
+    private String m_callback;
 	
 	public ConfigurationDependency(BundleContext context, Logger logger) {
 		m_context = context;
-        m_logger = logger;
+		m_logger = logger;
 	}
 	
 	public synchronized boolean isAvailable() {
@@ -98,38 +100,68 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 		m_service = null;
 	}
 
+        public Dependency setCallback(String callback) {
+		m_callback = callback;
+		return this;
+	}
+
 	public void updated(Dictionary settings) throws ConfigurationException {
 		// if non-null settings come in, we have to instantiate the service and
 		// apply these settings
 		((ServiceImpl) m_service).initService();
 		Object service = m_service.getService();
-		if (service != null) {
-			if (service instanceof ManagedService) {
-				ManagedService ms = (ManagedService) service;
-				ms.updated(settings);
 				
-				// if exception is thrown here, what does that mean for the
-				// state of this dependency? how smart do we want to be??
-				// it's okay like this, if the new settings contain errors, we
-				// remain in the state we were, assuming that any error causes
-				// the "old" configuration to stay in effect
-			}
-			else {
-				m_logger.log(Logger.LOG_ERROR, "Service " + m_service + " with configuration dependency " + this + " does not implement ManagedService.");
-				return;
-			}
-		}
-		else {
-		    m_logger.log(Logger.LOG_ERROR, "Service " + m_service + " with configuration dependency " + this + " could not be instantiated.");
-		    return;
-		}
-		// if these settings did not cause a configuration exception, we determine
-		// if they have caused the dependency state to change
 		Dictionary oldSettings = null; 
 		synchronized (this) {
 			oldSettings = m_settings;
+		}
+		
+		if (oldSettings == null && settings == null) {
+	       // CM has started but our configuration is not still present in the CM database: ignore
+	       return;
+		}
+		
+        if (service != null) {
+          	String callback = (m_callback == null) ? "updated" : m_callback;
+      	  	Method m;
+			try {
+			  	m = service.getClass().getDeclaredMethod(callback, new Class[] { Dictionary.class });
+		
+			  	// if exception is thrown here, what does that mean for the
+			  	// state of this dependency? how smart do we want to be??
+			  	// it's okay like this, if the new settings contain errors, we
+			  	// remain in the state we were, assuming that any error causes
+			  	// the "old" configuration to stay in effect.
+			  	// CM will log any thrown exceptions.
+			  	m.invoke(service, new Object[] { settings });
+			} 
+      	  	catch (InvocationTargetException e) {
+                // The component has thrown an exception during it's callback invocation.
+                if (e.getTargetException() instanceof ConfigurationException) {
+                    // the callback threw an OSGi ConfigurationException: just re-throw it.
+                    throw (ConfigurationException) e.getTargetException();
+                }
+                else {
+                    // wrap the callback exception into a ConfigurationException.
+                    throw new ConfigurationException(null, "Service " + m_service + " with " + this.toString() + " could not be updated", e.getTargetException());
+                }
+            }
+            catch (Throwable t) {
+                // wrap any other exception as a ConfigurationException.
+                throw new ConfigurationException(null, "Service " + m_service + " with " + this.toString() + " could not be updated", t);
+            }
+        }
+        else {
+            m_logger.log(Logger.LOG_ERROR, "Service " + m_service + " with configuration dependency " + this + " could not be instantiated.");
+            return;
+        }
+
+		// If these settings did not cause a configuration exception, we determine if they have 
+		// caused the dependency state to change
+		synchronized (this) {
 			m_settings = settings;
 		}
+
 		if ((oldSettings == null) && (settings != null)) {
 			m_service.dependencyAvailable(this);
 		}
@@ -162,10 +194,10 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 		return this;
 	}
 	
-    private void ensureNotActive() {
-        if (m_service != null) {
-            throw new IllegalStateException("Cannot modify state while active.");
-        }
+	private void ensureNotActive() {
+	  	if (m_service != null) {
+	  	  throw new IllegalStateException("Cannot modify state while active.");
+	  	}
     }
     
     public String toString() {
