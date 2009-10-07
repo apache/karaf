@@ -140,7 +140,19 @@ public class MockBundle implements Bundle
     }
 
 
+    public void start( int options )
+    {
+
+    }
+
+
     public void stop()
+    {
+
+    }
+
+
+    public void stop( int options )
     {
 
     }

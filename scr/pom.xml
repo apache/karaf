@@ -38,14 +38,14 @@
     </scm>
     <dependencies>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>1.0.0</version>
+            <version>4.1.0</version>
         </dependency>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>1.0.0</version>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
@@ -107,16 +107,29 @@
                         </Bundle-Activator>
                         <Export-Package>
                             org.apache.felix.scr;version=${pom.version},
-                            org.osgi.service.component;version=1.0;-split-package:=merge-first
+                            org.osgi.service.component
                         </Export-Package>
                         <Private-Package>
                             org.apache.felix.scr.impl.*,
                             org.osgi.util.tracker
                         </Private-Package>
                         <Import-Package>
-                            org.osgi.service.cm;
+                            <!--
+                                The Felix Shell support is optional 
+                            -->
                             org.apache.felix.shell; resolution:=optional,
-                            *
+                            
+                            <!--
+                                Framework version 1.3 (from R4.0) is enough,
+                                the Bundle.getBundleContext method is guarded
+                            -->
+                            org.osgi.framework;version=1.3,
+                            
+                            <!--
+                                Configuration Admin is optional and if it is
+                                present, version 1.2 (from R4.0) is enough  
+                            -->
+                            org.osgi.service.cm;version=1.2;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>
                             org.osgi.service.log
