@@ -293,7 +293,7 @@ public class ScrCommand implements Command
             if ( component.getState() != Component.STATE_DISABLED )
             {
                 component.disable();
-                out.println( "Componnent " + component.getName() + " disabled" );
+                out.println( "Component " + component.getName() + " disabled" );
             }
             else
             {
