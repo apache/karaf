@@ -133,6 +133,8 @@ public class Main {
     public static final String PROPERTY_LOCK_LEVEL = "karaf.lock.level";
 
     public static final String DEFAULT_REPO = "karaf.default.repository";
+    
+    public static final String KARAF_FRAMEWORK = "karaf.framework";
 
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
@@ -172,6 +174,8 @@ public class Main {
         configProps = loadConfigProperties();
         BootstrapLogManager.setProperties(configProps);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
+        
+        updateClassLoader(configProps);
 
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
@@ -731,7 +735,7 @@ public class Main {
         Properties configProps = loadPropertiesFile(configPropURL);
         Properties startupProps = loadPropertiesFile(startupPropURL);
 
-        String defaultRepo = configProps.getProperty(DEFAULT_REPO, "system");
+        String defaultRepo = System.getProperty(DEFAULT_REPO, "system");
 
         if (karafBase.equals(karafHome)) {
             bundleDirs.add(new File(karafHome, defaultRepo));
@@ -816,6 +820,30 @@ public class Main {
                 configProps.setProperty(key, System.getProperty(key));
             }
         }
+    }
+    
+    private void updateClassLoader(Properties configProps) throws Exception {
+    	String framework = configProps.getProperty(KARAF_FRAMEWORK);
+        if (framework == null) {
+            throw new IllegalArgumentException("Property " + KARAF_FRAMEWORK + " must be set in the etc/" + CONFIG_PROPERTIES_FILE_NAME + " configuration file");
+        }
+        String bundle = configProps.getProperty(KARAF_FRAMEWORK + "." + framework);
+        if (bundle == null) {
+            throw new IllegalArgumentException("Property " + KARAF_FRAMEWORK + "." + framework + " must be set in the etc/" + CONFIG_PROPERTIES_FILE_NAME + " configuration file");
+        }
+        File bundleFile = new File(karafBase, bundle);
+        if (!bundleFile.exists()) {
+            bundleFile = new File(karafHome, bundle);
+        }
+        if (!bundleFile.exists()) {
+            throw new FileNotFoundException(bundleFile.getAbsolutePath());
+        }
+
+        URLClassLoader classLoader = (URLClassLoader) Bootstrap.class.getClassLoader();
+        Method mth = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+        mth.setAccessible(true);
+        mth.invoke(classLoader, bundleFile.toURL());
+
     }
 
     /**
