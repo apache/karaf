@@ -635,12 +635,6 @@ public class ModuleImpl implements IModule
                         result = (isClass)
                             ? (Object) parent.loadClass(name)
                             : (Object) parent.getResource(name);
-                         // If this is a java.* package, then always terminate the
-                         // search; otherwise, continue to look locally if not found.
-                         if (pkgName.startsWith("java.") || (result != null))
-                        result = (isClass)
-                            ? (Object) getClass().getClassLoader().loadClass(name)
-                            : (Object) getClass().getClassLoader().getResource(name);
                         // If this is a java.* package, then always terminate the
                         // search; otherwise, continue to look locally if not found.
                         if (pkgName.startsWith("java.") || (result != null))
