@@ -73,8 +73,11 @@ public class ModuleImpl implements IModule
     private final Version m_version;
 
     private final ICapability[] m_capabilities;
+    private ICapability[] m_cachedCapabilities = null;
     private final IRequirement[] m_requirements;
+    private IRequirement[] m_cachedRequirements = null;
     private final IRequirement[] m_dynamicRequirements;
+    private IRequirement[] m_cachedDynamicRequirements = null;
     private final R4Library[] m_nativeLibraries;
     private final int m_declaredActivationPolicy;
     private final String[] m_activationIncludes;
@@ -250,69 +253,84 @@ public class ModuleImpl implements IModule
 
     public synchronized ICapability[] getCapabilities()
     {
-        List capList = (m_capabilities == null)
-            ? new ArrayList() : new ArrayList(Arrays.asList(m_capabilities));
-        for (int fragIdx = 0;
-            (m_fragments != null) && (fragIdx < m_fragments.length);
-            fragIdx++)
+        if (m_cachedCapabilities == null)
         {
-            ICapability[] caps = m_fragments[fragIdx].getCapabilities();
-            for (int capIdx = 0;
-                (caps != null) && (capIdx < caps.length);
-                capIdx++)
+            List capList = (m_capabilities == null)
+                ? new ArrayList() : new ArrayList(Arrays.asList(m_capabilities));
+            for (int fragIdx = 0;
+                (m_fragments != null) && (fragIdx < m_fragments.length);
+                fragIdx++)
             {
-                if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                ICapability[] caps = m_fragments[fragIdx].getCapabilities();
+                for (int capIdx = 0;
+                    (caps != null) && (capIdx < caps.length);
+                    capIdx++)
                 {
-                    capList.add(caps[capIdx]);
+                    if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    {
+                        capList.add(caps[capIdx]);
+                    }
                 }
             }
+            m_cachedCapabilities = (ICapability[])
+                capList.toArray(new ICapability[capList.size()]);
         }
-        return (ICapability[]) capList.toArray(new ICapability[capList.size()]);
+        return m_cachedCapabilities;
     }
 
     public synchronized IRequirement[] getRequirements()
     {
-        List reqList = (m_requirements == null)
-            ? new ArrayList() : new ArrayList(Arrays.asList(m_requirements));
-        for (int fragIdx = 0;
-            (m_fragments != null) && (fragIdx < m_fragments.length);
-            fragIdx++)
+        if (m_cachedRequirements == null)
         {
-            IRequirement[] reqs = m_fragments[fragIdx].getRequirements();
-            for (int reqIdx = 0;
-                (reqs != null) && (reqIdx < reqs.length);
-                reqIdx++)
+            List reqList = (m_requirements == null)
+                ? new ArrayList() : new ArrayList(Arrays.asList(m_requirements));
+            for (int fragIdx = 0;
+                (m_fragments != null) && (fragIdx < m_fragments.length);
+                fragIdx++)
             {
-                if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
-                    || reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+                IRequirement[] reqs = m_fragments[fragIdx].getRequirements();
+                for (int reqIdx = 0;
+                    (reqs != null) && (reqIdx < reqs.length);
+                    reqIdx++)
                 {
-                    reqList.add(reqs[reqIdx]);
+                    if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                        || reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+                    {
+                        reqList.add(reqs[reqIdx]);
+                    }
                 }
             }
+            m_cachedRequirements = (IRequirement[])
+                reqList.toArray(new IRequirement[reqList.size()]);
         }
-        return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
+        return m_cachedRequirements;
     }
 
     public synchronized IRequirement[] getDynamicRequirements()
     {
-        List reqList = (m_dynamicRequirements == null)
-            ? new ArrayList() : new ArrayList(Arrays.asList(m_dynamicRequirements));
-        for (int fragIdx = 0;
-            (m_fragments != null) && (fragIdx < m_fragments.length);
-            fragIdx++)
+        if (m_cachedDynamicRequirements == null)
         {
-            IRequirement[] reqs = m_fragments[fragIdx].getDynamicRequirements();
-            for (int reqIdx = 0;
-                (reqs != null) && (reqIdx < reqs.length);
-                reqIdx++)
+            List reqList = (m_dynamicRequirements == null)
+                ? new ArrayList() : new ArrayList(Arrays.asList(m_dynamicRequirements));
+            for (int fragIdx = 0;
+                (m_fragments != null) && (fragIdx < m_fragments.length);
+                fragIdx++)
             {
-                if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                IRequirement[] reqs = m_fragments[fragIdx].getDynamicRequirements();
+                for (int reqIdx = 0;
+                    (reqs != null) && (reqIdx < reqs.length);
+                    reqIdx++)
                 {
-                    reqList.add(reqs[reqIdx]);
+                    if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    {
+                        reqList.add(reqs[reqIdx]);
+                    }
                 }
             }
+            m_cachedDynamicRequirements = (IRequirement[])
+                reqList.toArray(new IRequirement[reqList.size()]);
         }
-        return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
+        return m_cachedDynamicRequirements;
     }
 
     public synchronized R4Library[] getNativeLibraries()
@@ -1077,6 +1095,11 @@ public class ModuleImpl implements IModule
         {
             ((ModuleImpl) m_fragments[i]).removeDependentHost(this);
         }
+
+        // Remove cached capabilities and requirements.
+        m_cachedCapabilities = null;
+        m_cachedRequirements = null;
+        m_cachedDynamicRequirements = null;
 
         // Update the dependencies on the new fragments.
         m_fragments = fragments;
