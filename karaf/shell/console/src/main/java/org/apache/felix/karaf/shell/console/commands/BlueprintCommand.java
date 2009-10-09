@@ -18,6 +18,9 @@
 package org.apache.felix.karaf.shell.console.commands;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -82,8 +85,14 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
         }
 
         @Override
-        protected void printUsage(Command command, Set<Option> options, Set<Argument> arguments, PrintStream out)
+        protected void printUsage(Command command, Set<Option> options, Set<Argument> args, PrintStream out)
         {
+            List<Argument> arguments = new ArrayList<Argument>(args);
+            Collections.sort(arguments, new Comparator<Argument>() {
+                public int compare(Argument o1, Argument o2) {
+                    return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
+                }
+            });
             options = new HashSet<Option>(options);
             options.add(HELP);
             if (command != null && (command.description() != null || command.name() != null))
