@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -124,7 +124,7 @@ class CaseInsensitiveDictionary extends Dictionary
         {
             tmp.putAll( props.internalMap );
         }
-        
+
         internalMap = tmp;
         originalKeys = new Hashtable( props.originalKeys );
     }
@@ -132,7 +132,7 @@ class CaseInsensitiveDictionary extends Dictionary
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.Dictionary#elements()
      */
     public Enumeration elements()
@@ -143,7 +143,7 @@ class CaseInsensitiveDictionary extends Dictionary
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.Dictionary#get(java.lang.Object)
      */
     public Object get( Object key )
@@ -160,7 +160,7 @@ class CaseInsensitiveDictionary extends Dictionary
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.Dictionary#isEmpty()
      */
     public boolean isEmpty()
@@ -171,7 +171,7 @@ class CaseInsensitiveDictionary extends Dictionary
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.Dictionary#keys()
      */
     public Enumeration keys()
@@ -182,7 +182,7 @@ class CaseInsensitiveDictionary extends Dictionary
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.Dictionary#put(java.lang.Object, java.lang.Object)
      */
     public Object put( Object key, Object value )
@@ -203,7 +203,7 @@ class CaseInsensitiveDictionary extends Dictionary
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.Dictionary#remove(java.lang.Object)
      */
     public Object remove( Object key )
@@ -221,7 +221,7 @@ class CaseInsensitiveDictionary extends Dictionary
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.Dictionary#size()
      */
     public int size()
@@ -235,7 +235,7 @@ class CaseInsensitiveDictionary extends Dictionary
     /**
      * Ensures the <code>key</code> complies with the <em>symbolic-name</em>
      * production of the OSGi core specification (1.3.2):
-     * 
+     *
      * <pre>
      * symbolic-name :: = token('.'token)*
      * digit    ::= [0..9]
@@ -243,10 +243,10 @@ class CaseInsensitiveDictionary extends Dictionary
      * alphanum ::= alpha | digit
      * token    ::= ( alphanum | ’_’ | ’-’ )+
      * </pre>
-     * 
+     *
      * If the key does not comply an <code>IllegalArgumentException</code> is
      * thrown.
-     * 
+     *
      * @param key
      *            The configuration property key to check.
      * @throws IllegalArgumentException
@@ -254,17 +254,27 @@ class CaseInsensitiveDictionary extends Dictionary
      */
     static void checkKey( Object keyObject )
     {
+        // check for wrong type or null key
         if ( !( keyObject instanceof String ) )
         {
             throw new IllegalArgumentException( "Key [" + keyObject + "] must be a String" );
         }
 
         String key = ( String ) keyObject;
-        if ( key.startsWith( "." ) || key.endsWith( "." ) )
+
+        // check for empty string
+        if ( key.length() == 0 )
         {
-            throw new IllegalArgumentException( "Key [" + key + "] must not start or end with a dot" );
+            throw new IllegalArgumentException( "Key [" + key + "] must not be an empty string" );
         }
 
+        // check for trailing dot
+        if ( key.endsWith( "." ) )
+        {
+            throw new IllegalArgumentException( "Key [" + key + "] must not end with a dot" );
+        }
+
+        // check for legal characters and non-consecutive dots
         int lastDot = Integer.MIN_VALUE;
         for ( int i = 0; i < key.length(); i++ )
         {

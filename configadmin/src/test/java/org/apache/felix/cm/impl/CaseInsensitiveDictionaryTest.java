@@ -211,7 +211,7 @@ public class CaseInsensitiveDictionaryTest extends TestCase
     public void testKeyDots()
     {
         testFailingKey( "." );
-        testFailingKey( ".a.b.c" );
+        CaseInsensitiveDictionary.checkKey( ".a.b.c" );
         testFailingKey( "a.b.c." );
         testFailingKey( ".a.b.c." );
         testFailingKey( "a..b" );
@@ -220,6 +220,8 @@ public class CaseInsensitiveDictionaryTest extends TestCase
 
     public void testKeyIllegalCharacters()
     {
+        testFailingKey( null );
+        testFailingKey( "" );
         testFailingKey( " " );
         testFailingKey( "§" );
         testFailingKey( "${yikes}" );
