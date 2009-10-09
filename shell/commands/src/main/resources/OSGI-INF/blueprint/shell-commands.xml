@@ -23,6 +23,9 @@
         <command name="shell/cat">
             <action class="org.apache.felix.karaf.shell.commands.CatAction"/>
         </command>
+        <command name="shell/each">
+            <action class="org.apache.felix.karaf.shell.commands.EachAction"/>
+        </command>
         <command name="shell/echo">
             <action class="org.apache.felix.karaf.shell.commands.EchoAction"/>
         </command>
@@ -37,6 +40,9 @@
             <action class="org.apache.felix.karaf.shell.commands.HistoryAction"/>
         </command>
         -->
+        <command name="shell/if">
+            <action class="org.apache.felix.karaf.shell.commands.IfAction"/>
+        </command>
         <command name="shell/info">
             <action class="org.apache.felix.karaf.shell.commands.InfoAction"/>
         </command>
