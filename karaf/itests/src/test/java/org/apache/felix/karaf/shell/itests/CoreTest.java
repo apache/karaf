@@ -22,11 +22,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
 import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
+import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import org.ops4j.pax.exam.Option;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
@@ -139,6 +142,15 @@ public class CoreTest extends AbstractIntegrationTest {
 
             equinox()
         );
+        // We need to add pax-exam-junit here when running with the ibm
+        // jdk to avoid the following exception during the test run:
+        // ClassNotFoundException: org.ops4j.pax.exam.junit.Configuration
+        if ("IBM Corporation".equals(System.getProperty("java.vendor"))) {
+            Option[] ibmOptions = options(
+                wrappedBundle(maven("org.ops4j.pax.exam", "pax-exam-junit"))
+            );
+            options = combine(ibmOptions, options);
+        }
         return options;
     }
 
