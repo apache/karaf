@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
@@ -47,7 +48,7 @@ public class JarContent implements IContent
     private final File m_file;
     private final JarFileX m_jarFile;
     private final boolean m_isJarFileOwner;
-    private int m_libCount = 0;
+    private Map m_nativeLibMap;
 
     public JarContent(Logger logger, Map configMap, Object revisionLock, File rootDir,
         File file, JarFileX jarFile)
@@ -297,83 +298,87 @@ public class JarContent implements IContent
                 // Since native libraries cannot be shared, we must extract a
                 // separate copy per request, so use the request library counter
                 // as part of the extracted path.
+                if (m_nativeLibMap == null)
+                {
+                    m_nativeLibMap = new HashMap();
+                }
+                Integer libCount = (Integer) m_nativeLibMap.get(entryName);
+                // Either set or increment the library count.
+                libCount = (libCount == null) ? new Integer(0) : new Integer(libCount.intValue() + 1);
+                m_nativeLibMap.put(entryName, libCount);
                 File libFile = new File(
-                    libDir, Integer.toString(m_libCount) + File.separatorChar + entryName);
-                // Increment library request counter.
-                m_libCount++;
+                    libDir, libCount.toString() + File.separatorChar + entryName);
 
                 if (!BundleCache.getSecureAction().fileExists(libFile))
                 {
-                    if (!BundleCache.getSecureAction().fileExists(libFile.getParentFile()))
+                    if (!BundleCache.getSecureAction().fileExists(libFile.getParentFile())
+                        && !BundleCache.getSecureAction().mkdirs(libFile.getParentFile()))
                     {
-                        if (!BundleCache.getSecureAction().mkdirs(libFile.getParentFile()))
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Unable to create library directory.");
+                    }
+                    else
+                    {
+                        InputStream is = null;
+
+                        try
+                        {
+                            is = new BufferedInputStream(
+                                m_jarFile.getInputStream(ze),
+                                BundleCache.BUFSIZE);
+                            if (is == null)
+                            {
+                                throw new IOException("No input stream: " + entryName);
+                            }
+
+                            // Create the file.
+                            BundleCache.copyStreamToFile(is, libFile);
+
+                            // Perform exec permission command on extracted library
+                            // if one is configured.
+                            String command = (String) m_configMap.get(
+                                Constants.FRAMEWORK_EXECPERMISSION);
+                            if (command != null)
+                            {
+                                Properties props = new Properties();
+                                props.setProperty("abspath", libFile.toString());
+                                command = Util.substVars(command, "command", null, props);
+                                Process p = BundleCache.getSecureAction().exec(command);
+                                // We have to make sure we read stdout and stderr because
+                                // otherwise we will block on certain unbuffered os's
+                                // (like eg. windows)
+                                Thread stdOut = new Thread(
+                                    new DevNullRunnable(p.getInputStream()));
+                                Thread stdErr = new Thread(
+                                    new DevNullRunnable(p.getErrorStream()));
+                                stdOut.setDaemon(true);
+                                stdErr.setDaemon(true);
+                                stdOut.start();
+                                stdErr.start();
+                                p.waitFor();
+                                stdOut.join();
+                                stdErr.join();
+                            }
+
+                            // Return the path to the extracted native library.
+                            result = BundleCache.getSecureAction().getAbsolutePath(libFile);
+                        }
+                        catch (Exception ex)
                         {
                             m_logger.log(
                                 Logger.LOG_ERROR,
-                                "Unable to create library directory.");
+                                "Extracting native library.", ex);
                         }
-                        else
+                        finally
                         {
-                            InputStream is = null;
-
                             try
                             {
-                                is = new BufferedInputStream(
-                                    m_jarFile.getInputStream(ze),
-                                    BundleCache.BUFSIZE);
-                                if (is == null)
-                                {
-                                    throw new IOException("No input stream: " + entryName);
-                                }
-
-                                // Create the file.
-                                BundleCache.copyStreamToFile(is, libFile);
-
-                                // Perform exec permission command on extracted library
-                                // if one is configured.
-                                String command = (String) m_configMap.get(
-                                    Constants.FRAMEWORK_EXECPERMISSION);
-                                if (command != null)
-                                {
-                                    Properties props = new Properties();
-                                    props.setProperty("abspath", libFile.toString());
-                                    command = Util.substVars(command, "command", null, props);
-                                    Process p = BundleCache.getSecureAction().exec(command);
-                                    // We have to make sure we read stdout and stderr because
-                                    // otherwise we will block on certain unbuffered os's
-                                    // (like eg. windows)
-                                    Thread stdOut = new Thread(
-                                        new DevNullRunnable(p.getInputStream()));
-                                    Thread stdErr = new Thread(
-                                        new DevNullRunnable(p.getErrorStream()));
-                                    stdOut.setDaemon(true);
-                                    stdErr.setDaemon(true);
-                                    stdOut.start();
-                                    stdErr.start();
-                                    p.waitFor();
-                                    stdOut.join();
-                                    stdErr.join();
-                                }
-
-                                // Return the path to the extracted native library.
-                                result = BundleCache.getSecureAction().getAbsolutePath(libFile);
+                                if (is != null) is.close();
                             }
-                            catch (Exception ex)
+                            catch (IOException ex)
                             {
-                                m_logger.log(
-                                    Logger.LOG_ERROR,
-                                    "Extracting native library.", ex);
-                            }
-                            finally
-                            {
-                                try
-                                {
-                                    if (is != null) is.close();
-                                }
-                                catch (IOException ex)
-                                {
-                                    // Not much we can do.
-                                }
+                                // Not much we can do.
                             }
                         }
                     }

@@ -37,7 +37,7 @@ public class DirectoryContent implements IContent
     private final Object m_revisionLock;
     private final File m_rootDir;
     private final File m_dir;
-    private int m_libCount = 0;
+    private Map m_nativeLibMap;
 
     public DirectoryContent(Logger logger, Map configMap, Object revisionLock,
         File rootDir, File dir)
@@ -209,70 +209,74 @@ public class DirectoryContent implements IContent
                 // Since native libraries cannot be shared, we must extract a
                 // separate copy per request, so use the request library counter
                 // as part of the extracted path.
+                if (m_nativeLibMap == null)
+                {
+                    m_nativeLibMap = new HashMap();
+                }
+                Integer libCount = (Integer) m_nativeLibMap.get(entryName);
+                // Either set or increment the library count.
+                libCount = (libCount == null) ? new Integer(0) : new Integer(libCount.intValue() + 1);
+                m_nativeLibMap.put(entryName, libCount);
                 File libFile = new File(
-                    libDir, Integer.toString(m_libCount) + File.separatorChar + entryName);
-                // Increment library request counter.
-                m_libCount++;
+                    libDir, libCount.toString() + File.separatorChar + entryName);
 
                 if (!BundleCache.getSecureAction().fileExists(libFile))
                 {
-                    if (!BundleCache.getSecureAction().fileExists(libFile.getParentFile()))
+                    if (!BundleCache.getSecureAction().fileExists(libFile.getParentFile())
+                        && !BundleCache.getSecureAction().mkdirs(libFile.getParentFile()))
                     {
-                        if (!BundleCache.getSecureAction().mkdirs(libFile.getParentFile()))
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Unable to create library directory.");
+                    }
+                    else
+                    {
+                        InputStream is = null;
+
+                        try
+                        {
+                            is = new BufferedInputStream(
+                                new FileInputStream(entryFile),
+                                BundleCache.BUFSIZE);
+                            if (is == null)
+                            {
+                                throw new IOException("No input stream: " + entryName);
+                            }
+
+                            // Create the file.
+                            BundleCache.copyStreamToFile(is, libFile);
+
+                            // Perform exec permission command on extracted library
+                            // if one is configured.
+                            String command = (String) m_configMap.get(
+                                Constants.FRAMEWORK_EXECPERMISSION);
+                            if (command != null)
+                            {
+                                Properties props = new Properties();
+                                props.setProperty("abspath", libFile.toString());
+                                command = Util.substVars(command, "command", null, props);
+                                Process p = BundleCache.getSecureAction().exec(command);
+                                p.waitFor();
+                            }
+
+                            // Return the path to the extracted native library.
+                            result = BundleCache.getSecureAction().getAbsolutePath(libFile);
+                        }
+                        catch (Exception ex)
                         {
                             m_logger.log(
                                 Logger.LOG_ERROR,
-                                "Unable to create library directory.");
+                                "Extracting native library.", ex);
                         }
-                        else
+                        finally
                         {
-                            InputStream is = null;
-
                             try
                             {
-                                is = new BufferedInputStream(
-                                    new FileInputStream(entryFile),
-                                    BundleCache.BUFSIZE);
-                                if (is == null)
-                                {
-                                    throw new IOException("No input stream: " + entryName);
-                                }
-
-                                // Create the file.
-                                BundleCache.copyStreamToFile(is, libFile);
-
-                                // Perform exec permission command on extracted library
-                                // if one is configured.
-                                String command = (String) m_configMap.get(
-                                    Constants.FRAMEWORK_EXECPERMISSION);
-                                if (command != null)
-                                {
-                                    Properties props = new Properties();
-                                    props.setProperty("abspath", libFile.toString());
-                                    command = Util.substVars(command, "command", null, props);
-                                    Process p = BundleCache.getSecureAction().exec(command);
-                                    p.waitFor();
-                                }
-
-                                // Return the path to the extracted native library.
-                                result = BundleCache.getSecureAction().getAbsolutePath(libFile);
+                                if (is != null) is.close();
                             }
-                            catch (Exception ex)
+                            catch (IOException ex)
                             {
-                                m_logger.log(
-                                    Logger.LOG_ERROR,
-                                    "Extracting native library.", ex);
-                            }
-                            finally
-                            {
-                                try
-                                {
-                                    if (is != null) is.close();
-                                }
-                                catch (IOException ex)
-                                {
-                                    // Not much we can do.
-                                }
+                                // Not much we can do.
                             }
                         }
                     }
