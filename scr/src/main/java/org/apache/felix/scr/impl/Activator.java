@@ -57,8 +57,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     // the log service to log messages to
     private static ServiceTracker m_logService;
 
-    // map of BundleComponentActivator instances per Bundle indexed by Bundle symbolic
-    // name
+    // map of BundleComponentActivator instances per Bundle indexed by Bundle id
     private Map m_componentBundles;
 
     // registry of managed component
@@ -170,8 +169,13 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      */
     public void bundleChanged( BundleEvent event )
     {
-        if ( event.getType() == BundleEvent.STARTED )
+        if ( event.getType() == BundleEvent.LAZY_ACTIVATION || event.getType() == BundleEvent.STARTED )
         {
+            // FELIX-1666 LAZY_ACTIVATION event is sent if the bundle has lazy
+            // activation policy and is waiting for class loader access to
+            // actually load it; STARTED event is sent if bundle has regular
+            // activation policy or if the lazily activated bundle finally is
+            // really started. In both cases just try to load the components
             loadComponents( event.getBundle() );
         }
         else if ( event.getType() == BundleEvent.STOPPING )
@@ -215,12 +219,22 @@ public class Activator implements BundleActivator, SynchronousBundleListener
             return;
         }
 
+        // FELIX-1666 method is called for the LAZY_ACTIVATION event and
+        // the started event. Both events cause this method to be called;
+        // so we have to make sure to not load components twice
+        if ( m_componentBundles.containsKey( bundle.getBundleId() ) )
+        {
+            log( LogService.LOG_DEBUG, m_context.getBundle(), "Components for bundle  " + bundle.getSymbolicName()
+                + "/" + bundle.getBundleId() + " already loaded. Nothing to do", null );
+            return;
+        }
+
         // there should be components, load them with a bundle context
         BundleContext context = getBundleContext( bundle );
         if ( context == null )
         {
             log( LogService.LOG_ERROR, m_context.getBundle(), "Cannot get BundleContext of bundle "
-                + bundle.getSymbolicName(), null );
+                + bundle.getSymbolicName() + "/" + bundle.getBundleId(), null );
             return;
         }
 
@@ -228,7 +242,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         {
             BundleComponentActivator ga = new BundleComponentActivator( m_componentRegistry, m_componentActor, context,
                 m_logLevel );
-            m_componentBundles.put( bundle.getSymbolicName(), ga );
+            m_componentBundles.put( new Long( bundle.getBundleId() ), ga );
         }
         catch ( Exception e )
         {
@@ -239,13 +253,15 @@ public class Activator implements BundleActivator, SynchronousBundleListener
                     m_context.getBundle(),
                     "Bundle "
                         + bundle.getSymbolicName()
+                        + "/"
+                        + bundle.getBundleId()
                         + " has been stopped while trying to activate its components. Trying again when the bundles gets startet again.",
                     e );
             }
             else
             {
                 log( LogService.LOG_ERROR, m_context.getBundle(), "Error while loading components of bundle "
-                    + bundle.getSymbolicName(), e );
+                    + bundle.getSymbolicName() + "/" + bundle.getBundleId(), e );
             }
         }
     }
@@ -257,8 +273,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      */
     private void disposeComponents( Bundle bundle )
     {
-        String name = bundle.getSymbolicName();
-        BundleComponentActivator ga = ( BundleComponentActivator ) m_componentBundles.remove( name );
+        BundleComponentActivator ga = ( BundleComponentActivator ) m_componentBundles.remove( new Long( bundle
+            .getBundleId() ) );
         if ( ga != null )
         {
             try
@@ -267,8 +283,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener
             }
             catch ( Exception e )
             {
-                log( LogService.LOG_ERROR, m_context.getBundle(), "Error while disposing components of bundle " + name,
-                    e );
+                log( LogService.LOG_ERROR, m_context.getBundle(), "Error while disposing components of bundle "
+                    + bundle.getSymbolicName() + "/" + bundle.getBundleId(), e );
             }
         }
     }
