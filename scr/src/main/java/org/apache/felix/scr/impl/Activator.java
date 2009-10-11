@@ -222,7 +222,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         // FELIX-1666 method is called for the LAZY_ACTIVATION event and
         // the started event. Both events cause this method to be called;
         // so we have to make sure to not load components twice
-        if ( m_componentBundles.containsKey( bundle.getBundleId() ) )
+        if ( m_componentBundles.containsKey( new Long( bundle.getBundleId() ) ) )
         {
             log( LogService.LOG_DEBUG, m_context.getBundle(), "Components for bundle  " + bundle.getSymbolicName()
                 + "/" + bundle.getBundleId() + " already loaded. Nothing to do", null );
