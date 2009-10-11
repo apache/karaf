@@ -136,10 +136,18 @@ public class ScrCommand implements Command
                     err.println( "Missing bundle with ID " + bundleId );
                     return;
                 }
-                components = scrService.getComponents( bundle );
-                if ( components == null )
+                if ( bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STARTING )
                 {
-                    out.println( "Bundle " + bundleId + " declares no components" );
+                    components = scrService.getComponents( bundle );
+                    if ( components == null )
+                    {
+                        out.println( "Bundle " + bundleId + " declares no components" );
+                        return;
+                    }
+                }
+                else
+                {
+                    out.println( "Bundle " + bundleId + " is not active" );
                     return;
                 }
             }
@@ -193,6 +201,34 @@ public class ScrCommand implements Command
         out.println( component.isDefaultEnabled() ? "enabled" : "disabled" );
         out.print( "Activation: " );
         out.println( component.isImmediate() ? "immediate" : "delayed" );
+
+        // DS 1.1 new features
+        out.print( "Configuration Policy: " );
+        out.println( component.getConfigurationPolicy() );
+        out.print( "Activate Method: " );
+        out.print( component.getActivate() );
+        if ( component.isActivateDeclared() )
+        {
+            out.print( " (declared in the descriptor)" );
+        }
+        out.println();
+        out.print( "Deactivate Method: " );
+        out.print( component.getDeactivate() );
+        if ( component.isDeactivateDeclared() )
+        {
+            out.print( " (declared in the descriptor)" );
+        }
+        out.println();
+        out.print( "Modified Method: " );
+        if ( component.getModified() != null )
+        {
+            out.print( component.getModified() );
+        }
+        else
+        {
+            out.print( "-" );
+        }
+        out.println();
 
         if ( component.getFactory() != null )
         {
