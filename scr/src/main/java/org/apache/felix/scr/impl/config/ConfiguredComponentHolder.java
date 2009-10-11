@@ -264,10 +264,15 @@ public class ConfiguredComponentHolder extends AbstractComponentHolder
 
     public void disposeComponents( final int reason )
     {
+        // FELIX-1733: get a copy of the single component and clear
+        // the field to prevent recreation in disposed(ICM)
+        final ImmediateComponentManager singleComponent = m_singleComponent;
+        m_singleComponent = null;
+
         final ImmediateComponentManager[] cms = getComponentManagers( true );
         if ( cms == null )
         {
-            m_singleComponent.dispose( reason );
+            singleComponent.dispose( reason );
         }
         else
         {
@@ -284,12 +289,15 @@ public class ConfiguredComponentHolder extends AbstractComponentHolder
         // ensure the component is removed from the components map
         synchronized ( m_components )
         {
-            for ( Iterator vi = m_components.values().iterator(); vi.hasNext(); )
+            if ( !m_components.isEmpty() )
             {
-                if ( component == vi.next() )
+                for ( Iterator vi = m_components.values().iterator(); vi.hasNext(); )
                 {
-                    vi.remove();
-                    break;
+                    if ( component == vi.next() )
+                    {
+                        vi.remove();
+                        break;
+                    }
                 }
             }
         }
