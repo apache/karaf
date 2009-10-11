@@ -99,7 +99,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -107,6 +106,9 @@
                             ${artifactId}
                         </Bundle-SymbolicName>
                         <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
+                        <Bundle-DocURL>
+                            http://felix.apache.org/site/apache-felix-service-component-runtime.html
+                        </Bundle-DocURL>
                         <Bundle-Activator>
                             org.apache.felix.scr.impl.Activator
                         </Bundle-Activator>
