@@ -19,7 +19,6 @@ Changes from 2.0.0 to 2.0.1
     * [FELIX-1724] - Various module metadata should be cached
 
 ** Task
-    * [FELIX-1144] - The NOTICE file for Main subproject is not correctly copied into the source JAR
     * [FELIX-1617] - Modify framework, main, shell, shell.tui, and obr to depend on official OSGi JAR files
 
 Changes from 1.8.1 to 2.0.0
