@@ -84,7 +84,7 @@ class JarRevision extends BundleRevision
         try
         {
             // Open bundle JAR file.
-            jarFile = BundleCache.getSecureAction().openJAR(m_bundleFile);
+            jarFile = BundleCache.getSecureAction().openJAR(m_bundleFile, false);
             // Error if no jar file.
             if (jarFile == null)
             {
