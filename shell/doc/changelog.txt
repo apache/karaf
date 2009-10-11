@@ -1,3 +1,17 @@
+Changes from 1.4.0 to 1.4.1
+---------------------------
+
+** Bug
+    * [FELIX-1653] - [Shell] The new sysprop command does not allow to delete a system property
+    * [FELIX-1662] - find returns invalid level for bundles and find all returns strange listing
+    * [FELIX-1699] - The 'version' shell command is framework specific
+
+** Improvement
+    * [FELIX-1561] - [Shell] Add a command to display and modify system properties with the Felix Shell
+
+** Task
+    * [FELIX-1617] - Modify framework, main, shell, shell.tui, and obr to depend on official OSGi JAR files
+
 Changes form 1.2.0 to 1.4.0
 ---------------------------
 
