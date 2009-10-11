@@ -1,3 +1,27 @@
+Changes from 2.0.0 to 2.0.1
+---------------------------
+
+** Bug
+    * [FELIX-1565] - Deadlock UrlHandlers
+    * [FELIX-1573] - Occasional NPE in URLHandlersBundleStreamHandler
+    * [FELIX-1580] - Regression with native library handling
+    * [FELIX-1586] - Framework reports org.osgi.framework.version as 1.3
+    * [FELIX-1600] - ServiceReference.isAssignableTo() always returns true if requesting bundle has no wire
+    * [FELIX-1631] - Implicit bootdelegation causes hang on android
+    * [FELIX-1710] - Resolver still does not discard all partial results when a cyclical dependency fails
+    * [FELIX-1721] - Framework boot delegation has a bug due to extraneous code
+    * [FELIX-1731] - Native library extraction could be improved to help cases where there are dependencies among libraries
+
+** Improvement
+    * [FELIX-1619] - Change the default auto-deploy actions to be install and start only
+    * [FELIX-1625] - Refactor bundle cache to simplify management
+    * [FELIX-1679] - VersionRange class should use finals to be thread safe.
+    * [FELIX-1724] - Various module metadata should be cached
+
+** Task
+    * [FELIX-1144] - The NOTICE file for Main subproject is not correctly copied into the source JAR
+    * [FELIX-1617] - Modify framework, main, shell, shell.tui, and obr to depend on official OSGi JAR files
+
 Changes from 1.8.1 to 2.0.0
 ---------------------------
 
