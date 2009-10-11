@@ -255,6 +255,31 @@ public interface Component
 
 
     /**
+     * Reuturns the configuration policy declared in the component descriptor.
+     * If the component descriptor is a Declarative Services 1.0 descriptor or
+     * not configuration poliy has been declared, the default value
+     * <i>optional</i> is returned.
+     * <p>
+     * The returned string is one of the three policies defined in the
+     * Declarative Services specification 1.1:
+     * <dl>
+     * <dt>optional</dt>
+     * <dd>Configuration from the Configuration Admin service is supplied to
+     * the component if available. Otherwise the component is activated without
+     * Configuration Admin configuration. This is the default value reflecting
+     * the behaviour of Declarative Services 1.0</dd>
+     * <dt>require</dt>
+     * <dd>Configuration is required. The component remains unsatisfied until
+     * configuartion is available from the Configuration Admin service.</dd>
+     * <dt>ignore</dt>
+     * <dd>Configuration is ignored. No Configuration Admin service
+     * configuration is supplied to the component.</dd>
+     * </dl>
+     */
+    String getConfigurationPolicy();
+
+
+    /**
      * Enables this Component if it is disabled. If the Component is not
      * currently {@link #STATE_DISABLED disabled} this method has no effect. If
      * the Component is {@link #STATE_DESTROYED destroyed}, this method throws

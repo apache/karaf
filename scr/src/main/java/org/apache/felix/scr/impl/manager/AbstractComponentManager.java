@@ -623,7 +623,12 @@ public abstract class AbstractComponentManager implements Component
     public String getModified()
     {
         return m_componentMetadata.getModified();
+    }
 
+
+    public String getConfigurationPolicy()
+    {
+        return m_componentMetadata.getConfigurationPolicy();
     }
 
 
