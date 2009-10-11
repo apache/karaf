@@ -41,21 +41,25 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <version>4.1.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <version>4.2.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.shell</artifactId>
             <version>1.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.sf.kxml</groupId>
             <artifactId>kxml2</artifactId>
             <version>2.2.2</version>
+            <scope>provided</scope>
         </dependency>
         
         <!-- Integration Testing with Pax Exam -->
@@ -63,6 +67,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.6</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
