@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
@@ -121,7 +122,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
 
-        svc.installFeature("f1");
+        svc.installFeature("f1", FeatureImpl.DEFAULT_VERSION, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         
         Feature[] installed = svc.listInstalledFeatures();
         assertEquals(1, installed.length);
@@ -256,8 +257,8 @@ public class FeaturesServiceTest extends TestCase {
             // ok
         }
 
-        svc.installFeature("f1", "0.1");
-        svc.installFeature("f1", "0.2");
+        svc.installFeature("f1", "0.1", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        svc.installFeature("f1", "0.2", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 
         try {
             svc.uninstallFeature("f1");
@@ -397,6 +398,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
         expect(installedBundle.getHeaders()).andReturn(new Hashtable());
+
         installedBundle.start();
         
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -465,6 +467,8 @@ public class FeaturesServiceTest extends TestCase {
         featuresNode.put("f2" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + "0.2", "1234567");
         prefs.putBoolean("bootFeaturesInstalled", false);
         prefs.flush();
+
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable()).anyTimes();
 
         // uninstallAllFeatures 
         

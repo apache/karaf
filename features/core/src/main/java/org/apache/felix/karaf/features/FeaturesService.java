@@ -17,11 +17,18 @@
 package org.apache.felix.karaf.features;
 
 import java.net.URI;
+import java.util.EnumSet;
 
 /**
  * The service managing features repositories.
  */
 public interface FeaturesService {
+
+    enum Option {
+        NoCleanIfFailure,
+        PrintBundlesToRefresh,
+        NoAutoRefreshBundles,
+    }
 
     void addRepository(URI url) throws Exception;
 
@@ -33,7 +40,7 @@ public interface FeaturesService {
     
     void installFeature(String name, String version) throws Exception;
 
-    void installFeature(String name, String version, boolean cleanIfFailure) throws Exception;
+    void installFeature(String name, String version, EnumSet<Option> options) throws Exception;
 
     void uninstallFeature(String name) throws Exception;
     

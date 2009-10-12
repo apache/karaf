@@ -36,6 +36,7 @@
         <property name="configAdmin" ref="configAdmin" />
         <property name="packageAdmin" ref="packageAdmin" />
         <property name="preferences" ref="preferences" />
+        <property name="startLevel" ref="startLevel" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 
@@ -51,6 +52,8 @@
 
     <reference id="packageAdmin" interface="org.osgi.service.packageadmin.PackageAdmin" />
 
+    <reference id="startLevel" interface="org.osgi.service.startlevel.StartLevel" />
+    
     <service ref="featuresService" interface="org.apache.felix.karaf.features.FeaturesService" />
 
 </blueprint>

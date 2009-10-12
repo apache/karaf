@@ -16,6 +16,8 @@
  */
 package org.apache.felix.karaf.features.command;
 
+import java.util.EnumSet;
+
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
@@ -30,13 +32,22 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     String name;
     @Argument(index = 1, name = "version", description = "The version of the feature", required = false, multiValued = false)
     String version;
-    @Option(name = "-n", aliases = "--no-clean", description = "Do not uninstall bundles on failure", required = false, multiValued = false)
+    @Option(name = "-c", aliases = "--no-clean", description = "Do not uninstall bundles on failure", required = false, multiValued = false)
     boolean noClean;
+    @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)
+    boolean noRefresh;
 
     protected void doExecute(FeaturesService admin) throws Exception {
     	if (version == null || version.length() == 0) {
             version = DEFAULT_VERSION;
     	}
-        admin.installFeature(name, version, !noClean);
+        EnumSet<FeaturesService.Option> options = EnumSet.of(FeaturesService.Option.PrintBundlesToRefresh);
+        if (noRefresh) {
+            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        }
+        if (noClean) {
+            options.add(FeaturesService.Option.NoCleanIfFailure);
+        }
+        admin.installFeature(name, version, options);
     }
 }

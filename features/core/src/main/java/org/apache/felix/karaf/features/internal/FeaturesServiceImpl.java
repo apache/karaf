@@ -25,9 +25,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +57,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.startlevel.StartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +77,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
     private PackageAdmin packageAdmin;
+    private StartLevel startLevel;
     private PreferencesService preferences;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
@@ -113,6 +117,14 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setPreferences(PreferencesService preferences) {
         this.preferences = preferences;
+    }
+
+    public StartLevel getStartLevel() {
+        return startLevel;
+    }
+
+    public void setStartLevel(StartLevel startLevel) {
+        this.startLevel = startLevel;
     }
 
     public void registerListener(FeaturesListener listener) {
@@ -196,10 +208,10 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void installFeature(String name, String version) throws Exception {
-        installFeature(name, version, true);
+        installFeature(name, version, EnumSet.noneOf(Option.class));
     }
 
-    public void installFeature(String name, String version, boolean cleanIfFailure) throws Exception {
+    public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
         InstallationState state = new InstallationState();
         Feature f = getFeature(name, version);
         if (f == null) {
@@ -209,20 +221,66 @@ public class FeaturesServiceImpl implements FeaturesService {
         try {
             // Install everything
             doInstallFeature(state, f);
+            // Find bundles to refresh
+            boolean print = options.contains(Option.PrintBundlesToRefresh);
+            boolean refresh = !options.contains(Option.NoAutoRefreshBundles);
+            if (print || refresh) {
+                Set<Bundle> bundlesToRefresh = findBundlesToRefresh(state);
+                StringBuilder sb = new StringBuilder();
+                for (Bundle b : bundlesToRefresh) {
+                    if (sb.length() > 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(b.getSymbolicName()).append(" (").append(b.getBundleId()).append(")");
+                }
+                LOGGER.info("Bundles to refresh: {}", sb.toString());
+                if (!bundlesToRefresh.isEmpty()) {
+                    if (print) {
+                        if (refresh) {
+                            System.out.println("Refreshing bundles " + sb.toString());
+                        } else {
+                            System.out.println("The following bundles may need to be refreshed: " + sb.toString());
+                        }
+                    }
+                    if (refresh) {
+                        LOGGER.info("Refreshing bundles: {}", sb.toString());
+                        getPackageAdmin().refreshPackages(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
+                    }
+                }
+            }
             // Start all bundles
             for (Bundle b : state.bundles) {
-                // do not start fragment bundles.
+                // do not start fragment bundles
                 Dictionary d = b.getHeaders();
                 String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
                 if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
-                    b.start();
+                    // do not start bundles that are persistently stopped
+                    if (state.installed.contains(b)
+                            || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
+                                    && getStartLevel().isBundlePersistentlyStarted(b))) {
+                        b.start();
+                    }
                 }
             }
         } catch (Exception e) {
-            // uninstall everything
-            if (cleanIfFailure) {
-                for (Bundle b : state.bundles) {
-                    b.uninstall();
+            // cleanup on error
+            if (!options.contains(Option.NoCleanIfFailure)) {
+                // Uninstall everything
+                for (Bundle b : state.installed) {
+                    try {
+                        b.uninstall();
+                    } catch (Exception e2) {
+                        // Ignore
+                    }
+                }
+            } else {
+                // Force start of bundles so that they are flagged as persistently started
+                for (Bundle b : state.installed) {
+                    try {
+                        b.start();
+                    } catch (Exception e2) {
+                        // Ignore
+                    }
                 }
             }
             // rethrow exception
@@ -236,6 +294,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected static class InstallationState {
+        final Set<Bundle> installed = new HashSet<Bundle>();
         final Set<Bundle> bundles = new HashSet<Bundle>();
         final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
     }
@@ -262,18 +321,91 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
         Set<Long> bundles = new HashSet<Long>();
         for (String bundleLocation : feature.getBundles()) {
-            try {
-                Bundle b = installBundleIfNeeded(bundleLocation);
-                state.bundles.add(b);
-                bundles.add(b.getBundleId());
-            } catch (BundleAlreadyInstalledException e) {
-                bundles.add(e.getBundle().getBundleId());
-            }
+            Bundle b = installBundleIfNeeded(state, bundleLocation);
+            bundles.add(b.getBundleId());
         }
         state.features.put(feature, bundles);
     }
 
-    protected Bundle installBundleIfNeeded(String bundleLocation) throws IOException, BundleException, BundleAlreadyInstalledException {
+    protected Set<Bundle> findBundlesToRefresh(InstallationState state) {
+        // First pass: include all bundles contained in these features
+        Set<Bundle> bundles = new HashSet<Bundle>(state.bundles);
+        bundles.removeAll(state.installed);
+        if (bundles.isEmpty()) {
+            return bundles;
+        }
+        // Second pass: for each bundle, check if there is any unresolved optional package that could be resolved
+        Map<Bundle, List<HeaderParser.PathElement>> imports = new HashMap<Bundle, List<HeaderParser.PathElement>>();
+        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
+            Bundle b = it.next();
+            String importsStr = (String) b.getHeaders().get(Constants.IMPORT_PACKAGE);
+            if (importsStr == null) {
+                it.remove();
+            } else {
+                List<HeaderParser.PathElement> importsList = HeaderParser.parseHeader(importsStr);
+                for (Iterator<HeaderParser.PathElement> itp = importsList.iterator(); itp.hasNext();) {
+                    HeaderParser.PathElement p = itp.next();
+                    String resolution = p.getDirective(Constants.RESOLUTION_DIRECTIVE);
+                    if (!Constants.RESOLUTION_OPTIONAL.equals(resolution)) {
+                        itp.remove();
+                    }
+                }
+                if (importsList.isEmpty()) {
+                    it.remove();
+                } else {
+                    imports.put(b, importsList);
+                }
+            }
+        }
+        if (bundles.isEmpty()) {
+            return bundles;
+        }
+        // Third pass: compute a list of packages that are exported by our bundles and see if
+        //             some exported packages can be wired to the optional imports
+        List<HeaderParser.PathElement> exports = new ArrayList<HeaderParser.PathElement>();
+        for (Bundle b : state.installed) {
+            String exportsStr = (String) b.getHeaders().get(Constants.EXPORT_PACKAGE);
+            if (exportsStr != null) {
+                List<HeaderParser.PathElement> exportsList = HeaderParser.parseHeader(exportsStr);
+                exports.addAll(exportsList);
+            }
+        }
+        for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
+            Bundle b = it.next();
+            List<HeaderParser.PathElement> importsList = imports.get(b);
+            for (Iterator<HeaderParser.PathElement> itpi = importsList.iterator(); itpi.hasNext();) {
+                HeaderParser.PathElement pi = itpi.next();
+                boolean matching = false;
+                for (HeaderParser.PathElement pe : exports) {
+                    if (pi.getName().equals(pe.getName())) {
+                        String evStr = pe.getAttribute(Constants.VERSION_ATTRIBUTE);
+                        String ivStr = pi.getAttribute(Constants.VERSION_ATTRIBUTE);
+                        Version exported = evStr != null ? Version.parseVersion(evStr) : Version.emptyVersion;
+                        VersionRange imported = ivStr != null ? VersionRange.parse(ivStr) : VersionRange.infiniteRange;
+                        if (imported.isInRange(exported)) {
+                            matching = true;
+                            break;
+                        }
+                    }
+                }
+                if (!matching) {
+                    itpi.remove();
+                }
+            }
+            if (importsList.isEmpty()) {
+                it.remove();
+            } else {
+                LOGGER.debug("Refeshing bundle {} ({}) to solve the following optional imports", b.getSymbolicName(), b.getBundleId());
+                for (HeaderParser.PathElement p : importsList) {
+                    LOGGER.debug("    {}", p);
+                }
+
+            }
+        }
+        return bundles;
+    }
+
+    protected Bundle installBundleIfNeeded(InstallationState state, String bundleLocation) throws IOException, BundleException {
         LOGGER.debug("Checking " + bundleLocation);
         InputStream is;
         try {
@@ -295,7 +427,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                     Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
                     if (v.equals(bv)) {
                         LOGGER.debug("  found installed bundle: " + b);
-                        throw new BundleAlreadyInstalledException(b);
+                        state.bundles.add(b);
+                        return b;
                     }
                 }
             }
@@ -306,21 +439,12 @@ public class FeaturesServiceImpl implements FeaturesService {
                 is = new BufferedInputStream(new URL(bundleLocation).openStream());
             }
             LOGGER.debug("Installing bundle " + bundleLocation);
-            return getBundleContext().installBundle(bundleLocation, is);
+            Bundle b = getBundleContext().installBundle(bundleLocation, is);
+            state.bundles.add(b);
+            state.installed.add(b);
+            return b;
         } finally {
             is.close();
-        }
-    }
-
-    protected static class BundleAlreadyInstalledException extends Exception {
-        private final Bundle bundle;
-
-        public BundleAlreadyInstalledException(Bundle bundle) {
-            this.bundle = bundle;
-        }
-
-        public Bundle getBundle() {
-            return bundle;
         }
     }
 
