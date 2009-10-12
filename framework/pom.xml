@@ -38,12 +38,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <version>4.2.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>${pom.groupId}</groupId>
-          <artifactId>javax.servlet</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
   <properties>
