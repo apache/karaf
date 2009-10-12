@@ -36,6 +36,34 @@
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/scr</developerConnection>
         <url>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/scr</url>
     </scm>
+    
+    <!--
+        A Note on Testing
+        =================
+        
+        This project contains two kinds of tests: regular unit tests running
+        in the test phase and integration tests based on PAX Exam running
+        in the integration-test phase.
+        
+        Basically the complete project is build using Java 1.3 source and target
+        compatibility (as inherited from the parent pom). The exception are the
+        unit tests in the "integration" packages. These have to be compiled with
+        Java 5 source and target compatibility because the employ annotations
+        and generics.
+        
+        For running the integration tests from the console using Maven nothing
+        special has to be done as the tests run automatically. To run the tests
+        in your IDE, the project has to be built to the "package" phase with
+        the profile "ide" enabled:
+        
+             $ mvn -Pide clean package
+             
+        This creates the scr.jar file in the target folder, which is used by
+        the integration tests when run from the IDE. Alternatively the
+        "project.bundle.file" system property may be set to the bundle JAR
+        in the IDE launcher. 
+    -->
+    
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -180,38 +208,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Provide bundle for integration tests -->
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.3</version>
-                <executions>
-                    <execution>
-                        <id>configadmin-file-create</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar" tofile="${project.build.directory}/scr.jar" />
-                            </tasks>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>configadmin-file-remove</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <delete file="${project.build.directory}/configadmin.jar" />
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!--
                 Exclude Integration tests in (default) unit tests and
                 conversely enable integration tests for integration testing
@@ -227,6 +223,12 @@
                             <goal>test</goal>
                         </goals>
                         <configuration>
+                            <systemProperties>
+                                <property>
+                                    <name>project.bundle.file</name>
+                                    <value>${project.build.directory}/${project.build.finalName}.jar</value>
+                                </property>
+                            </systemProperties>
                             <excludes>
                                 <exclude>**/components/**</exclude>
                             </excludes>
@@ -247,7 +249,40 @@
             </plugin>
         </plugins>
     </build>
-    
+
+    <profiles>
+        <!--
+            copy the package such that IDEs may easily use it without
+            setting the system property
+        -->
+        <profile>
+            <id>ide</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.3</version>
+                        <executions>
+                            <execution>
+                                <id>scr-file-create</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                            tofile="${project.build.directory}/scr.jar" />
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+        
     <!-- repositories for Pax Exam and BND tool -->
     <repositories>
     	<repository>

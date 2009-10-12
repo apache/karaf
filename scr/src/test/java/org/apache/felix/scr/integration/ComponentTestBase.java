@@ -67,6 +67,12 @@ public abstract class ComponentTestBase
 
     protected ServiceTracker configAdminTracker;
 
+    // the name of the system property providing the bundle file to be installed and tested
+    protected static final String BUNDLE_JAR_SYS_PROP = "project.bundle.file";
+
+    // the default bundle jar file name
+    protected static final String BUNDLE_JAR_DEFAULT = "target/scr.jar";
+
     protected static final String PROP_NAME = "theValue";
     protected static final Dictionary<String, String> theConfig;
 
@@ -91,9 +97,17 @@ public abstract class ComponentTestBase
     @Configuration
     public static Option[] configuration()
     {
+        final String bundleFileName = System.getProperty( BUNDLE_JAR_SYS_PROP, BUNDLE_JAR_DEFAULT );
+        final File bundleFile = new File( bundleFileName );
+        if ( !bundleFile.canRead() )
+        {
+            throw new IllegalArgumentException( "Cannot read from bundle file " + bundleFileName + " specified in the "
+                + BUNDLE_JAR_SYS_PROP + " system property" );
+        }
+
         final Option[] base = options(
             provision(
-                CoreOptions.bundle( new File("target/scr.jar").toURI().toString() ),
+                CoreOptions.bundle( bundleFile.toURI().toString() ),
                 mavenBundle( "org.ops4j.pax.swissbox", "pax-swissbox-tinybundles", "1.0.0" ),
                 mavenBundle( "org.apache.felix", "org.apache.felix.configadmin", "1.0.10" )
              )
