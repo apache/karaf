@@ -699,6 +699,10 @@ public class DirectoryWatcher extends Thread
         try
         {
             File path = artifact.getPath();
+            // Find a listener for this artifact if needed
+            if (artifact.getListener() == null) {
+                artifact.setListener(findListener(path, FileInstall.getListeners()));
+            }
             // Forget this artifact
             currentManagedArtifacts.remove(path);
             // Delete transformed file
@@ -709,7 +713,7 @@ public class DirectoryWatcher extends Thread
                 ((ArtifactInstaller) artifact.getListener()).uninstall(path);
             }
             // else we need uninstall the bundle
-            else if (artifact.getListener() instanceof ArtifactTransformer)
+            else if (artifact.getBundleId() != 0)
             {
                 // old can't be null because of the way we calculate deleted list.
                 bundle = context.getBundle(artifact.getBundleId());
@@ -721,6 +725,7 @@ public class DirectoryWatcher extends Thread
                         + ". The bundle has already been uninstalled", null);
                     return null;
                 }
+                log("Uninstalling bundle " + bundle.getBundleId() + " (" + bundle.getSymbolicName() + ")", null);
                 bundle.uninstall();
             }
             log("Uninstalled " + path, null);
