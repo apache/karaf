@@ -176,7 +176,12 @@ public class BldProject implements IBldProject, IRepositoryConfig
 
             try
             {
-                File file = new File(base, defaults).getCanonicalFile();
+                File file = new File(defaults);
+                if (!file.isAbsolute()) {
+                    file = new File(base, defaults);
+                }
+                file = file.getCanonicalFile();
+                
                 URL url = file.toURL();
                 BldProperties bp = new BldProperties(file.getParentFile(), bldOverrides);
 
