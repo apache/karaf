@@ -95,9 +95,10 @@ public class Scanner {
      * Upon restart, such checksums are not known so that all files will
      * be reported as modified. 
      *
+     * @param reportImmediately report all files immediately without waiting for the checksum to be stable
      * @return a list of changes on the files included in the directory
      */
-    public Set/*<File>*/ scan()
+    public Set/*<File>*/ scan(boolean reportImmediately)
     {
         File[] list = directory.listFiles(filter);
         if (list == null)
@@ -114,7 +115,7 @@ public class Scanner {
             long newChecksum = checksum(file);
             lastChecksums.put(file, Long.valueOf(newChecksum));
             // Only handle file when it does not change anymore and it has changed since last reported
-            if (newChecksum == lastChecksum && newChecksum != storedChecksum)
+            if ((newChecksum == lastChecksum || reportImmediately) && newChecksum != storedChecksum)
             {
                 storedChecksums.put(file, Long.valueOf(newChecksum));
                 files.add(file);

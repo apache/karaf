@@ -115,6 +115,7 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         set(ht, DirectoryWatcher.FILTER);
         set(ht, DirectoryWatcher.TMPDIR);
         set(ht, DirectoryWatcher.START_NEW_BUNDLES);
+        set(ht, DirectoryWatcher.NO_INITIAL_DELAY);
         updated("initial", ht);
     }
 
@@ -135,12 +136,17 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
 
     public void stop(BundleContext context) throws Exception
     {
-        for (Iterator w = watchers.values().iterator(); w.hasNext();)
+        List /*<DirectoryWatcher>*/ toClose = new ArrayList /*<DirectoryWatcher>*/();
+        synchronized (watchers)
+        {
+            toClose.addAll(watchers.values());
+            watchers.clear();
+        }
+        for (Iterator w = toClose.iterator(); w.hasNext();)
         {
             try
             {
                 DirectoryWatcher dir = (DirectoryWatcher) w.next();
-                w.remove();
                 dir.close();
             }
             catch (Exception e)
@@ -155,7 +161,11 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
 
     public void deleted(String pid)
     {
-        DirectoryWatcher watcher = (DirectoryWatcher) watchers.remove(pid);
+        DirectoryWatcher watcher;
+        synchronized (watchers)
+        {
+            watcher = (DirectoryWatcher) watchers.remove(pid);
+        }
         if (watcher != null)
         {
             watcher.close();
@@ -184,6 +194,7 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         {
             listeners.add(listener);
         }
+        notifyWatchers();
     }
 
     private void removeListener(ArtifactListener listener)
@@ -191,6 +202,24 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         synchronized (listeners)
         {
             listeners.remove(listener);
+        }
+        notifyWatchers();
+    }
+
+    private void notifyWatchers()
+    {
+        List /*<DirectoryWatcher>*/ toNotify = new ArrayList /*<DirectoryWatcher>*/();
+        synchronized (watchers)
+        {
+            toNotify.addAll(watchers.values());
+        }
+        for (Iterator w = toNotify.iterator(); w.hasNext();)
+        {
+            DirectoryWatcher dir = (DirectoryWatcher) w.next();
+            synchronized (dir)
+            {
+                dir.notifyAll();
+            }
         }
     }
 

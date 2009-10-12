@@ -77,6 +77,7 @@ public class DirectoryWatcher extends Thread
     public final static String TMPDIR = "felix.fileinstall.tmpdir";
     public final static String FILTER = "felix.fileinstall.filter";
     public final static String START_NEW_BUNDLES = "felix.fileinstall.bundles.new.start";
+    public final static String NO_INITIAL_DELAY = "felix.fileinstall.noInitialDelay";
 
     File watchedDirectory;
     File tmpDir;
@@ -86,6 +87,7 @@ public class DirectoryWatcher extends Thread
     String filter;
     BundleContext context;
     String originatingFileName;
+    boolean noInitialDelay;
 
     // Map of all installed artifacts
     Map/* <File, Artifact> */ currentManagedArtifacts = new HashMap/* <File, Artifact> */();
@@ -111,6 +113,7 @@ public class DirectoryWatcher extends Thread
         tmpDir = getFile(properties, TMPDIR, new File("./tmp"));
         startBundles = getBoolean(properties, START_NEW_BUNDLES, true);  // by default, we start bundles.
         filter = (String) properties.get(FILTER);
+        noInitialDelay = getBoolean(properties, NO_INITIAL_DELAY, false);
 
         FilenameFilter flt;
         if (filter != null && filter.length() > 0)
@@ -127,6 +130,18 @@ public class DirectoryWatcher extends Thread
             flt = null;
         }
         scanner = new Scanner(watchedDirectory, flt);
+
+        if (noInitialDelay)
+        {
+            log("Starting initial scan", null);
+            initializeCurrentManagedBundles();
+            scanner.initialize(currentManagedArtifacts.keySet());
+            Set/*<File>*/ files = scanner.scan(true);
+            if (files != null)
+            {
+                process(files);
+            }
+        }
     }
 
     /**
@@ -143,165 +158,35 @@ public class DirectoryWatcher extends Thread
                 + TMPDIR + " = " + tmpDir + ", "
                 + FILTER + " = " + filter + "}", null);
 
-        initializeCurrentManagedBundles();
-
-        scanner.initialize(currentManagedArtifacts.keySet());
+        if (!noInitialDelay)
+        {
+            initializeCurrentManagedBundles();
+            scanner.initialize(currentManagedArtifacts.keySet());
+        }
 
         while (!interrupted())
         {
             try
             {
-                Set/*<File>*/ files = scanner.scan();
+                Set/*<File>*/ files = scanner.scan(false);
                 // Check that there is a result.  If not, this means that the directory can not be listed,
                 // so it's presumably not a valid directory (it may have been deleted by someone).
                 // In such case, just sleep
                 if (files == null)
                 {
-                    Thread.sleep(poll);
+                    synchronized (this)
+                    {
+                        wait(poll);
+                    }
                     continue;
                 }
 
-                List/*<ArtifactListener>*/ listeners = FileInstall.getListeners();
-                List/*<Artifact>*/ deleted = new ArrayList/*<Artifact>*/();
-                List/*<Artifact>*/ modified = new ArrayList/*<Artifact>*/();
-                List/*<Artifact>*/ created = new ArrayList/*<Artifact>*/();
+                process(files);
 
-                // Try to process again files that could not be processed
-                files.addAll(processingFailures);
-                processingFailures.clear();
-
-                for (Iterator it = files.iterator(); it.hasNext();)
+                synchronized (this)
                 {
-                    File file = (File) it.next();
-                    boolean exists = file.exists();
-                    Artifact artifact = (Artifact) currentManagedArtifacts.get(file);
-                    // File has been deleted
-                    if (!exists && artifact != null)
-                    {
-                        deleteJaredDirectory(artifact);
-                        deleteTransformedFile(artifact);
-                        deleted.add(artifact);
-                    }
-                    else
-                    {
-                        File jar  = file;
-                        // Jar up the directory if needed
-                        if (file.isDirectory())
-                        {
-                            prepareDir(tmpDir);
-                            try
-                            {
-                                jar = new File(tmpDir, file.getName() + ".jar");
-                                Util.jarDir(file, jar);
-
-                            }
-                            catch (IOException e)
-                            {
-                                log("Unable to create jar for: " + file.getAbsolutePath(), e);
-                                continue;
-                            }
-                        }
-                        // File has been modified
-                        if (exists && artifact != null)
-                        {
-                            // Check the last modified date against
-                            // the artifact last modified date if available.  This will loose
-                            // the possibility of the jar being replaced by an older one
-                            // or the content changed without the date being modified, but
-                            // else, we'd have to reinstall all the deployed bundles on restart.
-                            if (artifact.getLastModified() > Util.getLastModified(file))
-                            {
-                                continue;
-                            }
-                            // If there's no listener, this is because this artifact has been installed before
-                            // fileinstall has been restarted.  In this case, try to find a listener.
-                            if (artifact.getListener() == null)
-                            {
-                                ArtifactListener listener = findListener(jar, listeners);
-                                // If no listener can handle this artifact, we need to defer the
-                                // processing for this artifact until one is found
-                                if (listener == null)
-                                {
-                                    processingFailures.add(file);
-                                    continue;
-                                }
-                                artifact.setListener(listener);
-                            }
-                            // If the listener can not handle this file anymore,
-                            // uninstall the artifact and try as if is was new
-                            if (!listeners.contains(artifact.getListener()) || !artifact.getListener().canHandle(jar))
-                            {
-                                deleted.add(artifact);
-                                artifact = null;
-                            }
-                            // The listener is still ok
-                            else
-                            {
-                                deleteTransformedFile(artifact);
-                                artifact.setJaredDirectory(jar);
-                                if (transformArtifact(artifact))
-                                {
-                                    modified.add(artifact);
-                                }
-                                else
-                                {
-                                    deleteJaredDirectory(artifact);
-                                    deleted.add(artifact);
-                                }
-                                continue;
-                            }
-                        }
-                        // File has been added
-                        if (exists && artifact == null)
-                        {
-                            // Find the listener
-                            ArtifactListener listener = findListener(jar, listeners);
-                            // If no listener can handle this artifact, we need to defer the
-                            // processing for this artifact until one is found
-                            if (listener == null)
-                            {
-                                processingFailures.add(file);
-                                continue;
-                            }
-                            // Create the artifact
-                            artifact = new Artifact();
-                            artifact.setPath(file);
-                            artifact.setJaredDirectory(jar);
-                            artifact.setListener(listener);
-                            if (transformArtifact(artifact))
-                            {
-                                created.add(artifact);
-                            }
-                            else
-                            {
-                                deleteJaredDirectory(artifact);
-                            }
-                        }
-                    }
+                    wait(poll);
                 }
-                // Handle deleted artifacts
-                // We do the operations in the following order:
-                // uninstall, update, install, refresh & start.
-                Collection uninstalledBundles = uninstall(deleted);
-                Collection updatedBundles = update(modified);
-                Collection installedBundles = install(created);
-                if (uninstalledBundles.size() > 0 || updatedBundles.size() > 0)
-                {
-                    // Refresh if any bundle got uninstalled or updated.
-                    // This can lead to restart of recently updated bundles, but
-                    // don't worry about that at this point of time.
-                    refresh();
-                }
-
-                if (startBundles)
-                {
-                    // Try to start all the bundles that are not persistently stopped
-                    startAllBundles();
-                    // Try to start newly installed bundles
-                    start(installedBundles);
-                }
-
-                Thread.sleep(poll);
             }
             catch (InterruptedException e)
             {
@@ -311,6 +196,148 @@ public class DirectoryWatcher extends Thread
             {
                 log("In main loop, we have serious trouble", e);
             }
+        }
+    }
+
+    private void process(Set files) {
+        List/*<ArtifactListener>*/ listeners = FileInstall.getListeners();
+        List/*<Artifact>*/ deleted = new ArrayList/*<Artifact>*/();
+        List/*<Artifact>*/ modified = new ArrayList/*<Artifact>*/();
+        List/*<Artifact>*/ created = new ArrayList/*<Artifact>*/();
+
+        // Try to process again files that could not be processed
+        files.addAll(processingFailures);
+        processingFailures.clear();
+
+        for (Iterator it = files.iterator(); it.hasNext();)
+        {
+            File file = (File) it.next();
+            boolean exists = file.exists();
+            Artifact artifact = (Artifact) currentManagedArtifacts.get(file);
+            // File has been deleted
+            if (!exists && artifact != null)
+            {
+                deleteJaredDirectory(artifact);
+                deleteTransformedFile(artifact);
+                deleted.add(artifact);
+            }
+            else
+            {
+                File jar  = file;
+                // Jar up the directory if needed
+                if (file.isDirectory())
+                {
+                    prepareDir(tmpDir);
+                    try
+                    {
+                        jar = new File(tmpDir, file.getName() + ".jar");
+                        Util.jarDir(file, jar);
+
+                    }
+                    catch (IOException e)
+                    {
+                        log("Unable to create jar for: " + file.getAbsolutePath(), e);
+                        continue;
+                    }
+                }
+                // File has been modified
+                if (exists && artifact != null)
+                {
+                    // Check the last modified date against
+                    // the artifact last modified date if available.  This will loose
+                    // the possibility of the jar being replaced by an older one
+                    // or the content changed without the date being modified, but
+                    // else, we'd have to reinstall all the deployed bundles on restart.
+                    if (artifact.getLastModified() > Util.getLastModified(file))
+                    {
+                        continue;
+                    }
+                    // If there's no listener, this is because this artifact has been installed before
+                    // fileinstall has been restarted.  In this case, try to find a listener.
+                    if (artifact.getListener() == null)
+                    {
+                        ArtifactListener listener = findListener(jar, listeners);
+                        // If no listener can handle this artifact, we need to defer the
+                        // processing for this artifact until one is found
+                        if (listener == null)
+                        {
+                            processingFailures.add(file);
+                            continue;
+                        }
+                        artifact.setListener(listener);
+                    }
+                    // If the listener can not handle this file anymore,
+                    // uninstall the artifact and try as if is was new
+                    if (!listeners.contains(artifact.getListener()) || !artifact.getListener().canHandle(jar))
+                    {
+                        deleted.add(artifact);
+                        artifact = null;
+                    }
+                    // The listener is still ok
+                    else
+                    {
+                        deleteTransformedFile(artifact);
+                        artifact.setJaredDirectory(jar);
+                        if (transformArtifact(artifact))
+                        {
+                            modified.add(artifact);
+                        }
+                        else
+                        {
+                            deleteJaredDirectory(artifact);
+                            deleted.add(artifact);
+                        }
+                        continue;
+                    }
+                }
+                // File has been added
+                if (exists && artifact == null)
+                {
+                    // Find the listener
+                    ArtifactListener listener = findListener(jar, listeners);
+                    // If no listener can handle this artifact, we need to defer the
+                    // processing for this artifact until one is found
+                    if (listener == null)
+                    {
+                        processingFailures.add(file);
+                        continue;
+                    }
+                    // Create the artifact
+                    artifact = new Artifact();
+                    artifact.setPath(file);
+                    artifact.setJaredDirectory(jar);
+                    artifact.setListener(listener);
+                    if (transformArtifact(artifact))
+                    {
+                        created.add(artifact);
+                    }
+                    else
+                    {
+                        deleteJaredDirectory(artifact);
+                    }
+                }
+            }
+        }
+        // Handle deleted artifacts
+        // We do the operations in the following order:
+        // uninstall, update, install, refresh & start.
+        Collection uninstalledBundles = uninstall(deleted);
+        Collection updatedBundles = update(modified);
+        Collection installedBundles = install(created);
+        if (uninstalledBundles.size() > 0 || updatedBundles.size() > 0)
+        {
+            // Refresh if any bundle got uninstalled or updated.
+            // This can lead to restart of recently updated bundles, but
+            // don't worry about that at this point of time.
+            refresh();
+        }
+
+        if (startBundles)
+        {
+            // Try to start all the bundles that are not persistently stopped
+            startAllBundles();
+            // Try to start newly installed bundles
+            start(installedBundles);
         }
     }
 
