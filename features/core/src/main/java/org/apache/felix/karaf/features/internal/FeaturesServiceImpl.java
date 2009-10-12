@@ -196,16 +196,61 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void installFeature(String name, String version) throws Exception {
+        installFeature(name, version, true);
+    }
+
+    public void installFeature(String name, String version, boolean cleanIfFailure) throws Exception {
+        InstallationState state = new InstallationState();
         Feature f = getFeature(name, version);
         if (f == null) {
-            throw new Exception("No feature named '" + name 
+            throw new Exception("No feature named '" + name
             		+ "' with version '" + version + "' available");
         }
-        for (Feature dependency : f.getDependencies()) {
-        	installFeature(dependency.getName(), dependency.getVersion());
+        try {
+            // Install everything
+            doInstallFeature(state, f);
+            // Start all bundles
+            for (Bundle b : state.bundles) {
+                // do not start fragment bundles.
+                Dictionary d = b.getHeaders();
+                String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
+                if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
+                    b.start();
+                }
+            }
+        } catch (Exception e) {
+            // uninstall everything
+            if (cleanIfFailure) {
+                for (Bundle b : state.bundles) {
+                    b.uninstall();
+                }
+            }
+            // rethrow exception
+            throw e;
         }
-        for (String config : f.getConfigurations().keySet()) {
-            Dictionary<String,String> props = new Hashtable<String, String>(f.getConfigurations().get(config));
+        callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
+        for (Map.Entry<Feature, Set<Long>> e : state.features.entrySet()) {
+            installed.put(e.getKey(), e.getValue());
+        }
+        saveState();
+    }
+
+    protected static class InstallationState {
+        final Set<Bundle> bundles = new HashSet<Bundle>();
+        final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
+    }
+
+    protected void doInstallFeature(InstallationState state, Feature feature) throws Exception {
+        for (Feature dependency : feature.getDependencies()) {
+            Feature f = getFeature(dependency.getName(), dependency.getVersion());
+            if (f == null) {
+                throw new Exception("No feature named '" + dependency.getName()
+                        + "' with version '" + dependency.getVersion() + "' available");
+            }
+        	doInstallFeature(state, f);
+        }
+        for (String config : feature.getConfigurations().keySet()) {
+            Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
             String[] pid = parsePid(config);
             String key = (pid[1] == null ? pid[0] : pid[0] + "-" + pid[1]);
             props.put(CONFIG_KEY, key);
@@ -216,25 +261,19 @@ public class FeaturesServiceImpl implements FeaturesService {
             cfg.update(props);
         }
         Set<Long> bundles = new HashSet<Long>();
-        for (String bundleLocation : f.getBundles()) {
-            Bundle b = installBundleIfNeeded(bundleLocation);
-            bundles.add(b.getBundleId());
-        }
-        for (long id : bundles) {
-            Bundle b = bundleContext.getBundle(id);
-            // do not start fragment bundles.
-            Dictionary d = b.getHeaders();
-            String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
-            if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
-                b.start();
+        for (String bundleLocation : feature.getBundles()) {
+            try {
+                Bundle b = installBundleIfNeeded(bundleLocation);
+                state.bundles.add(b);
+                bundles.add(b.getBundleId());
+            } catch (BundleAlreadyInstalledException e) {
+                bundles.add(e.getBundle().getBundleId());
             }
         }
-        callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
-        installed.put(f, bundles);
-        saveState();
+        state.features.put(feature, bundles);
     }
 
-    protected Bundle installBundleIfNeeded(String bundleLocation) throws IOException, BundleException {
+    protected Bundle installBundleIfNeeded(String bundleLocation) throws IOException, BundleException, BundleAlreadyInstalledException {
         LOGGER.debug("Checking " + bundleLocation);
         InputStream is;
         try {
@@ -256,7 +295,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
                     if (v.equals(bv)) {
                         LOGGER.debug("  found installed bundle: " + b);
-                        return b;
+                        throw new BundleAlreadyInstalledException(b);
                     }
                 }
             }
@@ -270,6 +309,18 @@ public class FeaturesServiceImpl implements FeaturesService {
             return getBundleContext().installBundle(bundleLocation, is);
         } finally {
             is.close();
+        }
+    }
+
+    protected static class BundleAlreadyInstalledException extends Exception {
+        private final Bundle bundle;
+
+        public BundleAlreadyInstalledException(Bundle bundle) {
+            this.bundle = bundle;
+        }
+
+        public Bundle getBundle() {
+            return bundle;
         }
     }
 
