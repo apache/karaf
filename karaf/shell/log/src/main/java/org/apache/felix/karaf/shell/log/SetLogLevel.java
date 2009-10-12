@@ -16,6 +16,7 @@
  */
 package org.apache.felix.karaf.shell.log;
 
+import java.io.IOException;
 import java.util.Dictionary;
 
 import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
@@ -30,8 +31,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 @Command(scope = "log", name = "set", description = "Sets the log level.")
 public class SetLogLevel extends OsgiCommandSupport {
-
-    @Argument(index = 0, name = "level", description = "The log level to set (TRACE, DEBUG, INFO, WARN, ERROR or - to unset)", required = true, multiValued = false)
+    
+    @Argument(index = 0, name = "level", description = "The log level to set (TRACE, DEBUG, INFO, WARN, ERROR) or DEFAULT to unset", required = true, multiValued = false)
     String level;
 
     @Argument(index = 1, name = "logger", description = "Logger name or ROOT (default)", required = false, multiValued = false)
@@ -47,7 +48,7 @@ public class SetLogLevel extends OsgiCommandSupport {
     static final String INFO = "INFO";
     static final String WARN = "WARN";
     static final String ERROR = "ERROR";
-    static final String INHERITED = "-";
+    static final String DEFAULT = "DEFAULT";
 
     protected Object doExecute() throws Exception {
         if (ROOT_LOGGER.equalsIgnoreCase(this.logger)) {
@@ -58,17 +59,16 @@ public class SetLogLevel extends OsgiCommandSupport {
                 !INFO.equals(level) &&
                 !WARN.equals(level) &&
                 !ERROR.equals(level) &&
-                !INHERITED.equals(level)) {
-            System.err.println("level must be set to TRACE, DEBUG, INFO, WARN or ERROR (or - to unset it)");
+                !DEFAULT.equals(level)) {
+            System.err.println("level must be set to TRACE, DEBUG, INFO, WARN or ERROR (or DEFAULT to unset it)");
             return null;
         }
-        if (INHERITED.equals(level) && logger == null) {
+        if (DEFAULT.equals(level) && logger == null) {
             System.err.println("Can not unset the ROOT logger");
             return null;
         }
 
-        ConfigurationAdmin cfgAdmin = getConfigAdmin();
-        Configuration cfg = cfgAdmin.getConfiguration(CONFIGURATION_PID, null);
+        Configuration cfg = getConfiguration();
         Dictionary props = cfg.getProperties();
 
         String logger = this.logger;
@@ -80,7 +80,7 @@ public class SetLogLevel extends OsgiCommandSupport {
             prop = LOGGER_PREFIX + logger;
         }
         val = (String) props.get(prop);
-        if (INHERITED.equals(level)) {
+        if (DEFAULT.equals(level)) {
             if (val != null) {
                 val = val.trim();
                 int idx = val.indexOf(",");
@@ -96,9 +96,9 @@ public class SetLogLevel extends OsgiCommandSupport {
             } else {
                 val = val.trim();
                 int idx = val.indexOf(",");
-                if (idx == 0) {
-                    val = level + val;
-                } else if (idx > 0) {
+                if (idx < 0) {
+                    val = level;
+                } else {
                     val = level + val.substring(idx);
                 }
             }
@@ -111,6 +111,13 @@ public class SetLogLevel extends OsgiCommandSupport {
         cfg.update(props);
 
         return null;
+    }
+    
+    
+
+    protected Configuration getConfiguration() throws IOException {
+        Configuration cfg = getConfigAdmin().getConfiguration(CONFIGURATION_PID, null);
+        return cfg;
     }
 
     protected ConfigurationAdmin getConfigAdmin() {
