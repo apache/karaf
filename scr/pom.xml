@@ -63,6 +63,12 @@
         "project.bundle.file" system property may be set to the bundle JAR
         in the IDE launcher. 
     -->
+    <properties>
+        <project.bundle.file>
+            ${project.build.directory}/${project.build.finalName}.jar
+        </project.bundle.file>
+    </properties>
+    
     
     <dependencies>
         <dependency>
@@ -226,7 +232,7 @@
                             <systemProperties>
                                 <property>
                                     <name>project.bundle.file</name>
-                                    <value>${project.build.directory}/${project.build.finalName}.jar</value>
+                                    <value>${project.bundle.file}</value>
                                 </property>
                             </systemProperties>
                             <excludes>
