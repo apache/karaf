@@ -33,6 +33,8 @@ public interface FeaturesService {
     
     void installFeature(String name, String version) throws Exception;
 
+    void installFeature(String name, String version, boolean cleanIfFailure) throws Exception;
+
     void uninstallFeature(String name) throws Exception;
     
     void uninstallFeature(String name, String version) throws Exception;

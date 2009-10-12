@@ -16,6 +16,7 @@
  */
 package org.apache.felix.karaf.features.command;
 
+import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
@@ -23,16 +24,19 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "features", name = "install", description = "Installs a feature with the specified name and version.")
 public class InstallFeatureCommand extends FeaturesCommandSupport {
 
+    private static String DEFAULT_VERSION = "0.0.0";
+
     @Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
     String name;
     @Argument(index = 1, name = "version", description = "The version of the feature", required = false, multiValued = false)
     String version;
+    @Option(name = "-n", aliases = "--no-clean", description = "Do not uninstall bundles on failure", required = false, multiValued = false)
+    boolean noClean;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-    	if (version != null && version.length() > 0) {
-    		admin.installFeature(name, version);
-    	} else {
-    		admin.installFeature(name);
+    	if (version == null || version.length() == 0) {
+            version = DEFAULT_VERSION;
     	}
+        admin.installFeature(name, version, !noClean);
     }
 }
