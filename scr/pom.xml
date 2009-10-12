@@ -64,9 +64,9 @@
         in the IDE launcher. 
     -->
     <properties>
-        <project.bundle.file>
+        <bundle.file.name>
             ${project.build.directory}/${project.build.finalName}.jar
-        </project.bundle.file>
+        </bundle.file.name>
     </properties>
     
     
@@ -232,7 +232,7 @@
                             <systemProperties>
                                 <property>
                                     <name>project.bundle.file</name>
-                                    <value>${project.bundle.file}</value>
+                                    <value>${bundle.file.name}</value>
                                 </property>
                             </systemProperties>
                             <excludes>
