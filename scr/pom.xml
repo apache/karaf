@@ -64,8 +64,11 @@
         in the IDE launcher. 
     -->
     <properties>
+        <bundle.build.name>
+            ${basedir}/target
+        </bundle.build.name>
         <bundle.file.name>
-            ${project.build.directory}/${project.build.finalName}.jar
+            ${bundle.build.name}/${project.build.finalName}.jar
         </bundle.file.name>
     </properties>
     
@@ -88,6 +91,12 @@
             <artifactId>org.apache.felix.shell</artifactId>
             <version>1.0.0</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.sf.kxml</groupId>
@@ -129,6 +138,7 @@
         </dependency>
     </dependencies>
     <build>
+        <directory>${bundle.build.name}</directory>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
