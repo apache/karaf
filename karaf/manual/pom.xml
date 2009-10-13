@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+    <groupId>org.apache.felix.karaf</groupId>
+    <artifactId>karaf</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.felix.karaf</groupId>
+  <artifactId>manual</artifactId>
+  <version>1.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Karaf :: Manual</name>
+  <description>The Karaf Manual which generates a HTML and PDF representation of the manual.</description>
+
+  <build>
+    <plugins>
+        
+    <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+            <execution>
+                <configuration>
+                    <tasks>
+                        <taskdef name="for" classname="net.sf.antcontrib.logic.ForTask" classpathref="maven.plugin.classpath"/>
+                        <property name="ant.regexp.regexpimpl" value="org.apache.tools.ant.util.regexp.Jdk14RegexpRegexp" />
+                        <mkdir dir="target/site/manual"/>
+                        <get src="http://cwiki.apache.org/confluence/display/FELIX/Karaf+Users%27+Guide+in+one+page"
+                             dest="target/site/manual/manual.html" />
+                         <for list="1,2,3,4,5,6,7,8,9,10" param="letter">
+                             <sequential>
+                                 <replaceregexp
+                                     file="target/site/manual/manual.html"
+                                     flags="g"
+                                     match='"/confluence/display/FELIX/([^"]*)\+([^"+]*)"'
+                                     replace='"/confluence/display/FELIX/\1\2"' />
+                             </sequential>
+                         </for>
+                         <replaceregexp
+                             file="target/site/manual/manual.html"
+                             flags="g"
+                             match='"/confluence/display/FELIX/([^"]*)"'
+                             replace='"#KarafUsers%27Guideinonepage-\1"' />
+                         <replaceregexp
+                             file="target/site/manual/manual.html"
+                             flags="g"
+                             match='"/confluence/([^"]*)"'
+                             replace='"http://cwiki.apache.org/confluence/\1"' />
+                    </tasks>
+                </configuration>
+                <goals>
+                    <goal>run</goal>
+                </goals>
+                <phase>generate-resources</phase>
+            </execution>
+         </executions>
+          <dependencies>
+              <dependency>
+                  <groupId>ant-contrib</groupId>
+                  <artifactId>ant-contrib</artifactId>
+                  <version>1.0b3</version>
+              </dependency>
+              <dependency>
+                  <groupId>ant</groupId>
+                  <artifactId>ant-optional</artifactId>
+                  <version>1.5.3-1</version>
+              </dependency>
+         </dependencies>
+    </plugin>
+
+     <plugin>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>maven-html-to-pdf</artifactId>
+        <version>2.0.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <phase>compile</phase>
+          </execution>
+        </executions>    
+        <configuration>
+          <page>file://${basedir}/target/site/manual/manual.html</page>
+          <head><![CDATA[ 
+              <link href="file:${basedir}/src/styles/print.css" rel="stylesheet" type="text/css" />
+              <style type="text/css">
+                @page :left {
+                  @top-left {
+                    content: "Apache Felix Karaf ${pom.version} Developer's Manual";
+                  }
+                }
+              </style>
+          ]]></head>
+          <replaceToken><![CDATA[
+              >top</a>
+          ]]></replaceToken>
+          <replaceValue><![CDATA[
+              ></a>
+          ]]></replaceValue>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <!-- Don't need to attach PDF here because the html-to-pdf plugin did that already -->
+                <artifact>
+                  <file>${project.build.directory}/site/manual/manual-${project.version}.html</file>
+                  <type>html</type>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>      
+    </plugins>
+  </build>
+
+
+</project>
