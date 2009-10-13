@@ -18,6 +18,7 @@
  */
 package org.apache.felix.karaf.shell.console.jline;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -67,7 +68,7 @@ public class Console implements Runnable
                    Terminal term,
                    Completer completer,
                    Runnable closeCallback,
-                   Callable<Boolean> printStackTraces ) throws Exception
+                   Callable<Boolean> printStackTraces) throws Exception
     {
         this.in = in;
         this.out = out;
@@ -84,6 +85,10 @@ public class Console implements Runnable
                                    new PrintWriter(this.out),
                                    getClass().getResourceAsStream("keybinding.properties"),
                                    this.terminal);
+
+        File file = new File(System.getProperty("user.home"), ".karaf/karaf.history");
+        file.getParentFile().mkdirs();
+        reader.getHistory().setHistoryFile(file);
         if (completer != null) {
             reader.addCompletor(new CompleterAsCompletor(completer));
         }
