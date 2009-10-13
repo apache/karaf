@@ -18,6 +18,7 @@
  */
 package org.apache.felix.fileinstall.internal;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -68,10 +69,17 @@ public class ConfigInstaller implements ArtifactInstaller
     boolean setConfig(File f) throws Exception
     {
         Properties p = new Properties();
-        InputStream in = new FileInputStream(f);
+        InputStream in = new BufferedInputStream(new FileInputStream(f));
         try
         {
-            p.load(in);
+            in.mark(1);
+            boolean isXml = in.read() == '<';
+            in.reset();
+            if (isXml) {
+                p.loadFromXML(in);
+            } else {
+                p.load(in);
+            }
         }
         finally
         {
