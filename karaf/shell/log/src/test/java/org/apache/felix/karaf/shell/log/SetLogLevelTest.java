@@ -16,7 +16,9 @@
  */
 package org.apache.felix.karaf.shell.log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
@@ -32,14 +34,18 @@ public class SetLogLevelTest extends TestCase {
     
     private static final String ROOT_LOGGER = "log4j.rootLogger";
     private static final String PACKAGE_LOGGER = "log4j.logger.org.apache.karaf.test";
+    private static final PrintStream ORIGINAL_STDERR = System.err;
     
     private SetLogLevel command;
-    private Hashtable properties = new Hashtable();
+    private Hashtable properties;
+    private ByteArrayOutputStream stderr;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        properties.clear();
+        properties = new Hashtable();
+        stderr = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(stderr));
 
         final Configuration configuration = EasyMock.createMock(Configuration.class);
         EasyMock.expect(configuration.getProperties()).andReturn(properties);
@@ -54,6 +60,18 @@ public class SetLogLevelTest extends TestCase {
         };
     }
     
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        System.setErr(ORIGINAL_STDERR);
+    }
+    
+    public void testInvalidLogLevel() throws Exception {
+        runCommand("log:set INVALID");
+        assertTrue("Expected an error message on System.err",
+                   stderr.toString().contains("level must be set to"));
+    }
+    
     public void testSetLogLevel() throws Exception {
         runCommand("log:set INFO org.apache.karaf.test");
         
@@ -62,6 +80,18 @@ public class SetLogLevelTest extends TestCase {
     
     public void testSetRootLogLevel() throws Exception {
         runCommand("log:set INFO");
+        
+        assertEquals("INFO", properties.get(ROOT_LOGGER));
+    }
+    
+    public void testSetLogLevelLowerCase() throws Exception {
+        runCommand("log:set info org.apache.karaf.test");
+        
+        assertEquals("INFO", properties.get(PACKAGE_LOGGER));
+    }
+    
+    public void testSetRootLogLevelLowerCase() throws Exception {
+        runCommand("log:set info");
         
         assertEquals("INFO", properties.get(ROOT_LOGGER));
     }
@@ -116,6 +146,8 @@ public class SetLogLevelTest extends TestCase {
         
         assertEquals("Configuration for root logger should not be removed",
                      "INFO", properties.get(ROOT_LOGGER));
+        assertTrue("Expected an error message on System.err",
+                   stderr.toString().contains("Can not unset the ROOT logger"));
     }
     
     /*
