@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -212,15 +213,25 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
-        InstallationState state = new InstallationState();
         Feature f = getFeature(name, version);
         if (f == null) {
             throw new Exception("No feature named '" + name
             		+ "' with version '" + version + "' available");
         }
+        installFeature(f, options);
+    }
+
+    public void installFeature(Feature f, EnumSet<Option> options) throws Exception {
+        installFeatures(Collections.singleton(f), options);
+    }
+
+    public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
+        InstallationState state = new InstallationState();
         try {
             // Install everything
-            doInstallFeature(state, f);
+            for (Feature f : features) {
+                doInstallFeature(state, f);
+            }
             // Find bundles to refresh
             boolean print = options.contains(Option.PrintBundlesToRefresh);
             boolean refresh = !options.contains(Option.NoAutoRefreshBundles);
@@ -286,7 +297,9 @@ public class FeaturesServiceImpl implements FeaturesService {
             // rethrow exception
             throw e;
         }
-        callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
+        for (Feature f : features) {
+            callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
+        }
         for (Map.Entry<Feature, Set<Long>> e : state.features.entrySet()) {
             installed.put(e.getKey(), e.getValue());
         }
@@ -590,14 +603,25 @@ public class FeaturesServiceImpl implements FeaturesService {
             new Thread() {
                 public void run() {
                     String[] list = boot.split(",");
+                    Set<Feature> features = new HashSet<Feature>();
                     for (String f : list) {
                         if (f.length() > 0) {
                             try {
-                                installFeature(f);
+                                Feature feature = getFeature(f, FeatureImpl.DEFAULT_VERSION);
+                                if (feature != null) {
+                                    features.add(feature);
+                                } else {
+                                    LOGGER.error("Error installing boot feature " + f + ": feature not found");
+                                }
                             } catch (Exception e) {
                                 LOGGER.error("Error installing boot feature " + f, e);
                             }
                         }
+                    }
+                    try {
+                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure));
+                    } catch (Exception e) {
+                        LOGGER.error("Error installing boot features", e);
                     }
                     bootFeaturesInstalled = true;
                     saveState();
