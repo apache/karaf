@@ -84,7 +84,7 @@ public class Scanner {
     {
         for (Iterator it = files.iterator(); it.hasNext();)
         {
-            storedChecksums.put(it.next(), Long.valueOf(0));
+            storedChecksums.put(it.next(), new Long(0));
         }
     }
 
@@ -113,11 +113,11 @@ public class Scanner {
             long lastChecksum = lastChecksums.get(file) != null ? ((Long) lastChecksums.get(file)).longValue() : 0;
             long storedChecksum = storedChecksums.get(file) != null ? ((Long) storedChecksums.get(file)).longValue() : 0;
             long newChecksum = checksum(file);
-            lastChecksums.put(file, Long.valueOf(newChecksum));
+            lastChecksums.put(file, new Long(newChecksum));
             // Only handle file when it does not change anymore and it has changed since last reported
             if ((newChecksum == lastChecksum || reportImmediately) && newChecksum != storedChecksum)
             {
-                storedChecksums.put(file, Long.valueOf(newChecksum));
+                storedChecksums.put(file, new Long(newChecksum));
                 files.add(file);
             }
             removed.remove(file);

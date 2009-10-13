@@ -520,7 +520,7 @@ public class DirectoryWatcher extends Thread
         String value = (String) properties.get(property);
         if (value != null)
         {
-            return Boolean.parseBoolean(value);
+            return Boolean.valueOf(value).booleanValue();
         }
         return dflt;
     }
@@ -801,9 +801,9 @@ public class DirectoryWatcher extends Thread
             artifact.setLastModified(Util.getLastModified(path));
             log("Updated " + path, null);
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-            log("Failed to update artifact " + artifact.getPath(), e);
+            log("Failed to update artifact " + artifact.getPath(), t);
         }
         return bundle;
     }
