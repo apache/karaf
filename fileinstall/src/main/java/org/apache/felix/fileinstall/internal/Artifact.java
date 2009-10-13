@@ -29,10 +29,10 @@ public class Artifact {
 
     private File path;
     private File jaredDirectory;
-    private long lastModified = -1;
     private ArtifactListener listener;
     private File transformed;
     private long bundleId = -1;
+    private long checksum;
 
     public File getPath() {
         return path;
@@ -48,14 +48,6 @@ public class Artifact {
 
     public void setJaredDirectory(File jaredDirectory) {
         this.jaredDirectory = jaredDirectory;
-    }
-
-    public long getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
     }
 
     public ArtifactListener getListener() {
@@ -80,5 +72,13 @@ public class Artifact {
 
     public void setBundleId(long bundleId) {
         this.bundleId = bundleId;
+    }
+
+    public long getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(long checksum) {
+        this.checksum = checksum;
     }
 }

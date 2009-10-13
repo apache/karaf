@@ -135,7 +135,6 @@ public class DirectoryWatcher extends Thread
         {
             log("Starting initial scan", null);
             initializeCurrentManagedBundles();
-            scanner.initialize(currentManagedArtifacts.keySet());
             Set/*<File>*/ files = scanner.scan(true);
             if (files != null)
             {
@@ -161,7 +160,6 @@ public class DirectoryWatcher extends Thread
         if (!noInitialDelay)
         {
             initializeCurrentManagedBundles();
-            scanner.initialize(currentManagedArtifacts.keySet());
         }
 
         while (!interrupted())
@@ -248,10 +246,11 @@ public class DirectoryWatcher extends Thread
                     // the possibility of the jar being replaced by an older one
                     // or the content changed without the date being modified, but
                     // else, we'd have to reinstall all the deployed bundles on restart.
-                    if (artifact.getLastModified() > Util.getLastModified(file))
-                    {
-                        continue;
-                    }
+//                    if (artifact.getLastModified() > Util.getLastModified(file))
+//                    {
+//                        continue;
+//                    }
+                    artifact.setChecksum(scanner.getChecksum(file));
                     // If there's no listener, this is because this artifact has been installed before
                     // fileinstall has been restarted.  In this case, try to find a listener.
                     if (artifact.getListener() == null)
@@ -307,6 +306,7 @@ public class DirectoryWatcher extends Thread
                     artifact.setPath(file);
                     artifact.setJaredDirectory(jar);
                     artifact.setListener(listener);
+                    artifact.setChecksum(scanner.getChecksum(file));
                     if (transformArtifact(artifact))
                     {
                         created.add(artifact);
@@ -547,11 +547,12 @@ public class DirectoryWatcher extends Thread
     {
         Bundle[] bundles = this.context.getBundles();
         String watchedDirPath = watchedDirectory.toURI().normalize().getPath();
+        Map /*<File, Long>*/ checksums = new HashMap/*<File, Long>*/();
         for (int i = 0; i < bundles.length; i++)
         {
             Artifact artifact = new Artifact();
             artifact.setBundleId(bundles[i].getBundleId());
-            artifact.setLastModified(bundles[i].getLastModified());
+            artifact.setChecksum(Util.loadChecksum(bundles[i], context));
             artifact.setListener(null);
             // Convert to a URI because the location of a bundle
             // is typically a URI. At least, that's the case for
@@ -588,8 +589,10 @@ public class DirectoryWatcher extends Thread
             if (index != -1 && path.startsWith(watchedDirPath))
             {
                 currentManagedArtifacts.put(new File(path), artifact);
+                checksums.put(new File(path), new Long(artifact.getChecksum()));
             }
         }
+        scanner.initialize(checksums);
     }
 
     /**
@@ -603,11 +606,11 @@ public class DirectoryWatcher extends Thread
         for (Iterator iter = artifacts.iterator(); iter.hasNext();)
         {
             Artifact artifact = (Artifact) iter.next();
-
             Bundle bundle = install(artifact);
             if (bundle != null)
             {
                 bundles.add(bundle);
+                Util.storeChecksum(bundle, artifact.getChecksum(), context);
             }
         }
         return bundles;
@@ -623,11 +626,11 @@ public class DirectoryWatcher extends Thread
         List bundles = new ArrayList();
         for (Iterator iter = artifacts.iterator(); iter.hasNext();)
         {
-            final Artifact artifact = (Artifact) iter.next();
-            Bundle b = uninstall(artifact);
-            if (b != null)
+            Artifact artifact = (Artifact) iter.next();
+            Bundle bundle = uninstall(artifact);
+            if (bundle != null)
             {
-                bundles.add(b);
+                bundles.add(bundle);
             }
         }
         return bundles;
@@ -644,11 +647,12 @@ public class DirectoryWatcher extends Thread
         List bundles = new ArrayList();
         for (Iterator iter = artifacts.iterator(); iter.hasNext(); )
         {
-            Artifact e = (Artifact) iter.next();
-            Bundle b = update(e);
-            if (b != null)
+            Artifact artifact = (Artifact) iter.next();
+            Bundle bundle = update(artifact);
+            if (bundle != null)
             {
-                bundles.add(b);
+                bundles.add(bundle);
+                Util.storeChecksum(bundle, artifact.getChecksum(), context);
             }
         }
         return bundles;
@@ -683,7 +687,7 @@ public class DirectoryWatcher extends Thread
             {
                 File transformed = artifact.getTransformed();
                 Artifact badArtifact = (Artifact) installationFailures.get(artifact.getPath());
-                if (badArtifact != null && badArtifact.getLastModified() == artifact.getLastModified())
+                if (badArtifact != null && badArtifact.getChecksum() == artifact.getChecksum())
                 {
                     return null; // Don't attempt to install it; nothing has changed.
                 }
@@ -700,7 +704,6 @@ public class DirectoryWatcher extends Thread
                 }
                 artifact.setBundleId(bundle.getBundleId());
             }
-            artifact.setLastModified(Util.getLastModified(path));
             installationFailures.remove(path);
             currentManagedArtifacts.put(path, artifact);
             log("Installed " + path, null);
@@ -798,7 +801,6 @@ public class DirectoryWatcher extends Thread
                     in.close();
                 }
             }
-            artifact.setLastModified(Util.getLastModified(path));
             log("Updated " + path, null);
         }
         catch (Throwable t)

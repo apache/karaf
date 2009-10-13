@@ -18,6 +18,8 @@
  */
 package org.apache.felix.fileinstall.internal;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.File;
@@ -34,6 +36,7 @@ import java.util.zip.ZipOutputStream;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.BundleContext;
@@ -342,32 +345,81 @@ public class Util
     }
 
     /**
-     * Return the latest time at which this file or any child if the file denotes
-     * a directory has been modified
-     *
-     * @param file file or directory to check
-     * @return the latest modification time
+     * Stores the checksum into a bundle data file.
+     * @param b The bundle whose checksum must be stored
+     * @param checksum the lastModified date to be stored in bc
+     * @param bc the FileInstall's bundle context where to store the checksum.
      */
-    public static long getLastModified(File file)
+    public static void storeChecksum( Bundle b, long checksum, BundleContext bc )
     {
-        if (file.isFile())
+        String key = getBundleKey(b);
+        File f = bc.getDataFile( key + ".checksum" );
+        DataOutputStream dout = null;
+        try
         {
-            return file.lastModified();
+            dout = new DataOutputStream( new FileOutputStream( f ) );
+            dout.writeLong( checksum );
         }
-        else if (file.isDirectory())
+        catch ( Exception e )
         {
-            File[] children = file.listFiles();
-            long lastModified = 0;
-            for (int i = 0; i < children.length; i++)
+            e.printStackTrace();
+        }
+        finally
+        {
+            if ( dout != null )
             {
-                lastModified = Math.max(lastModified, getLastModified(children[i]));
+                try
+                {
+                    dout.close();
+                }
+                catch ( IOException ignored )
+                {
+                }
             }
-            return lastModified;
         }
-        else
+    }
+
+    /**
+     * Returns the stored checksum of the bundle.
+     * @param b the bundle whose checksum must be returned
+     * @param bc the FileInstall's bundle context.
+     * @return the stored checksum of the bundle
+     */
+    public static long loadChecksum( Bundle b, BundleContext bc )
+    {
+        String key = getBundleKey(b);
+        File f = bc.getDataFile( key + ".checksum" );
+        DataInputStream in = null;
+        try
         {
-            return 0;
+            in = new DataInputStream( new FileInputStream( f ) );
+            return in.readLong();
         }
+        catch ( Exception e )
+        {
+            return Long.MIN_VALUE;
+        }
+        finally
+        {
+            if ( in != null )
+            {
+                try
+                {
+                    in.close();
+                }
+                catch ( IOException e )
+                {
+                }
+            }
+        }
+    }
+
+    private static String getBundleKey(Bundle b) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(b.getSymbolicName()).append("_");
+        String version = (String) b.getHeaders().get( "Bundle-Version" );
+        sb.append(version != null ? version : "0.0.0");
+        return sb.toString();
     }
 
 }

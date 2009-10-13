@@ -78,14 +78,11 @@ public class Scanner {
      * the list of known files.  The purpose is to be able to detect
      * files that have been deleted while the scanner was inactive.
      *
-     * @param files a list of known files
+     * @param checksums a map of checksums
      */
-    public void initialize(Collection/*<File>*/ files)
+    public void initialize(Map/*<File, Long>*/ checksums)
     {
-        for (Iterator it = files.iterator(); it.hasNext();)
-        {
-            storedChecksums.put(it.next(), new Long(0));
-        }
+        storedChecksums.putAll(checksums);
     }
 
     /**
@@ -132,6 +129,18 @@ public class Scanner {
             storedChecksums.remove(file);
         }
         return files;
+    }
+
+    /**
+     * Retrieve the previously computed checksum for a give file.
+     *
+     * @param file the file to retrieve the checksum
+     * @return the checksum
+     */
+    public long getChecksum(File file)
+    {
+        Long c = (Long) storedChecksums.get(file);
+        return c != null ? c.longValue() : 0;
     }
 
     /**
