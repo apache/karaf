@@ -33,6 +33,10 @@
   <name>Karaf :: Manual</name>
   <description>The Karaf Manual which generates a HTML and PDF representation of the manual.</description>
 
+  <properties>
+      <must-succeed>false</must-succeed>
+  </properties>
+
   <build>
     <plugins>
         
@@ -43,30 +47,49 @@
             <execution>
                 <configuration>
                     <tasks>
+                        <taskdef name="if" classname="net.sf.antcontrib.logic.IfTask" classpathref="maven.plugin.classpath"/>
                         <taskdef name="for" classname="net.sf.antcontrib.logic.ForTask" classpathref="maven.plugin.classpath"/>
+                        <taskdef name="trycatch" classname="net.sf.antcontrib.logic.TryCatchTask" classpathref="maven.plugin.classpath"/>
                         <property name="ant.regexp.regexpimpl" value="org.apache.tools.ant.util.regexp.Jdk14RegexpRegexp" />
-                        <mkdir dir="target/site/manual"/>
-                        <get src="http://cwiki.apache.org/confluence/display/FELIX/Karaf+Users%27+Guide+in+one+page"
-                             dest="target/site/manual/manual.html" />
-                         <for list="1,2,3,4,5,6,7,8,9,10" param="letter">
-                             <sequential>
-                                 <replaceregexp
-                                     file="target/site/manual/manual.html"
-                                     flags="g"
-                                     match='"/confluence/display/FELIX/([^"]*)\+([^"+]*)"'
-                                     replace='"/confluence/display/FELIX/\1\2"' />
-                             </sequential>
-                         </for>
-                         <replaceregexp
-                             file="target/site/manual/manual.html"
-                             flags="g"
-                             match='"/confluence/display/FELIX/([^"]*)"'
-                             replace='"#KarafUsers%27Guideinonepage-\1"' />
-                         <replaceregexp
-                             file="target/site/manual/manual.html"
-                             flags="g"
-                             match='"/confluence/([^"]*)"'
-                             replace='"http://cwiki.apache.org/confluence/\1"' />
+                        <property name="manual.dir" value="target/site/manual" />
+                        <property name="manual" value="${manual.dir}/manual-${project.version}.html" />
+                        <mkdir dir="${manual.dir}"/>
+                        <trycatch property="error">
+                            <try>
+                                <get src="http://cwiki.apache.org/confluence/display/FELIX/Karaf+Users%27+Guide+in+one+page"
+                                     dest="${manual}" />
+                                <for list="1,2,3,4,5,6,7,8,9,10" param="letter">
+                                    <sequential>
+                                        <replaceregexp
+                                            file="${manual}"
+                                            flags="g"
+                                            match='"/confluence/display/FELIX/([^"]*)\+([^"+]*)"'
+                                            replace='"/confluence/display/FELIX/\1\2"' />
+                                    </sequential>
+                                </for>
+                                <replaceregexp
+                                    file="${manual}"
+                                    flags="g"
+                                    match='"/confluence/display/FELIX/([^"]*)"'
+                                    replace='"#KarafUsers%27Guideinonepage-\1"' />
+                                <replaceregexp
+                                    file="${manual}"
+                                    flags="g"
+                                    match='"/confluence/([^"]*)"'
+                                    replace='"http://cwiki.apache.org/confluence/\1"' />
+                            </try>
+                            <catch>
+                                <if>
+                                    <equals arg1="${must-succeed}" arg2="true"/>
+                                    <then>
+                                        <fail>${error}</fail>
+                                    </then>
+                                    <else>
+                                        <copy file="src/fallback/manual.html" tofile="${manual}" />
+                                    </else>
+                                </if>
+                            </catch>
+                        </trycatch>
                     </tasks>
                 </configuration>
                 <goals>
@@ -102,7 +125,7 @@
           </execution>
         </executions>    
         <configuration>
-          <page>file://${basedir}/target/site/manual/manual.html</page>
+          <page>file://${basedir}/target/site/manual/manual-${project.version}.html</page>
           <head><![CDATA[ 
               <link href="file:${basedir}/src/styles/print.css" rel="stylesheet" type="text/css" />
               <style type="text/css">
@@ -119,6 +142,8 @@
           <replaceValue><![CDATA[
               ></a>
           ]]></replaceValue>
+          <errorOnConverionFailure>${must-succeed}</errorOnConverionFailure>
+          <errorOnDownloadFailure>${must-succeed}</errorOnDownloadFailure>
         </configuration>
       </plugin>
       <plugin>
@@ -146,5 +171,13 @@
     </plugins>
   </build>
 
+  <profiles>
+      <profile>
+          <id>release</id>
+          <properties>
+              <must-succeed>true</must-succeed>
+          </properties>
+      </profile>
+  </profiles>
 
 </project>
