@@ -48,6 +48,10 @@
         </command>
         <command name="log/set">
             <action class="org.apache.felix.karaf.shell.log.SetLogLevel" />
+            <completers>
+            	<ref component-id="logLevelCompleter"/>
+            	<null/>
+            </completers>
         </command>
 
         <alias name="ld" alias="log/d"/>
@@ -61,6 +65,8 @@
     <bean id="events" class="org.apache.felix.karaf.shell.log.LruList">
         <argument value="${size}"/>
     </bean>
+    
+    <bean id="logLevelCompleter" class="org.apache.felix.karaf.shell.log.completers.LogLevelCompleter"/>
 
     <service ref="vmLogAppender" interface="org.ops4j.pax.logging.spi.PaxAppender">
         <service-properties>

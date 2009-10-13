@@ -43,27 +43,22 @@ public class SetLogLevel extends OsgiCommandSupport {
     static final String LOGGER_PREFIX      = "log4j.logger.";
     static final String ROOT_LOGGER        = "ROOT";
 
-    static final String TRACE = "TRACE";
-    static final String DEBUG = "DEBUG";
-    static final String INFO = "INFO";
-    static final String WARN = "WARN";
-    static final String ERROR = "ERROR";
-    static final String DEFAULT = "DEFAULT";
-
     protected Object doExecute() throws Exception {
         if (ROOT_LOGGER.equalsIgnoreCase(this.logger)) {
             this.logger = null;
         }
-        if (!TRACE.equals(level) &&
-                !DEBUG.equals(level) &&
-                !INFO.equals(level) &&
-                !WARN.equals(level) &&
-                !ERROR.equals(level) &&
-                !DEFAULT.equals(level)) {
+        
+        // make sure both uppercase and lowercase levels are supported
+        level = level.toUpperCase();
+        
+        try {
+            Level.valueOf(level);
+        } catch (IllegalArgumentException e) {
             System.err.println("level must be set to TRACE, DEBUG, INFO, WARN or ERROR (or DEFAULT to unset it)");
             return null;
         }
-        if (DEFAULT.equals(level) && logger == null) {
+        
+        if (Level.isDefault(level) && logger == null) {
             System.err.println("Can not unset the ROOT logger");
             return null;
         }
@@ -80,14 +75,14 @@ public class SetLogLevel extends OsgiCommandSupport {
             prop = LOGGER_PREFIX + logger;
         }
         val = (String) props.get(prop);
-        if (DEFAULT.equals(level)) {
+        if (Level.isDefault(level)) {
             if (val != null) {
                 val = val.trim();
                 int idx = val.indexOf(",");
-                if (idx > 0) {
-                    val = val.substring(idx);
-                } else {
+                if (idx < 0) {
                     val = null;
+                } else {
+                    val = val.substring(idx);
                 }
             }
         } else {
