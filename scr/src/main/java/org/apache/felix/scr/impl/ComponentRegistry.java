@@ -324,4 +324,24 @@ public class ComponentRegistry implements ScrService
         return new UnconfiguredComponentHolder( activator, metadata );
     }
 
+
+    //---------- Helper method
+
+    static boolean isBundleActive( Bundle bundle )
+    {
+        if ( bundle.getState() == Bundle.ACTIVE )
+        {
+            return true;
+        }
+
+        if ( bundle.getState() == Bundle.STARTING )
+        {
+            // might want to check lazy start setting
+
+            return true;
+        }
+
+        // fall back: bundle is not considered active
+        return false;
+    }
 }

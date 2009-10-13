@@ -194,7 +194,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         for ( int i = 0; i < bundles.length; i++ )
         {
             Bundle bundle = bundles[i];
-            if ( bundle.getState() == Bundle.ACTIVE )
+            if ( ComponentRegistry.isBundleActive( bundle ) )
             {
                 loadComponents( bundle );
             }
@@ -225,7 +225,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         if ( m_componentBundles.containsKey( new Long( bundle.getBundleId() ) ) )
         {
             log( LogService.LOG_DEBUG, m_context.getBundle(), "Components for bundle  " + bundle.getSymbolicName()
-                + "/" + bundle.getBundleId() + " already loaded. Nothing to do", null );
+                + "/" + bundle.getBundleId() + " already loaded. Nothing to do.", null );
             return;
         }
 

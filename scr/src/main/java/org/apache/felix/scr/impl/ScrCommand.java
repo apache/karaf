@@ -136,7 +136,7 @@ public class ScrCommand implements Command
                     err.println( "Missing bundle with ID " + bundleId );
                     return;
                 }
-                if ( bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STARTING )
+                if ( ComponentRegistry.isBundleActive( bundle ) )
                 {
                     components = scrService.getComponents( bundle );
                     if ( components == null )

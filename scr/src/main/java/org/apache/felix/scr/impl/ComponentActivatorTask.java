@@ -21,7 +21,6 @@ package org.apache.felix.scr.impl;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.impl.manager.AbstractComponentManager;
-import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
 
 
@@ -58,7 +57,7 @@ public abstract class ComponentActivatorTask implements Runnable
             Activator.log( LogService.LOG_WARNING, null, "Cannot run task '" + this
                 + "': Component has already been destroyed", null );
         }
-        else if ( component.getBundle().getState() != Bundle.ACTIVE )
+        else if ( !ComponentRegistry.isBundleActive( component.getBundle() ) )
         {
             Activator.log( LogService.LOG_WARNING, component.getBundle(), "Cannot run task '" + this
                 + "': Declaring bundle is not active", null );
