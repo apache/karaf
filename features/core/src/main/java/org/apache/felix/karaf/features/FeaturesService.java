@@ -18,6 +18,7 @@ package org.apache.felix.karaf.features;
 
 import java.net.URI;
 import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * The service managing features repositories.
@@ -41,6 +42,10 @@ public interface FeaturesService {
     void installFeature(String name, String version) throws Exception;
 
     void installFeature(String name, String version, EnumSet<Option> options) throws Exception;
+
+    void installFeature(Feature f, EnumSet<Option> options) throws Exception;
+
+    void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception;
 
     void uninstallFeature(String name) throws Exception;
     
