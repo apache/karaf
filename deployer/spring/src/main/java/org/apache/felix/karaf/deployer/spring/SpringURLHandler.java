@@ -17,6 +17,8 @@
  */
 package org.apache.felix.karaf.deployer.spring;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -77,16 +79,10 @@ public class SpringURLHandler extends AbstractURLStreamHandlerService {
         @Override
         public InputStream getInputStream() throws IOException {
             try {
-                final File f = File.createTempFile("smx", "xml");
-                FileOutputStream os = new FileOutputStream(f);
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
                 SpringTransformer.transform(springXmlURL, os);
                 os.close();
-                return new FileInputStream(f) {
-                    public void close() throws IOException {
-                        super.close();
-                        f.delete();
-                    }
-                };
+                return new ByteArrayInputStream(os.toByteArray());
             } catch (Exception e) {
                 logger.error("Error opening spring xml url", e);
                 throw (IOException) new IOException("Error opening spring xml url").initCause(e);
