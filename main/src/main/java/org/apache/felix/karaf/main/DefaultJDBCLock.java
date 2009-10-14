@@ -126,7 +126,7 @@ public class DefaultJDBCLock implements Lock {
             long time = System.currentTimeMillis();
             statement = lockConnection.prepareStatement(statements.getLockUpdateStatement(time));
             int rows = statement.executeUpdate();
-            if (rows == 1) {
+            if (rows >= 1) {
                 result=true;
             }
         } catch (Exception e) {
@@ -168,7 +168,7 @@ public class DefaultJDBCLock implements Lock {
             long time = System.currentTimeMillis();
             statement = lockConnection.prepareStatement(statements.getLockUpdateStatement(time));
             int rows = statement.executeUpdate();
-            if (rows != 1) {
+            if (rows < 1) {
                 result = false;
             }
         } catch (Exception ex) {
