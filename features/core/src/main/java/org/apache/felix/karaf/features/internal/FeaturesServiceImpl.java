@@ -308,7 +308,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected static class InstallationState {
         final Set<Bundle> installed = new HashSet<Bundle>();
-        final Set<Bundle> bundles = new HashSet<Bundle>();
+        final List<Bundle> bundles = new ArrayList<Bundle>();
         final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
     }
 
