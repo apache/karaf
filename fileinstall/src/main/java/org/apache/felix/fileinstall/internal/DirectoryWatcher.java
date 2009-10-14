@@ -43,7 +43,9 @@ import org.apache.felix.fileinstall.ArtifactTransformer;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -70,7 +72,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class DirectoryWatcher extends Thread
+public class DirectoryWatcher extends Thread implements BundleListener
 {
 	public final static String FILENAME = "felix.fileinstall.filename";
     public final static String POLL = "felix.fileinstall.poll";
@@ -116,6 +118,7 @@ public class DirectoryWatcher extends Thread
         startBundles = getBoolean(properties, START_NEW_BUNDLES, true);  // by default, we start bundles.
         filter = (String) properties.get(FILTER);
         noInitialDelay = getBoolean(properties, NO_INITIAL_DELAY, false);
+        this.context.addBundleListener(this);
 
         FilenameFilter flt;
         if (filter != null && filter.length() > 0)
@@ -195,6 +198,24 @@ public class DirectoryWatcher extends Thread
             catch (Throwable e)
             {
                 log("In main loop, we have serious trouble", e);
+            }
+        }
+    }
+
+    public void bundleChanged(BundleEvent bundleEvent)
+    {
+        if (bundleEvent.getType() == BundleEvent.UNINSTALLED)
+        {
+            for (Iterator it = currentManagedArtifacts.entrySet().iterator(); it.hasNext();)
+            {
+                Map.Entry entry = (Map.Entry) it.next();
+                Artifact artifact = (Artifact) entry.getValue();
+                if (artifact.getBundleId() == bundleEvent.getBundle().getBundleId())
+                {
+                    log("Bundle " + bundleEvent.getBundle().getBundleId() + " has been uninstalled", null);
+                    currentManagedArtifacts.remove(entry.getKey());
+                    break;
+                }
             }
         }
     }
@@ -554,6 +575,7 @@ public class DirectoryWatcher extends Thread
 
     public void close()
     {
+        this.context.removeBundleListener(this);
         interrupt();
         try
         {
