@@ -241,15 +241,6 @@ public class DirectoryWatcher extends Thread
                 // File has been modified
                 if (exists && artifact != null)
                 {
-                    // Check the last modified date against
-                    // the artifact last modified date if available.  This will loose
-                    // the possibility of the jar being replaced by an older one
-                    // or the content changed without the date being modified, but
-                    // else, we'd have to reinstall all the deployed bundles on restart.
-//                    if (artifact.getLastModified() > Util.getLastModified(file))
-//                    {
-//                        continue;
-//                    }
                     artifact.setChecksum(scanner.getChecksum(file));
                     // If there's no listener, this is because this artifact has been installed before
                     // fileinstall has been restarted.  In this case, try to find a listener.
