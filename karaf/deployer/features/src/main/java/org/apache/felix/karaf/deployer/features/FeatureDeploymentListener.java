@@ -25,7 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -168,12 +173,11 @@ public class FeatureDeploymentListener implements ArtifactTransformer, Synchrono
                     featuresService.addRepository(url.toURI());
                     for (Repository repo : featuresService.listRepositories()) {
                         if (repo.getURI().equals(url.toURI())) {
-                            for (Feature f : repo.getFeatures()) {
-                                try {
-                                    featuresService.installFeature(f.getName(), f.getVersion());
-                                } catch (Exception e) {
-                                    LOGGER.error("Unable to install feature: " + f.getName(), e);
-                                }
+                            Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
+                            try {
+                                featuresService.installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
+                            } catch (Exception e) {
+                                LOGGER.error("Unable to install features", e);
                             }
                         }
                     }
