@@ -29,9 +29,10 @@ public class Statements {
     private static Logger LOG = Logger.getLogger(Statements.class.getName());
     private String lockTableName = "KARAF_LOCK";
     private String clusterName = "karaf";
+    private String dbName = "sample";
     private String lockCreateStatement;
+    private String lockDBCreateStatement;
     private String lockPopulateStatement;
-    private String lockUpdateStatement;
 
     public Statements(String tableName, String clusterName) {
         LOG.addHandler( BootstrapLogManager.getDefaultHandler() );
@@ -42,16 +43,49 @@ public class Statements {
         this.lockPopulateStatement="insert into " + lockTableName + " (TIME, CLUSTER) values (1, '" + clusterName + "')";
     }
 
+    public Statements(String dbName, String tableName, String clusterName) {
+        LOG.addHandler( BootstrapLogManager.getDefaultHandler() );
+        
+        this.dbName = dbName;
+        this.lockTableName = tableName;
+        this.clusterName = clusterName;
+        this.lockDBCreateStatement="create database if not exists " + dbName;
+        this.lockCreateStatement="create table " + lockTableName + " (TIME bigint, CLUSTER varchar(20)) ENGINE = INNODB";
+        this.lockPopulateStatement="insert into " + lockTableName + " (TIME, CLUSTER) values (1, '" + clusterName + "')";
+    }
+
+
     public String setUpdateCursor() {
         String test = "SELECT * FROM " + lockTableName + " FOR UPDATE";
         return test;
     }
 
     public String getLockUpdateStatement(long timeStamp) {
+        String lockUpdateStatement = "";
         lockUpdateStatement = "UPDATE " + lockTableName + 
                               " SET TIME=" + timeStamp + 
                               " WHERE CLUSTER = '" + clusterName + "'";
         return lockUpdateStatement;
+    }
+
+    public void init (Connection lockConnection, String dbName) {
+        Statement s = null;
+        try {
+            s = lockConnection.createStatement();
+            s.execute(lockDBCreateStatement);
+        } catch (SQLException e) {
+            LOG.severe("SQL Exception: " + e +
+                      " " + e.getMessage());
+        } catch (Exception ignore) {
+            LOG.severe("Could not create database: " + ignore +
+                      " " + ignore.getMessage());
+        } finally {
+            try {
+                s.close();
+            } catch (Throwable e) {
+                // ignore
+            }
+        }
     }
 
     /**
