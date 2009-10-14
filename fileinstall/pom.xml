@@ -53,14 +53,14 @@
         <configuration>
           <instructions>
             <Export-Package>
-                org.apache.felix.fileinstall;version=${project.version},
-                org.osgi.service.cm
+                org.apache.felix.fileinstall;version=${project.version}
             </Export-Package>
             <Private-Package>
                 org.apache.felix.fileinstall.internal
             </Private-Package>
             <Import-Package>
                 org.osgi.service.log;resolution:=optional,
+                org.osgi.service.cm;resolution:=optional,
                 *
             </Import-Package>
             <Bundle-Activator>org.apache.felix.fileinstall.internal.FileInstall</Bundle-Activator>

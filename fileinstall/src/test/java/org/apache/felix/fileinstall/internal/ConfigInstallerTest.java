@@ -63,7 +63,7 @@ public class ConfigInstallerTest extends TestCase {
     public void testParsePidWithoutFactoryPid()
     {
         mockBundleContextControl.replay();
-        ConfigInstaller ci = new ConfigInstaller(null);
+        ConfigInstaller ci = new ConfigInstaller(null, null);
 
         String path = "pid.cfg";
         assertEquals( "Pid without Factory Pid calculated", "pid", ci.parsePid( path )[0] );
@@ -74,7 +74,7 @@ public class ConfigInstallerTest extends TestCase {
     public void testParsePidWithFactoryPid()
     {
         mockBundleContextControl.replay();
-        ConfigInstaller ci = new ConfigInstaller(null);
+        ConfigInstaller ci = new ConfigInstaller(null, null);
 
         String path = "factory-pid.cfg";
         assertEquals( "Pid with Factory Pid calculated", "factory", ci.parsePid( path )[0] );
@@ -90,13 +90,9 @@ public class ConfigInstallerTest extends TestCase {
         mockConfigurationAdmin.createFactoryConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
         mockBundleContextControl.replay();
 
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        ConfigInstaller ci = new ConfigInstaller( mockBundleContext );
+        ConfigInstaller ci = new ConfigInstaller( mockBundleContext, mockConfigurationAdmin );
 
         assertEquals( "Factory configuration retrieved", mockConfiguration, ci.getConfiguration( "pid", "factoryPid" ) );
 
@@ -115,13 +111,9 @@ public class ConfigInstallerTest extends TestCase {
         mockConfigurationAdmin.createFactoryConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
         mockBundleContextControl.replay();
 
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        ConfigInstaller ci = new ConfigInstaller( mockBundleContext );
+        ConfigInstaller ci = new ConfigInstaller( mockBundleContext, mockConfigurationAdmin );
 
         assertEquals( "Factory configuration retrieved", mockConfiguration, ci.getConfiguration( "pid", "factoryPid" ) );
 
@@ -140,13 +132,9 @@ public class ConfigInstallerTest extends TestCase {
         mockConfigurationAdmin.getConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
         mockBundleContextControl.replay();
 
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        ConfigInstaller ci = new ConfigInstaller( mockBundleContext );
+        ConfigInstaller ci = new ConfigInstaller( mockBundleContext, mockConfigurationAdmin );
 
         assertEquals( "Factory configuration retrieved", mockConfiguration, ci.getConfiguration( "pid", null ) );
 
@@ -166,13 +154,9 @@ public class ConfigInstallerTest extends TestCase {
         mockConfigurationAdmin.getConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
         mockBundleContextControl.replay();
 
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        ConfigInstaller ci = new ConfigInstaller( mockBundleContext );
+        ConfigInstaller ci = new ConfigInstaller( mockBundleContext, mockConfigurationAdmin );
 
         assertTrue( ci.deleteConfig( new File( "pid.cfg" ) ) );
 
@@ -207,13 +191,9 @@ public class ConfigInstallerTest extends TestCase {
         mockConfigurationAdmin.getConfiguration( "firstcfg", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
         mockBundleContextControl.replay();
 
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        ConfigInstaller ci = new ConfigInstaller( mockBundleContext );
+        ConfigInstaller ci = new ConfigInstaller( mockBundleContext, mockConfigurationAdmin );
 
         assertTrue( ci.setConfig( new File( "src/test/resources/watched/firstcfg.cfg" ) ) );
 

@@ -48,49 +48,38 @@ import org.osgi.util.tracker.ServiceTracker;
  * fragment).
  * 
  */
-public class FileInstall implements BundleActivator, ManagedServiceFactory
+public class FileInstall implements BundleActivator
 {
     static ServiceTracker padmin;
     static ServiceTracker startLevel;
-    static ServiceTracker cmTracker;
+    static Runnable cmSupport;
     static List /* <ArtifactListener> */ listeners = new ArrayList /* <ArtifactListener> */();
     BundleContext context;
     Map watchers = new HashMap();
-    ConfigInstaller configInstaller;
     ServiceTracker listenersTracker;
 
     public void start(BundleContext context) throws Exception
     {
         this.context = context;
         addListener(new BundleTransformer());
+
         Hashtable props = new Hashtable();
-        props.put(Constants.SERVICE_PID, getName());
-        context.registerService(ManagedServiceFactory.class.getName(), this, props);
-        props = new Hashtable();
         props.put("url.handler.protocol", JarDirUrlHandler.PROTOCOL);
         context.registerService(org.osgi.service.url.URLStreamHandlerService.class.getName(), new JarDirUrlHandler(), props);
+
+        try
+        {
+            cmSupport = new ConfigAdminSupport(context, this);
+        }
+        catch (NoClassDefFoundError e)
+        {
+            Util.log(context, 0, "ConfigAdmin is not available, some features will be disabled", e);
+        }
 
         padmin = new ServiceTracker(context, PackageAdmin.class.getName(), null);
         padmin.open();
         startLevel = new ServiceTracker(context, StartLevel.class.getName(), null);
         startLevel.open();
-        cmTracker = new ServiceTracker(context, ConfigurationAdmin.class.getName(), null)
-        {
-            public Object addingService(ServiceReference serviceReference)
-            {
-                ConfigurationAdmin cm = (ConfigurationAdmin) super.addingService(serviceReference);
-                configInstaller = new ConfigInstaller(context);
-                addListener(configInstaller);
-                return cm;
-            }
-            public void removedService(ServiceReference serviceReference, Object o)
-            {
-                configInstaller = null;
-                removeListener(configInstaller);
-                super.removedService(serviceReference, o);
-            }
-        };
-        cmTracker.open();
         String flt = "(|(" + Constants.OBJECTCLASS + "=" + ArtifactInstaller.class.getName() + ")"
                      + "(" + Constants.OBJECTCLASS + "=" + ArtifactTransformer.class.getName() + ")"
                      + "(" + Constants.OBJECTCLASS + "=" + ArtifactUrlTransformer.class.getName() + "))";
@@ -140,10 +129,13 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
     public void stop(BundleContext context) throws Exception
     {
         List /*<DirectoryWatcher>*/ toClose = new ArrayList /*<DirectoryWatcher>*/();
-        synchronized (watchers)
+        if (watchers != null)
         {
-            toClose.addAll(watchers.values());
-            watchers.clear();
+            synchronized (watchers)
+            {
+                toClose.addAll(watchers.values());
+                watchers.clear();
+            }
         }
         for (Iterator w = toClose.iterator(); w.hasNext();)
         {
@@ -157,9 +149,18 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
                 // Ignore
             }
         }
-        listenersTracker.close();
-        cmTracker.close();
-        padmin.close();
+        if (listenersTracker != null)
+        {
+            listenersTracker.close();
+        }
+        if (cmSupport != null)
+        {
+            cmSupport.run();
+        }
+        if (padmin != null)
+        {
+            padmin.close();
+        }
     }
 
     public void deleted(String pid)
@@ -175,13 +176,7 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         }
     }
 
-    public String getName()
-    {
-        return "org.apache.felix.fileinstall";
-    }
-
     public void updated(String pid, Dictionary properties)
-        throws ConfigurationException
     {
         deleted(pid);
         Util.performSubstitution(properties);    
@@ -270,21 +265,64 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         }
     }
 
-    static ConfigurationAdmin getConfigurationAdmin()
+    private static class ConfigAdminSupport implements Runnable
     {
-        return getConfigurationAdmin(10000);
-    }
+        private Tracker tracker;
 
-    static ConfigurationAdmin getConfigurationAdmin(long timeout)
-    {
-        try
+        private ConfigAdminSupport(BundleContext context, FileInstall fileInstall)
         {
-            return (ConfigurationAdmin) cmTracker.waitForService(timeout);
+            tracker = new Tracker(context, fileInstall);
+            Hashtable props = new Hashtable();
+            props.put(Constants.SERVICE_PID, tracker.getName());
+            context.registerService(ManagedServiceFactory.class.getName(), this, props);
+            tracker.open();
         }
-        catch (InterruptedException e)
+
+        public void run()
         {
-            Thread.currentThread().interrupt();
-            return null;
+            tracker.close();
+        }
+
+        private class Tracker extends ServiceTracker implements ManagedServiceFactory {
+
+            private final FileInstall fileInstall;
+            private ConfigInstaller configInstaller;
+
+            private Tracker(BundleContext bundleContext, FileInstall fileInstall)
+            {
+                super(bundleContext, ConfigurationAdmin.class.getName(), null);
+                this.fileInstall = fileInstall;
+            }
+
+            public String getName()
+            {
+                return "org.apache.felix.fileinstall";
+            }
+
+            public void updated(String s, Dictionary dictionary) throws ConfigurationException
+            {
+                fileInstall.updated(s, dictionary);
+            }
+
+            public void deleted(String s)
+            {
+                fileInstall.deleted(s);
+            }
+
+            public Object addingService(ServiceReference serviceReference)
+            {
+                ConfigurationAdmin cm = (ConfigurationAdmin) super.addingService(serviceReference);
+                configInstaller = new ConfigInstaller(context, cm);
+                fileInstall.addListener(configInstaller);
+                return cm;
+            }
+
+            public void removedService(ServiceReference serviceReference, Object o)
+            {
+                configInstaller = null;
+                fileInstall.removeListener(configInstaller);
+                super.removedService(serviceReference, o);
+            }
         }
     }
 

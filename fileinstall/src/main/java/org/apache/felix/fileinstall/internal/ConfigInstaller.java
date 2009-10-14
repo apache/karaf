@@ -28,6 +28,7 @@ import java.util.Properties;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * ArtifactInstaller for configurations.
@@ -35,11 +36,13 @@ import org.osgi.service.cm.Configuration;
  */
 public class ConfigInstaller implements ArtifactInstaller
 {
-    BundleContext context;
+    private final BundleContext context;
+    private final ConfigurationAdmin configAdmin;
 
-    ConfigInstaller(BundleContext context)
+    ConfigInstaller(BundleContext context, ConfigurationAdmin configAdmin)
     {
         this.context = context;
+        this.configAdmin = configAdmin;
     }
 
     public boolean canHandle(File artifact)
@@ -60,6 +63,11 @@ public class ConfigInstaller implements ArtifactInstaller
     public void uninstall(File artifact) throws Exception
     {
         deleteConfig(artifact);
+    }
+
+    ConfigurationAdmin getConfigurationAdmin()
+    {
+        return configAdmin;
     }
 
     /**
@@ -156,11 +164,11 @@ public class ConfigInstaller implements ArtifactInstaller
             Configuration newConfiguration;
             if (factoryPid != null)
             {
-                newConfiguration = FileInstall.getConfigurationAdmin().createFactoryConfiguration(pid, null);
+                newConfiguration = getConfigurationAdmin().createFactoryConfiguration(pid, null);
             }
             else
             {
-                newConfiguration = FileInstall.getConfigurationAdmin().getConfiguration(pid, null);
+                newConfiguration = getConfigurationAdmin().getConfiguration(pid, null);
             }
             return newConfiguration;
         }
@@ -171,7 +179,7 @@ public class ConfigInstaller implements ArtifactInstaller
         String suffix = factoryPid == null ? ".cfg" : "-" + factoryPid + ".cfg";
 
         String filter = "(" + DirectoryWatcher.FILENAME + "=" + pid + suffix + ")";
-        Configuration[] configurations = FileInstall.getConfigurationAdmin().listConfigurations(filter);
+        Configuration[] configurations = getConfigurationAdmin().listConfigurations(filter);
         if (configurations != null && configurations.length > 0)
         {
             return configurations[0];
