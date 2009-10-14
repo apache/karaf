@@ -184,7 +184,7 @@ public class Util
 
     private static Logger getLogger(BundleContext context)
     {
-        if (logger != null)
+        if (logger != null && logger.isValidLogger(context))
         {
             return logger;
         }
@@ -203,11 +203,16 @@ public class Util
 
     interface Logger
     {
+        boolean isValidLogger(BundleContext context);
         void log(boolean debug, java.lang.String message, java.lang.Throwable throwable);
     }
 
     static class StdOutLogger implements Logger
     {
+        public boolean isValidLogger(BundleContext context)
+        {
+            return true;
+        }
         public void log(boolean debug, String message, Throwable throwable)
         {
             System.out.println(message + (throwable == null ? "" : ": " + throwable));
@@ -235,6 +240,11 @@ public class Util
             {
                 throw new NoClassDefFoundError(e.getMessage());
             }
+        }
+
+        public boolean isValidLogger(BundleContext context)
+        {
+            return context == this.context;
         }
 
         public void log(boolean debug, String message, Throwable throwable)
