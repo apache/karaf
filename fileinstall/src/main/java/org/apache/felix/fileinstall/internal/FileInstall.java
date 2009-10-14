@@ -274,7 +274,7 @@ public class FileInstall implements BundleActivator
             tracker = new Tracker(context, fileInstall);
             Hashtable props = new Hashtable();
             props.put(Constants.SERVICE_PID, tracker.getName());
-            context.registerService(ManagedServiceFactory.class.getName(), this, props);
+            context.registerService(ManagedServiceFactory.class.getName(), tracker, props);
             tracker.open();
         }
 
