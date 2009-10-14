@@ -26,7 +26,8 @@ import org.apache.felix.fileinstall.ArtifactListener;
 /**
  * An artifact that has been dropped into one watched directory.
  */
-public class Artifact {
+public class Artifact
+{
 
     private File path;
     private File jaredDirectory;
@@ -37,67 +38,83 @@ public class Artifact {
     private long bundleId = -1;
     private long checksum;
 
-    public File getPath() {
+    public File getPath()
+    {
         return path;
     }
 
-    public void setPath(File path) {
+    public void setPath(File path)
+    {
         this.path = path;
     }
 
-    public File getJaredDirectory() {
+    public File getJaredDirectory()
+    {
         return jaredDirectory;
     }
 
-    public void setJaredDirectory(File jaredDirectory) {
+    public void setJaredDirectory(File jaredDirectory)
+    {
         this.jaredDirectory = jaredDirectory;
     }
 
-    public URL getJaredUrl() {
+    public URL getJaredUrl()
+    {
         return jaredUrl;
     }
 
-    public void setJaredUrl(URL jaredUrl) {
+    public void setJaredUrl(URL jaredUrl)
+    {
         this.jaredUrl = jaredUrl;
     }
 
-    public ArtifactListener getListener() {
+    public ArtifactListener getListener()
+    {
         return listener;
     }
 
-    public void setListener(ArtifactListener listener) {
+    public void setListener(ArtifactListener listener)
+    {
         this.listener = listener;
     }
 
-    public File getTransformed() {
+    public File getTransformed()
+    {
         return transformed;
     }
 
-    public void setTransformed(File transformed) {
+    public void setTransformed(File transformed)
+    {
         this.transformed = transformed;
     }
 
-    public URL getTransformedUrl() {
+    public URL getTransformedUrl()
+    {
         return transformedUrl;
     }
 
-    public void setTransformedUrl(URL transformedUrl) {
+    public void setTransformedUrl(URL transformedUrl)
+    {
         this.transformedUrl = transformedUrl;
     }
 
-    public long getBundleId() {
+    public long getBundleId()
+    {
         return bundleId;
     }
 
-    public void setBundleId(long bundleId) {
+    public void setBundleId(long bundleId)
+    {
         this.bundleId = bundleId;
     }
 
-    public long getChecksum() {
+    public long getChecksum()
+    {
         return checksum;
     }
 
-    public void setChecksum(long checksum) {
+    public void setChecksum(long checksum)
+    {
         this.checksum = checksum;
     }
 }

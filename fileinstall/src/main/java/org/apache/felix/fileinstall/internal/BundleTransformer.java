@@ -21,11 +21,10 @@ package org.apache.felix.fileinstall.internal;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.jar.Attributes;
 
-import org.apache.felix.fileinstall.ArtifactTransformer;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 
 /**
@@ -77,7 +76,8 @@ public class BundleTransformer implements ArtifactUrlTransformer
         return false;
     }
 
-    public URL transform(URL artifact) {
+    public URL transform(URL artifact)
+    {
         return artifact;
     }
 

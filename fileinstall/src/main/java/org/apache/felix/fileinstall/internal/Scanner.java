@@ -18,15 +18,14 @@
  */
 package org.apache.felix.fileinstall.internal;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.HashSet;
-import java.util.zip.CRC32;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.zip.CRC32;
 
 /**
  * A Scanner object is able to detect and report new, modified

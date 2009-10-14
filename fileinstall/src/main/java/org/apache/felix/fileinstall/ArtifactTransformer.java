@@ -24,7 +24,8 @@ import java.io.File;
  * kind of artifacts to OSGi bundles.
  *
  */
-public interface ArtifactTransformer extends ArtifactListener {
+public interface ArtifactTransformer extends ArtifactListener
+{
 
     /**
      * Process the given file (canHandle returned true previously)

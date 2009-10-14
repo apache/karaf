@@ -26,7 +26,6 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
-import org.apache.felix.fileinstall.internal.Util;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 
@@ -38,23 +37,28 @@ public class ConfigInstaller implements ArtifactInstaller
 {
     BundleContext context;
 
-    ConfigInstaller(BundleContext context) {
+    ConfigInstaller(BundleContext context)
+    {
         this.context = context;
     }
 
-    public boolean canHandle(File artifact) {
+    public boolean canHandle(File artifact)
+    {
         return artifact.getName().endsWith(".cfg");
     }
 
-    public void install(File artifact) throws Exception {
+    public void install(File artifact) throws Exception
+    {
         setConfig(artifact);
     }
 
-    public void update(File artifact) throws Exception {
+    public void update(File artifact) throws Exception
+    {
         setConfig(artifact);
     }
 
-    public void uninstall(File artifact) throws Exception {
+    public void uninstall(File artifact) throws Exception
+    {
         deleteConfig(artifact);
     }
 

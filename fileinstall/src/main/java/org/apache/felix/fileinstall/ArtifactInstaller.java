@@ -30,7 +30,8 @@ import java.io.File;
  * artifacts will be reported as new, while any deleted artifact
  * won't be reported as deleted.
  */
-public interface ArtifactInstaller extends ArtifactListener {
+public interface ArtifactInstaller extends ArtifactListener
+{
 
     /**
      * Install the artifact

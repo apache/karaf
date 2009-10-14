@@ -26,7 +26,8 @@ import java.net.URL;
  * This kind of artifact listener should be favored over the {@link ArtifactTransformer}
  * because it allows the use of the OSGi update feature on bundles.
  */
-public interface ArtifactUrlTransformer extends ArtifactListener {
+public interface ArtifactUrlTransformer extends ArtifactListener
+{
 
     /**
      * Process the given file (canHandle returned true previously)

@@ -41,7 +41,6 @@ import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.felix.fileinstall.ArtifactTransformer;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
-import org.apache.felix.fileinstall.internal.Util;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -200,7 +199,8 @@ public class DirectoryWatcher extends Thread
         }
     }
 
-    private void process(Set files) {
+    private void process(Set files)
+    {
         List/*<ArtifactListener>*/ listeners = FileInstall.getListeners();
         List/*<Artifact>*/ deleted = new ArrayList/*<Artifact>*/();
         List/*<Artifact>*/ modified = new ArrayList/*<Artifact>*/();
@@ -411,7 +411,8 @@ public class DirectoryWatcher extends Thread
         }
     }
 
-    private void deleteJaredDirectory(Artifact artifact) {
+    private void deleteJaredDirectory(Artifact artifact)
+    {
         if (artifact.getJaredDirectory() != null
                 && !artifact.getJaredDirectory().equals(artifact.getPath())
                 && !artifact.getJaredDirectory().delete())

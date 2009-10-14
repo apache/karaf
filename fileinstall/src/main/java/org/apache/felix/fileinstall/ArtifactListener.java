@@ -27,7 +27,8 @@ import java.io.File;
  * {@link ArtifactInstaller}.
  *
  */
-public interface ArtifactListener {
+public interface ArtifactListener
+{
 	
 	/**
      * Returns true if the listener can process the given artifact.
