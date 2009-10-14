@@ -23,8 +23,10 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -38,6 +40,7 @@ import java.util.Set;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.felix.fileinstall.ArtifactTransformer;
+import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.felix.fileinstall.internal.Util;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -222,6 +225,15 @@ public class DirectoryWatcher extends Thread
             else
             {
                 File jar  = file;
+                URL jaredUrl = null;
+                try
+                {
+                    jaredUrl = file.toURI().toURL();
+                }
+                catch (MalformedURLException e)
+                {
+                    // Ignore, can't happen
+                }
                 // Jar up the directory if needed
                 if (file.isDirectory())
                 {
@@ -230,6 +242,7 @@ public class DirectoryWatcher extends Thread
                     {
                         jar = new File(tmpDir, file.getName() + ".jar");
                         Util.jarDir(file, jar);
+                        jaredUrl = new URL(JarDirUrlHandler.PROTOCOL, null, file.getPath());
 
                     }
                     catch (IOException e)
@@ -268,6 +281,7 @@ public class DirectoryWatcher extends Thread
                     {
                         deleteTransformedFile(artifact);
                         artifact.setJaredDirectory(jar);
+                        artifact.setJaredUrl(jaredUrl);
                         if (transformArtifact(artifact))
                         {
                             modified.add(artifact);
@@ -296,6 +310,7 @@ public class DirectoryWatcher extends Thread
                     artifact = new Artifact();
                     artifact.setPath(file);
                     artifact.setJaredDirectory(jar);
+                    artifact.setJaredUrl(jaredUrl);
                     artifact.setListener(listener);
                     artifact.setChecksum(scanner.getChecksum(file));
                     if (transformArtifact(artifact))
@@ -345,7 +360,8 @@ public class DirectoryWatcher extends Thread
         return null;
     }
 
-    boolean transformArtifact(Artifact artifact) {
+    boolean transformArtifact(Artifact artifact)
+    {
         if (artifact.getListener() instanceof ArtifactTransformer)
         {
             prepareDir(tmpDir);
@@ -364,10 +380,29 @@ public class DirectoryWatcher extends Thread
             }
             return false;
         }
+        else if (artifact.getListener() instanceof ArtifactUrlTransformer)
+        {
+            try
+            {
+                URL url = artifact.getJaredUrl();
+                URL transformed = ((ArtifactUrlTransformer) artifact.getListener()).transform(url);
+                if (transformed != null)
+                {
+                    artifact.setTransformedUrl(transformed);
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                log("Unable to transform artifact: " + artifact.getPath().getAbsolutePath(), e);
+            }
+            return false;
+        }
         return true;
     }
 
-    private void deleteTransformedFile(Artifact artifact) {
+    private void deleteTransformedFile(Artifact artifact)
+    {
         if (artifact.getTransformed() != null
                 && !artifact.getTransformed().equals(artifact.getPath())
                 && !artifact.getTransformed().delete())
@@ -673,6 +708,18 @@ public class DirectoryWatcher extends Thread
             {
                 ((ArtifactInstaller) artifact.getListener()).install(path);
             }
+            // if the listener is an url transformer
+            else if (artifact.getListener() instanceof ArtifactUrlTransformer)
+            {
+                URL transformed = artifact.getTransformedUrl();
+                Artifact badArtifact = (Artifact) installationFailures.get(artifact.getPath());
+                if (badArtifact != null && badArtifact.getChecksum() == artifact.getChecksum())
+                {
+                    return null; // Don't attempt to install it; nothing has changed.
+                }
+                bundle = context.installBundle(transformed.toString());
+                artifact.setBundleId(bundle.getBundleId());
+            }
             // else we need to ask for an update on the bundle
             else if (artifact.getListener() instanceof ArtifactTransformer)
             {
@@ -768,6 +815,20 @@ public class DirectoryWatcher extends Thread
             if (artifact.getListener() instanceof ArtifactInstaller)
             {
                 ((ArtifactInstaller) artifact.getListener()).update(path);
+            }
+            // if the listener is an url transformer
+            else if (artifact.getListener() instanceof ArtifactUrlTransformer)
+            {
+                bundle = context.getBundle(artifact.getBundleId());
+                if (bundle == null)
+                {
+                    log("Failed to update bundle: "
+                        + path + " with ID "
+                        + artifact.getBundleId()
+                        + ". The bundle has been uninstalled", null);
+                    return null;
+                }
+                bundle.update();
             }
             // else we need to ask for an update on the bundle
             else if (artifact.getListener() instanceof ArtifactTransformer)

@@ -19,6 +19,7 @@
 package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
+import java.net.URL;
 
 import org.apache.felix.fileinstall.ArtifactListener;
 
@@ -29,7 +30,9 @@ public class Artifact {
 
     private File path;
     private File jaredDirectory;
+    private URL jaredUrl;
     private ArtifactListener listener;
+    private URL transformedUrl;
     private File transformed;
     private long bundleId = -1;
     private long checksum;
@@ -50,6 +53,14 @@ public class Artifact {
         this.jaredDirectory = jaredDirectory;
     }
 
+    public URL getJaredUrl() {
+        return jaredUrl;
+    }
+
+    public void setJaredUrl(URL jaredUrl) {
+        this.jaredUrl = jaredUrl;
+    }
+
     public ArtifactListener getListener() {
         return listener;
     }
@@ -64,6 +75,14 @@ public class Artifact {
 
     public void setTransformed(File transformed) {
         this.transformed = transformed;
+    }
+
+    public URL getTransformedUrl() {
+        return transformedUrl;
+    }
+
+    public void setTransformedUrl(URL transformedUrl) {
+        this.transformedUrl = transformedUrl;
     }
 
     public long getBundleId() {

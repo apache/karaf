@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.File;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -281,8 +282,12 @@ public class Util
      * @throws IOException
      */
     public static void jarDir(File directory, File zipName) throws IOException {
+        jarDir(directory, new BufferedOutputStream(new FileOutputStream(zipName)));
+    }
+
+    public static void jarDir(File directory, OutputStream os) throws IOException {
         // create a ZipOutputStream to zip the data to
-        JarOutputStream zos = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(zipName)));
+        JarOutputStream zos = new JarOutputStream(os);
         String path = "";
         File manFile = new File(directory, JarFile.MANIFEST_NAME);
         if (manFile.exists()) {

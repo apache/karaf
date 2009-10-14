@@ -20,16 +20,18 @@ package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes;
 
 import org.apache.felix.fileinstall.ArtifactTransformer;
+import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 
 /**
- * ArtifactTransformer for plain bundles.
+ * ArtifactUrlTransformer for plain bundles.
  */
-public class BundleTransformer implements ArtifactTransformer
+public class BundleTransformer implements ArtifactUrlTransformer
 {
     public boolean canHandle(File artifact)
     {
@@ -75,7 +77,7 @@ public class BundleTransformer implements ArtifactTransformer
         return false;
     }
 
-    public File transform(File artifact, File tmpDir) {
+    public URL transform(URL artifact) {
         return artifact;
     }
 

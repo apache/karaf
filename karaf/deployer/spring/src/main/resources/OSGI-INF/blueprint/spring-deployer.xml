@@ -17,8 +17,7 @@
     limitations under the License.
 
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://geronimo.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <service auto-export="interfaces">
         <bean class="org.apache.felix.karaf.deployer.spring.SpringDeploymentListener"/>

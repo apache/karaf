@@ -19,6 +19,7 @@ package org.apache.felix.karaf.deployer.blueprint;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,6 +29,7 @@ import org.w3c.dom.Document;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.felix.fileinstall.ArtifactTransformer;
+import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.SAXException;
@@ -36,7 +38,7 @@ import org.xml.sax.SAXException;
  * A deployment listener that listens for spring xml applications
  * and creates bundles for these.
  */
-public class BlueprintDeploymentListener implements ArtifactTransformer {
+public class BlueprintDeploymentListener implements ArtifactUrlTransformer {
 
 
     private static final Log LOGGER = LogFactory.getLog(BlueprintDeploymentListener.class);
@@ -59,13 +61,9 @@ public class BlueprintDeploymentListener implements ArtifactTransformer {
         return false;
     }
 
-    public File transform(File artifact, File tmpDir) {
+    public URL transform(URL artifact) {
         try {
-            File destFile = new File(tmpDir, artifact.getName() + ".jar");
-            FileOutputStream os = new FileOutputStream(destFile);
-            BlueprintTransformer.transform(artifact.toURL(), os);
-            os.close();
-            return destFile;
+            return new URL("blueprint", null, artifact.toString());
         } catch (Exception e) {
             LOGGER.error("Unable to build blueprint application bundle", e);
             return null;

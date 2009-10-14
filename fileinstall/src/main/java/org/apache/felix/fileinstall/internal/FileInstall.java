@@ -26,15 +26,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.spi.ServiceRegistry;
+
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.felix.fileinstall.ArtifactTransformer;
+import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.felix.fileinstall.internal.Util;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -65,8 +69,10 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         addListener(new BundleTransformer());
         Hashtable props = new Hashtable();
         props.put(Constants.SERVICE_PID, getName());
-        context.registerService(ManagedServiceFactory.class.getName(), this,
-            props);
+        context.registerService(ManagedServiceFactory.class.getName(), this, props);
+        props = new Hashtable();
+        props.put("url.handler.protocol", JarDirUrlHandler.PROTOCOL);
+        context.registerService(org.osgi.service.url.URLStreamHandlerService.class.getName(), new JarDirUrlHandler(), props);
 
         padmin = new ServiceTracker(context, PackageAdmin.class.getName(), null);
         padmin.open();
@@ -90,7 +96,8 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         };
         cmTracker.open();
         String flt = "(|(" + Constants.OBJECTCLASS + "=" + ArtifactInstaller.class.getName() + ")"
-                     + "(" + Constants.OBJECTCLASS + "=" + ArtifactTransformer.class.getName() + "))";
+                     + "(" + Constants.OBJECTCLASS + "=" + ArtifactTransformer.class.getName() + ")"
+                     + "(" + Constants.OBJECTCLASS + "=" + ArtifactUrlTransformer.class.getName() + "))";
         listenersTracker = new ServiceTracker(context, FrameworkUtil.createFilter(flt), null)
         {
             public Object addingService(ServiceReference serviceReference)
