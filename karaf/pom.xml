@@ -46,7 +46,7 @@
         <module>demos</module>
         <module>itests</module>
         <module>tooling</module>
-        <module>manual</module>
+        <!--<module>manual</module>-->
     </modules>
 
     <scm>
