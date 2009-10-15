@@ -147,6 +147,7 @@
                 </plugins>
             </build>
         </profile>
+        <!--
         <profile>
             <activation>
                 <os>
@@ -165,6 +166,7 @@
                 </plugins>
             </build>
         </profile>
+        -->
     </profiles>
 
 </project>
