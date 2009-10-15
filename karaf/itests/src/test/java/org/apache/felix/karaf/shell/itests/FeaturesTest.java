@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
+import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
@@ -63,7 +64,7 @@ public class FeaturesTest extends AbstractIntegrationTest {
             systemProperty("karaf.startRemoteShell").value("false"),
 
             // hack system packages
-            systemPackages("org.apache.felix.karaf.main.spi;version=1.0.0", "org.apache.felix.karaf.jaas.boot;version=0.9.0"),
+            systemPackages("org.apache.felix.karaf.jaas.boot;version=1.99"),
             bootClasspathLibrary(mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.boot")).afterFramework(),
             bootClasspathLibrary(mavenBundle("org.apache.felix.karaf", "org.apache.felix.karaf.main")).afterFramework(),
 
@@ -91,7 +92,7 @@ public class FeaturesTest extends AbstractIntegrationTest {
                     "obr", "wrapper"
             ),
 
-            equinox()
+            equinox(), felix()
         );
         // We need to add pax-exam-junit here when running with the ibm
         // jdk to avoid the following exception during the test run:

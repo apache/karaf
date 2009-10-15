@@ -91,9 +91,9 @@
         <log4j.version>1.2.14</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.0-M6</mina.version>
-        <pax.exam.version>1.0.0</pax.exam.version>
+        <pax.exam.version>1.1.0</pax.exam.version>
         <pax.logging.version>1.4</pax.logging.version>
-        <pax.runner.version>1.1.1</pax.runner.version>
+        <pax.runner.version>1.2.1</pax.runner.version>
         <pax.url.version>1.0.0</pax.url.version>
         <pax.web.version>0.6.0</pax.web.version>
         <servlet.api.version>2.5</servlet.api.version>

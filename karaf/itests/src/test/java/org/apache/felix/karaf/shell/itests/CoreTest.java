@@ -119,7 +119,7 @@ public class CoreTest extends AbstractIntegrationTest {
             systemProperty("karaf.startRemoteShell").value("false"),
 
             // hack system packages
-            systemPackages("org.apache.felix.karaf.main.spi;version=1.0.0", "org.apache.felix.karaf.jaas.boot;version=0.9.0"),
+            systemPackages("org.apache.felix.karaf.jaas.boot;version=1.99"),
             bootClasspathLibrary(mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.boot")).afterFramework(),
             bootClasspathLibrary(mavenBundle("org.apache.felix.karaf", "org.apache.felix.karaf.main")).afterFramework(),
 
@@ -140,7 +140,7 @@ public class CoreTest extends AbstractIntegrationTest {
             mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.osgi"),
             mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.log").noStart(),
 
-            equinox()
+            equinox(), felix()
         );
         // We need to add pax-exam-junit here when running with the ibm
         // jdk to avoid the following exception during the test run:
