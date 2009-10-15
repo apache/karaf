@@ -18,6 +18,7 @@
  */
 package org.apache.felix.fileinstall.internal;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -36,6 +37,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.ArtifactListener;
@@ -47,6 +50,7 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
@@ -197,6 +201,15 @@ public class DirectoryWatcher extends Thread implements BundleListener
             }
             catch (Throwable e)
             {
+                try
+                {
+                    context.getBundle();
+                }
+                catch (IllegalStateException t)
+                {
+                    // FileInstall bundle has been uninstalled, exiting loop
+                    return;
+                }
                 log("In main loop, we have serious trouble", e);
             }
         }
@@ -599,10 +612,6 @@ public class DirectoryWatcher extends Thread implements BundleListener
         Map /*<File, Long>*/ checksums = new HashMap/*<File, Long>*/();
         for (int i = 0; i < bundles.length; i++)
         {
-            Artifact artifact = new Artifact();
-            artifact.setBundleId(bundles[i].getBundleId());
-            artifact.setChecksum(Util.loadChecksum(bundles[i], context));
-            artifact.setListener(null);
             // Convert to a URI because the location of a bundle
             // is typically a URI. At least, that's the case for
             // autostart bundles and bundles installed by fileinstall.
@@ -633,10 +642,14 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 // We can't do any meaningful processing for this bundle.
                 continue;
             }
-            artifact.setPath(new File(path));
             final int index = path.lastIndexOf('/');
             if (index != -1 && path.startsWith(watchedDirPath))
             {
+                Artifact artifact = new Artifact();
+                artifact.setBundleId(bundles[i].getBundleId());
+                artifact.setChecksum(Util.loadChecksum(bundles[i], context));
+                artifact.setListener(null);
+                artifact.setPath(new File(path));
                 currentManagedArtifacts.put(new File(path), artifact);
                 checksums.put(new File(path), new Long(artifact.getChecksum()));
             }
@@ -659,7 +672,6 @@ public class DirectoryWatcher extends Thread implements BundleListener
             if (bundle != null)
             {
                 bundles.add(bundle);
-                Util.storeChecksum(bundle, artifact.getChecksum(), context);
             }
         }
         return bundles;
@@ -701,7 +713,6 @@ public class DirectoryWatcher extends Thread implements BundleListener
             if (bundle != null)
             {
                 bundles.add(bundle);
-                Util.storeChecksum(bundle, artifact.getChecksum(), context);
             }
         }
         return bundles;
@@ -722,10 +733,10 @@ public class DirectoryWatcher extends Thread implements BundleListener
      */
     private Bundle install(Artifact artifact)
     {
+        File path = artifact.getPath();
         Bundle bundle = null;
         try
         {
-            File path = artifact.getPath();
             // If the listener is an installer, ask for an update
             if (artifact.getListener() instanceof ArtifactInstaller)
             {
@@ -734,30 +745,38 @@ public class DirectoryWatcher extends Thread implements BundleListener
             // if the listener is an url transformer
             else if (artifact.getListener() instanceof ArtifactUrlTransformer)
             {
+                Artifact badArtifact = (Artifact) installationFailures.get(path);
+                if (badArtifact != null && badArtifact.getChecksum() == artifact.getChecksum())
+                {
+                    return null; // Don't attempt to install it; nothing has changed.
+                }
                 URL transformed = artifact.getTransformedUrl();
-                Artifact badArtifact = (Artifact) installationFailures.get(artifact.getPath());
-                if (badArtifact != null && badArtifact.getChecksum() == artifact.getChecksum())
-                {
-                    return null; // Don't attempt to install it; nothing has changed.
-                }
-                bundle = context.installBundle(transformed.toString());
-                artifact.setBundleId(bundle.getBundleId());
-            }
-            // else we need to ask for an update on the bundle
-            else if (artifact.getListener() instanceof ArtifactTransformer)
-            {
-                File transformed = artifact.getTransformed();
-                Artifact badArtifact = (Artifact) installationFailures.get(artifact.getPath());
-                if (badArtifact != null && badArtifact.getChecksum() == artifact.getChecksum())
-                {
-                    return null; // Don't attempt to install it; nothing has changed.
-                }
-                InputStream in = new FileInputStream(transformed != null ? transformed : path);
+                String location = transformed.toString();
+                BufferedInputStream in = new BufferedInputStream(transformed.openStream());
                 try
                 {
-                    // Some users wanted the location to be a URI (See FELIX-1269)
-                    final String location = path.toURI().normalize().toString();
-                    bundle = context.installBundle(location, in);
+                    bundle = installOrUpdateBundle(location, in, artifact.getChecksum());
+                }
+                finally
+                {
+                    in.close();
+                }
+                artifact.setBundleId(bundle.getBundleId());
+            }
+            // if the listener is an artifact transformer
+            else if (artifact.getListener() instanceof ArtifactTransformer)
+            {
+                Artifact badArtifact = (Artifact) installationFailures.get(path);
+                if (badArtifact != null && badArtifact.getChecksum() == artifact.getChecksum())
+                {
+                    return null; // Don't attempt to install it; nothing has changed.
+                }
+                File transformed = artifact.getTransformed();
+                String location = path.toURI().normalize().toString();
+                BufferedInputStream in = new BufferedInputStream(new FileInputStream(transformed != null ? transformed : path));
+                try
+                {
+                    bundle = installOrUpdateBundle(location, in, artifact.getChecksum());
                 }
                 finally
                 {
@@ -771,14 +790,44 @@ public class DirectoryWatcher extends Thread implements BundleListener
         }
         catch (Exception e)
         {
-            log("Failed to install artifact: " + artifact.getPath(), e);
+            log("Failed to install artifact: " + path, e);
 
             // Add it our bad jars list, so that we don't
             // attempt to install it again and again until the underlying
             // jar has been modified.
-            installationFailures.put(artifact.getPath(), artifact);
+            installationFailures.put(path, artifact);
         }
         return bundle;
+    }
+
+    private Bundle installOrUpdateBundle(String bundleLocation, BufferedInputStream is, long checksum) throws IOException, BundleException {
+        is.mark(256 * 1024);
+        JarInputStream jar = new JarInputStream(is);
+        Manifest m = jar.getManifest();
+        String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
+        String vStr = m.getMainAttributes().getValue(Constants.BUNDLE_VERSION);
+        Version v = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
+        Bundle[] bundles = context.getBundles();
+        for (int i = 0; i < bundles.length; i++) {
+            Bundle b = bundles[i];
+            if (b.getSymbolicName() != null && b.getSymbolicName().equals(sn)) {
+                vStr = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
+                Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
+                if (v.equals(bv)) {
+                    is.reset();
+                    if (Util.loadChecksum(b, context) != checksum) {
+                        log("A bundle with the same symbolic name (" + sn + ") and version (" + vStr + ") is already installed.  Updating this bundle instead.", null);
+                        Util.storeChecksum(b, checksum, context);
+                        b.update(is);
+                    }
+                    return b;
+                }
+            }
+        }
+        is.reset();
+        Bundle b = context.installBundle(bundleLocation, is);
+        Util.storeChecksum(b, checksum, context);
+        return b;
     }
 
     /**
@@ -851,6 +900,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                         + ". The bundle has been uninstalled", null);
                     return null;
                 }
+                Util.storeChecksum(bundle, artifact.getChecksum(), context);
                 bundle.update();
             }
             // else we need to ask for an update on the bundle
@@ -866,6 +916,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                         + ". The bundle has been uninstalled", null);
                     return null;
                 }
+                Util.storeChecksum(bundle, artifact.getChecksum(), context);
                 InputStream in = new FileInputStream(transformed != null ? transformed : path);
                 try
                 {

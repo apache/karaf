@@ -39,13 +39,17 @@ import java.util.zip.ZipOutputStream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 import org.osgi.service.log.LogService;
 
 public class Util
 {
     private static final String DELIM_START = "${";
     private static final String DELIM_STOP = "}";
+
+    private static final String CHECKSUM_SUFFIX = ".checksum";
 
     /**
      * Perform substitution on a property set
@@ -184,12 +188,13 @@ public class Util
 
     private static Logger getLogger(BundleContext context)
     {
-        if (logger != null && logger.isValidLogger(context))
-        {
-            return logger;
-        }
         try
         {
+            context.getBundle();
+            if (logger != null && logger.isValidLogger(context))
+            {
+                return logger;
+            }
             logger = new OsgiLogger(context);
         }
         catch (Throwable t)
@@ -383,7 +388,7 @@ public class Util
     public static void storeChecksum( Bundle b, long checksum, BundleContext bc )
     {
         String key = getBundleKey(b);
-        File f = bc.getDataFile( key + ".checksum" );
+        File f = bc.getDataFile( key + CHECKSUM_SUFFIX );
         DataOutputStream dout = null;
         try
         {
@@ -418,7 +423,7 @@ public class Util
     public static long loadChecksum( Bundle b, BundleContext bc )
     {
         String key = getBundleKey(b);
-        File f = bc.getDataFile( key + ".checksum" );
+        File f = bc.getDataFile( key + CHECKSUM_SUFFIX );
         DataInputStream in = null;
         try
         {
@@ -448,8 +453,8 @@ public class Util
     {
         StringBuffer sb = new StringBuffer();
         sb.append(b.getSymbolicName()).append("_");
-        String version = (String) b.getHeaders().get( "Bundle-Version" );
-        sb.append(version != null ? version : "0.0.0");
+        String version = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
+        sb.append(version != null ? version : Version.emptyVersion.toString());
         return sb.toString();
     }
 
