@@ -25,10 +25,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,17 +37,15 @@ import org.apache.felix.karaf.features.Feature;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Repository;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-
 import org.json.JSONException;
 import org.json.JSONWriter;
-
 import org.osgi.framework.BundleContext;
 
 
 /**
  * The <code>FeaturesPlugin</code>
  */
-public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
+public class FeaturesPlugin extends AbstractWebConsolePlugin
 {
 
     /** Pseudo class version ID to keep the IDE quite. */
