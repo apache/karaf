@@ -114,11 +114,6 @@ public class Main {
     public static final String PROPERTY_CONVERT_TO_MAVEN_URL = "karaf.maven.convert";
 
     /**
-     * ConfigAdmin properties directory
-     */
-    public static final String PROPERTY_CM_DIRECTORY = "karaf.cm.dir";
-
-    /**
      * If a lock should be used before starting the runtime
      */
     public static final String PROPERTY_USE_LOCK = "karaf.lock";
