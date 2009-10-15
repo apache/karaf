@@ -22,30 +22,30 @@
 
 package org.apache.felix.karaf.webconsole.gogo;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.PipedOutputStream;
-import java.io.PipedInputStream;
-import java.io.InterruptedIOException;
-import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
-import java.io.PrintStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.zip.GZIPOutputStream;
-import java.util.List;
-import java.net.URL;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.karaf.shell.console.jline.Console;
-import org.apache.felix.karaf.shell.console.Completer;
-import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.felix.karaf.shell.console.Completer;
+import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
+import org.apache.felix.karaf.shell.console.jline.Console;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
@@ -53,7 +53,7 @@ import org.osgi.service.command.CommandSession;
 /**
  * The <code>GogoPlugin</code>
  */
-public class GogoPlugin extends AbstractResourceAwareWebConsolePlugin {
+public class GogoPlugin extends AbstractWebConsolePlugin {
 
     /** Pseudo class version ID to keep the IDE quite. */
     private static final long serialVersionUID = 1L;

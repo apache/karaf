@@ -80,7 +80,7 @@
         <felix.osgi.version>1.4.0</felix.osgi.version>
         <felix.plugin.version>2.0.0</felix.plugin.version>
         <felix.prefs.version>1.0.2</felix.prefs.version>
-        <felix.webconsole.version>1.2.10</felix.webconsole.version>
+        <felix.webconsole.version>2.0.0</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
         <geronimo.blueprint.version>1.0.0</geronimo.blueprint.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
