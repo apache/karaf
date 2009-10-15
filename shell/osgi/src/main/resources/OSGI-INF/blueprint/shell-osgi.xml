@@ -74,7 +74,7 @@
     <bean id="blueprintListener" class="org.apache.felix.karaf.shell.osgi.BlueprintListener" />
     <service ref="blueprintListener" interface="org.osgi.service.blueprint.container.BlueprintListener" />
 
-    <bean id="springListener" class="org.apache.felix.karaf.shell.osgi.SpringStateListenerFactory" destroy-method="destroy">
+    <bean id="springListener" class="org.apache.felix.karaf.shell.osgi.SpringStateListenerFactory" init-method="init" destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 
