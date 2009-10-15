@@ -47,7 +47,10 @@
         </config>
         <bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jetty-bundle/${jetty.bundle.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-bundle/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-api/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${pax.web.version}</bundle>
     </feature>
     <feature name="webconsole" version="${version}">
         <feature version="${version}">http</feature>
