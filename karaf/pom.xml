@@ -149,6 +149,18 @@
         <dependencies>
             <dependency>
                 <groupId>org.apache.felix.karaf</groupId>
+                <artifactId>manual</artifactId>
+                <type>pdf</type>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf</groupId>
+                <artifactId>manual</artifactId>
+                <type>html</type>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf</groupId>
                 <artifactId>org.apache.felix.karaf.main</artifactId>
                 <version>${pom.version}</version>
             </dependency>
