@@ -45,6 +45,10 @@ public class SpringStateListenerFactory implements BundleStateListener.Factory {
         this.bundleContext = bundleContext;
     }
 
+    public void init() {
+        createListener();
+    }
+
     public void destroy() throws Exception {
         if (listener instanceof Destroyable) {
             ((Destroyable) listener).destroy();
