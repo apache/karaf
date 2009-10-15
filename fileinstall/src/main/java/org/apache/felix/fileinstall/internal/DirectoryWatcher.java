@@ -87,6 +87,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
     public final static String START_NEW_BUNDLES = "felix.fileinstall.bundles.new.start";
     public final static String NO_INITIAL_DELAY = "felix.fileinstall.noInitialDelay";
 
+    Dictionary properties;
     File watchedDirectory;
     File tmpDir;
     long poll;
@@ -112,6 +113,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
     public DirectoryWatcher(Dictionary properties, BundleContext context)
     {
         super(properties.toString());
+        this.properties = properties;
         this.context = context;
         poll = getLong(properties, POLL, 2000);
         debug = getLong(properties, DEBUG, -1);
@@ -139,7 +141,13 @@ public class DirectoryWatcher extends Thread implements BundleListener
             flt = null;
         }
         scanner = new Scanner(watchedDirectory, flt);
+    }
 
+    public Dictionary getProperties() {
+        return properties;
+    }
+
+    public void start() {
         if (noInitialDelay)
         {
             log("Starting initial scan", null);
@@ -150,6 +158,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 process(files);
             }
         }
+        super.start();
     }
 
     /**

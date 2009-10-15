@@ -129,13 +129,10 @@ public class FileInstall implements BundleActivator
     public void stop(BundleContext context) throws Exception
     {
         List /*<DirectoryWatcher>*/ toClose = new ArrayList /*<DirectoryWatcher>*/();
-        if (watchers != null)
+        synchronized (watchers)
         {
-            synchronized (watchers)
-            {
-                toClose.addAll(watchers.values());
-                watchers.clear();
-            }
+            toClose.addAll(watchers.values());
+            watchers.clear();
         }
         for (Iterator w = toClose.iterator(); w.hasNext();)
         {
@@ -178,11 +175,25 @@ public class FileInstall implements BundleActivator
 
     public void updated(String pid, Dictionary properties)
     {
-        deleted(pid);
-        Util.performSubstitution(properties);    
-        
-        DirectoryWatcher watcher = new DirectoryWatcher(properties, context);
-        watchers.put(pid, watcher);
+        Util.performSubstitution(properties);
+        DirectoryWatcher watcher = null;
+        synchronized (watchers)
+        {
+            watcher = (DirectoryWatcher) watchers.get(pid);
+            if (watcher != null && watcher.getProperties().equals(properties))
+            {
+                return;
+            }
+        }
+        if (watcher != null)
+        {
+            watcher.close();
+        }
+        watcher = new DirectoryWatcher(properties, context);
+        synchronized (watchers)
+        {
+            watchers.put(pid, watcher);
+        }
         watcher.start();
     }
 
