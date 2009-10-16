@@ -20,5 +20,5 @@
 
 KARAF_HOME=${karaf.home}
 
-${KARAF_HOME}/bin/admin start ${karaf.name} "$@"
+exec ${KARAF_HOME}/bin/admin start ${karaf.name} "$@"
 

@@ -19,11 +19,14 @@
 package org.apache.felix.karaf.main;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -164,6 +167,8 @@ public class Main {
 
         // Load system properties.
         loadSystemProperties();
+
+        updateInstancePid();
 
         // Read configuration properties.
         configProps = loadConfigProperties();
@@ -327,6 +332,41 @@ public class Main {
                     System.err.println("Unable to register security provider: " + t);
                 }
             }
+        }
+    }
+
+    private void updateInstancePid() {
+        try {
+            if (!karafHome.equals(karafBase)) {
+                String instanceName = System.getProperty("karaf.name");
+                String pid = ManagementFactory.getRuntimeMXBean().getName();
+                if (pid.indexOf('@') > 0) {
+                    pid = pid.substring(0, pid.indexOf('@'));
+                }
+                if (instanceName != null) {
+                    String storage = System.getProperty("storage.location");
+                    if (storage == null) {
+                        throw new Exception("System property 'storage.location' is not set. \n" +
+                            "This property needs to be set to the full path of the instance.properties file.");
+                    }
+                    File storageFile = new File(storage);
+                    File propertiesFile = new File(storageFile, "instance.properties");
+                    Properties props = new Properties();
+                    props.load(new FileInputStream(propertiesFile));
+                    int count = Integer.parseInt(props.getProperty("count"));
+                    for (int i = 0; i < count; i++) {
+                        String name = props.getProperty("item." + i + ".name");
+                        if (name.equals(instanceName)) {
+                            props.setProperty("item." + i + ".pid", pid);
+                            props.store(new FileOutputStream(propertiesFile), null);
+                            return;
+                        }
+                    }
+                    throw new Exception("Instance " + args[1] + " not found");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Unable to update instance pid: " + e.getMessage());
         }
     }
 
