@@ -94,7 +94,7 @@
         <pax.exam.version>1.1.0</pax.exam.version>
         <pax.logging.version>1.4</pax.logging.version>
         <pax.runner.version>1.2.1</pax.runner.version>
-        <pax.url.version>1.0.0</pax.url.version>
+        <pax.url.version>1.1.2</pax.url.version>
         <pax.web.version>0.7.1</pax.web.version>
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
