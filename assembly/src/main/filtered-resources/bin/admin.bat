@@ -54,7 +54,7 @@ if "%KARAF_BASE%" == "" (
   set KARAF_BASE=%KARAF_HOME%
 )
 
-set DEFAULT_JAVA_OPTS=-Dstorage.location="%KARAF_HOME%\instances"
+set DEFAULT_JAVA_OPTS=
 set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
 
 rem Support for loading native libraries
@@ -87,7 +87,7 @@ set CLASSPATH=%KARAF_HOME%\system\org\apache\felix\karaf\shell\org.apache.felix.
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
     if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8    
     rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" org.apache.felix.karaf.shell.admin.main.Execute %ARGS%
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dstorage.location="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" org.apache.felix.karaf.shell.admin.main.Execute %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 

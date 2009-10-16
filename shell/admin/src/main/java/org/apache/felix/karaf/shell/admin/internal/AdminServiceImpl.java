@@ -156,11 +156,14 @@ public class AdminServiceImpl implements AdminService {
         copyFilteredResourceToDir(karafBase, "etc/system.properties", props);
         copyFilteredResourceToDir(karafBase, "etc/org.apache.felix.karaf.shell.cfg", props);
         if( System.getProperty("os.name").startsWith("Win") ) {
+            copyFilteredResourceToDir(karafBase, "bin/karaf.bat", props);
             copyFilteredResourceToDir(karafBase, "bin/start.bat", props);
             copyFilteredResourceToDir(karafBase, "bin/stop.bat", props);
         } else {
+            copyFilteredResourceToDir(karafBase, "bin/karaf", props);
             copyFilteredResourceToDir(karafBase, "bin/start", props);
             copyFilteredResourceToDir(karafBase, "bin/stop", props);
+            chmod(new File(karafBase, "bin/karaf"), "a+x");
             chmod(new File(karafBase, "bin/start"), "a+x");
             chmod(new File(karafBase, "bin/stop"), "a+x");
         }
