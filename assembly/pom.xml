@@ -331,14 +331,12 @@
                                     <artifactId>manual</artifactId>
                                     <type>pdf</type>
                                     <outputDirectory>target/dependencies</outputDirectory>
-                                    <destFileName>manual.pdf</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix.karaf</groupId>
                                     <artifactId>manual</artifactId>
                                     <type>html</type>
                                     <outputDirectory>target/dependencies</outputDirectory>
-                                    <destFileName>manual.html</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
