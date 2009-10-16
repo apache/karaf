@@ -29,6 +29,11 @@ function renderView() {
     "<td>Name: <input id='name' type='text' name='name' style='width:70%' colspan='2'/></td>" +
     "<td>Port: <input id='port' type='text' name='port' style='width:70%' colspan='2'/></td>" +
     "<td>Location: <input id='location' type='text' name='location' style='width:70%' colspan='2'/></td>" +
+    "<td />" +
+    "</tr><tr><td>Features: <input id='features' type='text' name='features' style='width:70%' colspan='2'" + 
+    " title='Specify initial features separated by commas.'/></td>" + 
+    "<td colspan='2'>Feature URLs: <input id='featureURLs' type='text' name='featureURLs' style='width:80%' colspan='2'" + 
+    " title='Specify additional feature URLs separate by commas.'/></td>" +
     "<td class='col_Actions'><input type='button' value='Create' onclick='createInstance()'/></td>" +
     "</tr></tbody></table></div></form><br/>";
     $("#plugin_content").append( txt );
@@ -40,11 +45,15 @@ function createInstance() {
     var name = document.getElementById( "name" ).value;
     var port = document.getElementById( "port" ).value;
     var location = document.getElementById( "location" ).value;
-    postCreateInstance( name, port, location );
+    var features = document.getElementById( "features" ).value;
+    var featureURLs = document.getElementById( "featureURLs" ).value;
+    postCreateInstance( name, port, location, features, featureURLs );
 }
 
-function postCreateInstance( /* String */ name, /* String */ port, /* String */ location ) {
-    $.post( pluginRoot, {"action": "create", "name": name, "port": port, "location": location}, function( data ) {
+function postCreateInstance( /* String */ name, /* String */ port, /* String */ location, 
+		/* String */ features, /* String */ featureURLs ) {
+    $.post( pluginRoot, {"action": "create", "name": name, "port": port, "location": location, 
+                             "features": features, "featureURLs": featureURLs }, function( data ) {
         renderData( data );
     }, "json" );
 }

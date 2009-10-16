@@ -46,4 +46,37 @@ public class InstanceSettings {
     public List<String> getFeatures() {
         return features;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof InstanceSettings)) {
+            return false;
+        }
+        InstanceSettings is = (InstanceSettings) o;
+        return is.port == port &&
+               (location == null ? is.location == null : location.equals(is.location)) &&
+               (featureURLs == null ? is.featureURLs == null : featureURLs.equals(is.featureURLs)) &&
+               (features == null ? is.features == null : features.equals(is.features));
+    }
+
+    @Override
+    public int hashCode() {
+        int rc = 17;
+        rc = 37 * port;
+        if (location != null) {
+            rc = 37 * location.hashCode();
+        }
+        if (featureURLs != null) {
+            rc = 37 * featureURLs.hashCode();
+        }
+        if (features != null) {
+            rc = 37 * features.hashCode();
+        }
+        return rc;
+    }
+    
+    
 }
