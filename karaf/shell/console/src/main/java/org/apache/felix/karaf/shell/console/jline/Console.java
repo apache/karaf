@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
@@ -36,6 +37,8 @@ import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.AnsiWindowsTerminal;
 import org.apache.felix.karaf.shell.console.Completer;
+import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
+import org.apache.felix.karaf.shell.console.completer.SessionScopeCompleter;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Converter;
@@ -90,7 +93,16 @@ public class Console implements Runnable
         file.getParentFile().mkdirs();
         reader.getHistory().setHistoryFile(file);
         if (completer != null) {
-            reader.addCompletor(new CompleterAsCompletor(completer));
+            reader.addCompletor(
+                new CompleterAsCompletor(
+                    new AggregateCompleter(
+                        Arrays.asList(
+                            completer,
+                            new SessionScopeCompleter( session, completer )
+                        )
+                    )
+                )
+            );
         }
         pipe = new Thread(new Pipe());
         pipe.setName("gogo shell pipe thread");
