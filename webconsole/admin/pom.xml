@@ -76,6 +76,14 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+        
+        <!-- Only needed while running the unit tests -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons.logging.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
   
     <build>

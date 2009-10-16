@@ -33,10 +33,10 @@ import org.apache.felix.karaf.shell.admin.InstanceSettings;
 public class CreateCommand extends AdminCommandSupport
 {
     @Option(name = "-p", aliases = {"--port"}, description = "Port number for remote shell connection", required = false, multiValued = false)
-    private int port = 0;
+    int port = 0;
 
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the new container instance in the file system", required = false, multiValued = false)
-    private String location;
+    String location;
     
     @Option(name = "-f", aliases = {"--feature"}, 
             description = "Initial features. This option can be specified multiple times to enable multiple initial features", required = false, multiValued = true)
@@ -47,7 +47,7 @@ public class CreateCommand extends AdminCommandSupport
     List<String> featureURLs;
 
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
-    private String instance = null;
+    String instance = null;
 
     protected Object doExecute() throws Exception {
         InstanceSettings settings = new InstanceSettings(port, location, featureURLs, features);

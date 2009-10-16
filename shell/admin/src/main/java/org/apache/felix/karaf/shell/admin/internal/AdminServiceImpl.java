@@ -176,7 +176,7 @@ public class AdminServiceImpl implements AdminService {
         return instance;
     }
 
-    private void handleFeatures(File featuresCfg, InstanceSettings settings) throws IOException {
+    void handleFeatures(File featuresCfg, InstanceSettings settings) throws IOException {
         Properties p = loadStorage(featuresCfg);
 
         appendToPropList(p, "featuresBoot", settings.getFeatures());
@@ -188,7 +188,7 @@ public class AdminServiceImpl implements AdminService {
         if (elements == null) {
             return;
         }
-        StringBuilder sb = new StringBuilder(p.getProperty(key));
+        StringBuilder sb = new StringBuilder(p.getProperty(key).trim());
         for (String f : elements) {
             if (sb.length() > 0) {
                 sb.append(',');

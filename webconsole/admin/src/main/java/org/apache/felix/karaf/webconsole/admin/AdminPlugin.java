@@ -20,7 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -112,7 +113,10 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
         } else if ("create".equals(action)) {
             int port = parsePortNumber(req.getParameter("port"));
             String location = parseString(req.getParameter("location"));
-            success = createInstance(name, port, location);
+            List<String> featureURLs = parseStringList(req.getParameter("featureURLs"));
+            List<String> features = parseStringList(req.getParameter("features"));
+            InstanceSettings settings = new InstanceSettings(port, location, featureURLs, features); 
+            success = createInstance(name, settings);
         } else if ("destroy".equals(action)) {
             success = destroyInstance(name);
         } else if ("start".equals(action)) {
@@ -141,6 +145,20 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
             value = null;
         }
         return value;
+    }
+    
+    private List<String> parseStringList(String value) {
+        List<String> list = new ArrayList<String>();
+        if (value != null) {
+            for (String el : value.split(",")) {
+                String trimmed = el.trim();
+                if (trimmed.length() == 0) {
+                    continue;
+                }
+                list.add(trimmed);
+            }            
+        }
+        return list;
     }
 
     /*
@@ -273,10 +291,8 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
         return buffer.toString();
     }
 
-    private boolean createInstance(String name, int port, String location) {
+    private boolean createInstance(String name, InstanceSettings settings) {
         try {
-            InstanceSettings settings = new InstanceSettings(port, location, 
-                    Collections.<String>emptyList(), Collections.<String>emptyList());
             adminService.createInstance(name, settings);
             return true;
         } catch (Exception ex) {
