@@ -16,9 +16,12 @@
  */
 package org.apache.felix.karaf.shell.admin.internal;
 
+import java.util.Collections;
+
 import org.apache.felix.karaf.shell.admin.AdminService;
 import org.apache.felix.karaf.shell.admin.AdminServiceMBean;
 import org.apache.felix.karaf.shell.admin.Instance;
+import org.apache.felix.karaf.shell.admin.InstanceSettings;
 
 public class AdminServiceMBeanImpl implements AdminServiceMBean {
 
@@ -33,7 +36,9 @@ public class AdminServiceMBeanImpl implements AdminServiceMBean {
     }
 
     public void createInstance(String name, int port, String location) throws Exception {
-        adminService.createInstance(name, port, location);
+        InstanceSettings settings = new InstanceSettings(port, location, 
+                Collections.<String>emptyList(), Collections.<String>emptyList());
+        adminService.createInstance(name, settings);
     }
 
     public String[] getInstances() {

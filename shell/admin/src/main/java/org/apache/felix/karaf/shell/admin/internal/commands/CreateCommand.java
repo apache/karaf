@@ -16,9 +16,12 @@
  */
 package org.apache.felix.karaf.shell.admin.internal.commands;
 
+import java.util.List;
+
 import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.karaf.shell.admin.InstanceSettings;
 
 
 /**
@@ -29,17 +32,26 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "admin", name = "create", description = "Creates a new container instance.")
 public class CreateCommand extends AdminCommandSupport
 {
-    @Option(name = "-p", aliases = { "--port"}, description = "Port number for remote shell connection", required = false, multiValued = false)
+    @Option(name = "-p", aliases = {"--port"}, description = "Port number for remote shell connection", required = false, multiValued = false)
     private int port = 0;
 
-    @Option(name = "-l", aliases = { "--location"}, description = "Location of the new container instance in the file system", required = false, multiValued = false)
+    @Option(name = "-l", aliases = {"--location"}, description = "Location of the new container instance in the file system", required = false, multiValued = false)
     private String location;
+    
+    @Option(name = "-f", aliases = {"--feature"}, 
+            description = "Initial features. This option can be specified multiple times to enable multiple initial features", required = false, multiValued = true)
+    List<String> features;
+    
+    @Option(name = "-furl", aliases = {"--featureURL"}, 
+            description = "Additional feature descriptor URLs. This option can be specified multiple times to add multiple URLs", required = false, multiValued = true)
+    List<String> featureURLs;
 
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
     private String instance = null;
 
     protected Object doExecute() throws Exception {
-        getAdminService().createInstance(instance, port, location);
+        InstanceSettings settings = new InstanceSettings(port, location, featureURLs, features);
+        getAdminService().createInstance(instance, settings);
         return null;
     }
 
