@@ -35,6 +35,10 @@
 
   <properties>
       <must-succeed>false</must-succeed>
+      
+      <manual.dir>${project.build.directory}/manual</manual.dir>
+      <manual>${manual.dir}/manual-${project.version}</manual>
+      <svn.root>${project.scm.connection}</svn.root>
   </properties>
 
   <build>
@@ -45,47 +49,74 @@
         <version>1.2</version>
         <executions>
             <execution>
+                <id>preprocess</id>
                 <configuration>
                     <tasks>
                         <taskdef name="if" classname="net.sf.antcontrib.logic.IfTask" classpathref="maven.plugin.classpath"/>
                         <taskdef name="for" classname="net.sf.antcontrib.logic.ForTask" classpathref="maven.plugin.classpath"/>
                         <taskdef name="trycatch" classname="net.sf.antcontrib.logic.TryCatchTask" classpathref="maven.plugin.classpath"/>
                         <property name="ant.regexp.regexpimpl" value="org.apache.tools.ant.util.regexp.Jdk14RegexpRegexp" />
-                        <property name="manual.dir" value="target/site/manual" />
-                        <property name="manual" value="${manual.dir}/manual-${project.version}.html" />
                         <mkdir dir="${manual.dir}"/>
                         <trycatch property="error">
                             <try>
                                 <get src="http://cwiki.apache.org/confluence/display/FELIX/Karaf+Users%27+Guide+in+one+page"
-                                     dest="${manual}" />
+                                     dest="${manual}.temp" />
                                 <for list="1,2,3,4,5,6,7,8,9,10" param="letter">
                                     <sequential>
                                         <replaceregexp
-                                            file="${manual}"
+                                            file="${manual}.temp"
                                             flags="g"
                                             match='"/confluence/display/FELIX/([^"]*)\+([^"+]*)"'
                                             replace='"/confluence/display/FELIX/\1\2"' />
                                     </sequential>
                                 </for>
                                 <replaceregexp
-                                    file="${manual}"
+                                    file="${manual}.temp"
                                     flags="g"
                                     match='"/confluence/display/FELIX/([^"]*)"'
                                     replace='"#KarafUsers%27Guideinonepage-\1"' />
                                 <replaceregexp
-                                    file="${manual}"
+                                    file="${manual}.temp"
                                     flags="g"
                                     match='"/confluence/([^"]*)"'
                                     replace='"http://cwiki.apache.org/confluence/\1"' />
+                                <replaceregexp
+                                    file="${manual}.temp"
+                                    flags="g"
+                                    match='&gt;top&lt;/a&gt;'
+                                    replace='&gt;&lt;/a&gt;' />
+                                <java classname="org.ccil.cowan.tagsoup.CommandLine"
+                                      classpathref="maven.plugin.classpath"
+                                      fork="true"
+                                      output="${manual}.temp2"
+                                      logError="true">
+                                    <arg value="${manual}.temp" />
+                                </java>
+                                <xslt in="${manual}.temp2" out="${manual}.html"
+                                      style="${basedir}/src/xslt/extract.xsl">
+                                    <param name="stylesheet" expression="${basedir}/src/styles/print.css"/>
+                                </xslt>
+                                <exec executable="prince">
+                                    <arg value="${manual}.html"/>
+                                    <arg value="${manual}.pdf"/>
+                                </exec>
+                                <replace file="${manual}.html" 
+                                         token="${basedir}/src/styles/print.css" 
+                                         value="${svn.root}/src/styles/print.css" />
+                                <replace file="${manual}.html" token="scm:svn:" value="" />
                             </try>
                             <catch>
                                 <if>
                                     <equals arg1="${must-succeed}" arg2="true"/>
                                     <then>
+                                        <echo>ERROR: ${error}</echo>
                                         <fail>${error}</fail>
                                     </then>
                                     <else>
-                                        <copy file="src/fallback/manual.html" tofile="${manual}" />
+                                        <echo>ERROR: ${error}</echo>
+                                        <echo>Falling back to dummy manuals</echo>
+                                        <copy file="src/fallback/manual.html" tofile="${manual}.html" />
+                                        <copy file="src/fallback/manual.pdf" tofile="${manual}.pdf" />
                                     </else>
                                 </if>
                             </catch>
@@ -98,54 +129,8 @@
                 <phase>generate-resources</phase>
             </execution>
          </executions>
-          <dependencies>
-              <dependency>
-                  <groupId>ant-contrib</groupId>
-                  <artifactId>ant-contrib</artifactId>
-                  <version>1.0b3</version>
-              </dependency>
-              <dependency>
-                  <groupId>ant</groupId>
-                  <artifactId>ant-optional</artifactId>
-                  <version>1.5.3-1</version>
-              </dependency>
-         </dependencies>
-    </plugin>
-
-     <plugin>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>maven-html-to-pdf</artifactId>
-        <version>2.0.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-            <phase>compile</phase>
-          </execution>
-        </executions>    
-        <configuration>
-          <page>file://${basedir}/target/site/manual/manual-${project.version}.html</page>
-          <head><![CDATA[ 
-              <link href="file:${basedir}/src/styles/print.css" rel="stylesheet" type="text/css" />
-              <style type="text/css">
-                @page :left {
-                  @top-left {
-                    content: "Apache Felix Karaf ${pom.version} Developer's Manual";
-                  }
-                }
-              </style>
-          ]]></head>
-          <replaceToken><![CDATA[
-              >top</a>
-          ]]></replaceToken>
-          <replaceValue><![CDATA[
-              ></a>
-          ]]></replaceValue>
-          <errorOnConverionFailure>${must-succeed}</errorOnConverionFailure>
-          <errorOnDownloadFailure>${must-succeed}</errorOnDownloadFailure>
-        </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -158,10 +143,13 @@
             </goals>
             <configuration>
               <artifacts>
-                <!-- Don't need to attach PDF here because the html-to-pdf plugin did that already -->
                 <artifact>
-                  <file>${project.build.directory}/site/manual/manual-${project.version}.html</file>
+                  <file>${manual}.html</file>
                   <type>html</type>
+                </artifact>
+                <artifact>
+                  <file>${manual}.pdf</file>
+                  <type>pdf</type>
                 </artifact>
               </artifacts>
             </configuration>

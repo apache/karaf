@@ -42,11 +42,11 @@
         <module>client</module>
         <module>management</module>
         <module>webconsole</module>
+        <module>manual</module>
         <module>assembly</module>
         <module>demos</module>
         <module>itests</module>
         <module>tooling</module>
-        <module>manual</module>
     </modules>
 
     <scm>
@@ -763,6 +763,11 @@
                             <groupId>ant</groupId>
                             <artifactId>ant-optional</artifactId>
                             <version>1.5.3-1</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.ccil.cowan.tagsoup</groupId>
+                            <artifactId>tagsoup</artifactId>
+                            <version>1.2</version>
                         </dependency>
                     </dependencies>
                 </plugin>
