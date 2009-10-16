@@ -16,11 +16,34 @@
  */
 package org.apache.felix.karaf.shell.admin;
 
-public interface AdminService {
+import java.util.List;
 
-    Instance createInstance(String name, InstanceSettings settings) throws Exception;
+public class InstanceSettings {
+    private final int port;
+    private final String location;
+    private final List<String> featureURLs;
+    private final List<String> features;
 
-    Instance[] getInstances();
+    public InstanceSettings(int port, String location, List<String> featureURLs, List<String> features) {
+        this.port = port;
+        this.location = location;
+        this.featureURLs = featureURLs;
+        this.features = features;
+    }
 
-    Instance getInstance(String name);    
+    public int getPort() {
+        return port;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public List<String> getFeatureURLs() {
+        return featureURLs;
+    }
+
+    public List<String> getFeatures() {
+        return features;
+    }
 }

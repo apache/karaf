@@ -17,27 +17,28 @@
 package org.apache.felix.karaf.shell.admin.internal;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.FileInputStream;
-import java.net.ServerSocket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Properties;
+import java.util.Scanner;
 
 import org.apache.felix.karaf.shell.admin.AdminService;
 import org.apache.felix.karaf.shell.admin.Instance;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.felix.karaf.shell.admin.InstanceSettings;
 import org.fusesource.jansi.Ansi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AdminServiceImpl implements AdminService {
-
     public static final String STORAGE_FILE = "instance.properties";
+    private static final String FEATURES_CFG = "etc/org.apache.felix.karaf.features.cfg";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminServiceImpl.class);
 
@@ -69,11 +70,11 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
-    private void saveStorage(Properties props, File location) throws IOException {
+    private void saveStorage(Properties props, File location, String comment) throws IOException {
         OutputStream os = null;
         try {
             os = new FileOutputStream(location);
-            props.store(os, "Admin Service storage");
+            props.store(os, comment);
         } finally {
             if (os != null) {
                 os.close();
@@ -116,16 +117,16 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
-    public synchronized Instance createInstance(String name, int port, String location) throws Exception {
+    public synchronized Instance createInstance(String name, InstanceSettings settings) throws Exception {
         if (instances.get(name) != null) {
             throw new IllegalArgumentException("Instance '" + name + "' already exists");
         }
-        String loc = location != null ? location : name;
+        String loc = settings.getLocation() != null ? settings.getLocation() : name;
         File karafBase = new File(loc);
         if (!karafBase.isAbsolute()) {
             karafBase = new File(storageLocation, loc);
         }
-        int sshPort = port;
+        int sshPort = settings.getPort();
         if (sshPort <= 0) {
             sshPort = ++defaultPortStart;
         }
@@ -140,7 +141,7 @@ public class AdminServiceImpl implements AdminService {
         copyResourceToDir(karafBase, "etc/config.properties", true);
         copyResourceToDir(karafBase, "etc/java.util.logging.properties", true);
         copyResourceToDir(karafBase, "etc/org.apache.felix.karaf.log.cfg", true);
-        copyResourceToDir(karafBase, "etc/org.apache.felix.karaf.features.cfg", true);
+        copyResourceToDir(karafBase, FEATURES_CFG, true);
         copyResourceToDir(karafBase, "etc/org.apache.felix.karaf.management.cfg", true);
         copyResourceToDir(karafBase, "etc/org.ops4j.pax.logging.cfg", true);
         copyResourceToDir(karafBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
@@ -163,12 +164,37 @@ public class AdminServiceImpl implements AdminService {
             chmod(new File(karafBase, "bin/start"), "a+x");
             chmod(new File(karafBase, "bin/stop"), "a+x");
         }
+        
+        handleFeatures(new File(karafBase, FEATURES_CFG), settings);
+        
         Instance instance = new InstanceImpl(this, name, karafBase.toString());
         instances.put(name, instance);
         saveState();
         return instance;
     }
 
+    private void handleFeatures(File featuresCfg, InstanceSettings settings) throws IOException {
+        Properties p = loadStorage(featuresCfg);
+
+        appendToPropList(p, "featuresBoot", settings.getFeatures());
+        appendToPropList(p, "featuresRepositories", settings.getFeatureURLs());
+        saveStorage(p, featuresCfg, "Features Configuration");
+    }
+
+    private void appendToPropList(Properties p, String key, List<String> elements) {
+        if (elements == null) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder(p.getProperty(key));
+        for (String f : elements) {
+            if (sb.length() > 0) {
+                sb.append(',');
+            }
+            sb.append(f);
+        }
+        p.setProperty(key, sb.toString());
+    }
+    
     public synchronized Instance[] getInstances() {
         return instances.values().toArray(new Instance[0]);
     }
@@ -191,7 +217,7 @@ public class AdminServiceImpl implements AdminService {
             storage.setProperty("item." + i + ".loc", data[i].getLocation());
             storage.setProperty("item." + i + ".pid", Integer.toString(data[i].getPid()));
         }
-        saveStorage(storage, new File(storageLocation, STORAGE_FILE));
+        saveStorage(storage, new File(storageLocation, STORAGE_FILE), "Admin Service storage");
     }
 
     private void copyResourceToDir(File target, String resource, boolean text) throws Exception {

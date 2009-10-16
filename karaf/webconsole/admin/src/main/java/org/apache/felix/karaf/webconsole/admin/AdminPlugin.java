@@ -20,19 +20,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.felix.karaf.shell.admin.AdminService;
-import org.apache.felix.karaf.shell.admin.Instance;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.json.JSONException;
-import org.osgi.framework.BundleContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.felix.karaf.shell.admin.AdminService;
+import org.apache.felix.karaf.shell.admin.Instance;
+import org.apache.felix.karaf.shell.admin.InstanceSettings;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.json.JSONException;
 import org.json.JSONWriter;
+import org.osgi.framework.BundleContext;
 
 /**
  * Felix Web Console plugin for interacting with the {@link AdminService}
@@ -271,7 +275,9 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
 
     private boolean createInstance(String name, int port, String location) {
         try {
-            adminService.createInstance(name, port, location);
+            InstanceSettings settings = new InstanceSettings(port, location, 
+                    Collections.<String>emptyList(), Collections.<String>emptyList());
+            adminService.createInstance(name, settings);
             return true;
         } catch (Exception ex) {
             Logger.getLogger(AdminPlugin.class.getName()).log(Level.SEVERE, null, ex);
