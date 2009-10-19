@@ -743,7 +743,7 @@ public class OsgiManager extends GenericServlet
     }
 
 
-    void updateConfiguration( Dictionary config )
+    synchronized void updateConfiguration( Dictionary config )
     {
         if ( config == null )
         {
