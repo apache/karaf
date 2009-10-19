@@ -19,11 +19,11 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <service auto-export="interfaces">
+    <service auto-export="interfaces" depends-on="springUrlHandler">
         <bean class="org.apache.felix.karaf.deployer.spring.SpringDeploymentListener"/>
     </service>
 
-    <service interface="org.osgi.service.url.URLStreamHandlerService">
+    <service id="springUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService">
     	<service-properties>
             <entry key="url.handler.protocol" value="spring"/>
         </service-properties>

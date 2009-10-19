@@ -20,7 +20,7 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            default-activation="lazy">
 
-    <service ref="featureDeploymentListener" auto-export="interfaces"/>
+    <service ref="featureDeploymentListener" auto-export="interfaces" depends-on="featureUrlHandler"/>
 
     <bean id="featureDeploymentListener" class="org.apache.felix.karaf.deployer.features.FeatureDeploymentListener"
           init-method="init" destroy-method="destroy" activation="lazy">
@@ -29,5 +29,12 @@
             <reference interface="org.apache.felix.karaf.features.FeaturesService"/>
         </property>
     </bean>
+
+    <service id="featureUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService">
+    	<service-properties>
+            <entry key="url.handler.protocol" value="feature"/>
+        </service-properties>
+        <bean class="org.apache.felix.karaf.deployer.features.FeatureURLHandler"/>
+    </service>
 
 </blueprint>
