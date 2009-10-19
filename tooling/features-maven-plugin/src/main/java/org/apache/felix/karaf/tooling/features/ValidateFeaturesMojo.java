@@ -31,6 +31,9 @@ import org.apache.felix.karaf.features.Feature;
 import org.apache.felix.karaf.features.Repository;
 import org.apache.felix.karaf.features.internal.RepositoryImpl;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.DefaultArtifactRepository;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.DefaultArtifactCollector;
@@ -57,6 +60,7 @@ import org.osgi.impl.bundle.obr.resource.ManifestEntry;
 public class ValidateFeaturesMojo extends MojoSupport {
 
     private static final String MVN_URI_PREFIX = "mvn:";
+    private static final String MVN_REPO_SEPARATOR = "!";
 
     /**
      * The dependency tree builder to use.
@@ -323,7 +327,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
      * Check if the artifact is an OSGi bundle
      */
     private boolean isBundle(Artifact artifact) {
-        if (artifact.getArtifactHandler().getPackaging().equals("bundle")) {
+        if ("bundle".equals(artifact.getArtifactHandler().getPackaging())) {
             return true;
         } else {
             try {
@@ -366,18 +370,39 @@ public class ValidateFeaturesMojo extends MojoSupport {
     /*
      * Resolve an artifact, downloading it from remote repositories when necessary
      */
-    private Artifact resolve(String bundle) throws ArtifactResolutionException, ArtifactNotFoundException {
+    private Artifact resolve(String bundle) throws Exception, ArtifactNotFoundException {
         Artifact artifact = getArtifact(bundle);
-        resolver.resolve(artifact, remoteRepos, localRepo);
-        return artifact;
+        if (bundle.indexOf(MVN_REPO_SEPARATOR) >= 0) {
+            if (bundle.startsWith(MVN_URI_PREFIX)) {
+                bundle = bundle.substring(MVN_URI_PREFIX.length());
+            }
+            String repo = bundle.substring(0, bundle.indexOf(MVN_REPO_SEPARATOR));
+            ArtifactRepository repository = new DefaultArtifactRepository(artifact.getArtifactId() + "-repo", repo,
+                                                                          new DefaultRepositoryLayout());
+            List<ArtifactRepository> repos = new LinkedList<ArtifactRepository>();
+            repos.add(repository);
+            resolver.resolve(artifact, repos, localRepo);
+        } else {
+            resolver.resolve(artifact, remoteRepos, localRepo);
+        }
+        if (artifact == null) {
+            throw new Exception("Unable to resolve artifact for uri " + bundle);
+        } else {
+            return artifact;
+        }
     }
 
     /*
      * Create an artifact for a given mvn: uri
      */
     private Artifact getArtifact(String uri) {
+        // remove the mvn: prefix when necessary
         if (uri.startsWith(MVN_URI_PREFIX)) {
             uri = uri.substring(MVN_URI_PREFIX.length());
+        }
+        // remove the repository url when specified
+        if (uri.contains(MVN_REPO_SEPARATOR)) {
+            uri = uri.split(MVN_REPO_SEPARATOR)[1];
         }
         String[] elements = uri.split("/");
         switch (elements.length) {
