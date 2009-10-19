@@ -18,6 +18,8 @@
 
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://geronimo.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
+           xmlns:ext="http://geronimo.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
@@ -59,7 +61,9 @@
             </completers>
         </command>
         <command name="config/update">
-            <action class="org.apache.felix.karaf.shell.config.UpdateCommand"/>
+            <action class="org.apache.felix.karaf.shell.config.UpdateCommand">
+                <property name="storage" value="${storage}" />
+            </action>
         </command>
     </command-bundle>
 
@@ -72,5 +76,12 @@
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
+
+    <cm:property-placeholder persistent-id="org.apache.felix.karaf.shell.config">
+        <cm:default-properties>
+            <cm:property name="storage" value="$[karaf.base]/etc/"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
 
 </blueprint>
