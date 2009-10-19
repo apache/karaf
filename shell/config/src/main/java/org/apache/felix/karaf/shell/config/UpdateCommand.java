@@ -16,8 +16,13 @@
  */
 package org.apache.felix.karaf.shell.config;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Properties;
 
+import org.apache.felix.gogo.commands.Option;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.felix.gogo.commands.Command;
@@ -25,10 +30,41 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "config", name = "update", description = "Save and propagate changes from the configuration being edited.")
 public class UpdateCommand extends ConfigCommandSupport {
 
+    @Option(name = "-b", aliases = { "--bypass-storage" }, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")
+    private boolean bypassStorage;
+
+    private File storage;
+
+    public File getStorage() {
+        return storage;
+    }
+
+    public void setStorage(File storage) {
+        this.storage = storage;
+    }
+
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Dictionary props = getEditedProps();
         if (props == null) {
             System.err.println("No configuration is being edited. Run the edit command first");
+        } else if (!bypassStorage && storage != null) {
+            Properties p = new Properties();
+            for (Enumeration keys = props.keys(); keys.hasMoreElements();) {
+                Object key = keys.nextElement();
+                if (!"service.pid".equals(key) && !"felix.fileinstall.filename".equals(key)) {
+                    p.put(key, props.get(key));
+                }
+            }
+            storage.mkdirs();
+            String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
+            FileOutputStream os = new FileOutputStream(new File(storage, pid + ".cfg"));
+            try {
+                p.store(os, null);
+            } finally {
+                os.close();
+            }
+            this.session.put(PROPERTY_CONFIG_PID, null);
+            this.session.put(PROPERTY_CONFIG_PROPS, null);
         } else {
             String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
             Configuration cfg = admin.getConfiguration(pid, null);
