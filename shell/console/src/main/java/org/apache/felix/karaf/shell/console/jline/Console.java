@@ -18,37 +18,46 @@
  */
 package org.apache.felix.karaf.shell.console.jline;
 
+import java.io.CharArrayWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import jline.AnsiWindowsTerminal;
 import jline.ConsoleReader;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
-import jline.AnsiWindowsTerminal;
 import org.apache.felix.karaf.shell.console.Completer;
 import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.felix.karaf.shell.console.completer.SessionScopeCompleter;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Converter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Console implements Runnable
 {
 
+    public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String PROMPT = "PROMPT";
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}> ";
     public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
     private CommandSession session;
     private ConsoleReader reader;
@@ -125,6 +134,32 @@ public class Console implements Runnable
         running = true;
         pipe.start();
         welcome();
+        String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
+        if (scriptFileName != null) {
+            Reader r = null;
+            try {
+                File scriptFile = new File(scriptFileName);
+                r = new InputStreamReader(new FileInputStream(scriptFile));
+                CharArrayWriter w = new CharArrayWriter();
+                int n;
+                char[] buf = new char[8192];
+                while ((n = r.read(buf)) > 0) {
+                    w.write(buf, 0, n);
+                }
+                session.execute(new String(w.toCharArray()));
+            } catch (Exception e) {
+                LOGGER.debug("Error in initialization script", e);
+                System.err.println("Error in initialization script: " + e.getMessage());
+            } finally {
+                if (r != null) {
+                    try {
+                        r.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
         while (running) {
             try {
                 String line = reader.readLine(getPrompt());
