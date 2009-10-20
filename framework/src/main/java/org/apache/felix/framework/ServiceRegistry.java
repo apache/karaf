@@ -30,7 +30,7 @@ public class ServiceRegistry
     private final Logger m_logger;
     private long m_currentServiceId = 1L;
     // Maps bundle to an array of service registrations.
-    private Map m_serviceRegsMap = new HashMap();
+    private final Map m_serviceRegsMap = Collections.synchronizedMap(new HashMap());
     // Maps registration to thread to keep track when a
     // registration is in use, which will cause other
     // threads to wait.
@@ -50,17 +50,24 @@ public class ServiceRegistry
         m_callbacks = callbacks;
     }
 
-    public synchronized ServiceReference[] getRegisteredServices(Bundle bundle)
+    public ServiceReference[] getRegisteredServices(Bundle bundle)
     {
         ServiceRegistration[] regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
         if (regs != null)
         {
-            ServiceReference[] refs = new ServiceReference[regs.length];
-            for (int i = 0; i < refs.length; i++)
+            List refs = new ArrayList(regs.length);
+            for (int i = 0; i < regs.length; i++)
             {
-                refs[i] = regs[i].getReference();
+                try
+                {
+                    refs.add(regs[i].getReference());
+                }
+                catch (IllegalStateException ex)
+                {
+                    // Don't include the reference as it is not valid anymore
+                }
             }
-            return refs;
+            return (ServiceReference[]) refs.toArray(new ServiceReference[refs.size()]);
         }
         return null;
     }
@@ -168,56 +175,64 @@ public class ServiceRegistry
         }
     }
 
-    public synchronized List getServiceReferences(String className, Filter filter)
+    public List getServiceReferences(String className, Filter filter)
     {
         // Create a filtered list of service references.
         List list = new ArrayList();
 
+        Object[] registrations = m_serviceRegsMap.values().toArray();
+        
         // Iterator over all service registrations.
-        for (Iterator i = m_serviceRegsMap.entrySet().iterator(); i.hasNext(); )
+        for (int i = 0; i < registrations.length; i++)
         {
-            Map.Entry entry = (Map.Entry) i.next();
-            ServiceRegistration[] regs = (ServiceRegistration[]) entry.getValue();
+            ServiceRegistration[] regs = (ServiceRegistration[]) registrations[i];
 
             for (int regIdx = 0;
                 (regs != null) && (regIdx < regs.length);
                 regIdx++)
             {
-                // Determine if the registered services matches
-                // the search criteria.
-                boolean matched = false;
+                try
+                {
+                    // Determine if the registered services matches
+                    // the search criteria.
+                    boolean matched = false;
 
-                // If className is null, then look at filter only.
-                if ((className == null) &&
-                    ((filter == null) || filter.match(regs[regIdx].getReference())))
-                {
-                    matched = true;
-                }
-                // If className is not null, then first match the
-                // objectClass property before looking at the
-                // filter.
-                else if (className != null)
-                {
-                    String[] objectClass = (String[])
-                        ((ServiceRegistrationImpl) regs[regIdx])
-                            .getProperty(FelixConstants.OBJECTCLASS);
-                    for (int classIdx = 0;
-                        classIdx < objectClass.length;
-                        classIdx++)
+                    // If className is null, then look at filter only.
+                    if ((className == null) &&
+                        ((filter == null) || filter.match(regs[regIdx].getReference())))
                     {
-                        if (objectClass[classIdx].equals(className) &&
-                            ((filter == null) || filter.match(regs[regIdx].getReference())))
+                        matched = true;
+                    }
+                    // If className is not null, then first match the
+                    // objectClass property before looking at the
+                    // filter.
+                    else if (className != null)
+                    {
+                        String[] objectClass = (String[])
+                            ((ServiceRegistrationImpl) regs[regIdx])
+                                .getProperty(FelixConstants.OBJECTCLASS);
+                        for (int classIdx = 0;
+                            classIdx < objectClass.length;
+                            classIdx++)
                         {
-                            matched = true;
-                            break;
+                            if (objectClass[classIdx].equals(className) &&
+                                ((filter == null) || filter.match(regs[regIdx].getReference())))
+                            {
+                                matched = true;
+                                break;
+                            }
                         }
                     }
-                }
 
-                // Add reference if it was a match.
-                if (matched)
+                    // Add reference if it was a match.
+                    if (matched)
+                    {
+                        list.add(regs[regIdx].getReference());
+                    }
+                }
+                catch (IllegalStateException ex)
                 {
-                    list.add(regs[regIdx].getReference());
+                    // Don't include the reference as it is not valid anymore
                 }
             }
         }
