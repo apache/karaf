@@ -45,7 +45,7 @@ public class ManifestParser
     private volatile R4LibraryClause[] m_libraryHeaders;
     private volatile boolean m_libraryHeadersOptional = false;
 
-    public ManifestParser(Logger logger, Map configMap, Map headerMap)
+    public ManifestParser(Logger logger, Map configMap, IModule owner, Map headerMap)
         throws BundleException
     {
         m_logger = logger;
@@ -91,7 +91,7 @@ public class ManifestParser
         // Parse bundle symbolic name.
         //
 
-        ICapability moduleCap = parseBundleSymbolicName(m_headerMap);
+        ICapability moduleCap = parseBundleSymbolicName(owner, m_headerMap);
         if (moduleCap != null)
         {
             m_bundleSymbolicName = (String)
@@ -107,7 +107,7 @@ public class ManifestParser
             {
                 capList.add(moduleCap);
                 capList.add(new Capability(
-                    ICapability.HOST_NAMESPACE, null,
+                    owner, ICapability.HOST_NAMESPACE, null,
                     ((Capability) moduleCap).getAttributes()));
             }
         }
@@ -139,7 +139,7 @@ public class ManifestParser
 
         // Get exported packages from bundle manifest.
         ICapability[] exportCaps = parseExportHeader(
-            (String) headerMap.get(Constants.EXPORT_PACKAGE));
+            owner, (String) headerMap.get(Constants.EXPORT_PACKAGE));
 
         // Verify that "java.*" packages are not exported.
         for (int capIdx = 0; capIdx < exportCaps.length; capIdx++)
@@ -600,6 +600,7 @@ public class ManifestParser
                     // Recreate the export to remove any other attributes
                     // and add version if missing.
                     m_capabilities[capIdx] = new Capability(
+                        m_capabilities[capIdx].getModule(),
                         ICapability.PACKAGE_NAMESPACE,
                         null,
                         new R4Attribute[] { pkgName, pkgVersion } );
@@ -728,6 +729,7 @@ public class ManifestParser
             if (m_capabilities[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
                 m_capabilities[i] = new Capability(
+                    m_capabilities[i].getModule(),
                     ICapability.PACKAGE_NAMESPACE,
                     new R4Directive[] { uses },
                     ((Capability) m_capabilities[i]).getAttributes());
@@ -809,6 +811,7 @@ public class ManifestParser
                 newAttrs[attrs.length + 1] = new R4Attribute(
                     Constants.BUNDLE_VERSION_ATTRIBUTE, bv, false);
                 caps[i] = new Capability(
+                    caps[i].getModule(),
                     ICapability.PACKAGE_NAMESPACE,
                     ((Capability) caps[i]).getDirectives(),
                     newAttrs);
@@ -830,7 +833,7 @@ public class ManifestParser
         }
     }
 
-    private static ICapability parseBundleSymbolicName(Map headerMap)
+    private static ICapability parseBundleSymbolicName(IModule owner, Map headerMap)
         throws BundleException
     {
         Object[][][] clauses = parseStandardHeader(
@@ -856,7 +859,8 @@ public class ManifestParser
             {
                 try
                 {
-                    bundleVersion = Version.parseVersion((String) headerMap.get(Constants.BUNDLE_VERSION));
+                    bundleVersion = Version.parseVersion(
+                        (String) headerMap.get(Constants.BUNDLE_VERSION));
                 }
                 catch (RuntimeException ex)
                 {
@@ -876,16 +880,21 @@ public class ManifestParser
                 Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symName, false);
             attrs[1] = new R4Attribute(
                 Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersion, false);
-            return new Capability(ICapability.MODULE_NAMESPACE, (R4Directive[]) clauses[0][CLAUSE_DIRECTIVES_INDEX], attrs);
+            return new Capability(
+                owner,
+                ICapability.MODULE_NAMESPACE,
+                (R4Directive[]) clauses[0][CLAUSE_DIRECTIVES_INDEX],
+                attrs);
         }
 
         return null;
     }
 
-    public static ICapability[] parseExportHeader(String header, String bsn, Version bv)
+    public static ICapability[] parseExportHeader(
+        IModule owner, String header, String bsn, Version bv)
         throws BundleException
     {
-        ICapability[] caps = parseExportHeader(header);
+        ICapability[] caps = parseExportHeader(owner, header);
         try
         {
             caps = checkAndNormalizeR4Exports(caps, bsn, bv);
@@ -897,7 +906,7 @@ public class ManifestParser
         return caps;
     }
 
-    private static ICapability[] parseExportHeader(String header)
+    private static ICapability[] parseExportHeader(IModule owner, String header)
     {
         Object[][][] clauses = parseStandardHeader(header);
 
@@ -984,6 +993,7 @@ public class ManifestParser
                 // Create package capability and add to capability list.
                 capList.add(
                     new Capability(
+                        owner,
                         ICapability.PACKAGE_NAMESPACE,
                         (R4Directive[]) clauses[clauseIdx][CLAUSE_DIRECTIVES_INDEX],
                         newAttrs));

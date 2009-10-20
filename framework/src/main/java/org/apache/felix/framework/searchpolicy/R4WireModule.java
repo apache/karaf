@@ -21,11 +21,7 @@ package org.apache.felix.framework.searchpolicy;
 import java.net.URL;
 import java.util.*;
 
-import org.apache.felix.framework.searchpolicy.PackageSource;
-import org.apache.felix.framework.searchpolicy.ResolvedPackage;
-import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.moduleloader.*;
 
 public class R4WireModule implements IWire

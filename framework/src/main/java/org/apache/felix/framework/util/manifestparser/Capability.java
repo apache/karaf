@@ -22,41 +22,46 @@ import java.util.*;
 
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.ICapability;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
-public class Capability implements ICapability
+public class Capability implements ICapability, Comparable
 {
-    private String m_namespace;
-    private R4Directive[] m_directives;
-    private R4Attribute[] m_attributes;
-    private Map m_attrMap;
-    private String[] m_uses = new String[0];
-    private String[][] m_includeFilter;
-    private String[][] m_excludeFilter;
+    private final IModule m_module;
+    private final String m_namespace;
+    private final R4Directive[] m_directives;
+    private final R4Attribute[] m_attributes;
+    private final String[] m_uses;
+    private final String[][] m_includeFilter;
+    private final String[][] m_excludeFilter;
+    private volatile Map m_attrMap;
 
     // Cached properties for performance reasons.
-    private String m_pkgName;
-    private Version m_pkgVersion = Version.emptyVersion;
+    private final String m_pkgName;
+    private final Version m_pkgVersion;
 
-    public Capability(String namespace, R4Directive[] dirs, R4Attribute[] attrs)
+    public Capability(IModule module, String namespace, R4Directive[] dirs, R4Attribute[] attrs)
     {
+        m_module = module;
         m_namespace = namespace;
         m_directives = dirs;
         m_attributes = attrs;
 
         // Find all export directives: uses, mandatory, include, and exclude.
         String mandatory = "";
+        String[] uses = new String[0];
+        String[][] includeFilter = null, excludeFilter = null;
         for (int dirIdx = 0; (m_directives != null) && (dirIdx < m_directives.length); dirIdx++)
         {
             if (m_directives[dirIdx].getName().equals(Constants.USES_DIRECTIVE))
             {
                 // Parse these uses directive.
                 StringTokenizer tok = new StringTokenizer(m_directives[dirIdx].getValue(), ",");
-                m_uses = new String[tok.countTokens()];
-                for (int i = 0; i < m_uses.length; i++)
+                uses = new String[tok.countTokens()];
+                for (int i = 0; i < uses.length; i++)
                 {
-                    m_uses[i] = tok.nextToken().trim();
+                    uses[i] = tok.nextToken().trim();
                 }
             }
             else if (m_directives[dirIdx].getName().equals(Constants.MANDATORY_DIRECTIVE))
@@ -66,22 +71,27 @@ public class Capability implements ICapability
             else if (m_directives[dirIdx].getName().equals(Constants.INCLUDE_DIRECTIVE))
             {
                 String[] ss = ManifestParser.parseDelimitedString(m_directives[dirIdx].getValue(), ",");
-                m_includeFilter = new String[ss.length][];
+                includeFilter = new String[ss.length][];
                 for (int filterIdx = 0; filterIdx < ss.length; filterIdx++)
                 {
-                    m_includeFilter[filterIdx] = Util.parseSubstring(ss[filterIdx]);
+                    includeFilter[filterIdx] = Util.parseSubstring(ss[filterIdx]);
                 }
             }
             else if (m_directives[dirIdx].getName().equals(Constants.EXCLUDE_DIRECTIVE))
             {
                 String[] ss = ManifestParser.parseDelimitedString(m_directives[dirIdx].getValue(), ",");
-                m_excludeFilter = new String[ss.length][];
+                excludeFilter = new String[ss.length][];
                 for (int filterIdx = 0; filterIdx < ss.length; filterIdx++)
                 {
-                    m_excludeFilter[filterIdx] = Util.parseSubstring(ss[filterIdx]);
+                    excludeFilter[filterIdx] = Util.parseSubstring(ss[filterIdx]);
                 }
             }
         }
+
+        // Set final values.
+        m_uses = uses;
+        m_includeFilter = includeFilter;
+        m_excludeFilter = excludeFilter;
 
         // Parse mandatory directive and mark specified
         // attributes as mandatory.
@@ -112,17 +122,28 @@ public class Capability implements ICapability
         }
 
         // For performance reasons, find the package name and version properties.
+        String pkgName = null;
+        Version pkgVersion = Version.emptyVersion;
         for (int i = 0; i < m_attributes.length; i++)
         {
             if (m_attributes[i].getName().equals(ICapability.PACKAGE_PROPERTY))
             {
-                m_pkgName = (String) m_attributes[i].getValue();
+                pkgName = (String) m_attributes[i].getValue();
             }
             else if (m_attributes[i].getName().equals(ICapability.VERSION_PROPERTY))
             {
-                m_pkgVersion = (Version) m_attributes[i].getValue();
+                pkgVersion = (Version) m_attributes[i].getValue();
             }
         }
+
+        // Set final values.
+        m_pkgName = pkgName;
+        m_pkgVersion = pkgVersion;
+    }
+
+    public IModule getModule()
+    {
+        return m_module;
     }
 
     public String getNamespace()
@@ -312,7 +333,53 @@ public class Capability implements ICapability
         return m_attrMap;
     }
 
-// TODO: RB - Remove or simplify toString() for final version.
+    public int compareTo(Object o)
+    {
+        Capability cap = (Capability) o;
+        Version thisVersion = null;
+        Version version = null;
+        if (getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+        {
+            thisVersion = getPackageVersion();
+            version = cap.getPackageVersion();
+        }
+        else if (getNamespace().equals(ICapability.MODULE_NAMESPACE))
+        {
+            thisVersion = (Version) getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
+            version = (Version) cap.getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
+        }
+        if ((thisVersion != null) && (version != null))
+        {
+            int cmp = thisVersion.compareTo(version);
+            if (cmp < 0)
+            {
+                return 1;
+            }
+            else if (cmp > 0)
+            {
+                return -1;
+            }
+            else
+            {
+                long thisId = m_module.getBundle().getBundleId();
+                long id = cap.getModule().getBundle().getBundleId();
+                if (thisId < id)
+                {
+                    return -1;
+                }
+                else if (thisId > id)
+                {
+                    return 1;
+                }
+                return 0;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
     public String toString()
     {
         StringBuffer sb = new StringBuffer();

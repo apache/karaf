@@ -47,6 +47,7 @@ import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecureAction;
 import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.Requirement;
@@ -200,7 +201,7 @@ public class ModuleImpl implements IModule
                 (String) m_configMap.get(
                     FelixConstants.IMPLICIT_BOOT_DELEGATION_PROP)).booleanValue();
 
-        ManifestParser mp = new ManifestParser(m_logger, m_configMap, m_headerMap);
+        ManifestParser mp = new ManifestParser(m_logger, m_configMap, this, m_headerMap);
 
         // Record some of the parsed metadata. Note, if this is an extension
         // bundle it's exports are removed, since they will be added to the
@@ -268,7 +269,12 @@ public class ModuleImpl implements IModule
                 {
                     if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
-                        capList.add(caps[capIdx]);
+                        capList.add(
+                            new Capability(
+                                this,
+                                caps[capIdx].getNamespace(),
+                                ((Capability) caps[capIdx]).getDirectives(),
+                                ((Capability) caps[capIdx]).getAttributes()));
                     }
                 }
             }
@@ -1992,7 +1998,7 @@ public class ModuleImpl implements IModule
         String pkgName = Util.getClassPackage(name);
 
         // First, get the bundle ID of the module doing the class loader.
-        long impId = Util.getBundleIdFromModuleId(module.getId());
+        long impId = module.getBundle().getBundleId();
 
         // Next, check to see if the module imports the package.
         IWire[] wires = module.getWires();
@@ -2001,7 +2007,7 @@ public class ModuleImpl implements IModule
             if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                 wires[i].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
             {
-                long expId = Util.getBundleIdFromModuleId(wires[i].getExporter().getId());
+                long expId = wires[i].getExporter().getBundle().getBundleId();
 
                 StringBuffer sb = new StringBuffer("*** Package '");
                 sb.append(pkgName);
@@ -2160,7 +2166,7 @@ public class ModuleImpl implements IModule
         {
             // This should never happen.
         }
-        PackageSource[] exporters =
+        ICapability[] exporters =
             resolver.getResolvedCandidates(pkgReq);
         exporters = (exporters.length == 0)
             ? resolver.getUnresolvedCandidates(pkgReq)
@@ -2182,7 +2188,7 @@ public class ModuleImpl implements IModule
                 // Ignore
             }
 
-            long expId = Util.getBundleIdFromModuleId(exporters[0].m_module.getId());
+            long expId = exporters[0].getModule().getBundle().getBundleId();
 
             StringBuffer sb = new StringBuffer("*** Class '");
             sb.append(name);

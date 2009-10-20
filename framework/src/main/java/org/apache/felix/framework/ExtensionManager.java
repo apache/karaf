@@ -108,7 +108,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
     private final Logger m_logger;
     private final Map m_headerMap = new StringMap(false);
-    private final IModule m_module;
+    private final IModule m_systemBundleModule;
     private ICapability[] m_capabilities = null;
     private Set m_exportNames = null;
     private Object m_securityContext = null;
@@ -121,7 +121,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
     private ExtensionManager()
     {
         m_logger = null;
-        m_module = null;
+        m_systemBundleModule = null;
         m_extensions = new ArrayList();
         m_names = new HashSet();
         m_sourceToExtensions = new HashMap();
@@ -140,7 +140,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
      */
     ExtensionManager(Logger logger, Felix felix)
     {
-        m_module = new ExtensionManagerModule(felix);
+        m_systemBundleModule = new ExtensionManagerModule(felix);
         m_extensions = null;
         m_names = null;
         m_sourceToExtensions = null;
@@ -175,7 +175,8 @@ class ExtensionManager extends URLStreamHandler implements IContent
         m_headerMap.put(FelixConstants.EXPORT_PACKAGE, syspkgs);
         try
         {
-            ManifestParser mp = new ManifestParser(m_logger, felix.getConfig(), m_headerMap);
+            ManifestParser mp = new ManifestParser(
+                m_logger, felix.getConfig(), m_systemBundleModule, m_headerMap);
             ICapability[] caps = aliasSymbolicName(mp.getCapabilities());
             setCapabilities(caps);
         }
@@ -218,6 +219,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
                         new String[] { (String) attrs[i].getValue(), Constants.SYSTEM_BUNDLE_SYMBOLICNAME }, false);
                     // Create the aliased capability to replace the old capability.
                     aliasCaps[capIdx] = new Capability(
+                        caps[capIdx].getModule(),
                         caps[capIdx].getNamespace(),
                         ((Capability) caps[capIdx]).getDirectives(),
                         aliasAttrs);
@@ -232,7 +234,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
     public IModule getModule()
     {
-        return m_module;
+        return m_systemBundleModule;
     }
 
     public synchronized Object getSecurityContext()
@@ -294,9 +296,10 @@ class ExtensionManager extends URLStreamHandler implements IContent
             ICapability[] exports = null;
             try
             {
-                exports = ManifestParser.parseExportHeader((String)
-                    bundle.getCurrentModule().getHeaders().get(Constants.EXPORT_PACKAGE),
-                    m_module.getSymbolicName(), m_module.getVersion());
+                exports = ManifestParser.parseExportHeader(
+                    m_systemBundleModule,
+                    (String) bundle.getCurrentModule().getHeaders().get(Constants.EXPORT_PACKAGE),
+                    m_systemBundleModule.getSymbolicName(), m_systemBundleModule.getVersion());
                 exports = aliasSymbolicName(exports);
             }
             catch (Exception ex)

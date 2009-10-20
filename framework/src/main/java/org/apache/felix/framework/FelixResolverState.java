@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.felix.framework.searchpolicy.Resolver;
-import org.apache.felix.framework.searchpolicy.PackageSource;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.R4Attribute;
 import org.apache.felix.framework.util.manifestparser.R4Directive;
@@ -45,16 +44,16 @@ public class FelixResolverState implements Resolver.ResolverState
     private final List m_moduleList = new ArrayList();
     // Map of fragment symbolic names to array of modules sorted version.
     private final Map m_fragmentMap = new HashMap();
-    // Maps a package name to an array of modules.
-    private final Map m_unresolvedPkgIndexMap = new HashMap();
-    // Maps a package name to an array of modules.
-    private final Map m_resolvedPkgIndexMap = new HashMap();
+    // Maps a package name to an array of exporting capabilities.
+    private final Map m_unresolvedPkgIndex = new HashMap();
+    // Maps a package name to an array of exporting capabilities.
+    private final Map m_resolvedPkgIndex = new HashMap();
     // Maps a module to an array of capabilities.
     private final Map m_resolvedCapMap = new HashMap();
 
     // Reusable empty array.
     private static final IModule[] m_emptyModules = new IModule[0];
-    private static final PackageSource[] m_emptySources = new PackageSource[0];
+    private static final ICapability[] m_emptyCandidates = new ICapability[0];
 
     public FelixResolverState(Logger logger)
     {
@@ -158,7 +157,7 @@ public class FelixResolverState implements Resolver.ResolverState
                             if (fragCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                             {
                                 indexPackageCapability(
-                                    m_unresolvedPkgIndexMap, host, fragCaps[capIdx]);
+                                    m_unresolvedPkgIndex, host, fragCaps[capIdx]);
                             }
                         }
                     }
@@ -387,7 +386,7 @@ public class FelixResolverState implements Resolver.ResolverState
             {
                 if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                 {
-                    indexPackageCapability(m_unresolvedPkgIndexMap, module, caps[i]);
+                    indexPackageCapability(m_unresolvedPkgIndex, module, caps[i]);
                 }
             }
         }
@@ -435,19 +434,19 @@ public class FelixResolverState implements Resolver.ResolverState
                     String pkgName = (String)
                         caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
                     // Remove from "unresolved" package map.
-                    IModule[] modules = (IModule[]) m_unresolvedPkgIndexMap.get(pkgName);
+                    IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
                     if (modules != null)
                     {
                         modules = removeModuleFromArray(modules, module);
-                        m_unresolvedPkgIndexMap.put(pkgName, modules);
+                        m_unresolvedPkgIndex.put(pkgName, modules);
                     }
 
                     // Remove from "resolved" package map.
-                    modules = (IModule[]) m_resolvedPkgIndexMap.get(pkgName);
+                    modules = (IModule[]) m_resolvedPkgIndex.get(pkgName);
                     if (modules != null)
                     {
                         modules = removeModuleFromArray(modules, module);
-                        m_resolvedPkgIndexMap.put(pkgName, modules);
+                        m_resolvedPkgIndex.put(pkgName, modules);
                     }
                 }
             }
@@ -493,10 +492,7 @@ public class FelixResolverState implements Resolver.ResolverState
             if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
                 // Add to "resolved" package index.
-                indexPackageCapability(
-                    m_resolvedPkgIndexMap,
-                    module,
-                    caps[i]);
+                indexPackageCapability(m_resolvedPkgIndex, module, caps[i]);
             }
         }
     }
@@ -569,10 +565,10 @@ public class FelixResolverState implements Resolver.ResolverState
                     String pkgName = (String)
                         caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
                     // Remove the module's capability for the package.
-                    m_unresolvedPkgIndexMap.put(
+                    m_unresolvedPkgIndex.put(
                         pkgName,
                         removeModuleFromArray(
-                            (IModule[]) m_unresolvedPkgIndexMap.get(pkgName),
+                            (IModule[]) m_unresolvedPkgIndex.get(pkgName),
                             module));
                 }
             }
@@ -626,10 +622,7 @@ public class FelixResolverState implements Resolver.ResolverState
                     if (capsCopy[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
                         // Add to "resolved" package index.
-                        indexPackageCapability(
-                            m_resolvedPkgIndexMap,
-                            module,
-                            capsCopy[capIdx]);
+                        indexPackageCapability(m_resolvedPkgIndex, module, capsCopy[capIdx]);
                     }
                 }
             }
@@ -641,16 +634,16 @@ public class FelixResolverState implements Resolver.ResolverState
 //dumpPackageIndexMap(m_resolvedPkgIndexMap);
     }
 
-    public synchronized PackageSource[] getResolvedCandidates(IRequirement req)
+    public synchronized ICapability[] getResolvedCandidates(IRequirement req)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
-        PackageSource[] candidates = m_emptySources;
+        ICapability[] candidates = m_emptyCandidates;
         if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
             && (((Requirement) req).getTargetName() != null))
         {
             String pkgName = ((Requirement) req).getTargetName();
-            IModule[] modules = (IModule[]) m_resolvedPkgIndexMap.get(pkgName);
+            IModule[] modules = (IModule[]) m_resolvedPkgIndex.get(pkgName);
 
             for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
             {
@@ -670,10 +663,9 @@ public class FelixResolverState implements Resolver.ResolverState
                     }
                     else
                     {
-                        PackageSource[] tmp = new PackageSource[candidates.length + 1];
+                        ICapability[] tmp = new ICapability[candidates.length + 1];
                         System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                        tmp[candidates.length] =
-                            new PackageSource(modules[modIdx], resolvedCap);
+                        tmp[candidates.length] = resolvedCap;
                         candidates = tmp;
                     }
                 }
@@ -706,9 +698,9 @@ public class FelixResolverState implements Resolver.ResolverState
                         }
                         else
                         {
-                            PackageSource[] tmp = new PackageSource[candidates.length + 1];
+                            ICapability[] tmp = new ICapability[candidates.length + 1];
                             System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                            tmp[candidates.length] = new PackageSource(module, resolvedCaps[capIdx]);
+                            tmp[candidates.length] = resolvedCaps[capIdx];
                             candidates = tmp;
                         }
                     }
@@ -719,14 +711,14 @@ public class FelixResolverState implements Resolver.ResolverState
         return candidates;
     }
 
-    public synchronized PackageSource[] getUnresolvedCandidates(IRequirement req)
+    public synchronized ICapability[] getUnresolvedCandidates(IRequirement req)
     {
         // Get all modules.
         IModule[] modules = null;
         if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
             (((Requirement) req).getTargetName() != null))
         {
-            modules = (IModule[]) m_unresolvedPkgIndexMap.get(((Requirement) req).getTargetName());
+            modules = (IModule[]) m_unresolvedPkgIndex.get(((Requirement) req).getTargetName());
         }
         else
         {
@@ -734,7 +726,7 @@ public class FelixResolverState implements Resolver.ResolverState
         }
 
         // Create list of compatible providers.
-        PackageSource[] candidates = m_emptySources;
+        ICapability[] candidates = m_emptyCandidates;
         for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
         {
             // Get the module's export package for the target package.
@@ -743,9 +735,9 @@ public class FelixResolverState implements Resolver.ResolverState
             // the unresolved candidate to the list.
             if ((cap != null) && !modules[modIdx].isResolved())
             {
-                PackageSource[] tmp = new PackageSource[candidates.length + 1];
+                ICapability[] tmp = new ICapability[candidates.length + 1];
                 System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                tmp[candidates.length] = new PackageSource(modules[modIdx], cap);
+                tmp[candidates.length] = cap;
                 candidates = tmp;
             }
         }
@@ -795,8 +787,8 @@ public class FelixResolverState implements Resolver.ResolverState
                     else if (cmp == 0)
                     {
                         // Sort further by ascending bundle ID.
-                        long middleId = Util.getBundleIdFromModuleId(modules[middle].getId());
-                        long exportId = Util.getBundleIdFromModuleId(module.getId());
+                        long middleId = modules[middle].getBundle().getBundleId();
+                        long exportId = module.getBundle().getBundleId();
                         if (middleId < exportId)
                         {
                             top = middle + 1;
@@ -857,8 +849,8 @@ public class FelixResolverState implements Resolver.ResolverState
                 else if (cmp == 0)
                 {
                     // Sort further by ascending bundle ID.
-                    long middleId = Util.getBundleIdFromModuleId(modules[middle].getId());
-                    long exportId = Util.getBundleIdFromModuleId(module.getId());
+                    long middleId = modules[middle].getBundle().getBundleId();
+                    long exportId = module.getBundle().getBundleId();
                     if (middleId < exportId)
                     {
                         top = middle + 1;

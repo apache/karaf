@@ -20,19 +20,20 @@ package org.apache.felix.framework.searchpolicy;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.felix.moduleloader.ICapability;
 
 /**
  * This utility class is a resolved package, which is comprised of a
- * set of <tt>PackageSource</tt>s that is calculated by the resolver
- * algorithm. A given resolved package may have a single package source,
+ * set of <tt>ICapability</tt>s that is calculated by the resolver
+ * algorithm. A given resolved package may have a single capability,
  * as is the case with imported packages, or it may have multiple
- * package sources, as is the case with required bundles.
+ * capabilities, as is the case with required bundles.
  */
 class ResolvedPackage
 {
     public final String m_name;
     public final CandidateSet m_cs;
-    public final List m_sourceList = new ArrayList();
+    public final List m_capList = new ArrayList();
 
     public ResolvedPackage(String name, CandidateSet cs)
     {
@@ -43,7 +44,7 @@ class ResolvedPackage
 
     public boolean isSubset(ResolvedPackage rp)
     {
-        if (m_sourceList.size() > rp.m_sourceList.size())
+        if (m_capList.size() > rp.m_capList.size())
         {
             return false;
         }
@@ -52,13 +53,13 @@ class ResolvedPackage
             return false;
         }
         // Determine if the target set of source modules is a subset.
-        return rp.m_sourceList.containsAll(m_sourceList);
+        return rp.m_capList.containsAll(m_capList);
     }
 
     public Object clone()
     {
         ResolvedPackage rp = new ResolvedPackage(m_name, m_cs);
-        rp.m_sourceList.addAll(m_sourceList);
+        rp.m_capList.addAll(m_capList);
         return rp;
     }
 
@@ -66,11 +67,11 @@ class ResolvedPackage
     {
         // Merge required packages, avoiding duplicate
         // package sources and maintaining ordering.
-        for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+        for (int capIdx = 0; capIdx < rp.m_capList.size(); capIdx++)
         {
-            if (!m_sourceList.contains(rp.m_sourceList.get(srcIdx)))
+            if (!m_capList.contains(rp.m_capList.get(capIdx)))
             {
-                m_sourceList.add(rp.m_sourceList.get(srcIdx));
+                m_capList.add(rp.m_capList.get(capIdx));
             }
         }
     }
@@ -85,11 +86,11 @@ class ResolvedPackage
         sb.append(padding);
         sb.append(m_name);
         sb.append(" from [");
-        for (int i = 0; i < m_sourceList.size(); i++)
+        for (int i = 0; i < m_capList.size(); i++)
         {
-            PackageSource ps = (PackageSource) m_sourceList.get(i);
-            sb.append(ps.m_module);
-            if ((i + 1) < m_sourceList.size())
+            ICapability cap = (ICapability) m_capList.get(i);
+            sb.append(cap.getModule());
+            if ((i + 1) < m_capList.size())
             {
                 sb.append(", ");
             }

@@ -29,6 +29,7 @@ public interface ICapability
     public static final String PACKAGE_PROPERTY = "package";
     public static final String VERSION_PROPERTY = "version";
 
+    IModule getModule();
     String getNamespace();
     Map getProperties();
 }
