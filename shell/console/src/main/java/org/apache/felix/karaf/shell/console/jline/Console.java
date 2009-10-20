@@ -113,6 +113,9 @@ public class Console implements Runnable
                 )
             );
         }
+        if (Boolean.getBoolean("jline.nobell")) {
+            reader.setBellEnabled(false);
+        }
         pipe = new Thread(new Pipe());
         pipe.setName("gogo shell pipe thread");
         pipe.setDaemon(true);
