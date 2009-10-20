@@ -28,8 +28,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.util.Collections;
-import java.util.Arrays;
 
 import org.apache.felix.framework.util.SecureAction;
 import org.osgi.service.url.URLStreamHandlerService;
@@ -360,6 +358,10 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
     }
 
+    // We use this thread local to detect whether we have a reentrant entry to the parseURL 
+    // method. This can happen do to some difference between gnu/classpath and sun jvms
+    // For more see inside the method.
+    private static final ThreadLocal m_loopCheck = new ThreadLocal();
     protected void parseURL(URL url, String spec, int start, int limit)
     {
         Object svc = getStreamHandlerService();
@@ -377,17 +379,50 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
             try 
             {
                 URL test = null;
+                // In order to cater for built-in urls being over-writable we need to use a 
+                // somewhat strange hack. We use a hidden feature inside the jdk which passes
+                // the handler of the url given as a context to a new URL to that URL as its
+                // handler. This way, we can create a new URL which will use the given built-in
+                // handler to parse the url. Subsequently, we can use the information from that
+                // URL to call set with the correct values. 
                 if (m_builtInURL != null)
                 {
-                    test = new URL(new URL(m_builtInURL, url.toExternalForm()), spec);
+                    // However, if we are on gnu/classpath we have to pass the handler directly
+                    // because the hidden feature is not there. Funnily, the workaround to pass
+                    // pass the handler directly doesn't work on sun as their handler detects
+                    // that it is not the same as the one inside the url and throws an exception
+                    // Luckily it doesn't do that on gnu/classpath. We detect that we need to 
+                    // pass the handler directly by using the m_loopCheck thread local to detect
+                    // that we parseURL has been called inside a call to parseURL.
+                    if (m_loopCheck.get() != null)
+                    {
+                        test = new URL(new URL(m_builtInURL, url.toExternalForm()), spec, (URLStreamHandler) svc);
+                    }
+                    else
+                    {
+                        // Set-up the thread local as we don't expect to be called again until we are
+                        // done. Otherwise, we are on gnu/classpath
+                        m_loopCheck.set(Thread.currentThread());
+                        try
+                        {
+                            test = new URL(new URL(m_builtInURL, url.toExternalForm()), spec);
+                        }
+                        finally
+                        {
+                            m_loopCheck.set(null);
+                        }
+                    }
                 }
                 else
                 {
+                    // We don't have a url with a built-in handler for this but still want to create
+                    // the url with the buil-in handler as we could find one now. This might not 
+                    // work for all handlers on sun but it is better then doing nothing. 
                     test = m_action.createURL(url, spec, (URLStreamHandler) svc);
                 }
-                    
+
                 super.setURL(url, test.getProtocol(), test.getHost(), test.getPort(),test.getAuthority(), 
-                   test.getUserInfo(), test.getPath(), test.getQuery(), test.getRef());
+                    test.getUserInfo(), test.getPath(), test.getQuery(), test.getRef());
             } 
             catch (Exception ex)  
             {
@@ -452,8 +487,17 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
         {
             try 
             {
-                return (String) TO_EXTERNAL_FORM.invoke( 
+                String result = (String) TO_EXTERNAL_FORM.invoke( 
                     svc, new Object[]{url});
+                
+                // mika does return an invalid format if we have a url with the 
+                // protocol only (<proto>://null) - we catch this case now
+                if ((result != null) && (result.equals(url.getProtocol() + "://null")))
+                {
+                    result = url.getProtocol() + ":";
+                }
+                
+                return result;
             }
             catch (InvocationTargetException ex)
             {
@@ -484,7 +528,7 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
             answer.append(url.getProtocol());
             answer.append(':');
             String authority = url.getAuthority();
-            if (authority != null && authority.length() > 0) 
+            if ((authority != null) && (authority.length() > 0)) 
             {
                 answer.append("//"); //$NON-NLS-1$
                 answer.append(url.getAuthority());
@@ -563,6 +607,13 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         catch (Throwable t)
         {
+            // In case that we are inside tomcat - the problem is that the webapp classloader
+            // creates a new url to load a class. This gets us to this method. Now, if we 
+            // trigger a classload while executing tomcat is creating a new url and we end-up with
+            // a loop which is cut short after two iterations (because of a circularclassload). 
+            // We catch this exception (and all others) and just return the built-in handler
+            // (if we have any) as this way we at least eventually get started (this just means 
+            // that we don't use the potentially provided built-in handler overwrite). 
             return m_builtIn;
         }
     }

@@ -112,7 +112,7 @@ public class ModuleImpl implements IModule
             m_secureAction.setAccesssible(ctor);
             cl = (ClassLoader) m_secureAction.invoke(ctor, new Object[] { null });
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             // On Android we get an exception if we set the parent class loader
             // to null, so we will work around that case by setting the parent
@@ -1602,7 +1602,7 @@ public class ModuleImpl implements IModule
             dexFileClassLoadClass = dexFileClass.getMethod("loadClass",
                 new Class[] { String.class, ClassLoader.class });
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
            dexFileClassConstructor = null;
            dexFileClassLoadDex = null;

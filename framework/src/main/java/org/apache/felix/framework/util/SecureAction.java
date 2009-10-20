@@ -22,6 +22,7 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
 import java.security.*;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import org.osgi.framework.BundleActivator;
@@ -996,6 +997,60 @@ public class SecureAction
         return null;
     }
 
+    public void flush(Class targetClazz, Object lock) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.FLUSH_FIELD_ACTION, targetClazz, lock);
+            try
+            {
+                AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            _flush(targetClazz, lock);
+        }
+    }
+
+    private static void _flush(Class targetClazz, Object lock) throws Exception
+    {
+        synchronized (lock) 
+        {
+            Field[] fields = targetClazz.getDeclaredFields();
+            // reset cache
+            for (int i = 0; i < fields.length; i++)
+            {
+                if (Modifier.isStatic(fields[i].getModifiers()) &&
+                    ((fields[i].getType() == Hashtable.class) || (fields[i].getType() == HashMap.class)))
+                {
+                    fields[i].setAccessible(true);
+                    if (fields[i].getType() == Hashtable.class)
+                    {
+                        Hashtable cache = (Hashtable) fields[i].get(null);
+                        if (cache != null)
+                        {
+                            cache.clear();
+                        }
+                    }
+                    else
+                    {
+                        HashMap cache = (HashMap) fields[i].get(null);
+                        if (cache != null)
+                        {
+                            cache.clear();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private static class Actions implements PrivilegedExceptionAction
     {
         public static final int INITIALIZE_CONTEXT = 0;
@@ -1038,6 +1093,7 @@ public class SecureAction
         public static final int STOP_ACTIVATOR_ACTION = 37;
         public static final int SWAP_FIELD_ACTION = 38;
         public static final int SYSTEM_EXIT_ACTION = 39;
+        public static final int FLUSH_FIELD_ACTION = 40;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -1279,6 +1335,10 @@ public class SecureAction
             else if (action == SET_ACCESSIBLE_ACTION)
             {
                 ((AccessibleObject) arg1).setAccessible(true);
+            }
+            else if (action == FLUSH_FIELD_ACTION)
+            {
+                _flush(((Class) arg1), arg2);
             }
 
             return null;

@@ -125,7 +125,6 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         }
         catch (Throwable ex)
         {
-            ex.printStackTrace();
             // Ignore, this is a best effort (maybe log it or something).
         }
     }
@@ -150,7 +149,6 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         }
         catch (Throwable ex)
         {
-            ex.printStackTrace();
             // Ignore, this is a best effort (maybe log it or something)
         }
         m_sm = new SecurityManagerEx();
@@ -161,6 +159,15 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                 URL.setURLStreamHandlerFactory(this);
                 m_streamHandlerFactory = this;
                 m_rootURLHandlers = this;
+                // try to flush the cache (gnu/classpath doesn't do it itself)
+                try
+                {
+                    m_secureAction.flush(URL.class, URL.class);
+                }
+                catch (Throwable t)
+                {
+                    // Not much we can do
+                }
             }
             catch (Error err)
             {
@@ -208,6 +215,15 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             {
                 URLConnection.setContentHandlerFactory(this);
                 m_contentHandlerFactory = this;
+                // try to flush the cache (gnu/classpath doesn't do it itself)
+                try
+                {
+                    m_secureAction.flush(URLConnection.class, URLConnection.class);
+                }
+                catch (Throwable t)
+                {
+                    // Not much we can do
+                }
             }
             catch (Error err)
             {
@@ -341,7 +357,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                         (URLStreamHandler) handler.newInstance());
                 }
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 // This could be a class not found exception or an
                 // instantiation exception, not much we can do in either

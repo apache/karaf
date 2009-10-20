@@ -88,9 +88,19 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
     static
     {
+        // pre-init the url sub-system as otherwise we don't work on gnu/classpath
+        ExtensionManager extensionManager = new ExtensionManager();
+        try 
+        {
+            (new URL("http://felix.extensions:9/")).openConnection();
+        }
+        catch (Throwable t)
+        {
+            // This doesn't matter much - we only need the above to init the url subsystem
+        }
+        
         // We use the secure action of Felix to add a new instance to the parent
         // classloader.
-        ExtensionManager extensionManager = new ExtensionManager();
         try
         {
             Felix.m_secureAction.addURLToURLClassLoader(Felix.m_secureAction.createURL(
@@ -98,7 +108,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
                 "http://felix.extensions:9/", extensionManager),
                 Felix.class.getClassLoader());
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             // extension bundles will not be supported.
             extensionManager = null;
@@ -375,7 +385,6 @@ class ExtensionManager extends URLStreamHandler implements IContent
             }
             catch (Throwable ex)
             {
-                ex.printStackTrace();
                 m_logger.log(Logger.LOG_WARNING,
                     "Unable to start Felix Extension Activator", ex);
             }
