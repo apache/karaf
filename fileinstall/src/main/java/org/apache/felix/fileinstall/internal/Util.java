@@ -39,9 +39,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Version;
 import org.osgi.service.log.LogService;
 
 public class Util
@@ -451,11 +449,7 @@ public class Util
 
     private static String getBundleKey(Bundle b)
     {
-        StringBuffer sb = new StringBuffer();
-        sb.append(b.getSymbolicName()).append("_");
-        String version = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
-        sb.append(version != null ? version : Version.emptyVersion.toString());
-        return sb.toString();
+        return Long.toString(b.getBundleId());
     }
 
 }

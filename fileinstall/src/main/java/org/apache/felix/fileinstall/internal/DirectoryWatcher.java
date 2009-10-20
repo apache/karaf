@@ -259,12 +259,15 @@ public class DirectoryWatcher extends Thread implements BundleListener
             boolean exists = file.exists();
             Artifact artifact = (Artifact) currentManagedArtifacts.get(file);
             // File has been deleted
-            if (!exists && artifact != null)
+            if (!exists)
             {
-                deleteJaredDirectory(artifact);
-                deleteTransformedFile(artifact);
-                deleted.add(artifact);
+                if (artifact != null) {
+                    deleteJaredDirectory(artifact);
+                    deleteTransformedFile(artifact);
+                    deleted.add(artifact);
+                }
             }
+            // File exists
             else
             {
                 File jar  = file;
@@ -295,7 +298,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     }
                 }
                 // File has been modified
-                if (exists && artifact != null)
+                if (artifact != null)
                 {
                     artifact.setChecksum(scanner.getChecksum(file));
                     // If there's no listener, this is because this artifact has been installed before
@@ -338,7 +341,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     }
                 }
                 // File has been added
-                if (exists && artifact == null)
+                else
                 {
                     // Find the listener
                     ArtifactListener listener = findListener(jar, listeners);
