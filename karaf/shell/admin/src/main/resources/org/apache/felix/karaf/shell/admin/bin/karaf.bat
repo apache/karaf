@@ -18,8 +18,8 @@ REM limitations under the License.
 REM
 REM =========================================================================
 
-SET KARAF_BASE=${karaf.base}
 SETLOCAL
+SET KARAF_BASE=${karaf.base}
 SET KARAF_HOME=${karaf.home}
 
 %KARAF_HOME%\bin\karaf.bat %*
