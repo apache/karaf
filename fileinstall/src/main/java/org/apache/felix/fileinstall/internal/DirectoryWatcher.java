@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -87,6 +88,10 @@ public class DirectoryWatcher extends Thread implements BundleListener
     public final static String START_NEW_BUNDLES = "felix.fileinstall.bundles.new.start";
     public final static String NO_INITIAL_DELAY = "felix.fileinstall.noInitialDelay";
 
+    static final SecureRandom random = new SecureRandom();
+
+    static final File javaIoTmpdir = new File(System.getProperty("java.io.tmpdir"));
+
     Dictionary properties;
     File watchedDirectory;
     File tmpDir;
@@ -120,7 +125,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
         originatingFileName = (String) properties.get(FILENAME);
         watchedDirectory = getFile(properties, DIR, new File("./load"));
         prepareDir(watchedDirectory);
-        tmpDir = getFile(properties, TMPDIR, new File(System.getProperty("java.io.tmpdir"), "fileinstall"));
+        tmpDir = getFile(properties, TMPDIR, null);
+        prepareTempDir();
         startBundles = getBoolean(properties, START_NEW_BUNDLES, true);  // by default, we start bundles.
         filter = (String) properties.get(FILTER);
         noInitialDelay = getBoolean(properties, NO_INITIAL_DELAY, false);
@@ -283,7 +289,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 // Jar up the directory if needed
                 if (file.isDirectory())
                 {
-                    prepareDir(tmpDir);
+                    prepareTempDir();
                     try
                     {
                         jar = new File(tmpDir, file.getName() + ".jar");
@@ -410,7 +416,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
     {
         if (artifact.getListener() instanceof ArtifactTransformer)
         {
-            prepareDir(tmpDir);
+            prepareTempDir();
             try
             {
                 File transformed = ((ArtifactTransformer) artifact.getListener()).transform(artifact.getJaredDirectory(), tmpDir);
@@ -464,6 +470,28 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 && !artifact.getJaredDirectory().delete())
         {
             log("Unable to delete jared artifact: " + artifact.getJaredDirectory().getAbsolutePath(), null);
+        }
+    }
+
+
+    private void prepareTempDir()
+    {
+        if (tmpDir == null)
+        {
+            for (;;)
+            {
+                File f = new File(javaIoTmpdir, "fileinstall-" + Long.toString(random.nextLong()));
+                if (!f.exists() && f.mkdirs())
+                {
+                    tmpDir = f;
+                    System.err.println("Created temp dir at " + tmpDir);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            prepareDir(tmpDir);
         }
     }
 
