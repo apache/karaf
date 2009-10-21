@@ -237,7 +237,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         try {
             // Install everything
             for (Feature f : features) {
-                doInstallFeature(state, f);
+            	try {
+            		doInstallFeature(state, f);
+            	} catch (Exception e) {
+            		LOGGER.error("can't install Feature with name " + f.getName() + " for " + e.getMessage());
+            	}
             }
             // Find bundles to refresh
             boolean print = options.contains(Option.PrintBundlesToRefresh);
