@@ -20,14 +20,20 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import junit.framework.TestCase;
 import org.apache.felix.karaf.features.internal.FeaturesServiceImpl;
 import org.apache.felix.karaf.features.internal.FeatureImpl;
 import org.easymock.EasyMock;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
@@ -42,10 +48,7 @@ public class FeaturesServiceTest extends TestCase {
 
     public void testInstallFeature() throws Exception {
 
-        String name = Bundle.class.getName();
-        name = name.replace(".", "/")  + ".class";
-        name = getClass().getClassLoader().getResource(name).toString();
-        name = name.substring("jar:".length(), name.indexOf('!'));
+        String name = getJarUrl(Bundle.class);
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -130,11 +133,8 @@ public class FeaturesServiceTest extends TestCase {
     }
 
     public void testUninstallFeature() throws Exception {
-    	
-        String name = Bundle.class.getName();
-        name = name.replace(".", "/")  + ".class";
-        name = getClass().getClassLoader().getResource(name).toString();
-        name = name.substring("jar:".length(), name.indexOf('!'));
+
+        String name = getJarUrl(Bundle.class);
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -272,12 +272,9 @@ public class FeaturesServiceTest extends TestCase {
     }    
     
     // Tests Add and Remove Repository
-    public void testAddAndRemoveRepository() throws Exception {        
+    public void testAddAndRemoveRepository() throws Exception {
 
-    	String name = Bundle.class.getName();
-        name = name.replace(".", "/")  + ".class";
-        name = getClass().getClassLoader().getResource(name).toString();
-        name = name.substring("jar:".length(), name.indexOf('!'));        
+        String name = getJarUrl(Bundle.class);
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -349,12 +346,9 @@ public class FeaturesServiceTest extends TestCase {
 
     // Tests installing all features in a repo and uninstalling
     // all features in a repo
-    public void testInstallUninstallAllFeatures() throws Exception {        
+    public void testInstallUninstallAllFeatures() throws Exception {
 
-    	String name = Bundle.class.getName();
-        name = name.replace(".", "/")  + ".class";
-        name = getClass().getClassLoader().getResource(name).toString();
-        name = name.substring("jar:".length(), name.indexOf('!'));        
+        String name = getJarUrl(Bundle.class);
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -556,12 +550,9 @@ public class FeaturesServiceTest extends TestCase {
     // with a feature dependency  
     // The dependant feature is in the same repository 
     // Tests uninstall of features
-    public void testInstallFeatureWithDependantFeatures() throws Exception {          
+    public void testInstallFeatureWithDependantFeatures() throws Exception {
 
-    	String name = Bundle.class.getName();
-        name = name.replace(".", "/")  + ".class";
-        name = getClass().getClassLoader().getResource(name).toString();
-        name = name.substring("jar:".length(), name.indexOf('!'));        
+        String name = getJarUrl(Bundle.class);
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -673,11 +664,11 @@ public class FeaturesServiceTest extends TestCase {
         expect(prefs.node("repositories")).andReturn(repositoriesNode);
         repositoriesNode.clear();
         repositoriesNode.putInt("count", 0);
-        repositoriesNode.put("item.0", uri.toString());        
+        repositoriesNode.put("item.0", uri.toString());
         expect(prefs.node("features")).andReturn(featuresNode);
-        featuresNode.clear();        
+        featuresNode.clear();
         prefs.putBoolean("bootFeaturesInstalled", false);
-        prefs.flush();                        
+        prefs.flush();
         
         replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
 
@@ -692,6 +683,304 @@ public class FeaturesServiceTest extends TestCase {
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f2", "0.1");
         
+    }
+
+    public void testInstallBatchFeatureWithContinueOnFailureNoClean() throws Exception {
+        String bundle1 = getJarUrl(Bundle.class);
+        String bundle2 = getJarUrl(PreferencesService.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name='f1'>");
+        pw.println("    <bundle>" + bundle1 + "</bundle>");
+        pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name='f2'>");
+        pw.println("    <bundle>" + bundle2 + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        // loads the state
+        Preferences prefs = EasyMock.createMock(Preferences.class);
+        PreferencesService preferencesService = EasyMock.createMock(PreferencesService.class);
+        Preferences repositoriesNode = EasyMock.createMock(Preferences.class);
+        Preferences repositoriesAvailableNode = EasyMock.createMock(Preferences.class);
+        Preferences featuresNode = EasyMock.createMock(Preferences.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
+        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // savestate from addRepository
+        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
+        expect(prefs.node("repositories")).andReturn(repositoriesNode);
+        repositoriesNode.clear();
+        repositoriesNode.putInt("count", 1);
+        repositoriesNode.put("item.0", uri.toString());
+        expect(prefs.node("features")).andReturn(featuresNode);
+        featuresNode.clear();
+        prefs.putBoolean("bootFeaturesInstalled", false);
+        prefs.flush();
+
+        // Installs feature f1 and f2
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
+        expect(installedBundle1.getBundleId()).andReturn(12345L);
+
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
+        expect(installedBundle2.getBundleId()).andReturn(54321L);
+        expect(installedBundle2.getHeaders()).andReturn(new Hashtable());
+        installedBundle2.start();
+
+        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
+        expect(prefs.node("repositories")).andReturn(repositoriesNode);
+        repositoriesNode.clear();
+        repositoriesNode.putInt("count", 1);
+        repositoriesNode.put("item.0", uri.toString());
+        expect(prefs.node("features")).andReturn(featuresNode);
+        featuresNode.clear();
+        featuresNode.put("f2" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + "0.0.0", "54321");
+        prefs.putBoolean("bootFeaturesInstalled", false);
+        prefs.flush();
+
+        replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setPreferences(preferencesService);
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        svc.installFeatures(new CopyOnWriteArraySet<Feature>(Arrays.asList(svc.listFeatures())),
+                            EnumSet.of(FeaturesService.Option.ContinueBatchOnFailure, FeaturesService.Option.NoCleanIfFailure));
+
+        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+    }
+
+    public void testInstallBatchFeatureWithContinueOnFailureClean() throws Exception {
+        String bundle1 = getJarUrl(Bundle.class);
+        String bundle2 = getJarUrl(PreferencesService.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name='f1'>");
+        pw.println("    <bundle>" + bundle1 + "</bundle>");
+        pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name='f2'>");
+        pw.println("    <bundle>" + bundle2 + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        // loads the state
+        Preferences prefs = EasyMock.createMock(Preferences.class);
+        PreferencesService preferencesService = EasyMock.createMock(PreferencesService.class);
+        Preferences repositoriesNode = EasyMock.createMock(Preferences.class);
+        Preferences repositoriesAvailableNode = EasyMock.createMock(Preferences.class);
+        Preferences featuresNode = EasyMock.createMock(Preferences.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
+        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // savestate from addRepository
+        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
+        expect(prefs.node("repositories")).andReturn(repositoriesNode);
+        repositoriesNode.clear();
+        repositoriesNode.putInt("count", 1);
+        repositoriesNode.put("item.0", uri.toString());
+        expect(prefs.node("features")).andReturn(featuresNode);
+        featuresNode.clear();
+        prefs.putBoolean("bootFeaturesInstalled", false);
+        prefs.flush();
+
+        // Installs feature f1 and f2
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
+        expect(installedBundle1.getBundleId()).andReturn(12345L);
+        installedBundle1.uninstall();
+
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
+        expect(installedBundle2.getBundleId()).andReturn(54321L);
+        expect(installedBundle2.getHeaders()).andReturn(new Hashtable());
+        installedBundle2.start();
+
+        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
+        expect(prefs.node("repositories")).andReturn(repositoriesNode);
+        repositoriesNode.clear();
+        repositoriesNode.putInt("count", 1);
+        repositoriesNode.put("item.0", uri.toString());
+        expect(prefs.node("features")).andReturn(featuresNode);
+        featuresNode.clear();
+        featuresNode.put("f2" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + "0.0.0", "54321");
+        prefs.putBoolean("bootFeaturesInstalled", false);
+        prefs.flush();
+
+        replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setPreferences(preferencesService);
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        svc.installFeatures(new CopyOnWriteArraySet<Feature>(Arrays.asList(svc.listFeatures())),
+                            EnumSet.of(FeaturesService.Option.ContinueBatchOnFailure));
+
+        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+    }
+
+    public void testInstallBatchFeatureWithoutContinueOnFailureNoClean() throws Exception {
+        String bundle1 = getJarUrl(Bundle.class);
+        String bundle2 = getJarUrl(PreferencesService.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name='f1'>");
+        pw.println("    <bundle>" + bundle1 + "</bundle>");
+        pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name='f2'>");
+        pw.println("    <bundle>" + bundle2 + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        // loads the state
+        Preferences prefs = EasyMock.createMock(Preferences.class);
+        PreferencesService preferencesService = EasyMock.createMock(PreferencesService.class);
+        Preferences repositoriesNode = EasyMock.createMock(Preferences.class);
+        Preferences repositoriesAvailableNode = EasyMock.createMock(Preferences.class);
+        Preferences featuresNode = EasyMock.createMock(Preferences.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
+        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // savestate from addRepository
+        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
+        expect(prefs.node("repositories")).andReturn(repositoriesNode);
+        repositoriesNode.clear();
+        repositoriesNode.putInt("count", 1);
+        repositoriesNode.put("item.0", uri.toString());
+        expect(prefs.node("features")).andReturn(featuresNode);
+        featuresNode.clear();
+        prefs.putBoolean("bootFeaturesInstalled", false);
+        prefs.flush();
+
+        // Installs feature f1 and f2
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
+        expect(installedBundle1.getBundleId()).andReturn(12345L);
+
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
+        expect(installedBundle2.getBundleId()).andReturn(54321L);
+        installedBundle2.start();
+
+        replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setPreferences(preferencesService);
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        try {
+            List<Feature> features = Arrays.asList(svc.listFeatures());
+            Collections.reverse(features);
+            svc.installFeatures(new CopyOnWriteArraySet<Feature>(features),
+                                EnumSet.of(FeaturesService.Option.NoCleanIfFailure));
+            fail("Call should have thrown an exception");
+        } catch (MalformedURLException e) {
+        }
+
+        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+    }
+
+    public void testInstallBatchFeatureWithoutContinueOnFailureClean() throws Exception {
+        String bundle1 = getJarUrl(Bundle.class);
+        String bundle2 = getJarUrl(PreferencesService.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name='f1'>");
+        pw.println("    <bundle>" + bundle1 + "</bundle>");
+        pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name='f2'>");
+        pw.println("    <bundle>" + bundle2 + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        // loads the state
+        Preferences prefs = EasyMock.createMock(Preferences.class);
+        PreferencesService preferencesService = EasyMock.createMock(PreferencesService.class);
+        Preferences repositoriesNode = EasyMock.createMock(Preferences.class);
+        Preferences repositoriesAvailableNode = EasyMock.createMock(Preferences.class);
+        Preferences featuresNode = EasyMock.createMock(Preferences.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
+        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // savestate from addRepository
+        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
+        expect(prefs.node("repositories")).andReturn(repositoriesNode);
+        repositoriesNode.clear();
+        repositoriesNode.putInt("count", 1);
+        repositoriesNode.put("item.0", uri.toString());
+        expect(prefs.node("features")).andReturn(featuresNode);
+        featuresNode.clear();
+        prefs.putBoolean("bootFeaturesInstalled", false);
+        prefs.flush();
+
+        // Installs feature f1 and f2
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(eq(bundle1), isA(InputStream.class))).andReturn(installedBundle1);
+        expect(installedBundle1.getBundleId()).andReturn(12345L);
+        installedBundle1.uninstall();
+
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
+        expect(installedBundle2.getBundleId()).andReturn(54321L);
+        installedBundle2.uninstall();
+
+        replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setPreferences(preferencesService);
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        try {
+            List<Feature> features = Arrays.asList(svc.listFeatures());
+            Collections.reverse(features);
+            svc.installFeatures(new CopyOnWriteArraySet<Feature>(features),
+                                EnumSet.noneOf(FeaturesService.Option.class));
+            fail("Call should have thrown an exception");
+        } catch (MalformedURLException e) {
+        }
+
+        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+    }
+
+    private String getJarUrl(Class cl) {
+        String name = cl.getName();
+        name = name.replace(".", "/")  + ".class";
+        name = getClass().getClassLoader().getResource(name).toString();
+        name = name.substring("jar:".length(), name.indexOf('!'));
+        return name;
     }
 
 }
