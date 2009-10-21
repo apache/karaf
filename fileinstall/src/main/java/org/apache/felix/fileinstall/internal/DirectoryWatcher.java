@@ -903,6 +903,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
             // if the listener is an url transformer
             else if (artifact.getListener() instanceof ArtifactUrlTransformer)
             {
+                URL transformed = artifact.getTransformedUrl();
                 bundle = context.getBundle(artifact.getBundleId());
                 if (bundle == null)
                 {
@@ -913,7 +914,15 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     return null;
                 }
                 Util.storeChecksum(bundle, artifact.getChecksum(), context);
-                bundle.update();
+                InputStream in = (transformed != null) ? transformed.openStream() : new FileInputStream(path);
+                try
+                {
+                    bundle.update(in);
+                }
+                finally
+                {
+                    in.close();
+                }
             }
             // else we need to ask for an update on the bundle
             else if (artifact.getListener() instanceof ArtifactTransformer)
