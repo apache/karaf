@@ -120,7 +120,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
         originatingFileName = (String) properties.get(FILENAME);
         watchedDirectory = getFile(properties, DIR, new File("./load"));
         prepareDir(watchedDirectory);
-        tmpDir = getFile(properties, TMPDIR, new File("./tmp"));
+        tmpDir = getFile(properties, TMPDIR, new File(System.getProperty("java.io.tmpdir"), "fileinstall"));
         startBundles = getBoolean(properties, START_NEW_BUNDLES, true);  // by default, we start bundles.
         filter = (String) properties.get(FILTER);
         noInitialDelay = getBoolean(properties, NO_INITIAL_DELAY, false);

@@ -183,8 +183,8 @@ public class DirectoryWatcherTest extends TestCase
             "src" + File.separatorChar + "test" + File.separatorChar + "resources" ) );
         assertEquals( "Default POLL parameter correctly read", 2000l, dw.poll );
         assertEquals( "Default DEBUG parameter correctly read", -1l, dw.debug );
-        assertTrue( "Default TMPDIR parameter correctly read", dw.tmpDir.getAbsolutePath().endsWith(
-            File.separatorChar + "tmp" ) );
+        assertTrue( "Default TMPDIR parameter correctly read", dw.tmpDir.getAbsolutePath().equals(
+                new File(System.getProperty("java.io.tmpdir"), "fileinstall").getAbsolutePath()) );
         assertEquals( "Default START_NEW_BUNDLES parameter correctly read", true, dw.startBundles );
         assertEquals( "Default FILTER parameter correctly read", null, dw.filter );
     }
