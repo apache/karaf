@@ -29,6 +29,7 @@ public interface FeaturesService {
         NoCleanIfFailure,
         PrintBundlesToRefresh,
         NoAutoRefreshBundles,
+        ContinueBatchOnFailure
     }
 
     void addRepository(URI url) throws Exception;

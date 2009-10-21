@@ -234,13 +234,25 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
         InstallationState state = new InstallationState();
+        InstallationState failure = new InstallationState();
         try {
             // Install everything
             for (Feature f : features) {
+                InstallationState s = new InstallationState();
             	try {
-            		doInstallFeature(state, f);
+                    doInstallFeature(s, f);
+                    state.bundles.addAll(s.bundles);
+                    state.features.putAll(s.features);
+                    state.installed.addAll(s.installed);
             	} catch (Exception e) {
-            		LOGGER.error("can't install Feature with name " + f.getName() + " for " + e.getMessage());
+                    failure.bundles.addAll(s.bundles);
+                    failure.features.putAll(s.features);
+                    failure.installed.addAll(s.installed);
+                    if (options.contains(Option.ContinueBatchOnFailure)) {
+                        LOGGER.info("Error when installing feature {}: {}", f.getName(), e);
+                    } else {
+                        throw e;
+                    }
             	}
             }
             // Find bundles to refresh
@@ -284,11 +296,29 @@ public class FeaturesServiceImpl implements FeaturesService {
                     }
                 }
             }
+            // Clean up for batch
+            if (!options.contains(Option.NoCleanIfFailure)) {
+                failure.installed.removeAll(state.bundles);
+                for (Bundle b : failure.installed) {
+                    try {
+                        b.uninstall();
+                    } catch (Exception e2) {
+                        // Ignore
+                    }
+                }
+            }
         } catch (Exception e) {
             // cleanup on error
             if (!options.contains(Option.NoCleanIfFailure)) {
                 // Uninstall everything
                 for (Bundle b : state.installed) {
+                    try {
+                        b.uninstall();
+                    } catch (Exception e2) {
+                        // Ignore
+                    }
+                }
+                for (Bundle b : failure.installed) {
                     try {
                         b.uninstall();
                     } catch (Exception e2) {
@@ -630,7 +660,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                         }
                     }
                     try {
-                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure));
+                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
                     } catch (Exception e) {
                         LOGGER.error("Error installing boot features", e);
                     }
