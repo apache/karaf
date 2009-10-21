@@ -117,7 +117,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Synchr
     public void bundleChanged(BundleEvent bundleEvent) {
         try {
             Bundle bundle = bundleEvent.getBundle();
-            if (bundleEvent.getType() == BundleEvent.INSTALLED) {
+            if (bundleEvent.getType() == BundleEvent.RESOLVED) {
                 Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                 while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                     URL url = (URL) featuresUrlEnumeration.nextElement();
