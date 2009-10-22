@@ -152,6 +152,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
     if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8    
     rem Execute the Java Virtual Machine
+    cd %KARAF_BASE% 
     "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dstorage.location="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" org.apache.felix.karaf.main.Bootstrap %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
