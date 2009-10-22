@@ -53,8 +53,7 @@ public class ManifestParser
         m_headerMap = headerMap;
 
         // Verify that only manifest version 2 is specified.
-        String manifestVersion = (String) m_headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
-        manifestVersion = (manifestVersion == null) ? null : manifestVersion.trim();
+        String manifestVersion = getManifestVersion(m_headerMap);
         if ((manifestVersion != null) && !manifestVersion.equals("2"))
         {
             throw new BundleException(
@@ -113,27 +112,6 @@ public class ManifestParser
         }
 
         //
-        // Parse Fragment-Host.
-        //
-        Object[][][] clauses = parseStandardHeader(
-            (String) headerMap.get(Constants.FRAGMENT_HOST));
-        if (clauses.length > 0)
-        {
-            try
-            {
-                reqList.add(
-                    new Requirement(
-                        ICapability.HOST_NAMESPACE,
-                        "(" + Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE
-                            + "=" + clauses[0][CLAUSE_PATHS_INDEX][0] + ")"));
-            }
-            catch (InvalidSyntaxException ex)
-            {
-                ex.printStackTrace();
-            }
-        }
-
-        //
         // Parse Export-Package.
         //
 
@@ -158,6 +136,16 @@ public class ManifestParser
 
         // Create an array of all capabilities.
         m_capabilities = (ICapability[]) capList.toArray(new ICapability[capList.size()]);
+
+        //
+        // Parse Fragment-Host.
+        //
+
+        IRequirement req = parseFragmentHost(m_logger, m_headerMap);
+        if (req != null)
+        {
+            reqList.add(req);
+        }
 
         //
         // Parse Require-Bundle
@@ -274,8 +262,14 @@ public class ManifestParser
 
     public String getManifestVersion()
     {
-        String manifestVersion = (String) m_headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
-        return (manifestVersion == null) ? "1" : manifestVersion.trim();
+        String manifestVersion = getManifestVersion(m_headerMap);
+        return (manifestVersion == null) ? "1" : manifestVersion;
+    }
+
+    private static String getManifestVersion(Map headerMap)
+    {
+        String manifestVersion = (String) headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
+        return (manifestVersion == null) ? null : manifestVersion.trim();
     }
 
     public int getActivationPolicy()
@@ -865,7 +859,8 @@ public class ManifestParser
                 catch (RuntimeException ex)
                 {
                     // R4 bundle versions must parse, R3 bundle version may not.
-                    if (((String) headerMap.get(Constants.BUNDLE_MANIFESTVERSION)).equals("2"))
+                    String mv = getManifestVersion(headerMap);
+                    if (mv != null)
                     {
                         throw ex;
                     }
@@ -888,6 +883,70 @@ public class ManifestParser
         }
 
         return null;
+    }
+
+    private static IRequirement parseFragmentHost(Logger logger, Map headerMap)
+        throws BundleException
+    {
+        IRequirement req = null;
+
+        String mv = getManifestVersion(headerMap);
+        if ((mv != null) && mv.equals("2"))
+        {
+            Object[][][] clauses = parseStandardHeader(
+                (String) headerMap.get(Constants.FRAGMENT_HOST));
+            if (clauses.length > 0)
+            {
+                // Make sure that only one fragment host symbolic name is specified.
+                if (clauses.length > 1)
+                {
+                    throw new BundleException(
+                        "Fragments cannot have multiple hosts: "
+                            + headerMap.get(Constants.FRAGMENT_HOST));
+                }
+                else if (clauses[0][CLAUSE_PATHS_INDEX].length > 1)
+                {
+                    throw new BundleException(
+                        "Fragments cannot have multiple hosts: "
+                            + headerMap.get(Constants.FRAGMENT_HOST));
+                }
+
+                // If the bundle version matching attribute is specified, then
+                // convert it to the proper type.
+                for (int attrIdx = 0;
+                    attrIdx < clauses[0][CLAUSE_ATTRIBUTES_INDEX].length;
+                    attrIdx++)
+                {
+                    R4Attribute attr = (R4Attribute) clauses[0][CLAUSE_ATTRIBUTES_INDEX][attrIdx];
+                    if (attr.getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE))
+                    {
+                        clauses[0][CLAUSE_ATTRIBUTES_INDEX][attrIdx] =
+                            new R4Attribute(
+                                Constants.BUNDLE_VERSION_ATTRIBUTE,
+                                VersionRange.parse(attr.getValue().toString()),
+                                attr.isMandatory());
+                    }
+                }
+
+                // Prepend the host symbolic name to the array of attributes.
+                R4Attribute[] attrs = (R4Attribute[]) clauses[0][CLAUSE_ATTRIBUTES_INDEX];
+                R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
+                newAttrs[0] = new R4Attribute(
+                    Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE,
+                    clauses[0][CLAUSE_PATHS_INDEX][0], false);
+                System.arraycopy(attrs, 0, newAttrs, 1, attrs.length);
+
+                req = new Requirement(ICapability.HOST_NAMESPACE,
+                    (R4Directive[]) clauses[0][CLAUSE_DIRECTIVES_INDEX],
+                    newAttrs);
+            }
+        }
+        else
+        {
+            logger.log(Logger.LOG_WARNING, "Only R4 bundles can be fragments.");
+        }
+
+        return req;
     }
 
     public static ICapability[] parseExportHeader(
