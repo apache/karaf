@@ -205,8 +205,10 @@
                             *
                         </Import-Package>
                         <Private-Package>
+                            org.apache.felix.karaf.admin.bin,
+                            org.apache.felix.karaf.admin.etc,
                             org.apache.felix.karaf.admin.internal,
-                            org.apache.felix.karaf.jpm.impl
+                            org.apache.felix.karaf.jpm.impl,
                         </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

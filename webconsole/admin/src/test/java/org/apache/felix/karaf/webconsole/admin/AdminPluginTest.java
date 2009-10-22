@@ -30,9 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
-import org.apache.felix.karaf.shell.admin.AdminService;
-import org.apache.felix.karaf.shell.admin.Instance;
-import org.apache.felix.karaf.shell.admin.InstanceSettings;
+import org.apache.felix.karaf.admin.AdminService;
+import org.apache.felix.karaf.admin.Instance;
+import org.apache.felix.karaf.admin.InstanceSettings;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 
