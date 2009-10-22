@@ -36,6 +36,7 @@
     <modules>
         <module>main</module>
         <module>features</module>
+        <module>admin</module>
         <module>deployer</module>
         <module>shell</module>
         <module>jaas</module>
@@ -217,6 +218,21 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.felix.karaf.admin</groupId>
+                <artifactId>org.apache.felix.karaf.admin.core</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.admin</groupId>
+                <artifactId>org.apache.felix.karaf.admin.command</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.admin</groupId>
+                <artifactId>org.apache.felix.karaf.admin.management</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.felix.karaf.shell</groupId>
                 <artifactId>org.apache.felix.karaf.shell.core</artifactId>
                 <version>${pom.version}</version>
@@ -234,6 +250,11 @@
             <dependency>
                 <groupId>org.apache.felix.karaf.shell</groupId>
                 <artifactId>org.apache.felix.karaf.shell.admin</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.admin.management</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>

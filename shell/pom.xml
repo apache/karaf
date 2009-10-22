@@ -33,7 +33,6 @@
     <name>Apache Felix Karaf :: Shell</name>
 
     <modules>
-        <module>admin</module>
         <module>commands</module>
         <module>config</module>
         <module>console</module>

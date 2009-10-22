@@ -180,6 +180,17 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>org/apache/felix/karaf/admin/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.felix.karaf.admin:org.apache.felix.karaf.admin.core</include>
+                <include>org.apache.felix.karaf.admin:org.apache.felix.karaf.admin.command</include>
+                <include>org.apache.felix.karaf.admin:org.apache.felix.karaf.admin.management</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/apache/felix/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.spring</include>
@@ -194,7 +205,6 @@
             <outputFileNameMapping>org/apache/felix/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console</include>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.admin</include>
                 <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.osgi</include>
                 <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.log</include>
                 <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.config</include>
