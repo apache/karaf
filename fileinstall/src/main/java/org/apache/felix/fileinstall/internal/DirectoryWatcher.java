@@ -484,7 +484,6 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 if (!f.exists() && f.mkdirs())
                 {
                     tmpDir = f;
-                    System.err.println("Created temp dir at " + tmpDir);
                     break;
                 }
             }
