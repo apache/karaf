@@ -20,7 +20,7 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:cm="http://geronimo.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0">
 
-    <reference id="adminService" interface="org.apache.felix.karaf.shell.admin.AdminService" />
+    <reference id="adminService" interface="org.apache.felix.karaf.admin.AdminService" />
 
     <bean id="adminPlugin" class="org.apache.felix.karaf.webconsole.admin.AdminPlugin" init-method="start" destroy-method="stop">
         <property name="adminService" ref="adminService" />
