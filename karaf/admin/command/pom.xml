@@ -85,6 +85,7 @@
                         <Export-Package>${pom.artifactId}*;version=${pom.version}</Export-Package>
                         <Import-Package>
                             !${pom.artifactId}*,
+                            !org.apache.felix.karaf.admin.internal,
                             javax.management,
                             javax.management.loading,
                             org.osgi.service.command,
@@ -92,7 +93,9 @@
                             org.apache.felix.karaf.shell.console,
                             *
                         </Import-Package>
-                        <Private-Package>!*</Private-Package>
+                        <Private-Package>
+                            org.apache.felix.karaf.admin.main
+                        </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
