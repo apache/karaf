@@ -173,18 +173,20 @@ function printTextArea(/* Element */ parent, props )
         propsValue += key + ' =  ' + props[key] + '\r\n';
     }
 
-    return tr( "content", null, [
-        td( "content aligntop", null, [
-            text( "Properties" )
-        ]),
-        td( "content", { style: { width: "99%" } }, [
-            createElement( "textarea", null, {
-                    name: "properties",
-                    style: { height: "50%", width: "99%" }
-                }, [ text( propsValue ) ] ),
-            text( "Enter Name-Value pairs of configuration properties" )
+    parent.appendChild(
+        tr( "content", null, [
+            td( "content aligntop", null, [
+                text( "Properties" )
+            ]),
+            td( "content", { style: { width: "99%" } }, [
+                createElement( "textarea", null, {
+                        name: "properties",
+                        style: { height: "50%", width: "99%" }
+                    }, [ text( propsValue ) ] ),
+                text( "Enter Name-Value pairs of configuration properties" )
+            ])
         ])
-    ]);        
+    );        
 }
 
 function printForm( /* Element */ parent, obj ) {

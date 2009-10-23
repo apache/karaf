@@ -373,7 +373,7 @@ public class ConfigManager extends ConfigManagerBase
         {
             // start with ManagedService instances
             SortedMap optionsPlain = getServices( ManagedService.class.getName(), pidFilter, locale, true );
-            
+
             // next are the MetaType informations without ManagedService
             addMetaTypeNames( optionsPlain, getPidObjectClasses( locale ), pidFilter, Constants.SERVICE_PID );
 
@@ -403,10 +403,7 @@ public class ConfigManager extends ConfigManagerBase
                     name = pid;
                 }
 
-                if ( ocd != null )
-                {
-                    optionsPlain.put( pid, name );
-                }
+                optionsPlain.put( pid, name );
             }
 
             printOptionsForm( pw, optionsPlain, "configSelection_pid", "configure", "Configure" );
@@ -758,21 +755,30 @@ public class ConfigManager extends ConfigManagerBase
         }
         else
         {
+            // if the configuration is bound to a bundle location which
+            // is not related to an installed bundle, we just print the
+            // raw bundle location binding
             Bundle bundle = this.getBundle( config.getBundleLocation() );
-
-            Dictionary headers = bundle.getHeaders( locale );
-            String name = ( String ) headers.get( Constants.BUNDLE_NAME );
-            if ( name == null )
+            if ( bundle == null )
             {
-                location = bundle.getSymbolicName();
+                location = config.getBundleLocation();
             }
             else
             {
-                location = name + " (" + bundle.getSymbolicName() + ")";
-            }
+                Dictionary headers = bundle.getHeaders( locale );
+                String name = ( String ) headers.get( Constants.BUNDLE_NAME );
+                if ( name == null )
+                {
+                    location = bundle.getSymbolicName();
+                }
+                else
+                {
+                    location = name + " (" + bundle.getSymbolicName() + ")";
+                }
 
-            Version v = Version.parseVersion( ( String ) headers.get( Constants.BUNDLE_VERSION ) );
-            location += ", Version " + v.toString();
+                Version v = Version.parseVersion( ( String ) headers.get( Constants.BUNDLE_VERSION ) );
+                location += ", Version " + v.toString();
+            }
         }
         json.key( "bundleLocation" );
         json.value( location );

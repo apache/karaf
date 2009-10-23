@@ -91,7 +91,7 @@ abstract class ConfigManagerBase extends BaseWebConsolePlugin
      * returned by the <code>idGetter</code>. Depending on the
      * <code>idGetter</code> implementation this will be for factory PIDs or
      * plain PIDs.
-     * 
+     *
      * @param idGetter The {@link IdGetter} used to get the list of factory PIDs
      *          or PIDs from <code>MetaTypeInformation</code> objetcs.
      * @param locale The name of the locale to get the object class definitions
@@ -127,43 +127,43 @@ abstract class ConfigManagerBase extends BaseWebConsolePlugin
 
     protected ObjectClassDefinition getObjectClassDefinition( Configuration config, String locale )
     {
-
-        // if the configuration is not bound, search in the bundles
-        if ( config.getBundleLocation() == null )
-        {
-            // if the configuration is a factory one, use the factory PID
-            if ( config.getFactoryPid() != null )
-            {
-                return this.getObjectClassDefinition( config.getFactoryPid(), locale );
-            }
-
-            // otherwise use the configuration PID
-            return this.getObjectClassDefinition( config.getPid(), locale );
-        }
-
-        MetaTypeService mts = this.getMetaTypeService();
-        if ( mts != null )
+        // if the configuration is bound, try to get the object class
+        // definition from the bundle installed from the given location
+        if ( config.getBundleLocation() != null )
         {
             Bundle bundle = this.getBundle( config.getBundleLocation() );
             if ( bundle != null )
             {
-                MetaTypeInformation mti = mts.getMetaTypeInformation( bundle );
-                if ( mti != null )
+                MetaTypeService mts = this.getMetaTypeService();
+                if ( mts != null )
                 {
-                    // check by factory PID
-                    if ( config.getFactoryPid() != null )
+                    MetaTypeInformation mti = mts.getMetaTypeInformation( bundle );
+                    if ( mti != null )
                     {
-                        return mti.getObjectClassDefinition( config.getFactoryPid(), locale );
-                    }
+                        // check by factory PID
+                        if ( config.getFactoryPid() != null )
+                        {
+                            return mti.getObjectClassDefinition( config.getFactoryPid(), locale );
+                        }
 
-                    // otherwise check by configuration PID
-                    return mti.getObjectClassDefinition( config.getPid(), locale );
+                        // otherwise check by configuration PID
+                        return mti.getObjectClassDefinition( config.getPid(), locale );
+                    }
                 }
             }
         }
 
-        // fallback to nothing found
-        return null;
+        // get here if the configuration is not bound or if no
+        // bundle with the bound location is installed. We search
+        // all bundles for a matching [factory] PID
+        // if the configuration is a factory one, use the factory PID
+        if ( config.getFactoryPid() != null )
+        {
+            return this.getObjectClassDefinition( config.getFactoryPid(), locale );
+        }
+
+        // otherwise use the configuration PID
+        return this.getObjectClassDefinition( config.getPid(), locale );
     }
 
 
@@ -269,7 +269,7 @@ abstract class ConfigManagerBase extends BaseWebConsolePlugin
      * The <code>IdGetter</code> interface is an internal helper to abstract
      * retrieving object class definitions from all bundles for either
      * pids or factory pids.
-     * 
+     *
      * @see #PID_GETTER
      * @see #FACTORY_PID_GETTER
      */
@@ -278,10 +278,10 @@ abstract class ConfigManagerBase extends BaseWebConsolePlugin
         String[] getIds( MetaTypeInformation metaTypeInformation );
     }
 
-    /** 
+    /**
      * The implementation of the {@link IdGetter} interface returning the PIDs
      * listed in the meta type information.
-     * 
+     *
      * @see #getPidObjectClasses(String)
      */
     private static final IdGetter PID_GETTER = new IdGetter()
@@ -292,10 +292,10 @@ abstract class ConfigManagerBase extends BaseWebConsolePlugin
         }
     };
 
-    /** 
+    /**
      * The implementation of the {@link IdGetter} interface returning the
      * factory PIDs listed in the meta type information.
-     * 
+     *
      * @see #getFactoryPidObjectClasses(String)
      */
     private static final IdGetter FACTORY_PID_GETTER = new IdGetter()
