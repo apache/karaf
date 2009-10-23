@@ -19,16 +19,18 @@ package org.apache.felix.karaf.admin.internal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-
+import org.apache.felix.karaf.admin.Instance;
 import org.apache.felix.karaf.admin.InstanceSettings;
 
 public class AdminServiceImplTest extends TestCase {
+
     public void testHandleFeatures() throws Exception {
         AdminServiceImpl as = new AdminServiceImpl();
         
@@ -61,4 +63,34 @@ public class AdminServiceImplTest extends TestCase {
             f.delete();
         }
     }
+
+    /**
+     * Ensure the admin:create generates all the required configuration files
+     * //TODO: fix this test so it can run in an IDE
+     */
+    public void testConfigurationFiles() throws Exception {
+        AdminServiceImpl service = new AdminServiceImpl();
+        service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
+
+        InstanceSettings settings = new InstanceSettings(8122, getName(), null, null);
+        Instance instance = service.createInstance(getName(), settings);
+
+        assertFileExists(instance.getLocation(), "etc/config.properties");
+        assertFileExists(instance.getLocation(), "etc/users.properties");
+        assertFileExists(instance.getLocation(), "etc/startup.properties");
+
+        assertFileExists(instance.getLocation(), "etc/java.util.logging.properties");
+        assertFileExists(instance.getLocation(), "etc/org.apache.felix.karaf.features.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.apache.felix.fileinstall-deploy.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.apache.felix.karaf.log.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.apache.felix.karaf.management.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
+    }
+
+    private void assertFileExists(String path, String name) throws IOException {
+        File file = new File(path, name);
+        assertTrue("Expected " + file.getCanonicalPath() + " to exist",
+                   file.exists());
+    }   
 }
