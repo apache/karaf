@@ -119,10 +119,6 @@ public class GrepAction extends OsgiCommandSupport {
             while ((line = readLine(r)) != null) {
                 if (p.matcher(line).matches() ^ invertMatch) {
 
-                    if (!count && lineNumber) {
-                        System.out.print(String.format("%6d  ", lineno++));
-                    }
-
                     Matcher matcher2 = p2.matcher(line);
                     StringBuffer sb = new StringBuffer();
                     while (matcher2.find()) {
@@ -138,9 +134,12 @@ public class GrepAction extends OsgiCommandSupport {
                         nb++;
                     }
                     matcher2.appendTail(sb);
-					lines.add(sb.toString());
+                    if (!count && lineNumber) {
+                        lines.add(String.format("%6d  ", lineno) + sb.toString());
+                    } else {
+                        lines.add(sb.toString());
+                    }
 					lineMatch = lines.size();
-                    lineno++;
                 } else {
                     if (lineMatch != 0 & lineMatch + after + before <= lines.size()) {
                         if (!count) {
@@ -163,6 +162,7 @@ public class GrepAction extends OsgiCommandSupport {
                         lines.remove(0);
                     }
                 }
+                lineno++;
             }
             if (!count && lineMatch > 0) {
                 if (!firstPrint && before + after > 0) {
