@@ -100,11 +100,15 @@ public class GrepAction extends OsgiCommandSupport {
         } else {
             regexp = ".*" + regexp + ".*";
         }
+        Pattern p;
+        Pattern p2;
         if (ignoreCase) {
-            regexp = regexp.toUpperCase();
+            p = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE);
+            p2 = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        } else {
+            p = Pattern.compile(regexp);
+            p2 = Pattern.compile(regex);
         }
-        Pattern p = Pattern.compile(regexp);
-        Pattern p2 = Pattern.compile(regex);
         try {
             boolean firstPrint = true;
             int nb = 0;
@@ -113,14 +117,13 @@ public class GrepAction extends OsgiCommandSupport {
             int lineMatch = 0;
             Reader r = new InputStreamReader(System.in);
             while ((line = readLine(r)) != null) {
-                String pattern = ignoreCase ? line.toUpperCase() : line;
-                if (p.matcher(pattern).matches() ^ invertMatch) {
+                if (p.matcher(line).matches() ^ invertMatch) {
 
                     if (!count && lineNumber) {
                         System.out.print(String.format("%6d  ", lineno++));
                     }
 
-                    Matcher matcher2 = p2.matcher(pattern);
+                    Matcher matcher2 = p2.matcher(line);
                     StringBuffer sb = new StringBuffer();
                     while (matcher2.find()) {
                         if (!invertMatch && color != ColorOption.never) {
