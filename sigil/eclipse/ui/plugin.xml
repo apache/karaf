@@ -119,7 +119,7 @@
             allowMultiple="false"
             category="org.apache.felix.sigil.ui.views"
             class="org.apache.felix.sigil.ui.eclipse.ui.views.resolution.BundleResolverView"
-            icon="icons/jar_web_obj.png"
+            icon="icons/bundle-graph.gif"
             id="org.apache.felix.sigil.ui.bundleDependencyView"
             name="Bundle Dependency View"
             restorable="true">
@@ -128,7 +128,7 @@
             allowMultiple="false"
             category="org.apache.felix.sigil.ui.views"
             class="org.apache.felix.sigil.ui.eclipse.ui.views.RepositoryViewPart"
-            icon="icons/jars_obj.png"
+            icon="icons/repository.gif"
             id="org.apache.felix.sigil.ui.repositoryBrowser"
             name="Repository Browser"
             restorable="true">
