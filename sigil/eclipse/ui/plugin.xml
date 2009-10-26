@@ -81,7 +81,7 @@
             class="org.apache.felix.sigil.ui.eclipse.ui.editors.project.SigilProjectEditorPart"
             default="true"
             filenames="sigil.properties"
-            icon="etc/images/newton.png"
+            icon="icons/logo16x16.gif"
             id="org.apache.felix.sigil.editors.SigilProjectEditor"
             name="Sigil Project Editor"/>
    </extension>
@@ -101,7 +101,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.apache.felix.sigil.ui.eclipse.ui.perspective.SigilPerspectiveFactory"
-            icon="etc/images/newton.png"
+            icon="icons/logo16x16.gif"
             id="org.apache.felix.sigil.ui.perspective"
             name="Sigil">
       </perspective>
@@ -221,11 +221,11 @@
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.apache.felix.sigil.ui.convertproject"
-            icon="etc/images/newton.png">
+            icon="icons/logo16x16.gif">
       </image>
       <image
             commandId="org.apache.felix.sigil.ui.refreshclasspath"
-            icon="etc/images/newton.png">
+            icon="icons/repository.gif">
       </image>
    </extension>
    

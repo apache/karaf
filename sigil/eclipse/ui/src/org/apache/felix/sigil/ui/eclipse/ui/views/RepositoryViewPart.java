@@ -143,7 +143,7 @@ public class RepositoryViewPart extends ViewPart implements IRepositoryChangeLis
             Image img = model.getType().getIcon();
             if ( img == null )
             {
-                return ImageDescriptor.createFromFile( RepositoryViewPart.class, "/icons/jars_obj.png" );
+                return ImageDescriptor.createFromFile( RepositoryViewPart.class, "/icons/repository.gif" );
             }
             else
             {
