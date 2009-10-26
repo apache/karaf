@@ -158,7 +158,7 @@ function displayConfigForm(obj) {
     innerHTML += '&nbsp;&nbsp;&nbsp;';
     innerHTML += '<input type="reset" class="submit" name="reset" value="Reset" />';
     innerHTML += '&nbsp;&nbsp;&nbsp;';
-    innerHTML += '<input type="submit" class="submit" name="delete" value="Delete" onClick="return confirmDelete();"/>';
+    innerHTML += '<input type="submit" class="submit" name="delete" value="Delete" onClick="return confirmDelete(\'' + obj.pid + '\', \'' + obj.bundleLocation + '\');"/>';
     tdEl.innerHTML = innerHTML;
 
     printConfigurationInfo(parent, obj);
@@ -297,6 +297,35 @@ function printConfigurationInfo( /* Element */ parent, obj )
             ])
         ])
     );
+    
+    if (obj.bundleLocation)
+    {         
+        parent.appendChild( tr( "content", null, [
+                td( "content", null, [
+                    text( " " )
+                ]),
+                td( "content", null, [
+                    createElement( "form", null, {
+                            method: "POST",
+                            action: pluginRoot + "/" + obj.pid
+                        }, [
+                            createElement( "input", null, {
+                                type: "hidden",
+                                name: "unbind",
+                                value: "true"
+                            }),
+                            createElement( "input", "submit", {
+                                type: "submit",
+                                name: "submit",
+                                value: "Unbind",
+                                title: "Unbind Configuration from Bundle",
+                                onClick: "return confirmUnbind('" + obj.pid + "', '" + obj.bundleLocation + "');"
+                            })
+                        ])
+                ])
+            ])
+        );
+    }
 }
 
 
@@ -441,7 +470,26 @@ function removeValue(vidx)
     span.parentNode.removeChild(span);
 }
 
-function confirmDelete()
+function configConfirm(/* String */ message, /* String */ title, /* String */ location)
 {
-    return confirm("Are you sure to delete this configuration ?");
+    var message = "Are you sure to delete this configuration ?";
+    
+    if (title) {
+        message += "\r\nConfiguration: " + title;
+    }
+    if (location) {
+        message += "\r\nBundle: " + location;
+    }
+    
+    return confirm(message);
+}
+
+function confirmDelete(/* String */ title, /* String */ location)
+{
+    return configConfirm("Are you sure to unbind this configuration ?", title, location);
+}
+
+function confirmUnbind(/* String */ title, /* String */ location)
+{
+    return configConfirm("Are you sure to unbind this configuration ?", title, location);
 }

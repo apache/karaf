@@ -144,6 +144,14 @@ public class ConfigManager extends ConfigManagerBase
             config = getConfiguration( ca, pid );
         }
 
+        // check for configuration unbinding
+        if ( request.getParameter( "unbind" ) != null )
+        {
+            config.setBundleLocation( null );
+            sendRedirect( request, response, config.getPid() );
+            return;
+        }
+
         // send the result
         response.setContentType( "application/json" );
         response.setCharacterEncoding( "UTF-8" );
@@ -751,7 +759,7 @@ public class ConfigManager extends ConfigManagerBase
         String location;
         if ( config.getBundleLocation() == null )
         {
-            location = "None";
+            location = "";
         }
         else
         {
