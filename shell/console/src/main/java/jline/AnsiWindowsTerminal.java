@@ -18,14 +18,21 @@
  */
 package jline;
 
+import org.fusesource.jansi.AnsiConsole;
+import org.fusesource.jansi.WindowsAnsiOutputStream;
+
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public class AnsiWindowsTerminal extends WindowsTerminal {
 
+    private boolean ansisupported = checkAnsiSupport();
+
     @Override
     public boolean isANSISupported() {
-        return true;
+        return ansisupported;
     }
 
     @Override
@@ -35,6 +42,19 @@ public class AnsiWindowsTerminal extends WindowsTerminal {
 
     public int readDirectChar(InputStream in) throws IOException {
         return super.readCharacter(in);
+    }
+
+    public static boolean checkAnsiSupport() {
+        OutputStream dummy = new ByteArrayOutputStream();
+        OutputStream ansiout = AnsiConsole.wrapOutputStream(dummy);
+        try {
+            dummy.close();
+            ansiout.close();
+        } catch (IOException ignore) {
+        }
+
+        return (ansiout instanceof WindowsAnsiOutputStream);
+
     }
 
 }
