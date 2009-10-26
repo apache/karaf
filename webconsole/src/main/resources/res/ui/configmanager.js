@@ -153,7 +153,7 @@ function displayConfigForm(obj) {
     trEl.appendChild( tdEl );
 
     // define this TD as innerHTML otherwise the onClick event handler
-    // of the Delete button is not accepted by IE...    
+    // of the Delete button is not accepted by IE6 (!)...    
     var innerHTML = '<input type="submit" class="submit" name="submit" value="Save" />';
     innerHTML += '&nbsp;&nbsp;&nbsp;';
     innerHTML += '<input type="reset" class="submit" name="reset" value="Reset" />';
@@ -300,29 +300,22 @@ function printConfigurationInfo( /* Element */ parent, obj )
     
     if (obj.bundleLocation)
     {         
+        var form = createElement( "form", null, {
+                        method: "POST",
+                        action: pluginRoot + "/" + obj.pid
+                    });
+
+        // define this form contents as innerHTML otherwise the onClick
+        // event handler of the Unbind button is not accepted by IE6 (!)...
+        var formInner = '<input type="hidden" name="unbind" value="true"/>';
+        formInner += '<input type="submit" name="submit" value="Unbind" class="submit" title="Unbind Configuration from Bundle"  onClick="return confirmUnbind(\'' + obj.pid + '\', \'' + obj.bundleLocation + '\');"/>';
+        form.innerHTML = formInner;
+    
         parent.appendChild( tr( "content", null, [
                 td( "content", null, [
                     text( " " )
                 ]),
-                td( "content", null, [
-                    createElement( "form", null, {
-                            method: "POST",
-                            action: pluginRoot + "/" + obj.pid
-                        }, [
-                            createElement( "input", null, {
-                                type: "hidden",
-                                name: "unbind",
-                                value: "true"
-                            }),
-                            createElement( "input", "submit", {
-                                type: "submit",
-                                name: "submit",
-                                value: "Unbind",
-                                title: "Unbind Configuration from Bundle",
-                                onClick: "return confirmUnbind('" + obj.pid + "', '" + obj.bundleLocation + "');"
-                            })
-                        ])
-                ])
+                td( "content", null, [ form ] )
             ])
         );
     }
