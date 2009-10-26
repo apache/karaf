@@ -44,7 +44,6 @@ import org.osgi.framework.Version;
 
 public class ModelLabelProvider extends LabelProvider
 {
-
     private volatile Set<? extends IModelElement> unresolvedElements = null;
 
 
@@ -179,7 +178,7 @@ public class ModelLabelProvider extends LabelProvider
 
     private Image findPackage()
     {
-        return cacheImage( "icons/package_obj.png" );
+        return cacheImage( "icons/package.gif" );
     }
 
 
@@ -188,11 +187,11 @@ public class ModelLabelProvider extends LabelProvider
         String path;
         if ( optional )
         {
-            path = unresolved ? "icons/package_obj_import_opt_error.png" : "icons/package_obj_import_opt.png";
+            path = unresolved ? "icons/import-package-optional-error.gif" : "icons/import-package-optional.gif";
         }
         else
         {
-            path = unresolved ? "icons/package_obj_import_error.png" : "icons/package_obj_import.png";
+            path = unresolved ? "icons/import-package-error.gif" : "icons/import-package.gif";
         }
         return cacheImage( path );
     }
@@ -200,13 +199,13 @@ public class ModelLabelProvider extends LabelProvider
 
     private Image findPackageExport()
     {
-        return cacheImage( "icons/package_obj_export.png" );
+        return cacheImage( "icons/export-package.gif" );
     }
 
 
     private Image findBundle()
     {
-        return cacheImage( "icons/jar_obj.png" );
+        return cacheImage( "icons/bundle.gif" );
     }
 
 
@@ -215,11 +214,11 @@ public class ModelLabelProvider extends LabelProvider
         String path;
         if ( optional )
         {
-            path = unresolved ? "icons/required_bundle_opt_error.png" : "icons/required_bundle_opt.png";
+            path = unresolved ? "icons/require-bundle-optional-error.gif" : "icons/require-bundle-optional.gif";
         }
         else
         {
-            path = unresolved ? "icons/required_bundle_error.png" : "icons/jar_obj.png";
+            path = unresolved ? "icons/require-bundle-error.gif" : "icons/require-bundle.gif";
         }
         return cacheImage( path );
     }
