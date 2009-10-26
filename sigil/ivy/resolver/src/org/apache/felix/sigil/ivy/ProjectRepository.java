@@ -159,7 +159,7 @@ public class ProjectRepository extends AbstractBundleRepository
         {
             try
             {
-                Collection<File> files = FindUtil.findFiles(pattern);
+                Collection<File> files = FindUtil.findFiles(new File(""), pattern);
                 if (files.isEmpty())
                 {
                     Log.warn("ProjectRepository: no projects match: " + pattern);

@@ -27,11 +27,11 @@ import java.util.TreeSet;
 
 public class FindUtil
 {
-    static final String WILD_ANY = "[^.].*";
-    static final String WILD_ONE = "[^.][^;]*"; // WILD_ONE.endsWith(WILD_ANY) == false
-
+    static final String WILD_ANY = "[^.]?.*";
+    static final String WILD_ONE = "[^.]?[^;]*"; // WILD_ONE.endsWith(WILD_ANY) == false
+    
     // example pattern: ${repository}/projects/abc*/*/project.sigil
-    public static Collection<File> findFiles(String pattern) throws IOException
+    public static Collection<File> findFiles(File workingDir, String pattern) throws IOException
     {
         int star = pattern.indexOf("*");
         if (star == -1)
@@ -49,7 +49,7 @@ public class FindUtil
         String[] patterns = regex.split("/");
 
         TreeSet<File> list = new TreeSet<File>();
-        File root = new File(slash == -1 ? "." : pattern.substring(0, slash));
+        File root = slash == -1 ? workingDir : new File(pattern.substring(0, slash)).getAbsoluteFile();
 
         if (root.isDirectory())
         {
@@ -66,7 +66,7 @@ public class FindUtil
     private static void findFiles(File dir, int level, String[] patterns,
         Collection<File> list)
     {
-        final String filePattern = patterns[patterns.length - 1];
+        final String filePattern = patterns[patterns.length - 1] + "$";
         final String dirPattern;
 
         if (level < patterns.length - 1)
