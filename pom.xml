@@ -71,7 +71,7 @@
         <commons.logging.version>1.1.1</commons.logging.version>
         <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
         <easymock.version>2.4</easymock.version>
-        <equinox.version>3.5.0.v20090520</equinox.version>
+        <equinox.version>3.5.1.v20090827</equinox.version>
         <felix.bundlerepository.version>1.4.0</felix.bundlerepository.version>
         <felix.compendium.version>1.2.0</felix.compendium.version>
         <felix.configadmin.version>1.2.4</felix.configadmin.version>
