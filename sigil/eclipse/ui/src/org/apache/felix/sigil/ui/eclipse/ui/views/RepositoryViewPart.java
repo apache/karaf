@@ -57,6 +57,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 
@@ -152,6 +154,29 @@ public class RepositoryViewPart extends ViewPart implements IRepositoryChangeLis
         }
     }
 
+    class CollapseAction extends Action
+    {
+        @Override
+        public void run()
+        {
+            treeViewer.collapseAll();
+        }
+
+
+        @Override
+        public String getText()
+        {
+            return "Collapse All";
+        }
+
+
+        @Override
+        public ImageDescriptor getImageDescriptor()
+        {
+            return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
+        }
+    }
+    
     class RefreshAction extends Action
     {
         @Override
@@ -176,6 +201,7 @@ public class RepositoryViewPart extends ViewPart implements IRepositoryChangeLis
         @Override
         public ImageDescriptor getImageDescriptor()
         {
+            
             return ImageDescriptor.createFromFile( RepositoryViewPart.class, "/icons/bundle-refresh.gif" );
         }
 
@@ -219,6 +245,7 @@ public class RepositoryViewPart extends ViewPart implements IRepositoryChangeLis
         IActionBars bars = getViewSite().getActionBars();
         IToolBarManager toolBar = bars.getToolBarManager();
         toolBar.add( new RefreshAction() );
+        toolBar.add( new CollapseAction() );
     }
 
 
