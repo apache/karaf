@@ -29,12 +29,13 @@ import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IWire;
 import org.osgi.framework.*;
+import org.osgi.framework.BundleReference;
 
 class ServiceRegistrationImpl implements ServiceRegistration
 {
     // Service registry.
     private final ServiceRegistry m_registry;
-    // Bundle implementing the service.
+    // Bundle providing the service.
     private final Bundle m_bundle;
     // Interfaces associated with the service object.
     private final String[] m_classes;
@@ -146,19 +147,31 @@ class ServiceRegistrationImpl implements ServiceRegistration
     **/
     private boolean isClassAccessible(Class clazz)
     {
-        try
+        // We need to see if the class loader of the service object has
+        // access to the specified class; however, we may not have a service
+        // object. If we only have service factory, then we will assume two
+        // different scenarios:
+        // 1. The service factory is provided by the bundle providing the
+        //    service.
+        // 2. The service factory is NOT provided by the bundle providing
+        //    the service.
+        // For case 1, we will use the class loaded of the service factory
+        // to find the class. For case 2, we will assume we have an extender
+        // at work here and always return true, since we have no real way of
+        // knowing the wiring of the provider unless we actually get the
+        // service object, which defeats the lazy aspect of service factories.
+
+        // Case 2.
+        if ((m_factory != null)
+            && (m_factory.getClass().getClassLoader() instanceof BundleReference)
+            && !((BundleReference) m_factory.getClass().getClassLoader()).getBundle().equals(m_bundle))
         {
-            // Try to load from the service object or service factory class.
-            Class sourceClass = (m_factory != null)
-                ? m_factory.getClass() : m_svcObj.getClass();
-            Class targetClass = Util.loadClassUsingClass(sourceClass, clazz.getName());
-            return (targetClass == clazz);
+            return true;
         }
-        catch (Exception ex)
-        {
-            // Ignore this and return false.
-        }
-        return false;
+
+        // Case 1.
+        Class sourceClass = (m_factory != null) ? m_factory.getClass() : m_svcObj.getClass();
+        return Util.loadClassUsingClass(sourceClass, clazz.getName()) == clazz;
     }
 
     Object getProperty(String key)
