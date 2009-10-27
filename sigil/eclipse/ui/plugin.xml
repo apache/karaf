@@ -33,7 +33,7 @@
             category="org.apache.felix.sigil.newWizardCategory"
             class="org.apache.felix.sigil.ui.eclipse.ui.wizard.project.SigilProjectWizard"
             finalPerspective="org.apache.felix.sigil.ui.perspective"
-            icon="etc/images/newton.png"
+            icon="icons/logo16x16.gif"
             id="org.apache.felix.sigil.editors.newProjectWizard"
             name="Sigil Project"
             project="true"/>
