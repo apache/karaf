@@ -24,6 +24,8 @@ import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.ui.eclipse.ui.SigilUI;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 
 public class BundleGraphLabelProvider extends LabelProvider
@@ -82,11 +84,11 @@ public class BundleGraphLabelProvider extends LabelProvider
         Image result = null;
         if ( element instanceof ISigilBundle )
         {
-            result = SigilUI.cacheImage( "icons/jar_obj.png", BundleGraphLabelProvider.class.getClassLoader() );
+            result = SigilUI.cacheImage( "icons/bundle.gif", BundleGraphLabelProvider.class.getClassLoader() );
         }
         else if ( element instanceof Link.Unsatisfied )
         {
-            result = SigilUI.cacheImage( "icons/error.gif", BundleGraphLabelProvider.class.getClassLoader() );
+            return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
         }
 
         return result;
