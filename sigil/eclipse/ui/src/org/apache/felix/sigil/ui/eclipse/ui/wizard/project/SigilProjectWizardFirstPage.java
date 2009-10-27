@@ -20,12 +20,14 @@
 package org.apache.felix.sigil.ui.eclipse.ui.wizard.project;
 
 
+import org.apache.felix.sigil.ui.eclipse.ui.views.RepositoryViewPart;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -62,6 +64,7 @@ public class SigilProjectWizardFirstPage extends WizardNewProjectCreationPage
         super( "newSigilProjectPage" );
         setTitle( "Sigil Project" );
         setDescription( "Create a new Sigil project" );
+        setImageDescriptor( ImageDescriptor.createFromFile( RepositoryViewPart.class, "/icons/logo64x64.gif" ) );
     }
 
 
