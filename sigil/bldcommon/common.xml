@@ -22,11 +22,8 @@
          xmlns:groovy="antlib:org.codehaus.groovy">
     
     <dirname property="common.dir" file="${ant.file.bldcommon}"/>
-    <property file="${common.dir}/sigil-defaults.properties" prefix="default."/>
     <property file="${common.dir}/build.properties"/>
 
-    <echo>cache=${cache.dir}</echo>
-    <echo>buildVersion=${buildVersion}</echo>
     <!-- =====================================================
          stuff intended to be over-ridden is prefixed with my.
          =====================================================-->
