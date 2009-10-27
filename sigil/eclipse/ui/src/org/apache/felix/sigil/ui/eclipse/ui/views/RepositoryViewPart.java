@@ -176,7 +176,7 @@ public class RepositoryViewPart extends ViewPart implements IRepositoryChangeLis
         @Override
         public ImageDescriptor getImageDescriptor()
         {
-            return ImageDescriptor.createFromFile( RepositoryViewPart.class, "/icons/refreshBundle.png" );
+            return ImageDescriptor.createFromFile( RepositoryViewPart.class, "/icons/bundle-refresh.gif" );
         }
 
     }
