@@ -26,16 +26,18 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Map;
 import java.util.Properties;
 
+import org.apache.felix.sigil.common.runtime.BundleForm.BundleStatus;
 import org.apache.felix.sigil.common.runtime.io.InstallAction;
+import org.apache.felix.sigil.common.runtime.io.RefreshAction;
 import org.apache.felix.sigil.common.runtime.io.StartAction;
 import org.apache.felix.sigil.common.runtime.io.StatusAction;
 import org.apache.felix.sigil.common.runtime.io.StopAction;
 import org.apache.felix.sigil.common.runtime.io.UninstallAction;
 import org.apache.felix.sigil.common.runtime.io.UpdateAction;
 import org.apache.felix.sigil.common.runtime.io.UpdateAction.Update;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 import static org.apache.felix.sigil.common.runtime.Runtime.PORT_PROPERTY;
@@ -90,6 +92,27 @@ public class Client
         out = null;
     }
 
+    public void apply(BundleForm form) throws IOException, BundleException {
+        BundleStatus[] newStatus = form.toStatus();
+
+        BundleStatus[] currentStatus = status();
+        
+        stopOldBundles(currentStatus, newStatus);
+        
+        boolean change = uninstallOldBundles(currentStatus, newStatus);
+        change |= installNewBundles(currentStatus, newStatus);
+        
+        if ( change )
+            refresh();
+        
+        startNewBundles(newStatus);
+    }
+
+    public void refresh() throws IOException, BundleException
+    {
+        if ( socket == null ) throw new IllegalStateException( "Not connected" );
+        new RefreshAction( in, out ).client();
+    }
 
     public long install( String url ) throws IOException, BundleException
     {
@@ -135,9 +158,84 @@ public class Client
     }
 
 
-    public Map<Long, String> status() throws IOException, BundleException
+    public BundleStatus[] status() throws IOException, BundleException
     {
         if ( socket == null ) throw new IllegalStateException( "Not connected" );
         return new StatusAction( in, out ).client();
     }
+    
+    private boolean installNewBundles(BundleStatus[] status, BundleStatus[] newStatus) throws IOException, BundleException
+    {
+        boolean change = false;
+        for (BundleStatus n : newStatus) {
+            boolean found = false;
+            for ( BundleStatus o : status ) {
+                if ( o.isMatch(n) ) {
+                    update(o.getId(), n.getLocation());
+                    found = true;
+                    change = true;
+                    break;
+                }
+            }
+            
+            if ( !found ) {
+                install(n.getLocation());
+                change = true;
+            }
+        }
+        
+        return change;
+    }
+
+    private void startNewBundles(BundleStatus[] newStatus) throws IOException, BundleException
+    {
+        BundleStatus[] status = status();
+        for (BundleStatus n : newStatus) {
+            if ( n.getStatus() == Bundle.ACTIVE ) {
+                for ( BundleStatus o : status ) {
+                    if ( o.isMatch(n) ) {
+                        start(o.getId());
+                    }
+                }
+            }            
+        }
+    }
+
+    private void stopOldBundles(BundleStatus[] status, BundleStatus[] newStatus) throws IOException, BundleException
+    {
+        for (BundleStatus n : newStatus) {
+            if ( n.getStatus() == Bundle.INSTALLED ) {
+                for ( BundleStatus o : status ) {
+                    if ( o.getId() != 0 ) {
+                        if ( o.isMatch(n) ) {
+                            stop(o.getId());
+                        }                        
+                    }
+                }
+            }            
+        }
+    }
+
+    private boolean uninstallOldBundles(BundleStatus[] status, BundleStatus[] newStatus) throws IOException, BundleException
+    {
+        boolean change = false;
+        for ( BundleStatus o : status ) {
+            if ( o.getId() != 0 ) {
+                boolean found = false;
+                
+                for (BundleStatus n : newStatus) {
+                    if ( o.isMatch(n) ) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if ( !found ) {
+                    change = true;
+                    uninstall(o.getId());
+                }
+            }
+        }
+        return change;
+    }    
 }

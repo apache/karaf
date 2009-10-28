@@ -21,23 +21,25 @@ package org.apache.felix.sigil.common.runtime.io;
 
 
 import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
+import org.apache.felix.sigil.common.runtime.BundleForm.BundleStatus;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.launch.Framework;
 
 import static org.apache.felix.sigil.common.runtime.io.Constants.STATUS;
 import static org.osgi.framework.Constants.BUNDLE_VERSION;
+import static org.osgi.framework.Constants.BUNDLE_NAME;
 
 
 /**
  * @author dave
  *
  */
-public class StatusAction extends Action<Void, Map<Long, String>>
+public class StatusAction extends Action<Void, BundleStatus[]>
 {
 
     public StatusAction( DataInputStream in, DataOutputStream out ) throws IOException
@@ -47,20 +49,24 @@ public class StatusAction extends Action<Void, Map<Long, String>>
 
 
     @Override
-    public Map<Long, String> client( Void in ) throws IOException
+    public BundleStatus[] client( Void in ) throws IOException
     {
         writeInt(STATUS);
         flush();
         int num = readInt();
-        HashMap<Long, String> map = new HashMap<Long, String>(num);
+        ArrayList<BundleStatus> ret = new ArrayList<BundleStatus>(num);
         
         for (int i = 0; i < num; i++) {
-            long id = readLong();
-            String symbol = readString();
-            map.put( id, symbol );
+            BundleStatus s = new BundleStatus();
+            s.setId(readLong());
+            s.setBundleSymbolicName(readString());
+            s.setVersion(readString());
+            s.setLocation(readString());
+            s.setStatus(readInt());
+            ret.add(s);
         }
         
-        return map;
+        return ret.toArray(new BundleStatus[num]);
     }
 
 
@@ -72,25 +78,17 @@ public class StatusAction extends Action<Void, Map<Long, String>>
         writeInt( bundles.length );
         for ( Bundle b : bundles ) {
             writeLong(b.getBundleId());
-            String symbol = b.getSymbolicName() + ":" + b.getHeaders().get( BUNDLE_VERSION ) + ":" + state(b);
-            writeString(symbol);
+            System.out.println( "Written " + b.getBundleId());
+            String bsn = b.getSymbolicName();
+            if ( bsn == null )
+                bsn = (String) b.getHeaders().get(BUNDLE_NAME);
+            
+            writeString(bsn);
+            writeString((String) b.getHeaders().get( BUNDLE_VERSION ));
+            writeString(b.getLocation());
+            writeInt(b.getState());
+            flush();
         }
-        
-        flush();
+        flush();        
     }
-
-
-    private String state( Bundle b )
-    {
-        switch ( b.getState() ) {
-            case Bundle.ACTIVE: return "active";
-            case Bundle.INSTALLED: return "installed";
-            case Bundle.RESOLVED: return "resolved";
-            case Bundle.STARTING: return "starting";
-            case Bundle.STOPPING: return "stopping";
-            case Bundle.UNINSTALLED: return "uninstalled";
-            default: return "unknown";
-        }
-    }
-
 }

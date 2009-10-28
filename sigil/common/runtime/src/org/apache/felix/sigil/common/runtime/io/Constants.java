@@ -31,4 +31,5 @@ public interface Constants
     public static final int UNINSTALL = 4;
     public static final int UPDATE = 5;
     public static final int STATUS = 6;
+    public static final int REFRESH = 7;
 }

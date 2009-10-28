@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.felix.sigil.common.runtime.io.Action;
 import org.apache.felix.sigil.common.runtime.io.InstallAction;
+import org.apache.felix.sigil.common.runtime.io.RefreshAction;
 import org.apache.felix.sigil.common.runtime.io.StartAction;
 import org.apache.felix.sigil.common.runtime.io.StatusAction;
 import org.apache.felix.sigil.common.runtime.io.StopAction;
@@ -163,6 +164,9 @@ public class Server
                             break;
                         case STATUS:
                             task = new StatusAction( in, out );
+                            break;
+                        case REFRESH:
+                            task = new RefreshAction(in, out);
                             break;
                     }
                     

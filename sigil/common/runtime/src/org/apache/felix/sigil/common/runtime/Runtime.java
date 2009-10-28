@@ -19,7 +19,7 @@
 
 package org.apache.felix.sigil.common.runtime;
 
-public class Runtime
+public interface Runtime
 {
     public static final String PORT_PROPERTY = "port";
     public static final String ADDRESS_PROPERTY = "address";
