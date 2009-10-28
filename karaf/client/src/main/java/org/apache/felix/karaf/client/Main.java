@@ -17,7 +17,10 @@
 package org.apache.felix.karaf.client;
 
 import java.io.ByteArrayInputStream;
+import java.io.PrintWriter;
 
+import jline.Terminal;
+import org.apache.felix.karaf.shell.console.jline.TerminalFactory;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -71,6 +74,7 @@ public class Main {
         // TODO: implement sending a direct command
 
         SshClient client = null;
+        Terminal terminal = null;
         try {
             client = SshClient.setUpDefaultClient();
             client.start();
@@ -83,8 +87,12 @@ public class Main {
  				channel = session.createChannel("exec");
 	            channel.setIn(new ByteArrayInputStream(sb.append("\n").toString().getBytes()));
 			} else {
+                terminal = new TerminalFactory().getTerminal();
  				channel = session.createChannel("shell");
-	            channel.setIn(new ConsoleReader().getInput());
+                ConsoleReader reader = new ConsoleReader(System.in, new PrintWriter(System.out),
+                                                TerminalFactory.class.getResourceAsStream("keybinding.properties"),
+                                                terminal);
+	            channel.setIn(reader.getInput());
 			}
             channel.setOut(System.out);
             channel.setErr(System.err);
@@ -96,6 +104,11 @@ public class Main {
         } finally {
             try {
                 client.stop();
+            } catch (Throwable t) { }
+            try {
+                if (terminal != null) {
+                    terminal.restoreTerminal();
+                }
             } catch (Throwable t) { }
         }
         System.exit(0);

@@ -94,8 +94,8 @@ public class ShellFactoryImpl implements ShellFactory
                 };
                 Console console = new Console(commandProcessor,
                                               in,
-                                              new PrintStream(out),
-                                              new PrintStream(err),
+                                              new PrintStream(out, true),
+                                              new PrintStream(err, true),
                                               new SshTerminal(env),
                                               new AggregateCompleter(completers),
                                               new Runnable() {
