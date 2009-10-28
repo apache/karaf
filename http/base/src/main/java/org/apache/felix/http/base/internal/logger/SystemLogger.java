@@ -9,9 +9,7 @@ public final class SystemLogger
 
     public static void setLogService(LogService service)
     {
-        if (LOGGER == null) {
-            LOGGER = service;
-        }
+        LOGGER = service;
     }
 
     private static LogService getLogger()
