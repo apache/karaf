@@ -19,6 +19,7 @@ package org.apache.felix.http.jetty.internal;
 import org.osgi.framework.BundleContext;
 import java.util.Dictionary;
 import java.util.Properties;
+import java.util.Hashtable;
 
 public final class JettyConfig
 {
@@ -46,7 +47,7 @@ public final class JettyConfig
 
     /** Felix specific property to control whether to enable HTTPS. */
     private static final String FELIX_HTTPS_ENABLE = "org.apache.felix.https.enable";
-    private static final String  OSCAR_HTTPS_ENABLE   = "org.ungoverned.osgi.bundle.https.enable";
+    private static final String OSCAR_HTTPS_ENABLE   = "org.ungoverned.osgi.bundle.https.enable";
 
     /** Felix specific property to control whether to enable HTTP. */
     private static final String FELIX_HTTP_ENABLE = "org.apache.felix.http.enable";
@@ -185,5 +186,13 @@ public final class JettyConfig
         } catch (Exception e) {
             return defValue;
         }
+    }
+
+    public void setServiceProperties(Hashtable<String, Object> props)
+    {
+        props.put(HTTP_PORT, String.valueOf(this.httpPort));
+        props.put(HTTPS_PORT, String.valueOf(this.httpsPort));
+        props.put(FELIX_HTTP_ENABLE, String.valueOf(this.useHttp));
+        props.put(FELIX_HTTPS_ENABLE, String.valueOf(this.useHttps));
     }
 }

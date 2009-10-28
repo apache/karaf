@@ -27,7 +27,7 @@ public final class JettyActivator
         throws Exception
     {
         super.doStart();
-        this.jetty = new JettyService(getBundleContext(), getDispatcherServlet());
+        this.jetty = new JettyService(getBundleContext(), getDispatcherServlet(), getHttpServiceController());
         this.jetty.start();
     }
 

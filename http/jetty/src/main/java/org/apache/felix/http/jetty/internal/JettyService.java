@@ -29,10 +29,12 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.*;
 import org.mortbay.log.Log;
 import org.apache.felix.http.base.internal.DispatcherServlet;
+import org.apache.felix.http.base.internal.HttpServiceController;
 import org.apache.felix.http.base.internal.logger.SystemLogger;
 
 import java.util.Properties;
 import java.util.Dictionary;
+import java.util.Hashtable;
 
 public final class JettyService
     implements ManagedService, Runnable
@@ -47,12 +49,14 @@ public final class JettyService
     private ServiceRegistration configServiceReg;
     private Server server;
     private DispatcherServlet dispatcher;
+    private final HttpServiceController controller;
 
-    public JettyService(BundleContext context, DispatcherServlet dispatcher)
+    public JettyService(BundleContext context, DispatcherServlet dispatcher, HttpServiceController controller)
     {
         this.context = context;
         this.config = new JettyConfig(this.context);
         this.dispatcher = dispatcher;
+        this.controller = controller;
     }
     
     public void start()
@@ -85,10 +89,18 @@ public final class JettyService
         }
     }
 
+    private void publishServiceProperties()
+    {
+        Hashtable<String, Object> props = new Hashtable<String, Object>();
+        this.config.setServiceProperties(props);
+        this.controller.setProperties(props);
+    }
+
     public void updated(Dictionary props)
         throws ConfigurationException
     {
         this.config.update(props);
+
         if (this.running && (this.thread != null)) {
             this.thread.interrupt();
         }
@@ -131,6 +143,7 @@ public final class JettyService
         context.addServlet(new ServletHolder(this.dispatcher), "/*");
 
         this.server.start();
+        publishServiceProperties();
         SystemLogger.info("Started jetty " + Server.getVersion() + " at port " + this.config.getHttpPort());
     }
 
