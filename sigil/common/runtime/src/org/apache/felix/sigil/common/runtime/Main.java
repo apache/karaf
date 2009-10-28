@@ -117,10 +117,6 @@ public class Main
             e.printStackTrace();
             System.exit( 1 );
         }
-        catch (Error e) {
-            e.printStackTrace();
-            throw e;
-        }
     }
 
 
