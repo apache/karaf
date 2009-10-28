@@ -93,17 +93,27 @@ public abstract class Action<I, O>
     protected String readString() throws IOException
     {
         int l = in.readInt();
-        byte[] buf = new byte[l];
-        in.readFully( buf );
-        return new String(buf, ASCII);
+        if ( l == -1 ) {
+            return null;
+        }
+        else {
+            byte[] buf = new byte[l];
+            in.readFully( buf );
+            return new String(buf, ASCII);
+        }
     }
 
 
     protected void writeString( String str ) throws IOException
     {
-        byte[] buf = str.getBytes( ASCII );
-        out.writeInt( buf.length );
-        out.write( buf );
+        if ( str == null ) {
+            out.writeInt(-1);
+        }
+        else {
+            byte[] buf = str.getBytes( ASCII );
+            out.writeInt( buf.length );
+            out.write( buf );
+        }
     }
 
 
