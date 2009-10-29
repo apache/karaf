@@ -18,6 +18,7 @@
  */
 package org.apache.felix.scr.impl.manager;
 
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -34,6 +35,7 @@ import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
@@ -519,9 +521,39 @@ public abstract class AbstractComponentManager implements Component
         } );
     }
 
-    public String toString() {
+
+    public String toString()
+    {
         return "Component: " + getName() + " (" + getId() + ")";
     }
+
+
+    private boolean hasServiceRegistrationPermissions()
+    {
+        boolean allowed = true;
+        if ( System.getSecurityManager() != null )
+        {
+            final String[] services = getComponentMetadata().getServiceMetadata().getProvides();
+            if ( services != null && services.length > 0 )
+            {
+                final Bundle bundle = getBundle();
+                for ( int i = 0; i < services.length; i++ )
+                {
+                    final Permission perm = new ServicePermission( services[i], ServicePermission.REGISTER );
+                    if ( !bundle.hasPermission( perm ) )
+                    {
+                        log( LogService.LOG_INFO, "Permission to register service {0} is denied", new Object[]
+                            { services[i] }, null );
+                        allowed = false;
+                    }
+                }
+            }
+        }
+
+        // no security manager or no services to register
+        return allowed;
+    }
+
 
     private void loadDependencyManagers( ComponentMetadata metadata )
     {
@@ -563,15 +595,21 @@ public abstract class AbstractComponentManager implements Component
         Iterator it = getDependencyManagers();
         while ( it.hasNext() )
         {
-            DependencyManager dm = (DependencyManager) it.next();
+            DependencyManager dm = ( DependencyManager ) it.next();
 
             // ensure the target filter is correctly set
             dm.setTargetFilter( properties );
 
-            // check whether the service is satisfied
-            if ( !dm.isSatisfied() )
+            if ( !dm.hasGetPermission() )
             {
-                // at least one dependency is not satisfied
+                // bundle has no service get permission
+                log( LogService.LOG_INFO, "No permission to get dependency: {0}", new Object[]
+                    { dm.getName() }, null );
+                satisfied = false;
+            }
+            else if ( !dm.isSatisfied() )
+            {
+                // bundle would have permission but there are not enough services
                 log( LogService.LOG_INFO, "Dependency not satisfied: {0}", new Object[]
                     { dm.getName() }, null );
                 satisfied = false;
@@ -922,6 +960,16 @@ public abstract class AbstractComponentManager implements Component
             if ( !acm.verifyDependencyManagers( acm.getProperties() ) )
             {
                 acm.log( LogService.LOG_INFO, "Not all dependencies satisified, cannot activate", null );
+                acm.changeState( Unsatisfied.getInstance() );
+                return;
+            }
+
+            // Before creating the implementation object, we are going to
+            // test that the bundle has enough permissions to register services
+            if ( !acm.hasServiceRegistrationPermissions() )
+            {
+                acm.log( LogService.LOG_INFO, "Component is not permitted to register all services, cannot activate",
+                    null );
                 acm.changeState( Unsatisfied.getInstance() );
                 return;
             }

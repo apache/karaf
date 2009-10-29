@@ -19,6 +19,7 @@
 package org.apache.felix.scr.impl.manager;
 
 
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -36,6 +37,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
@@ -460,18 +462,31 @@ public class DependencyManager implements ServiceListener, Reference
      */
     void enable() throws InvalidSyntaxException
     {
-        // get the current number of registered services available
-        ServiceReference refs[] = getFrameworkServiceReferences();
-        m_size = ( refs == null ) ? 0 : refs.length;
+        if ( hasGetPermission() )
+        {
+            // get the current number of registered services available
+            ServiceReference refs[] = getFrameworkServiceReferences();
+            m_size = ( refs == null ) ? 0 : refs.length;
 
-        // register the service listener
-        String filterString = "(" + Constants.OBJECTCLASS + "=" + m_dependencyMetadata.getInterface() + ")";
-        m_componentManager.getActivator().getBundleContext().addServiceListener( this, filterString );
+            // register the service listener
+            String filterString = "(" + Constants.OBJECTCLASS + "=" + m_dependencyMetadata.getInterface() + ")";
+            m_componentManager.getActivator().getBundleContext().addServiceListener( this, filterString );
 
-        m_componentManager.log( LogService.LOG_DEBUG,
-            "Registered for service events, currently {0} service(s) match the filter", new Object[]
-                { new Integer( m_size ) }, null );
+            m_componentManager.log( LogService.LOG_DEBUG,
+                "Registered for service events, currently {0} service(s) match the filter", new Object[]
+                    { new Integer( m_size ) }, null );
+        }
+        else
+        {
+            // no services available
+            m_size = 0;
+
+            m_componentManager.log( LogService.LOG_DEBUG,
+                "Not registered for service events since the bundle has no permission to get service {0}", new Object[]
+                    { m_dependencyMetadata.getInterface() }, null );
+        }
     }
+
 
     /**
      * Disposes off this dependency manager by removing as a service listener
@@ -536,17 +551,23 @@ public class DependencyManager implements ServiceListener, Reference
 
     private ServiceReference[] getFrameworkServiceReferences( String targetFilter )
     {
-        try
+        if ( hasGetPermission() )
         {
-            return m_componentManager.getActivator().getBundleContext().getServiceReferences(
-                m_dependencyMetadata.getInterface(), targetFilter );
+            try
+            {
+                return m_componentManager.getActivator().getBundleContext().getServiceReferences(
+                    m_dependencyMetadata.getInterface(), targetFilter );
+            }
+            catch ( InvalidSyntaxException ise )
+            {
+                m_componentManager.log( LogService.LOG_ERROR, "Unexpected problem with filter ''{0}''", new Object[]
+                    { targetFilter }, ise );
+                return null;
+            }
         }
-        catch ( InvalidSyntaxException ise )
-        {
-            m_componentManager.log( LogService.LOG_ERROR, "Unexpected problem with filter ''{0}''", new Object[]
-                { targetFilter }, ise );
-            return null;
-        }
+
+        m_componentManager.log( LogService.LOG_DEBUG, "No permission to access the services", null );
+        return null;
     }
 
 
@@ -760,6 +781,23 @@ public class DependencyManager implements ServiceListener, Reference
     public boolean isSatisfied()
     {
         return size() > 0 || m_dependencyMetadata.isOptional();
+    }
+
+
+    /**
+     * Returns <code>true</code> if the component providing bundle has permission
+     * to get the service described by this reference.
+     */
+    public boolean hasGetPermission()
+    {
+        if ( System.getSecurityManager() != null )
+        {
+            Permission perm = new ServicePermission( getServiceName(), ServicePermission.GET );
+            return m_componentManager.getBundle().hasPermission( perm );
+        }
+
+        // no security manager, hence permission given
+        return true;
     }
 
 
