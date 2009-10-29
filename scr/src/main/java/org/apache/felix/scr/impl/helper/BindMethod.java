@@ -232,18 +232,8 @@ public class BindMethod extends BaseMethod
     private Method getServiceReferenceMethod( final Class targetClass, boolean acceptPrivate, boolean acceptPackage )
         throws SuitableMethodNotAccessibleException, InvocationTargetException
     {
-        try
-        {
-            return getMethod( targetClass, getMethodName(), new Class[]
-                { SERVICE_REFERENCE_CLASS }, acceptPrivate, acceptPackage );
-        }
-        catch ( NoSuchMethodException e )
-        {
-            // the named method could not be found
-        }
-
-        // no method taking service reference
-        return null;
+        return getMethod( targetClass, getMethodName(), new Class[]
+            { SERVICE_REFERENCE_CLASS }, acceptPrivate, acceptPackage );
     }
 
 
@@ -267,18 +257,8 @@ public class BindMethod extends BaseMethod
     private Method getServiceObjectMethod( final Class targetClass, final Class parameterClass, boolean acceptPrivate,
         boolean acceptPackage ) throws SuitableMethodNotAccessibleException, InvocationTargetException
     {
-        try
-        {
-            return getMethod( targetClass, getMethodName(), new Class[]
-                { parameterClass }, acceptPrivate, acceptPackage );
-        }
-        catch ( NoSuchMethodException nsme )
-        {
-            // no method taking service object
-        }
-
-        // no method taking service object
-        return null;
+        return getMethod( targetClass, getMethodName(), new Class[]
+            { parameterClass }, acceptPrivate, acceptPackage );
     }
 
 
@@ -372,18 +352,8 @@ public class BindMethod extends BaseMethod
         boolean acceptPrivate, boolean acceptPackage ) throws SuitableMethodNotAccessibleException,
         InvocationTargetException
     {
-        try
-        {
-            return getMethod( targetClass, getMethodName(), new Class[]
-                { parameterClass, MAP_CLASS }, acceptPrivate, acceptPackage );
-        }
-        catch ( NoSuchMethodException nsme )
-        {
-            // no method taking service object
-        }
-
-        // no method taking service object
-        return null;
+        return getMethod( targetClass, getMethodName(), new Class[]
+            { parameterClass, MAP_CLASS }, acceptPrivate, acceptPackage );
     }
 
 

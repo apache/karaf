@@ -279,18 +279,17 @@ abstract class BaseMethod
      * @param parameterTypes The parameters to the method. Passing
      *      <code>null</code> is equivalent to using an empty array.
      *
-     * @return The named method with enforced accessibility
+     * @return The named method with enforced accessibility or <code>null</code>
+     *      if no such method exists in the class.
      *
-     * @throws NoSuchMethodException If no public or protected method with
-     *      the given name can be found in the class or any of its super classes.
      * @throws SuitableMethodNotAccessibleException If method with the given
      *      name taking the parameters is found in the class but the method
      *      is not accessible.
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to access the desired method.
      */
-    public static Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean acceptPrivate,
-        boolean acceptPackage ) throws NoSuchMethodException, SuitableMethodNotAccessibleException,
+    public /* static */ Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean acceptPrivate,
+        boolean acceptPackage ) throws SuitableMethodNotAccessibleException,
         InvocationTargetException
     {
         try
@@ -303,11 +302,33 @@ abstract class BaseMethod
             {
                 return method;
             }
+
+            // the method would fit the requirements but is not acceptable
+            throw new SuitableMethodNotAccessibleException();
         }
         catch ( NoSuchMethodException nsme )
         {
-            // forward to caller
-            throw nsme;
+            // thrown if no method is declared with the given name and
+            // parameters
+        }
+        catch ( NoClassDefFoundError cdfe )
+        {
+            // may be thrown if a method would be found but the signature
+            // contains throws declaration for an exception which cannot
+            // be loaded
+            // FELIX... TODO
+            StringBuffer buf = new StringBuffer();
+            buf.append( "Failure loooking up method " ).append( name ).append( '(' );
+            for ( int i = 0; parameterTypes != null && i < parameterTypes.length; i++ )
+            {
+                buf.append( parameterTypes[i].getName() );
+                if ( i > 0 )
+                {
+                    buf.append( ", " );
+                }
+            }
+            buf.append( ") in class class " ).append( clazz.getName() ).append( ". Assuming no such method." );
+            getComponentManager().log( LogService.LOG_WARNING, buf.toString(), cdfe );
         }
         catch ( Throwable throwable )
         {
@@ -316,8 +337,8 @@ abstract class BaseMethod
             throw new InvocationTargetException( throwable, "Unexpected problem trying to get method " + name );
         }
 
-        // suitable method found which is not accessible
-        throw new SuitableMethodNotAccessibleException();
+        // cuaght and ignored exception, assume no method and continue search
+        return null;
     }
 
 

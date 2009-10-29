@@ -43,11 +43,11 @@ public class ActivateMethod extends BaseMethod
 
         try
         {
-            return getSingleParameterMethod( targetClass, acceptPrivate, acceptPackage );
-        }
-        catch ( NoSuchMethodException nsme )
-        {
-            // ignore for now
+            final Method method = getSingleParameterMethod( targetClass, acceptPrivate, acceptPackage );
+            if ( method != null )
+            {
+                return method;
+            }
         }
         catch ( SuitableMethodNotAccessibleException smnae )
         {
@@ -80,10 +80,6 @@ public class ActivateMethod extends BaseMethod
                 {
                     // find the declared method in this class
                     return getMethod( targetClass, getMethodName(), null, acceptPrivate, acceptPackage );
-                }
-                catch ( NoSuchMethodException nsme )
-                {
-                    // ignore for now
                 }
                 catch ( SuitableMethodNotAccessibleException smnae )
                 {
@@ -143,23 +139,37 @@ public class ActivateMethod extends BaseMethod
     }
 
 
+    /**
+     * Returns a method taking a single parameter of one of the
+     * {@link #getAcceptedParameterTypes()} or <code>null</code> if no such
+     * method exists.
+     *
+     * @param targetClass The class in which to look for the method. Only this
+     *      class is searched for the method.
+     * @param acceptPrivate <code>true</code> if private methods should be
+     *      considered.
+     * @param acceptPackage <code>true</code> if package private methods should
+     *      be considered.
+     * @return The requested method or <code>null</code> if no acceptable method
+     *      can be found in the target class.
+     * @throws SuitableMethodNotAccessibleException If a suitable method was
+     *      found which is not accessible
+     * @throws InvocationTargetException If an unexpected Throwable is caught
+     *      trying to find the requested method.
+     */
     private Method getSingleParameterMethod( final Class targetClass, final boolean acceptPrivate,
-        final boolean acceptPackage ) throws SuitableMethodNotAccessibleException, InvocationTargetException,
-        NoSuchMethodException
+        final boolean acceptPackage ) throws SuitableMethodNotAccessibleException, InvocationTargetException
     {
         SuitableMethodNotAccessibleException ex = null;
+        Method singleParameterMethod = null;
         final Class[] acceptedTypes = getAcceptedParameterTypes();
-        for ( int i = 0; i < acceptedTypes.length; i++ )
+        for ( int i = 0; singleParameterMethod == null && i < acceptedTypes.length; i++ )
         {
             try
             {
                 // find the declared method in this class
-                return getMethod( targetClass, getMethodName(), new Class[]
+                singleParameterMethod = getMethod( targetClass, getMethodName(), new Class[]
                     { acceptedTypes[i] }, acceptPrivate, acceptPackage );
-            }
-            catch ( NoSuchMethodException nsme )
-            {
-                // ignore for now
             }
             catch ( SuitableMethodNotAccessibleException thrown )
             {
@@ -168,12 +178,15 @@ public class ActivateMethod extends BaseMethod
 
         }
 
+        // rethrow if we looked for all method signatures and only found
+        // one or more which would be suitable but not accessible
         if ( ex != null )
         {
             throw ex;
         }
 
-        throw new NoSuchMethodException();
+        // no method with a matching single parameter has been found
+        return singleParameterMethod;
     }
 
 
