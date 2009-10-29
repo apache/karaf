@@ -174,13 +174,22 @@
                                 Framework version 1.3 (from R4.0) is enough,
                                 the Bundle.getBundleContext method is guarded
                             -->
-                            org.osgi.framework;version=1.3,
+                            org.osgi.framework;version="[1.3,2)",
                             
                             <!--
                                 Configuration Admin is optional and if it is
                                 present, version 1.2 (from R4.0) is enough  
                             -->
-                            org.osgi.service.cm;version=1.2;resolution:=optional
+                            org.osgi.service.cm;version="[1.2,2)";resolution:=optional,
+                            
+                            <!--
+                                SCR API is required (we also export it) and must
+                                be of any 1.1 version, because we implement that
+                                exact version. This import is only used if the
+                                framework decides to wire the bundle to another
+                                API provider. 
+                            -->
+                            org.osgi.service.component;version="[1.1,1.2)"
                         </Import-Package>
                         <DynamicImport-Package>
                             org.osgi.service.log
