@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.felix.framework.searchpolicy.ResolveException;
 import org.apache.felix.framework.searchpolicy.Resolver;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.R4Attribute;
@@ -42,7 +43,7 @@ public class FelixResolverState implements Resolver.ResolverState
     private final Logger m_logger;
     // List of all modules.
     private final List m_moduleList = new ArrayList();
-    // Map of fragment symbolic names to array of modules sorted version.
+    // Map of fragment symbolic names to array of fragment modules sorted by version.
     private final Map m_fragmentMap = new HashMap();
     // Maps a package name to an array of exporting capabilities.
     private final Map m_unresolvedPkgIndex = new HashMap();
@@ -60,116 +61,277 @@ public class FelixResolverState implements Resolver.ResolverState
         m_logger = logger;
     }
 
-    public synchronized IModule mergeFragments(IModule rootModule) throws Exception
+    public synchronized void addModule(IModule module)
+    {
+        if (Util.isFragment(module))
+        {
+            addFragment(module);
+        }
+        else
+        {
+            addHost(module);
+        }
+
+//System.out.println("UNRESOLVED PACKAGES:");
+//dumpPackageIndexMap(m_unresolvedPkgIndexMap);
+//System.out.println("RESOLVED PACKAGES:");
+//dumpPackageIndexMap(m_resolvedPkgIndexMap);
+    }
+
+    public synchronized void removeModule(IModule module)
+    {
+        if (Util.isFragment(module))
+        {
+            removeFragment(module);
+        }
+        else
+        {
+            removeHost(module);
+        }
+    }
+
+    private void addFragment(IModule fragment)
     {
 // TODO: FRAGMENT - This should check to make sure that the host allows fragments.
-        IModule newRootModule = rootModule;
-        for (int hostIdx = 0; hostIdx < m_moduleList.size(); hostIdx++)
+        IModule bestFragment = indexFragment(m_fragmentMap, fragment);
+
+        // If the newly added fragment is the highest version for
+        // its given symbolic name, then try to merge it to any
+        // matching unresolved hosts and remove the previous highest
+        // version of the fragment.
+        if (bestFragment == fragment)
         {
-            IModule host = (IModule) m_moduleList.get(hostIdx);
-            if (!host.isResolved() && !Util.isFragment(host))
+
+            // If we have any matching hosts, then merge the new fragment while
+            // removing any older version of the new fragment. Also remove host's
+            // existing capabilities from the package index and reindex its new
+            // ones after attaching the fragment.
+            List matchingHosts = getMatchingHosts(fragment);
+            for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
             {
-                ICapability[] caps = host.getCapabilities();
-                ICapability hostCap = null;
-                for (int capIdx = 0; capIdx < caps.length; capIdx++)
+                IModule host = ((ICapability) matchingHosts.get(hostIdx)).getModule();
+
+                // Get the fragments currently attached to the host so we
+                // can remove the older version of the current fragment, if any.
+                IModule[] fragments = ((ModuleImpl) host).getFragments();
+                List fragmentList = new ArrayList();
+                for (int fragIdx = 0;
+                    (fragments != null) && (fragIdx < fragments.length);
+                    fragIdx++)
                 {
-                    if (caps[capIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
+                    if (!fragments[fragIdx].getSymbolicName().equals(
+                        bestFragment.getSymbolicName()))
                     {
-                        hostCap = caps[capIdx];
-                        break;
+                        fragmentList.add(fragments[fragIdx]);
                     }
                 }
 
-                // If there is no host capability in the current module,
-                // then just ignore it.
-                if (hostCap == null)
+                // Now add the new fragment in bundle ID order.
+                int index = -1;
+                for (int listIdx = 0;
+                    (index < 0) && (listIdx < fragmentList.size());
+                    listIdx++)
                 {
-                    continue;
-                }
-
-                // Need to remove any previously attached, but not resolved fragments.
-// TODO: FRAGMENT - We need to rethink how we do fragment merging...probably merging
-//       as bundles are installed would be better.
-                ((ModuleImpl) host).attachFragments(null);
-
-                // Fragments are grouped by symbolic name and descending version.
-                // Attach the first matching fragment from each group if possible,
-                // since only one version of a given fragment may attach to a host.
-                List fragmentList = new ArrayList();
-                for (Iterator it = m_fragmentMap.entrySet().iterator(); it.hasNext(); )
-                {
-                    Map.Entry entry = (Map.Entry) it.next();
-                    IModule[] fragments = (IModule[]) entry.getValue();
-                    done: for (int fragIdx = 0; fragIdx < fragments.length; fragIdx++)
+                    IModule f = (IModule) fragmentList.get(listIdx);
+                    if (bestFragment.getBundle().getBundleId()
+                        < f.getBundle().getBundleId())
                     {
-                        IRequirement[] reqs = fragments[fragIdx].getRequirements();
-                        for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
+                        index = listIdx;
+                    }
+                }
+                fragmentList.add(
+                    (index < 0) ? fragmentList.size() : index, bestFragment);
+
+                // Remove host's existing exported packages from index.
+                ICapability[] caps = host.getCapabilities();
+                for (int i = 0; (caps != null) && (i < caps.length); i++)
+                {
+                    if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    {
+                        // Get package name.
+                        String pkgName = (String)
+                            caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                        // Remove from "unresolved" package map.
+                        IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
+                        if (modules != null)
                         {
-                            if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE)
-                                && reqs[reqIdx].isSatisfied(hostCap)
-                                && !((BundleImpl) fragments[fragIdx].getBundle()).isStale()
-                                && !((BundleImpl) fragments[fragIdx].getBundle()).isRemovalPending())
-                            {
-                                // Fragments are attached in bundle ID order.
-                                int index = -1;
-                                for (int listIdx = 0;
-                                    (index < 0) && (listIdx < fragmentList.size());
-                                    listIdx++)
-                                {
-                                    if (fragments[fragIdx].getBundle().getBundleId()
-                                        < ((IModule) fragmentList.get(listIdx)).getBundle().getBundleId())
-                                    {
-                                        index = listIdx;
-                                    }
-                                }
-                                fragmentList.add(
-                                    (index < 0) ? fragmentList.size() : index,
-                                    fragments[fragIdx]);
-                                break done;
-                            }
+                            modules = removeModuleFromArray(modules, fragment);
+                            m_unresolvedPkgIndex.put(pkgName, modules);
                         }
                     }
                 }
 
-                if (fragmentList.size() > 0)
+                // Check if fragment conflicts with existing metadata.
+                checkForConflicts(host, fragmentList);
+
+                // Attach the fragments to the host.
+                fragments = (fragmentList.size() == 0)
+                    ? null
+                    : (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]);
+                try
                 {
+                    ((ModuleImpl) host).attachFragments(fragments);
+                }
+                catch (Exception ex)
+                {
+                    // Try to clean up by removing all fragments.
+                    try
+                    {
+                        ((ModuleImpl) host).attachFragments(null);
+                    }
+                    catch (Exception ex2)
+                    {
+                    }
+                    m_logger.log(Logger.LOG_ERROR,
+                        "Serious error attaching fragments.", ex);
+                }
+
+                // Reindex the host's exported packages.
+                caps = host.getCapabilities();
+                for (int i = 0; (caps != null) && (i < caps.length); i++)
+                {
+                    if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    {
+                        indexPackageCapability(m_unresolvedPkgIndex, host, caps[i]);
+                    }
+                }
+            }
+        }
+    }
+
+    private void removeFragment(IModule fragment)
+    {
+        // If module is a fragment, then remove from fragment map.
+        IModule[] fragments = (IModule[]) m_fragmentMap.get(fragment.getSymbolicName());
+        fragments = removeModuleFromArray(fragments, fragment);
+        if (fragments.length == 0)
+        {
+            m_fragmentMap.remove(fragment.getSymbolicName());
+        }
+        else
+        {
+            m_fragmentMap.put(fragment.getSymbolicName(), fragments);
+        }
+
+        // If we have any matching hosts, then remove  fragment while
+        // removing any older version of the new fragment. Also remove host's
+        // existing capabilities from the package index and reindex its new
+        // ones after attaching the fragment.
+        List matchingHosts = getMatchingHosts(fragment);
+        for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
+        {
+            IModule host = ((ICapability) matchingHosts.get(hostIdx)).getModule();
+
+            // Check to see if the removed fragment was actually merged with
+            // the host, since it might not be if it wasn't the highest version.
+            // If it was, recalculate the fragments for the host.
+            fragments = ((ModuleImpl) host).getFragments();
+            for (int fragIdx = 0; (fragments != null) && (fragIdx < fragments.length); fragIdx++)
+            {
+                if (!fragments[fragIdx].equals(fragment))
+                {
+                    List fragmentList = getMatchingFragments(host);
+
+                    // Remove host's existing exported packages from index.
+                    ICapability[] caps = host.getCapabilities();
+                    for (int i = 0; (caps != null) && (i < caps.length); i++)
+                    {
+                        if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                        {
+                            // Get package name.
+                            String pkgName = (String)
+                                caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                            // Remove from "unresolved" package map.
+                            IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
+                            if (modules != null)
+                            {
+                                modules = removeModuleFromArray(modules, fragment);
+                                m_unresolvedPkgIndex.put(pkgName, modules);
+                            }
+                        }
+                    }
+
                     // Check if fragment conflicts with existing metadata.
                     checkForConflicts(host, fragmentList);
 
                     // Attach the fragments to the host.
-                    IModule[] fragments = (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]);
-                    ((ModuleImpl) host).attachFragments(fragments);
-
-                    for (int fragIdx = 0; fragIdx < fragments.length; fragIdx++)
+                    fragments = (fragmentList.size() == 0)
+                        ? null
+                        : (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]);
+                    try
                     {
-                        // Check to see if the root module is actually a fragment,
-                        // if so then we want to return the host for resolving.
-                        if (rootModule == fragments[fragIdx])
+                        ((ModuleImpl) host).attachFragments(fragments);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Try to clean up by removing all fragments.
+                        try
                         {
-                            newRootModule = host;
+                            ((ModuleImpl) host).attachFragments(null);
                         }
-
-                        // Add each fragment capabililty to the resolver state
-                        // data structures.
-                        ICapability[] fragCaps = fragments[fragIdx].getCapabilities();
-                        for (int capIdx = 0; (fragCaps != null) && (capIdx < fragCaps.length); capIdx++)
+                        catch (Exception ex2)
                         {
-                            if (fragCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                            {
-                                indexPackageCapability(
-                                    m_unresolvedPkgIndex, host, fragCaps[capIdx]);
-                            }
+                        }
+                        m_logger.log(Logger.LOG_ERROR,
+                            "Serious error attaching fragments.", ex);
+                    }
+
+                    // Reindex the host's exported packages.
+                    caps = host.getCapabilities();
+                    for (int i = 0; (caps != null) && (i < caps.length); i++)
+                    {
+                        if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                        {
+                            indexPackageCapability(m_unresolvedPkgIndex, host, caps[i]);
                         }
                     }
                 }
             }
         }
+    }
 
-        return newRootModule;
+    private List getMatchingHosts(IModule fragment)
+    {
+        // Find the fragment's host requirement.
+        IRequirement hostReq = getFragmentHostRequirement(fragment);
+
+        // Create a list of all matching hosts for this fragment.
+        List matchingHosts = new ArrayList();
+        for (int hostIdx = 0; (hostReq != null) && (hostIdx < m_moduleList.size()); hostIdx++)
+        {
+            IModule host = (IModule) m_moduleList.get(hostIdx);
+            // Only look at unresolved hosts, since we don't support
+            // dynamic attachment of fragments.
+            if (host.isResolved()
+                || ((BundleImpl) host.getBundle()).isStale()
+                || ((BundleImpl) host.getBundle()).isRemovalPending())
+            {
+                continue;
+            }
+
+            // Find the host capability for the current host.
+            ICapability hostCap = Util.getSatisfyingCapability(host, hostReq);
+
+            // If there is no host capability in the current module,
+            // then just ignore it.
+            if (hostCap == null)
+            {
+                continue;
+            }
+
+            matchingHosts.add(hostCap);
+        }
+
+        return matchingHosts;
     }
 
     private void checkForConflicts(IModule host, List fragmentList)
     {
+        if ((fragmentList == null) || (fragmentList.size() == 0))
+        {
+            return;
+        }
+
         // Verify the fragments do not have conflicting imports.
         // For now, just check for duplicate imports, but in the
         // future we might want to make this more fine grained.
@@ -211,10 +373,12 @@ public class FelixResolverState implements Resolver.ResolverState
                     || reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
                 {
                     String targetName = ((Requirement) reqs[reqIdx]).getTargetName();
-                    Map mergedReqMap = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                        ? ipMerged : rbMerged;
-                    Map fragmentReqMap = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                        ? ipFragment : rbFragment;
+                    Map mergedReqMap =
+                        (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                            ? ipMerged : rbMerged;
+                    Map fragmentReqMap =
+                        (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                            ? ipFragment : rbFragment;
                     Object[] existing = (Object[]) mergedReqMap.get(targetName);
                     if (existing == null)
                     {
@@ -359,114 +523,213 @@ public class FelixResolverState implements Resolver.ResolverState
         return false;
     }
 
-    private void addFragment(IModule module)
+    private void addHost(IModule host)
     {
-        indexFragment(m_fragmentMap, module);
-//        System.out.println("+++ BEGIN FRAGMENT DUMP");
-//        dumpModuleIndexMap(m_fragmentMap);
-//        System.out.println("+++ END FRAGMENT DUMP");
-    }
+        // When a module is added, we first need to pre-merge any potential fragments
+        // into the host and then second create an aggregated list of unresolved
+        // capabilities to simplify later processing when resolving bundles.
+        m_moduleList.add(host);
 
-    public synchronized void addModule(IModule module)
-    {
-        if (Util.isFragment(module))
+        //
+        // First, merge applicable fragments.
+        //
+
+        List fragmentList = getMatchingFragments(host);
+
+        // Attach any fragments we found for this host.
+        if (fragmentList.size() > 0)
         {
-            addFragment(module);
-        }
-        else
-        {
-            // When a module is added, create an aggregated list of unresolved
-            // exports to simplify later processing when resolving bundles.
-            m_moduleList.add(module);
+            // Check if fragment conflicts with existing metadata.
+            checkForConflicts(host, fragmentList);
 
-            ICapability[] caps = module.getCapabilities();
-
-            // Add exports to unresolved package map.
-            for (int i = 0; (caps != null) && (i < caps.length); i++)
-            {
-                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                {
-                    indexPackageCapability(m_unresolvedPkgIndex, module, caps[i]);
-                }
-            }
-        }
-
-//System.out.println("UNRESOLVED PACKAGES:");
-//dumpPackageIndexMap(m_unresolvedPkgIndexMap);
-//System.out.println("RESOLVED PACKAGES:");
-//dumpPackageIndexMap(m_resolvedPkgIndexMap);
-    }
-
-    public synchronized void removeModule(IModule module)
-    {
-        // Depending on whether the module is a fragment or not,
-        // we need to do different things.
-
-        // If module is a fragment, then remove from fragment map.
-        if (Util.isFragment(module))
-        {
-            IModule[] fragments = (IModule[]) m_fragmentMap.get(module.getSymbolicName());
-            fragments = removeModuleFromArray(fragments, module);
-            if (fragments.length == 0)
-            {
-                m_fragmentMap.remove(module.getSymbolicName());
-            }
-            else
-            {
-                m_fragmentMap.put(module.getSymbolicName(), fragments);
-            }
-        }
-        // If it is not a fragment, then we need remove its exports
-        // from the "resolved" and "unresolved" package maps, remove
-        // the module's dependencies on fragments and exporters,
-        // and remove the module from the module list.
-        else
-        {
-            m_moduleList.remove(module);
-
-            // Remove exports from package maps.
-            ICapability[] caps = module.getCapabilities();
-            for (int i = 0; (caps != null) && (i < caps.length); i++)
-            {
-                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                {
-                    // Get package name.
-                    String pkgName = (String)
-                        caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
-                    // Remove from "unresolved" package map.
-                    IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
-                    if (modules != null)
-                    {
-                        modules = removeModuleFromArray(modules, module);
-                        m_unresolvedPkgIndex.put(pkgName, modules);
-                    }
-
-                    // Remove from "resolved" package map.
-                    modules = (IModule[]) m_resolvedPkgIndex.get(pkgName);
-                    if (modules != null)
-                    {
-                        modules = removeModuleFromArray(modules, module);
-                        m_resolvedPkgIndex.put(pkgName, modules);
-                    }
-                }
-            }
-
-            // Remove the module from the "resolved" map.
-            m_resolvedCapMap.remove(module);
-            // Set fragments to null, which will remove the module from all
-            // of its dependent fragment modules.
+            // Attach the fragments to the host.
+            IModule[] fragments =
+                (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]);
             try
             {
-                ((ModuleImpl) module).attachFragments(null);
+                ((ModuleImpl) host).attachFragments(fragments);
             }
             catch (Exception ex)
             {
-                m_logger.log(Logger.LOG_ERROR, "Error detaching fragments.", ex);
+                // Try to clean up by removing all fragments.
+                try
+                {
+                    ((ModuleImpl) host).attachFragments(null);
+                }
+                catch (Exception ex2)
+                {
+                }
+                m_logger.log(Logger.LOG_ERROR,
+                    "Serious error attaching fragments.", ex);
             }
-            // Set wires to null, which will remove the module from all
-            // of its dependent modules.
-            ((ModuleImpl) module).setWires(null);
         }
+
+        //
+        // Second, index module's capabilities.
+        //
+
+        ICapability[] caps = host.getCapabilities();
+
+        // Add exports to unresolved package map.
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        {
+            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            {
+                indexPackageCapability(m_unresolvedPkgIndex, host, caps[i]);
+            }
+        }
+    }
+
+    private void removeHost(IModule host)
+    {
+        // We need remove the host's exports from the "resolved" and
+        // "unresolved" package maps, remove its dependencies on fragments
+        // and exporters, and remove it from the module list.
+        m_moduleList.remove(host);
+
+        // Remove exports from package maps.
+        ICapability[] caps = host.getCapabilities();
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        {
+            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            {
+                // Get package name.
+                String pkgName = (String)
+                    caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                // Remove from "unresolved" package map.
+                IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
+                if (modules != null)
+                {
+                    modules = removeModuleFromArray(modules, host);
+                    m_unresolvedPkgIndex.put(pkgName, modules);
+                }
+
+                // Remove from "resolved" package map.
+                modules = (IModule[]) m_resolvedPkgIndex.get(pkgName);
+                if (modules != null)
+                {
+                    modules = removeModuleFromArray(modules, host);
+                    m_resolvedPkgIndex.put(pkgName, modules);
+                }
+            }
+        }
+
+        // Remove the module from the "resolved" map.
+        m_resolvedCapMap.remove(host);
+        // Set fragments to null, which will remove the module from all
+        // of its dependent fragment modules.
+        try
+        {
+            ((ModuleImpl) host).attachFragments(null);
+        }
+        catch (Exception ex)
+        {
+            m_logger.log(Logger.LOG_ERROR, "Error detaching fragments.", ex);
+        }
+        // Set wires to null, which will remove the module from all
+        // of its dependent modules.
+        ((ModuleImpl) host).setWires(null);
+    }
+
+    private List getMatchingFragments(IModule host)
+    {
+        // Find the host capability for the current host.
+        ICapability[] caps = Util.getCapabilityByNamespace(host, ICapability.HOST_NAMESPACE);
+        ICapability hostCap = (caps.length == 0) ? null : caps[0];
+
+        // If we have a host capability, then loop through all fragments trying to
+        // find ones that match.
+        List fragmentList = new ArrayList();
+        for (Iterator it = m_fragmentMap.entrySet().iterator(); (hostCap != null) && it.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            IModule[] fragments = ((IModule[]) entry.getValue());
+            IModule fragment = null;
+            for (int i = 0; (fragment == null) && (i < fragments.length); i++)
+            {
+                if (!((BundleImpl) fragments[i].getBundle()).isStale()
+                    && !((BundleImpl) fragments[i].getBundle()).isRemovalPending())
+                {
+                    fragment = fragments[i];
+                }
+            }
+
+            if (fragment == null)
+            {
+                continue;
+            }
+
+            IRequirement hostReq = getFragmentHostRequirement(fragment);
+
+            // If we have a host requirement, then loop through each host and
+            // see if it matches the host requirement.
+            if ((hostReq != null) && hostReq.isSatisfied(hostCap))
+            {
+                // Now add the new fragment in bundle ID order.
+                int index = -1;
+                for (int listIdx = 0;
+                    (index < 0) && (listIdx < fragmentList.size());
+                    listIdx++)
+                {
+                    IModule existing = (IModule) fragmentList.get(listIdx);
+                    if (fragment.getBundle().getBundleId()
+                        < existing.getBundle().getBundleId())
+                    {
+                        index = listIdx;
+                    }
+                }
+                fragmentList.add(
+                    (index < 0) ? fragmentList.size() : index, fragment);
+            }
+        }
+
+        return fragmentList;
+    }
+
+    public synchronized IModule findHost(IModule rootModule) throws ResolveException
+    {
+        IModule newRootModule = rootModule;
+        if (Util.isFragment(rootModule))
+        {
+            List matchingHosts = getMatchingHosts(rootModule);
+            IModule currentBestHost = null;
+            for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
+            {
+                IModule host = ((ICapability) matchingHosts.get(hostIdx)).getModule();
+                if (currentBestHost == null)
+                {
+                    currentBestHost = host;
+                }
+                else if (currentBestHost.getVersion().compareTo(host.getVersion()) < 0)
+                {
+                    currentBestHost = host;
+                }
+            }
+            newRootModule = currentBestHost;
+
+            if (newRootModule == null)
+            {
+                throw new ResolveException(
+                    "Unable to find host.", rootModule, getFragmentHostRequirement(rootModule));
+            }
+        }
+
+        return newRootModule;
+    }
+
+    private IRequirement getFragmentHostRequirement(IModule fragment)
+    {
+        // Find the fragment's host requirement.
+        IRequirement[] reqs = fragment.getRequirements();
+        IRequirement hostReq = null;
+        for (int reqIdx = 0; (hostReq == null) && (reqIdx < reqs.length); reqIdx++)
+        {
+            if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
+            {
+                hostReq = reqs[reqIdx];
+            }
+        }
+        return hostReq;
     }
 
     /**
@@ -819,7 +1082,7 @@ public class FelixResolverState implements Resolver.ResolverState
         }
     }
 
-    private void indexFragment(Map map, IModule module)
+    private IModule indexFragment(Map map, IModule module)
     {
         IModule[] modules = (IModule[]) map.get(module.getSymbolicName());
 
@@ -878,6 +1141,8 @@ public class FelixResolverState implements Resolver.ResolverState
         }
 
         map.put(module.getSymbolicName(), modules);
+
+        return modules[0];
     }
 
     private static IModule[] removeModuleFromArray(IModule[] modules, IModule m)

@@ -3855,20 +3855,11 @@ ex.printStackTrace();
                         }
                     }
 
-                    // Before trying to resolve, tell the resolver state to
-                    // merge all fragments into hosts, which may result in the
-                    // rootModule changing if the root is a fragment.
-                    IModule newRootModule;
-                    try
-                    {
-                        newRootModule = m_resolverState.mergeFragments(rootModule);
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.printStackTrace();
-                        throw new ResolveException("Unable to merge fragments", rootModule, null);
-                    }
-
+                    // If the root module to resolve is a fragment, then we
+                    // must find a host to attach it to and resolve the host
+                    // instead, since the underlying resolver doesn't know
+                    // how to deal with fragments.
+                    IModule newRootModule = m_resolverState.findHost(rootModule);
                     if (!Util.isFragment(newRootModule))
                     {
                         // Resolve the module.
@@ -3912,23 +3903,6 @@ ex.printStackTrace();
                         if (wires[i].hasPackage(pkgName))
                         {
                             return wires[i];
-                        }
-                    }
-
-                    // Before trying to resolve, tell the resolver state to
-                    // merge all fragments into their hosts.
-// TODO: FRAGMENT - We need to rethink how we do fragment merging...probably merging
-//       as bundles are installed would be better.
-                    if (Resolver.isDynamicImportAllowed(importer, pkgName))
-                    {
-                        try
-                        {
-                            m_resolverState.mergeFragments(null);
-                        }
-                        catch (Exception ex)
-                        {
-                            ex.printStackTrace();
-                            throw new ResolveException("Unable to merge fragments", importer, null);
                         }
                     }
 
