@@ -78,7 +78,6 @@ public class StatusAction extends Action<Void, BundleStatus[]>
         writeInt( bundles.length );
         for ( Bundle b : bundles ) {
             writeLong(b.getBundleId());
-            System.out.println( "Written " + b.getBundleId());
             String bsn = b.getSymbolicName();
             if ( bsn == null )
                 bsn = (String) b.getHeaders().get(BUNDLE_NAME);
