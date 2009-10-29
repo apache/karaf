@@ -177,6 +177,12 @@
                             org.osgi.framework;version="[1.3,2)",
                             
                             <!--
+                                LogService is optional but if present the
+                                R4.0 version 1.3 is sufficient.
+                            -->
+                            org.osgi.service.log;version="[1.3,2)";resolution:=optional,
+
+                            <!--
                                 Configuration Admin is optional and if it is
                                 present, version 1.2 (from R4.0) is enough  
                             -->
@@ -191,9 +197,6 @@
                             -->
                             org.osgi.service.component;version="[1.1,1.2)"
                         </Import-Package>
-                        <DynamicImport-Package>
-                            org.osgi.service.log
-                        </DynamicImport-Package>
                         <Embed-Dependency>
                             kxml2
                         </Embed-Dependency>
