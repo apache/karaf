@@ -777,6 +777,12 @@ public abstract class AbstractComponentManager implements Component
         }
 
 
+        void ungetService( DelayedComponentManager dcm )
+        {
+            log( dcm, "ungetService" );
+        }
+
+
         void enable( AbstractComponentManager acm )
         {
             log( acm, "enable" );
@@ -1031,6 +1037,13 @@ public abstract class AbstractComponentManager implements Component
         Object getService( DelayedComponentManager dcm )
         {
             return dcm.getInstance();
+        }
+
+
+        void ungetService( DelayedComponentManager dcm )
+        {
+            dcm.deleteComponent( ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED );
+            dcm.changeState( Registered.getInstance() );
         }
     }
 

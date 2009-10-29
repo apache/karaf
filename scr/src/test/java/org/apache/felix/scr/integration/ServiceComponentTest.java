@@ -26,6 +26,7 @@ import org.apache.felix.scr.integration.components.SimpleComponent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 
@@ -83,5 +84,90 @@ public class ServiceComponentTest extends ComponentTestBase
                 + "] must have at least one character and not start with a dot", propKey.length() > 0
                 && !propKey.startsWith( "." ) );
         }
+    }
+
+
+    @Test
+    public void test_DelayedSimpleComponent_service_single_use()
+    {
+        final String pid = "DelayedServiceComponent";
+
+        // one single component exists without configuration
+        final Component component = findComponentByName( pid );
+        TestCase.assertNotNull( component );
+        TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
+
+        component.enable();
+        delay();
+
+        // the delayed service is expected to only be registered before use
+        TestCase.assertEquals( Component.STATE_REGISTERED, component.getState() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
+
+        // get the service
+        ServiceReference reference = bundleContext.getServiceReference( "java.lang.Object" );
+        TestCase.assertNotNull( reference );
+        try
+        {
+            final Object theService = bundleContext.getService( reference );
+
+            // service must now be active
+            TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
+
+            // and of course we expect the instance
+            TestCase.assertEquals( SimpleComponent.INSTANCE, theService );
+        }
+        finally
+        {
+            bundleContext.ungetService( reference );
+        }
+
+        // service is not used anymore, ensure REGISTERED state and INSTANCE==null
+        TestCase.assertEquals( Component.STATE_REGISTERED, component.getState() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
+    }
+
+
+    @Test
+    public void test_DelayedSimpleComponent_service_multi_use()
+    {
+        final String pid = "DelayedServiceComponent";
+
+        // one single component exists without configuration
+        final Component component = findComponentByName( pid );
+        TestCase.assertNotNull( component );
+        TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
+
+        component.enable();
+        delay();
+
+        // the delayed service is expected to only be registered before use
+        TestCase.assertEquals( Component.STATE_REGISTERED, component.getState() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
+
+        // get the service once
+        final ServiceReference reference1 = bundleContext.getServiceReference( "java.lang.Object" );
+        TestCase.assertNotNull( reference1 );
+        bundleContext.getService( reference1 );
+        TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
+        TestCase.assertNotNull( SimpleComponent.INSTANCE );
+
+        // get the service a second time
+        final BundleContext bundleContext2 = bundle.getBundleContext();
+        final ServiceReference reference2 = bundleContext2.getServiceReference( "java.lang.Object" );
+        TestCase.assertNotNull( reference2 );
+        bundleContext2.getService( reference2 );
+        TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
+        TestCase.assertNotNull( SimpleComponent.INSTANCE );
+
+        // unget the service once -- must still be active !
+        bundleContext2.ungetService( reference2 );
+        TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
+        TestCase.assertNotNull( SimpleComponent.INSTANCE );
+
+        // unget the service second time -- must be registered and null now
+        bundleContext.ungetService( reference1 );
+        TestCase.assertEquals( Component.STATE_REGISTERED, component.getState() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
     }
 }

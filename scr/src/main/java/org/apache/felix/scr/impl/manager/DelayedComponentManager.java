@@ -19,6 +19,9 @@
 package org.apache.felix.scr.impl.manager;
 
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.felix.scr.impl.BundleComponentActivator;
 import org.apache.felix.scr.impl.config.ComponentHolder;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
@@ -32,6 +35,9 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class DelayedComponentManager extends ImmediateComponentManager implements ServiceFactory
 {
+
+    // keep the using bundles as reference "counters" for instance deactivation
+    private final Set usingBundles = new HashSet();
 
     /**
      * @param activator
@@ -59,6 +65,9 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
         {
             super.deleteComponent( reason );
         }
+
+        // ensure the refence set is also clear
+        usingBundles.clear();
     }
 
 
@@ -72,17 +81,23 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 
     public synchronized Object getService( Bundle bundle, ServiceRegistration sr )
     {
-        return state().getService(this);
+        usingBundles.add(bundle);
+        return state().getService( this );
     }
 
-	protected boolean createRealComponent()
-	{
-		return super.createComponent();
-	}
 
-    public void ungetService( Bundle arg0, ServiceRegistration arg1, Object arg2 )
+    protected boolean createRealComponent()
     {
-        // nothing to do here
+        return super.createComponent();
     }
 
+
+    public void ungetService( Bundle bundle, ServiceRegistration sr, Object service )
+    {
+        usingBundles.remove( bundle );
+        if ( usingBundles.isEmpty() )
+        {
+            state().ungetService( this );
+        }
+    }
 }

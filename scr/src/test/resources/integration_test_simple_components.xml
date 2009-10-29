@@ -58,7 +58,7 @@
         <property name="service.pid" value="FactoryConfigurationComponent" />
     </scr:component>
 
-    <!-- component is a stupid service to verify non-use of private props -->
+    <!-- component is a simple service to verify non-use of private props -->
     <scr:component name="ServiceComponent"
         enabled="false" immediate="true"
         configuration-policy="ignore" >
@@ -66,6 +66,17 @@
         <property name="service.pid" value="ServiceComponent" />
         <property name="prop.public" value="required" />
         <property name=".prop.private" value="private" />
+        <service>
+            <provide interface="java.lang.Object" />
+        </service>
+    </scr:component>
+
+    <!-- component is a simple service to verify deactivation when not being used any longer -->
+    <scr:component name="DelayedServiceComponent"
+        enabled="false" immediate="false"
+        configuration-policy="ignore" >
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="service.pid" value="ServiceComponent" />
         <service>
             <provide interface="java.lang.Object" />
         </service>
