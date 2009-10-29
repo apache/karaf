@@ -37,7 +37,7 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 {
 
     // keep the using bundles as reference "counters" for instance deactivation
-    private final Set usingBundles = new HashSet();
+    private final Set m_usingBundles = new HashSet();
 
     /**
      * @param activator
@@ -67,7 +67,7 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
         }
 
         // ensure the refence set is also clear
-        usingBundles.clear();
+        m_usingBundles.clear();
     }
 
 
@@ -81,7 +81,7 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 
     public synchronized Object getService( Bundle bundle, ServiceRegistration sr )
     {
-        usingBundles.add(bundle);
+        m_usingBundles.add(bundle);
         return state().getService( this );
     }
 
@@ -94,8 +94,8 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 
     public void ungetService( Bundle bundle, ServiceRegistration sr, Object service )
     {
-        usingBundles.remove( bundle );
-        if ( usingBundles.isEmpty() )
+        m_usingBundles.remove( bundle );
+        if ( m_usingBundles.isEmpty() )
         {
             state().ungetService( this );
         }
