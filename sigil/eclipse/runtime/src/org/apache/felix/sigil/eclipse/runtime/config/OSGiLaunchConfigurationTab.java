@@ -19,10 +19,27 @@
 
 package org.apache.felix.sigil.eclipse.runtime.config;
 
+import java.net.URL;
+
+
+import org.apache.felix.sigil.common.runtime.BundleForm;
+import org.apache.felix.sigil.eclipse.SigilCore;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * @author dave
@@ -31,7 +48,8 @@ import org.eclipse.swt.widgets.Composite;
 public class OSGiLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 {
 
-    private OSGiConfigurationView configurationView;
+    private Text formText;
+    private String formLocation;
 
     /* (non-Javadoc)
      * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
@@ -46,8 +64,68 @@ public class OSGiLaunchConfigurationTab extends AbstractLaunchConfigurationTab
      */
     public void createControl( Composite parent )
     {
-        configurationView = new OSGiConfigurationView(parent, this);
+        Composite configurationView = new Composite(parent, SWT.NONE);
+        new Label(configurationView, SWT.NONE).setText("Form");
+
+        // components
+        formText = new Text(configurationView, SWT.BORDER);
+
+        // layout
+        formText.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false ) );
+        
+        formText.addKeyListener(new KeyAdapter()
+        {
+            @Override
+            public void keyReleased(KeyEvent e)
+            {
+                updateLocation();
+            }
+        });
+        
+        Button browse = new Button(configurationView, SWT.PUSH);
+        browse.setText("Browse");
+        
+        browse.addSelectionListener( new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                FormSelectionDialog dialog =
+                    new FormSelectionDialog(getShell());
+                if ( dialog.open() == Window.OK ) {
+                    formLocation = dialog.getFormFile().getFullPath().toOSString();
+                    formText.setText(formLocation);
+                    updateLocation();
+                }
+            }
+        });
+        
+        
+        configurationView.setLayout( new GridLayout( 3, false ) );
+
         setControl(configurationView);
+    }
+
+    private void updateLocation()
+    {
+        String loc = formText.getText();
+        if ( loc.trim().length() > 0 ) {
+            try
+            {
+                URL url = OSGiLaunchConfigurationHelper.toURL(loc);
+                SigilCore.log("Resolving " + url);
+                BundleForm.resolve(url);
+                setErrorMessage(null);
+                setDirty(true);
+            }
+            catch (Exception e)
+            {
+                SigilCore.warn("Failed to resolve bundle form", e);
+                setErrorMessage("Invalid form file " + e.getMessage() );
+            }
+        }
+        else {
+            setErrorMessage("Missing form file");
+        }
+        updateLaunchConfigurationDialog();
     }
 
     /* (non-Javadoc)
@@ -55,8 +133,15 @@ public class OSGiLaunchConfigurationTab extends AbstractLaunchConfigurationTab
      */
     public void initializeFrom( ILaunchConfiguration config )
     {
-        // TODO Auto-generated method stub
-        
+        try
+        {
+            formLocation = config.getAttribute(OSGiLaunchConfigurationConstants.FORM_FILE_LOCATION, "");
+            formText.setText(formLocation);
+        }
+        catch (CoreException e)
+        {
+            SigilCore.error("Failed to initialise launch configuration view", e);
+        }
     }
 
     /* (non-Javadoc)
@@ -64,8 +149,7 @@ public class OSGiLaunchConfigurationTab extends AbstractLaunchConfigurationTab
      */
     public void performApply( ILaunchConfigurationWorkingCopy config )
     {
-        // TODO Auto-generated method stub
-        
+        config.setAttribute(OSGiLaunchConfigurationConstants.FORM_FILE_LOCATION, formLocation);
     }
 
     /* (non-Javadoc)
@@ -73,8 +157,6 @@ public class OSGiLaunchConfigurationTab extends AbstractLaunchConfigurationTab
      */
     public void setDefaults( ILaunchConfigurationWorkingCopy config )
     {
-        // TODO Auto-generated method stub
-        
+        config.setAttribute(OSGiLaunchConfigurationConstants.FORM_FILE_LOCATION, (String) null);
     }
-
 }

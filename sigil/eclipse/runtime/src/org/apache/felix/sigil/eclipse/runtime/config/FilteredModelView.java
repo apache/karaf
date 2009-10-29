@@ -39,7 +39,6 @@ public class FilteredModelView<T> extends Composite
     private StructuredViewer viewer;
     private String txt = "";
 
-
     public FilteredModelView( Composite parent, int style )
     {
         super( parent, style );
@@ -95,10 +94,6 @@ public class FilteredModelView<T> extends Composite
         });
     }
 
-    public void addChangeListener( IChangeListener listener ) {
-        
-    }
-    
     private void initLayout()
     {
         Text bundleTxt = createSelectionBox( this );
@@ -133,7 +128,6 @@ public class FilteredModelView<T> extends Composite
                 else
                 {
                     IStructuredSelection sel = ( IStructuredSelection ) event.getSelection();
-                    System.out.println( "Selected " + sel.toList() );
                     selected.addAll( sel.toList() );
                 }
             }
@@ -238,6 +232,10 @@ public class FilteredModelView<T> extends Composite
             elementDescriptor = UIHelper.getDefaultElementDescriptor();
         }
         this.elementDescriptor = elementDescriptor;
+    }
+    
+    public IElementDescriptor<T> getElementDescriptor() {
+        return elementDescriptor;
     }
 
 

@@ -49,6 +49,8 @@ public class Main
 
     private static Framework framework;
     private static final Options options;
+    
+    private static boolean verbose = false;
 
     static
     {
@@ -58,6 +60,7 @@ public class Main
         options.addOption( "a", "address", true, "Address to bind server to [default all]" );
         options.addOption( "c", "clean", false, "Clean bundle cache directory on init" );
         options.addOption( "s", "startLevel", true, "Start level for framework" );
+        options.addOption( "v", "verbose", false, "Verbose output" );
     }
 
 
@@ -76,6 +79,8 @@ public class Main
             }
             else
             {
+                verbose = cl.hasOption('v');
+                
                 Map<String, String> config = buildConfig( cl );
 
                 framework = factory.newFramework( config );
@@ -188,6 +193,7 @@ public class Main
     }
     
     public static void log(String msg) {
-        System.out.println( msg );
+        if ( verbose )
+            System.out.println( msg );
     }
 }

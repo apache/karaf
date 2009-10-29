@@ -40,8 +40,8 @@
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
             class="org.apache.felix.sigil.eclipse.runtime.shortcut.OSGiLaunchShortCut"
-            icon="etc/images/newton.png"
-            id="org.cauldron.sigil.launching.shortcut"
+            icon="/icons/logo16x16.gif"
+            id="org.apache.felix.sigil.eclipse.runtime.shortcut"
             label="OSGi Application"
             modes="run,debug">
          <contextualLaunch>
@@ -64,14 +64,14 @@
    <extension
          point="org.eclipse.jdt.launching.classpathProviders">
       <classpathProvider
-            class="org.cauldron.sigil.runtime.launch.NewtonSourcePathProvider"
-            id="org.cauldron.sigil.classpath.Provider"/>
+            class="org.apache.felix.sigil.eclipse.runtime.source.SigilSourcePathProvider"
+            id="org.apache.felix.sigil.classpath.Provider"/>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             configTypeID="org.apache.felix.sigil.eclipse.runtime.OSGi"
-            icon="etc/images/newton.png"
+            icon="icons/logo16x16.gif"
             id="org.apache.felix.sigil.eclipse.runtime.OSGi">
       </launchConfigurationTypeImage>
    </extension>

@@ -26,10 +26,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.apache.felix.sigil.common.runtime.BundleForm;
 import org.apache.felix.sigil.common.runtime.Client;
 import org.apache.felix.sigil.common.runtime.Main;
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.install.IOSGiInstall;
+import org.apache.felix.sigil.eclipse.runtime.config.OSGiLaunchConfigurationHelper;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,6 +43,7 @@ import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
+import org.osgi.framework.BundleException;
 
 
 public class OSGiLauncher extends AbstractJavaLaunchConfigurationDelegate implements ILaunchConfigurationDelegate,
@@ -81,6 +84,17 @@ public class OSGiLauncher extends AbstractJavaLaunchConfigurationDelegate implem
         runner.run( vmconfig, launch, monitor );
 
         Client client = connect( config );
+        
+        BundleForm form = OSGiLaunchConfigurationHelper.getBundleForm(config);
+        
+        try
+        {
+            client.apply(form);
+        }
+        catch (Exception e)
+        {
+            throw SigilCore.newCoreException("Failed to apply bundle form", e);
+        }
 
         SigilCore.log( "Connected " + client.isConnected() );
     }
