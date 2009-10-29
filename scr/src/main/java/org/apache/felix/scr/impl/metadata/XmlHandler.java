@@ -311,11 +311,12 @@ public class XmlHandler implements KXml2SAXHandler
                     m_currentComponent.addDependency( ref );
                 }
 
-                // unexpected element
-                else
+                // unexpected element (except the root element "components"
+                // used by the Maven SCR Plugin, which is just silently ignored)
+                else if ( !localName.equals( "components" ) )
                 {
-                    m_logger.log( LogService.LOG_INFO, "Ignoring unsupported element " + localName + " (bundle "
-                        + m_bundle.getLocation() + ")", null, null );
+                    m_logger.log( LogService.LOG_DEBUG, "Ignoring unsupported element {0} (bundle {1})", new Object[]
+                        { localName, m_bundle.getLocation() }, null, null );
                 }
             }
             catch ( Exception ex )
@@ -325,11 +326,12 @@ public class XmlHandler implements KXml2SAXHandler
             }
         }
 
-        // unexpected namespace
-        else
+        // unexpected namespace (except the root element "components"
+        // used by the Maven SCR Plugin, which is just silently ignored)
+        else if ( !localName.equals( "components" ) )
         {
-            m_logger.log( LogService.LOG_INFO, "Ignoring unsupported element {" + uri + "}" + localName + " (bundle "
-                + m_bundle.getLocation() + ")", null, null );
+            m_logger.log( LogService.LOG_DEBUG, "Ignoring unsupported element '{'{0}'}'{1} (bundle {2})", new Object[]
+                { uri, localName, m_bundle.getLocation() }, null, null );
         }
     }
 

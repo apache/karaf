@@ -165,7 +165,8 @@ public class BindMethod extends BaseMethod
         if ( suitableMethodNotAccessible )
         {
             getComponentManager().log( LogService.LOG_ERROR,
-                "DependencyManager : Suitable but non-accessible method found in class " + targetClass.getName(), null );
+                "DependencyManager : Suitable but non-accessible method found in class {0}", new Object[]
+                    { targetClass.getName() }, null );
             throw new SuitableMethodNotAccessibleException();
         }
 

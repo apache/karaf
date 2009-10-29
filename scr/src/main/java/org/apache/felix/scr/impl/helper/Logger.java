@@ -18,6 +18,7 @@
  */
 package org.apache.felix.scr.impl.helper;
 
+
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 
 
@@ -28,6 +29,28 @@ import org.apache.felix.scr.impl.metadata.ComponentMetadata;
  */
 public interface Logger
 {
+
+    /**
+     * Returns <code>true</code> if logging for the given level is enabled.
+     */
+    boolean isLogEnabled( int level );
+
+
+    /**
+     * Method to actually emit the log message. If the LogService is available,
+     * the message will be logged through the LogService. Otherwise the message
+     * is logged to stdout (or stderr in case of LOG_ERROR level messages),
+     *
+     * @param level The log level to log the message at
+     * @param pattern The <code>java.text.MessageFormat</code> message format
+     *      string for preparing the message
+     * @param arguments The format arguments for the <code>pattern</code>
+     *      string.
+     * @param ex An optional <code>Throwable</code> whose stack trace is written,
+     *      or <code>null</code> to not log a stack trace.
+     */
+    void log( int level, String pattern, Object[] arguments, ComponentMetadata metadata, Throwable ex );
+
 
     /**
      * Writes a messages for the given <code>ComponentMetadata</code>.

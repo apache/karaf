@@ -572,7 +572,8 @@ public abstract class AbstractComponentManager implements Component
             if ( !dm.isSatisfied() )
             {
                 // at least one dependency is not satisfied
-                log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(), null );
+                log( LogService.LOG_INFO, "Dependency not satisfied: {0}", new Object[]
+                    { dm.getName() }, null );
                 satisfied = false;
             }
         }
@@ -711,7 +712,8 @@ public abstract class AbstractComponentManager implements Component
      */
     void changeState( State newState )
     {
-        log( LogService.LOG_DEBUG, "State transition : " + m_state + " -> " + newState, null );
+        log( LogService.LOG_DEBUG, "State transition : {0} -> {1}", new Object[]
+            { m_state, newState }, null );
         m_state = newState;
     }
 

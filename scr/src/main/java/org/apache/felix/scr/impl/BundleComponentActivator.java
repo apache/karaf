@@ -135,8 +135,8 @@ public class BundleComponentActivator implements Logger
             {
                 // 112.4.1 If an XML document specified by the header cannot be located in the bundle and its attached
                 // fragments, SCR must log an error message with the Log Service, if present, and continue.
-                log( LogService.LOG_ERROR, "Component descriptor entry '" + descriptorLocation + "' not found", null,
-                    null );
+                log( LogService.LOG_ERROR, "Component descriptor entry ''{0}'' not found", new Object[]
+                    { descriptorLocation }, null, null );
                 continue;
             }
 
@@ -268,11 +268,13 @@ public class BundleComponentActivator implements Logger
             // 112.4.1 If an XML document specified by the header cannot be located in the bundle and its attached
             // fragments, SCR must log an error message with the Log Service, if present, and continue.
 
-            log( LogService.LOG_ERROR, "Problem reading descriptor entry '" + descriptorLocation + "'", null, ex );
+            log( LogService.LOG_ERROR, "Problem reading descriptor entry ''{0}''", new Object[]
+                { descriptorLocation }, null, ex );
         }
         catch ( Exception ex )
         {
-            log( LogService.LOG_ERROR, "General problem with descriptor entry '" + descriptorLocation + "'", null, ex );
+            log( LogService.LOG_ERROR, "General problem with descriptor entry ''{0}''", new Object[]
+                { descriptorLocation }, null, ex );
         }
         finally
         {
@@ -304,8 +306,8 @@ public class BundleComponentActivator implements Logger
         // mark instance inactive (no more component activations)
         m_active = false;
 
-        log( LogService.LOG_DEBUG, "BundleComponentActivator : Bundle [" + m_context.getBundle().getBundleId()
-            + "] will destroy " + m_managers.size() + " instances", null, null );
+        log( LogService.LOG_DEBUG, "BundleComponentActivator : Bundle [{0}] will destroy {1} instances", new Object[]
+            { new Long( m_context.getBundle().getBundleId() ), new Integer( m_managers.size() ) }, null, null );
 
         while ( m_managers.size() != 0 )
         {
@@ -327,8 +329,8 @@ public class BundleComponentActivator implements Logger
 
         }
 
-        log( LogService.LOG_DEBUG, "BundleComponentActivator : Bundle [" + m_context.getBundle().getBundleId()
-            + "] STOPPED", null, null );
+        log( LogService.LOG_DEBUG, "BundleComponentActivator : Bundle [{0}] STOPPED", new Object[]
+            { new Long( m_context.getBundle().getBundleId() ) }, null, null );
 
         m_context = null;
     }
@@ -513,7 +515,8 @@ public class BundleComponentActivator implements Logger
         }
         else
         {
-            log( LogService.LOG_INFO, "BundleComponentActivator is not active; not scheduling " + task, null, null );
+            log( LogService.LOG_INFO, "BundleComponentActivator is not active; not scheduling {0}", new Object[]
+                { task }, null, null );
         }
     }
 

@@ -281,8 +281,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         else
         {
             // 112.7 Factory Configuration not allowed for factory component
-            getActivator().log( LogService.LOG_ERROR,
-                "Component Factory cannot be configured by factory configuration", getComponentMetadata(), null );
+            log( LogService.LOG_ERROR, "Component Factory cannot be configured by factory configuration", null );
         }
     }
 

@@ -184,8 +184,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
         catch ( Exception ex )
         {
             // failed to instantiate, return null
-            log( LogService.LOG_ERROR, "Error during instantiation of the implementation object",
-                ex );
+            log( LogService.LOG_ERROR, "Error during instantiation of the implementation object", ex );
             return null;
         }
 
@@ -199,8 +198,9 @@ public class ImmediateComponentManager extends AbstractComponentManager
             DependencyManager dm = ( DependencyManager ) it.next();
             if ( !dm.open( implementationObject ) )
             {
-                log( LogService.LOG_ERROR, "Cannot create component instance due to failure to bind reference "
-                    + dm.getName(), null );
+                log( LogService.LOG_ERROR, "Cannot create component instance due to failure to bind reference {0}",
+                    new Object[]
+                        { dm.getName() }, null );
 
                 // make sure, we keep no bindings
                 it = getDependencyManagers();
@@ -400,8 +400,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
         }
         else if ( !modify() )
         {
-            log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration",
-                null );
+            log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration", null );
             int reason = ( configuration == null ) ? ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED
                 : ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED;
             reactivate( reason );
@@ -433,8 +432,9 @@ public class ImmediateComponentManager extends AbstractComponentManager
             if ( !dm.canUpdateDynamically( props ) )
             {
                 log( LogService.LOG_INFO,
-                    "Cannot dynamically update the configuration due to dependency changes induced on dependency "
-                        + dm.getName(), null );
+                    "Cannot dynamically update the configuration due to dependency changes induced on dependency {0}",
+                    new Object[]
+                        { dm.getName() }, null );
                 return false;
             }
         }
@@ -444,8 +444,9 @@ public class ImmediateComponentManager extends AbstractComponentManager
         if ( !m_modifyMethod.invoke( getInstance(), new ActivateMethod.ActivatorParameter( m_componentContext, -1 ) ) )
         {
             // log an error if the declared method cannot be found
-            log( LogService.LOG_ERROR, "Declared modify method '" + getComponentMetadata().getModified()
-                + "' cannot be found, configuring by reactivation", null );
+            log( LogService.LOG_ERROR, "Declared modify method '{0}' cannot be found, configuring by reactivation",
+                new Object[]
+                    { getComponentMetadata().getModified() }, null );
             return false;
         }
 

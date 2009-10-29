@@ -18,6 +18,9 @@
  */
 package org.apache.felix.scr.impl;
 
+
+import java.text.MessageFormat;
+
 import org.apache.felix.scr.impl.helper.Logger;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 
@@ -25,6 +28,21 @@ import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 public class MockLogger implements Logger
 {
     String lastMessage;
+
+
+    public boolean isLogEnabled( int level )
+    {
+        return true;
+    }
+
+
+    public void log( int level, String pattern, Object[] arguments, ComponentMetadata metadata, Throwable ex )
+    {
+        if ( isLogEnabled( level ) )
+        {
+            log( level, MessageFormat.format( pattern, arguments ), metadata, ex );
+        }
+    }
 
 
     public void log( int level, String message, ComponentMetadata metadata, Throwable ex )

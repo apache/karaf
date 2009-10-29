@@ -121,8 +121,8 @@ abstract class BaseMethod
         else
         {
             // optional method not found, log as DEBUG and ignore
-            getComponentManager().log( LogService.LOG_DEBUG,
-                getMethodNamePrefix() + " method [" + getMethodName() + "] not found, ignoring", null );
+            getComponentManager().log( LogService.LOG_DEBUG, "{0} method [{1}] not found, ignoring", new Object[]
+                { getMethodNamePrefix(), getMethodName() }, null );
             m_state = NotApplicable.INSTANCE;
         }
     }
@@ -174,8 +174,8 @@ abstract class BaseMethod
             {
                 // log and return null
                 getComponentManager().log( LogService.LOG_ERROR,
-                    "DependencyManager : Suitable but non-accessible method found in class " + targetClass.getName(),
-                    null );
+                    "DependencyManager : Suitable but non-accessible method found in class {0}", new Object[]
+                        { targetClass.getName() }, null );
                 break;
             }
 
@@ -222,21 +222,22 @@ abstract class BaseMethod
             // 112.3.1 If the method is not is not declared protected or
             // public, SCR must log an error message with the log service,
             // if present, and ignore the method
-            getComponentManager().log( LogService.LOG_DEBUG, "Method " + getMethodName() + " cannot be called", ex );
+            getComponentManager().log( LogService.LOG_DEBUG, "Method {0} cannot be called", new Object[]
+                { getMethodName() }, ex );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.7 If a bind method throws an exception, SCR must log an
             // error message containing the exception [...]
-            getComponentManager().log( LogService.LOG_ERROR,
-                "The " + getMethodName() + " method has thrown an exception", ex.getCause() );
+            getComponentManager().log( LogService.LOG_ERROR, "The {0} method has thrown an exception", new Object[]
+                { getMethodName() }, ex.getCause() );
             return false;
         }
         catch ( Throwable t )
         {
             // anything else went wrong, log the message and fail the invocation
-            getComponentManager().log( LogService.LOG_ERROR, "The " + getMethodName() + " method could not be called",
-                t );
+            getComponentManager().log( LogService.LOG_ERROR, "The {0} method could not be called", new Object[]
+                { getMethodName() }, t );
 
             // method invocation threw, so it was a failure
             return false;
@@ -316,19 +317,21 @@ abstract class BaseMethod
             // may be thrown if a method would be found but the signature
             // contains throws declaration for an exception which cannot
             // be loaded
-            // FELIX... TODO
-            StringBuffer buf = new StringBuffer();
-            buf.append( "Failure loooking up method " ).append( name ).append( '(' );
-            for ( int i = 0; parameterTypes != null && i < parameterTypes.length; i++ )
+            if ( getComponentManager().isLogEnabled( LogService.LOG_WARNING ) )
             {
-                buf.append( parameterTypes[i].getName() );
-                if ( i > 0 )
+                StringBuffer buf = new StringBuffer();
+                buf.append( "Failure loooking up method " ).append( name ).append( '(' );
+                for ( int i = 0; parameterTypes != null && i < parameterTypes.length; i++ )
                 {
-                    buf.append( ", " );
+                    buf.append( parameterTypes[i].getName() );
+                    if ( i > 0 )
+                    {
+                        buf.append( ", " );
+                    }
                 }
+                buf.append( ") in class class " ).append( clazz.getName() ).append( ". Assuming no such method." );
+                getComponentManager().log( LogService.LOG_WARNING, buf.toString(), cdfe );
             }
-            buf.append( ") in class class " ).append( clazz.getName() ).append( ". Assuming no such method." );
-            getComponentManager().log( LogService.LOG_WARNING, buf.toString(), cdfe );
         }
         catch ( Throwable throwable )
         {
@@ -471,8 +474,8 @@ abstract class BaseMethod
 
         private void resolve( final BaseMethod baseMethod )
         {
-            baseMethod.getComponentManager().log( LogService.LOG_DEBUG,
-                "getting " + baseMethod.getMethodNamePrefix() + ": " + baseMethod.getMethodName(), null );
+            baseMethod.getComponentManager().log( LogService.LOG_DEBUG, "getting {0}: {1}", new Object[]
+                { baseMethod.getMethodNamePrefix(), baseMethod.getMethodName() }, null );
 
             // resolve the method
             Method method;
@@ -483,8 +486,8 @@ abstract class BaseMethod
             catch ( InvocationTargetException ex )
             {
                 method = null;
-                baseMethod.getComponentManager().log( LogService.LOG_WARNING,
-                    baseMethod.getMethodName() + " cannot be found", ex.getTargetException() );
+                baseMethod.getComponentManager().log( LogService.LOG_WARNING, "{0} cannot be found", new Object[]
+                    { baseMethod.getMethodName() }, ex.getTargetException() );
             }
 
             baseMethod.setMethod( method );
@@ -515,8 +518,8 @@ abstract class BaseMethod
             // 112.3.1 If the method is not found , SCR must log an error
             // message with the log service, if present, and ignore the
             // method
-            baseMethod.getComponentManager().log( LogService.LOG_ERROR,
-                baseMethod.getMethodNamePrefix() + " method [" + baseMethod.getMethodName() + "] not found", null );
+            baseMethod.getComponentManager().log( LogService.LOG_ERROR, "{0} method [{1}] not found", new Object[]
+                { baseMethod.getMethodNamePrefix(), baseMethod.getMethodName() }, null );
             return false;
         }
 
@@ -534,8 +537,8 @@ abstract class BaseMethod
 
         public boolean invoke( final BaseMethod baseMethod, final Object componentInstance, final Object rawParameter )
         {
-            baseMethod.getComponentManager().log( LogService.LOG_DEBUG,
-                "invoking " + baseMethod.getMethodNamePrefix() + ": " + baseMethod.getMethodName(), null );
+            baseMethod.getComponentManager().log( LogService.LOG_DEBUG, "invoking {0}: {1}", new Object[]
+                { baseMethod.getMethodNamePrefix(), baseMethod.getMethodName() }, null );
             return baseMethod.invokeMethod( componentInstance, rawParameter );
         }
 
