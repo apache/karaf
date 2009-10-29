@@ -20,8 +20,6 @@ package org.apache.felix.scr.impl;
 
 
 import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -230,7 +228,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         }
 
         // there should be components, load them with a bundle context
-        BundleContext context = getBundleContext( bundle );
+        BundleContext context = bundle.getBundleContext();
         if ( context == null )
         {
             log( LogService.LOG_ERROR, m_context.getBundle(), "Cannot get BundleContext of bundle "
@@ -323,79 +321,6 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         }
 
         return new ComponentRegistry( bundleContext );
-    }
-
-
-    /**
-     * Returns the <code>BundleContext</code> of the bundle.
-     * <p>
-     * This method assumes a <code>getContext</code> method returning a
-     * <code>BundleContext</code> instance to be present in the class of the
-     * bundle or any of its parent classes.
-     *
-     * @param bundle The <code>Bundle</code> whose context is to be returned.
-     *
-     * @return The <code>BundleContext</code> of the bundle or
-     *         <code>null</code> if no <code>getContext</code> method
-     *         returning a <code>BundleContext</code> can be found.
-     */
-    private BundleContext getBundleContext( Bundle bundle )
-    {
-        try
-        {
-            return bundle.getBundleContext();
-        }
-        catch ( SecurityException se )
-        {
-            // assume we do not have the correct AdminPermission[*,CONTEXT]
-            // to call this, so we have to forward this exception
-            throw se;
-        }
-        catch ( Throwable t )
-        {
-            // ignore any other Throwable, most prominently NoSuchMethodError
-            // which is called in a pre-OSGI 4.1 environment
-        }
-
-        BundleContext context = null;
-        for ( Class clazz = bundle.getClass(); context == null && clazz != null; clazz = clazz.getSuperclass() )
-        {
-            try
-            {
-                context = getBundleContext( clazz, bundle, "getBundleContext" );
-                if ( context == null )
-                {
-                    context = getBundleContext( clazz, bundle, "getContext" );
-                }
-            }
-            catch ( NoSuchMethodException nsme )
-            {
-                // don't actually care, just try super class
-            }
-            catch ( Throwable t )
-            {
-                log( LogService.LOG_ERROR, m_context.getBundle(), "Cannot get BundleContext for "
-                    + bundle.getSymbolicName(), t );
-            }
-        }
-
-        // return what we found
-        return context;
-    }
-
-
-    private BundleContext getBundleContext( Class clazz, Bundle bundle, String methodName )
-        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
-    {
-        Method m = clazz.getDeclaredMethod( methodName, null );
-        if ( m.getReturnType().equals( BundleContext.class ) )
-        {
-            m.setAccessible( true );
-            return ( BundleContext ) m.invoke( bundle, null );
-        }
-
-        // method exists but has wrong return type
-        return null;
     }
 
 

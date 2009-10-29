@@ -171,10 +171,12 @@
                             org.apache.felix.shell; resolution:=optional,
                             
                             <!--
-                                Framework version 1.3 (from R4.0) is enough,
-                                the Bundle.getBundleContext method is guarded
+                                Framework version 1.4 (from R4.1) is required
+                                because we depend on ServiceReference being
+                                Comparable and Bundle.getBundleContext method
+                                being available.
                             -->
-                            org.osgi.framework;version="[1.3,2)",
+                            org.osgi.framework;version="[1.4,2)",
                             
                             <!--
                                 LogService is optional but if present the

@@ -88,4 +88,11 @@ public class SimpleServiceImpl implements SimpleService
     {
         return m_registration;
     }
+
+
+    @Override
+    public String toString()
+    {
+        return getClass().getSimpleName() + ": value=" + getValue();
+    }
 }

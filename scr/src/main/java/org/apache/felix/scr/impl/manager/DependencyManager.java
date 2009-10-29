@@ -577,21 +577,14 @@ public class DependencyManager implements ServiceListener, Reference
             return refs[0];
         }
 
-        // is it correct to assume an ordered bound services set ?
-        int maxRanking = Integer.MIN_VALUE;
-        long minId = Long.MAX_VALUE;
-        ServiceReference selectedRef = null;
 
         // find the service with the highest ranking
-        for ( int i = 0; refs != null && i < refs.length; i++ )
+        ServiceReference selectedRef = refs[0];
+        for ( int i = 1; i < refs.length; i++ )
         {
             ServiceReference ref = refs[i];
-            int ranking = getServiceRanking( ref );
-            long id = getServiceId( ref );
-            if ( maxRanking < ranking || ( maxRanking == ranking && id < minId ) )
+            if ( ref.compareTo( selectedRef ) > 0 )
             {
-                maxRanking = ranking;
-                minId = id;
                 selectedRef = ref;
             }
         }
@@ -639,46 +632,6 @@ public class DependencyManager implements ServiceListener, Reference
         }
 
         return ( services.size() > 0 ) ? services.toArray() : null;
-    }
-
-
-    /**
-     * Returns the value of the <code>service.ranking</code> service property
-     * if the property exists and is of type <code>java.lang.Integer</code>. If
-     * the property does not exist or is of another type, zero is returned as
-     * the default value for service ranking.
-     *
-     * @param serviceReference The Service reference whose ranking is to be
-     *          returned.
-     */
-    private int getServiceRanking( ServiceReference serviceReference )
-    {
-        Object nrRankObj = serviceReference.getProperty( Constants.SERVICE_RANKING );
-        if ( nrRankObj instanceof Integer )
-        {
-            return ( ( Integer ) nrRankObj ).intValue();
-        }
-        return 0;
-    }
-
-
-    /**
-     * Returns the value of the <code>service.id</code> service property.
-     *
-     * @param serviceReference The Service reference whose service id is to be
-     *          returned.
-     *
-     * @throws ClassCastException if the <code>service.id</code> property exists
-     *          but is not a <code>java.lang.Long</code> value. This is not
-     *          expected since the framework should guarantee this property and
-     *          its type.
-     * @throws NullPointerException if the <code>service.id</code> property
-     *          does not exist. This is not expected since the framework should
-     *          guarantee this property and its type.
-     */
-    private long getServiceId( ServiceReference serviceReference )
-    {
-        return ( ( Long ) serviceReference.getProperty( Constants.SERVICE_ID ) ).longValue();
     }
 
 
