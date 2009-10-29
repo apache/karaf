@@ -21,6 +21,7 @@ package org.apache.felix.sigil.eclipse.runtime;
 
 
 import java.io.IOException;
+
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,7 @@ import org.apache.felix.sigil.common.runtime.Client;
 import org.apache.felix.sigil.common.runtime.Main;
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.install.IOSGiInstall;
-import org.apache.felix.sigil.eclipse.runtime.config.OSGiLaunchConfigurationHelper;
+import org.apache.felix.sigil.repository.IRepositoryManager;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,7 +44,6 @@ import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.osgi.framework.BundleException;
 
 
 public class OSGiLauncher extends AbstractJavaLaunchConfigurationDelegate implements ILaunchConfigurationDelegate,
@@ -85,11 +85,13 @@ public class OSGiLauncher extends AbstractJavaLaunchConfigurationDelegate implem
 
         Client client = connect( config );
         
-        BundleForm form = OSGiLaunchConfigurationHelper.getBundleForm(config);
+        BundleForm form = LaunchHelper.getBundleForm(config);
         
         try
         {
-            client.apply(form);
+            String name = LaunchHelper.getRepositoryManagerName(config);
+            IRepositoryManager manager = SigilCore.getRepositoryManager(name);
+            client.apply(form.resolve(new RuntimeBundleResolver(manager)));
         }
         catch (Exception e)
         {

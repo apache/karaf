@@ -24,6 +24,7 @@ import java.net.URL;
 
 import org.apache.felix.sigil.common.runtime.BundleForm;
 import org.apache.felix.sigil.eclipse.SigilCore;
+import org.apache.felix.sigil.eclipse.runtime.LaunchHelper;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -110,9 +111,9 @@ public class OSGiLaunchConfigurationTab extends AbstractLaunchConfigurationTab
         if ( loc.trim().length() > 0 ) {
             try
             {
-                URL url = OSGiLaunchConfigurationHelper.toURL(loc);
+                URL url = LaunchHelper.toURL(loc);
                 SigilCore.log("Resolving " + url);
-                BundleForm.resolve(url);
+                BundleForm.create(url);
                 setErrorMessage(null);
                 setDirty(true);
             }

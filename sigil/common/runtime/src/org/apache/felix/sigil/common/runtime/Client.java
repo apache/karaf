@@ -92,9 +92,7 @@ public class Client
         out = null;
     }
 
-    public void apply(BundleForm form) throws IOException, BundleException {
-        BundleStatus[] newStatus = form.toStatus();
-
+    public void apply(BundleForm.BundleStatus[] newStatus) throws IOException, BundleException {
         BundleStatus[] currentStatus = status();
         
         stopOldBundles(currentStatus, newStatus);

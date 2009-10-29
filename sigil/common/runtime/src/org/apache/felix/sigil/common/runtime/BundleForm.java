@@ -19,6 +19,7 @@
 package org.apache.felix.sigil.common.runtime;
 
 import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,6 +39,30 @@ import org.osgi.framework.Constants;
 
 public class BundleForm
 {    
+    public interface Resolver {
+        URI[] resolve(URI base) throws URISyntaxException;
+    }
+    
+    public interface ResolutionContext {
+        Resolver findResolver(URI uri);
+    }
+    
+    private static final Resolver NULL_RESOLVER = new Resolver() {
+
+        public URI[] resolve(URI base)
+        {
+            return new URI[] { base };
+        }
+        
+    };
+    private static final ResolutionContext NULL_CONTEXT = new ResolutionContext()
+    {      
+        public Resolver findResolver(URI uri)
+        {
+            return NULL_RESOLVER;
+        }
+    };
+    
     public static class BundleStatus
     {
         private String location;
@@ -101,29 +126,83 @@ public class BundleForm
         }
     }
     
-    private String[] bundles;
-    private Set<String> startMap = new HashSet<String>();
+    private URI[] bundles;
+    private Set<URI> startMap = new HashSet<URI>();
 
     public BundleForm() {
     }
     
-    public static BundleForm resolve(URL formURL) throws IOException, URISyntaxException {
+    public BundleStatus[] resolve(ResolutionContext ctx) throws IOException, URISyntaxException {
+        if ( ctx == null ) {
+            ctx = NULL_CONTEXT;
+        }
+        
+        ArrayList<BundleStatus> ret = new ArrayList<BundleStatus>(bundles.length);
+        
+        for ( int i = 0; i < bundles.length; i++ ) {
+            Resolver resolver = ctx.findResolver(bundles[i]);
+            if ( resolver == null ) {
+                resolver = NULL_RESOLVER;
+            }
+            URI[] resolved = resolver.resolve(bundles[i]);
+            for ( URI uri : resolved ) {
+                ret.add( toBundle(uri, isStarted(bundles[i])) );
+            }
+        }
+        
+        return ret.toArray(new BundleStatus[ret.size()] );
+
+    }
+    
+    private BundleStatus toBundle(URI uri, boolean started) throws IOException
+    {
+        URL url = uri.toURL();
+        InputStream in = url.openStream();
+        try {
+            JarInputStream jin = new JarInputStream(in);
+            Manifest mf = jin.getManifest();
+            Attributes attr = mf.getMainAttributes();
+            String bsn = attr.getValue(Constants.BUNDLE_SYMBOLICNAME);
+            String ver = attr.getValue(Constants.BUNDLE_VERSION);
+            BundleStatus st = new BundleStatus();
+            st.setBundleSymbolicName(bsn);
+            st.setVersion(ver);
+            st.setLocation(url.toExternalForm());
+            st.setStatus(started ? Bundle.ACTIVE : Bundle.INSTALLED);
+            return st;
+        }
+        finally {
+            try
+            {
+                in.close();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static BundleForm create(URL formURL) throws IOException, URISyntaxException {
         InputStream in = formURL.openStream();
         try {
             BundleForm f = new BundleForm();
             BufferedReader r = new BufferedReader(new InputStreamReader(in));
-            LinkedList<String> locs = new LinkedList<String>();
+            LinkedList<URI> locs = new LinkedList<URI>();
             for(;;) {
                 String l = r.readLine();
                 if ( l == null ) break;
-                URI uri = URI.create(l);
-                String status = uri.getScheme();
-                uri = URI.create(uri.getSchemeSpecificPart());
-                String loc = uri.toString();
-                locs.add( loc );
-                f.setStarted(loc, "start".equalsIgnoreCase(status) );
+                l = l.trim();
+                if ( !l.startsWith( "#" ) ) {
+                    URI uri = URI.create(l);
+                    String status = uri.getScheme();
+                    uri = URI.create(uri.getSchemeSpecificPart());
+                    locs.add( uri );
+                    f.setStarted(uri, "start".equalsIgnoreCase(status) );
+                }
             }
-            f.setBundles(locs.toArray(new String[locs.size()]));
+            f.setBundles(locs.toArray(new URI[locs.size()]));
             return f;
         }
         finally {
@@ -139,59 +218,26 @@ public class BundleForm
         }
     }
 
-    public void setBundles(String[] bundles) {
+    public void setBundles(URI[] bundles) {
         this.bundles = bundles;
     }
     
-    public String[] getBundles()
+    public URI[] getBundles()
     {
         return bundles;
     }
 
-    public boolean isStarted(String url)
+    public boolean isStarted(URI uri)
     {
-        return startMap.contains(url);
+        return startMap.contains(uri);
     }
     
-    public void setStarted(String url, boolean started) {
+    public void setStarted(URI uri, boolean started) {
         if ( started ) {
-            startMap.add(url);
+            startMap.add(uri);
         }
         else {
-            startMap.remove(url);
+            startMap.remove(uri);
         }
-    }
-    
-    public BundleStatus[] toStatus() throws IOException  {
-        ArrayList<BundleStatus> ret = new ArrayList<BundleStatus>(bundles.length);
-        for ( String loc : bundles ) {
-            URL url = new URL(loc);
-            InputStream in = url.openStream();
-            try {
-                JarInputStream jin = new JarInputStream(in);
-                Manifest mf = jin.getManifest();
-                Attributes attr = mf.getMainAttributes();
-                String bsn = attr.getValue(Constants.BUNDLE_SYMBOLICNAME);
-                String ver = attr.getValue(Constants.BUNDLE_VERSION);
-                BundleStatus st = new BundleStatus();
-                st.setBundleSymbolicName(bsn);
-                st.setVersion(ver);
-                st.setLocation(loc);
-                st.setStatus(isStarted(loc) ? Bundle.ACTIVE : Bundle.INSTALLED);
-                ret.add(st);
-            }
-            finally {
-                try
-                {
-                    in.close();
-                }
-                catch (IOException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
-        return ret.toArray(new BundleStatus[ret.size()] );
-    }
+    }    
 }
