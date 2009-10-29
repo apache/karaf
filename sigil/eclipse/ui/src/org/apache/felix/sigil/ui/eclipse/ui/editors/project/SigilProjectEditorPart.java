@@ -53,7 +53,9 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IFormPart;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
@@ -68,8 +70,8 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
     private volatile boolean saving = false;
     private int dependenciesPageIndex;
 
-    // XXX-FIXME-XXX
-    private Image errorImage = null; //SigilUI.imageDescriptorFromPlugin(SigilUI.PLUGIN_ID, "icons/error.gif").createImage();
+    private Image errorImage = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+
     private PropertiesForm textPage;
 
 
