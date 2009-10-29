@@ -22,12 +22,12 @@ package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.ui.eclipse.ui.SigilUI;
 import org.apache.felix.sigil.ui.eclipse.ui.form.SigilPage;
-import org.apache.felix.sigil.ui.eclipse.ui.util.ModelLabelProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -48,6 +48,8 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
+import org.eclipse.ui.model.BaseWorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 
 /**
@@ -93,8 +95,8 @@ public class ResourceBuildSection extends AbstractResourceSection implements ICh
 
         viewer = new CheckboxTreeViewer( tree );
         IProject base = getProjectModel().getProject();
-        viewer.setContentProvider( new ContainerTreeProvider() );
-        viewer.setLabelProvider( new ModelLabelProvider() );
+        viewer.setContentProvider(new BaseWorkbenchContentProvider());
+        viewer.setLabelProvider(new WorkbenchLabelProvider());
         viewer.addCheckStateListener( this );
         resourcesFilter = new ExcludedResourcesFilter();
         viewer.addFilter( resourcesFilter );
