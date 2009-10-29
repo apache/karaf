@@ -3881,7 +3881,13 @@ ex.printStackTrace();
         {
             IWire candidateWire = null;
 
-            if (importer.isResolved())
+            // We cannot dynamically import if the module is already resolved or
+            // if it is not allowed, so check that first. Note: We check if the
+            // dynamic import is allowed without holding any locks, but this is
+            // okay since the resolver will double check later after we have
+            // acquired the global lock below.
+            if (importer.isResolved()
+                && (Resolver.findAllowedDynamicImport(importer, pkgName) != null))
             {
                 // Acquire global lock.
                 boolean locked = acquireGlobalLock();

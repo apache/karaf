@@ -122,127 +122,16 @@ public class Resolver
         ICapability candidate = null;
         Map resolvedModuleWireMap = null;
 
-        // We can only search dynamic imports if the bundle
-        // doesn't import, export, nor require the package in
-        // question. Check these conditions first.
-        if (isDynamicImportAllowed(importer, pkgName))
-        {
-            // Loop through the importer's dynamic requirements to determine if
-            // there is a matching one for the package from which we want to
-            // load a class.
-            IRequirement[] dynamics = importer.getDynamicRequirements();
-            for (int dynIdx = 0; (dynamics != null) && (dynIdx < dynamics.length); dynIdx++)
-            {
-                IRequirement target =
-                    createDynamicRequirement(dynamics[dynIdx], pkgName);
-                if (target != null)
-                {
-                    // See if there is a candidate exporter that satisfies the
-                    // constrained dynamic requirement.
-                    try
-                    {
-                        // Get "resolved" and "unresolved" candidates and put
-                        // the "resolved" candidates first.
-                        ICapability[] resolved = state.getResolvedCandidates(target);
-                        ICapability[] unresolved = state.getUnresolvedCandidates(target);
-                        ICapability[] candidates =
-                            new ICapability[resolved.length + unresolved.length];
-                        System.arraycopy(resolved, 0, candidates, 0, resolved.length);
-                        System.arraycopy(
-                            unresolved, 0, candidates, resolved.length, unresolved.length);
-
-                        // Take the first candidate that can resolve.
-                        for (int candIdx = 0;
-                            (candidate == null) && (candIdx < candidates.length);
-                            candIdx++)
-                        {
-                            try
-                            {
-                                // If a map is returned, then the candidate resolved
-                                // consistently with the importer.
-                                resolvedModuleWireMap =
-                                    resolveDynamicImportCandidate(
-                                        state, candidates[candIdx].getModule(), importer);
-                                if (resolvedModuleWireMap != null)
-                                {
-                                    candidate = candidates[candIdx];
-                                }
-                            }
-                            catch (ResolveException ex)
-                            {
-                                // Ignore candidates that cannot resolve.
-                            }
-                        }
-
-                        if (candidate != null)
-                        {
-                            // Create the wire and add it to the module.
-                            Object[] result = new Object[2];
-                            result[0] = new R4Wire(
-                                importer, dynamics[dynIdx], candidate.getModule(),
-                                candidate);
-                            result[1] = resolvedModuleWireMap;
-                            return result;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        m_logger.log(Logger.LOG_ERROR, "Unable to dynamically import package.", ex);
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-// TODO: FRAGMENT - This is only public so we could avoid merging fragments when
-//       when it wasn't necessary for dynamic imports. We need to rethink how we
-//       do fragment merging...probably merging as bundles are installed would be
-//       better.
-    public static boolean isDynamicImportAllowed(IModule importer, String pkgName)
-    {
-        // If any of the module exports this package, then we cannot
-        // attempt to dynamically import it.
-        ICapability[] caps = importer.getCapabilities();
-        for (int i = 0; (caps != null) && (i < caps.length); i++)
-        {
-            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
-                && caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
-            {
-                return false;
-            }
-        }
-        // If any of our wires have this package, then we cannot
-        // attempt to dynamically import it.
-        IWire[] wires = importer.getWires();
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
-        {
-            if (wires[i].hasPackage(pkgName))
-            {
-                return false;
-            }
-        }
-        // Ok to attempt to dynamically import the package.
-        return true;
-    }
-
-    private static IRequirement createDynamicRequirement(IRequirement dynReq, String pkgName)
-    {
-        IRequirement req = null;
-
-        // First check to see if the dynamic requirement matches the
-        // package name; this means we have to do wildcard matching.
-        String dynPkgName = ((Requirement) dynReq).getTargetName();
-        boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
-        // Remove the "*", but keep the "." if wildcarded.
-        dynPkgName = (wildcard)
-            ? dynPkgName.substring(0, dynPkgName.length() - 1) : dynPkgName;
-        // If the dynamic requirement matches the package name, then
-        // create a new requirement for the specific package.
-        if (dynPkgName.equals("*") ||
-            pkgName.equals(dynPkgName) ||
-            (wildcard && pkgName.startsWith(dynPkgName)))
+        // We can only create a dynamic import if the following
+        // conditions are met:
+        // 1. The package in question is not already imported.
+        // 2. The package in question is not accessible via require-bundle.
+        // 3. The package in question is not exported by the bundle.
+        // 4. The package in question matches a dynamic import of the bundle.
+        // The following call checks all of these conditions and returns
+        // a matching dynamic requirement if possible.
+        IRequirement dynReq = findAllowedDynamicImport(importer, pkgName);
+        if (dynReq != null)
         {
             // Create a new requirement based on the dynamic requirement,
             // but substitute the precise package name for which we are
@@ -261,10 +150,115 @@ public class Resolver
                     break;
                 }
             }
-            req = new Requirement(ICapability.PACKAGE_NAMESPACE, dirs, newAttrs);
+            IRequirement target = new Requirement(ICapability.PACKAGE_NAMESPACE, dirs, newAttrs);
+
+            // See if there is a candidate exporter that satisfies the
+            // constrained dynamic requirement.
+            try
+            {
+                // Get "resolved" and "unresolved" candidates and put
+                // the "resolved" candidates first.
+                ICapability[] resolved = state.getResolvedCandidates(target);
+                ICapability[] unresolved = state.getUnresolvedCandidates(target);
+                ICapability[] candidates =
+                    new ICapability[resolved.length + unresolved.length];
+                System.arraycopy(resolved, 0, candidates, 0, resolved.length);
+                System.arraycopy(
+                    unresolved, 0, candidates, resolved.length, unresolved.length);
+
+                // Take the first candidate that can resolve.
+                for (int candIdx = 0;
+                    (candidate == null) && (candIdx < candidates.length);
+                    candIdx++)
+                {
+                    try
+                    {
+                        // If a map is returned, then the candidate resolved
+                        // consistently with the importer.
+                        resolvedModuleWireMap =
+                            resolveDynamicImportCandidate(
+                                state, candidates[candIdx].getModule(), importer);
+                        if (resolvedModuleWireMap != null)
+                        {
+                            candidate = candidates[candIdx];
+                        }
+                    }
+                    catch (ResolveException ex)
+                    {
+                        // Ignore candidates that cannot resolve.
+                    }
+                }
+
+                if (candidate != null)
+                {
+                    // Create the wire and add it to the module.
+                    Object[] result = new Object[2];
+                    result[0] = new R4Wire(
+                        importer, dynReq, candidate.getModule(),
+                        candidate);
+                    result[1] = resolvedModuleWireMap;
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                m_logger.log(Logger.LOG_ERROR, "Unable to dynamically import package.", ex);
+            }
         }
 
-        return req;
+        return null;
+    }
+
+    public static IRequirement findAllowedDynamicImport(IModule importer, String pkgName)
+    {
+        // If any of the module exports this package, then we cannot
+        // attempt to dynamically import it.
+        ICapability[] caps = importer.getCapabilities();
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        {
+            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                && caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
+            {
+                return null;
+            }
+        }
+        // If any of our wires have this package, then we cannot
+        // attempt to dynamically import it.
+        IWire[] wires = importer.getWires();
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            if (wires[i].hasPackage(pkgName))
+            {
+                return null;
+            }
+        }
+
+        // Loop through the importer's dynamic requirements to determine if
+        // there is a matching one for the package from which we want to
+        // load a class.
+        IRequirement[] dynamics = importer.getDynamicRequirements();
+        for (int dynIdx = 0;
+            (dynamics != null) && (dynIdx < dynamics.length);
+            dynIdx++)
+        {
+            // First check to see if the dynamic requirement matches the
+            // package name; this means we have to do wildcard matching.
+            String dynPkgName = ((Requirement) dynamics[dynIdx]).getTargetName();
+            boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
+            // Remove the "*", but keep the "." if wildcarded.
+            dynPkgName = (wildcard)
+                ? dynPkgName.substring(0, dynPkgName.length() - 1) : dynPkgName;
+            // If the dynamic requirement matches the package name, then
+            // create a new requirement for the specific package.
+            if (dynPkgName.equals("*") ||
+                pkgName.equals(dynPkgName) ||
+                (wildcard && pkgName.startsWith(dynPkgName)))
+            {
+                return dynamics[dynIdx];
+            }
+        }
+
+        return null;
     }
 
     private Map resolveDynamicImportCandidate(
