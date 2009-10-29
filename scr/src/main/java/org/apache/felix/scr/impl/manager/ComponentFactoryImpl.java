@@ -30,6 +30,7 @@ import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
@@ -110,8 +111,14 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         cm.activateInternal();
 
         final ComponentInstance instance = cm.getComponentInstance();
-        m_componentInstances.put( cm, instance );
+        if ( instance == null )
+        {
+            // activation failed, clean up component manager
+            cm.dispose();
+            throw new ComponentException( "Failed activating component" );
+        }
 
+        m_componentInstances.put( cm, instance );
         return instance;
     }
 

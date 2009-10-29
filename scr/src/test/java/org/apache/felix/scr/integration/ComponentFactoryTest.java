@@ -32,6 +32,7 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
 
@@ -93,5 +94,111 @@ public class ComponentFactoryTest extends ComponentTestBase
 
         TestCase.assertEquals( 0, instanceMap.size() );
         TestCase.assertFalse( instanceMap.containsValue( instance ) );
+    }
+
+
+    @Test
+    public void test_component_factory_disable_factory() throws InvalidSyntaxException
+    {
+        // tests components remain alive after factory has been disabled
+
+        final String componentname = "factory.component";
+        final String componentfactory = "factory.component.factory";
+
+        final Component component = findComponentByName( componentname );
+
+        TestCase.assertNotNull( component );
+        TestCase.assertFalse( component.isDefaultEnabled() );
+
+        TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
+
+        component.enable();
+        delay();
+
+        TestCase.assertEquals( Component.STATE_FACTORY, component.getState() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
+
+        final ServiceReference[] refs = bundleContext.getServiceReferences( ComponentFactory.class.getName(), "("
+            + ComponentConstants.COMPONENT_FACTORY + "=" + componentfactory + ")" );
+        TestCase.assertNotNull( refs );
+        TestCase.assertEquals( 1, refs.length );
+        final ComponentFactory factory = ( ComponentFactory ) bundleContext.getService( refs[0] );
+        TestCase.assertNotNull( factory );
+
+        Hashtable<String, String> props = new Hashtable<String, String>();
+        props.put( PROP_NAME, PROP_NAME );
+        final ComponentInstance instance = factory.newInstance( props );
+        TestCase.assertNotNull( instance );
+
+        TestCase.assertNotNull( instance.getInstance() );
+        TestCase.assertEquals( SimpleComponent.INSTANCE, instance.getInstance() );
+        TestCase.assertEquals( PROP_NAME, SimpleComponent.INSTANCE.getProperty( PROP_NAME ) );
+
+        final Map<?, ?> instanceMap = ( Map<?, ?> ) getFieldValue( component, "m_componentInstances" );
+        TestCase.assertNotNull( instanceMap );
+        TestCase.assertEquals( 1, instanceMap.size() );
+        TestCase.assertTrue( instanceMap.containsValue( instance ) );
+
+        // disable the factory
+        component.disable();
+        delay();
+
+        // factory is disabled but the instance is still alive
+        TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
+        TestCase.assertNotNull( SimpleComponent.INSTANCE );
+        TestCase.assertEquals( 1, instanceMap.size() );
+        TestCase.assertTrue( instanceMap.containsValue( instance ) );
+
+        instance.dispose();
+        TestCase.assertNull( SimpleComponent.INSTANCE );
+
+        TestCase.assertEquals( 0, instanceMap.size() );
+        TestCase.assertFalse( instanceMap.containsValue( instance ) );
+    }
+
+
+    @Test
+    public void test_component_factory_newInstance_failure() throws InvalidSyntaxException
+    {
+        final String componentname = "factory.component";
+        final String componentfactory = "factory.component.factory";
+
+        final Component component = findComponentByName( componentname );
+
+        TestCase.assertNotNull( component );
+        TestCase.assertFalse( component.isDefaultEnabled() );
+
+        TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
+
+        component.enable();
+        delay();
+
+        TestCase.assertEquals( Component.STATE_FACTORY, component.getState() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
+
+        final ServiceReference[] refs = bundleContext.getServiceReferences( ComponentFactory.class.getName(), "("
+            + ComponentConstants.COMPONENT_FACTORY + "=" + componentfactory + ")" );
+        TestCase.assertNotNull( refs );
+        TestCase.assertEquals( 1, refs.length );
+        final ComponentFactory factory = ( ComponentFactory ) bundleContext.getService( refs[0] );
+        TestCase.assertNotNull( factory );
+
+        Hashtable<String, String> props = new Hashtable<String, String>();
+        props.put( PROP_NAME, PROP_NAME );
+        props.put( SimpleComponent.PROP_ACTIVATE_FAILURE, "Requested Failure" );
+        try {
+            final ComponentInstance instance = factory.newInstance( props );
+            TestCase.assertNotNull( instance );
+            TestCase.fail("Expected newInstance method to fail with ComponentException");
+        } catch (ComponentException ce) {
+            // this is expected !
+        }
+
+        final Map<?, ?> instanceMap = ( Map<?, ?> ) getFieldValue( component, "m_componentInstances" );
+        TestCase.assertNotNull( instanceMap );
+        TestCase.assertTrue( instanceMap.isEmpty() );
+        TestCase.assertNull( SimpleComponent.INSTANCE );
     }
 }

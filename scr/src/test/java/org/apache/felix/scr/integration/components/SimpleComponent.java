@@ -33,11 +33,15 @@ import org.osgi.service.component.ComponentContext;
 public class SimpleComponent
 {
 
-    public static SimpleComponent INSTANCE;
+    // component configuration property whose existence causes the
+    // activate method to fail
+    public static final String PROP_ACTIVATE_FAILURE = "request.activation.failure";
 
     public static final Map<Long, SimpleComponent> INSTANCES = new HashMap<Long, SimpleComponent>();
 
     public static final Set<SimpleComponent> PREVIOUS_INSTANCES = new HashSet<SimpleComponent>();
+
+    public static SimpleComponent INSTANCE;
 
     private Map<?, ?> m_config;
 
@@ -53,6 +57,12 @@ public class SimpleComponent
     @SuppressWarnings("unused")
     private void activate( ComponentContext activateContext, Map<?, ?> config )
     {
+        // fail activation if requested so
+        if ( config.containsKey( PROP_ACTIVATE_FAILURE ) )
+        {
+            throw new RuntimeException( String.valueOf( config.get( PROP_ACTIVATE_FAILURE ) ) );
+        }
+
         m_id = ( Long ) config.get( ComponentConstants.COMPONENT_ID );
         m_activateContext = activateContext;
 
