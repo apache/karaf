@@ -53,20 +53,17 @@ public class DependencyManager implements ServiceListener, Reference
         | AbstractComponentManager.STATE_ACTIVATING | AbstractComponentManager.STATE_ACTIVE
         | AbstractComponentManager.STATE_REGISTERED | AbstractComponentManager.STATE_FACTORY;
 
-    // the ServiceReference class instance
-    private static final Class SERVICE_REFERENCE_CLASS = ServiceReference.class;
-
     // pseudo service to mark a bound service without actual service instance
     private static final Object BOUND_SERVICE_SENTINEL = new Object();
 
     // the component to which this dependency belongs
-    private AbstractComponentManager m_componentManager;
+    private final AbstractComponentManager m_componentManager;
 
     // Reference to the metadata
-    private ReferenceMetadata m_dependencyMetadata;
+    private final ReferenceMetadata m_dependencyMetadata;
 
     // The map of bound services indexed by their ServiceReference
-    private Map m_bound;
+    private final Map m_bound;
 
     // the number of matching services registered in the system
     private int m_size;
@@ -77,14 +74,8 @@ public class DependencyManager implements ServiceListener, Reference
     // the bind method
     private BindMethod m_bind;
 
-    // whether the bind method takes a service reference
-    private boolean m_bindUsesReference;
-
     // the unbind method
     private UnbindMethod m_unbind;
-
-    // whether the unbind method takes a service reference
-    private boolean m_unbindUsesReference;
 
     // the target service filter string
     private String m_target;
@@ -107,8 +98,17 @@ public class DependencyManager implements ServiceListener, Reference
         // setup the target filter from component descriptor
         setTargetFilter( m_dependencyMetadata.getTarget() );
 
-        m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager " + getName() + " created: filter="
-            + getTarget() + ", interface=" + m_dependencyMetadata.getInterface(), null );
+        // dump the reference information if DEBUG is enabled
+        if ( m_componentManager.isLogEnabled( LogService.LOG_DEBUG ) )
+        {
+            m_componentManager
+                .log(
+                    LogService.LOG_DEBUG,
+                    "Dependency Manager {0} created: interface={1}, filter={2}, policy={3}, cardinality={4}, bind={5}, unbind={6}",
+                    new Object[]
+                        { getName(), dependency.getInterface(), dependency.getTarget(), dependency.getPolicy(),
+                            dependency.getCardinality(), dependency.getBind(), dependency.getUnbind() }, null );
+        }
     }
 
     /**
@@ -474,7 +474,7 @@ public class DependencyManager implements ServiceListener, Reference
      * bound services. This list will not be empty if the service lookup
      * method is used by the component to access the service.
      */
-    void dispose()
+    void disable()
     {
         BundleContext context = m_componentManager.getActivator().getBundleContext();
         context.removeServiceListener( this );
@@ -490,6 +490,9 @@ public class DependencyManager implements ServiceListener, Reference
                 ungetService( boundRefs[i] );
             }
         }
+
+        // reset the target filter from component descriptor
+        setTargetFilter( m_dependencyMetadata.getTarget() );
     }
 
 
@@ -825,6 +828,7 @@ public class DependencyManager implements ServiceListener, Reference
             m_componentInstance = null;
             m_bind = null;
             m_unbind = null;
+            m_bound.clear();
 
         }
     }

@@ -308,9 +308,9 @@ public class ScrCommand implements Command
             return;
         }
 
-        if ( component.getState() == Component.STATE_DESTROYED )
+        if ( component.getState() == Component.STATE_DISPOSED )
         {
-            err.println( "Component " + component.getName() + " already destroyed, cannot change state" );
+            err.println( "Component " + component.getName() + " already disposed, cannot change state" );
         }
         else if ( enable )
         {
@@ -420,6 +420,8 @@ public class ScrCommand implements Command
         {
             case Component.STATE_DISABLED:
                 return "disabled";
+            case Component.STATE_ENABLING:
+                return "enabling";
             case Component.STATE_ENABLED:
                 return "enabled";
             case Component.STATE_UNSATISFIED:
@@ -434,8 +436,12 @@ public class ScrCommand implements Command
                 return "factory";
             case Component.STATE_DEACTIVATING:
                 return "deactivating";
-            case Component.STATE_DESTROYED:
-                return "destroyed";
+            case Component.STATE_DISABLING:
+                return "disabling";
+            case Component.STATE_DISPOSING:
+                return "disposing";
+            case Component.STATE_DISPOSED:
+                return "disposed";
             default:
                 return String.valueOf( state );
         }

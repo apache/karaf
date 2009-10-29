@@ -104,7 +104,8 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
         cm.setFactoryProperties( dictionary );
         cm.reconfigure( m_configuration );
-        // enable synchronously
+
+        // enable and activate immediately
         cm.enableInternal();
         cm.activateInternal();
 

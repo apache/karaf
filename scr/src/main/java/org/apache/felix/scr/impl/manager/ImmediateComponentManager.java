@@ -88,17 +88,6 @@ public class ImmediateComponentManager extends AbstractComponentManager
     }
 
 
-    /**
-     * Before doing real disposal, we also have to unregister the managed
-     * service which was registered when the instance was created.
-     */
-    public synchronized void dispose( final int reason )
-    {
-        // really dispose off this manager instance
-        disposeInternal( reason );
-    }
-
-
     ComponentHolder getComponentHolder()
     {
         return m_componentHolder;

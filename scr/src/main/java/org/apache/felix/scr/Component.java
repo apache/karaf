@@ -40,8 +40,18 @@ public interface Component
     static final int STATE_DISABLED = 1;
 
     /**
+     * The Component is being enabled (value is 512). After the component has
+     * been enabled it enters the {@link #STATE_UNSATISFIED} state.
+     * @since 1.2
+     */
+    static final int STATE_ENABLING = 512;
+
+    /**
      * The Component has been enabled and is now going to be activated (value
      * is 2).
+     * @deprecated as of version 1.2 the enabled state is collapsed into the
+     *      {@link #STATE_UNSATISFIED} state. This status code is never returned
+     *      from the {@link #getState()} method.
      */
     static final int STATE_ENABLED = 2;
 
@@ -88,11 +98,37 @@ public interface Component
     static final int STATE_DEACTIVATING = 128;
 
     /**
+     * The Component is being disabled (value is 1024). After the component has
+     * been disabled it enters the {@link #STATE_DISABLED} state.
+     * @since 1.2
+     */
+    static final int STATE_DISABLING = 1024;
+
+    /**
+     * The Component is being disposed off (value is 2048). After the component
+     * has been disposed off it enters the {@link #STATE_DESTROYED} state.
+     * @since 1.2
+     */
+    static final int STATE_DISPOSING = 2048;
+
+    /**
      * The Component has been destroyed and cannot be used any more (value is
      * 256). This state is only used when the bundle declaring the component
      * is being stopped and all components have to be removed.
+     * @deprecated as of version 1.2 this constant has been renamed to
+     *      {@link #STATE_DISPOSED}.
      */
     static final int STATE_DESTROYED = 256;
+
+    /**
+     * The Component has been disposed off and cannot be used any more (value is
+     * 256). This state is used when the bundle declaring the component
+     * is being stopped and all components have to be removed. This status is
+     * also the final status of a component after the
+     * <code>ComponentInstance.dispose()</code> method has been called.
+     * @since 1.2
+     */
+    static final int STATE_DISPOSED = 256;
 
 
     /**

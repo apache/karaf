@@ -50,12 +50,12 @@ public abstract class ComponentActivatorTask implements Runnable
     public void run()
     {
         // fail, if the bundle is not active
-        if ( component.getState() == Component.STATE_DESTROYED )
+        if ( component.getState() == Component.STATE_DISPOSED )
         {
             // cannot use bundle to log because it is not accessible from the
             // component if the component is destroyed
             Activator.log( LogService.LOG_WARNING, null, "Cannot run task '" + this
-                + "': Component has already been destroyed", null );
+                + "': Component has already been disposed", null );
         }
         else if ( !ComponentRegistry.isBundleActive( component.getBundle() ) )
         {

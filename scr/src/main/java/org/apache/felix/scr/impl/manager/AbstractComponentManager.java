@@ -19,6 +19,7 @@
 package org.apache.felix.scr.impl.manager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -65,398 +66,6 @@ public abstract class AbstractComponentManager implements Component
     // The ServiceRegistration
     private volatile ServiceRegistration m_serviceRegistration;
 
-    /**
-     * There are 9 states in all. They are: Disabled, Enabled, Unsatisfied,
-     * Registered, Factory, Active, Destroyed, Activating and Deactivating.
-     * State Enabled is right State Unsatisfied. State Registered, Factory
-     * and Active are the "Satisfied" state in concept. State Activating and
-     * Deactivating are transition states. They will be changed to other state
-     * automatically when work is done.
-     * <p>
-     * The transition cases are listed below.
-     * <ul>
-     * <li>Disabled -(enable)-> Enabled</li>
-     * <li>Disabled -(dispose)-> Destoryed</li>
-     * <li>Enabled -(activate, SUCCESS)-> Satisfied(Registered, Factory or Active)</li>
-     * <li>Enabled -(activate, FAIL)-> Unsatisfied</li>
-     * <li>Enabled -(disable)-> Disabled</li>
-     * <li>Enabled -(dispose)-> Destroyed</li>
-     * <li>Unsatisfied -(activate, SUCCESS)-> Satisfied(Registered, Factory or Active)</li>
-     * <li>Unsatisfied -(activate, FAIL)-> Unsatisfied</li>
-     * <li>Unsatisfied -(disable)-> Disabled</li>
-     * <li>Unsatisfied -(dispose)-> Destroyed</li>
-     * <li>Registered -(getService, SUCCESS)-> Active</li>
-     * <li>Registered -(getService, FAIL)-> Unsatisfied</li>
-     * <li>Satisfied -(deactivate)-> Unsatisfied</li>
-     * </ul>
-     */
-    protected static abstract class State
-    {
-        private final String m_name;
-        private final int m_state;
-
-        protected State( String name, int state )
-        {
-            m_name = name;
-            m_state = state;
-        }
-
-        public String toString()
-        {
-            return m_name;
-        }
-
-        int getState()
-        {
-            return m_state;
-        }
-
-        ServiceReference getServiceReference( AbstractComponentManager acm )
-        {
-            return null;
-        }
-
-        void enableInternal( AbstractComponentManager acm )
-        {
-            acm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_name + ", Event: enable",
-                    null );
-        }
-
-        void disableInternal( AbstractComponentManager acm )
-        {
-            acm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_name + ", Event: disable",
-                    null );
-        }
-
-        void activateInternal( AbstractComponentManager acm )
-        {
-            acm.log(LogService.LOG_DEBUG,
-                    "Current state: " + m_name + ", Event: activate",
-                    null);
-        }
-
-        void deactivateInternal( AbstractComponentManager acm, int reason )
-        {
-            acm.log( LogService.LOG_DEBUG, "Current state: " + m_name + ", Event: deactivate (reason: " + reason + ")",
-                null );
-        }
-
-        void disposeInternal( AbstractComponentManager acm )
-        {
-            acm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_name + ", Event: dispose",
-                    null );
-        }
-
-        Object getService( DelayedComponentManager dcm )
-        {
-            dcm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_name + ", Event: getService",
-                    null );
-            return null;
-        }
-    }
-
-    protected static final class Destroyed extends State
-    {
-        private static final Destroyed m_inst = new Destroyed();
-
-        private Destroyed()
-        {
-            super( "Destroyed", STATE_DESTROYED );
-        }
-
-        static State getInstance()
-        {
-            return m_inst;
-        }
-    }
-
-    protected static final class Disabled extends State
-    {
-        private static final Disabled m_inst = new Disabled();
-
-        private Disabled()
-        {
-            super( "Disabled", STATE_DISABLED );
-        }
-
-        static State getInstance()
-        {
-            return m_inst;
-        }
-
-        void enableInternal( AbstractComponentManager acm )
-        {
-            acm.changeState( Enabled.getInstance() );
-
-            acm.log( LogService.LOG_DEBUG, "Component enabled", null );
-        }
-
-        void disposeInternal( AbstractComponentManager acm )
-        {
-            acm.clear();
-            acm.changeState( Destroyed.getInstance() );
-        }
-    }
-
-    protected static final class Enabled extends State
-    {
-        private static final Enabled m_inst = new Enabled();
-
-        private Enabled()
-        {
-            super( "Enabled", STATE_ENABLED );
-        }
-
-        static State getInstance()
-        {
-            return m_inst;
-        }
-
-        void activateInternal( AbstractComponentManager acm )
-        {
-            ComponentMetadata componentMetadata = acm.getComponentMetadata();
-
-            try
-            {
-                acm.enableDependencyManagers();
-                Unsatisfied.getInstance().activateInternal(acm);
-            }
-            catch (Exception e)
-            {
-                acm.log( LogService.LOG_ERROR, "Failed enabling Component", e );
-                acm.disposeDependencyManagers();
-                acm.loadDependencyManagers( acm.getComponentMetadata() );
-            }
-        }
-
-        void disableInternal( AbstractComponentManager acm )
-        {
-            acm.changeState( Disabled.getInstance() );
-
-            acm.log( LogService.LOG_DEBUG, "Component disabled", null );
-        }
-
-        void disposeInternal( AbstractComponentManager acm )
-        {
-            acm.clear();
-            acm.changeState( Destroyed.getInstance() );
-
-            acm.log( LogService.LOG_DEBUG, "Component disposed", null );
-        }
-    }
-
-    protected static final class Unsatisfied extends State
-    {
-        private static final Unsatisfied m_inst = new Unsatisfied();
-
-        private Unsatisfied()
-        {
-            super( "Unsatisfied", STATE_UNSATISFIED );
-        }
-
-        static State getInstance()
-        {
-            return m_inst;
-        }
-
-        void activateInternal( AbstractComponentManager acm )
-        {
-            acm.changeState( Activating.getInstance() );
-
-            ComponentMetadata componentMetadata = acm.getComponentMetadata();
-            acm.log( LogService.LOG_DEBUG, "Activating component", null );
-
-            // Before creating the implementation object, we are going to
-            // test if we have configuration if such is required
-            if ( !acm.hasConfiguration() && acm.getComponentMetadata().isConfigurationRequired() )
-            {
-                acm.log( LogService.LOG_INFO, "Missing required configuration, cannot activate", null );
-                acm.changeState( Unsatisfied.getInstance() );
-                return;
-            }
-
-            // Before creating the implementation object, we are going to
-            // test if all the mandatory dependencies are satisfied
-            if ( !acm.verifyDependencyManagers( acm.getProperties()) )
-            {
-                acm.log( LogService.LOG_INFO, "Not all dependencies satisified, cannot activate", null );
-                acm.changeState( Unsatisfied.getInstance() );
-                return;
-            }
-
-            // 1. Load the component implementation class
-            // 2. Create the component instance and component context
-            // 3. Bind the target services
-            // 4. Call the activate method, if present
-            if ( !acm.createComponent() )
-            {
-                // component creation failed, not active now
-                acm.log( LogService.LOG_ERROR, "Component instance could not be created, activation failed",
-                        null );
-
-                // set state to unsatisfied
-                acm.changeState( Unsatisfied.getInstance() );
-                return;
-            }
-
-            acm.changeState( acm.getSatisfiedState() );
-
-            acm.registerComponentService();
-        }
-
-        void disableInternal( AbstractComponentManager acm )
-        {
-            ComponentMetadata componentMetadata = acm.getComponentMetadata();
-            acm.log( LogService.LOG_DEBUG, "Disabling component", null );
-
-            // dispose and recreate dependency managers
-            acm.disposeDependencyManagers();
-            acm.loadDependencyManagers( componentMetadata );
-
-            // we are now disabled, ready for re-enablement or complete destroyal
-            acm.changeState( Disabled.getInstance() );
-
-            acm.log( LogService.LOG_DEBUG, "Component disabled", null );
-        }
-
-        void disposeInternal( AbstractComponentManager acm )
-        {
-            acm.disposeDependencyManagers();
-            acm.clear();
-            acm.changeState( Destroyed.getInstance() );
-
-            acm.log( LogService.LOG_DEBUG, "Component disposed", null );
-        }
-    }
-
-    protected static final class Activating extends State
-    {
-        private static final Activating m_inst = new Activating();
-
-        private Activating() {
-            super( "Activating", STATE_ACTIVATING );
-        }
-
-        static State getInstance()
-        {
-            return m_inst;
-        }
-    }
-
-    protected static final class Deactivating extends State
-    {
-        private static final Deactivating m_inst = new Deactivating();
-
-        private Deactivating() {
-            super( "Deactivating", STATE_DEACTIVATING );
-        }
-
-        static State getInstance() {
-            return m_inst;
-        }
-    }
-
-    protected static abstract class Satisfied extends State
-    {
-        protected Satisfied( String name, int state )
-        {
-            super( name, state );
-        }
-
-        ServiceReference getServiceReference( AbstractComponentManager acm )
-        {
-            ServiceRegistration sr = acm.getServiceRegistration();
-            return sr == null ? null : sr.getReference();
-        }
-
-        void deactivateInternal( AbstractComponentManager acm, int reason )
-        {
-            acm.changeState(Deactivating.getInstance());
-
-            ComponentMetadata componentMetadata = acm.getComponentMetadata();
-            acm.log( LogService.LOG_DEBUG, "Deactivating component", null );
-
-            // catch any problems from deleting the component to prevent the
-            // component to remain in the deactivating state !
-            try
-            {
-                acm.unregisterComponentService();
-                acm.deleteComponent( reason );
-            }
-            catch ( Throwable t )
-            {
-                acm.log( LogService.LOG_WARNING, "Component deactivation threw an exception", t );
-            }
-
-            acm.changeState( Unsatisfied.getInstance() );
-            acm.log( LogService.LOG_DEBUG, "Component deactivated", null );
-        }
-    }
-
-    protected static final class Registered extends Satisfied
-    {
-        private static final Registered m_inst = new Registered();
-
-        private Registered() {
-            super( "Registered", STATE_REGISTERED );
-        }
-
-        static State getInstance()
-        {
-            return m_inst;
-        }
-
-        Object getService(DelayedComponentManager dcm)
-        {
-            if ( dcm.createRealComponent() )
-            {
-                dcm.changeState( Active.getInstance() );
-                return dcm.getInstance();
-            }
-
-            super.deactivateInternal( dcm, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED );
-            return null;
-        }
-    }
-
-    protected static final class Factory extends Satisfied
-    {
-        private static final Factory m_inst = new Factory();
-
-        private Factory()
-        {
-            super( "Factory", STATE_FACTORY );
-        }
-
-        static State getInstance()
-        {
-            return m_inst;
-        }
-    }
-
-    protected static final class Active extends Satisfied
-    {
-        private static final Active m_inst = new Active();
-
-        private Active()
-        {
-            super( "Active", STATE_ACTIVE );
-        }
-
-        static State getInstance()
-        {
-            return m_inst;
-        }
-
-        Object getService( DelayedComponentManager dcm )
-        {
-            return dcm.getInstance();
-        }
-    }
 
     /**
      * The constructor receives both the activator and the metadata
@@ -475,7 +84,32 @@ public abstract class AbstractComponentManager implements Component
         m_state = Disabled.getInstance();
         loadDependencyManagers( metadata );
 
-        log( LogService.LOG_DEBUG, "Component created", null );
+        // dump component details
+        if ( isLogEnabled( LogService.LOG_DEBUG ) )
+        {
+            log(
+                LogService.LOG_DEBUG,
+                "Component {0} created: DS={1}, implementation={2}, immediate={3}, default-enabled={4}, factory={5}, configuration-policy={6}, activate={7}, deactivate={8}, modified={9}",
+                new Object[]
+                    { metadata.getName(), new Integer( metadata.getNamespaceCode() ),
+                        metadata.getImplementationClassName(), Boolean.valueOf( metadata.isImmediate() ),
+                        Boolean.valueOf( metadata.isEnabled() ), metadata.getFactoryIdentifier(),
+                        metadata.getConfigurationPolicy(), metadata.getActivate(), metadata.getDeactivate(),
+                        metadata.getModified() }, null );
+
+            if ( metadata.getServiceMetadata() != null )
+            {
+                log( LogService.LOG_DEBUG, "Component {0} Services: servicefactory={1}, services={2}", new Object[]
+                    { metadata.getName(), Boolean.valueOf( metadata.getServiceMetadata().isServiceFactory() ),
+                        Arrays.asList( metadata.getServiceMetadata().getProvides() ) }, null );
+            }
+
+            if ( metadata.getProperties() != null )
+            {
+                log( LogService.LOG_DEBUG, "Component {0} Properties: {1}", new Object[]
+                    { metadata.getName(), metadata.getProperties() }, null );
+            }
+        }
     }
 
 
@@ -549,6 +183,7 @@ public abstract class AbstractComponentManager implements Component
     }
 
     //---------- Component interface ------------------------------------------
+
     public long getId()
     {
         return m_componentId;
@@ -649,6 +284,27 @@ public abstract class AbstractComponentManager implements Component
     }
 
     //-------------- atomic transition methods -------------------------------
+
+    final void enableInternal()
+    {
+        m_state.enable( this );
+    }
+
+    final void activateInternal()
+    {
+        m_state.activate( this );
+    }
+
+    final void deactivateInternal( int reason )
+    {
+        m_state.deactivate( this, reason );
+    }
+
+    final void disableInternal()
+    {
+        m_state.disable( this );
+    }
+
     /**
      * Disposes off this component deactivating and disabling it first as
      * required. After disposing off the component, it may not be used anymore.
@@ -658,34 +314,11 @@ public abstract class AbstractComponentManager implements Component
      * method has to actually complete before other actions like bundle stopping
      * may continue.
      */
-    synchronized final void enableInternal()
+    final void disposeInternal( int reason )
     {
-        m_state.enableInternal( this );
-    }
-
-    synchronized final void disableInternal()
-    {
-        m_state.disableInternal( this );
-    }
-
-    synchronized final void activateInternal()
-    {
-        m_state.activateInternal( this );
-    }
-
-    synchronized final void deactivateInternal( int reason )
-    {
-        m_state.deactivateInternal( this, reason );
-    }
-
-    synchronized final void disposeInternal( int reason )
-    {
-        m_state.deactivateInternal( this, reason );
-        // For the sake of the performance(no need to loadDependencyManagers again),
-        // the disable transition is integrated into the destroy transition.
-        // That is to say, state "Enabled" goes directly into state "Desctroyed"
-        // in the event "dipose".
-        m_state.disposeInternal( this );
+        m_state.deactivate( this, reason );
+        m_state.disable( this );
+        m_state.dispose( this );
     }
 
 
@@ -816,12 +449,37 @@ public abstract class AbstractComponentManager implements Component
     }
 
 
+    /**
+     * Returns <code>true</code> if logging for the given level is enabled.
+     */
+    public boolean isLogEnabled( int level )
+    {
+        BundleComponentActivator activator = getActivator();
+        if ( activator != null )
+        {
+            return activator.isLogEnabled( level );
+        }
+
+        // bundle activator has already been removed, so no logging
+        return false;
+    }
+
+
     public void log( int level, String message, Throwable ex )
     {
         BundleComponentActivator activator = getActivator();
         if ( activator != null )
         {
             activator.log( level, message, getComponentMetadata(), ex );
+        }
+    }
+
+    public void log( int level, String message, Object[] arguments, Throwable ex )
+    {
+        BundleComponentActivator activator = getActivator();
+        if ( activator != null )
+        {
+            activator.log( level, message, arguments, getComponentMetadata(), ex );
         }
     }
 
@@ -943,13 +601,13 @@ public abstract class AbstractComponentManager implements Component
         return null;
     }
 
-    private void disposeDependencyManagers()
+    private void disableDependencyManagers()
     {
         Iterator it = getDependencyManagers();
         while ( it.hasNext() )
         {
             DependencyManager dm = (DependencyManager) it.next();
-            dm.dispose();
+            dm.disable();
         }
     }
 
@@ -1050,13 +708,442 @@ public abstract class AbstractComponentManager implements Component
 
     /**
      * sets the state of the manager
-     **/
+     */
     void changeState( State newState )
     {
-        log( LogService.LOG_DEBUG,
-                "State transition : " + m_state + " -> " + newState,
-                null );
-
+        log( LogService.LOG_DEBUG, "State transition : " + m_state + " -> " + newState, null );
         m_state = newState;
+    }
+
+    //--------- State classes
+
+    /**
+     * There are 12 states in all. They are: Disabled, Unsatisfied,
+     * Registered, Factory, Active, Disposed, as well as the transient states
+     * Enabling, Activating, Deactivating, Disabling, and Disposing.
+     * The Registered, Factory and Active states are the "Satisfied" state in
+     * concept. The tansient states will be changed to other states
+     * automatically when work is done.
+     * <p>
+     * The transition cases are listed below.
+     * <ul>
+     * <li>Disabled -(enable/ENABLING) -> Unsatisifed</li>
+     * <li>Disabled -(dispose/DISPOSING)-> Disposed</li>
+     * <li>Unsatisfied -(activate/ACTIVATING, SUCCESS) -> Satisfied(Registered, Factory or Active)</li>
+     * <li>Unsatisfied -(activate/ACTIVATING, FAIL) -> Unsatisfied</li>
+     * <li>Unsatisfied -(disable/DISABLING) -> Disabled</li>
+     * <li>Registered -(getService, SUCCESS) -> Active</li>
+     * <li>Registered -(getService, FAIL) -> Unsatisfied</li>
+     * <li>Satisfied -(deactivate/DEACTIVATING)-> Unsatisfied</li>
+     * </ul>
+     */
+    protected static abstract class State
+    {
+        private final String m_name;
+        private final int m_state;
+
+
+        protected State( String name, int state )
+        {
+            m_name = name;
+            m_state = state;
+        }
+
+
+        public String toString()
+        {
+            return m_name;
+        }
+
+
+        int getState()
+        {
+            return m_state;
+        }
+
+
+        ServiceReference getServiceReference( AbstractComponentManager acm )
+        {
+            return null;
+        }
+
+
+        Object getService( DelayedComponentManager dcm )
+        {
+            log( dcm, "getService" );
+            return null;
+        }
+
+
+        void enable( AbstractComponentManager acm )
+        {
+            log( acm, "enable" );
+        }
+
+
+        void activate( AbstractComponentManager acm )
+        {
+            log( acm, "activate" );
+        }
+
+
+        void deactivate( AbstractComponentManager acm, int reason )
+        {
+            log( acm, "deactivate (reason: " + reason + ")" );
+        }
+
+
+        void disable( AbstractComponentManager acm )
+        {
+            log( acm, "disable" );
+        }
+
+
+        void dispose( AbstractComponentManager acm )
+        {
+            log( acm, "dispose" );
+        }
+
+
+        private void log( AbstractComponentManager acm, String event )
+        {
+            acm.log( LogService.LOG_DEBUG, "Current state: {0}, Event: {1}", new Object[]
+                { m_name, event }, null );
+        }
+    }
+
+    protected static final class Disabled extends State
+    {
+        private static final Disabled m_inst = new Disabled();
+
+
+        private Disabled()
+        {
+            super( "Disabled", STATE_DISABLED );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+
+
+        void enable( AbstractComponentManager acm )
+        {
+            acm.changeState( Enabling.getInstance() );
+
+            try
+            {
+                acm.enableDependencyManagers();
+                acm.changeState( Unsatisfied.getInstance() );
+                acm.log( LogService.LOG_DEBUG, "Component enabled", null );
+            }
+            catch ( InvalidSyntaxException ise )
+            {
+                // one of the reference target filters is invalid, fail
+                acm.log( LogService.LOG_ERROR, "Failed enabling Component", ise );
+                acm.disableDependencyManagers();
+                acm.changeState( Disabled.getInstance() );
+            }
+        }
+
+
+        void dispose( AbstractComponentManager acm )
+        {
+            acm.changeState( Disposing.getInstance() );
+            acm.log( LogService.LOG_DEBUG, "Disposing component", null );
+            acm.clear();
+            acm.changeState( Disposed.getInstance() );
+
+            acm.log( LogService.LOG_DEBUG, "Component disposed", null );
+        }
+    }
+
+    protected static final class Enabling extends State
+    {
+        private static final Enabling m_inst = new Enabling();
+
+
+        private Enabling()
+        {
+            super( "Enabling", STATE_ENABLING );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+    }
+
+    protected static final class Unsatisfied extends State
+    {
+        private static final Unsatisfied m_inst = new Unsatisfied();
+
+
+        private Unsatisfied()
+        {
+            super( "Unsatisfied", STATE_UNSATISFIED );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+
+
+        void activate( AbstractComponentManager acm )
+        {
+            acm.changeState( Activating.getInstance() );
+
+            acm.log( LogService.LOG_DEBUG, "Activating component", null );
+
+            // Before creating the implementation object, we are going to
+            // test if we have configuration if such is required
+            if ( !acm.hasConfiguration() && acm.getComponentMetadata().isConfigurationRequired() )
+            {
+                acm.log( LogService.LOG_INFO, "Missing required configuration, cannot activate", null );
+                acm.changeState( Unsatisfied.getInstance() );
+                return;
+            }
+
+            // Before creating the implementation object, we are going to
+            // test if all the mandatory dependencies are satisfied
+            if ( !acm.verifyDependencyManagers( acm.getProperties() ) )
+            {
+                acm.log( LogService.LOG_INFO, "Not all dependencies satisified, cannot activate", null );
+                acm.changeState( Unsatisfied.getInstance() );
+                return;
+            }
+
+            // 1. Load the component implementation class
+            // 2. Create the component instance and component context
+            // 3. Bind the target services
+            // 4. Call the activate method, if present
+            if ( !acm.createComponent() )
+            {
+                // component creation failed, not active now
+                acm.log( LogService.LOG_ERROR, "Component instance could not be created, activation failed", null );
+
+                // set state to unsatisfied
+                acm.changeState( Unsatisfied.getInstance() );
+                return;
+            }
+
+            acm.changeState( acm.getSatisfiedState() );
+
+            acm.registerComponentService();
+        }
+
+
+        void disable( AbstractComponentManager acm )
+        {
+            acm.changeState( Disabling.getInstance() );
+
+            acm.log( LogService.LOG_DEBUG, "Disabling component", null );
+
+            // dispose and recreate dependency managers
+            acm.disableDependencyManagers();
+
+            // we are now disabled, ready for re-enablement or complete destroyal
+            acm.changeState( Disabled.getInstance() );
+
+            acm.log( LogService.LOG_DEBUG, "Component disabled", null );
+        }
+    }
+
+    protected static final class Activating extends State
+    {
+        private static final Activating m_inst = new Activating();
+
+
+        private Activating()
+        {
+            super( "Activating", STATE_ACTIVATING );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+    }
+
+    protected static abstract class Satisfied extends State
+    {
+        protected Satisfied( String name, int state )
+        {
+            super( name, state );
+        }
+
+
+        ServiceReference getServiceReference( AbstractComponentManager acm )
+        {
+            ServiceRegistration sr = acm.getServiceRegistration();
+            return sr == null ? null : sr.getReference();
+        }
+
+
+        void deactivate( AbstractComponentManager acm, int reason )
+        {
+            acm.changeState( Deactivating.getInstance() );
+
+            acm.log( LogService.LOG_DEBUG, "Deactivating component", null );
+
+            // catch any problems from deleting the component to prevent the
+            // component to remain in the deactivating state !
+            try
+            {
+                acm.unregisterComponentService();
+                acm.deleteComponent( reason );
+            }
+            catch ( Throwable t )
+            {
+                acm.log( LogService.LOG_WARNING, "Component deactivation threw an exception", t );
+            }
+
+            acm.changeState( Unsatisfied.getInstance() );
+            acm.log( LogService.LOG_DEBUG, "Component deactivated", null );
+        }
+    }
+
+    protected static final class Active extends Satisfied
+    {
+        private static final Active m_inst = new Active();
+
+
+        private Active()
+        {
+            super( "Active", STATE_ACTIVE );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+
+
+        Object getService( DelayedComponentManager dcm )
+        {
+            return dcm.getInstance();
+        }
+    }
+
+    protected static final class Registered extends Satisfied
+    {
+        private static final Registered m_inst = new Registered();
+
+
+        private Registered()
+        {
+            super( "Registered", STATE_REGISTERED );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+
+
+        Object getService( DelayedComponentManager dcm )
+        {
+            if ( dcm.createRealComponent() )
+            {
+                dcm.changeState( Active.getInstance() );
+                return dcm.getInstance();
+            }
+
+            super.deactivate( dcm, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED );
+            return null;
+        }
+    }
+
+    protected static final class Factory extends Satisfied
+    {
+        private static final Factory m_inst = new Factory();
+
+
+        private Factory()
+        {
+            super( "Factory", STATE_FACTORY );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+    }
+
+    protected static final class Deactivating extends State
+    {
+        private static final Deactivating m_inst = new Deactivating();
+
+
+        private Deactivating()
+        {
+            super( "Deactivating", STATE_DEACTIVATING );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+    }
+
+    protected static final class Disabling extends State
+    {
+        private static final Disabling m_inst = new Disabling();
+
+
+        private Disabling()
+        {
+            super( "Disabling", STATE_DISABLING );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+    }
+
+    protected static final class Disposing extends State
+    {
+        private static final Disposing m_inst = new Disposing();
+
+
+        private Disposing()
+        {
+            super( "Disposing", STATE_DISPOSING );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+    }
+
+    protected static final class Disposed extends State
+    {
+        private static final Disposed m_inst = new Disposed();
+
+
+        private Disposed()
+        {
+            super( "Disposed", STATE_DISPOSED );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
     }
 }
