@@ -21,9 +21,6 @@ package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.swt.widgets.Composite;
