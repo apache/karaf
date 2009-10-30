@@ -187,36 +187,33 @@ public class Main {
             storage.mkdirs();
             configProps.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
         }
+        
+        defaultStartLevel = Integer.parseInt(configProps.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+        lockStartLevel = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
+        lockDelay = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
+        configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
+        // Start up the OSGI framework
 
-        try {
-            defaultStartLevel = Integer.parseInt(configProps.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-            lockStartLevel = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
-            lockDelay = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
-            configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
-            // Start up the OSGI framework
-
-            InputStream is = getClass().getResourceAsStream("/META-INF/services/" + FrameworkFactory.class.getName());
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            String factoryClass = br.readLine();
-            br.close();
-            FrameworkFactory factory = (FrameworkFactory) getClass().getClassLoader().loadClass(factoryClass).newInstance();
-            framework = factory.newFramework(new StringMap(configProps, false));
-            framework.start();
-            processAutoProperties(framework.getBundleContext());
-            // Start lock monitor
-            new Thread() {
-                public void run() {
-                    lock(configProps);
-                }
-            }.start();
-        }
-        catch (Exception ex) {
-            setExitCode(-1);
-            throw new Exception("Could not create framework", ex);
-        }
+        InputStream is = getClass().getResourceAsStream("/META-INF/services/" + FrameworkFactory.class.getName());
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        String factoryClass = br.readLine();
+        br.close();
+        FrameworkFactory factory = (FrameworkFactory) getClass().getClassLoader().loadClass(factoryClass).newInstance();
+        framework = factory.newFramework(new StringMap(configProps, false));
+        framework.start();
+        processAutoProperties(framework.getBundleContext());
+        // Start lock monitor
+        new Thread() {
+            public void run() {
+                lock(configProps);
+            }
+        }.start();
     }
 
     public void destroy(boolean await) throws Exception {
+        if (framework == null) {
+            return;
+        }
         try {
             if (await) {
                 framework.waitForStop(0);
@@ -311,9 +308,15 @@ public class Main {
         final Main main = new Main(args);
         try {
             main.launch();
+        } catch (Throwable ex) {
+            main.setExitCode(-1);
+            System.err.println("Could not create framework: " + ex);
+            ex.printStackTrace();
+        }        
+        try {
             main.destroy(true);
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
+            main.setExitCode(-2);
             System.err.println("Error occured shutting down framework: " + ex);
             ex.printStackTrace();
         } finally {
@@ -362,7 +365,7 @@ public class Main {
                             return;
                         }
                     }
-                    throw new Exception("Instance " + args[1] + " not found");
+                    throw new Exception("Instance " + instanceName + " not found");
                 }
             }
         } catch (Exception e) {
@@ -796,8 +799,7 @@ public class Main {
             String key = (String) e.nextElement();
             if (key.startsWith("felix.") ||
                     key.startsWith("karaf.") ||
-                    key.equals("org.osgi.framework.system.packages") ||
-                    key.equals("org.osgi.framework.bootdelegation")) {
+                    key.startsWith("org.osgi.framework.")) {
                 configProps.setProperty(key, System.getProperty(key));
             }
         }
@@ -1063,6 +1065,10 @@ public class Main {
         this.exitCode = exitCode;
     }
 
+    public Framework getFramework() {
+        return framework;
+    }
+    
     public void lock(Properties props) {
         try {
             if (Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"))) {
