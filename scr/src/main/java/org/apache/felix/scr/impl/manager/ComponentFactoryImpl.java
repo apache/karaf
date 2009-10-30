@@ -118,7 +118,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             throw new ComponentException( "Failed activating component" );
         }
 
-        m_componentInstances.put( cm, instance );
+        m_componentInstances.put( cm, cm );
         return instance;
     }
 
