@@ -155,7 +155,7 @@ public class FelixResolverState implements Resolver.ResolverState
                         IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
                         if (modules != null)
                         {
-                            modules = removeModuleFromArray(modules, fragment);
+                            modules = removeModuleFromArray(modules, host);
                             m_unresolvedPkgIndex.put(pkgName, modules);
                         }
                     }
@@ -245,7 +245,7 @@ public class FelixResolverState implements Resolver.ResolverState
                             IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
                             if (modules != null)
                             {
-                                modules = removeModuleFromArray(modules, fragment);
+                                modules = removeModuleFromArray(modules, host);
                                 m_unresolvedPkgIndex.put(pkgName, modules);
                             }
                         }
