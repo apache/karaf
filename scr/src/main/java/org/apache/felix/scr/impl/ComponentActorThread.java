@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -28,7 +28,7 @@ import org.osgi.service.log.LogService;
  * The <code>ComponentActorThread</code> is the thread used to act upon registered
  * components of the service component runtime.
  */
-class ComponentActorThread extends Thread
+class ComponentActorThread implements Runnable
 {
 
     // sentinel task to terminate this thread
@@ -51,7 +51,6 @@ class ComponentActorThread extends Thread
 
     ComponentActorThread()
     {
-        super( "SCR Component Actor" );
         tasks = new LinkedList();
     }
 
@@ -65,7 +64,7 @@ class ComponentActorThread extends Thread
     {
         for ( ;; )
         {
-            Runnable task;
+            final Runnable task;
             synchronized ( tasks )
             {
                 while ( tasks.isEmpty() )

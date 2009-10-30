@@ -332,6 +332,13 @@ public class BundleComponentActivator implements Logger
         log( LogService.LOG_DEBUG, "BundleComponentActivator : Bundle [{0}] STOPPED", new Object[]
             { new Long( m_context.getBundle().getBundleId() ) }, null, null );
 
+        if (m_logService != null) {
+            m_logService.close();
+            m_logService = null;
+        }
+
+        m_componentActor = null;
+        m_componentRegistry = null;
         m_context = null;
     }
 

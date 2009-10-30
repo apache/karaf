@@ -92,7 +92,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener
 
         // create and start the component actor
         m_componentActor = new ComponentActorThread();
-        m_componentActor.start();
+        Thread t = new Thread(m_componentActor, "SCR Component Actor");
+        t.setDaemon( true );
+        t.start();
 
         // register for bundle updates
         context.addBundleListener( this );
@@ -136,21 +138,11 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         // dispose component registry
         m_componentRegistry.dispose();
 
-        // terminate the actor thread and wait for it for a limited time
+        // terminate the actor thread
         if ( m_componentActor != null )
         {
-            // terminate asynchrounous updates
             m_componentActor.terminate();
-
-            // wait for all updates to terminate
-            try
-            {
-                m_componentActor.join( 5000 );
-            }
-            catch ( InterruptedException ie )
-            {
-                // don't really care
-            }
+            m_componentActor = null;
         }
     }
 
