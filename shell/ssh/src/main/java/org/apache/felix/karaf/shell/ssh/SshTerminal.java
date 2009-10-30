@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 
 import jline.Terminal;
 import org.apache.sshd.server.ShellFactory;
+import org.apache.sshd.server.Signal;
 
 public class SshTerminal extends Terminal implements ShellFactory.SignalListener {
 
@@ -88,8 +89,7 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
     public void disableEcho() {
     }
 
-    public void signal(int signal) {
-
+    public void signal(Signal signal) {
     }
 
     public int readVirtualKey(InputStream in) throws IOException {
