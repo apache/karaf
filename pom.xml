@@ -170,13 +170,6 @@
                 <artifactId>org.apache.felix.karaf.client</artifactId>
                 <version>${pom.version}</version>
             </dependency>
-            <!--
-            <dependency>
-                <groupId>org.apache.felix.karaf.deployer</groupId>
-                <artifactId>org.apache.felix.karaf.deployer.filemonitor</artifactId>
-                <version>${pom.version}</version>
-            </dependency>
-            -->
             <dependency>
                 <groupId>org.apache.felix.karaf.deployer</groupId>
                 <artifactId>org.apache.felix.karaf.deployer.spring</artifactId>
@@ -198,8 +191,8 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf</groupId>
-                <artifactId>org.apache.felix.karaf.demos</artifactId>
+                <groupId>org.apache.felix.karaf.demos</groupId>
+                <artifactId>demos</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
@@ -234,17 +227,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix.karaf.shell</groupId>
-                <artifactId>org.apache.felix.karaf.shell.core</artifactId>
-                <version>${pom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix.karaf.shell</groupId>
                 <artifactId>org.apache.felix.karaf.shell.console</artifactId>
-                <version>${pom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix.karaf.shell</groupId>
-                <artifactId>org.apache.felix.karaf.shell.run</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
@@ -299,7 +282,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix.karaf.demos</groupId>
-                <artifactId>smx4web</artifactId>
+                <artifactId>web</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
@@ -544,11 +527,6 @@
                 <version>3.0-alpha-1</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.commons-io</artifactId>
-                <version>${commons.io.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.mina</groupId>
                 <artifactId>mina-core</artifactId>
                 <version>${mina.version}</version>
@@ -576,6 +554,11 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-nop</artifactId>
+                <version>1.4.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
                 <version>1.4.3</version>
             </dependency>
             <dependency>
@@ -608,11 +591,6 @@
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-servlet_2.5_spec</artifactId>
                 <version>${geronimo.servlet.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-annotation_1.0_spec</artifactId>
-                <version>${geronimo.annotation.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.easymock</groupId>
