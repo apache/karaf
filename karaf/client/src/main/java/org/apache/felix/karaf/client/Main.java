@@ -16,17 +16,19 @@
  */
 package org.apache.felix.karaf.client;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.PrintWriter;
 
 import jline.Terminal;
 import org.apache.felix.karaf.shell.console.jline.TerminalFactory;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
+import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 
-import jline.ConsoleReader;
+import org.fusesource.jansi.AnsiConsole;
+import org.slf4j.impl.SimpleLogger;
 
 /**
  * A very simple
@@ -39,6 +41,7 @@ public class Main {
         String user = "karaf";
         String password = "karaf";
         StringBuilder sb = new StringBuilder();
+        int level = 1;
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
@@ -50,6 +53,8 @@ public class Main {
                     user = args[++i];
                 } else if (args[i].equals("-p")) {
                     password = args[++i];
+                } else if (args[i].equals("-v")) {
+                    level++;
                 } else if (args[i].equals("--help")) {
                     System.out.println("Apache Felix Karaf client");
                     System.out.println("  -a [port]     specify the port to connect to");
@@ -57,6 +62,7 @@ public class Main {
                     System.out.println("  -u [user]     specify the user name");
                     System.out.println("  -p [password] specify the password");
                     System.out.println("  --help        shows this help message");
+                    System.out.println("  -v            raise verbosity");
                     System.out.println("  [commands]    commands to run");
                     System.out.println("If no commands are specified, the client will be put in an interactive mode");
                     System.exit(0);
@@ -70,8 +76,7 @@ public class Main {
                 sb.append(' ');
             }
         }
-
-        // TODO: implement sending a direct command
+        SimpleLogger.setLevel(level);
 
         SshClient client = null;
         Terminal terminal = null;
@@ -89,13 +94,11 @@ public class Main {
 			} else {
                 terminal = new TerminalFactory().getTerminal();
  				channel = session.createChannel("shell");
-                ConsoleReader reader = new ConsoleReader(System.in, new PrintWriter(System.out),
-                                                TerminalFactory.class.getResourceAsStream("keybinding.properties"),
-                                                terminal);
-	            channel.setIn(reader.getInput());
-			}
-            channel.setOut(System.out);
-            channel.setErr(System.err);
+                channel.setIn(System.in);
+                ((ChannelShell) channel).setupSensibleDefaultPty();
+            }
+            channel.setOut(AnsiConsole.wrapOutputStream(System.out));
+            channel.setErr(AnsiConsole.wrapOutputStream(System.err));
             channel.open();
             channel.waitFor(ClientChannel.CLOSED, 0);
         } catch (Throwable t) {

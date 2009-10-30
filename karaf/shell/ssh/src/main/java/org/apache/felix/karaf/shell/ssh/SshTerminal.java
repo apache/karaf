@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import jline.Terminal;
+import org.apache.sshd.common.PtyMode;
 import org.apache.sshd.server.ShellFactory;
 import org.apache.sshd.server.Signal;
 
@@ -46,6 +47,7 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
     private String encoding = System.getProperty("input.encoding", "UTF-8");
     private ReplayPrefixOneCharInputStream replayStream = new ReplayPrefixOneCharInputStream(encoding);
     private InputStreamReader replayReader;
+    private boolean isWindowsTerminal;
 
     public SshTerminal(ShellFactory.Environment environment) {
         this.environment = environment;
@@ -55,6 +57,9 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        Integer verase = this.environment.getPtyModes().get(PtyMode.VERASE);
+        backspaceDeleteSwitched = verase != null && verase == DELETE;
+        this.isWindowsTerminal = "windows".equals(environment.getEnv().get("TERM"));
     }
 
     public void initializeTerminal() throws Exception {
@@ -63,12 +68,17 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
     public void restoreTerminal() throws Exception {
     }
 
+    @Override
+    public boolean isANSISupported() {
+        return !isWindowsTerminal;
+    }
+
     public int getTerminalWidth() {
-        return Integer.valueOf(this.environment.getEnv().get("COLUMNS"));
+        return Integer.valueOf(this.environment.getEnv().get(ShellFactory.Environment.ENV_COLUMNS));
     }
 
     public int getTerminalHeight() {
-        return Integer.valueOf(this.environment.getEnv().get("LINES"));
+        return Integer.valueOf(this.environment.getEnv().get(ShellFactory.Environment.ENV_LINES));
     }
 
     public boolean isSupported() {
@@ -97,8 +107,8 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
 
         if (backspaceDeleteSwitched)
             if (c == DELETE)
-                c = '\b';
-            else if (c == '\b')
+                c = BACKSPACE;
+            else if (c == BACKSPACE)
                 c = DELETE;
 
         // in Unix terminals, arrow keys are represented by
@@ -215,5 +225,5 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
             return byteLength - byteRead;
         }
     }
-
+    
 }
