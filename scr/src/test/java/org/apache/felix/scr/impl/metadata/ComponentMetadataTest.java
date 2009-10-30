@@ -548,6 +548,92 @@ public class ComponentMetadataTest extends TestCase
     }
 
 
+    public void test_property_no_name_ds10()
+    {
+        final ComponentMetadata cm = createComponentMetadata( null, null );
+        cm.addProperty( createPropertyMetadata( null, null, "" ) );
+        try
+        {
+            cm.validate( logger );
+            fail( "Expect validation failure for missing property name" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_property_no_name_ds11()
+    {
+        final ComponentMetadata cm = createComponentMetadata11( null, null );
+        cm.addProperty( createPropertyMetadata( null, null, "" ) );
+        try
+        {
+            cm.validate( logger );
+            fail( "Expect validation failure for missing property name" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_property_char_ds10() throws ComponentException
+    {
+        final ComponentMetadata cm = createComponentMetadata( null, null );
+        PropertyMetadata prop = createPropertyMetadata( "x", "Char", "x" );
+        cm.addProperty( prop );
+        cm.validate( logger );
+        assertTrue( prop.getValue() instanceof Character );
+        assertEquals( new Character( 'x' ), prop.getValue() );
+    }
+
+
+    public void test_property_char_ds11()
+    {
+        final ComponentMetadata cm = createComponentMetadata11( null, null );
+        cm.addProperty( createPropertyMetadata( "x", "Char", "x" ) );
+        try
+        {
+            cm.validate( logger );
+            fail( "Expect validation failure for illegal property type Char" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_property_character_ds10()
+    {
+        final ComponentMetadata cm = createComponentMetadata( null, null );
+        cm.addProperty( createPropertyMetadata( "x", "Character", "x" ) );
+        try
+        {
+            cm.validate( logger );
+            fail( "Expect validation failure for illegal property type Character" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_property_character_ds11() throws ComponentException
+    {
+        final ComponentMetadata cm = createComponentMetadata11( null, null );
+        PropertyMetadata prop = createPropertyMetadata( "x", "Character", "x" );
+        cm.addProperty( prop );
+        cm.validate( logger );
+        assertTrue( prop.getValue() instanceof Character );
+        assertEquals( new Character( 'x' ), prop.getValue() );
+    }
+
+
     //---------- Helper methods
 
     // Creates DS 1.0 Component Metadata
@@ -603,6 +689,25 @@ public class ComponentMetadataTest extends TestCase
         ReferenceMetadata meta = new ReferenceMetadata();
         meta.setName( name );
         meta.setInterface( "place.holder" );
+        return meta;
+    }
+
+
+    private PropertyMetadata createPropertyMetadata( String propertyName, String type, String value )
+    {
+        PropertyMetadata meta = new PropertyMetadata();
+        if ( propertyName != null )
+        {
+            meta.setName( propertyName );
+        }
+        if ( type != null )
+        {
+            meta.setType( type );
+        }
+        if ( value != null )
+        {
+            meta.setValue( value );
+        }
         return meta;
     }
 }

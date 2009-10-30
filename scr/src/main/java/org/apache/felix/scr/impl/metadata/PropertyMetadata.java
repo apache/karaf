@@ -199,41 +199,66 @@ public class PropertyMetadata {
         {
             throw componentMetadata.validationFailure( "Property name attribute is mandatory" );
         }
+
+        // check character type name
+        if ( componentMetadata.isDS11() && m_type.equals( "Char" ) )
+        {
+            throw componentMetadata
+                .validationFailure( "Illegal property type 'Char' used for DS 1.1 descriptor, use 'Character' instead" );
+        }
+        else if ( !componentMetadata.isDS11() && m_type.equals( "Character" ) )
+        {
+            throw componentMetadata
+                .validationFailure( "Illegal property type 'Character' used for DS 1.0 descriptor, use 'Char' instead" );
+        }
     }
 
-    private Object toType(String value) {
+
+    private Object toType( String value )
+    {
         // 112.4.5 Parsing of the value is done by the valueOf(String) method (P. 291)
         // Should the type accept lowercase too?
-        if(m_type.equals("String")) {
-            return String.valueOf(value);
+        if ( m_type.equals( "String" ) )
+        {
+            return String.valueOf( value );
         }
-        else if(m_type.equals("Long")) {
-            return Long.valueOf(value);
+        else if ( m_type.equals( "Long" ) )
+        {
+            return Long.valueOf( value );
         }
-        else if(m_type.equals("Double")) {
-            return Double.valueOf(value);
+        else if ( m_type.equals( "Double" ) )
+        {
+            return Double.valueOf( value );
         }
-        else if(m_type.equals("Float")) {
-            return Float.valueOf(value);
+        else if ( m_type.equals( "Float" ) )
+        {
+            return Float.valueOf( value );
         }
-        else if(m_type.equals("Integer")) {
-            return Integer.valueOf(value);
+        else if ( m_type.equals( "Integer" ) )
+        {
+            return Integer.valueOf( value );
         }
-        else if(m_type.equals("Byte")) {
-            return Byte.valueOf(value);
+        else if ( m_type.equals( "Byte" ) )
+        {
+            return Byte.valueOf( value );
         }
-        else if(m_type.equals("Char")) {
+        else if ( m_type.equals( "Char" ) || m_type.equals( "Character" ) )
+        {
+            // DS 1.1 changes the "Char" type to "Character", here we support both
             char c = ( value.length() > 0 ) ? value.charAt( 0 ) : 0;
             return new Character( c );
         }
-        else if(m_type.equals("Boolean")) {
-            return Boolean.valueOf(value);
+        else if ( m_type.equals( "Boolean" ) )
+        {
+            return Boolean.valueOf( value );
         }
-        else if(m_type.equals("Short")) {
-            return Short.valueOf(value);
+        else if ( m_type.equals( "Short" ) )
+        {
+            return Short.valueOf( value );
         }
-        else {
-            throw new IllegalArgumentException("Undefined property type '"+m_type+"'");
+        else
+        {
+            throw new IllegalArgumentException( "Undefined property type '" + m_type + "'" );
         }
     }
 }
