@@ -419,12 +419,13 @@ public abstract class AbstractComponentManager implements Component
 
         if ( m_serviceRegistration != null )
         {
-            log( LogService.LOG_DEBUG, "unregistering the services", null );
+            log( LogService.LOG_DEBUG, "Unregistering the services", null );
 
             m_serviceRegistration.unregister();
             m_serviceRegistration = null;
         }
     }
+
 
     //**********************************************************************************************************
     public BundleComponentActivator getActivator()
@@ -1120,7 +1121,19 @@ public abstract class AbstractComponentManager implements Component
                 return dcm.getInstance();
             }
 
-            super.deactivate( dcm, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED );
+            // component could not really be created. This may be temporary
+            // so we stay in the registered state but ensure the component
+            // instance is deleted
+            try
+            {
+                dcm.deleteComponent( ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED );
+            }
+            catch ( Throwable t )
+            {
+                dcm.log( LogService.LOG_DEBUG, "Cannot delete incomplete component instance. Ignoring.", t );
+            }
+
+            // no service can be returned (be prepared for more logging !!)
             return null;
         }
     }
