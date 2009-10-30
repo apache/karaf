@@ -19,6 +19,7 @@
 package org.apache.felix.framework;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.*;
 
 import org.apache.felix.framework.util.SecureAction;
@@ -60,9 +61,11 @@ class URLHandlersBundleStreamHandler extends URLStreamHandler
                 Class targetClass = framework.getClass().getClassLoader().loadClass(
                     URLHandlersBundleURLConnection.class.getName());
                 
-                return (URLConnection) m_action.invoke(m_action.getConstructor(targetClass, 
-                    new Class[]{URL.class, framework.getClass().getClassLoader().loadClass(
-                    Felix.class.getName())}), new Object[]{url, framework});
+                Constructor constructor = m_action.getConstructor(targetClass, 
+                        new Class[]{URL.class, framework.getClass().getClassLoader().loadClass(
+                                Felix.class.getName())});
+                m_action.setAccesssible(constructor);
+                return (URLConnection) m_action.invoke(constructor, new Object[]{url, framework});
             }
             catch (Exception ex)
             {
