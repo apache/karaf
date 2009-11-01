@@ -761,14 +761,6 @@ ex.printStackTrace();
                 AdminPermission.EXECUTE));
         }
 
-        synchronized (m_bundleLock) 
-        {
-            if ((getState() & (STARTING | STOPPING)) != 0)
-            {
-                throw new BundleException("Can't stop the system bundle while it is either starting or stopping.");
-            }
-        }
-
         stopBundle(this, true);
     }
 
