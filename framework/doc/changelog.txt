@@ -1,3 +1,17 @@
+Changes from 2.0.1 to 2.0.2
+---------------------------
+
+** Bug
+    * [FELIX-1754] - Usage of BundleContext.getServiceReferences results in failure to activate components
+    * [FELIX-1782] - Errors during start-up on gnu/classpath based VMs (jamvm, kaffe, cacao) and mika
+    * [FELIX-1795] - Bundle version ignored in Fragment-Host header
+    * [FELIX-1834] - java.io.IOException: No framework context found when embedding felix frameworks as bundles
+
+** Improvement
+    * [FELIX-1534] - Improve fragment merging
+    * [FELIX-1781] - Try to reduce object allocations/usage in resolver algorithm
+    * [FELIX-1783] - Eliminate contention on ServiceRegistry.getServiceReferences(String, Filter)
+
 Changes from 2.0.0 to 2.0.1
 ---------------------------
 
