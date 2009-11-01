@@ -2166,12 +2166,12 @@ public class ModuleImpl implements IModule
         {
             // This should never happen.
         }
-        ICapability[] exporters =
+        List exports =
             resolver.getResolvedCandidates(pkgReq);
-        exporters = (exporters.length == 0)
+        exports = (exports.size() == 0)
             ? resolver.getUnresolvedCandidates(pkgReq)
-            : exporters;
-        if (exporters.length > 0)
+            : exports;
+        if (exports.size() > 0)
         {
             boolean classpath = false;
             try
@@ -2188,7 +2188,7 @@ public class ModuleImpl implements IModule
                 // Ignore
             }
 
-            long expId = exporters[0].getModule().getBundle().getBundleId();
+            long expId = ((ICapability) exports.get(0)).getModule().getBundle().getBundleId();
 
             StringBuffer sb = new StringBuffer("*** Class '");
             sb.append(name);

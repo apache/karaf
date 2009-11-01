@@ -158,17 +158,12 @@ public class Resolver
             {
                 // Get "resolved" and "unresolved" candidates and put
                 // the "resolved" candidates first.
-                ICapability[] resolved = state.getResolvedCandidates(target);
-                ICapability[] unresolved = state.getUnresolvedCandidates(target);
-                ICapability[] candidates =
-                    new ICapability[resolved.length + unresolved.length];
-                System.arraycopy(resolved, 0, candidates, 0, resolved.length);
-                System.arraycopy(
-                    unresolved, 0, candidates, resolved.length, unresolved.length);
+                List candidates = state.getResolvedCandidates(target);
+                candidates.addAll(state.getUnresolvedCandidates(target));
 
                 // Take the first candidate that can resolve.
                 for (int candIdx = 0;
-                    (candidate == null) && (candIdx < candidates.length);
+                    (candidate == null) && (candIdx < candidates.size());
                     candIdx++)
                 {
                     try
@@ -177,10 +172,11 @@ public class Resolver
                         // consistently with the importer.
                         resolvedModuleWireMap =
                             resolveDynamicImportCandidate(
-                                state, candidates[candIdx].getModule(), importer);
+                                state, ((ICapability) candidates.get(candIdx)).getModule(),
+                                importer);
                         if (resolvedModuleWireMap != null)
                         {
-                            candidate = candidates[candIdx];
+                            candidate = (ICapability) candidates.get(candIdx);
                         }
                     }
                     catch (ResolveException ex)
@@ -380,29 +376,26 @@ public class Resolver
             // package maps. The "resolved" candidates have higher priority
             // than "unresolved" ones, so put the "resolved" candidates
             // at the front of the list of candidates.
-            ICapability[] resolved = state.getResolvedCandidates(reqs[reqIdx]);
-            ICapability[] unresolved = state.getUnresolvedCandidates(reqs[reqIdx]);
-            ICapability[] cand = new ICapability[resolved.length + unresolved.length];
-            System.arraycopy(resolved, 0, cand, 0, resolved.length);
-            System.arraycopy(unresolved, 0, cand, resolved.length, unresolved.length);
-            List candidates = new ArrayList(Arrays.asList(cand));
+            List candidates = state.getResolvedCandidates(reqs[reqIdx]);
+            candidates.addAll(state.getUnresolvedCandidates(reqs[reqIdx]));
 
             // If we have candidates, then we need to recursively populate
             // the resolver map with each of them.
             ResolveException rethrow = null;
             if (candidates.size() > 0)
             {
-                for (int candIdx = 0; candIdx < candidates.size(); candIdx++)
+                for (Iterator it = candidates.iterator(); it.hasNext(); )
                 {
+                    ICapability candidate = (ICapability) it.next();
+
                     try
                     {
                         // Only populate the resolver map with modules that
                         // are not already resolved.
-                        if (!((ICapability) candidates.get(candIdx)).getModule().isResolved())
+                        if (!candidate.getModule().isResolved())
                         {
                             populateCandidatesMap(
-                                state, candidatesMap,
-                                ((ICapability) candidates.get(candIdx)).getModule());
+                                state, candidatesMap, candidate.getModule());
                         }
                     }
                     catch (ResolveException ex)
@@ -411,8 +404,7 @@ public class Resolver
                         // current candidate is not resolvable for some
                         // reason and should be removed from the list of
                         // candidates. For now, just null it.
-                        candidates.remove(candIdx);
-                        candIdx--;
+                        it.remove();
                         rethrow = ex;
                     }
                 }
@@ -1762,7 +1754,7 @@ public class Resolver
     public static interface ResolverState
     {
         IModule[] getModules();
-        ICapability[] getResolvedCandidates(IRequirement req);
-        ICapability[] getUnresolvedCandidates(IRequirement req);
+        List getResolvedCandidates(IRequirement req);
+        List getUnresolvedCandidates(IRequirement req);
     }
 }

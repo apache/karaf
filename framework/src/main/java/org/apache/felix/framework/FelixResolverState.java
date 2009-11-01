@@ -20,6 +20,7 @@ package org.apache.felix.framework;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,18 +44,14 @@ public class FelixResolverState implements Resolver.ResolverState
     private final Logger m_logger;
     // List of all modules.
     private final List m_moduleList = new ArrayList();
-    // Map of fragment symbolic names to array of fragment modules sorted by version.
+    // Map of fragment symbolic names to list of fragment modules sorted by version.
     private final Map m_fragmentMap = new HashMap();
-    // Maps a package name to an array of exporting capabilities.
+    // Maps a package name to a list of exporting capabilities.
     private final Map m_unresolvedPkgIndex = new HashMap();
-    // Maps a package name to an array of exporting capabilities.
+    // Maps a package name to a list of exporting capabilities.
     private final Map m_resolvedPkgIndex = new HashMap();
-    // Maps a module to an array of capabilities.
+    // Maps a module to a list of capabilities.
     private final Map m_resolvedCapMap = new HashMap();
-
-    // Reusable empty array.
-    private static final IModule[] m_emptyModules = new IModule[0];
-    private static final ICapability[] m_emptyCandidates = new ICapability[0];
 
     public FelixResolverState(Logger logger)
     {
@@ -73,9 +70,9 @@ public class FelixResolverState implements Resolver.ResolverState
         }
 
 //System.out.println("UNRESOLVED PACKAGES:");
-//dumpPackageIndexMap(m_unresolvedPkgIndexMap);
+//dumpPackageIndex(m_unresolvedPkgIndex);
 //System.out.println("RESOLVED PACKAGES:");
-//dumpPackageIndexMap(m_resolvedPkgIndexMap);
+//dumpPackageIndex(m_resolvedPkgIndex);
     }
 
     public synchronized void removeModule(IModule module)
@@ -152,11 +149,10 @@ public class FelixResolverState implements Resolver.ResolverState
                         String pkgName = (String)
                             caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
                         // Remove from "unresolved" package map.
-                        IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
-                        if (modules != null)
+                        List capList = (List) m_unresolvedPkgIndex.get(pkgName);
+                        if (capList != null)
                         {
-                            modules = removeModuleFromArray(modules, host);
-                            m_unresolvedPkgIndex.put(pkgName, modules);
+                            capList.remove(caps[i]);
                         }
                     }
                 }
@@ -192,7 +188,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 {
                     if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
-                        indexPackageCapability(m_unresolvedPkgIndex, host, caps[i]);
+                        indexPackageCapability(m_unresolvedPkgIndex, caps[i]);
                     }
                 }
             }
@@ -201,88 +197,89 @@ public class FelixResolverState implements Resolver.ResolverState
 
     private void removeFragment(IModule fragment)
     {
-        // If module is a fragment, then remove from fragment map.
-        IModule[] fragments = (IModule[]) m_fragmentMap.get(fragment.getSymbolicName());
-        fragments = removeModuleFromArray(fragments, fragment);
-        if (fragments.length == 0)
+        // Get fragment list, which may be null for system bundle fragments.
+        List fragList = (List) m_fragmentMap.get(fragment.getSymbolicName());
+        if (fragList != null)
         {
-            m_fragmentMap.remove(fragment.getSymbolicName());
-        }
-        else
-        {
-            m_fragmentMap.put(fragment.getSymbolicName(), fragments);
-        }
-
-        // If we have any matching hosts, then remove  fragment while
-        // removing any older version of the new fragment. Also remove host's
-        // existing capabilities from the package index and reindex its new
-        // ones after attaching the fragment.
-        List matchingHosts = getMatchingHosts(fragment);
-        for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
-        {
-            IModule host = ((ICapability) matchingHosts.get(hostIdx)).getModule();
-
-            // Check to see if the removed fragment was actually merged with
-            // the host, since it might not be if it wasn't the highest version.
-            // If it was, recalculate the fragments for the host.
-            fragments = ((ModuleImpl) host).getFragments();
-            for (int fragIdx = 0; (fragments != null) && (fragIdx < fragments.length); fragIdx++)
+            // Remove from fragment map.
+            fragList.remove(fragment);
+            if (fragList.size() == 0)
             {
-                if (!fragments[fragIdx].equals(fragment))
-                {
-                    List fragmentList = getMatchingFragments(host);
+                m_fragmentMap.remove(fragment.getSymbolicName());
+            }
 
-                    // Remove host's existing exported packages from index.
-                    ICapability[] caps = host.getCapabilities();
-                    for (int i = 0; (caps != null) && (i < caps.length); i++)
+            // If we have any matching hosts, then remove  fragment while
+            // removing any older version of the new fragment. Also remove host's
+            // existing capabilities from the package index and reindex its new
+            // ones after attaching the fragment.
+            List matchingHosts = getMatchingHosts(fragment);
+            for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
+            {
+                IModule host = ((ICapability) matchingHosts.get(hostIdx)).getModule();
+
+                // Check to see if the removed fragment was actually merged with
+                // the host, since it might not be if it wasn't the highest version.
+                // If it was, recalculate the fragments for the host.
+                IModule[] fragments = ((ModuleImpl) host).getFragments();
+                for (int fragIdx = 0;
+                    (fragments != null) && (fragIdx < fragments.length);
+                    fragIdx++)
+                {
+                    if (!fragments[fragIdx].equals(fragment))
                     {
-                        if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                        List fragmentList = getMatchingFragments(host);
+
+                        // Remove host's existing exported packages from index.
+                        ICapability[] caps = host.getCapabilities();
+                        for (int i = 0; (caps != null) && (i < caps.length); i++)
                         {
-                            // Get package name.
-                            String pkgName = (String)
-                                caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
-                            // Remove from "unresolved" package map.
-                            IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
-                            if (modules != null)
+                            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                             {
-                                modules = removeModuleFromArray(modules, host);
-                                m_unresolvedPkgIndex.put(pkgName, modules);
+                                // Get package name.
+                                String pkgName = (String)
+                                    caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                                // Remove from "unresolved" package map.
+                                List capList = (List) m_unresolvedPkgIndex.get(pkgName);
+                                if (capList != null)
+                                {
+                                    capList.remove(caps[i]);
+                                }
                             }
                         }
-                    }
 
-                    // Check if fragment conflicts with existing metadata.
-                    checkForConflicts(host, fragmentList);
+                        // Check if fragment conflicts with existing metadata.
+                        checkForConflicts(host, fragmentList);
 
-                    // Attach the fragments to the host.
-                    fragments = (fragmentList.size() == 0)
-                        ? null
-                        : (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]);
-                    try
-                    {
-                        ((ModuleImpl) host).attachFragments(fragments);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Try to clean up by removing all fragments.
+                        // Attach the fragments to the host.
+                        fragments = (fragmentList.size() == 0)
+                            ? null
+                            : (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]);
                         try
                         {
-                            ((ModuleImpl) host).attachFragments(null);
+                            ((ModuleImpl) host).attachFragments(fragments);
                         }
-                        catch (Exception ex2)
+                        catch (Exception ex)
                         {
+                            // Try to clean up by removing all fragments.
+                            try
+                            {
+                                ((ModuleImpl) host).attachFragments(null);
+                            }
+                            catch (Exception ex2)
+                            {
+                            }
+                            m_logger.log(Logger.LOG_ERROR,
+                                "Serious error attaching fragments.", ex);
                         }
-                        m_logger.log(Logger.LOG_ERROR,
-                            "Serious error attaching fragments.", ex);
-                    }
 
-                    // Reindex the host's exported packages.
-                    caps = host.getCapabilities();
-                    for (int i = 0; (caps != null) && (i < caps.length); i++)
-                    {
-                        if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                        // Reindex the host's exported packages.
+                        caps = host.getCapabilities();
+                        for (int i = 0; (caps != null) && (i < caps.length); i++)
                         {
-                            indexPackageCapability(m_unresolvedPkgIndex, host, caps[i]);
+                            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                            {
+                                indexPackageCapability(m_unresolvedPkgIndex, caps[i]);
+                            }
                         }
                     }
                 }
@@ -575,7 +572,7 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
-                indexPackageCapability(m_unresolvedPkgIndex, host, caps[i]);
+                indexPackageCapability(m_unresolvedPkgIndex, caps[i]);
             }
         }
     }
@@ -597,25 +594,24 @@ public class FelixResolverState implements Resolver.ResolverState
                 String pkgName = (String)
                     caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
                 // Remove from "unresolved" package map.
-                IModule[] modules = (IModule[]) m_unresolvedPkgIndex.get(pkgName);
-                if (modules != null)
+                List capList = (List) m_unresolvedPkgIndex.get(pkgName);
+                if (capList != null)
                 {
-                    modules = removeModuleFromArray(modules, host);
-                    m_unresolvedPkgIndex.put(pkgName, modules);
+                    capList.remove(caps[i]);
                 }
 
                 // Remove from "resolved" package map.
-                modules = (IModule[]) m_resolvedPkgIndex.get(pkgName);
-                if (modules != null)
+                capList = (List) m_resolvedPkgIndex.get(pkgName);
+                if (capList != null)
                 {
-                    modules = removeModuleFromArray(modules, host);
-                    m_resolvedPkgIndex.put(pkgName, modules);
+                    capList.remove(caps[i]);
                 }
             }
         }
 
         // Remove the module from the "resolved" map.
         m_resolvedCapMap.remove(host);
+
         // Set fragments to null, which will remove the module from all
         // of its dependent fragment modules.
         try
@@ -643,14 +639,15 @@ public class FelixResolverState implements Resolver.ResolverState
         for (Iterator it = m_fragmentMap.entrySet().iterator(); (hostCap != null) && it.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) it.next();
-            IModule[] fragments = ((IModule[]) entry.getValue());
+            List fragments = (List) entry.getValue();
             IModule fragment = null;
-            for (int i = 0; (fragment == null) && (i < fragments.length); i++)
+            for (int i = 0; (fragment == null) && (i < fragments.size()); i++)
             {
-                if (!((BundleImpl) fragments[i].getBundle()).isStale()
-                    && !((BundleImpl) fragments[i].getBundle()).isRemovalPending())
+                IModule f = (IModule) fragments.get(i);
+                if (!((BundleImpl) f.getBundle()).isStale()
+                    && !((BundleImpl) f.getBundle()).isRemovalPending())
                 {
-                    fragment = fragments[i];
+                    fragment = f;
                 }
             }
 
@@ -745,9 +742,15 @@ public class FelixResolverState implements Resolver.ResolverState
         ICapability[] caps = module.getCapabilities();
         for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
-            ICapability[] resolvedCaps = (ICapability[]) m_resolvedCapMap.get(module);
-            resolvedCaps = addCapabilityToArray(resolvedCaps, caps[i]);
-            m_resolvedCapMap.put(module, resolvedCaps);
+            List resolvedCaps = (List) m_resolvedCapMap.get(module);
+            if (resolvedCaps == null)
+            {
+                m_resolvedCapMap.put(module, resolvedCaps = new ArrayList());
+            }
+            if (!resolvedCaps.contains(caps[i]))
+            {
+                resolvedCaps.add(caps[i]);
+            }
 
             // If the capability is a package, then add the exporter module
             // of the wire to the "resolved" package index and remove it
@@ -755,45 +758,25 @@ public class FelixResolverState implements Resolver.ResolverState
             if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
                 // Add to "resolved" package index.
-                indexPackageCapability(m_resolvedPkgIndex, module, caps[i]);
+                indexPackageCapability(m_resolvedPkgIndex, caps[i]);
             }
         }
     }
 
-    private void dumpModuleIndexMap(Map moduleIndexMap)
+    private void dumpPackageIndex(Map pkgIndex)
     {
-        for (Iterator i = moduleIndexMap.entrySet().iterator(); i.hasNext(); )
+        for (Iterator i = pkgIndex.entrySet().iterator(); i.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) i.next();
-            IModule[] modules = (IModule[]) entry.getValue();
-            if ((modules != null) && (modules.length > 0))
+            List capList = (List) entry.getValue();
+            if (capList.size() > 0)
             {
-                if (!((modules.length == 1) && modules[0].getId().equals("0")))
+                if (!((capList.size() == 1) && ((ICapability) capList.get(0)).getModule().getId().equals("0")))
                 {
                     System.out.println("  " + entry.getKey());
-                    for (int j = 0; j < modules.length; j++)
+                    for (int j = 0; j < capList.size(); j++)
                     {
-                        System.out.println("    " + modules[j]);
-                    }
-                }
-            }
-        }
-    }
-
-    private void dumpPackageIndexMap(Map pkgIndexMap)
-    {
-        for (Iterator i = pkgIndexMap.entrySet().iterator(); i.hasNext(); )
-        {
-            Map.Entry entry = (Map.Entry) i.next();
-            IModule[] modules = (IModule[]) entry.getValue();
-            if ((modules != null) && (modules.length > 0))
-            {
-                if (!((modules.length == 1) && modules[0].getId().equals("0")))
-                {
-                    System.out.println("  " + entry.getKey());
-                    for (int j = 0; j < modules.length; j++)
-                    {
-                        System.out.println("    " + modules[j]);
+                        System.out.println("    " + ((ICapability) capList.get(j)).getModule());
                     }
                 }
             }
@@ -828,11 +811,8 @@ public class FelixResolverState implements Resolver.ResolverState
                     String pkgName = (String)
                         caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
                     // Remove the module's capability for the package.
-                    m_unresolvedPkgIndex.put(
-                        pkgName,
-                        removeModuleFromArray(
-                            (IModule[]) m_unresolvedPkgIndex.get(pkgName),
-                            module));
+                    List capList = (List) m_unresolvedPkgIndex.get(pkgName);
+                    capList.remove(caps[capIdx]);
                 }
             }
 
@@ -875,9 +855,15 @@ public class FelixResolverState implements Resolver.ResolverState
             {
                 if (capsCopy[capIdx] != null)
                 {
-                    ICapability[] resolvedCaps = (ICapability[]) m_resolvedCapMap.get(module);
-                    resolvedCaps = addCapabilityToArray(resolvedCaps, capsCopy[capIdx]);
-                    m_resolvedCapMap.put(module, resolvedCaps);
+                    List resolvedCaps = (List) m_resolvedCapMap.get(module);
+                    if (resolvedCaps == null)
+                    {
+                        m_resolvedCapMap.put(module, resolvedCaps = new ArrayList());
+                    }
+                    if (!resolvedCaps.contains(capsCopy[capIdx]))
+                    {
+                        resolvedCaps.add(capsCopy[capIdx]);
+                    }
 
                     // If the capability is a package, then add the exporter module
                     // of the wire to the "resolved" package index and remove it
@@ -885,51 +871,47 @@ public class FelixResolverState implements Resolver.ResolverState
                     if (capsCopy[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
                         // Add to "resolved" package index.
-                        indexPackageCapability(m_resolvedPkgIndex, module, capsCopy[capIdx]);
+                        indexPackageCapability(m_resolvedPkgIndex, capsCopy[capIdx]);
                     }
                 }
             }
         }
 
 //System.out.println("UNRESOLVED PACKAGES:");
-//dumpPackageIndexMap(m_unresolvedPkgIndexMap);
+//dumpPackageIndex(m_unresolvedPkgIndex);
 //System.out.println("RESOLVED PACKAGES:");
-//dumpPackageIndexMap(m_resolvedPkgIndexMap);
+//dumpPackageIndex(m_resolvedPkgIndex);
     }
 
-    public synchronized ICapability[] getResolvedCandidates(IRequirement req)
+    public synchronized List getResolvedCandidates(IRequirement req)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
-        ICapability[] candidates = m_emptyCandidates;
+        List candidates = new ArrayList();
         if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
             && (((Requirement) req).getTargetName() != null))
         {
             String pkgName = ((Requirement) req).getTargetName();
-            IModule[] modules = (IModule[]) m_resolvedPkgIndex.get(pkgName);
+            List capList = (List) m_resolvedPkgIndex.get(pkgName);
 
-            for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
+            for (int capIdx = 0; (capList != null) && (capIdx < capList.size()); capIdx++)
             {
-                ICapability resolvedCap = Util.getSatisfyingCapability(modules[modIdx], req);
-                if (resolvedCap != null)
+                ICapability cap = (ICapability) capList.get(capIdx);
+                if (req.isSatisfied(cap))
                 {
 // TODO: RB - Is this permission check correct.
                     if ((System.getSecurityManager() != null) &&
-                        !((BundleProtectionDomain) modules[modIdx].getSecurityContext()).impliesDirect(
-                            new PackagePermission(pkgName,
-                                PackagePermission.EXPORT)))
+                        !((BundleProtectionDomain) cap.getModule().getSecurityContext())
+                            .impliesDirect(new PackagePermission(pkgName, PackagePermission.EXPORT)))
                     {
                         m_logger.log(Logger.LOG_DEBUG,
                             "PackagePermission.EXPORT denied for "
                             + pkgName
-                            + "from " + modules[modIdx].getId());
+                            + "from " + cap.getModule().getId());
                     }
                     else
                     {
-                        ICapability[] tmp = new ICapability[candidates.length + 1];
-                        System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                        tmp[candidates.length] = resolvedCap;
-                        candidates = tmp;
+                        candidates.add(cap);
                     }
                 }
             }
@@ -941,70 +923,73 @@ public class FelixResolverState implements Resolver.ResolverState
             {
                 Map.Entry entry = (Map.Entry) i.next();
                 IModule module = (IModule) entry.getKey();
-                ICapability[] resolvedCaps = (ICapability[]) entry.getValue();
-                for (int capIdx = 0; capIdx < resolvedCaps.length; capIdx++)
+                List caps = (List) entry.getValue();
+                for (int capIdx = 0; (caps != null) && (capIdx < caps.size()); capIdx++)
                 {
-                    if (req.isSatisfied(resolvedCaps[capIdx]))
+                    ICapability cap = (ICapability) caps.get(capIdx);
+                    if (req.isSatisfied(cap))
                     {
 // TODO: RB - Is this permission check correct.
-                        if (resolvedCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                        if (cap.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                             (System.getSecurityManager() != null) &&
                             !((BundleProtectionDomain) module.getSecurityContext()).impliesDirect(
                                 new PackagePermission(
-                                    (String) resolvedCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
+                                    (String) cap.getProperties().get(ICapability.PACKAGE_PROPERTY),
                                     PackagePermission.EXPORT)))
                         {
                             m_logger.log(Logger.LOG_DEBUG,
                                 "PackagePermission.EXPORT denied for "
-                                + resolvedCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY)
+                                + cap.getProperties().get(ICapability.PACKAGE_PROPERTY)
                                 + "from " + module.getId());
                         }
                         else
                         {
-                            ICapability[] tmp = new ICapability[candidates.length + 1];
-                            System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                            tmp[candidates.length] = resolvedCaps[capIdx];
-                            candidates = tmp;
+                            candidates.add(cap);
                         }
                     }
                 }
             }
         }
-        Arrays.sort(candidates);
+        Collections.sort(candidates);
         return candidates;
     }
 
-    public synchronized ICapability[] getUnresolvedCandidates(IRequirement req)
+    public synchronized List getUnresolvedCandidates(IRequirement req)
     {
-        // Get all modules.
-        IModule[] modules = null;
+        // Get all matching unresolved capabilities.
+        List candidates = new ArrayList();
         if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
             (((Requirement) req).getTargetName() != null))
         {
-            modules = (IModule[]) m_unresolvedPkgIndex.get(((Requirement) req).getTargetName());
+            List capList = (List) m_unresolvedPkgIndex.get(((Requirement) req).getTargetName());
+            for (int capIdx = 0; (capList != null) && (capIdx < capList.size()); capIdx++)
+            {
+                // If compatible and it is not currently resolved, then add
+                // the unresolved candidate to the list.
+                if (req.isSatisfied((ICapability) capList.get(capIdx)))
+                {
+                    candidates.add(capList.get(capIdx));
+                }
+            }
         }
         else
         {
-            modules = getModules();
+            IModule[] modules = getModules();
+            for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
+            {
+                // Get the module's export package for the target package.
+                ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
+                // If compatible and it is not currently resolved, then add
+                // the unresolved candidate to the list.
+                if ((cap != null) && !modules[modIdx].isResolved())
+                {
+                    candidates.add(cap);
+                }
+            }
         }
 
         // Create list of compatible providers.
-        ICapability[] candidates = m_emptyCandidates;
-        for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
-        {
-            // Get the module's export package for the target package.
-            ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
-            // If compatible and it is not currently resolved, then add
-            // the unresolved candidate to the list.
-            if ((cap != null) && !modules[modIdx].isResolved())
-            {
-                ICapability[] tmp = new ICapability[candidates.length + 1];
-                System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                tmp[candidates.length] = cap;
-                candidates = tmp;
-            }
-        }
-        Arrays.sort(candidates);
+        Collections.sort(candidates);
         return candidates;
     }
 
@@ -1012,35 +997,34 @@ public class FelixResolverState implements Resolver.ResolverState
     // Utility methods.
     //
 
-    private void indexPackageCapability(Map map, IModule module, ICapability capability)
+    private void indexPackageCapability(Map map, ICapability capability)
     {
         if (capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
         {
             String pkgName = (String)
                 capability.getProperties().get(ICapability.PACKAGE_PROPERTY);
-            IModule[] modules = (IModule[]) map.get(pkgName);
+            List capList = (List) map.get(pkgName);
 
-            // We want to add the module into the list of exporters
+            // We want to add the capability into the list of exporters
             // in sorted order (descending version and ascending bundle
             // identifier). Insert using a simple binary search algorithm.
-            if (modules == null)
+            if (capList == null)
             {
-                modules = new IModule[] { module };
+                capList = new ArrayList();
+                capList.add(capability);
             }
             else
             {
                 Version version = (Version)
                     capability.getProperties().get(ICapability.VERSION_PROPERTY);
                 Version middleVersion = null;
-                int top = 0, bottom = modules.length - 1, middle = 0;
+                int top = 0, bottom = capList.size() - 1, middle = 0;
                 while (top <= bottom)
                 {
                     middle = (bottom - top) / 2 + top;
                     middleVersion = (Version)
-                        getExportPackageCapability(
-                            modules[middle], pkgName)
-                                .getProperties()
-                                    .get(ICapability.VERSION_PROPERTY);
+                        ((ICapability) capList.get(middle))
+                            .getProperties().get(ICapability.VERSION_PROPERTY);
                     // Sort in reverse version order.
                     int cmp = middleVersion.compareTo(version);
                     if (cmp < 0)
@@ -1050,8 +1034,9 @@ public class FelixResolverState implements Resolver.ResolverState
                     else if (cmp == 0)
                     {
                         // Sort further by ascending bundle ID.
-                        long middleId = modules[middle].getBundle().getBundleId();
-                        long exportId = module.getBundle().getBundleId();
+                        long middleId = ((ICapability) capList.get(middle))
+                            .getModule().getBundle().getBundleId();
+                        long exportId = capability.getModule().getBundle().getBundleId();
                         if (middleId < exportId)
                         {
                             top = middle + 1;
@@ -1068,23 +1053,19 @@ public class FelixResolverState implements Resolver.ResolverState
                 }
 
                 // Ignore duplicates.
-                if ((top >= modules.length) || (modules[top] != module))
+                if ((top >= capList.size()) || (capList.get(top) != capability))
                 {
-                    IModule[] newMods = new IModule[modules.length + 1];
-                    System.arraycopy(modules, 0, newMods, 0, top);
-                    System.arraycopy(modules, top, newMods, top + 1, modules.length - top);
-                    newMods[top] = module;
-                    modules = newMods;
+                    capList.add(top, capability);
                 }
             }
 
-            map.put(pkgName, modules);
+            map.put(pkgName, capList);
         }
     }
 
     private IModule indexFragment(Map map, IModule module)
     {
-        IModule[] modules = (IModule[]) map.get(module.getSymbolicName());
+        List modules = (List) map.get(module.getSymbolicName());
 
         // We want to add the fragment into the list of matching
         // fragments in sorted order (descending version and
@@ -1092,17 +1073,18 @@ public class FelixResolverState implements Resolver.ResolverState
         // binary search algorithm.
         if (modules == null)
         {
-            modules = new IModule[] { module };
+            modules = new ArrayList();
+            modules.add(module);
         }
         else
         {
             Version version = module.getVersion();
             Version middleVersion = null;
-            int top = 0, bottom = modules.length - 1, middle = 0;
+            int top = 0, bottom = modules.size() - 1, middle = 0;
             while (top <= bottom)
             {
                 middle = (bottom - top) / 2 + top;
-                middleVersion = modules[middle].getVersion();
+                middleVersion = ((IModule) modules.get(middle)).getVersion();
                 // Sort in reverse version order.
                 int cmp = middleVersion.compareTo(version);
                 if (cmp < 0)
@@ -1112,7 +1094,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 else if (cmp == 0)
                 {
                     // Sort further by ascending bundle ID.
-                    long middleId = modules[middle].getBundle().getBundleId();
+                    long middleId = ((IModule) modules.get(middle)).getBundle().getBundleId();
                     long exportId = module.getBundle().getBundleId();
                     if (middleId < exportId)
                     {
@@ -1130,104 +1112,14 @@ public class FelixResolverState implements Resolver.ResolverState
             }
 
             // Ignore duplicates.
-            if ((top >= modules.length) || (modules[top] != module))
+            if ((top >= modules.size()) || (modules.get(top) != module))
             {
-                IModule[] newMods = new IModule[modules.length + 1];
-                System.arraycopy(modules, 0, newMods, 0, top);
-                System.arraycopy(modules, top, newMods, top + 1, modules.length - top);
-                newMods[top] = module;
-                modules = newMods;
+                modules.add(top, module);
             }
         }
 
         map.put(module.getSymbolicName(), modules);
 
-        return modules[0];
-    }
-
-    private static IModule[] removeModuleFromArray(IModule[] modules, IModule m)
-    {
-        if (modules == null)
-        {
-            return m_emptyModules;
-        }
-
-        int idx = -1;
-        do
-        {
-            idx = -1;
-            for (int i = 0; i < modules.length; i++)
-            {
-                if (modules[i] == m)
-                {
-                    idx = i;
-                    break;
-                }
-            }
-
-            if (idx >= 0)
-            {
-                // If this is the module, then point to empty list.
-                if ((modules.length - 1) == 0)
-                {
-                    modules = m_emptyModules;
-                }
-                // Otherwise, we need to do some array copying.
-                else
-                {
-                    IModule[] newModules = new IModule[modules.length - 1];
-                    System.arraycopy(modules, 0, newModules, 0, idx);
-                    if (idx < newModules.length)
-                    {
-                        System.arraycopy(
-                            modules, idx + 1, newModules, idx, newModules.length - idx);
-                    }
-                    modules = newModules;
-                }
-            }
-        }
-        while (idx >= 0);
-
-        return modules;
-    }
-
-    public static ICapability getExportPackageCapability(IModule m, String pkgName)
-    {
-        ICapability[] caps = m.getCapabilities();
-        for (int i = 0; (caps != null) && (i < caps.length); i++)
-        {
-            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-                caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
-            {
-                return caps[i];
-            }
-        }
-        return null;
-    }
-
-    private static ICapability[] addCapabilityToArray(ICapability[] caps, ICapability cap)
-    {
-        // Verify that the capability is not already in the array.
-        for (int i = 0; (caps != null) && (i < caps.length); i++)
-        {
-            if (caps[i].equals(cap))
-            {
-                return caps;
-            }
-        }
-
-        if (caps != null)
-        {
-            ICapability[] newCaps = new ICapability[caps.length + 1];
-            System.arraycopy(caps, 0, newCaps, 0, caps.length);
-            newCaps[caps.length] = cap;
-            caps = newCaps;
-        }
-        else
-        {
-            caps = new ICapability[] { cap };
-        }
-
-        return caps;
+        return (IModule) modules.get(0);
     }
 }

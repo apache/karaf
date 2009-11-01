@@ -2961,14 +2961,14 @@ ex.printStackTrace();
     ExportedPackage[] getExportedPackages(String pkgName)
     {
         // First, get all exporters of the package.
-        ICapability[] exporters =
+        List exports =
             m_resolverState.getResolvedCandidates(
                 new Requirement(
                     ICapability.PACKAGE_NAMESPACE,
                     null,
                     new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }));
 
-        if (exporters != null)
+        if (exports != null)
         {
             List pkgs = new ArrayList();
 
@@ -2976,10 +2976,11 @@ ex.printStackTrace();
                 null,
                 new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) });
 
-            for (int pkgIdx = 0; pkgIdx < exporters.length; pkgIdx++)
+            for (int pkgIdx = 0; pkgIdx < exports.size(); pkgIdx++)
             {
                 // Get the bundle associated with the current exporting module.
-                BundleImpl bundle = (BundleImpl) exporters[pkgIdx].getModule().getBundle();
+                BundleImpl bundle = (BundleImpl)
+                    ((ICapability) exports.get(pkgIdx)).getModule().getBundle();
 
                 // We need to find the version of the exported package, but this
                 // is tricky since there may be multiple versions of the package
@@ -3090,20 +3091,19 @@ ex.printStackTrace();
                 for (int capIdx = 0; capIdx < caps.length; capIdx++)
                 {
                     // See if the target bundle's module is one of the
-                    // "in use" exporters of the package.
+                    // resolved exporters of the package.
                     if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
-                        ICapability[] inUseCaps = m_resolverState.getResolvedCandidates(
+                        List resolvedCaps = m_resolverState.getResolvedCandidates(
                             new Requirement(
                                 ICapability.PACKAGE_NAMESPACE,
                                 null,
                                 new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }));
 
-                        // Search through the current providers to find the target
-                        // module.
-                        for (int i = 0; (inUseCaps != null) && (i < inUseCaps.length); i++)
+                        // Search through the current providers to find the target module.
+                        for (int i = 0; (resolvedCaps != null) && (i < resolvedCaps.size()); i++)
                         {
-                            if (inUseCaps[i].getModule() == modules[modIdx])
+                            if (((ICapability) resolvedCaps.get(i)).getModule() == modules[modIdx])
                             {
                                 list.add(new ExportedPackageImpl(
                                     this, bundle, modules[modIdx], (Capability) caps[capIdx]));
@@ -3960,12 +3960,12 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             return candidateWire;
         }
 
-        public synchronized ICapability[] getResolvedCandidates(IRequirement req)
+        public synchronized List getResolvedCandidates(IRequirement req)
         {
             return m_resolverState.getResolvedCandidates(req);
         }
 
-        public synchronized ICapability[] getUnresolvedCandidates(IRequirement req)
+        public synchronized List getUnresolvedCandidates(IRequirement req)
         {
             return m_resolverState.getUnresolvedCandidates(req);
         }
