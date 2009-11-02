@@ -482,21 +482,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.springframework.osgi</groupId>
-                <artifactId>spring-osgi-extender</artifactId>
-                <version>${spring.osgi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.osgi</groupId>
-                <artifactId>spring-osgi-annotation</artifactId>
-                <version>${spring.osgi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.mina</groupId>
-                <artifactId>mina-core</artifactId>
-                <version>${mina.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.junit</artifactId>
                 <version>${junit.version}</version>
