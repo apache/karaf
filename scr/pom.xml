@@ -30,11 +30,11 @@
         Implementation of the Declarative Services specification 1.0
     </description>
     <artifactId>org.apache.felix.scr</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1-SNAPSHOT</version>
     <scm>
-        <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.2.0</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.2.0</developerConnection>
-        <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.2.0</url>
+        <connection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/scr</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/scr</developerConnection>
+        <url>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/scr</url>
     </scm>
     
     <!--
