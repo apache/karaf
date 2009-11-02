@@ -87,13 +87,15 @@ public class ComponentFactoryTest extends ComponentTestBase
         final Map<?, ?> instanceMap = ( Map<?, ?> ) getFieldValue( component, "m_componentInstances" );
         TestCase.assertNotNull( instanceMap );
         TestCase.assertEquals( 1, instanceMap.size() );
-        TestCase.assertTrue( instanceMap.containsValue( instance ) );
+
+        final Object instanceManager = getFieldValue( instance, "m_componentManager" );
+        TestCase.assertTrue( instanceMap.containsValue( instanceManager ) );
 
         instance.dispose();
         TestCase.assertNull( SimpleComponent.INSTANCE );
 
         TestCase.assertEquals( 0, instanceMap.size() );
-        TestCase.assertFalse( instanceMap.containsValue( instance ) );
+        TestCase.assertFalse( instanceMap.containsValue( instanceManager ) );
     }
 
 
@@ -138,7 +140,9 @@ public class ComponentFactoryTest extends ComponentTestBase
         final Map<?, ?> instanceMap = ( Map<?, ?> ) getFieldValue( component, "m_componentInstances" );
         TestCase.assertNotNull( instanceMap );
         TestCase.assertEquals( 1, instanceMap.size() );
-        TestCase.assertTrue( instanceMap.containsValue( instance ) );
+
+        final Object instanceManager = getFieldValue( instance, "m_componentManager" );
+        TestCase.assertTrue( instanceMap.containsValue( instanceManager ) );
 
         // disable the factory
         component.disable();
@@ -148,13 +152,13 @@ public class ComponentFactoryTest extends ComponentTestBase
         TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
         TestCase.assertNotNull( SimpleComponent.INSTANCE );
         TestCase.assertEquals( 1, instanceMap.size() );
-        TestCase.assertTrue( instanceMap.containsValue( instance ) );
+        TestCase.assertTrue( instanceMap.containsValue( instanceManager ) );
 
         instance.dispose();
         TestCase.assertNull( SimpleComponent.INSTANCE );
 
         TestCase.assertEquals( 0, instanceMap.size() );
-        TestCase.assertFalse( instanceMap.containsValue( instance ) );
+        TestCase.assertFalse( instanceMap.containsValue( instanceManager ) );
     }
 
 
