@@ -30,11 +30,11 @@
         Implementation of the Declarative Services specification 1.0
     </description>
     <artifactId>org.apache.felix.scr</artifactId>
-    <version>1.0.9-SNAPSHOT</version>
+    <version>1.2.0</version>
     <scm>
-        <connection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/scr</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/scr</developerConnection>
-        <url>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/scr</url>
+        <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.2.0</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.2.0</developerConnection>
+        <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.2.0</url>
     </scm>
     
     <!--
@@ -301,8 +301,7 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <copy file="${project.build.directory}/${project.build.finalName}.jar"
-                                            tofile="${project.build.directory}/scr.jar" />
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar" tofile="${project.build.directory}/scr.jar" />
                                     </tasks>
                                 </configuration>
                             </execution>
