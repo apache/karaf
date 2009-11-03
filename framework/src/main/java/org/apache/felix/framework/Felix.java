@@ -3095,7 +3095,7 @@ ex.printStackTrace();
                         // Search through the current providers to find the target module.
                         for (int i = 0; (resolvedCaps != null) && (i < resolvedCaps.size()); i++)
                         {
-                            if (((ICapability) resolvedCaps.get(i)).getModule() == modules[modIdx])
+                            if ((ICapability) resolvedCaps.get(i) == caps[capIdx])
                             {
                                 list.add(new ExportedPackageImpl(
                                     this, bundle, modules[modIdx], (Capability) caps[capIdx]));
