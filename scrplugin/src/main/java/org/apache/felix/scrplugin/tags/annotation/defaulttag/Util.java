@@ -24,12 +24,12 @@ import org.apache.felix.scrplugin.SCRDescriptorException;
 import org.apache.felix.scrplugin.tags.ClassUtil;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.JavaField;
+import org.apache.felix.scrplugin.tags.annotation.AnnotationJavaClassDescription;
+import org.apache.felix.scrplugin.tags.annotation.AnnotationJavaField;
 
 import com.thoughtworks.qdox.model.Annotation;
-import com.thoughtworks.qdox.model.annotation.AnnotationConstant;
 import com.thoughtworks.qdox.model.annotation.AnnotationFieldRef;
-import com.thoughtworks.qdox.model.annotation.AnnotationValue;
-import com.thoughtworks.qdox.model.annotation.AnnotationValueList;
+import com.thoughtworks.qdox.model.annotation.EvaluatingVisitor;
 
 /**
  * Helper class for getting values from annotations.
@@ -347,70 +347,68 @@ public abstract class Util {
         return getEnumValue(annotation, name, enumClass, clazz, true);
     }
 
-    private static String getAnnotationValue(final AnnotationValue av, final JavaClassDescription desc)
-    throws IllegalArgumentException
-    {
-        if ( av instanceof AnnotationFieldRef )
-        {
-            // during prescan of AnnotationTagProviderManager#hasScrPluginAnnotation this method is called without desc attribute
-            // avoid NPE in this case and just skip value resolving
-            // FELIX-1629
-            if ( desc == null)
-            {
-                return null;
-            }
-
-            // getField throws AIOOBE
-            // return ((AnnotationFieldRef)av).getField().getInitializationExpression();
-            final String s = av.getParameterValue().toString().trim();
-            try
-            {
-                int classSep = s.lastIndexOf('.');
-                JavaField field = null;
-                if ( classSep == -1 ) {
-                    // local variable
-                    field = desc.getFieldByName(s);
-                }
-                if ( field == null ) {
-                    field = desc.getExternalFieldByName(s);
-                }
-                if ( field == null ) {
-                    throw new IllegalArgumentException("Property references unknown field " + s + " in class " + desc.getName());
-                }
-                String[] values = field.getInitializationExpression();
-                if ( values != null && values.length == 1 ) {
-                    return values[0];
-                }
-                throw new IllegalArgumentException("Something is wrong.");
-            }
-            catch (SCRDescriptorException mee)
-            {
-                throw new IllegalArgumentException(mee);
-            }
-        }
-        return ((AnnotationConstant)av).getValue().toString();
-    }
-
     public static String[] getAnnotationValues(final Annotation annotation, final String name, final JavaClassDescription desc)
     throws IllegalArgumentException
     {
-        final AnnotationValue av = annotation.getProperty(name);
-        if ( av != null )
-        {
-            if ( av instanceof AnnotationValueList )
-            {
-                final AnnotationValueList avl = (AnnotationValueList)av;
-                @SuppressWarnings("unchecked")
-                final List<AnnotationValue> list = avl.getValueList();
-                final String[] values = new String[list.size()];
-                for(int i=0; i < values.length; i++)
+
+        EvaluatingVisitor evaluatingVisitor = new EvaluatingVisitor() {
+            
+            public Object visitAnnotationFieldRef( AnnotationFieldRef fieldRef ) {
+                // during prescan of AnnotationTagProviderManager#hasScrPluginAnnotation this method is called without desc attribute
+                // avoid NPE in this case and just skip value resolving
+                // FELIX-1629
+                if ( desc == null)
                 {
-                    values[i] = getAnnotationValue(list.get(i), desc);
+                    return "";
                 }
-                return values;
+
+                // getField throws AIOOBE
+                // return ((AnnotationFieldRef)av).getField().getInitializationExpression();
+                final String s = fieldRef.getParameterValue().toString().trim();
+                try
+                {
+                    int classSep = s.lastIndexOf('.');
+                    JavaField field = null;
+                    if ( classSep == -1 ) {
+                        // local variable
+                        field = desc.getFieldByName(s);
+                    }
+                    if ( field == null ) {
+                        field = desc.getExternalFieldByName(s);
+                    }
+                    if ( field == null ) {
+                        throw new IllegalArgumentException("Property references unknown field " + s + " in class " + desc.getName());
+                    }
+                    String[] values = field.getInitializationExpression();
+                    if ( values != null && values.length == 1 ) {
+                        return values[0];
+                    }
+                    throw new IllegalArgumentException("Something is wrong: " + s);
+                }
+                catch (SCRDescriptorException mee)
+                {
+                    throw new IllegalArgumentException(mee);
+                }
             }
-            return new String[] {getAnnotationValue(av, desc)};
+
+            @Override
+            protected Object getFieldReferenceValue(com.thoughtworks.qdox.model.JavaField javaField) {
+                // is never called because visitAnnotationFieldRef is overridden as well
+                return null;
+            }
+        
+        };
+        List<Object> valueList = evaluatingVisitor.getListValue(annotation, name);
+        if (valueList==null) {
+            return null;
         }
-        return null;
+        String[] values = new String[valueList.size()];
+        for (int i=0; i<values.length; i++) {
+            Object value = valueList.get(i);
+            if (value!=null) {
+                values[i] = value.toString();
+            }
+        }
+        return values;
     }
 }
