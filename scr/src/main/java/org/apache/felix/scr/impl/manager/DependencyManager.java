@@ -390,7 +390,6 @@ public class DependencyManager implements ServiceListener, Reference
                 ungetService( reference );
             }
         }
-
         else
         {
             m_componentManager.log( LogService.LOG_DEBUG,
@@ -1064,8 +1063,10 @@ public class DependencyManager implements ServiceListener, Reference
     boolean canUpdateDynamically( Dictionary properties )
     {
         // 1. no target filter change
-        final String targetFilter = ( String ) properties.get( m_dependencyMetadata.getTargetPropertyName() );
-        if ( ( getTarget() == null && targetFilter == null ) || getTarget().equals( targetFilter ) )
+        final String newTarget = ( String ) properties.get( m_dependencyMetadata.getTargetPropertyName() );
+        final String currentTarget = getTarget();
+        if ( ( currentTarget == null && newTarget == null )
+            || ( currentTarget != null && currentTarget.equals( newTarget ) ) )
         {
             // can update if target filter is not changed, since there is
             // no change is service binding
@@ -1085,7 +1086,7 @@ public class DependencyManager implements ServiceListener, Reference
         // invariant: target filter change + dynamic policy
 
         // 3. check target services matching the new filter
-        ServiceReference[] refs = getFrameworkServiceReferences( targetFilter );
+        ServiceReference[] refs = getFrameworkServiceReferences( newTarget );
         if ( refs != null && refs.length > 0 )
         {
             // can update since there is at least on service matching the
