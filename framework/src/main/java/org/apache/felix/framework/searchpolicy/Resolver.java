@@ -52,7 +52,6 @@ public class Resolver
 
     // Reusable empty array.
     private static final IWire[] m_emptyWires = new IWire[0];
-    private static final IModule[] m_emptyModules = new IModule[0];
 
     public Resolver(Logger logger, String fwkExecEnvStr)
     {
@@ -1717,34 +1716,6 @@ public class Resolver
             }
         }
         return newSet;
-    }
-
-    private static IModule[] shrinkModuleArray(IModule[] modules)
-    {
-        if (modules == null)
-        {
-            return m_emptyModules;
-        }
-
-        // Move all non-null values to one end of the array.
-        int lower = 0;
-        for (int i = 0; i < modules.length; i++)
-        {
-            if (modules[i] != null)
-            {
-                modules[lower++] = modules[i];
-            }
-        }
-
-        if (lower == 0)
-        {
-            return m_emptyModules;
-        }
-
-        // Copy non-null values into a new array and return.
-        IModule[] newModules = new IModule[lower];
-        System.arraycopy(modules, 0, newModules, 0, lower);
-        return newModules;
     }
 
     //
