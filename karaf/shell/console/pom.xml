@@ -117,8 +117,7 @@
                             org.apache.felix.gogo.commands*;version=${felix.gogo.version},
                             org.apache.felix.karaf.shell.console*;version=${pom.version},
                             org.fusesource.jansi;version=${jansi.version},
-                            jline;version=${jline.version},
-
+                            jline;version=${jline.version}
                         </Export-Package>
                         <Private-Package>
                             org.fusesource.jansi.internal
