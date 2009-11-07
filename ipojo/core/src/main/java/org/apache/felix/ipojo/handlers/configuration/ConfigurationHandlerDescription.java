@@ -38,18 +38,26 @@ public class ConfigurationHandlerDescription extends HandlerDescription {
      * The property descriptions.
      */
     private PropertyDescription[] m_properties;
+    
+    /**
+     * The Managed Service PID.
+     * <code>null</code> if not set.
+     */
+    private String m_pid;
 
     /**
      * Creates the description object for the configuration handler description.
      * @param handler the configuration handler.
      * @param props the list of properties.
+     * @param pid the managed service pid or <code>null</code> if not set.
      */
-    public ConfigurationHandlerDescription(Handler handler, List/*<Property>*/ props) {
+    public ConfigurationHandlerDescription(Handler handler, List/*<Property>*/ props, String pid) {
         super(handler);
         m_properties = new PropertyDescription[props.size()];
         for (int i = 0; i < props.size(); i++) {
             m_properties[i] = new PropertyDescription((Property) props.get(i));
-        }
+        }        
+        m_pid = pid;
     }
     
     /**
@@ -59,6 +67,11 @@ public class ConfigurationHandlerDescription extends HandlerDescription {
      */
     public Element getHandlerInfo() {
         Element elem = super.getHandlerInfo();
+        
+        if (m_pid != null) {
+            elem.addAttribute(new Attribute("managed.service.pid", m_pid));
+        }
+        
         for (int i = 0; i < m_properties.length; i++) {
             String name = m_properties[i].getName();
             Object value = m_properties[i].getValue();
@@ -84,6 +97,15 @@ public class ConfigurationHandlerDescription extends HandlerDescription {
      */
     public PropertyDescription[] getProperties() {
         return m_properties;
+    }
+    
+    /**
+     * Gets the managed service pid.
+     * @return the managed service pid of <code>null</code>
+     * if not set.
+     */
+    public String getManagedServicePid() {
+        return m_pid;
     }
 
 }

@@ -138,7 +138,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             }
             
             // Then create the provided service
-            ProvidedService svc = new ProvidedService(this, serviceSpecifications, factory, custom);
+            ProvidedService svc = new ProvidedService(this, serviceSpecifications, factory, custom, configuration);
 
             Element[] props = providedServices[i].getElements("Property");
             if (props != null) {
@@ -447,7 +447,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
     }
 
     /**
-     * Add properties to all provided services.
+     * Adds properties to all provided services.
      * @param dict : dictionary of properties to add
      */
     public void addProperties(Dictionary dict) {

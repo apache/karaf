@@ -38,6 +38,7 @@ import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -113,8 +114,9 @@ public class ProvidedService implements ServiceFactory {
      * @param specification the specifications provided by this provided service
      * @param factoryPolicy the service providing policy
      * @param creationStrategyClass the customized service object creation strategy.
+     * @param conf the instance configuration.
      */
-    public ProvidedService(ProvidedServiceHandler handler, String[] specification, int factoryPolicy, Class creationStrategyClass) {
+    public ProvidedService(ProvidedServiceHandler handler, String[] specification, int factoryPolicy, Class creationStrategyClass, Dictionary conf) {
         m_handler = handler;
 
         m_serviceSpecification = specification;
@@ -123,9 +125,25 @@ public class ProvidedService implements ServiceFactory {
         try {
             addProperty(new Property("instance.name", null, null, handler.getInstanceManager().getInstanceName(), String.class.getName(), handler.getInstanceManager(), handler));
             addProperty(new Property("factory.name", null, null, handler.getInstanceManager().getFactory().getFactoryName(), String.class.getName(), handler.getInstanceManager(), handler));
+         
             if (handler.getInstanceManager().getFactory().getVersion() != null) {
                 addProperty(new Property("factory.version", null, null, handler.getInstanceManager().getFactory().getVersion(), String.class.getName(), handler.getInstanceManager(), handler));
             }
+
+            // Add the service.* if defined
+            if (conf.get(Constants.SERVICE_PID) != null) {
+                addProperty(new Property(Constants.SERVICE_PID, null, null, (String) conf.get(Constants.SERVICE_PID), String.class.getName(), handler.getInstanceManager(), handler));
+            }
+            if (conf.get(Constants.SERVICE_RANKING) != null) {
+                addProperty(new Property(Constants.SERVICE_RANKING, null, null, (String) conf.get(Constants.SERVICE_RANKING), "int", handler.getInstanceManager(), handler));                
+            }
+            if (conf.get(Constants.SERVICE_VENDOR) != null) {
+                addProperty(new Property(Constants.SERVICE_VENDOR, null, null, (String) conf.get(Constants.SERVICE_VENDOR), String.class.getName(), handler.getInstanceManager(), handler));
+            }
+            if (conf.get(Constants.SERVICE_DESCRIPTION) != null) {
+                addProperty(new Property(Constants.SERVICE_DESCRIPTION, null, null, (String) conf.get(Constants.SERVICE_DESCRIPTION), String.class.getName(), handler.getInstanceManager(), handler));
+            }
+
         } catch (ConfigurationException e) {
             m_handler.error("An exception occurs when adding instance.name and factory.name property : " + e.getMessage());
         }

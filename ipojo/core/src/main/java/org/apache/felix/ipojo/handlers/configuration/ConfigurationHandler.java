@@ -251,7 +251,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             }
         }
 
-        m_description = new ConfigurationHandlerDescription(this, m_configurableProperties);
+        m_description = new ConfigurationHandlerDescription(this, m_configurableProperties, m_managedServicePID);
 
     }
 
@@ -536,5 +536,6 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
     public HandlerDescription getDescription() {
         return m_description;
     }
+    
 
 }
