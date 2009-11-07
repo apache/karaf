@@ -1,0 +1,3 @@
+<ipojo>
+<instance component="org.apache.felix.ipojo.tests.inheritance.d.D" name="d"/>
+</ipojo>

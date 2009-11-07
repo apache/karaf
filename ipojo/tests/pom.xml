@@ -38,6 +38,7 @@
   <module>core/service-dependency-filter</module>
   <module>core/service-dependency-comparator</module>
   <module>core/service-providing-strategies</module>
+  <module>core/service-providing-inheritance</module>
   <module>core/configuration</module>
   <module>core/handler</module>
   <module>core/external-handlers</module>
