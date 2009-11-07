@@ -242,7 +242,7 @@ public class InstanceCreator implements FactoryStateListener {
             m_logger.log(Logger.DEBUG, "A factory is becoming valid : " + factory.getName());
             onValidation((IPojoFactory) factory);
         } else {
-            m_logger.log(Logger.DEBUG, "A factory is bocoming invalid : " + factory.getName());
+            m_logger.log(Logger.DEBUG, "A factory is becoming invalid : " + factory.getName());
             onInvalidation((IPojoFactory) factory);
         }
     }
