@@ -25,21 +25,22 @@ import org.osgi.framework.BundleContext;
 
 public class ConfigurationTestSuite {
 
-	public static Test suite(BundleContext bc) {
-		OSGiTestSuite ots = new OSGiTestSuite("Configuration Test Suite", bc);
-		ots.addTestSuite(SimpleProperties.class);
-		ots.addTestSuite(DynamicallyConfigurableProperties.class);
-		ots.addTestSuite(TestFieldProperties.class);
-		ots.addTestSuite(TestMethodProperties.class);
-		ots.addTestSuite(TestBothProperties.class);
-		ots.addTestSuite(TestSuperMethodProperties.class);
-		ots.addTestSuite(ManagedServiceConfigurableProperties.class);
-		ots.addTestSuite(TestComplexProperties.class);
-		ots.addTestSuite(TestPropertyModifier.class);
-		ots.addTestSuite(UpdatedMethod.class);
-		ots.addTestSuite(UpdatedMethodAndManagedServiceFactory.class);
-		ots.addTestSuite(UpdatedMethodAndManagedService.class);
-		return ots;
-	}
+    public static Test suite(BundleContext bc) {
+        OSGiTestSuite ots = new OSGiTestSuite("Configuration Test Suite", bc);
+        ots.addTestSuite(SimpleProperties.class);
+        ots.addTestSuite(DynamicallyConfigurableProperties.class);
+        ots.addTestSuite(TestFieldProperties.class);
+        ots.addTestSuite(TestMethodProperties.class);
+        ots.addTestSuite(TestBothProperties.class);
+        ots.addTestSuite(TestSuperMethodProperties.class);
+        ots.addTestSuite(ManagedServiceConfigurableProperties.class);
+        ots.addTestSuite(TestComplexProperties.class);
+        ots.addTestSuite(TestPropertyModifier.class);
+        ots.addTestSuite(UpdatedMethod.class);
+        ots.addTestSuite(UpdatedMethodAndManagedServiceFactory.class);
+        ots.addTestSuite(UpdatedMethodAndManagedService.class);
+        ots.addTestSuite(ArchitectureTest.class);
+        return ots;
+    }
 
 }
