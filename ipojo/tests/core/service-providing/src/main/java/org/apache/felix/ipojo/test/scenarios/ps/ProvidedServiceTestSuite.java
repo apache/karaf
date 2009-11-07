@@ -26,18 +26,19 @@ import org.osgi.framework.BundleContext;
 
 public class ProvidedServiceTestSuite extends TestSuite {
 
-	public static Test suite(BundleContext bc) {
-		OSGiTestSuite ots = new OSGiTestSuite("Provided Service Test Suite", bc);
-		ots.addTestSuite(Exposition.class);
-		ots.addTestSuite(SimplePS.class);
-		ots.addTestSuite(StaticProps.class);
-		ots.addTestSuite(DynamicProps.class);
-		ots.addTestSuite(StaticPropsReconfiguration.class);
-		ots.addTestSuite(DynamicPropsReconfiguration.class);
-		ots.addTestSuite(InheritedTest.class);
-		ots.addTestSuite(ProvidedServiceArchitectureTest.class);
-		ots.addTestSuite(ClassTest.class);
-		return ots;
-	}
+    public static Test suite(BundleContext bc) {
+        OSGiTestSuite ots = new OSGiTestSuite("Provided Service Test Suite", bc);
+        ots.addTestSuite(Exposition.class);
+        ots.addTestSuite(SimplePS.class);
+        ots.addTestSuite(StaticProps.class);
+        ots.addTestSuite(DynamicProps.class);
+        ots.addTestSuite(StaticPropsReconfiguration.class);
+        ots.addTestSuite(DynamicPropsReconfiguration.class);
+        ots.addTestSuite(InheritedTest.class);
+        ots.addTestSuite(ProvidedServiceArchitectureTest.class);
+        ots.addTestSuite(ClassTest.class);
+        ots.addTestSuite(OSGiPropertiesTest.class);
+        return ots;
+    }
 
 }
