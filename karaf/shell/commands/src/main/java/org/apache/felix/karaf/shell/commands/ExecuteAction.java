@@ -37,11 +37,11 @@ public class ExecuteAction extends OsgiCommandSupport {
     protected Object doExecute() throws Exception {
         ProcessBuilder builder = new ProcessBuilder(args);
 
-        log.info("Executing: {}", builder.command());
+        PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err);
 
+        log.info("Executing: {}", builder.command());
         Process p = builder.start();
 
-        PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err);
         handler.attach(p);
         handler.start();
 
@@ -54,7 +54,7 @@ public class ExecuteAction extends OsgiCommandSupport {
 
         handler.stop();
 
-        return status;
+        return null;
     }
 
 }

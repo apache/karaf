@@ -105,13 +105,20 @@ public class StreamPumper
 
         int length;
         try {
-            while ((length = in.read(buf)) > 0 && !finish) {
-                out.write(buf, 0, length);
-                if (autoflush) {
-                    out.flush();
+            do {
+                while (in.available() > 0 && !finish) {
+                    length = in.read(buf);
+                    if (length < 1 ) {
+                        break;
+                    }
+                    out.write(buf, 0, length);
+                    if (autoflush) {
+                        out.flush();
+                    }
                 }
-            }
-            out.flush();
+                out.flush();
+                Thread.sleep(200);  // Pause to avoid tight loop if external proc is slow
+            } while (!finish && closeWhenExhausted);
         }
         catch (Exception e) {
             synchronized (this) {
