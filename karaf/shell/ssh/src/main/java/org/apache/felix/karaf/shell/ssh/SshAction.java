@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
+import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.util.NoCloseInputStream;
 import org.apache.sshd.common.util.NoCloseOutputStream;
@@ -114,6 +115,7 @@ public class SshAction
 
                 ClientChannel channel = session.createChannel("shell");
                 channel.setIn(new NoCloseInputStream(System.in));
+                ((ChannelShell) channel).setupSensibleDefaultPty();
                 channel.setOut(new NoCloseOutputStream(System.out));
                 channel.setErr(new NoCloseOutputStream(System.err));
                 channel.open();
