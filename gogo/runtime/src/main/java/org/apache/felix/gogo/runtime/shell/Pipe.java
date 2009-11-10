@@ -103,9 +103,6 @@ public class Pipe extends Thread
         {
             out.flush();
             closure.session.service.threadIO.close();
-            tIn.set(in);
-            tOut.set(out);
-            tErr.set(err);
 
             try
             {
@@ -122,6 +119,11 @@ public class Pipe extends Thread
             {
                 e.printStackTrace();
             }
+
+            tIn.set(null);
+            tOut.set(null);
+            tErr.set(null);
+
         }
     }
 }
