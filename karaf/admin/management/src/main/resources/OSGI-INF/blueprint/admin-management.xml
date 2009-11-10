@@ -39,7 +39,7 @@
                             <argument value="org.apache.felix.karaf.admin.management.AdminServiceMBean"/>
                         </bean>
                     </key>
-                    <value>org.apache.felix.karaf:service=admin</value>
+                    <value>org.apache.felix.karaf:type=admin,name=${karaf.name}</value>
                 </entry>
             </map>
         </property>

@@ -52,7 +52,8 @@ public class MBeanRegistrer {
     protected void registerMBeans() throws JMException {
         if (mbeanServer != null && mbeans != null) {
             for (Map.Entry<Object, String> entry : mbeans.entrySet()) {
-                mbeanServer.registerMBean(entry.getKey(), new ObjectName(entry.getValue()));
+                String value = parseProperty(entry.getValue());
+                mbeanServer.registerMBean(entry.getKey(), new ObjectName(value));
             }
         }
     }
@@ -60,8 +61,20 @@ public class MBeanRegistrer {
     protected void unregisterMBeans() throws JMException {
         if (mbeanServer != null && mbeans != null) {
             for (Map.Entry<Object, String> entry : mbeans.entrySet()) {
-                mbeanServer.unregisterMBean(new ObjectName(entry.getValue()));
+                String value = parseProperty(entry.getValue());
+                mbeanServer.unregisterMBean(new ObjectName(value));
             }
         }
+    }
+
+    protected String parseProperty(String raw) {
+        if (raw.indexOf("${") > -1 && raw.indexOf("}", raw.indexOf("${")) > -1) {
+            String var = raw.substring(raw.indexOf("${") + 2, raw.indexOf("}"));
+            String val = System.getProperty(var);
+            if (val != null) {
+                raw = raw.replace("${" + var + "}", val);
+            }
+        }
+        return raw;
     }
 }
