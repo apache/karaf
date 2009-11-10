@@ -41,7 +41,7 @@
                             <argument value="org.apache.felix.karaf.features.management.FeaturesServiceMBean"/>
                         </bean>
                     </key>
-                    <value>org.apache.felix.karaf:service=features</value>
+                    <value>org.apache.felix.karaf:type=features,name=${karaf.name}</value>
                 </entry>
             </map>
         </property>
