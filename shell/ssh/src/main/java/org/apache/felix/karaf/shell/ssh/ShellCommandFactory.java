@@ -24,7 +24,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
+import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.ExitCallback;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
 
@@ -68,7 +71,7 @@ public class ShellCommandFactory implements CommandFactory {
             this.callback = callback;
         }
 
-        public void start() throws IOException {
+        public void start(final Environment env) throws IOException {
             try {
                 CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
                 session.execute(command);
@@ -79,6 +82,9 @@ public class ShellCommandFactory implements CommandFactory {
                 callback.onExit(0);
             }
         }
+
+        public void destroy() {
+		}
 
     }
 

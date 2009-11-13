@@ -24,10 +24,11 @@ import java.io.InputStreamReader;
 
 import jline.Terminal;
 import org.apache.sshd.common.PtyMode;
-import org.apache.sshd.server.ShellFactory;
+import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.Signal;
+import org.apache.sshd.server.SignalListener;
 
-public class SshTerminal extends Terminal implements ShellFactory.SignalListener {
+public class SshTerminal extends Terminal implements SignalListener {
 
     public static final short ARROW_START = 27;
     public static final short ARROW_PREFIX = 91;
@@ -42,14 +43,14 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
     public static final short DEL_THIRD = 51;
     public static final short DEL_SECOND = 126;
 
-    private ShellFactory.Environment environment;
+    private Environment environment;
     private boolean backspaceDeleteSwitched = false;
     private String encoding = System.getProperty("input.encoding", "UTF-8");
     private ReplayPrefixOneCharInputStream replayStream = new ReplayPrefixOneCharInputStream(encoding);
     private InputStreamReader replayReader;
     private boolean isWindowsTerminal;
 
-    public SshTerminal(ShellFactory.Environment environment) {
+    public SshTerminal(Environment environment) {
         this.environment = environment;
         this.environment.addSignalListener(this);
         try {
@@ -74,11 +75,11 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
     }
 
     public int getTerminalWidth() {
-        return Integer.valueOf(this.environment.getEnv().get(ShellFactory.Environment.ENV_COLUMNS));
+        return Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
     }
 
     public int getTerminalHeight() {
-        return Integer.valueOf(this.environment.getEnv().get(ShellFactory.Environment.ENV_LINES));
+        return Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
     }
 
     public boolean isSupported() {
