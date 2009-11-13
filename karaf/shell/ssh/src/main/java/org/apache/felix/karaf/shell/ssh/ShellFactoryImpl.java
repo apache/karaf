@@ -26,21 +26,26 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 
 import org.apache.felix.karaf.shell.console.Completer;
 import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.felix.karaf.shell.console.jline.Console;
-import org.apache.sshd.server.ShellFactory;
+import org.apache.sshd.common.Factory;
+import org.apache.sshd.server.Command;
+import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.ExitCallback;
+import org.osgi.service.blueprint.container.ReifiedType;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
 
 /**
- * SSHD {@link org.apache.sshd.server.ShellFactory} which provides access to Shell.
+ * SSHD {@link org.apache.sshd.server.Command} factory which provides access to Shell.
  *
  * @version $Rev: 731517 $ $Date: 2009-01-05 11:25:19 +0100 (Mon, 05 Jan 2009) $
  */
-public class ShellFactoryImpl implements ShellFactory
+public class ShellFactoryImpl implements Factory<Command>
 {
     private CommandProcessor commandProcessor;
     private List<Completer> completers;
@@ -53,11 +58,11 @@ public class ShellFactoryImpl implements ShellFactory
         this.completers = completers;
     }
 
-    public Shell createShell() {
+    public Command create() {
         return new ShellImpl();
     }
 
-    public class ShellImpl implements Shell
+    public class ShellImpl implements Command
     {
         private InputStream in;
 
@@ -132,6 +137,23 @@ public class ShellFactoryImpl implements ShellFactory
             } catch (IOException e) {
                 // Ignore
             }
+        }
+    }
+
+    public static Converter getConverter() {
+        return new Converter();
+    }
+
+    public static class Converter implements org.osgi.service.blueprint.container.Converter {
+
+        public boolean canConvert(Object sourceObject, ReifiedType targetType) {
+            return ShellFactoryImpl.class.isAssignableFrom(sourceObject.getClass())
+                    && Factory.class.equals(targetType.getRawClass())
+                    && Command.class.equals(targetType.getActualTypeArgument(0).getRawClass());
+        }
+
+        public Object convert(Object sourceObject, ReifiedType targetType) throws Exception {
+            return sourceObject;
         }
     }
 

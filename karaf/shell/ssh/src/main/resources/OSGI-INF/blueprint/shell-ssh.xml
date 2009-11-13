@@ -23,6 +23,10 @@
            xmlns:ext="http://geronimo.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
+    <type-converters>
+        <bean class="org.apache.felix.karaf.shell.ssh.ShellFactoryImpl" factory-method="getConverter" />
+    </type-converters>
+
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
 
     <cm:property-placeholder persistent-id="org.apache.felix.karaf.shell">
