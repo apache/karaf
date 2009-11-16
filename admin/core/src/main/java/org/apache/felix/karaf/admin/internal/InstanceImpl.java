@@ -41,11 +41,17 @@ public class InstanceImpl implements Instance {
     private String name;
     private String location;
     private Process process;
+    private boolean root;
 
     public InstanceImpl(AdminServiceImpl service, String name, String location) {
+        this(service, name, location, false);
+    }
+    
+    public InstanceImpl(AdminServiceImpl service, String name, String location, boolean root) {
         this.service = service;
         this.name = name;
         this.location = location;
+        this.root = root;
     }
 
     public void attach(int pid) throws IOException {
@@ -58,6 +64,10 @@ public class InstanceImpl implements Instance {
 
     public String getName() {
         return this.name;
+    }
+    
+    public boolean isRoot() {
+        return root;
     }
 
     public String getLocation() {

@@ -340,21 +340,24 @@ public class Main {
 
     private void updateInstancePid() {
         try {
-            if (!karafHome.equals(karafBase)) {
-                String instanceName = System.getProperty("karaf.name");
-                String pid = ManagementFactory.getRuntimeMXBean().getName();
-                if (pid.indexOf('@') > 0) {
-                    pid = pid.substring(0, pid.indexOf('@'));
+            String instanceName = System.getProperty("karaf.name");
+            String pid = ManagementFactory.getRuntimeMXBean().getName();
+            if (pid.indexOf('@') > 0) {
+                pid = pid.substring(0, pid.indexOf('@'));
+            }
+            
+            boolean isRoot = karafHome.equals(karafBase);
+            
+            if (instanceName != null) {
+                String storage = System.getProperty("storage.location");
+                if (storage == null) {
+                    throw new Exception("System property 'storage.location' is not set. \n" +
+                        "This property needs to be set to the full path of the instance.properties file.");
                 }
-                if (instanceName != null) {
-                    String storage = System.getProperty("storage.location");
-                    if (storage == null) {
-                        throw new Exception("System property 'storage.location' is not set. \n" +
-                            "This property needs to be set to the full path of the instance.properties file.");
-                    }
-                    File storageFile = new File(storage);
-                    File propertiesFile = new File(storageFile, "instance.properties");
-                    Properties props = new Properties();
+                File storageFile = new File(storage);
+                File propertiesFile = new File(storageFile, "instance.properties");
+                Properties props = new Properties();
+                if (propertiesFile.exists()) {
                     props.load(new FileInputStream(propertiesFile));
                     int count = Integer.parseInt(props.getProperty("count"));
                     for (int i = 0; i < count; i++) {
@@ -365,7 +368,19 @@ public class Main {
                             return;
                         }
                     }
-                    throw new Exception("Instance " + instanceName + " not found");
+                    if (!isRoot) {
+                        throw new Exception("Instance " + instanceName + " not found");
+                    } 
+                } else if (isRoot) {
+                    if (!propertiesFile.getParentFile().exists()) {
+                        propertiesFile.getParentFile().mkdirs();
+                    }
+                    props.setProperty("count", "1");
+                    props.setProperty("item.0.name", instanceName);
+                    props.setProperty("item.0.loc", karafHome.getAbsolutePath());
+                    props.setProperty("item.0.pid", pid);
+                    props.setProperty("item.0.root", "true");
+                    props.store(new FileOutputStream(propertiesFile), null);
                 }
             }
         } catch (Exception e) {
