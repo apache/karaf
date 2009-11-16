@@ -126,7 +126,7 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
       	  	Method m;
 			try {
 			  	m = service.getClass().getDeclaredMethod(callback, new Class[] { Dictionary.class });
-		
+			  	m.setAccessible(true);
 			  	// if exception is thrown here, what does that mean for the
 			  	// state of this dependency? how smart do we want to be??
 			  	// it's okay like this, if the new settings contain errors, we
