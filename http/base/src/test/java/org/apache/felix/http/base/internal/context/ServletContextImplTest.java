@@ -111,6 +111,9 @@ public class ServletContextImplTest
 
         this.context.removeAttribute("key1");
         Assert.assertNull(this.context.getAttribute("key1"));
+
+        this.context.setAttribute("key1", null);
+        Assert.assertNull(this.context.getAttribute("key1"));
     }
 
     @Test

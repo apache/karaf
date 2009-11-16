@@ -149,7 +149,9 @@ public final class ServletContextImpl
 
     public void setAttribute(String name, Object value)
     {
-        this.attributes.put(name, value);
+        if ((name != null) && (value != null)) {
+            this.attributes.put(name, value);
+        }
     }
 
     public void removeAttribute(String name)
