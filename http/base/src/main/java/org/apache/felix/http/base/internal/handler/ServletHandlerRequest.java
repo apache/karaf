@@ -53,6 +53,9 @@ final class ServletHandlerRequest
     @Override
     public String getServletPath()
     {
+        if ("/".equals(this.alias)) {
+            return "";
+        }
         return this.alias;
     }
 

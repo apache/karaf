@@ -47,4 +47,11 @@ public class ServletHandlerRequestTest
         Assert.assertEquals("/request/to/resource", this.req1.getPathInfo());
         Assert.assertEquals("/request/to/resource", this.req2.getPathInfo());
     }
+    
+    @Test
+    public void testServletPath()
+    {
+        Assert.assertEquals("", this.req1.getServletPath());
+        Assert.assertEquals("/myservlet", this.req2.getServletPath());
+    }
 }
