@@ -50,8 +50,6 @@ public class ClassUtil {
                 return new String[] {value.toString()};
             }
             return null;
-        } catch (NoClassDefFoundError e) {
-            // ignore and just return null
         } catch (Exception e) {
             // ignore and just return null
         }

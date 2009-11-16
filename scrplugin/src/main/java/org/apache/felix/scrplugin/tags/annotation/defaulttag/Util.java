@@ -21,11 +21,7 @@ package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 import java.util.List;
 
 import org.apache.felix.scrplugin.SCRDescriptorException;
-import org.apache.felix.scrplugin.tags.ClassUtil;
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.annotation.AnnotationJavaClassDescription;
-import org.apache.felix.scrplugin.tags.annotation.AnnotationJavaField;
+import org.apache.felix.scrplugin.tags.*;
 
 import com.thoughtworks.qdox.model.Annotation;
 import com.thoughtworks.qdox.model.annotation.AnnotationFieldRef;
@@ -352,7 +348,7 @@ public abstract class Util {
     {
 
         EvaluatingVisitor evaluatingVisitor = new EvaluatingVisitor() {
-            
+
             public Object visitAnnotationFieldRef( AnnotationFieldRef fieldRef ) {
                 // during prescan of AnnotationTagProviderManager#hasScrPluginAnnotation this method is called without desc attribute
                 // avoid NPE in this case and just skip value resolving
@@ -385,6 +381,11 @@ public abstract class Util {
                     }
                     throw new IllegalArgumentException("Something is wrong: " + s);
                 }
+                catch (NoClassDefFoundError ncdfe)
+                {
+                    throw new IllegalArgumentException("A class could not be found while parsing class " + desc.getName() +
+                            ". Please check this stracktrace and add a dependency with the missing class to your project.", ncdfe);
+                }
                 catch (SCRDescriptorException mee)
                 {
                     throw new IllegalArgumentException(mee);
@@ -396,7 +397,7 @@ public abstract class Util {
                 // is never called because visitAnnotationFieldRef is overridden as well
                 return null;
             }
-        
+
         };
         List<Object> valueList = evaluatingVisitor.getListValue(annotation, name);
         if (valueList==null) {
