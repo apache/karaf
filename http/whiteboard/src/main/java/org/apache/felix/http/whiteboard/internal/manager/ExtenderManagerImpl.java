@@ -98,7 +98,12 @@ public final class ExtenderManagerImpl
     {
         Bundle bundle = ref.getBundle();
         String contextId = getStringProperty(ref, CONTEXT_ID_KEY);
-        return contextId != null ? this.contextManager.getHttpContext(bundle, contextId) : null;
+
+        if (contextId != null) {
+            return this.contextManager.getHttpContext(bundle, contextId);
+        } else {
+            return new DefaultHttpContext(bundle);
+        }
     }
 
     public void add(Filter service, ServiceReference ref)
