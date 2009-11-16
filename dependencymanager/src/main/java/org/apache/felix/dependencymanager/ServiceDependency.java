@@ -60,6 +60,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     private Object m_serviceInstance;
     private final Logger m_logger;
     private String m_autoConfigInstance;
+    private boolean m_autoConfigInvoked;
     private Object m_defaultImplementation;
     private Object m_defaultImplementationInstance;
     
@@ -596,6 +597,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public synchronized ServiceDependency setAutoConfig(boolean autoConfig) {
         ensureNotActive();
         m_autoConfig = autoConfig;
+        m_autoConfigInvoked = true;
         return this;
     }
     
@@ -611,6 +613,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         ensureNotActive();
         m_autoConfig = (instanceName != null);
         m_autoConfigInstance = instanceName;
+        m_autoConfigInvoked = true;
         return this;
     }
     
@@ -672,8 +675,9 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
      */
     public synchronized ServiceDependency setCallbacks(Object instance, String added, String changed, String removed) {
         ensureNotActive();
-        // if at least one valid callback is specified, we turn off auto configuration
-        if (added != null || removed != null || changed != null) {
+        // if at least one valid callback is specified, we turn off auto configuration, unless
+        // someone already explicitly invoked autoConfig
+        if ((added != null || removed != null || changed != null) && ! m_autoConfigInvoked) {
             setAutoConfig(false);
         }
         m_callbackInstance = instance;
