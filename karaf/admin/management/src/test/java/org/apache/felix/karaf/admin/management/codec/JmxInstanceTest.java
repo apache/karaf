@@ -47,6 +47,7 @@ public class JmxInstanceTest extends TestCase {
         Instance i = EasyMock.createMock(Instance.class);
         EasyMock.expect(i.getPid()).andReturn(1712);
         EasyMock.expect(i.getName()).andReturn("MyInstance");
+        EasyMock.expect(i.isRoot()).andReturn(false);
         EasyMock.expect(i.getPort()).andReturn(0);
         EasyMock.expect(i.getState()).andThrow(new Exception("gotcha"));
         EasyMock.expect(i.getLocation()).andReturn("somewhere");
@@ -60,6 +61,7 @@ public class JmxInstanceTest extends TestCase {
         CompositeData cd = td.get(keys.toArray());
         Assert.assertEquals(1712, cd.get("Pid"));
         Assert.assertEquals("MyInstance", cd.get("Name"));
+        Assert.assertEquals(false, cd.get("Is Root"));
         Assert.assertEquals(0, cd.get("Port"));
         Assert.assertEquals("Error", cd.get("State"));
         Assert.assertEquals("somewhere", cd.get("Location"));
@@ -69,6 +71,7 @@ public class JmxInstanceTest extends TestCase {
         Instance i = EasyMock.createMock(Instance.class);
         EasyMock.expect(i.getPid()).andReturn(1712);
         EasyMock.expect(i.getName()).andReturn("MyInstance");
+        EasyMock.expect(i.isRoot()).andReturn(true);
         EasyMock.expect(i.getPort()).andReturn(0);
         EasyMock.expect(i.getState()).andReturn("Started");
         EasyMock.expect(i.getLocation()).andReturn(null);
@@ -82,6 +85,7 @@ public class JmxInstanceTest extends TestCase {
         CompositeData cd = td.get(keys.toArray());
         Assert.assertEquals(1712, cd.get("Pid"));
         Assert.assertEquals("MyInstance", cd.get("Name"));
+        Assert.assertEquals(true, cd.get("Is Root"));
         Assert.assertEquals(0, cd.get("Port"));
         Assert.assertEquals("Started", cd.get("State"));
         Assert.assertNull(cd.get("Location"));

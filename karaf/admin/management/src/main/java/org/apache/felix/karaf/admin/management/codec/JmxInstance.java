@@ -52,13 +52,14 @@ public class JmxInstance {
             Object[] itemValues = new Object[itemNames.length];
             itemValues[0] = instance.getPid();
             itemValues[1] = instance.getName();
-            itemValues[2] = instance.getPort();
+            itemValues[2] = instance.isRoot();
+            itemValues[3] = instance.getPort();
             try {
-                itemValues[3] = instance.getState();
+                itemValues[4] = instance.getState();
             } catch (Exception e) {
-                itemValues[3] = "Error";
+                itemValues[4] = "Error";
             }
-            itemValues[4] = instance.getLocation();
+            itemValues[5] = instance.getLocation();
 
             data = new CompositeDataSupport(INSTANCE, itemNames, itemValues);
         } catch (OpenDataException e) {
@@ -78,15 +79,18 @@ public class JmxInstance {
 
             itemTypes[1] = SimpleType.STRING;
             descriptions[1] = "The name of the instance.";
+            
+            itemTypes[2] = SimpleType.BOOLEAN;
+            descriptions[2] = "Whether the instance is root.";
 
-            itemTypes[2] = SimpleType.INTEGER;
-            descriptions[2] = "The SSH port that can be used to connect to the instance.";
-
-            itemTypes[3] = SimpleType.STRING;
-            descriptions[3] = "The state of the instance.";
+            itemTypes[3] = SimpleType.INTEGER;
+            descriptions[3] = "The SSH port that can be used to connect to the instance.";
 
             itemTypes[4] = SimpleType.STRING;
-            descriptions[4] = "The location of the instance.";
+            descriptions[4] = "The state of the instance.";
+
+            itemTypes[5] = SimpleType.STRING;
+            descriptions[5] = "The location of the instance.";
 
             return new CompositeType("Instance", desc, itemNames, descriptions, itemTypes);
         } catch (OpenDataException e) {

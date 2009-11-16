@@ -22,11 +22,12 @@ public interface AdminServiceMBean {
 
     String INSTANCE_PID = "Pid";
     String INSTANCE_NAME = "Name";
+    String INSTANCE_IS_ROOT = "Is Root";
     String INSTANCE_PORT = "Port";
     String INSTANCE_STATE = "State";
     String INSTANCE_LOCATION = "Location";
 
-    String[] INSTANCE = {INSTANCE_PID, INSTANCE_NAME, INSTANCE_PORT,
+    String[] INSTANCE = {INSTANCE_PID, INSTANCE_NAME, INSTANCE_IS_ROOT, INSTANCE_PORT,
             INSTANCE_STATE, INSTANCE_LOCATION };
 
     // Operations

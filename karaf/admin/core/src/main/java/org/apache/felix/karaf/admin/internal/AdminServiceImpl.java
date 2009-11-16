@@ -99,8 +99,9 @@ public class AdminServiceImpl implements AdminService {
                 String name = storage.getProperty("item." + i + ".name", null);
                 String loc = storage.getProperty("item." + i + ".loc", null);
                 int pid = Integer.parseInt(storage.getProperty("item." + i + ".pid", "0"));
+                boolean root = Boolean.parseBoolean(storage.getProperty("item." + i + ".root", "false"));
                 if (name != null) {
-                    InstanceImpl instance = new InstanceImpl(this, name, loc);
+                    InstanceImpl instance = new InstanceImpl(this, name, loc, root);
                     if (pid > 0) {
                         try {
                             instance.attach(pid);

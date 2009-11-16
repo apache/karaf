@@ -69,6 +69,7 @@ public class AdminServiceMBeanImplTest extends TestCase {
         EasyMock.expect(i1.getPid()).andReturn(1234);
         EasyMock.expect(i1.getPort()).andReturn(8818);
         EasyMock.expect(i1.getName()).andReturn("i1");
+        EasyMock.expect(i1.isRoot()).andReturn(true);
         EasyMock.expect(i1.getLocation()).andReturn("somewhere");
         EasyMock.expect(i1.getState()).andReturn("Stopped");
         EasyMock.replay(i1);
@@ -87,6 +88,7 @@ public class AdminServiceMBeanImplTest extends TestCase {
         Assert.assertEquals(2, td.size());
         CompositeData cd1 = td.get(new Object [] {"i1"});
         Assert.assertTrue(cd1.containsValue("i1"));
+        Assert.assertTrue(cd1.containsValue(true));
         Assert.assertTrue(cd1.containsValue(1234));
         Assert.assertTrue(cd1.containsValue(8818));
         Assert.assertTrue(cd1.containsValue("somewhere"));

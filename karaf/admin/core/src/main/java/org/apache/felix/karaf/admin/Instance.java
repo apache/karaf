@@ -24,6 +24,8 @@ public interface Instance {
     String ERROR = "Error";
 
     String getName();
+    
+    boolean isRoot();
 
     String getLocation();
 
