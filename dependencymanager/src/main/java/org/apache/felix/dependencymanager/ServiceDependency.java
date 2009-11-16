@@ -337,13 +337,14 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public void addedService(ServiceReference ref, Object service) {
         if (makeAvailable()) {
             m_service.dependencyAvailable(this);
+            // try to invoke callback, if specified, but only for optional dependencies
+            // because callbacks for required dependencies are handled differently
+            if (!isRequired()) {
+                invokeAdded(ref, service);
+            }
         }
         else {
             m_service.dependencyChanged(this);
-        }
-        // try to invoke callback, if specified, but only for optional dependencies
-        // because callbacks for required dependencies are handled differently
-        if (!isRequired()) {
             invokeAdded(ref, service);
         }
     }
@@ -355,7 +356,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public void invokeAdded(ServiceReference reference, Object serviceInstance) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackAdded != null)) {
-                invokeCallbackMethod(callbackInstances, m_callbackAdded, reference, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackAdded, reference, serviceInstance);
         }
     }
 
@@ -372,20 +373,21 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public void invokeChanged(ServiceReference reference, Object serviceInstance) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackChanged != null)) {
-                if (m_reference == null) {
-                    Thread.dumpStack();
-                }
-                invokeCallbackMethod(callbackInstances, m_callbackChanged, reference, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackChanged, reference, serviceInstance);
         }
     }
 
     public void removedService(ServiceReference ref, Object service) {
         if (makeUnavailable()) {
             m_service.dependencyUnavailable(this);
+            // try to invoke callback, if specified, but only for optional dependencies
+            // because callbacks for required dependencies are handled differently
+            if (!isRequired()) {
+                invokeRemoved(ref, service);
+            }
         }
-        // try to invoke callback, if specified, but only for optional dependencies
-        // because callbacks for required dependencies are handled differently
-        if (!isRequired()) {
+        else {
+            m_service.dependencyChanged(this);
             invokeRemoved(ref, service);
         }
         
@@ -400,10 +402,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public void invokeRemoved(ServiceReference reference, Object serviceInstance) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackRemoved != null)) {
-                if (m_reference == null) {
-                    Thread.dumpStack();
-                }
-                invokeCallbackMethod(callbackInstances, m_callbackRemoved, reference, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackRemoved, reference, serviceInstance);
         }
     }
     
@@ -424,14 +423,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
     
     private synchronized Object[] getCallbackInstances() {
-        Object[] callbackInstances = ((ServiceImpl) m_service).getCompositionInstances();
-        if (m_callbackInstance == null) {
-            return callbackInstances;
-        }
-        Object[] res = new Object[callbackInstances.length + 1];
-        res[0] = m_callbackInstance; //this could also be extended to an array...?
-        System.arraycopy(callbackInstances, 0, res, 1, callbackInstances.length);
-        return res;
+        return m_callbackInstance != null ? new Object[] { m_callbackInstance } : ((ServiceImpl) m_service).getCompositionInstances();
     }
 
     private void invokeCallbackMethod(Object[] instances, String methodName, ServiceReference reference, Object service) {

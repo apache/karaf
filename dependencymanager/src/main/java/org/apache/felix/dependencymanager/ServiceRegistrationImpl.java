@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public final class ServiceRegistrationImpl implements ServiceRegistration {
     public static final ServiceRegistrationImpl ILLEGAL_STATE = new ServiceRegistrationImpl();
-    private ServiceRegistration m_registration;
+    private volatile ServiceRegistration m_registration;
 
     public ServiceRegistrationImpl() {
         m_registration = null;
