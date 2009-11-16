@@ -17,6 +17,7 @@
 package org.apache.felix.karaf.deployer.features;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -115,22 +116,21 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Synchr
     }
 
     public void bundleChanged(BundleEvent bundleEvent) {
-        try {
             Bundle bundle = bundleEvent.getBundle();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
                 Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                 while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                     URL url = (URL) featuresUrlEnumeration.nextElement();
-                    featuresService.addRepository(url.toURI());
-                    for (Repository repo : featuresService.listRepositories()) {
-                        if (repo.getURI().equals(url.toURI())) {
-                            Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
-                            try {
-                                featuresService.installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
-                            } catch (Exception e) {
-                                LOGGER.error("Unable to install features", e);
+                    try {
+                        featuresService.addRepository(url.toURI());
+                        for (Repository repo : featuresService.listRepositories()) {
+                            if (repo.getURI().equals(url.toURI())) {
+                                Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
+                                    featuresService.installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
                             }
                         }
+                    } catch (Exception e) {
+                        LOGGER.error("Unable to install features", e);
                     }
                 }
             } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
@@ -138,22 +138,27 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Synchr
                 while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                     URL url = (URL) featuresUrlEnumeration.nextElement();
                     for (Repository repo : featuresService.listRepositories()) {
-                        if (repo.getURI().equals(url.toURI())) {
-                            for (Feature f : repo.getFeatures()) {
-                                try {
-                                    featuresService.uninstallFeature(f.getName(), f.getVersion());
-                                } catch (Exception e) {
-                                    LOGGER.error("Unable to uninstall feature: " + f.getName(), e);
+                        try {
+                            if (repo.getURI().equals(url.toURI())) {
+                                for (Feature f : repo.getFeatures()) {
+                                    try {
+                                        featuresService.uninstallFeature(f.getName(), f.getVersion());
+                                    } catch (Exception e) {
+                                        LOGGER.error("Unable to uninstall feature: " + f.getName(), e);
+                                    }
                                 }
                             }
+                        } catch (Exception e) {
+                            LOGGER.error("Unable to uninstall features: " + url, e);
                         }
                     }
-                    featuresService.removeRepository(url.toURI());
+                    try {
+                        featuresService.removeRepository(url.toURI());
+                    } catch (URISyntaxException e) {
+                        LOGGER.error("Unable to remove repository: " + url, e);
+                    }
                 }
             }
-        } catch (Exception e) {
-            LOGGER.error("Unable to install / uninstall feature", e);
-        }
     }
 
     protected Document parse(File artifact) throws Exception {

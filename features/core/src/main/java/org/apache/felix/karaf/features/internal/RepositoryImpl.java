@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.rmi.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -33,6 +34,8 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -47,6 +50,7 @@ import org.xml.sax.SAXException;
  */
 public class RepositoryImpl implements Repository {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryImpl.class);
     private int unnamedRepoId = 0;
     private String name;
     private URI uri;
@@ -106,7 +110,12 @@ public class RepositoryImpl implements Repository {
                 }
                 if ("repository".equals(node.getNodeName())) {
                     Element e = (Element) nodes.item(i);
-                    repositories.add(new URI(e.getTextContent()));
+                    try {
+                        URI newrepo = new URI(e.getTextContent());
+                        repositories.add(newrepo);
+                    } catch (URISyntaxException ex) {
+                        LOGGER.error("Could not load feature repository: " + ex.getMessage() + " in feature repository " + uri);
+                    }
                 } else if ("feature".equals(node.getNodeName())) {
                     Element e = (Element) nodes.item(i);
                     String name = e.getAttribute("name");
@@ -155,9 +164,9 @@ public class RepositoryImpl implements Repository {
             throw (IOException) new IOException().initCause(e);
         } catch (ParserConfigurationException e) {
             throw (IOException) new IOException().initCause(e);
-        } catch (URISyntaxException e) {
-            throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
         } catch (IllegalArgumentException e) {
+            throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+        } catch (Exception e) {
             throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
         }
     }
