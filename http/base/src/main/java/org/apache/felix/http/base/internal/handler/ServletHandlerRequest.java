@@ -19,6 +19,8 @@ package org.apache.felix.http.base.internal.handler;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletRequest;
 
+import org.osgi.service.http.HttpContext;
+
 final class ServletHandlerRequest
     extends HttpServletRequestWrapper
 {
@@ -30,6 +32,17 @@ final class ServletHandlerRequest
     {
         super(req);
         this.alias = alias;
+    }
+    
+    @Override
+    public String getAuthType()
+    {
+        String authType = (String) getAttribute(HttpContext.AUTHENTICATION_TYPE);
+        if (authType != null) {
+            return authType;
+        }
+        
+        return super.getAuthType();
     }
 
     @Override
@@ -48,6 +61,17 @@ final class ServletHandlerRequest
     {
         final String info = getPathInfo();
         return (null == info) ? null : getRealPath(info);
+    }
+        
+    @Override
+    public String getRemoteUser()
+    {
+        String remoteUser = (String) getAttribute(HttpContext.REMOTE_USER);
+        if (remoteUser != null) {
+            return remoteUser;
+        }
+        
+        return super.getRemoteUser();
     }
 
     @Override
