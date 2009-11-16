@@ -39,9 +39,13 @@ public class RefreshUrlCommand extends FeaturesCommandSupport {
             }
         }
         for (String strUri : urls) {
-            URI uri = new URI(strUri);
-            admin.removeRepository(uri);
-            admin.addRepository(uri);
+            try {
+                URI uri = new URI(strUri);
+                admin.removeRepository(uri);
+                admin.addRepository(uri);
+            } catch (Exception e) {
+                System.out.println("Could not refresh Feature Repository:\n" + e.getMessage() );
+            }
         }
     }
 }

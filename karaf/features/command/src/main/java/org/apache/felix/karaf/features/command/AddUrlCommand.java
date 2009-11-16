@@ -31,7 +31,11 @@ public class AddUrlCommand extends FeaturesCommandSupport {
 
     protected void doExecute(FeaturesService admin) throws Exception {
         for (String url : urls) {
-            admin.addRepository(new URI(url));
+            try {
+                admin.addRepository(new URI(url));
+            } catch (Exception e) {
+                System.out.println("Could not add Feature Repository:\n" + e );  
+            }
         }
     }
 }
