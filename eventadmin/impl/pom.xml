@@ -33,14 +33,14 @@
   <artifactId>org.apache.felix.eventadmin</artifactId>
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>1.0.0</version>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <version>1.0.0</version>
+      <version>4.2.0</version>
     </dependency>
   </dependencies>
   <build>
