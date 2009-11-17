@@ -30,14 +30,28 @@ public abstract class AbstractCommand implements Function {
 
     public Object execute(CommandSession session, List<Object> arguments) throws Exception {
         Action action = createNewAction();
-        if (getPreparator().prepare(action, session, arguments)) {
-            return action.execute(session);
-        } else {
-            return null;
+        try {
+            if (getPreparator().prepare(action, session, arguments)) {
+                return action.execute(session);
+            } else {
+                return null;
+            }
+        } finally {
+        	releaseAction(action);
         }
     }
 
     protected abstract Action createNewAction() throws Exception;
+
+    /**
+     * Release the used Action.
+     * This method has to be overridden for pool based Actions.
+     * @param action Action that was executed
+     * @throws Exception if something went wrong during the Action release
+     */
+    protected void releaseAction(Action action) throws Exception {
+    	// Do nothing by default (stateful)
+    }
 
     protected ActionPreparator getPreparator() throws Exception {
         return new DefaultActionPreparator();
