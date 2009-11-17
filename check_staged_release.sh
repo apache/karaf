@@ -25,7 +25,7 @@ then
  wget \
   -r -np "--reject=html,txt" "--follow-tags=" \
   -P "${DOWNLOAD}/${STAGING}" -nH "--cut-dirs=3" --ignore-length --no-check-certificate \
-  "http://repository.apache.org/content/repositories/felix-staging-${STAGING}/org/apache/felix/"
+  "http://repository.apache.org/content/repositories/orgapachefelix-${STAGING}/org/apache/felix/"
 
 else
  echo "################################################################################"
