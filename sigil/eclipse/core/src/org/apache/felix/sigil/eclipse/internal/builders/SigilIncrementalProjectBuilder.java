@@ -21,8 +21,8 @@ package org.apache.felix.sigil.eclipse.internal.builders;
 
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -275,20 +275,26 @@ public class SigilIncrementalProjectBuilder extends IncrementalProjectBuilder
 
     private File[] buildClasspath( ISigilProjectModel sigil, IProgressMonitor monitor ) throws CoreException
     {
-        ArrayList<File> files = new ArrayList<File>();
-
-        buildLocalClasspath( sigil, files );
-        buildExternalClasspath( sigil, files, monitor );
-
-        return files.toArray( new File[files.size()] );
+        LinkedList<File> files = new LinkedList<File>();
+        if ( sigil.getBundle().getClasspathEntrys().isEmpty() ) {
+            IClasspathEntry[] entries = sigil.getJavaModel().getResolvedClasspath(true);
+            for ( IClasspathEntry cp : entries )
+            {
+                convert( cp, sigil, files );
+            }
+        }
+        else {
+            buildLocalClasspath( sigil, files );
+            buildExternalClasspath( sigil, files, monitor );
+        }
+        return files.toArray( new File[files.size()] );            
     }
 
 
-    private void buildExternalClasspath( ISigilProjectModel sigil, ArrayList<File> files, IProgressMonitor monitor )
+    private void buildExternalClasspath( ISigilProjectModel sigil, List<File> files, IProgressMonitor monitor )
         throws CoreException
     {
         Collection<IClasspathEntry> entries = sigil.findExternalClasspath( monitor );
-        files.ensureCapacity( files.size() + entries.size() );
 
         for ( IClasspathEntry cp : entries )
         {
@@ -297,10 +303,9 @@ public class SigilIncrementalProjectBuilder extends IncrementalProjectBuilder
     }
 
 
-    private void buildLocalClasspath( ISigilProjectModel sigil, ArrayList<File> files ) throws CoreException
+    private void buildLocalClasspath( ISigilProjectModel sigil, List<File> files ) throws CoreException
     {
         Collection<IClasspathEntry> entries = JavaHelper.findClasspathEntries( sigil.getBundle() );
-        files.ensureCapacity( files.size() + entries.size() );
         for ( IClasspathEntry cp : entries )
         {
             convert( cp, sigil, files );
@@ -308,7 +313,7 @@ public class SigilIncrementalProjectBuilder extends IncrementalProjectBuilder
     }
 
 
-    private void convert( IClasspathEntry cp, ISigilProjectModel sigil, ArrayList<File> files ) throws CoreException
+    private void convert( IClasspathEntry cp, ISigilProjectModel sigil, List<File> files ) throws CoreException
     {
         switch ( cp.getEntryKind() )
         {
