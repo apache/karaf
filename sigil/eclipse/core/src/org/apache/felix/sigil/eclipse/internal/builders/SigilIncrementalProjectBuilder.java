@@ -47,6 +47,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -319,47 +320,81 @@ public class SigilIncrementalProjectBuilder extends IncrementalProjectBuilder
         {
             case IClasspathEntry.CPE_PROJECT:
             {
-                IProject p = findProject( cp.getPath() );
-                ISigilProjectModel project = SigilCore.create( p );
-                for ( String scp : project.getBundle().getClasspathEntrys() )
-                {
-                    IClasspathEntry jcp = project.getJavaModel().decodeClasspathEntry( scp );
-                    convert( jcp, project, files );
-                }
+                convertProject(cp, files);
                 break;
             }
             case IClasspathEntry.CPE_SOURCE:
             {
-                IPath path = cp.getOutputLocation() == null ? sigil.getJavaModel().getOutputLocation() : cp
-                    .getOutputLocation();
-                IFolder buildFolder = sigil.getProject().getFolder( path.removeFirstSegments( 1 ) );
-                if ( buildFolder.exists() )
-                {
-                    files.add( buildFolder.getLocation().toFile() );
-                }
+                convertSource(sigil, cp, files);
                 break;
             }
             case IClasspathEntry.CPE_LIBRARY:
             {
-                IPath p = cp.getPath();
-
-                IProject project = sigil.getProject().getWorkspace().getRoot().getProject( p.segment( 0 ) );
-                if ( project.exists() )
-                {
-                    p = project.getLocation().append( p.removeFirstSegments( 1 ) );
-                }
-
-                files.add( p.toFile() );
+                convertLibrary(sigil, cp, files);
                 break;
             }
             case IClasspathEntry.CPE_VARIABLE:
-                cp = JavaCore.getResolvedClasspathEntry( cp );
-                if ( cp != null )
-                {
-                    IPath p = cp.getPath();
-                    files.add( p.toFile() );
-                }
+                convertVariable(cp, files);
                 break;
+        }
+    }
+
+
+    private void convertVariable(IClasspathEntry cp, List<File> files)
+    {
+        cp = JavaCore.getResolvedClasspathEntry( cp );
+        if ( cp != null )
+        {
+            IPath p = cp.getPath();
+            files.add( p.toFile() );
+        }
+    }
+
+
+    private void convertLibrary(ISigilProjectModel sigil, IClasspathEntry cp, List<File> files)
+    {
+        IPath p = cp.getPath();
+
+        IProject project = sigil.getProject().getWorkspace().getRoot().getProject( p.segment( 0 ) );
+        if ( project.exists() )
+        {
+            p = project.getLocation().append( p.removeFirstSegments( 1 ) );
+        }
+
+        files.add( p.toFile() );
+    }
+
+
+    private void convertSource(ISigilProjectModel sigil, IClasspathEntry cp, List<File> files) throws JavaModelException
+    {
+        IPath path = cp.getOutputLocation() == null ? sigil.getJavaModel().getOutputLocation() : cp
+            .getOutputLocation();
+        IFolder buildFolder = sigil.getProject().getFolder( path.removeFirstSegments( 1 ) );
+        if ( buildFolder.exists() )
+        {
+            files.add( buildFolder.getLocation().toFile() );
+        }
+    }
+
+
+    private void convertProject(IClasspathEntry cp, List<File> files) throws CoreException
+    {
+        IProject p = findProject( cp.getPath() );
+        ISigilProjectModel project = SigilCore.create( p );
+        if ( project.getBundle().getClasspathEntrys().isEmpty() ) {
+            // ew this is pretty messy - if a dependent bundle specifies it's dependencies
+            // via package statements vs source directories then we need to add
+            // the classpath path of that bundle
+            for ( IClasspathEntry rp : project.getJavaModel().getResolvedClasspath(true) ) {
+                convert( rp, project, files );
+            }
+        }
+        else {
+            for ( String scp : project.getBundle().getClasspathEntrys() )
+            {
+                IClasspathEntry jcp = project.getJavaModel().decodeClasspathEntry( scp );
+                convert( jcp, project, files );
+            }
         }
     }
 
