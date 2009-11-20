@@ -20,9 +20,11 @@
 package org.apache.felix.sigil.common.runtime.io;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
@@ -39,6 +41,7 @@ import static org.apache.felix.sigil.common.runtime.io.Constants.ERROR;
  */
 public abstract class Action<I, O>
 {
+    private static final String PREFIX = "\t";
     private static final String ASCII = "ASCII";
     private final DataInputStream in;
     private final DataOutputStream out;
@@ -89,6 +92,11 @@ public abstract class Action<I, O>
         writeInt( ERROR );
     }
 
+    protected void writeThrowable(Throwable t) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        t.printStackTrace(new PrintStream( bos ));
+        writeString( bos.toString() );
+    }
 
     protected String readString() throws IOException
     {

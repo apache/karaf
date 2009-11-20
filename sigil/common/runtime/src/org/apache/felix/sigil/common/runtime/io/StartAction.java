@@ -80,7 +80,7 @@ public class StartAction extends Action<Long, Void>
             catch ( BundleException e )
             {
                 writeError();
-                writeString( e.getMessage() );
+                writeThrowable(e);
             }
         }
         flush();

@@ -75,8 +75,9 @@ public class InstallAction extends Action<String, Long>
         }
         catch ( BundleException e )
         {
+            e.printStackTrace();
             writeError();
-            writeString( e.getMessage() );
+            writeThrowable( e );
         }
         flush();
     }

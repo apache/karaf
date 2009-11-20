@@ -116,7 +116,7 @@ public class UpdateAction extends Action<UpdateAction.Update, Void>
                     }
                     catch (IOException e) {
                         writeError();
-                        writeString(e.getMessage());
+                        writeThrowable( e );
                     }
                 }
                 else

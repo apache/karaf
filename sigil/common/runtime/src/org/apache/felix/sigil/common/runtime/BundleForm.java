@@ -20,6 +20,8 @@ package org.apache.felix.sigil.common.runtime;
 
 import java.io.BufferedReader;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,6 +33,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -146,7 +149,11 @@ public class BundleForm
             }
             URI[] resolved = resolver.resolve(bundles[i]);
             for ( URI uri : resolved ) {
-                ret.add( toBundle(uri, isStarted(bundles[i])) );
+                BundleStatus bundle = toBundle(uri, isStarted(bundles[i]));
+                if ( bundle == null ) {
+                    throw new IllegalStateException("Failed to read bundle " + uri);
+                }
+                ret.add( bundle );
             }
         }
         
@@ -156,32 +163,69 @@ public class BundleForm
     
     private BundleStatus toBundle(URI uri, boolean started) throws IOException
     {
-        URL url = uri.toURL();
-        InputStream in = url.openStream();
         try {
-            JarInputStream jin = new JarInputStream(in);
-            Manifest mf = jin.getManifest();
+            Manifest mf = findManifest(uri);
+            if ( mf == null ) return null;
             Attributes attr = mf.getMainAttributes();
             String bsn = attr.getValue(Constants.BUNDLE_SYMBOLICNAME);
             String ver = attr.getValue(Constants.BUNDLE_VERSION);
             BundleStatus st = new BundleStatus();
             st.setBundleSymbolicName(bsn);
             st.setVersion(ver);
-            st.setLocation(url.toExternalForm());
+            st.setLocation(uri.toURL().toExternalForm());
             st.setStatus(started ? Bundle.ACTIVE : Bundle.INSTALLED);
             return st;
         }
-        finally {
-            try
-            {
-                in.close();
-            }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid uri " + uri, e);
+        }
+    }
+
+    private Manifest findManifest(URI uri) throws IOException
+    {
+        Manifest mf = null;
+
+        try {
+            File f = new File(uri);
+            if ( f.isDirectory() ) {
+                f = new File(f, "META-INF/MANIFEST.MF" );
+                if ( f.isFile() ) {
+                    FileInputStream fin = new FileInputStream(f);
+                    try {
+                        mf = new Manifest(fin);
+                    }
+                    finally { 
+                        fin.close();
+                    }
+                }
             }
         }
+        catch (IllegalArgumentException e) {
+            // fine
+        }
+        
+        if ( mf == null) {
+            InputStream in = uri.toURL().openStream();
+            try {
+                JarInputStream jin = new JarInputStream(in);
+                mf = jin.getManifest();
+                if ( mf == null ) {
+                    for(;;) {
+                        JarEntry entry = jin.getNextJarEntry();
+                        if ( entry == null ) break;
+                        if ( "META-INF/MANIFEST.MF".equals(entry.getName()) ) {
+                            mf = new Manifest(jin);
+                            break;
+                        }
+                    }
+                }
+                
+            }
+            finally {
+                in.close();
+            }
+        }
+        return mf;
     }
 
     public static BundleForm create(URL formURL) throws IOException, URISyntaxException {
