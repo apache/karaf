@@ -184,7 +184,11 @@ public class Main {
 
         if (configProps.getProperty(Constants.FRAMEWORK_STORAGE) == null) {
             File storage = new File(karafBase.getPath(), "data/cache");
-            storage.mkdirs();
+            try {
+                storage.mkdirs();
+            } catch (SecurityException se) {
+                throw new Exception(se.getMessage()); 
+            }
             configProps.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
         }
         
@@ -358,29 +362,40 @@ public class Main {
                 File propertiesFile = new File(storageFile, "instance.properties");
                 Properties props = new Properties();
                 if (propertiesFile.exists()) {
-                    props.load(new FileInputStream(propertiesFile));
+                    FileInputStream fis = new FileInputStream(propertiesFile);
+                    props.load(fis);
                     int count = Integer.parseInt(props.getProperty("count"));
                     for (int i = 0; i < count; i++) {
                         String name = props.getProperty("item." + i + ".name");
                         if (name.equals(instanceName)) {
                             props.setProperty("item." + i + ".pid", pid);
-                            props.store(new FileOutputStream(propertiesFile), null);
+                            FileOutputStream fos = new FileOutputStream(propertiesFile);
+                            props.store(fos, null);
+                            fis.close();
+                            fos.close();
                             return;
                         }
                     }
+                    fis.close();
                     if (!isRoot) {
                         throw new Exception("Instance " + instanceName + " not found");
                     } 
                 } else if (isRoot) {
                     if (!propertiesFile.getParentFile().exists()) {
-                        propertiesFile.getParentFile().mkdirs();
+                        try {
+                            propertiesFile.getParentFile().mkdirs();
+                        } catch (SecurityException se) {
+                            throw new Exception(se.getMessage());
+                        }
                     }
                     props.setProperty("count", "1");
                     props.setProperty("item.0.name", instanceName);
                     props.setProperty("item.0.loc", karafHome.getAbsolutePath());
                     props.setProperty("item.0.pid", pid);
                     props.setProperty("item.0.root", "true");
-                    props.store(new FileOutputStream(propertiesFile), null);
+                    FileOutputStream fos = new FileOutputStream(propertiesFile);
+                    props.store(fos, null);
+                    fos.close();
                 }
             }
         } catch (Exception e) {
