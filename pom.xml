@@ -100,7 +100,7 @@
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring.version>2.5.6.SEC01</spring.version>
-        <sshd.version>0.3.0-SNAPSHOT</sshd.version>
+        <sshd.version>0.4.0-SNAPSHOT</sshd.version>
         <osgi.jmx.version>4.2.0.200907080519</osgi.jmx.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
