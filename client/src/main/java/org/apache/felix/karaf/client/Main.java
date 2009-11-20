@@ -26,6 +26,7 @@ import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.common.RuntimeSshException;
 
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
@@ -42,6 +43,8 @@ public class Main {
         String password = "karaf";
         StringBuilder sb = new StringBuilder();
         int level = 1;
+        int retryAttempts = 0;
+        int retryDelay = 2;
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
@@ -55,6 +58,10 @@ public class Main {
                     password = args[++i];
                 } else if (args[i].equals("-v")) {
                     level++;
+                } else if (args[i].equals("-r")) {
+                    retryAttempts = Integer.parseInt(args[++i]);
+                } else if (args[i].equals("-d")) {
+                    retryDelay = Integer.parseInt(args[++i]);
                 } else if (args[i].equals("--help")) {
                     System.out.println("Apache Felix Karaf client");
                     System.out.println("  -a [port]     specify the port to connect to");
@@ -63,6 +70,8 @@ public class Main {
                     System.out.println("  -p [password] specify the password");
                     System.out.println("  --help        shows this help message");
                     System.out.println("  -v            raise verbosity");
+                    System.out.println("  -r [attempts] retry connection establishment (up to attempts times)");
+                    System.out.println("  -d [delay]    intra-retry delay (defaults to 2 seconds)");
                     System.out.println("  [commands]    commands to run");
                     System.out.println("If no commands are specified, the client will be put in an interactive mode");
                     System.exit(0);
@@ -83,9 +92,22 @@ public class Main {
         try {
             client = SshClient.setUpDefaultClient();
             client.start();
-            ConnectFuture future = client.connect(host, port);
-            future.await();
-            ClientSession session = future.getSession();
+            int retries = 0;
+            ClientSession session = null;
+            do {
+                ConnectFuture future = client.connect(host, port);
+                future.await();
+                try { 
+                    session = future.getSession();
+                } catch (RuntimeSshException ex) {
+                    if (retries++ < retryAttempts) {
+                        Thread.sleep(retryDelay * 1000);
+                        System.out.println("retrying (attempt " + retries + ") ...");
+                    } else {
+                        throw ex;
+                    }
+                }
+            } while (session == null);
             session.authPassword(user, password);
             ClientChannel channel;
 			if (sb.length() > 0) {
