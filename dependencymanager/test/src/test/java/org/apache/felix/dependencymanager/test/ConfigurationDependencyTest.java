@@ -22,6 +22,12 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Properties;
+
+import junit.framework.Assert;
+
 import org.apache.felix.dependencymanager.DependencyManager;
 import org.apache.felix.dependencymanager.Logger;
 import org.apache.felix.dependencymanager.Service;
@@ -31,86 +37,76 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 
 @RunWith(JUnit4TestRunner.class)
-public class ComponentLifeCycleTest {
+public class ConfigurationDependencyTest {
     @Configuration
     public static Option[] configuration() {
         return options(
             provision(
                 mavenBundle().groupId("org.apache.felix").artifactId("org.osgi.compendium").versionAsInProject(),
+                mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.configadmin").version("1.2.4"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.dependencymanager").versionAsInProject()
             )
         );
     }    
     
     @Test
-    public void testComponentLifeCycleCallbacks(BundleContext context) {
+    public void testComponentWithRequiredConfiguration(BundleContext context) {
         DependencyManager m = new DependencyManager(context, new Logger(context));
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
-        // create a simple service component
-        Service s = m.createService().setImplementation(new ComponentInstance(e));
-        // add it, and since it has no dependencies, it should be activated immediately
-        m.add(s);
-        // remove it so it gets destroyed
-        m.remove(s);
+        // create a service provider and consumer
+        Service s1 = m.createService().setImplementation(new ConfigurationConsumer(e)).add(m.createConfigurationDependency().setPid("test"));
+        Service s2 = m.createService().setImplementation(new ConfigurationCreator(e)).add(m.createServiceDependency().setService(ConfigurationAdmin.class).setRequired(true));
+        m.add(s1);
+        m.add(s2);
+        e.waitForStep(2, 2000);
+        m.remove(s1);
+        m.remove(s2);
         // ensure we executed all steps inside the component instance
-        e.step(6);
+        e.step(3);
     }
+}
+
+class ConfigurationCreator {
+    private volatile ConfigurationAdmin m_ca;
+    private final Ensure m_ensure;
     
-    @Test
-    public void testCustomComponentLifeCycleCallbacks(BundleContext context) {
-        DependencyManager m = new DependencyManager(context, new Logger(context));
-        // helper class that ensures certain steps get executed in sequence
-        Ensure e = new Ensure();
-        // create a simple service component
-        Service s = m.createService().setImplementation(new CustomComponentInstance(e)).setCallbacks("a", "b", "c", "d");
-        // add it, and since it has no dependencies, it should be activated immediately
-        m.add(s);
-        // remove it so it gets destroyed
-        m.remove(s);
-        // ensure we executed all steps inside the component instance
-        e.step(6);
-    }
-}
-
-class ComponentInstance {
-    private final Ensure m_ensure;
-    public ComponentInstance(Ensure e) {
+    public ConfigurationCreator(Ensure e) {
         m_ensure = e;
-        m_ensure.step(1);
     }
-    public void init() {
-        m_ensure.step(2);
-    }
+
     public void start() {
-        m_ensure.step(3);
-    }
-    public void stop() {
-        m_ensure.step(4);
-    }
-    public void destroy() {
-        m_ensure.step(5);
+        try {
+            m_ensure.step(1);
+            org.osgi.service.cm.Configuration conf = m_ca.getConfiguration("test", null);
+            Properties props = new Properties();
+            props.put("testkey", "testvalue");
+            conf.update(props);
+        }
+        catch (IOException e) {
+            Assert.fail("Could not create configuration: " + e.getMessage());
+        }
     }
 }
 
-class CustomComponentInstance {
+class ConfigurationConsumer implements ManagedService {
     private final Ensure m_ensure;
-    public CustomComponentInstance(Ensure e) {
+
+    public ConfigurationConsumer(Ensure e) {
         m_ensure = e;
-        m_ensure.step(1);
     }
-    public void a() {
-        m_ensure.step(2);
-    }
-    public void b() {
-        m_ensure.step(3);
-    }
-    public void c() {
-        m_ensure.step(4);
-    }
-    public void d() {
-        m_ensure.step(5);
+
+    public void updated(Dictionary props) throws ConfigurationException {
+        if (props != null) {
+            m_ensure.step(2);
+            if (!"testvalue".equals(props.get("testkey"))) {
+                Assert.fail("Could not find the configured property.");
+            }
+        }
     }
 }
