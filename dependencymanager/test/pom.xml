@@ -20,13 +20,12 @@
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
     <version>1.0.4</version>
-    <relativePath>../pom/pom.xml</relativePath>
+    <relativePath>../../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>bundle</packaging>
-  <name>Apache Felix Dependency Manager</name>
+  <name>Apache Felix Dependency Manager Integration Tests</name>
   <version>3.0.0-SNAPSHOT</version>
-  <artifactId>org.apache.felix.dependencymanager</artifactId>
+  <artifactId>org.apache.felix.dependencymanager.test</artifactId>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -38,6 +37,12 @@
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <version>1.2.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.dependencymanager</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -65,23 +70,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.4.0</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-SymbolicName>org.apache.felix.dependencymanager</Bundle-SymbolicName>
-            <Bundle-Name>Apache Felix Dependency Manager</Bundle-Name>
-            <Bundle-Description>A bundle that provides a run-time
-              service dependency manager.</Bundle-Description>
-            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Export-Package>org.apache.felix.dependencymanager</Export-Package>
-            <Import-Package>!org.apache.felix.dependencymanager,*</Import-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <executions>
           <execution>
@@ -108,9 +96,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.dependencymanager-3.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.dependencymanager-3.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.dependencymanager-3.0.0</url>
-  </scm>
 </project>
