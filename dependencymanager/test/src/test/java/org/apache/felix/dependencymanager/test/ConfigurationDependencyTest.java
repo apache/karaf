@@ -55,20 +55,23 @@ public class ConfigurationDependencyTest {
     }    
     
     @Test
-    public void testComponentWithRequiredConfiguration(BundleContext context) {
+    public void testComponentWithRequiredConfigurationAndServicePropertyPropagation(BundleContext context) {
         DependencyManager m = new DependencyManager(context, new Logger(context));
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
         // create a service provider and consumer
-        Service s1 = m.createService().setImplementation(new ConfigurationConsumer(e)).add(m.createConfigurationDependency().setPid("test"));
+        Service s1 = m.createService().setImplementation(new ConfigurationConsumer(e)).setInterface(Runnable.class.getName(), null).add(m.createConfigurationDependency().setPid("test").setPropagate(true));
         Service s2 = m.createService().setImplementation(new ConfigurationCreator(e)).add(m.createServiceDependency().setService(ConfigurationAdmin.class).setRequired(true));
+        Service s3 = m.createService().setImplementation(new ConfiguredServiceConsumer(e)).add(m.createServiceDependency().setService(Runnable.class, ("(testkey=testvalue)")).setRequired(true));
         m.add(s1);
         m.add(s2);
-        e.waitForStep(2, 2000);
+        m.add(s3);
+        e.waitForStep(4, 2000);
         m.remove(s1);
         m.remove(s2);
+        m.remove(s3);
         // ensure we executed all steps inside the component instance
-        e.step(3);
+        e.step(5);
     }
 }
 
@@ -94,7 +97,7 @@ class ConfigurationCreator {
     }
 }
 
-class ConfigurationConsumer implements ManagedService {
+class ConfigurationConsumer implements ManagedService, Runnable {
     private final Ensure m_ensure;
 
     public ConfigurationConsumer(Ensure e) {
@@ -108,5 +111,23 @@ class ConfigurationConsumer implements ManagedService {
                 Assert.fail("Could not find the configured property.");
             }
         }
+    }
+    
+    public void run() {
+        m_ensure.step(4);
+    }
+}
+
+class ConfiguredServiceConsumer {
+    private final Ensure m_ensure;
+    private volatile Runnable m_runnable;
+
+    public ConfiguredServiceConsumer(Ensure e) {
+        m_ensure = e;
+    }
+    
+    public void start() {
+        m_ensure.step(3);
+        m_runnable.run();
     }
 }
