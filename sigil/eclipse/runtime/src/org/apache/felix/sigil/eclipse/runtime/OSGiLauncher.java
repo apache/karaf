@@ -77,6 +77,7 @@ public class OSGiLauncher extends AbstractJavaLaunchConfigurationDelegate implem
         SigilCore.log( "VM=" + install.getName() );
         SigilCore.log( "Main=" + vmconfig.getClassToLaunch() );
         SigilCore.log( "VMArgs=" + Arrays.asList( vmconfig.getVMArguments() ) );
+        SigilCore.log( "Boot Classpath=" + Arrays.asList( vmconfig.getBootClassPath() ) );
         SigilCore.log( "Classpath=" + Arrays.asList( vmconfig.getClassPath() ) );
         SigilCore.log( "Args=" + Arrays.asList( vmconfig.getProgramArguments() ) );
         SigilCore.log( "Working Dir=" + vmconfig.getWorkingDirectory() );
@@ -91,7 +92,7 @@ public class OSGiLauncher extends AbstractJavaLaunchConfigurationDelegate implem
         {
             String name = LaunchHelper.getRepositoryManagerName(config);
             IRepositoryManager manager = SigilCore.getRepositoryManager(name);
-            client.apply(form.resolve(new RuntimeBundleResolver(manager)));
+            client.apply(form.resolve(new RuntimeBundleResolver(manager, config)));
         }
         catch (Exception e)
         {

@@ -28,7 +28,7 @@ public class SigilSourcePathProvider extends StandardSourcePathProvider
         ArrayList<IRuntimeClasspathEntry> all = new ArrayList<IRuntimeClasspathEntry>(entries.length);
         
         all.addAll( workbenchSourcePath(entries, configuration) );
-        all.addAll( launchOverridePath( configuration ) );
+//        all.addAll( launchOverridePath( configuration ) );
 //        all.addAll( newtonSourcePath( configuration ) );
         Set<IRuntimeClasspathEntry> dynamic = dynamicRuntime.get( configuration );
         if ( dynamic != null ) {

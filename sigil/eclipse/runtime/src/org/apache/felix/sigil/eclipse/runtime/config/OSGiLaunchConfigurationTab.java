@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -151,6 +152,8 @@ public class OSGiLaunchConfigurationTab extends AbstractLaunchConfigurationTab
     public void performApply( ILaunchConfigurationWorkingCopy config )
     {
         config.setAttribute(OSGiLaunchConfigurationConstants.FORM_FILE_LOCATION, formLocation);
+        config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, OSGiLaunchConfigurationConstants.CLASSPATH_PROVIDER );
+        config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, OSGiLaunchConfigurationConstants.CLASSPATH_PROVIDER);    
     }
 
     /* (non-Javadoc)

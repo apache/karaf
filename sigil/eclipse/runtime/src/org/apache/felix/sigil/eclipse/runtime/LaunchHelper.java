@@ -55,7 +55,7 @@ public class LaunchHelper {
 
     public static String[] getProgramArgs( ILaunchConfiguration config )
     {
-        return new String[] { "-p", "9090", "-a", "localhost" };
+        return new String[] { "-p", "9090", "-a", "localhost", "-c" };
     }
 
     public static long getBackoff( ILaunchConfiguration config )

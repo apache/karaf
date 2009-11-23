@@ -10,6 +10,7 @@ import org.apache.felix.sigil.common.runtime.BundleForm.ResolutionContext;
 import org.apache.felix.sigil.common.runtime.BundleForm.Resolver;
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
+import org.apache.felix.sigil.eclipse.runtime.source.SigilSourcePathProvider;
 import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
@@ -19,6 +20,7 @@ import org.apache.felix.sigil.repository.IResolution;
 import org.apache.felix.sigil.repository.ResolutionConfig;
 import org.apache.felix.sigil.repository.ResolutionException;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.osgi.framework.Version;
 
 public class RuntimeBundleResolver implements ResolutionContext
@@ -55,6 +57,8 @@ public class RuntimeBundleResolver implements ResolutionContext
                     ISigilProjectModel p = b.getAncestor(ISigilProjectModel.class);
                     if ( p != null ) {
                         uris.add(p.findBundleLocation().toFile().toURI());
+                        SigilCore.log("Adding project source to source path " + p.getName());
+                        SigilSourcePathProvider.addProjectSource(launchConfig, p);
                     }
                     else {
                         b.synchronize(null);
@@ -80,9 +84,11 @@ public class RuntimeBundleResolver implements ResolutionContext
     }
     
     private final IRepositoryManager manager;
+    private final ILaunchConfiguration launchConfig;
     
-    public RuntimeBundleResolver(IRepositoryManager manager) {
+    public RuntimeBundleResolver(IRepositoryManager manager, ILaunchConfiguration launchConfig) {
         this.manager = manager;
+        this.launchConfig = launchConfig;
     }
 
     public Resolver findResolver(URI uri)
