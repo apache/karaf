@@ -127,32 +127,8 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     call %KARAF_PROFILER_SCRIPT%
 
 :RUN
-    SET OPTS=-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=true
-    SET SHIFT=false
-    if "%1" == "console" goto :EXECUTE_CONSOLE
-    if "%1" == "server" goto :EXECUTE_SERVER
-    if "%1" == "client" goto :EXECUTE_CLIENT
-    goto :EXECUTE
-
-:EXECUTE_CONSOLE
-    SET SHIFT=true
-    goto :EXECUTE    
-
-:EXECUTE_SERVER
-    SET OPTS=-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true
-    SET SHIFT=true
-    goto :EXECUTE
-
-:EXECUTE_CLIENT
-    SET OPTS=-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=false
-    SET SHIFT=true
-    goto :EXECUTE
-
-:EXECUTE
-    if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
-    if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8    
     rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" -jar "%KARAF_HOME%\lib\karaf-client.jar" "osgi:shutdown"
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" -jar "%KARAF_HOME%\lib\karaf-client.jar" "osgi:shutdown" %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 

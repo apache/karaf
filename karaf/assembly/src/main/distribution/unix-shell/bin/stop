@@ -270,7 +270,7 @@ run() {
         KARAF_BASE=`cygpath --path --windows "$KARAF_BASE"`
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
-    exec $JAVA $JAVA_OPTS -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties -jar "$KARAF_HOME/lib/karaf-client.jar" osgi:shutdown
+    exec $JAVA $JAVA_OPTS -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties -jar "$KARAF_HOME/lib/karaf-client.jar" osgi:shutdown "$@"
 }
 
 main() {
