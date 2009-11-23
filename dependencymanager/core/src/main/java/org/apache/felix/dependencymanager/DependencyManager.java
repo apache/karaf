@@ -85,6 +85,16 @@ public class DependencyManager {
         return new ServiceDependency(m_context, m_logger);
     }
     
+    /**
+     * Creates a new temporal service dependency.
+     * 
+     * @param timeout the max number of milliseconds to wait for a service availability.
+     * @return the service dependency
+     */
+    public TemporalServiceDependency createTemporalServiceDependency() {
+        return new TemporalServiceDependency(m_context, m_logger);
+    }
+    
     public ConfigurationDependency createConfigurationDependency() {
         return new ConfigurationDependency(m_context, m_logger);
     }

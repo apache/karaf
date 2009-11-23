@@ -52,12 +52,15 @@ public class ServiceDependencyTest {
         // create a service provider and consumer
         Service sp = m.createService().setImplementation(new ServiceProvider(e)).setInterface(ServiceInterface.class.getName(), null);
         Service sc = m.createService().setImplementation(new ServiceConsumer(e)).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(true));
+        Service sc2 = m.createService().setImplementation(new ServiceConsumerCallbacks(e)).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(false).setCallbacks("add", "remove"));
         m.add(sp);
         m.add(sc);
-        m.remove(sp);
         m.remove(sc);
+        m.add(sc2);
+        m.remove(sp);
+        m.remove(sc2);
         // ensure we executed all steps inside the component instance
-        e.step(4);
+        e.step(6);
     }
 }
 
@@ -90,5 +93,20 @@ class ServiceConsumer {
     
     public void stop() {
         m_ensure.step(3);
+    }
+}
+
+class ServiceConsumerCallbacks {
+    private final Ensure m_ensure;
+
+    public ServiceConsumerCallbacks(Ensure e) {
+        m_ensure = e;
+    }
+    
+    public void add(ServiceInterface service) {
+        m_ensure.step(4);
+    }
+    public void remove(ServiceInterface service) {
+        m_ensure.step(5);
     }
 }

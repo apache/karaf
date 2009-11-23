@@ -108,6 +108,16 @@ public abstract class DependencyActivatorBase implements BundleActivator {
     }
     
     /**
+     * Creates a new temporal service dependency.
+     * 
+     * @param timeout the max number of milliseconds to wait for a service availability.
+     * @return the service dependency
+     */
+    public TemporalServiceDependency createTemporalServiceDependency() {
+        return new TemporalServiceDependency(m_context, m_logger);
+    }
+    
+    /**
      * Creates a new configuration dependency.
      * 
      * @return the configuration dependency

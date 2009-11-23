@@ -41,11 +41,11 @@ import org.osgi.framework.ServiceReference;
  */
 public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, ServiceComponentDependency {
     private boolean m_isRequired;
-    private Service m_service;
-    private volatile ServiceTracker m_tracker;
-    private BundleContext m_context;
+    protected Service m_service;
+    protected volatile ServiceTracker m_tracker;
+    protected BundleContext m_context;
     private boolean m_isAvailable;
-    private volatile Class m_trackedServiceName;
+    protected volatile Class m_trackedServiceName;
     private Object m_nullObject;
     private volatile String m_trackedServiceFilter;
     private volatile String m_trackedServiceFilterUnmodified;
@@ -56,8 +56,8 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     private String m_callbackChanged;
     private String m_callbackRemoved;
     private boolean m_autoConfig;
-    private ServiceReference m_reference;
-    private Object m_serviceInstance;
+    protected ServiceReference m_reference;
+    protected Object m_serviceInstance;
     private final Logger m_logger;
     private String m_autoConfigInstance;
     private boolean m_autoConfigInvoked;
@@ -407,7 +407,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
     }
     
-    private synchronized boolean makeAvailable() {
+    protected synchronized boolean makeAvailable() {
         if (!m_isAvailable) {
             m_isAvailable = true;
             return true;
