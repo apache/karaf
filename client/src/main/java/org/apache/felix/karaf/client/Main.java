@@ -108,7 +108,9 @@ public class Main {
                     }
                 }
             } while (session == null);
-            session.authPassword(user, password);
+            if (!session.authPassword(user, password).await().isSuccess()) {
+                throw new Exception("Authentication failure");
+            }
             ClientChannel channel;
 			if (sb.length() > 0) {
  				channel = session.createChannel("exec");
@@ -124,7 +126,11 @@ public class Main {
             channel.open();
             channel.waitFor(ClientChannel.CLOSED, 0);
         } catch (Throwable t) {
-            t.printStackTrace();
+            if (level > 1) {
+                t.printStackTrace();
+            } else {
+                System.err.println(t.getMessage());
+            }
             System.exit(1);
         } finally {
             try {
