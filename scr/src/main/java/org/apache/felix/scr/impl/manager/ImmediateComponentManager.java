@@ -20,6 +20,7 @@ package org.apache.felix.scr.impl.manager;
 
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -468,8 +469,12 @@ public class ImmediateComponentManager extends AbstractComponentManager
         {
             try
             {
+                // Don't propagate if service properties did not change.
                 final Dictionary regProps = getServiceProperties();
-                sr.setProperties( regProps );
+                if ( !servicePropertiesMatches( sr, regProps ) )
+                {
+                    sr.setProperties( regProps );
+                }
             }
             catch ( IllegalStateException ise )
             {
@@ -490,5 +495,32 @@ public class ImmediateComponentManager extends AbstractComponentManager
 
         // 7. everything set and done, the component has been udpated
         return true;
+    }
+
+
+    /**
+     * Checks if the given service registration properties matches another set
+     * of properties.
+     *
+     * @param reg the service registration whose service properties will be
+     *      compared to the props parameter
+     * @param props the properties to be compared with the registration
+     *      service properties.
+     * @return <code>true</code> if the registration service properties equals
+     *      the prop properties, false if not.
+     */
+    private boolean servicePropertiesMatches( ServiceRegistration reg, Dictionary props )
+    {
+        Dictionary regProps = new Hashtable();
+        String[] keys = reg.getReference().getPropertyKeys();
+        for ( int i = 0; keys != null && i < keys.length; i++ )
+        {
+            if ( !keys[i].equals( org.osgi.framework.Constants.OBJECTCLASS )
+                && !keys[i].equals( org.osgi.framework.Constants.SERVICE_ID ) )
+            {
+                regProps.put( keys[i], reg.getReference().getProperty( keys[i] ) );
+            }
+        }
+        return regProps.equals( props );
     }
 }
