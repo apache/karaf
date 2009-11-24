@@ -30,13 +30,9 @@ import org.apache.felix.ipojo.IPOJOServiceFactory;
  * If the consumer of this service do not call the getService or ungetService
  * methods, it will get an Exception with an explicit error message telling
  * him that this service is only usable through iPOJO.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ErrorPrintingServiceFactoryProxy implements InvocationHandler {
-
-	/**
-	 * Wrapped factory.
-	 */
-    private final IPOJOServiceFactory factory;
 
     /**
      * getService(ComponentInstance) method.
@@ -48,8 +44,13 @@ public class ErrorPrintingServiceFactoryProxy implements InvocationHandler {
      */
     private static Method UNGET_METHOD;
 
+    /**
+     * Wrapped factory.
+     */
+    private final IPOJOServiceFactory m_factory;
+
     static {
-    	// Static initialization of theses constants.
+        // Static initialization of theses constants.
         try {
             GET_METHOD = IPOJOServiceFactory.class.getMethod("getService",
                                                              new Class[]{ComponentInstance.class});
@@ -68,19 +69,28 @@ public class ErrorPrintingServiceFactoryProxy implements InvocationHandler {
      * @param factory delegating iPOJO ServiceFactory
      */
     public ErrorPrintingServiceFactoryProxy(final IPOJOServiceFactory factory) {
-        this.factory = factory;
+        this.m_factory = factory;
     }
 
+    /**
+     * 'Invoke' methods called when a method is called on the proxy.
+     * @param proxy the proxy
+     * @param method the method
+     * @param args the arguments
+     * @return the result
+     * @throws Exception if something wrong happens
+     * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+     */
     public Object invoke(final Object proxy,
                          final Method method,
-                         final Object[] args) throws Throwable {
+                         final Object[] args) throws Exception {
 
         // Handle get/unget operations
         if (GET_METHOD.equals(method)) {
-            return factory.getService((ComponentInstance) args[0]);
+            return m_factory.getService((ComponentInstance) args[0]);
         }
         if (UNGET_METHOD.equals(method)) {
-            factory.ungetService((ComponentInstance) args[0], args[1]);
+            m_factory.ungetService((ComponentInstance) args[0], args[1]);
             return null;
         }
 

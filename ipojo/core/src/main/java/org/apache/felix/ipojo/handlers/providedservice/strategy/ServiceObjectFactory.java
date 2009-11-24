@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,12 +23,14 @@ import org.apache.felix.ipojo.IPOJOServiceFactory;
 
 /**
  * Extended iPOJOServiceFactory that supports a close() operation.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ServiceObjectFactory extends IPOJOServiceFactory {
 
     /**
      * Called when the supporting CreationStrategy is unpublished
-     * from the service registry.
+     * from the service registry. This allows to do an explicit 
+     * cleanup.
      */
     void close();
 }
