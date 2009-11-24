@@ -71,53 +71,53 @@ public class TemporalServiceDependencyTest {
         // ensure we executed all steps inside the component instance
         e.step(6);
     }
-}
 
-interface TemporalServiceInterface {
-    public void invoke();
-}
+    static interface TemporalServiceInterface {
+        public void invoke();
+    }
 
-class TemporalServiceProvider implements TemporalServiceInterface {
-    private final Ensure m_ensure;
-    public TemporalServiceProvider(Ensure e) {
-        m_ensure = e;
+    static class TemporalServiceProvider implements TemporalServiceInterface {
+        private final Ensure m_ensure;
+        public TemporalServiceProvider(Ensure e) {
+            m_ensure = e;
+        }
+        public void invoke() {
+            m_ensure.step(2);
+        }
     }
-    public void invoke() {
-        m_ensure.step(2);
-    }
-}
 
-class TemporalServiceProvider2 implements TemporalServiceInterface {
-    private final Ensure m_ensure;
-    public TemporalServiceProvider2(Ensure e) {
-        m_ensure = e;
+    static class TemporalServiceProvider2 implements TemporalServiceInterface {
+        private final Ensure m_ensure;
+        public TemporalServiceProvider2(Ensure e) {
+            m_ensure = e;
+        }
+        public void invoke() {
+            m_ensure.step(4);
+        }
     }
-    public void invoke() {
-        m_ensure.step(4);
-    }
-}
 
-class TemporalServiceConsumer implements Runnable {
-    private volatile TemporalServiceInterface m_service;
-    private final Ensure m_ensure;
+    static class TemporalServiceConsumer implements Runnable {
+        private volatile TemporalServiceInterface m_service;
+        private final Ensure m_ensure;
 
-    public TemporalServiceConsumer(Ensure e) {
-        m_ensure = e;
-    }
-    
-    public void start() {
-        m_ensure.step(1);
-        Thread t = new Thread(this);
-        t.start();
-    }
-    
-    public void run() {
-        m_service.invoke();
-        m_ensure.waitForStep(3, 1000);
-        m_service.invoke();
-    }
-    
-    public void stop() {
-        m_ensure.step(5);
+        public TemporalServiceConsumer(Ensure e) {
+            m_ensure = e;
+        }
+        
+        public void start() {
+            m_ensure.step(1);
+            Thread t = new Thread(this);
+            t.start();
+        }
+        
+        public void run() {
+            m_service.invoke();
+            m_ensure.waitForStep(3, 1000);
+            m_service.invoke();
+        }
+        
+        public void stop() {
+            m_ensure.step(5);
+        }
     }
 }

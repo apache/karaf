@@ -73,61 +73,61 @@ public class ConfigurationDependencyTest {
         // ensure we executed all steps inside the component instance
         e.step(5);
     }
-}
 
-class ConfigurationCreator {
-    private volatile ConfigurationAdmin m_ca;
-    private final Ensure m_ensure;
-    
-    public ConfigurationCreator(Ensure e) {
-        m_ensure = e;
-    }
-
-    public void start() {
-        try {
-            m_ensure.step(1);
-            org.osgi.service.cm.Configuration conf = m_ca.getConfiguration("test", null);
-            Properties props = new Properties();
-            props.put("testkey", "testvalue");
-            conf.update(props);
+    static class ConfigurationCreator {
+        private volatile ConfigurationAdmin m_ca;
+        private final Ensure m_ensure;
+        
+        public ConfigurationCreator(Ensure e) {
+            m_ensure = e;
         }
-        catch (IOException e) {
-            Assert.fail("Could not create configuration: " + e.getMessage());
-        }
-    }
-}
 
-class ConfigurationConsumer implements ManagedService, Runnable {
-    private final Ensure m_ensure;
-
-    public ConfigurationConsumer(Ensure e) {
-        m_ensure = e;
-    }
-
-    public void updated(Dictionary props) throws ConfigurationException {
-        if (props != null) {
-            m_ensure.step(2);
-            if (!"testvalue".equals(props.get("testkey"))) {
-                Assert.fail("Could not find the configured property.");
+        public void start() {
+            try {
+                m_ensure.step(1);
+                org.osgi.service.cm.Configuration conf = m_ca.getConfiguration("test", null);
+                Properties props = new Properties();
+                props.put("testkey", "testvalue");
+                conf.update(props);
+            }
+            catch (IOException e) {
+                Assert.fail("Could not create configuration: " + e.getMessage());
             }
         }
     }
-    
-    public void run() {
-        m_ensure.step(4);
-    }
-}
 
-class ConfiguredServiceConsumer {
-    private final Ensure m_ensure;
-    private volatile Runnable m_runnable;
+    static class ConfigurationConsumer implements ManagedService, Runnable {
+        private final Ensure m_ensure;
 
-    public ConfiguredServiceConsumer(Ensure e) {
-        m_ensure = e;
+        public ConfigurationConsumer(Ensure e) {
+            m_ensure = e;
+        }
+
+        public void updated(Dictionary props) throws ConfigurationException {
+            if (props != null) {
+                m_ensure.step(2);
+                if (!"testvalue".equals(props.get("testkey"))) {
+                    Assert.fail("Could not find the configured property.");
+                }
+            }
+        }
+        
+        public void run() {
+            m_ensure.step(4);
+        }
     }
-    
-    public void start() {
-        m_ensure.step(3);
-        m_runnable.run();
+
+    static class ConfiguredServiceConsumer {
+        private final Ensure m_ensure;
+        private volatile Runnable m_runnable;
+
+        public ConfiguredServiceConsumer(Ensure e) {
+            m_ensure = e;
+        }
+        
+        public void start() {
+            m_ensure.step(3);
+            m_runnable.run();
+        }
     }
 }

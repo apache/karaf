@@ -62,51 +62,51 @@ public class ServiceDependencyTest {
         // ensure we executed all steps inside the component instance
         e.step(6);
     }
-}
-
-interface ServiceInterface {
-    public void invoke();
-}
-
-class ServiceProvider implements ServiceInterface {
-    private final Ensure m_ensure;
-    public ServiceProvider(Ensure e) {
-        m_ensure = e;
-    }
-    public void invoke() {
-        m_ensure.step(2);
-    }
-}
-
-class ServiceConsumer {
-    private volatile ServiceInterface m_service;
-    private final Ensure m_ensure;
-
-    public ServiceConsumer(Ensure e) {
-        m_ensure = e;
-    }
     
-    public void start() {
-        m_ensure.step(1);
-        m_service.invoke();
+    static interface ServiceInterface {
+        public void invoke();
     }
-    
-    public void stop() {
-        m_ensure.step(3);
-    }
-}
 
-class ServiceConsumerCallbacks {
-    private final Ensure m_ensure;
+    static class ServiceProvider implements ServiceInterface {
+        private final Ensure m_ensure;
+        public ServiceProvider(Ensure e) {
+            m_ensure = e;
+        }
+        public void invoke() {
+            m_ensure.step(2);
+        }
+    }
 
-    public ServiceConsumerCallbacks(Ensure e) {
-        m_ensure = e;
+    static class ServiceConsumer {
+        private volatile ServiceInterface m_service;
+        private final Ensure m_ensure;
+
+        public ServiceConsumer(Ensure e) {
+            m_ensure = e;
+        }
+        
+        public void start() {
+            m_ensure.step(1);
+            m_service.invoke();
+        }
+        
+        public void stop() {
+            m_ensure.step(3);
+        }
     }
-    
-    public void add(ServiceInterface service) {
-        m_ensure.step(4);
-    }
-    public void remove(ServiceInterface service) {
-        m_ensure.step(5);
+
+    static class ServiceConsumerCallbacks {
+        private final Ensure m_ensure;
+
+        public ServiceConsumerCallbacks(Ensure e) {
+            m_ensure = e;
+        }
+        
+        public void add(ServiceInterface service) {
+            m_ensure.step(4);
+        }
+        public void remove(ServiceInterface service) {
+            m_ensure.step(5);
+        }
     }
 }

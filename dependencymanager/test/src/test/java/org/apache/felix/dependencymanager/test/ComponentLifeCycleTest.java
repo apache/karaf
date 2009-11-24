@@ -73,44 +73,44 @@ public class ComponentLifeCycleTest {
         // ensure we executed all steps inside the component instance
         e.step(6);
     }
-}
 
-class ComponentInstance {
-    private final Ensure m_ensure;
-    public ComponentInstance(Ensure e) {
-        m_ensure = e;
-        m_ensure.step(1);
+    static class ComponentInstance {
+        private final Ensure m_ensure;
+        public ComponentInstance(Ensure e) {
+            m_ensure = e;
+            m_ensure.step(1);
+        }
+        public void init() {
+            m_ensure.step(2);
+        }
+        public void start() {
+            m_ensure.step(3);
+        }
+        public void stop() {
+            m_ensure.step(4);
+        }
+        public void destroy() {
+            m_ensure.step(5);
+        }
     }
-    public void init() {
-        m_ensure.step(2);
-    }
-    public void start() {
-        m_ensure.step(3);
-    }
-    public void stop() {
-        m_ensure.step(4);
-    }
-    public void destroy() {
-        m_ensure.step(5);
-    }
-}
 
-class CustomComponentInstance {
-    private final Ensure m_ensure;
-    public CustomComponentInstance(Ensure e) {
-        m_ensure = e;
-        m_ensure.step(1);
-    }
-    public void a() {
-        m_ensure.step(2);
-    }
-    public void b() {
-        m_ensure.step(3);
-    }
-    public void c() {
-        m_ensure.step(4);
-    }
-    public void d() {
-        m_ensure.step(5);
+    static class CustomComponentInstance {
+        private final Ensure m_ensure;
+        public CustomComponentInstance(Ensure e) {
+            m_ensure = e;
+            m_ensure.step(1);
+        }
+        public void a() {
+            m_ensure.step(2);
+        }
+        public void b() {
+            m_ensure.step(3);
+        }
+        public void c() {
+            m_ensure.step(4);
+        }
+        public void d() {
+            m_ensure.step(5);
+        }
     }
 }
