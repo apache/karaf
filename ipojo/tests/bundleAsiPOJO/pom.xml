@@ -33,6 +33,7 @@
     <modules>
       <module>bundleAsiPOJO</module>
       <module>tests</module>
+      <module>helpers</module>
     </modules>
   </profile>
   <profile>
