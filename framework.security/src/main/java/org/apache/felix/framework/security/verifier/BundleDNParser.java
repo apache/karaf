@@ -37,7 +37,6 @@ import org.apache.felix.framework.cache.BundleRevision;
 import org.apache.felix.framework.security.util.BundleInputStream;
 import org.apache.felix.framework.security.util.TrustManager;
 import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.moduleloader.IContentLoader;
 
 public final class BundleDNParser
 {
@@ -98,7 +97,7 @@ public final class BundleDNParser
         }
     }
 
-    public void checkDNChains(String root, IContentLoader contentLoader) throws Exception
+    public void checkDNChains(String root, IContent content) throws Exception
     {
         synchronized (m_cache)
         {
@@ -117,7 +116,7 @@ public final class BundleDNParser
         Exception org = null;
         try
         {
-            result = _getDNChains(root, contentLoader.getContent());
+            result = _getDNChains(root, content);
         }
         catch (Exception ex)
         {
@@ -135,7 +134,7 @@ public final class BundleDNParser
         }
     }
 
-    public String[] getDNChains(String root, IContentLoader bundleRevision)
+    public String[] getDNChains(String root, IContent bundleRevision)
     {
         synchronized (m_cache)
         {
@@ -151,27 +150,14 @@ public final class BundleDNParser
         }
 
         String[] result = new String[0];
-
-        IContent content = null;
+        
         try
         {
-            content = bundleRevision.getContent();
-            result = _getDNChains(root, content);
+            result = _getDNChains(root, bundleRevision);
         }
         catch (Exception ex)
         {
             // Ignore
-        }
-        if (content != null)
-        {
-            try 
-            {
-                content.close();
-            }
-            catch (Exception ex)
-            {
-                // Ignore
-            }
         }
 
         synchronized (m_cache)

@@ -22,7 +22,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Hashtable;
 
-import org.apache.felix.framework.FilterImpl;
 import org.osgi.framework.*;
 
 /**
@@ -73,7 +72,7 @@ public class BundleLocationCondition
         try
         {
             filter =
-                new FilterImpl("(location=" + escapeLocation(args[0]) + ")");
+                FrameworkUtil.createFilter("(location=" + escapeLocation(args[0]) + ")");
         }
         catch (InvalidSyntaxException e)
         {

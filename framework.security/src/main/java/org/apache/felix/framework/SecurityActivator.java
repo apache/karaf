@@ -284,7 +284,7 @@ public final class SecurityActivator implements BundleActivator
             Bundle bundle = context.getBundle(Long.parseLong(id));
             long timeLong = Long.parseLong(time);
             if ((bundle == null) || 
-                ((FelixBundle) bundle).getInfo().getLastModified() > timeLong)
+                (bundle.getLastModified() > timeLong))
             {
                 continue;
             }

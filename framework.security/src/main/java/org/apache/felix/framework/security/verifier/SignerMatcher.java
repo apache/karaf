@@ -22,14 +22,14 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.felix.moduleloader.IContentLoader;
+import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IModule;
 
 public final class SignerMatcher
 {
     private final String m_filter;
     private final String m_root;
-    private final IContentLoader m_archive;
+    private final IContent m_archive;
     private final BundleDNParser m_parser;
     private final long m_lastModified;
     
@@ -42,7 +42,7 @@ public final class SignerMatcher
         m_lastModified = 0;
     }
     
-    public SignerMatcher(String root, long lastModified, IContentLoader archive, BundleDNParser parser)
+    public SignerMatcher(String root, long lastModified, IContent archive, BundleDNParser parser)
     {
         m_filter = null;
         m_root = root;

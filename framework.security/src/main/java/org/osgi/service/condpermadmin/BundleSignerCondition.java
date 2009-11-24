@@ -26,9 +26,9 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.felix.framework.FilterImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
 /**
@@ -179,7 +179,7 @@ final class ConditionImpl implements Condition, PrivilegedExceptionAction
         m_bundle = bundle;
         try
         {
-            m_filter = new FilterImpl(filter);
+            m_filter = FrameworkUtil.createFilter(filter);
         }
         catch (InvalidSyntaxException e)
         {

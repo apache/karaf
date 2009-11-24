@@ -37,7 +37,7 @@ import org.apache.felix.framework.security.util.LocalPermissions;
 import org.apache.felix.framework.security.util.Permissions;
 import org.apache.felix.framework.security.util.PropertiesCache;
 import org.apache.felix.framework.util.IteratorToEnumeration;
-import org.apache.felix.moduleloader.IContentLoader;
+import org.apache.felix.moduleloader.IContent;
 import org.osgi.framework.Bundle;
 import org.osgi.service.condpermadmin.ConditionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
@@ -303,7 +303,7 @@ public final class ConditionalPermissionAdminImpl implements
      * @return true in case the permission is granted or there are postponed tuples
      *     false if not. Again, see the spec for more explanations.
      */
-    public boolean hasPermission(Bundle felixBundle, IContentLoader loader, String root, 
+    public boolean hasPermission(Bundle felixBundle, IContent content, String root, 
         String[] signers, ProtectionDomain pd, Permission permission,
         boolean direct, Object admin)
     {
@@ -352,7 +352,7 @@ public final class ConditionalPermissionAdminImpl implements
 
         // check the local permissions. they need to all the permission if there
         // are any
-        if (!m_localPermissions.implies(root, loader, felixBundle, permission))
+        if (!m_localPermissions.implies(root, content, felixBundle, permission))
         {
             return false;
         }

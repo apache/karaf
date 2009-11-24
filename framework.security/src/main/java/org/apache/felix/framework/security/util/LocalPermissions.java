@@ -33,7 +33,6 @@ import java.util.Map.Entry;
 import org.apache.felix.framework.security.util.Permissions;
 import org.apache.felix.framework.security.util.PropertiesCache;
 import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
@@ -82,7 +81,7 @@ public final class LocalPermissions
      * @param permission the permission to check
      * @return true if implied by local permissions.
      */
-    public boolean implies(String root, IContentLoader loader, Bundle bundle,
+    public boolean implies(String root, IContent content, Bundle bundle,
         Permission permission)
     {
         PermissionInfo[] permissions = null;
@@ -92,11 +91,8 @@ public final class LocalPermissions
             if (!m_cache.containsKey(root))
             {
                 InputStream in = null;
-                IContent content = null;
                 try
                 {
-                    content = loader.getContent();
-
                     in = content.getEntryAsStream("OSGI-INF/permissions.perm");
                     if (in != null)
                     {

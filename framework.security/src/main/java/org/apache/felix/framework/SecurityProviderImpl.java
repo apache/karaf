@@ -65,11 +65,9 @@ public final class SecurityProviderImpl implements SecurityProvider
      */
     public void checkBundle(Bundle bundle) throws Exception
     {
-        BundleInfo info = ((FelixBundle) bundle).getInfo();
-
         m_parser.checkDNChains(
-            (Long.toString(bundle.getBundleId()) + "-" + info.getLastModified()), 
-            info.getCurrentModule().getContentLoader());
+            (Long.toString(bundle.getBundleId()) + "-" + bundle.getLastModified()), 
+            ((BundleImpl) bundle).getCurrentModule().getContent());
     }
 
     /**
@@ -78,11 +76,13 @@ public final class SecurityProviderImpl implements SecurityProvider
     public Object getSignerMatcher(final Bundle bundle)
     {
         return new SignerMatcher(Long.toString(bundle.getBundleId()), 
-            ((FelixBundle) bundle).getInfo().getLastModified(),
-            ((FelixBundle) bundle).getInfo().getCurrentModule().getContentLoader(), 
+            bundle.getLastModified(),
+            ((BundleImpl) bundle).getCurrentModule().getContent(), 
             m_parser);
     }
 
+    ThreadLocal loopCheck = new ThreadLocal();
+    
     /**
      * If we have a permissionadmin then ask that one first and have it
      * decide in case there is a location bound. If not then either use its 
@@ -92,12 +92,21 @@ public final class SecurityProviderImpl implements SecurityProvider
     public boolean hasBundlePermission(ProtectionDomain bundleProtectionDomain,
         Permission permission, boolean direct)
     {
+    	if (loopCheck.get() != null)
+    	{
+    		return true;
+    	}
+    	else
+    	{
+    	    loopCheck.set(this);
+    	}
+    	try
+    	{
         BundleProtectionDomain pd =
             (BundleProtectionDomain) bundleProtectionDomain;
-        FelixBundle bundle = pd.getBundle();
-        BundleInfo info = bundle.getInfo();
+        BundleImpl bundle = pd.getBundle();
 
-        if (info.getBundleId() == 0)
+        if (bundle.getBundleId() == 0)
         {
             return true;
         }
@@ -108,7 +117,7 @@ public final class SecurityProviderImpl implements SecurityProvider
         if (m_pai != null)
         {
             result =
-                m_pai.hasPermission(info.getLocation(), pd.getBundle(),
+                m_pai.hasPermission(bundle.getLocation(), pd.getBundle(),
                     permission, m_cpai, pd);
         }
 
@@ -122,9 +131,9 @@ public final class SecurityProviderImpl implements SecurityProvider
             try
             {
                 return m_cpai.hasPermission(bundle, 
-                    info.getCurrentModule().getContentLoader(), 
+                    bundle.getCurrentModule().getContent(), 
                     bundle.getBundleId() + "-" + 
-                    info.getLastModified(),null, pd,
+                    bundle.getLastModified(),null, pd,
                     permission, direct, m_pai);
             }
             catch (Exception e)
@@ -135,5 +144,8 @@ public final class SecurityProviderImpl implements SecurityProvider
         }
 
         return false;
+    	} finally {
+    		loopCheck.set(null);
+    	}
     }
 }
