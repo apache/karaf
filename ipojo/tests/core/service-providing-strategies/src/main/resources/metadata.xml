@@ -30,17 +30,29 @@
 		<provides strategy="instance"/>
 	</component>
 	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooProviderType1"
-		name="PSS-FooProviderType-Custom" architecture="true">
-		<provides strategy="org.apache.felix.ipojo.test.scenarios.component.strategies.DummyCreationStrategy"/>
-	</component>
-	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooBarProviderType1"
-		name="PSS-FooBarProviderType-Custom" architecture="true">
-		<provides strategy="org.apache.felix.ipojo.test.scenarios.component.strategies.DummyCreationStrategy"/>
-	</component>
-	
-	
+    <component
+        classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooProviderType1"
+        name="PSS-FooProviderType-Custom" architecture="true">
+        <provides strategy="org.apache.felix.ipojo.test.scenarios.component.strategies.DummyCreationStrategy"/>
+    </component>
+
+    <component
+        classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooBarProviderType1"
+        name="PSS-FooBarProviderType-Custom" architecture="true">
+        <provides strategy="org.apache.felix.ipojo.test.scenarios.component.strategies.DummyCreationStrategy"/>
+    </component>
+
+    <component
+        classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooProviderType1"
+        name="PSS-FooProviderType-Custom2" architecture="true">
+        <provides strategy="org.apache.felix.ipojo.test.scenarios.component.strategies.DummyCreationStrategy2"/>
+    </component>
+
+    <component
+        classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooBarProviderType1"
+        name="PSS-FooBarProviderType-Custom2" architecture="true">
+        <provides strategy="org.apache.felix.ipojo.test.scenarios.component.strategies.DummyCreationStrategy2"/>
+    </component>
+
+
 </ipojo>

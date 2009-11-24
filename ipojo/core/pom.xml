@@ -98,7 +98,7 @@
               org.apache.felix.ipojo.parser; version="${ipojo.package.version}",
               org.apache.felix.ipojo.util; version="${ipojo.package.version}",
               org.apache.felix.ipojo.handlers.dependency; version="${ipojo.package.version}",
-              org.apache.felix.ipojo.handlers.providedservice; version="${ipojo.package.version}",
+              org.apache.felix.ipojo.handlers.providedservice.*; version="${ipojo.package.version}",
               org.apache.felix.ipojo.handlers.configuration; version="${ipojo.package.version}",
               org.apache.felix.ipojo.context; version="${ipojo.package.version}",
               org.osgi.service.cm,
