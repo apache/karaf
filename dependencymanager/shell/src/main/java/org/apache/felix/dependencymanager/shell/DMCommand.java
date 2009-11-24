@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.StringTokenizer;
 
-import org.apache.felix.dependencymanager.ServiceComponent;
-import org.apache.felix.dependencymanager.ServiceComponentDependency;
+import org.apache.felix.dependencymanager.management.ServiceComponent;
+import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
 import org.apache.felix.shell.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

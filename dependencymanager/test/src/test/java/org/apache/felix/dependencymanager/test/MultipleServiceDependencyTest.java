@@ -23,7 +23,7 @@ public class MultipleServiceDependencyTest {
     public static Option[] configuration() {
         return options(
             provision(
-                mavenBundle().groupId("org.apache.felix").artifactId("org.osgi.compendium").versionAsInProject(),
+                mavenBundle().groupId("org.osgi").artifactId("org.osgi.compendium").version("4.2.0"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.dependencymanager").versionAsInProject()
             )
         );

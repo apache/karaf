@@ -29,16 +29,14 @@
   <artifactId>org.apache.felix.dependencymanager</artifactId>
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>1.2.0</version>
-      <scope>provided</scope>
+      <version>4.2.0</version>
     </dependency>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <version>1.2.0</version>
-      <scope>provided</scope>
+      <version>4.2.0</version>
     </dependency>
   </dependencies>
   <build>
@@ -55,7 +53,7 @@
             <Bundle-Description>A bundle that provides a run-time
               service dependency manager.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Export-Package>org.apache.felix.dependencymanager</Export-Package>
+            <Export-Package>org.apache.felix.dependencymanager,org.apache.felix.dependencymanager.management,org.apache.felix.dependencymanager.tracker</Export-Package>
             <Import-Package>!org.apache.felix.dependencymanager,*</Import-Package>
           </instructions>
         </configuration>

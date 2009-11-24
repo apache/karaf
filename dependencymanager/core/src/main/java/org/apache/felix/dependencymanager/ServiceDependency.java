@@ -29,6 +29,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
+import org.apache.felix.dependencymanager.tracker.ServiceTracker;
+import org.apache.felix.dependencymanager.tracker.ServiceTrackerCustomizer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;

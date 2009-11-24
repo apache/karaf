@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Properties;
 
+import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;

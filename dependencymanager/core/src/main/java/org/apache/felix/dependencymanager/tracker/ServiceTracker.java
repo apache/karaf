@@ -1,4 +1,4 @@
-package org.apache.felix.dependencymanager4.tracker;
+package org.apache.felix.dependencymanager.tracker;
 /*
  * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
  * 
