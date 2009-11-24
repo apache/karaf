@@ -15,6 +15,8 @@ import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
 import java.io.File;
 
 import org.apache.felix.ipojo.architecture.Architecture;
+import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
+import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.apache.felix.ipojo.tests.core.component.MyComponent;
 import org.apache.felix.ipojo.tests.core.service.MyService;
 import org.junit.After;
@@ -66,6 +68,7 @@ public class FactoryVersionTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject()),
                         mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
                         ),
                 provision(

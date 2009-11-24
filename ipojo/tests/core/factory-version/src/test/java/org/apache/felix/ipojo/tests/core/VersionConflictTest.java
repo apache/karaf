@@ -21,6 +21,8 @@ import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.handlers.dependency.Dependency;
 import org.apache.felix.ipojo.handlers.dependency.DependencyDescription;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandlerDescription;
+import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
+import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.apache.felix.ipojo.tests.core.component.MyComponent;
 import org.apache.felix.ipojo.tests.core.component.MyCons;
 import org.apache.felix.ipojo.tests.core.service.MyService;
@@ -137,6 +139,7 @@ public class VersionConflictTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject()),
                         mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
                         ),
                         systemProperty( "url1" ).value( url1 ),
