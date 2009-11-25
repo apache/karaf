@@ -273,30 +273,33 @@ public final class Permissions
                 {
                     String postfix = "";
                     String name = m_permissionInfos[i].getName();
-                    if (name.endsWith("*") || name.endsWith("-"))
+                    if (!"<<ALL FILES>>".equals(name)) 
                     {
-                        postfix = name.substring(name.length() - 1);
-                        name = name.substring(0, name.length() - 1);
-                    }
-                    if (!(new File(name)).isAbsolute())
-                    {
-                        BundleContext context = bundle.getBundleContext();
-                        if (context == null)
+                        if (name.endsWith("*") || name.endsWith("-"))
                         {
-                            break;
+                            postfix = name.substring(name.length() - 1);
+                            name = name.substring(0, name.length() - 1);
                         }
-                        name =
-                            m_action.getAbsolutePath(new File(context.getDataFile(""), name));
-                    }
-                    if (postfix.length() > 0)
-                    {
-                        if ((name.length() > 0) && !name.endsWith("/"))
+                        if (!(new File(name)).isAbsolute())
                         {
-                            name += "/" + postfix;
+                            BundleContext context = bundle.getBundleContext();
+                            if (context == null)
+                            {
+                                break;
+                            }
+                            name =
+                                m_action.getAbsolutePath(new File(context.getDataFile(""), name));
                         }
-                        else
+                        if (postfix.length() > 0)
                         {
-                            name += postfix;
+                            if ((name.length() > 0) && !name.endsWith("/"))
+                            {
+                                name += "/" + postfix;
+                            }
+                            else
+                            {
+                                name += postfix;
+                            }
                         }
                     }
                     return createPermission(
