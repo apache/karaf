@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dependencymanager.impl;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -33,8 +33,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.felix.dependencymanager.Dependency;
+import org.apache.felix.dependencymanager.DependencyManager;
+import org.apache.felix.dependencymanager.DependencyService;
+import org.apache.felix.dependencymanager.Service;
+import org.apache.felix.dependencymanager.ServiceStateListener;
+import org.apache.felix.dependencymanager.dependencies.BundleDependency;
+import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
+import org.apache.felix.dependencymanager.dependencies.ResourceDependency;
+import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
 import org.apache.felix.dependencymanager.management.ServiceComponent;
 import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
+import org.apache.felix.dependencymanager.resources.Resource;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
@@ -43,11 +54,12 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceImpl implements Service, ServiceComponent {
+public class ServiceImpl implements Service, DependencyService, ServiceComponent {
     private static final Class[] VOID = new Class[] {};
 	private static final ServiceRegistration NULL_REGISTRATION;
     private static final ServiceStateListener[] SERVICE_STATE_LISTENER_TYPE = new ServiceStateListener[] {};
 
+    private final Object SYNC = new Object();
     private final BundleContext m_context;
     private final DependencyManager m_manager;
 
@@ -71,6 +83,8 @@ public class ServiceImpl implements Service, ServiceComponent {
     // runtime state (changes because of state changes)
     private Object m_serviceInstance;
     private ServiceRegistration m_registration;
+    private boolean m_isBound;
+    private boolean m_isInstantiated;
 
     // service state listeners
     private final List m_stateListeners = new ArrayList();
@@ -95,7 +109,7 @@ public class ServiceImpl implements Service, ServiceComponent {
 
     public ServiceImpl(BundleContext context, DependencyManager manager, Logger logger) {
     	m_logger = logger;
-        m_state = new State((List) m_dependencies.clone(), false);
+        m_state = new State((List) m_dependencies.clone(), false, false, false);
         m_context = context;
         m_manager = manager;
         m_callbackInit = "init";
@@ -106,62 +120,134 @@ public class ServiceImpl implements Service, ServiceComponent {
         m_autoConfig.put(BundleContext.class, Boolean.TRUE);
         m_autoConfig.put(ServiceRegistration.class, Boolean.TRUE);
         m_autoConfig.put(DependencyManager.class, Boolean.TRUE);
+        m_autoConfig.put(Service.class, Boolean.TRUE);
     }
 
+    private void calculateStateChanges() {
+        // see if any of the things we did caused a further change of state
+        State oldState, newState;
+        synchronized (m_dependencies) {
+            oldState = m_state;
+            newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
+            m_state = newState;
+        }
+        calculateStateChanges(oldState, newState);
+    }
+    
     private void calculateStateChanges(final State oldState, final State newState) {
-    	if (oldState.isWaitingForRequired() && newState.isTrackingOptional()) {
-        	m_executor.enqueue(new Runnable() {
-				public void run() {
-					activateService(newState);
-				}});
-    	}
-    	if (oldState.isTrackingOptional() && newState.isWaitingForRequired()) {
-    		m_executor.enqueue(new Runnable() {
-				public void run() {
-					deactivateService(oldState);
-				}});
-    	}
-    	if (oldState.isInactive() && (newState.isTrackingOptional())) {
-    		m_executor.enqueue(new Runnable() {
-				public void run() {
-					activateService(newState);
-				}});
-    	}
-    	if (oldState.isInactive() && (newState.isWaitingForRequired())) {
-    		m_executor.enqueue(new Runnable() {
-				public void run() {
-					startTrackingRequired(newState);
-				}});
-    	}
-    	if ((oldState.isWaitingForRequired()) && newState.isInactive()) {
-    		m_executor.enqueue(new Runnable() {
-				public void run() {
-					stopTrackingRequired(oldState);
-				}});
-    	}
-    	if ((oldState.isTrackingOptional()) && newState.isInactive()) {
-    		m_executor.enqueue(new Runnable() {
-				public void run() {
-					deactivateService(oldState);
-					stopTrackingRequired(oldState);
-				}});
-    	}
-    	m_executor.execute();
+        if (oldState.isInactive() && (newState.isTrackingOptional())) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    activateService(newState);
+                }});
+        }
+        if (oldState.isInactive() && (newState.isWaitingForRequired())) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    startTrackingRequired(newState);
+                }});
+        }
+        if (oldState.isWaitingForRequired() && newState.isTrackingOptional()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    activateService(newState);
+                }});
+        }
+        if ((oldState.isWaitingForRequired()) && newState.isInactive()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    stopTrackingRequired(oldState);
+                }});
+        }
+        if (oldState.isTrackingOptional() && newState.isWaitingForRequiredInstantiated()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    // TODO as far as I can see there is nothing left to do here
+                }});
+        }
+        if (oldState.isTrackingOptional() && newState.isWaitingForRequired()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    deactivateService(oldState);
+                }});
+        }
+        if (oldState.isTrackingOptional() && newState.isBound()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    bindService(oldState);
+                }});
+        }
+        if (oldState.isTrackingOptional() && newState.isInactive()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    deactivateService(oldState);
+                    stopTrackingRequired(oldState);
+                }});
+        }
+        if (oldState.isWaitingForRequiredInstantiated() && newState.isWaitingForRequired()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    deactivateService(oldState);
+                }});
+        }
+        if (oldState.isWaitingForRequiredInstantiated() && newState.isInactive()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    deactivateService(oldState);
+                    stopTrackingRequired(oldState);
+                }});
+        }
+        if (oldState.isWaitingForRequiredInstantiated() && newState.isBound()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    bindService(oldState);
+                }});
+        }
+        if (oldState.isBound() && newState.isWaitingForRequiredInstantiated()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    unbindService(oldState);
+                }});
+        }
+        if (oldState.isBound() && newState.isWaitingForRequired()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    unbindService(oldState);
+                    deactivateService(oldState);
+                }});
+        }
+        if (oldState.isBound() && newState.isInactive()) {
+            m_executor.enqueue(new Runnable() {
+                public void run() {
+                    unbindService(oldState);
+                    deactivateService(oldState);
+                    stopTrackingRequired(oldState);
+                }});
+        }
+        m_executor.execute();
     }
-
+    
     public Service add(final Dependency dependency) {
     	State oldState, newState;
         synchronized (m_dependencies) {
         	oldState = m_state;
             m_dependencies.add(dependency);
         }
-        if (oldState.isTrackingOptional() || (oldState.isWaitingForRequired() && dependency.isRequired())) {
+        if (oldState.isAllRequiredAvailable() || (oldState.isWaitingForRequired() && dependency.isRequired())) {
         	dependency.start(this);
         }
         synchronized (m_dependencies) {
-            newState = new State((List) m_dependencies.clone(), !oldState.isInactive());
+            newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
-            calculateStateChanges(oldState, newState);
+        }
+        calculateStateChanges(oldState, newState);
+        return this;
+    }
+
+    public Service add(List dependencies) {
+        // TODO review if this can be done more smartly
+        for (int i = 0; i < dependencies.size(); i++) {
+            add((Dependency) dependencies.get(i));
         }
         return this;
     }
@@ -172,11 +258,11 @@ public class ServiceImpl implements Service, ServiceComponent {
         	oldState = m_state;
             m_dependencies.remove(dependency);
         }
-        if (oldState.isTrackingOptional() || (oldState.isWaitingForRequired() && dependency.isRequired())) {
+        if (oldState.isAllRequiredAvailable() || (oldState.isWaitingForRequired() && dependency.isRequired())) {
         	dependency.stop(this);
         }
         synchronized (m_dependencies) {
-            newState = new State((List) m_dependencies.clone(), !oldState.isInactive());
+            newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
@@ -201,11 +287,11 @@ public class ServiceImpl implements Service, ServiceComponent {
     	State oldState, newState;
         synchronized (m_dependencies) {
         	oldState = m_state;
-            newState = new State((List) m_dependencies.clone(), !oldState.isInactive());
+            newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
-        if (newState.isTrackingOptional()) {
+        if (newState.isAllRequiredAvailable()) {
         	m_executor.enqueue(new Runnable() {
         		public void run() {
         			updateInstance(dependency);
@@ -220,7 +306,7 @@ public class ServiceImpl implements Service, ServiceComponent {
         synchronized (m_dependencies) {
         	state = m_state;
         }
-        if (state.isTrackingOptional()) {
+        if (state.isAllRequiredAvailable()) {
         	m_executor.enqueue(new Runnable() {
         		public void run() {
         			updateInstance(dependency);
@@ -234,11 +320,11 @@ public class ServiceImpl implements Service, ServiceComponent {
     	State oldState, newState;
         synchronized (m_dependencies) {
         	oldState = m_state;
-            newState = new State((List) m_dependencies.clone(), !oldState.isInactive());
+            newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
-        if (newState.isTrackingOptional()) {
+        if (newState.isAllRequiredAvailable()) {
         	m_executor.enqueue(new Runnable() {
         		public void run() {
         			updateInstance(dependency);
@@ -253,7 +339,7 @@ public class ServiceImpl implements Service, ServiceComponent {
     	State oldState, newState;
         synchronized (m_dependencies) {
         	oldState = m_state;
-            newState = new State((List) m_dependencies.clone(), true);
+            newState = new State((List) m_dependencies.clone(), true, m_isInstantiated, m_isBound);
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
@@ -263,7 +349,7 @@ public class ServiceImpl implements Service, ServiceComponent {
     	State oldState, newState;
         synchronized (m_dependencies) {
         	oldState = m_state;
-            newState = new State((List) m_dependencies.clone(), false);
+            newState = new State((List) m_dependencies.clone(), false, m_isInstantiated, m_isBound);
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
@@ -350,7 +436,7 @@ public class ServiceImpl implements Service, ServiceComponent {
     	synchronized (m_dependencies) {
     		state = m_state;
     	}
-    	if (state.isTrackingOptional()) {
+    	if (state.isAllRequiredAvailable()) {
     		listener.starting(this);
     		listener.started(this);
     	}
@@ -362,7 +448,7 @@ public class ServiceImpl implements Service, ServiceComponent {
     	}
 	}
 
-	void removeStateListeners() {
+	public void removeStateListeners() {
     	synchronized (m_stateListeners) {
     		m_stateListeners.clear();
     	}
@@ -422,21 +508,31 @@ public class ServiceImpl implements Service, ServiceComponent {
 		}
 	}
 
-	private void activateService(State state) {
-		String init, start;
-		synchronized (this) {
-			init = m_callbackInit;
-			start = m_callbackStart;
-		}
+    private void activateService(State state) {
+        String init;
+        synchronized (this) {
+            init = m_callbackInit;
+        }
         // service activation logic, first we initialize the service instance itself
         // meaning it is created if necessary and the bundle context is set
         initService();
-        // then we invoke the init callback so the service can further initialize
-        // itself
-        invoke(init);
         // now is the time to configure the service, meaning all required
         // dependencies will be set and any callbacks called
         configureService(state);
+        // then we invoke the init callback so the service can further initialize
+        // itself
+        invoke(init);
+        // flag that our instance has been created
+        m_isInstantiated = true;
+        // see if any of this caused further state changes
+        calculateStateChanges();
+    }
+
+    private void bindService(State state) {
+        String start;
+        synchronized (this) {
+            start = m_callbackStart;
+        }
         // inform the state listeners we're starting
         stateListenersStarting();
         // invoke the start callback, since we're now ready to be used
@@ -448,13 +544,12 @@ public class ServiceImpl implements Service, ServiceComponent {
         // inform the state listeners we've started
         stateListenersStarted();
     }
-
-    private void deactivateService(State state) {
-    	String stop, destroy;
-    	synchronized (this) {
-    		stop = m_callbackStop;
-    		destroy = m_callbackDestroy;
-    	}
+    
+    private void unbindService(State state) {
+        String stop;
+        synchronized (this) {
+            stop = m_callbackStop;
+        }
         // service deactivation logic, first inform the state listeners
         // we're stopping
         stateListenersStopping();
@@ -466,12 +561,21 @@ public class ServiceImpl implements Service, ServiceComponent {
         invoke(stop);
         // inform the state listeners we've stopped
         stateListenersStopped();
+    }
+
+    private void deactivateService(State state) {
+        String destroy;
+        synchronized (this) {
+            destroy = m_callbackDestroy;
+        }
         // invoke the destroy callback
         invoke(destroy);
         // destroy the service instance
         destroyService(state);
+        // flag that our instance was destroyed
+        m_isInstantiated = false;
     }
-
+    
     private void invoke(String name) {
         if (name != null) {
             // invoke method if it exists
@@ -549,7 +653,7 @@ public class ServiceImpl implements Service, ServiceComponent {
         return clazz.newInstance();
     }
 
-    void initService() {
+    public void initService() {
     	if (m_serviceInstance == null) {
 	        if (m_implementation instanceof Class) {
 	            // instantiate
@@ -611,6 +715,9 @@ public class ServiceImpl implements Service, ServiceComponent {
             if (((Boolean) m_autoConfig.get(DependencyManager.class)).booleanValue()) {
                 configureImplementation(DependencyManager.class, m_manager, (String) m_autoConfigInstance.get(DependencyManager.class));
             }
+            if (((Boolean) m_autoConfig.get(Service.class)).booleanValue()) {
+                configureImplementation(Service.class, this, (String) m_autoConfigInstance.get(Service.class));
+            }
     	}
     }
 
@@ -665,6 +772,7 @@ public class ServiceImpl implements Service, ServiceComponent {
                 wrapper.setIllegalState();
             }
         }
+        m_isBound = true;
     }
 
 	private Dictionary calculateServiceProperties() {
@@ -700,6 +808,7 @@ public class ServiceImpl implements Service, ServiceComponent {
 	}
 
     private void unregisterService() {
+        m_isBound = false;
         if (m_serviceName != null) {
             m_registration.unregister();
             configureImplementation(ServiceRegistration.class, NULL_REGISTRATION);
@@ -718,10 +827,24 @@ public class ServiceImpl implements Service, ServiceComponent {
         else if (dependency instanceof ConfigurationDependency) {
         	ConfigurationDependency cd = (ConfigurationDependency) dependency;
         	if (cd.isPropagated()) {
-        		// change service properties accordingly
-        		Dictionary props = calculateServiceProperties();
-        		m_registration.setProperties(props);
+        		// change service properties accordingly, but only if the service was already registered
+        	    if (m_registration != null) {
+            		Dictionary props = calculateServiceProperties();
+            		m_registration.setProperties(props);
+        	    }
         	}
+        }
+        else if (dependency instanceof BundleDependency) {
+            BundleDependency bd = (BundleDependency) dependency;
+            if (bd.isAutoConfig()) {
+                configureImplementation(Bundle.class, bd.getBundle()); // TODO support AutoConfigName
+            }
+        }
+        else if (dependency instanceof ResourceDependency) {
+            ResourceDependency rd = (ResourceDependency) dependency;
+            if (rd.isAutoConfig()) {
+                configureImplementation(Resource.class, rd.getResource()); // TODO support AutoConfigName
+            }
         }
     }
 
@@ -747,7 +870,7 @@ public class ServiceImpl implements Service, ServiceComponent {
 		                    try {
 		                    	fields[j].setAccessible(true);
 		                        // synchronized makes sure the field is actually written to immediately
-		                        synchronized (new Object()) {
+		                        synchronized (SYNC) {
 		                            fields[j].set(serviceInstance, instance);
 		                        }
 		                    }
@@ -764,30 +887,30 @@ public class ServiceImpl implements Service, ServiceComponent {
     }
     
     public Object[] getCompositionInstances() {
-      Object[] instances = null;
-      if (m_compositionManagerGetMethod != null) {
-	if (m_compositionManager != null) {
-	  m_compositionManagerInstance = m_compositionManager;
-	}
-	else {
-	  m_compositionManagerInstance = m_serviceInstance;
-	}
-	if (m_compositionManagerInstance != null) {
-	  try {
-	    Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
-	    m.setAccessible(true);
-	    instances = (Object[]) m.invoke(m_compositionManagerInstance, null);
-	  }
-	  catch (Exception e) {
-	    m_logger.log(Logger.LOG_ERROR, "Could not obtain instances from the composition manager.", e);
-	    instances = new Object[] { m_serviceInstance };
-	  }
-	}
-      }
-      else {
-	instances = new Object[] { m_serviceInstance };
-      }
-      return instances;
+        Object[] instances = null;
+        if (m_compositionManagerGetMethod != null) {
+            if (m_compositionManager != null) {
+                m_compositionManagerInstance = m_compositionManager;
+            }
+            else {
+                m_compositionManagerInstance = m_serviceInstance;
+            }
+            if (m_compositionManagerInstance != null) {
+                try {
+                    Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
+                    m.setAccessible(true);
+                    instances = (Object[]) m.invoke(m_compositionManagerInstance, null);
+                }
+                catch (Exception e) {
+                    m_logger.log(Logger.LOG_ERROR, "Could not obtain instances from the composition manager.", e);
+                    instances = new Object[] { m_serviceInstance };
+                }
+            }
+        }
+        else {
+            instances = new Object[] { m_serviceInstance };
+        }
+        return instances;
     }
 
     private void configureImplementation(Class clazz, Object instance) {
@@ -812,7 +935,41 @@ public class ServiceImpl implements Service, ServiceComponent {
                 }
                 // for required dependencies, we invoke any callbacks here
                 if (sd.isRequired()) {
-                    sd.invokeAdded();
+                    sd.invokeAdded(this, sd.lookupServiceReference(), sd.lookupService());
+                }
+            }
+            else if (dependency instanceof BundleDependency) {
+                BundleDependency bd = (BundleDependency) dependency;
+                if (bd.isAutoConfig()) {
+                    if (bd.isRequired()) {
+                        configureImplementation(Bundle.class, bd.getBundle()); // TODO AutoConfigName support
+                    }
+                    else {
+                        // for optional services, we do an "ad-hoc" lookup to inject the service if it is
+                        // already available even though the tracker has not yet been started
+                        // TODO !!! configureImplementation(sd.getInterface(), sd.lookupService(), sd.getAutoConfigName());
+                    }
+                }
+                // for required dependencies, we invoke any callbacks here
+                if (bd.isRequired()) {
+                    bd.invokeAdded();
+                }
+            }
+            else if (dependency instanceof ResourceDependency) {
+                ResourceDependency bd = (ResourceDependency) dependency;
+                if (bd.isAutoConfig()) {
+                    if (bd.isRequired()) {
+                        configureImplementation(Resource.class, bd.getResource()); // TODO AutoConfigName support
+                    }
+                    else {
+                        // for optional services, we do an "ad-hoc" lookup to inject the service if it is
+                        // already available even though the tracker has not yet been started
+                        // TODO !!! configureImplementation(sd.getInterface(), sd.lookupService(), sd.getAutoConfigName());
+                    }
+                }
+                // for required dependencies, we invoke any callbacks here
+                if (bd.isRequired()) {
+                    bd.invokeAdded();
                 }
             }
         }
@@ -826,7 +983,7 @@ public class ServiceImpl implements Service, ServiceComponent {
                 ServiceDependency sd = (ServiceDependency) dependency;
                 // for required dependencies, we invoke any callbacks here
                 if (sd.isRequired()) {
-                    sd.invokeRemoved();
+                    sd.invokeRemoved(this, sd.lookupServiceReference(), sd.lookupService());
                 }
             }
         }
@@ -841,12 +998,13 @@ public class ServiceImpl implements Service, ServiceComponent {
             throw new IllegalStateException("Cannot modify state while active.");
         }
     }
-    boolean isRegistered() {
+    
+    public boolean isRegistered() {
     	State state;
     	synchronized (m_dependencies) {
     		state = m_state;
     	}
-        return (state.isTrackingOptional());
+        return (state.isAllRequiredAvailable());
     }
 
     // ServiceComponent interface

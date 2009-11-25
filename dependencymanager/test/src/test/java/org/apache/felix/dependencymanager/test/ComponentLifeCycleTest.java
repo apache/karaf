@@ -23,8 +23,8 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 
 import org.apache.felix.dependencymanager.DependencyManager;
-import org.apache.felix.dependencymanager.Logger;
 import org.apache.felix.dependencymanager.Service;
+import org.apache.felix.dependencymanager.impl.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;

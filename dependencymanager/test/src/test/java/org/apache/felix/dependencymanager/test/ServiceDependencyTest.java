@@ -23,8 +23,8 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 
 import org.apache.felix.dependencymanager.DependencyManager;
-import org.apache.felix.dependencymanager.Logger;
 import org.apache.felix.dependencymanager.Service;
+import org.apache.felix.dependencymanager.impl.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -85,12 +85,12 @@ public class ServiceDependencyTest {
             m_ensure = e;
         }
         
-        public void start() {
+        public void init() {
             m_ensure.step(1);
             m_service.invoke();
         }
         
-        public void stop() {
+        public void destroy() {
             m_ensure.step(3);
         }
     }

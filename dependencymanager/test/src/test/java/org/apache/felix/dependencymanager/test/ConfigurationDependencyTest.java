@@ -29,8 +29,8 @@ import java.util.Properties;
 import junit.framework.Assert;
 
 import org.apache.felix.dependencymanager.DependencyManager;
-import org.apache.felix.dependencymanager.Logger;
 import org.apache.felix.dependencymanager.Service;
+import org.apache.felix.dependencymanager.impl.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -82,7 +82,7 @@ public class ConfigurationDependencyTest {
             m_ensure = e;
         }
 
-        public void start() {
+        public void init() {
             try {
                 m_ensure.step(1);
                 org.osgi.service.cm.Configuration conf = m_ca.getConfiguration("test", null);
@@ -125,7 +125,7 @@ public class ConfigurationDependencyTest {
             m_ensure = e;
         }
         
-        public void start() {
+        public void init() {
             m_ensure.step(3);
             m_runnable.run();
         }

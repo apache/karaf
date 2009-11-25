@@ -16,19 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dependencymanager.dependencies;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.dependencymanager.Dependency;
+import org.apache.felix.dependencymanager.DependencyService;
+import org.apache.felix.dependencymanager.impl.DefaultNullObject;
+import org.apache.felix.dependencymanager.impl.Logger;
 import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
 import org.apache.felix.dependencymanager.tracker.ServiceTracker;
 import org.apache.felix.dependencymanager.tracker.ServiceTrackerCustomizer;
@@ -44,7 +50,7 @@ import org.osgi.framework.ServiceReference;
  */
 public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, ServiceComponentDependency {
     private boolean m_isRequired;
-    protected Service m_service;
+    protected List m_services = new ArrayList();
     protected volatile ServiceTracker m_tracker;
     protected BundleContext m_context;
     private boolean m_isAvailable;
@@ -66,6 +72,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     private boolean m_autoConfigInvoked;
     private Object m_defaultImplementation;
     private Object m_defaultImplementationInstance;
+    private boolean m_isInstanceBound;
     
     private static final Comparator COMPARATOR = new Comparator() {
         public int getRank(ServiceReference ref) {
@@ -188,6 +195,10 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public synchronized boolean isAutoConfig() {
         return m_autoConfig;
     }
+    
+    public boolean isInstanceBound() {
+        return m_isInstanceBound;
+    }
 
     public synchronized Object getService() {
         Object service = null;
@@ -246,6 +257,45 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
         return service;
     }
+    
+    // TODO lots of duplication in lookupService()
+    public ServiceReference lookupServiceReference() {
+        ServiceReference service = null;
+        if (m_isStarted) {
+            service = m_tracker.getServiceReference();
+        }
+        else {
+            ServiceReference[] refs = null;
+            ServiceReference ref = null;
+            if (m_trackedServiceName != null) {
+                if (m_trackedServiceFilter != null) {
+                    try {
+                        refs = m_context.getServiceReferences(m_trackedServiceName.getName(), m_trackedServiceFilter);
+                        if (refs != null) {
+                            Arrays.sort(refs, COMPARATOR);
+                            ref = refs[0];
+                        }
+                    }
+                    catch (InvalidSyntaxException e) {
+                        throw new IllegalStateException("Invalid filter definition for dependency.");
+                    }
+                }
+                else if (m_trackedServiceReference != null) {
+                    ref = m_trackedServiceReference;
+                }
+                else {
+                    ref = m_context.getServiceReference(m_trackedServiceName.getName());
+                }
+                if (ref != null) {
+                    service = ref;
+                }
+            }
+            else {
+                throw new IllegalStateException("Could not lookup dependency, no service name specified.");
+            }
+        }
+        return service;
+    }
 
     private Object getNullObject() {
         if (m_nullObject == null) {
@@ -284,45 +334,52 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         return m_trackedServiceName;
     }
 
-    public void start(Service service) {
+    public void start(DependencyService service) {
+        boolean needsStarting = false;
         synchronized (this) {
-            if (m_isStarted) {
-                throw new IllegalStateException("Service dependency was already started." + m_trackedServiceName);
-            }
-            m_service = service;
-            if (m_trackedServiceName != null) {
-                if (m_trackedServiceFilter != null) {
-                    try {
-                        m_tracker = new ServiceTracker(m_context, m_context.createFilter(m_trackedServiceFilter), this);
+            m_services.add(service);
+            if (!m_isStarted) {
+                if (m_trackedServiceName != null) {
+                    if (m_trackedServiceFilter != null) {
+                        try {
+                            m_tracker = new ServiceTracker(m_context, m_context.createFilter(m_trackedServiceFilter), this);
+                        }
+                        catch (InvalidSyntaxException e) {
+                            throw new IllegalStateException("Invalid filter definition for dependency.");
+                        }
                     }
-                    catch (InvalidSyntaxException e) {
-                        throw new IllegalStateException("Invalid filter definition for dependency.");
+                    else if (m_trackedServiceReference != null) {
+                        m_tracker = new ServiceTracker(m_context, m_trackedServiceReference, this);
                     }
-                }
-                else if (m_trackedServiceReference != null) {
-                    m_tracker = new ServiceTracker(m_context, m_trackedServiceReference, this);
+                    else {
+                        m_tracker = new ServiceTracker(m_context, m_trackedServiceName.getName(), this);
+                    }
                 }
                 else {
-                    m_tracker = new ServiceTracker(m_context, m_trackedServiceName.getName(), this);
+                    throw new IllegalStateException("Could not create tracker for dependency, no service name specified.");
                 }
+                m_isStarted = true;
+                needsStarting = true;
             }
-            else {
-                throw new IllegalStateException("Could not create tracker for dependency, no service name specified.");
-            }
-            m_isStarted = true;
         }
-        m_tracker.open();
+        if (needsStarting) {
+            m_tracker.open();
+        }
     }
 
-    public void stop(Service service) {
+    public void stop(DependencyService service) {
+        boolean needsStopping = false;
         synchronized (this) {
-            if (!m_isStarted) {
-                throw new IllegalStateException("Service dependency was not started.");
+            m_services.remove(service);
+            if (m_services.size() == 0) {
+                m_isStarted = false;
+                needsStopping = true;
             }
-            m_isStarted = false;
         }
-        m_tracker.close();
-        m_tracker = null;
+        if (needsStopping) {
+            m_tracker.close();
+            m_tracker = null;
+        }
     }
 
     public Object addingService(ServiceReference ref) {
@@ -339,26 +396,26 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
 
     public void addedService(ServiceReference ref, Object service) {
-        if (makeAvailable()) {
-            m_service.dependencyAvailable(this);
-            // try to invoke callback, if specified, but only for optional dependencies
-            // because callbacks for required dependencies are handled differently
-            if (!isRequired()) {
-                invokeAdded(ref, service);
+        boolean makeAvailable = makeAvailable();
+        
+        Object[] services = m_services.toArray();
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            if (makeAvailable) {
+                ds.dependencyAvailable(this);
+                if (!isRequired()) {
+                    invokeAdded(ds, ref, service);
+                }
             }
-        }
-        else {
-            m_service.dependencyChanged(this);
-            invokeAdded(ref, service);
+            else {
+                ds.dependencyChanged(this);
+                invokeAdded(ds, ref, service);
+            }
         }
     }
 
-    public void invokeAdded() {
-        invokeAdded(m_reference, m_serviceInstance);
-    }
-    
-    public void invokeAdded(ServiceReference reference, Object serviceInstance) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeAdded(DependencyService dependencyService, ServiceReference reference, Object serviceInstance) {
+        Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackAdded != null)) {
             invokeCallbackMethod(callbackInstances, m_callbackAdded, reference, serviceInstance);
         }
@@ -367,49 +424,53 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public void modifiedService(ServiceReference ref, Object service) {
         m_reference = ref;
         m_serviceInstance = service;
-        m_service.dependencyChanged(this);
-        // only invoke the changed callback if the service itself is "active"
-        if (((ServiceImpl) m_service).isRegistered()) {
-            invokeChanged(ref, service);
+        
+        Object[] services = m_services.toArray();
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            ds.dependencyChanged(this);
+            if (ds.isRegistered()) {
+                invokeChanged(ds, ref, service);
+            }
         }
     }
 
-    public void invokeChanged(ServiceReference reference, Object serviceInstance) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeChanged(DependencyService dependencyService, ServiceReference reference, Object serviceInstance) {
+        Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackChanged != null)) {
             invokeCallbackMethod(callbackInstances, m_callbackChanged, reference, serviceInstance);
         }
     }
 
     public void removedService(ServiceReference ref, Object service) {
-        if (makeUnavailable()) {
-            m_service.dependencyUnavailable(this);
-            // try to invoke callback, if specified, but only for optional dependencies
-            // because callbacks for required dependencies are handled differently
-            if (!isRequired()) {
-                invokeRemoved(ref, service);
+        boolean makeUnavailable = makeUnavailable();
+        
+        Object[] services = m_services.toArray();
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            if (makeUnavailable) {
+                ds.dependencyUnavailable(this);
+                if (!isRequired()) {
+                    invokeRemoved(ds, ref, service);
+                }
+            }
+            else {
+                ds.dependencyChanged(this);
+                invokeRemoved(ds, ref, service);
             }
         }
-        else {
-            m_service.dependencyChanged(this);
-            invokeRemoved(ref, service);
-        }
-        
         // unget what we got in addingService (see ServiceTracker 701.4.1)
         m_context.ungetService(ref);
+
     }
 
-    public void invokeRemoved() {
-        invokeRemoved(m_reference, m_serviceInstance);
-    }
-    
-    public void invokeRemoved(ServiceReference reference, Object serviceInstance) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeRemoved(DependencyService dependencyService, ServiceReference reference, Object serviceInstance) {
+        Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackRemoved != null)) {
             invokeCallbackMethod(callbackInstances, m_callbackRemoved, reference, serviceInstance);
         }
     }
-    
+
     protected synchronized boolean makeAvailable() {
         if (!m_isAvailable) {
             m_isAvailable = true;
@@ -426,8 +487,13 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         return false;
     }
     
-    private synchronized Object[] getCallbackInstances() {
-        return m_callbackInstance != null ? new Object[] { m_callbackInstance } : ((ServiceImpl) m_service).getCompositionInstances();
+    private synchronized Object[] getCallbackInstances(DependencyService dependencyService) {
+        if (m_callbackInstance == null) {
+            return dependencyService.getCompositionInstances();
+        }
+        else {
+            return new Object[] { m_callbackInstance };
+        }
     }
 
     private void invokeCallbackMethod(Object[] instances, String methodName, ServiceReference reference, Object service) {
@@ -586,6 +652,11 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public synchronized ServiceDependency setRequired(boolean required) {
         ensureNotActive();
         m_isRequired = required;
+        return this;
+    }
+    
+    public ServiceDependency setInstanceBound(boolean isInstanceBound) {
+        m_isInstanceBound = isInstanceBound;
         return this;
     }
 

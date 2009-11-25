@@ -16,12 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dependencymanager.dependencies;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Properties;
 
+import org.apache.felix.dependencymanager.Dependency;
+import org.apache.felix.dependencymanager.DependencyService;
+import org.apache.felix.dependencymanager.impl.Logger;
 import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -53,7 +57,7 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 	private BundleContext m_context;
 	private String m_pid;
 	private ServiceRegistration m_registration;
-	private volatile Service m_service;
+	private volatile DependencyService m_service;
 	private Dictionary m_settings;
 	private boolean m_propagate;
 	private final Logger m_logger;
@@ -77,6 +81,11 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 		return true;
 	}
 	
+	public boolean isInstanceBound() {
+	    // for now, configuration dependencies never are
+	    return false;
+	}
+	
 	/**
 	 * Returns <code>true</code> when configuration properties should be propagated
 	 * as service properties.
@@ -89,14 +98,14 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 		return m_settings;
 	}
 	
-	public void start(Service service) {
+	public void start(DependencyService service) {
 		m_service = service;
 		Properties props = new Properties();
 		props.put(Constants.SERVICE_PID, m_pid);
 		m_registration = m_context.registerService(ManagedService.class.getName(), this, props);
 	}
 
-	public void stop(Service service) {
+	public void stop(DependencyService service) {
 		m_registration.unregister();
 		m_service = null;
 	}
@@ -109,7 +118,7 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 	public void updated(Dictionary settings) throws ConfigurationException {
 		// if non-null settings come in, we have to instantiate the service and
 		// apply these settings
-		((ServiceImpl) m_service).initService();
+		m_service.initService(); /// <<< CHANGES THE STATE, WHEN IT SHOULD NOT (YET) DO THAT (we should not use m_serviceInstance to determine the state but use a flag var instead)
 		Object service = m_service.getService();
 				
 		Dictionary oldSettings = null; 

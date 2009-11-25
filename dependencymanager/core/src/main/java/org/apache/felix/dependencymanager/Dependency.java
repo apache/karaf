@@ -49,6 +49,14 @@ public interface Dependency {
     public boolean isAvailable();
     
     /**
+     * As soon as the instance is created, keep it around, even if this dependency
+     * goes away.
+     * 
+     * @return <code>true</code> if the dependency is instance bound
+     */
+    public boolean isInstanceBound();
+    
+    /**
      * Starts tracking the dependency. This activates some implementation
      * specific mechanism to do the actual tracking. If the tracking discovers
      * that the dependency becomes available, it should call 
@@ -56,7 +64,7 @@ public interface Dependency {
      * 
      * @param service the service that is associated with this dependency
      */
-    public void start(Service service);
+    public void start(DependencyService service);
     
     /**
      * Stops tracking the dependency. This deactivates the tracking. If the
@@ -64,5 +72,5 @@ public interface Dependency {
      * <code>dependencyUnavaible()</code> before stopping itself to ensure
      * that dependencies that aren't "active" are unavailable.
      */
-    public void stop(Service service);
+    public void stop(DependencyService service);
 }

@@ -50,6 +50,7 @@ public class Ensure {
      * @param timeout the number of milliseconds to wait
      */
     public synchronized void waitForStep(int nr, int timeout) {
+        final int initialTimeout = timeout;
         while (step <= nr && timeout > 0) {
             try {
                 wait(RESOLUTION);
@@ -58,7 +59,7 @@ public class Ensure {
             catch (InterruptedException e) {}
         }
         if (step <= nr) {
-            throw new IllegalStateException("Timed out waiting for " + timeout + " ms for step " + nr);
+            throw new IllegalStateException("Timed out waiting for " + initialTimeout + " ms for step " + nr + ", we are still at step " + step);
         }
     }
 }

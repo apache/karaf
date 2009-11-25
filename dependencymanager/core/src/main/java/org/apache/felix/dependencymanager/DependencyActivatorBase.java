@@ -20,6 +20,11 @@ package org.apache.felix.dependencymanager;
 
 import java.util.List;
 
+import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
+import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
+import org.apache.felix.dependencymanager.dependencies.TemporalServiceDependency;
+import org.apache.felix.dependencymanager.impl.Logger;
+import org.apache.felix.dependencymanager.impl.ServiceImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -95,7 +100,7 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      * @return the new service
      */
     public Service createService() {
-        return new ServiceImpl(m_context, m_manager, m_logger);
+        return m_manager.createService();
     }
     
     /**
@@ -104,7 +109,7 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      * @return the service dependency
      */
     public ServiceDependency createServiceDependency() {
-        return new ServiceDependency(m_context, m_logger);
+        return m_manager.createServiceDependency();
     }
     
     /**
@@ -114,7 +119,7 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      * @return the service dependency
      */
     public TemporalServiceDependency createTemporalServiceDependency() {
-        return new TemporalServiceDependency(m_context, m_logger);
+        return m_manager.createTemporalServiceDependency();
     }
     
     /**

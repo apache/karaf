@@ -22,6 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
+import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
+import org.apache.felix.dependencymanager.dependencies.TemporalServiceDependency;
+import org.apache.felix.dependencymanager.impl.Logger;
+import org.apache.felix.dependencymanager.impl.ServiceImpl;
 import org.osgi.framework.BundleContext;
 
 /**

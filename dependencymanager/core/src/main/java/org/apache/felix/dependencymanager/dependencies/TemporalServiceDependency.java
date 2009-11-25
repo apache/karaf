@@ -9,12 +9,15 @@
  * or implied. See the License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dependencymanager.dependencies;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.apache.felix.dependencymanager.DependencyActivatorBase;
+import org.apache.felix.dependencymanager.DependencyService;
+import org.apache.felix.dependencymanager.impl.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -110,12 +113,18 @@ public class TemporalServiceDependency extends ServiceDependency implements Invo
      * The ServiceTracker calls us here in order to inform about a service arrival.
      */
     public synchronized void addedService(ServiceReference ref, Object service) {
-        if (makeAvailable()) {
-            // So far, our dependency was not satisfied: wrap the service behind our proxy.
+        boolean makeAvailable = makeAvailable();
+        if (makeAvailable) {
             m_serviceInstance = Proxy.newProxyInstance(m_trackedServiceName.getClassLoader(), new Class[] { m_trackedServiceName }, this);
-            m_service.dependencyAvailable(this); // will invoke "added" callbacks, if any.
         }
-        else {
+        Object[] services = m_services.toArray();
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            if (makeAvailable) {
+                ds.dependencyAvailable(this);
+            }
+        }
+        if (!makeAvailable) {
             notifyAll();
         }
     }
