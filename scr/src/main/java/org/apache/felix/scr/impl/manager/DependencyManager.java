@@ -171,23 +171,48 @@ public class DependencyManager implements ServiceListener, Reference
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Updating {0}", new Object[]
                     { serviceString }, null );
 
-                // remove the service first
-                // only continue with further event handling if the service
-                // removal did not cause the component to be deactivated
-                if ( serviceRemoved( ref ) )
+                if ( getBoundService( ref ) == null )
                 {
-                    // recalculate the number of services matching the filter
-                    // because we don't know whether this service previously matched
-                    // or not
-                    ServiceReference refs[] = getFrameworkServiceReferences();
-                    m_size = ( refs == null ) ? 0 : refs.length;
-
-                    // now try to bind the service - if it matches the target filter
-                    // without recalculating the size (already done).
+                    // service not currently bound --- what to do ?
+                    // if static
+                    //    if inactive and target match: activate
+                    // if dynamic
+                    //    if multiple and target match: bind
                     if ( targetFilterMatch( ref ) )
                     {
-                        serviceAdded( ref );
+                        // new filter match, so increase the counter
+                        m_size++;
+
+                        if ( isStatic() )
+                        {
+                            // if static reference: activate if currentl unsatisifed, otherwise no influence
+                            if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
+                            {
+                                m_componentManager.log( LogService.LOG_INFO,
+                                    "Dependency Manager: Service {0} registered, activate component", new Object[]
+                                        { m_dependencyMetadata.getName() }, null );
+
+                                m_componentManager.activate();
+                            }
+                        }
+                        else if ( isMultiple() )
+                        {
+                            // if dynamic and multiple reference, bind, otherwise ignore
+                            serviceAdded( ref );
+                        }
                     }
+                }
+                else if ( !targetFilterMatch( ref ) )
+                {
+                    // service reference does not match target any more, remove
+                    m_size--;
+                    serviceRemoved( ref );
+                }
+                else if ( "true".equalsIgnoreCase( m_componentManager.getBundle().getBundleContext().getProperty(
+                    "ds.rebind.enabled" ) ) )
+                {
+                    // service is bound, bind again to update reference properties
+                    bind();
                 }
 
                 break;
@@ -390,6 +415,7 @@ public class DependencyManager implements ServiceListener, Reference
                 ungetService( reference );
             }
         }
+
         else
         {
             m_componentManager.log( LogService.LOG_DEBUG,

@@ -29,7 +29,11 @@ import org.osgi.framework.ServiceRegistration;
 public class SimpleServiceImpl implements SimpleService
 {
 
-    private final String m_value;
+    private String m_value;
+
+    private int m_ranking;
+
+    private String m_filterProp;
 
     private ServiceRegistration m_registration;
 
@@ -42,22 +46,51 @@ public class SimpleServiceImpl implements SimpleService
 
     public static SimpleServiceImpl create( BundleContext bundleContext, String value, int ranking )
     {
-        SimpleServiceImpl instance = new SimpleServiceImpl( value );
-        Properties props = new Properties();
-        props.put( "value", value );
-        if ( ranking != 0 )
-        {
-            props.put( Constants.SERVICE_RANKING, Integer.valueOf( ranking ) );
-        }
+        SimpleServiceImpl instance = new SimpleServiceImpl( value, ranking );
+        Properties props = instance.getProperties();
         instance.setRegistration( bundleContext.registerService( SimpleService.class.getName(), instance, props ) );
         return instance;
     }
 
 
-    SimpleServiceImpl( String value )
+    SimpleServiceImpl( final String value, final int ranking )
     {
         this.m_value = value;
+        this.m_ranking = ranking;
+        this.m_filterProp = "match";
+    }
 
+
+    private Properties getProperties()
+    {
+        final Properties props = new Properties();
+        props.put( "value", m_value );
+        props.put( "filterprop", m_filterProp );
+        if ( m_ranking != 0 )
+        {
+            props.put( Constants.SERVICE_RANKING, Integer.valueOf( m_ranking ) );
+        }
+        return props;
+    }
+
+
+    public void update( String value )
+    {
+        if ( this.m_registration != null )
+        {
+            this.m_value = value;
+            this.m_registration.setProperties( getProperties() );
+        }
+    }
+
+
+    public void setFilterProperty( String filterProp )
+    {
+        if ( this.m_registration != null )
+        {
+            this.m_filterProp = filterProp;
+            this.m_registration.setProperties( getProperties() );
+        }
     }
 
 
@@ -93,6 +126,6 @@ public class SimpleServiceImpl implements SimpleService
     @Override
     public String toString()
     {
-        return getClass().getSimpleName() + ": value=" + getValue();
+        return getClass().getSimpleName() + ": value=" + getValue() + ", filterprop=" + m_filterProp;
     }
 }

@@ -51,7 +51,15 @@ public class SimpleComponent
 
     public SimpleService m_singleRef;
 
+    public int m_singleRefBind = 0;
+
+    public int m_singleRefUnbind = 0;
+
     public final Set<SimpleService> m_multiRef = new HashSet<SimpleService>();
+
+    public int m_multiRefBind = 0;
+
+    public int m_multiRefUnbind = 0;
 
 
     @SuppressWarnings("unused")
@@ -132,6 +140,7 @@ public class SimpleComponent
     public void setSimpleService( SimpleService simpleService )
     {
         this.m_singleRef = simpleService;
+        this.m_singleRefBind++;
     }
 
 
@@ -142,6 +151,7 @@ public class SimpleComponent
         {
             this.m_singleRef = null;
         }
+        this.m_singleRefUnbind++;
     }
 
 
@@ -149,6 +159,7 @@ public class SimpleComponent
     public void bindSimpleService( SimpleService simpleService )
     {
         this.m_multiRef.add( simpleService );
+        this.m_multiRefBind++;
     }
 
 
@@ -156,5 +167,6 @@ public class SimpleComponent
     public void unbindSimpleService( SimpleService simpleService )
     {
         this.m_multiRef.remove( simpleService );
+        this.m_multiRefUnbind++;
     }
 }

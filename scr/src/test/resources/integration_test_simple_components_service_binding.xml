@@ -131,4 +131,127 @@
         />
     </scr:component>
 
+    
+    <!-- Same components as above but using a target spec -->
+
+    <scr:component name="test_optional_single_dynamic_target"
+        enabled="false"
+        configuration-policy="ignore">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="0..1"
+            policy="dynamic"
+            bind="setSimpleService"
+            unbind="unsetSimpleService"
+            target="(filterprop=match)"
+        />
+    </scr:component>
+
+    <scr:component name="test_required_single_dynamic_target"
+        enabled="false"
+        configuration-policy="ignore">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="1..1"
+            policy="dynamic"
+            bind="setSimpleService"
+            unbind="unsetSimpleService"
+            target="(filterprop=match)"
+        />
+    </scr:component>
+
+    <scr:component name="test_optional_multiple_dynamic_target"
+        enabled="false"
+        configuration-policy="ignore">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="0..n"
+            policy="dynamic"
+            bind="bindSimpleService"
+            unbind="unbindSimpleService"
+            target="(filterprop=match)"
+        />
+    </scr:component>
+
+    <scr:component name="test_required_multiple_dynamic_target"
+        enabled="false"
+        configuration-policy="ignore">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="1..n"
+            policy="dynamic"
+            bind="bindSimpleService"
+            unbind="unbindSimpleService"
+            target="(filterprop=match)"
+        />
+    </scr:component>
+    
+    <scr:component name="test_optional_single_static_target"
+        enabled="false"
+        configuration-policy="ignore">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="0..1"
+            policy="static"
+            bind="setSimpleService"
+            unbind="unsetSimpleService"
+            target="(filterprop=match)"
+        />
+    </scr:component>
+
+    <scr:component name="test_required_single_static_target"
+        enabled="false"
+        configuration-policy="ignore">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="1..1"
+            policy="static"
+            bind="setSimpleService"
+            unbind="unsetSimpleService"
+            target="(filterprop=match)"
+        />
+    </scr:component>
+
+    <scr:component name="test_optional_multiple_static_target"
+        enabled="false"
+        configuration-policy="ignore">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="0..n"
+            policy="static"
+            bind="bindSimpleService"
+            unbind="unbindSimpleService"
+            target="(filterprop=match)"
+        />
+    </scr:component>
+
+    <scr:component name="test_required_multiple_static_target"
+        enabled="false"
+        configuration-policy="ignore">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="1..n"
+            policy="static"
+            bind="bindSimpleService"
+            unbind="unbindSimpleService"
+            target="(filterprop=match)"
+        />
+    </scr:component>
+
 </components>
