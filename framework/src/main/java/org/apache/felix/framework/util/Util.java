@@ -158,16 +158,16 @@ public class Util
      * @return the loaded class or <tt>null</tt> if it could not be
      *         loaded.
     **/
-    public static Class loadClassUsingClass(Class clazz, String name)
+    public static Class loadClassUsingClass(Class clazz, String name, SecureAction action)
     {
         Class loadedClass = null;
 
         while (clazz != null)
         {
             // Get the class loader of the current class object.
-            ClassLoader loader = clazz.getClassLoader();
+            ClassLoader loader = action.getClassLoader(clazz);
             // A null class loader represents the system class loader.
-            loader = (loader == null) ? ClassLoader.getSystemClassLoader() : loader;
+            loader = (loader == null) ? action.getSystemClassLoader() : loader;
             try
             {
                 return loader.loadClass(name);
@@ -183,7 +183,7 @@ public class Util
             Class[] ifcs = clazz.getInterfaces();
             for (int i = 0; i < ifcs.length; i++)
             {
-                loadedClass = loadClassUsingClass(ifcs[i], name);
+                loadedClass = loadClassUsingClass(ifcs[i], name, action);
                 if (loadedClass != null)
                 {
                     return loadedClass;

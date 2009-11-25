@@ -2693,7 +2693,7 @@ ex.printStackTrace();
             {
                 for (int i = 0; i < classNames.length; i++)
                 {
-                    Class clazz = Util.loadClassUsingClass(svcObj.getClass(), classNames[i]);
+                    Class clazz = Util.loadClassUsingClass(svcObj.getClass(), classNames[i], m_secureAction);
                     if (clazz == null)
                     {
                         throw new IllegalArgumentException(

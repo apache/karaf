@@ -171,7 +171,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
         // Case 1.
         Class sourceClass = (m_factory != null) ? m_factory.getClass() : m_svcObj.getClass();
-        return Util.loadClassUsingClass(sourceClass, clazz.getName()) == clazz;
+        return Util.loadClassUsingClass(sourceClass, clazz.getName(), Felix.m_secureAction) == clazz;
     }
 
     Object getProperty(String key)
@@ -315,7 +315,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
         {
             for (int i = 0; i < m_classes.length; i++)
             {
-                Class clazz = Util.loadClassUsingClass(svcObj.getClass(), m_classes[i]);
+                Class clazz = Util.loadClassUsingClass(svcObj.getClass(), m_classes[i], Felix.m_secureAction);
                 if ((clazz == null) || !clazz.isAssignableFrom(svcObj.getClass()))
                 {
                     if (clazz == null)

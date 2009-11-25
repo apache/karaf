@@ -137,6 +137,27 @@ public class SecureAction
             return ClassLoader.getSystemClassLoader();
         }
     }
+    
+    public ClassLoader getClassLoader(Class clazz)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.GET_CLASS_LOADER_ACTION, clazz);
+                return (ClassLoader) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return clazz.getClassLoader();
+        }
+    }
 
     public Class forName(String name) throws ClassNotFoundException
     {
@@ -1094,6 +1115,7 @@ public class SecureAction
         public static final int SWAP_FIELD_ACTION = 38;
         public static final int SYSTEM_EXIT_ACTION = 39;
         public static final int FLUSH_FIELD_ACTION = 40;
+        public static final int GET_CLASS_LOADER_ACTION = 41;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -1339,6 +1361,10 @@ public class SecureAction
             else if (action == FLUSH_FIELD_ACTION)
             {
                 _flush(((Class) arg1), arg2);
+            }
+            else if (action == GET_CLASS_LOADER_ACTION)
+            {
+                return ((Class) arg1).getClassLoader();
             }
 
             return null;
