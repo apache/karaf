@@ -172,7 +172,12 @@ public class TemporalServiceDependency extends ServiceDependency implements Invo
                 }
             }
         }
-        method.setAccessible(true);
-        return method.invoke(service, args);
+        try {
+            return method.invoke(service, args);
+        }
+        catch (IllegalAccessException iae) {
+            method.setAccessible(true);
+            return method.invoke(service, args);
+        }
     }
 }
