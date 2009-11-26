@@ -20,6 +20,7 @@ package org.apache.felix.dependencymanager;
 
 import java.util.List;
 
+import org.apache.felix.dependencymanager.dependencies.BundleDependency;
 import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
 import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
 import org.apache.felix.dependencymanager.dependencies.TemporalServiceDependency;
@@ -128,7 +129,16 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      * @return the configuration dependency
      */
     public ConfigurationDependency createConfigurationDependency() {
-    	return new ConfigurationDependency(m_context, m_logger);
+    	return m_manager.createConfigurationDependency();
+    }
+
+    /**
+     * Creates a new bundle dependency.
+     * 
+     * @return the bundle dependency
+     */
+    public BundleDependency createBundleDependency() {
+        return m_manager.createBundleDependency();
     }
 
     /**

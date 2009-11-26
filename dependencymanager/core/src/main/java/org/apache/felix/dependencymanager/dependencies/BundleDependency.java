@@ -41,7 +41,7 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
 	private final Logger m_logger;
 	private boolean m_isStarted;
 	private BundleTracker m_tracker;
-	private int m_stateMask;
+	private int m_stateMask = Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE;
 	private boolean m_isAvailable;
 	private boolean m_isRequired;
 	private DependencyService m_service;

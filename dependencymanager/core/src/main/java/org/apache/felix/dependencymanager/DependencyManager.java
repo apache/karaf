@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.felix.dependencymanager.dependencies.BundleDependency;
 import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
 import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
 import org.apache.felix.dependencymanager.dependencies.TemporalServiceDependency;
@@ -102,6 +103,10 @@ public class DependencyManager {
     
     public ConfigurationDependency createConfigurationDependency() {
         return new ConfigurationDependency(m_context, m_logger);
+    }
+    
+    public BundleDependency createBundleDependency() {
+        return new BundleDependency(m_context, m_logger);
     }
     
     /**
