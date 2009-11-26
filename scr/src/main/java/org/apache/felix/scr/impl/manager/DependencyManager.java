@@ -932,9 +932,7 @@ public class DependencyManager implements ServiceListener, Reference
      */
     private void update( final ServiceReference ref )
     {
-        //        if ( m_componentManager.getActivator().getConfiguration().isRebindEnabled() )
-        if ( "true".equalsIgnoreCase( m_componentManager.getBundle().getBundleContext().getProperty(
-            "ds.rebind.enabled" ) ) )
+        if ( m_componentManager.getActivator().getConfiguration().isRebindEnabled() )
         {
             // The updated method is only invoked if the implementation object is not
             // null. This is valid for both immediate and delayed components

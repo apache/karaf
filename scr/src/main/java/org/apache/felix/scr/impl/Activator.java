@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.felix.scr.impl.config.ConfigurationComponentRegistry;
+import org.apache.felix.scr.impl.config.ScrConfiguration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -46,6 +47,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     //  name of the LogService class (this is a string to not create a reference to the class)
     static final String LOGSERVICE_CLASS = "org.osgi.service.log.LogService";
 
+    // Our configuration from bundle context properties and Config Admin
+    private ScrConfiguration m_configuration;
+
     // Flag that sets error messages
     private static int m_logLevel = LogService.LOG_ERROR;
 
@@ -64,7 +68,6 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     //  thread acting upon configurations
     private ComponentActorThread m_componentActor;
 
-
     /**
      * Registers this instance as a (synchronous) bundle listener and loads the
      * components of already registered bundles.
@@ -82,13 +85,15 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         m_logService = new ServiceTracker( context, LOGSERVICE_CLASS, null );
         m_logService.open();
 
+        // get the configuration
+        m_configuration = new ScrConfiguration( context );
+
         // configure logging from context properties
-        m_logLevel = getLogLevel( context );
-        if ( "true".equalsIgnoreCase( context.getProperty( "ds.showversion" ) ) )
-        {
-            log( LogService.LOG_INFO, context.getBundle(), " Version = "
-                + context.getBundle().getHeaders().get( Constants.BUNDLE_VERSION ), null );
-        }
+        m_logLevel = m_configuration.getLogLevel();
+
+        // log SCR startup
+        log( LogService.LOG_INFO, context.getBundle(), " Version = "
+            + context.getBundle().getHeaders().get( Constants.BUNDLE_VERSION ), null );
 
         // create and start the component actor
         m_componentActor = new ComponentActorThread();
@@ -110,7 +115,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
             // Register "scr" impl command service as a
             // wrapper for the bundle repository service.
             context.registerService( org.apache.felix.shell.Command.class.getName(), new ScrCommand( m_context,
-                m_componentRegistry ), null );
+                m_componentRegistry, m_configuration ), null );
         }
         catch ( Throwable th )
         {
@@ -231,7 +236,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         try
         {
             BundleComponentActivator ga = new BundleComponentActivator( m_componentRegistry, m_componentActor, context,
-                m_logLevel );
+                m_configuration );
             m_componentBundles.put( new Long( bundle.getBundleId() ), ga );
         }
         catch ( Exception e )
@@ -313,56 +318,6 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         }
 
         return new ComponentRegistry( bundleContext );
-    }
-
-
-    private static int getLogLevel( BundleContext bundleContext )
-    {
-        String levelString = bundleContext.getProperty( "ds.loglevel" );
-        if ( levelString != null )
-        {
-            try
-            {
-                return Integer.parseInt( levelString );
-            }
-            catch ( NumberFormatException nfe )
-            {
-                // might be a descriptive name
-            }
-
-            if ( "debug".equalsIgnoreCase( levelString ) )
-            {
-                return LogService.LOG_DEBUG;
-            }
-            else if ( "info".equalsIgnoreCase( levelString ) )
-            {
-                return LogService.LOG_INFO;
-            }
-            else if ( "warn".equalsIgnoreCase( levelString ) )
-            {
-                return LogService.LOG_WARNING;
-            }
-            else if ( "error".equalsIgnoreCase( levelString ) )
-            {
-                return LogService.LOG_ERROR;
-            }
-        }
-
-        // check ds.showtrace property
-        levelString = bundleContext.getProperty( "ds.trace" );
-        if ( "true".equalsIgnoreCase( bundleContext.getProperty( "ds.showtrace" ) ) )
-        {
-            return LogService.LOG_DEBUG;
-        }
-
-        // next check ds.showerrors property
-        if ( "false".equalsIgnoreCase( bundleContext.getProperty( "ds.showerrors" ) ) )
-        {
-            return -1; // no logging at all !!
-        }
-
-        // default log level (errors only)
-        return LogService.LOG_ERROR;
     }
 
 

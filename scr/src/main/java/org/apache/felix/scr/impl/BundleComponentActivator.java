@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.felix.scr.impl.config.ComponentHolder;
+import org.apache.felix.scr.impl.config.ScrConfiguration;
 import org.apache.felix.scr.impl.helper.Logger;
 import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
@@ -69,8 +70,8 @@ public class BundleComponentActivator implements Logger
     // true as long as the dispose method is not called
     private boolean m_active;
 
-    // the logging level
-    private int m_logLevel;
+    // the configuration
+    private ScrConfiguration m_configuration;
 
 
     /**
@@ -85,7 +86,7 @@ public class BundleComponentActivator implements Logger
      * @throws ComponentException if any error occurrs initializing this class
      */
     BundleComponentActivator( ComponentRegistry componentRegistry,
-        ComponentActorThread componentActor, BundleContext context, int logLevel ) throws ComponentException
+        ComponentActorThread componentActor, BundleContext context, ScrConfiguration configuration ) throws ComponentException
     {
         // keep the parameters for later
         m_componentRegistry = componentRegistry;
@@ -98,7 +99,7 @@ public class BundleComponentActivator implements Logger
         // have the LogService handy (if available)
         m_logService = new ServiceTracker( context, Activator.LOGSERVICE_CLASS, null );
         m_logService.open();
-        m_logLevel = logLevel;
+        m_configuration = configuration;
 
         // Get the Metadata-Location value from the manifest
         String descriptorLocations = ( String ) m_context.getBundle().getHeaders().get( "Service-Component" );
@@ -366,6 +367,12 @@ public class BundleComponentActivator implements Logger
     }
 
 
+    public ScrConfiguration getConfiguration()
+    {
+        return m_configuration;
+    }
+
+
     /**
      * Implements the <code>ComponentContext.enableComponent(String)</code>
      * method by first finding the component(s) for the <code>name</code> and
@@ -533,7 +540,7 @@ public class BundleComponentActivator implements Logger
      */
     public boolean isLogEnabled( int level )
     {
-        return m_logLevel >= level;
+        return m_configuration.getLogLevel() >= level;
     }
 
 

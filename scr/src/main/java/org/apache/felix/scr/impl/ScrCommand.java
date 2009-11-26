@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
+import org.apache.felix.scr.impl.config.ScrConfiguration;
 import org.apache.felix.shell.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -43,15 +44,18 @@ public class ScrCommand implements Command
     private static final String INFO_CMD = "info";
     private static final String ENABLE_CMD = "enable";
     private static final String DISABLE_CMD = "disable";
+    private static final String CONFIG_CMD = "config";
 
     private final BundleContext bundleContext;
     private final ScrService scrService;
+    private final ScrConfiguration scrConfiguration;
 
 
-    ScrCommand( BundleContext bundleContext, ScrService scrService )
+    ScrCommand( BundleContext bundleContext, ScrService scrService, ScrConfiguration scrConfiguration )
     {
         this.bundleContext = bundleContext;
         this.scrService = scrService;
+        this.scrConfiguration = scrConfiguration;
     }
 
 
@@ -112,6 +116,10 @@ public class ScrCommand implements Command
             else if ( command.equals( DISABLE_CMD ) )
             {
                 change( st, out, err, false );
+            }
+            else if ( command.equals( CONFIG_CMD ) )
+            {
+                config( out );
             }
             else
             {
@@ -340,6 +348,17 @@ public class ScrCommand implements Command
     }
 
 
+    private void config( PrintStream out )
+    {
+        out.print( "Log Level: " );
+        out.println( scrConfiguration.getLogLevel() );
+        out.print( "Component Factory with Factory Configuration: " );
+        out.println( scrConfiguration.isFactoryEnabled() ? "Supported" : "Unsupported" );
+        out.print( "Update bound Service Properties: " );
+        out.println( scrConfiguration.isRebindEnabled() ? "Yes" : "No" );
+    }
+
+
     private void help( PrintStream out, StringTokenizer st )
     {
         String command = HELP_CMD;
@@ -381,6 +400,14 @@ public class ScrCommand implements Command
             out.println( "This command disables the component whose component ID\n" + "is given as command argument." );
             out.println( "" );
         }
+        else if ( command.equals( CONFIG_CMD ) )
+        {
+            out.println( "" );
+            out.println( "scr " + CONFIG_CMD );
+            out.println( "" );
+            out.println( "This command lists the current SCR configuration." );
+            out.println( "" );
+        }
         else
         {
             out.println( "scr " + HELP_CMD + " [" + LIST_CMD + "]" );
@@ -388,6 +415,7 @@ public class ScrCommand implements Command
             out.println( "scr " + INFO_CMD + " <componentId>" );
             out.println( "scr " + ENABLE_CMD + " <componentId>" );
             out.println( "scr " + DISABLE_CMD + " <componentId>" );
+            out.println( "scr " + CONFIG_CMD );
         }
     }
 

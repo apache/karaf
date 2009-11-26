@@ -92,7 +92,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     {
         super( activator, metadata );
         m_componentInstances = new IdentityHashMap();
-        m_isConfigurationFactory = "true".equals( activator.getBundleContext().getProperty( "ds.factory.enabled" ) );
+        m_isConfigurationFactory = activator.getConfiguration().isFactoryEnabled();
     }
 
 
