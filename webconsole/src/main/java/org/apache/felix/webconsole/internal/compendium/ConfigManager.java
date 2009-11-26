@@ -728,7 +728,7 @@ public class ConfigManager extends ConfigManagerBase
                     if ( ad[i].getDescription() != null )
                     {
                         json.key( "description" );
-                        json.value( ad[i].getDescription() );
+                        json.value( ad[i].getDescription() + " (" + ad[i].getID() + ")" );
                     }
 
                     json.endObject();
