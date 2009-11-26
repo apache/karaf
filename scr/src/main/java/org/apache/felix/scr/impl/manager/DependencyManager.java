@@ -125,10 +125,10 @@ public class DependencyManager implements ServiceListener, Reference
                                  m_dependencyMetadata.getInterface()
         );
         m_unbind = new UnbindMethod( m_componentManager,
-                                     m_dependencyMetadata.getUnbind(),
-                                     m_componentInstance.getClass(),
-                                     m_dependencyMetadata.getName(),
-                                     m_dependencyMetadata.getInterface()
+            m_dependencyMetadata.getUnbind(),
+            m_componentInstance.getClass(),
+            m_dependencyMetadata.getName(),
+            m_dependencyMetadata.getInterface()
         );
     }
 
@@ -208,11 +208,10 @@ public class DependencyManager implements ServiceListener, Reference
                     m_size--;
                     serviceRemoved( ref );
                 }
-                else if ( "true".equalsIgnoreCase( m_componentManager.getBundle().getBundleContext().getProperty(
-                    "ds.rebind.enabled" ) ) )
+                else
                 {
-                    // service is bound, bind again to update reference properties
-                    bind();
+                    // update the service binding due to the new properties
+                    update( ref );
                 }
 
                 break;
@@ -917,6 +916,33 @@ public class DependencyManager implements ServiceListener, Reference
         // one service was available to be bound (regardless of whether the
         // bind method succeeded or not)
         return success;
+    }
+
+
+    /**
+     * Handles an update in the service reference properties of a bound service.
+     * <p>
+     * For now this just calls the bind method with the service again if
+     * the <code>ds.rebind.enabled</code> configuration property is set to
+     * <code>true</code>. If the property is not set to <code>true</code> this
+     * method does nothing.
+     *
+     * @param ref The <code>ServiceReference</code> representing the updated
+     *      service.
+     */
+    private void update( final ServiceReference ref )
+    {
+        //        if ( m_componentManager.getActivator().getConfiguration().isRebindEnabled() )
+        if ( "true".equalsIgnoreCase( m_componentManager.getBundle().getBundleContext().getProperty(
+            "ds.rebind.enabled" ) ) )
+        {
+            // The updated method is only invoked if the implementation object is not
+            // null. This is valid for both immediate and delayed components
+            if ( m_dependencyMetadata.getBind() != null )
+            {
+                invokeBindMethod( ref );
+            }
+        }
     }
 
 
