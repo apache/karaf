@@ -506,7 +506,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                     installed++;
                     break;
                 case Bundle.RESOLVED:
-                    if ( bundles[i].getHeaders().get(Constants.FRAGMENT_HOST) != null )
+                    if ( isFragmentBundle( bundles[i] ) )
                     {
                         fragments++;
                     }
@@ -638,7 +638,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
     private boolean isFragmentBundle( Bundle bundle)
     {
-        return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
+        return getPackageAdmin().getBundleType( bundle ) == PackageAdmin.BUNDLE_TYPE_FRAGMENT;
     }
 
     private boolean hasStart( Bundle bundle )
@@ -693,6 +693,8 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         keyVal( jw, "Start Level", getStartLevel( bundle ) );
 
         keyVal( jw, "Bundle Classpath", headers.get( Constants.BUNDLE_CLASSPATH ) );
+
+        listFragmentInfo( jw, bundle, pluginRoot );
 
         if ( bundle.getState() == Bundle.INSTALLED )
         {
@@ -990,6 +992,40 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         }
 
         keyVal( jw, "Manifest Headers", val );
+    }
+
+
+    private void listFragmentInfo( final JSONWriter jw, final Bundle bundle, final String pluginRoot )
+        throws JSONException
+    {
+
+        if ( isFragmentBundle( bundle ) )
+        {
+            Bundle[] hostBundles = getPackageAdmin().getHosts( bundle );
+            if ( hostBundles != null )
+            {
+                JSONArray val = new JSONArray();
+                for ( int i = 0; i < hostBundles.length; i++ )
+                {
+                    val.put( getBundleDescriptor( hostBundles[i], pluginRoot ) );
+                }
+                keyVal( jw, "Host Bundles", val );
+            }
+        }
+        else
+        {
+            Bundle[] fragmentBundles = getPackageAdmin().getFragments( bundle );
+            if ( fragmentBundles != null )
+            {
+                JSONArray val = new JSONArray();
+                for ( int i = 0; i < fragmentBundles.length; i++ )
+                {
+                    val.put( getBundleDescriptor( fragmentBundles[i], pluginRoot ) );
+                }
+                keyVal( jw, "Fragments Attached", val );
+            }
+        }
+
     }
 
 
