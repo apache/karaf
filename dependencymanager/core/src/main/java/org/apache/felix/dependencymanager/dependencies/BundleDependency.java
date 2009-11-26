@@ -18,9 +18,6 @@
  */
 package org.apache.felix.dependencymanager.dependencies;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Dictionary;
 
 import org.apache.felix.dependencymanager.Dependency;
@@ -36,15 +33,13 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 
-public class BundleDependency implements Dependency, BundleTrackerCustomizer, ServiceComponentDependency {
+public class BundleDependency extends AbstractDependency implements Dependency, BundleTrackerCustomizer, ServiceComponentDependency {
 	private final BundleContext m_context;
-	private final Logger m_logger;
 	private boolean m_isStarted;
 	private BundleTracker m_tracker;
 	private int m_stateMask = Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE;
-	private boolean m_isAvailable;
-	private boolean m_isRequired;
 	private DependencyService m_service;
+	private boolean m_isAvailable;
 	
     private Object m_callbackInstance;
     private String m_callbackAdded;
@@ -54,27 +49,23 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
 	private Bundle m_bundleInstance;
 	private Filter m_filter;
 	private long m_bundleId = -1;
-
-
-	public BundleDependency(BundleContext context, Logger logger) {
+    
+    public BundleDependency(BundleContext context, Logger logger) {
+        super(logger);
 		m_context = context;
-		m_logger = logger;
 		m_autoConfig = true;
 	}
 
-	public boolean isAvailable() {
-		return m_isAvailable;
-	}
-
-	public boolean isRequired() {
-		return m_isRequired;
-	}
-	
 	public boolean isInstanceBound() {
 		return false; // TODO for now we are never bound to the service implementation instance
 	}
 
-	public void start(DependencyService service) {
+	public synchronized boolean isAvailable() {
+        return m_isAvailable;
+    }
+
+
+    public void start(DependencyService service) {
 		synchronized (this) {
 			if (m_isStarted) {
 				throw new IllegalStateException("Dependency was already started." + getName());
@@ -169,7 +160,7 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
 	}
 	
     private synchronized boolean makeAvailable() {
-        if (!m_isAvailable) {
+        if (!isAvailable()) {
             m_isAvailable = true;
             return true;
         }
@@ -177,8 +168,9 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
     }
     
     private synchronized boolean makeUnavailable() {
-        if ((m_isAvailable) && (m_tracker.getTrackingCount() == 0)) {
+        if ((isAvailable()) && (m_tracker.getTrackingCount() == 0)) {
             m_isAvailable = false;
+
             return true;
         }
         return false;
@@ -188,17 +180,23 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
         invokeAdded(m_bundleInstance);
     }
     
-    public void invokeAdded(Bundle serviceInstance) {
+    public void invokeAdded(Bundle service) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackAdded != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackAdded, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackAdded, 
+                new Class[][] {{Bundle.class}, {Object.class}, {}},
+                new Object[][] {{service}, {service}, {}}
+            );
         }
     }
 
-    public void invokeChanged(Bundle serviceInstance) {
+    public void invokeChanged(Bundle service) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackChanged != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackChanged, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackChanged, 
+                new Class[][] {{Bundle.class}, {Object.class}, {}},
+                new Object[][] {{service}, {service}, {}}
+            );
         }
     }
     
@@ -206,68 +204,14 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
         invokeRemoved(m_bundleInstance);
     }
     
-    public void invokeRemoved(Bundle serviceInstance) {
+    public void invokeRemoved(Bundle service) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackRemoved != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackRemoved, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackRemoved,
+              new Class[][] {{Bundle.class}, {Object.class}, {}},
+              new Object[][] {{service}, {service}, {}}
+            );
         }
-    }
-    
-    private void invokeCallbackMethod(Object[] instances, String methodName, Object service) {
-        for (int i = 0; i < instances.length; i++) {
-            try {
-                invokeCallbackMethod(instances[i], methodName, service);
-            }
-            catch (NoSuchMethodException e) {
-                m_logger.log(Logger.LOG_DEBUG, "Method '" + methodName + "' does not exist on " + instances[i] + ". Callback skipped.");
-            }
-        }
-    }
-
-    private void invokeCallbackMethod(Object instance, String methodName, Object service) throws NoSuchMethodException {
-        Class currentClazz = instance.getClass();
-        boolean done = false;
-        while (!done && currentClazz != null) {
-            done = invokeMethod(instance, currentClazz, methodName,
-                new Class[][] {{Bundle.class}, {Object.class}, {}},
-                new Object[][] {{service}, {service}, {}},
-                false);
-            if (!done) {
-                currentClazz = currentClazz.getSuperclass();
-            }
-        }
-        if (!done && currentClazz == null) {
-            throw new NoSuchMethodException(methodName);
-        }
-    }
-    
-    private boolean invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) {
-        Method m = null;
-        for (int i = 0; i < signatures.length; i++) {
-            Class[] signature = signatures[i];
-            try {
-                m = clazz.getDeclaredMethod(name, signature);
-                if (!(isSuper && Modifier.isPrivate(m.getModifiers()))) {
-                    m.setAccessible(true);
-                    try {
-                        m.invoke(object, parameters[i]);
-                    }
-                    catch (InvocationTargetException e) {
-                        m_logger.log(Logger.LOG_ERROR, "Exception while invoking method " + m + ".", e);
-                    }
-                    // we did find and invoke the method, so we return true
-                    return true;
-                }
-            }
-            catch (NoSuchMethodException e) {
-                // ignore this and keep looking
-            }
-            catch (Exception e) {
-                // could not even try to invoke the method
-                m_logger.log(Logger.LOG_ERROR, "Exception while trying to invoke method " + m + ".", e);
-            }
-        }
-        return false;
     }
     
     private synchronized Object[] getCallbackInstances() {
@@ -362,7 +306,7 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
     
     public synchronized BundleDependency setRequired(boolean required) {
         ensureNotActive();
-        m_isRequired = required;
+        setIsRequired(required);
         return this;
     }
 

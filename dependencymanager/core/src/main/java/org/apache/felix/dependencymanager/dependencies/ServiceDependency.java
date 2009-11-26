@@ -18,9 +18,6 @@
  */
 package org.apache.felix.dependencymanager.dependencies;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -48,12 +45,10 @@ import org.osgi.framework.ServiceReference;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, ServiceComponentDependency {
-    private boolean m_isRequired;
+public class ServiceDependency extends AbstractDependency implements Dependency, ServiceTrackerCustomizer, ServiceComponentDependency {
     protected List m_services = new ArrayList();
     protected volatile ServiceTracker m_tracker;
     protected BundleContext m_context;
-    private boolean m_isAvailable;
     protected volatile Class m_trackedServiceName;
     private Object m_nullObject;
     private volatile String m_trackedServiceFilter;
@@ -67,12 +62,12 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     private boolean m_autoConfig;
     protected ServiceReference m_reference;
     protected Object m_serviceInstance;
-    private final Logger m_logger;
     private String m_autoConfigInstance;
     private boolean m_autoConfigInvoked;
     private Object m_defaultImplementation;
     private Object m_defaultImplementationInstance;
     private boolean m_isInstanceBound;
+    private boolean m_isAvailable;
     
     private static final Comparator COMPARATOR = new Comparator() {
         public int getRank(ServiceReference ref) {
@@ -179,23 +174,19 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
      * @param logger the logger
      */
     public ServiceDependency(BundleContext context, Logger logger) {
+        super(logger);
         m_context = context;
-        m_logger = logger;
         m_autoConfig = true;
-    }
-
-    public synchronized boolean isRequired() {
-        return m_isRequired;
-    }
-
-    public synchronized boolean isAvailable() {
-        return m_isAvailable;
     }
     
     public synchronized boolean isAutoConfig() {
         return m_autoConfig;
     }
     
+    public synchronized boolean isAvailable() {
+        return m_isAvailable;
+    }
+
     public boolean isInstanceBound() {
         return m_isInstanceBound;
     }
@@ -414,10 +405,13 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
     }
 
-    public void invokeAdded(DependencyService dependencyService, ServiceReference reference, Object serviceInstance) {
+    public void invokeAdded(DependencyService dependencyService, ServiceReference reference, Object service) {
         Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackAdded != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackAdded, reference, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackAdded, 
+                new Class[][] {{ServiceReference.class, m_trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {m_trackedServiceName}, {Object.class}, {}, {Map.class, m_trackedServiceName}},
+                new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}, {new ServicePropertiesMap(reference), service}}    
+            );
         }
     }
 
@@ -435,10 +429,13 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
     }
 
-    public void invokeChanged(DependencyService dependencyService, ServiceReference reference, Object serviceInstance) {
+    public void invokeChanged(DependencyService dependencyService, ServiceReference reference, Object service) {
         Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackChanged != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackChanged, reference, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackChanged, 
+                new Class[][] {{ServiceReference.class, m_trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {m_trackedServiceName}, {Object.class}, {}, {Map.class, m_trackedServiceName}},
+                new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}, {new ServicePropertiesMap(reference), service}}    
+            );
         }
     }
 
@@ -464,15 +461,18 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
 
     }
 
-    public void invokeRemoved(DependencyService dependencyService, ServiceReference reference, Object serviceInstance) {
+    public void invokeRemoved(DependencyService dependencyService, ServiceReference reference, Object service) {
         Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackRemoved != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackRemoved, reference, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackRemoved, 
+                new Class[][] {{ServiceReference.class, m_trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {m_trackedServiceName}, {Object.class}, {}, {Map.class, m_trackedServiceName}},
+                new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}, {new ServicePropertiesMap(reference), service}}    
+            );
         }
     }
 
     protected synchronized boolean makeAvailable() {
-        if (!m_isAvailable) {
+        if (!isAvailable()) {
             m_isAvailable = true;
             return true;
         }
@@ -480,7 +480,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
     
     private synchronized boolean makeUnavailable() {
-        if ((m_isAvailable) && (m_tracker.getServiceReference() == null)) {
+        if ((isAvailable()) && (m_tracker.getServiceReference() == null)) {
             m_isAvailable = false;
             return true;
         }
@@ -494,67 +494,6 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         else {
             return new Object[] { m_callbackInstance };
         }
-    }
-
-    private void invokeCallbackMethod(Object[] instances, String methodName, ServiceReference reference, Object service) {
-        for (int i = 0; i < instances.length; i++) {
-            try {
-                invokeCallbackMethod(instances[i], methodName, reference, service);
-            }
-            catch (NoSuchMethodException e) {
-                m_logger.log(Logger.LOG_DEBUG, "Method '" + methodName + "' does not exist on " + instances[i] + ". Callback skipped.");
-            }
-        }
-    }
-
-    private void invokeCallbackMethod(Object instance, String methodName, ServiceReference reference, Object service) throws NoSuchMethodException {
-        Class currentClazz = instance.getClass();
-        boolean done = false;
-        while (!done && currentClazz != null) {
-            Class trackedServiceName;
-            synchronized (this) {
-                trackedServiceName = m_trackedServiceName;
-            }
-            done = invokeMethod(instance, currentClazz, methodName,
-                new Class[][] {{ServiceReference.class, trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {trackedServiceName}, {Object.class}, {}, {Map.class, trackedServiceName}},
-                new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}, {new ServicePropertiesMap(reference), service}},
-                false);
-            if (!done) {
-                currentClazz = currentClazz.getSuperclass();
-            }
-        }
-        if (!done && currentClazz == null) {
-            throw new NoSuchMethodException(methodName);
-        }
-    }
-
-    private boolean invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) {
-        Method m = null;
-        for (int i = 0; i < signatures.length; i++) {
-            Class[] signature = signatures[i];
-            try {
-                m = clazz.getDeclaredMethod(name, signature);
-                if (!(isSuper && Modifier.isPrivate(m.getModifiers()))) {
-                    m.setAccessible(true);
-                    try {
-                        m.invoke(object, parameters[i]);
-                    }
-                    catch (InvocationTargetException e) {
-                        m_logger.log(Logger.LOG_ERROR, "Exception while invoking method " + m + ".", e);
-                    }
-                    // we did find and invoke the method, so we return true
-                    return true;
-                }
-            }
-            catch (NoSuchMethodException e) {
-                // ignore this and keep looking
-            }
-            catch (Exception e) {
-                // could not even try to invoke the method
-                m_logger.log(Logger.LOG_ERROR, "Exception while trying to invoke method " + m + ".", e);
-            }
-        }
-        return false;
     }
     
     // ----- CREATION
@@ -651,7 +590,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
      */
     public synchronized ServiceDependency setRequired(boolean required) {
         ensureNotActive();
-        m_isRequired = required;
+        setIsRequired(required);
         return this;
     }
     

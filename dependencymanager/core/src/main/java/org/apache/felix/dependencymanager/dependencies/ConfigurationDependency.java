@@ -118,7 +118,7 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 	public void updated(Dictionary settings) throws ConfigurationException {
 		// if non-null settings come in, we have to instantiate the service and
 		// apply these settings
-		m_service.initService(); /// <<< CHANGES THE STATE, WHEN IT SHOULD NOT (YET) DO THAT (we should not use m_serviceInstance to determine the state but use a flag var instead)
+		m_service.initService();
 		Object service = m_service.getService();
 				
 		Dictionary oldSettings = null; 
