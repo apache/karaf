@@ -148,7 +148,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         try
         {
             StringWriter w = new StringWriter();
-            writeJSON( w, null, null, true );
+            writeJSON( w, null, null, null, true );
             String jsonString = w.toString();
             JSONObject json = new JSONObject( jsonString );
 
@@ -224,7 +224,8 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         if ( reqInfo.extension.equals("json")  )
         {
             final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
-            this.renderJSON(response, reqInfo.bundle, pluginRoot);
+            final String servicesRoot = getServicesRoot( request );
+            this.renderJSON(response, reqInfo.bundle, pluginRoot, servicesRoot);
 
             // nothing more to do
             return;
@@ -232,7 +233,6 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
         super.doGet( request, response );
     }
-
 
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
@@ -324,14 +324,20 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 // we ignore this
             }
             final String pluginRoot = ( String ) req.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
-            this.renderJSON(resp, null, pluginRoot);
+            final String servicesRoot = getServicesRoot( req );
+            this.renderJSON(resp, null, pluginRoot, servicesRoot);
         }
         else
         {
             super.doPost( req, resp );
         }
     }
-
+    
+    private String getServicesRoot(HttpServletRequest request)
+    {
+        return ( ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT ) ) +
+            "/" + ServicesServlet.LABEL + "/";
+    }
 
     private Bundle getBundle( String pathInfo )
     {
@@ -418,7 +424,8 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             Util.startScript( pw );
             pw.print( "renderBundles(");
             final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
-            writeJSON(pw, reqInfo.bundle, pluginRoot );
+            final String servicesRoot = getServicesRoot ( request );
+            writeJSON(pw, reqInfo.bundle, pluginRoot, servicesRoot );
             pw.println(");" );
             Util.endScript( pw );
         }
@@ -437,24 +444,26 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         pw.println( "</form></div");
     }
 
-    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot ) throws IOException
+    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot )
+        throws IOException
     {
         response.setContentType( "application/json" );
         response.setCharacterEncoding( "UTF-8" );
 
         final PrintWriter pw = response.getWriter();
-        writeJSON(pw, bundle, pluginRoot);
+        writeJSON(pw, bundle, pluginRoot, servicesRoot);
     }
 
 
-    private void writeJSON( final PrintWriter pw, final Bundle bundle, final String pluginRoot ) throws IOException
+    private void writeJSON( final PrintWriter pw, final Bundle bundle, final String pluginRoot, final String servicesRoot )
+        throws IOException
     {
-        writeJSON( pw, bundle, pluginRoot, false );
+        writeJSON( pw, bundle, pluginRoot, servicesRoot, false );
     }
 
 
     private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot,
-        final boolean fullDetails ) throws IOException
+        final String servicesRoot, final boolean fullDetails ) throws IOException
     {
         final Bundle[] allBundles = this.getBundles();
         final String statusLine = this.getStatusLine(allBundles);
@@ -477,7 +486,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
             for ( int i = 0; i < bundles.length; i++ )
             {
-                bundleInfo( jw, bundles[i], fullDetails || bundle != null, pluginRoot );
+                bundleInfo( jw, bundles[i], fullDetails || bundle != null, pluginRoot, servicesRoot );
             }
 
             jw.endArray();
@@ -552,7 +561,8 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         return buffer.toString();
     }
 
-    private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details, final String pluginRoot ) throws JSONException
+    private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details, final String pluginRoot, final String servicesRoot )
+        throws JSONException
     {
         jw.object();
         jw.key( "id" );
@@ -587,7 +597,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
         if ( details )
         {
-            bundleDetails( jw, bundle, pluginRoot );
+            bundleDetails( jw, bundle, pluginRoot, servicesRoot );
         }
 
         jw.endObject();
@@ -669,7 +679,8 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     }
 
 
-    private void bundleDetails( JSONWriter jw, Bundle bundle, final String pluginRoot ) throws JSONException
+    private void bundleDetails( JSONWriter jw, Bundle bundle, final String pluginRoot, final String servicesRoot)
+        throws JSONException
     {
         Dictionary headers = bundle.getHeaders();
 
@@ -705,7 +716,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             listImportExport( jw, bundle, pluginRoot );
         }
 
-        listServices( jw, bundle );
+        listServices( jw, bundle, servicesRoot );
 
         listHeaders( jw, bundle );
 
@@ -944,9 +955,23 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             }
         }
     }
+    
+    private String getServiceID(ServiceReference ref, final String servicesRoot) {
+        String id = ref.getProperty( Constants.SERVICE_ID ).toString();
+        StringBuffer val = new StringBuffer();
+        
+        if ( servicesRoot != null ) {
+            val.append( "<a href='" ).append( servicesRoot ).append( id ).append( "'>" );
+            val.append( id );
+            val.append( "</a>" );
+            return val.toString();
+        } else {
+            return id;
+        }
+    }
 
 
-    private void listServices( JSONWriter jw, Bundle bundle ) throws JSONException
+    private void listServices( JSONWriter jw, Bundle bundle, final String servicesRoot ) throws JSONException
     {
         ServiceReference[] refs = bundle.getRegisteredServices();
         if ( refs == null || refs.length == 0 )
@@ -956,7 +981,9 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
         for ( int i = 0; i < refs.length; i++ )
         {
-            String key = "Service ID " + refs[i].getProperty( Constants.SERVICE_ID );
+            
+            
+            String key = "Service ID " + getServiceID( refs[i], servicesRoot );
 
             JSONArray val = new JSONArray();
 

@@ -24,10 +24,8 @@ import java.io.Writer;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
@@ -46,10 +44,6 @@ import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 
@@ -189,7 +183,6 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     private void printConfigurationStatus( ConfigurationWriter pw )
     {
         this.printSystemProperties( pw );
-        this.printServices( pw );
         this.printThreads( pw );
 
         for ( Iterator cpi = getConfigurationPrinters().iterator(); cpi.hasNext(); )
@@ -277,60 +270,6 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     //    }
 
 
-    private void printServices( ConfigurationWriter pw )
-    {
-        pw.title(  "Services" );
-
-        // get the list of services sorted by service ID (ascending)
-        SortedMap srMap = new TreeMap();
-        try
-        {
-            ServiceReference[] srs = getBundleContext().getAllServiceReferences( null, null );
-            for ( int i = 0; i < srs.length; i++ )
-            {
-                srMap.put( srs[i].getProperty( Constants.SERVICE_ID ), srs[i] );
-            }
-        }
-        catch ( InvalidSyntaxException ise )
-        {
-            // should handle, for now just print nothing, actually this is not
-            // expected
-        }
-
-        for ( Iterator si = srMap.values().iterator(); si.hasNext(); )
-        {
-            ServiceReference sr = ( ServiceReference ) si.next();
-
-            infoLine( pw, null, String.valueOf( sr.getProperty( Constants.SERVICE_ID ) ), sr
-                .getProperty( Constants.OBJECTCLASS ) );
-            infoLine( pw, "  ", "Bundle", this.getBundleString( sr.getBundle() ) );
-
-            Bundle[] users = sr.getUsingBundles();
-            if ( users != null && users.length > 0 )
-            {
-                for ( int i = 0; i < users.length; i++ )
-                {
-                    infoLine( pw, "  ", "Using Bundle", this.getBundleString( users[i] ) );
-                }
-            }
-
-            String[] keys = sr.getPropertyKeys();
-            Arrays.sort( keys );
-            for ( int i = 0; i < keys.length; i++ )
-            {
-                if ( !Constants.SERVICE_ID.equals( keys[i] ) && !Constants.OBJECTCLASS.equals( keys[i] ) )
-                {
-                    infoLine( pw, "  ", keys[i], sr.getProperty( keys[i] ) );
-                }
-            }
-
-            pw.println();
-        }
-
-        pw.end();
-    }
-
-
     private void printConfigurationPrinter( ConfigurationWriter pw, ConfigurationPrinter cp )
     {
         pw.title(  cp.getTitle() );
@@ -349,79 +288,37 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         if ( label != null )
         {
             pw.print( label );
-            pw.print( '=' );
+            pw.print( " = " );
         }
 
-        printObject( pw, value );
+        pw.print( asString( value ) );
 
         pw.println();
     }
 
 
-    private static void printObject( PrintWriter pw, Object value )
+    private static String asString( final Object value )
     {
         if ( value == null )
         {
-            pw.print( "null" );
+            return "n/a";
         }
         else if ( value.getClass().isArray() )
         {
-            printArray( pw, ( Object[] ) value );
-        }
-        else
-        {
-            pw.print( value );
-        }
-    }
-
-
-    private static void printArray( PrintWriter pw, Object[] values )
-    {
-        pw.print( '[' );
-        if ( values != null && values.length > 0 )
-        {
-            for ( int i = 0; i < values.length; i++ )
+            StringBuffer dest = new StringBuffer();
+            Object[] values = ( Object[] ) value;
+            for ( int j = 0; j < values.length; j++ )
             {
-                if ( i > 0 )
-                {
-                    pw.print( ", " );
-                }
-                printObject( pw, values[i] );
+                if ( j > 0 )
+                    dest.append( ", " );
+                dest.append( values[j] );
             }
-        }
-        pw.print( ']' );
-    }
-
-
-    private String getBundleString( Bundle bundle )
-    {
-        StringBuffer buf = new StringBuffer();
-
-        if ( bundle.getSymbolicName() != null )
-        {
-            buf.append( bundle.getSymbolicName() );
-        }
-        else if ( bundle.getLocation() != null )
-        {
-            buf.append( bundle.getLocation() );
+            return dest.toString();
         }
         else
         {
-            buf.append( bundle.getBundleId() );
+            return value.toString();
         }
-
-        Dictionary headers = bundle.getHeaders();
-        if ( headers.get( Constants.BUNDLE_VERSION ) != null )
-        {
-            buf.append( " (" ).append( headers.get( Constants.BUNDLE_VERSION ) ).append( ')' );
-        }
-
-        if ( headers.get( Constants.BUNDLE_NAME ) != null )
-        {
-            buf.append( " \"" ).append( headers.get( Constants.BUNDLE_NAME ) ).append( '"' );
-        }
-
-        return buf.toString();
     }
 
 
