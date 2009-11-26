@@ -122,7 +122,9 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
 		Filter filter = m_filter;
 		if (filter != null) {
 			Dictionary headers = bundle.getHeaders();
+//			System.out.println("HEADERS: " + headers);
 			if (!m_filter.match(headers)) {
+			    System.out.println("NO MATCH: " + bundle);
 				return null;
 			}
 		}
@@ -133,13 +135,12 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
 		System.out.println("ADDED " + bundle + " " + event);
         if (makeAvailable()) {
             m_service.dependencyAvailable(this);
+            if (!isRequired()) {
+                invokeAdded(bundle);
+            }
         }
         else {
             m_service.dependencyChanged(this);
-        }
-        // try to invoke callback, if specified, but only for optional dependencies
-        // because callbacks for required dependencies are handled differently
-        if (!isRequired()) {
             invokeAdded(bundle);
         }
 	}
@@ -148,7 +149,7 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
 		System.out.println("MODIFIED " + bundle + " " + event);
         m_service.dependencyChanged(this);
         // only invoke the changed callback if the service itself is "active"
-        if (((ServiceImpl) m_service).isRegistered()) {
+        if (m_service.isRegistered()) {
             invokeChanged(bundle);
         }
 	}
@@ -157,10 +158,12 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
 		System.out.println("REMOVED " + bundle + " " + event);
         if (makeUnavailable()) {
             m_service.dependencyUnavailable(this);
+            if (!isRequired()) {
+                invokeRemoved(bundle);
+            }
         }
-        // try to invoke callback, if specified, but only for optional dependencies
-        // because callbacks for required dependencies are handled differently
-        if (!isRequired()) {
+        else {
+            m_service.dependencyChanged(this);
             invokeRemoved(bundle);
         }
 	}
@@ -188,20 +191,16 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
     public void invokeAdded(Bundle serviceInstance) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackAdded != null)) {
-                invokeCallbackMethod(callbackInstances, m_callbackAdded, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackAdded, serviceInstance);
         }
     }
 
     public void invokeChanged(Bundle serviceInstance) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackChanged != null)) {
-//                if (m_reference == null) {
-//                    Thread.dumpStack();
-//                }
-                invokeCallbackMethod(callbackInstances, m_callbackChanged, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackChanged, serviceInstance);
         }
     }
-
     
     public void invokeRemoved() {
         invokeRemoved(m_bundleInstance);
@@ -210,15 +209,9 @@ public class BundleDependency implements Dependency, BundleTrackerCustomizer, Se
     public void invokeRemoved(Bundle serviceInstance) {
         Object[] callbackInstances = getCallbackInstances();
         if ((callbackInstances != null) && (m_callbackRemoved != null)) {
-//                if (m_reference == null) {
-//                    Thread.dumpStack();
-//                }
-                invokeCallbackMethod(callbackInstances, m_callbackRemoved, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackRemoved, serviceInstance);
         }
     }
-    
-
-    
     
     private void invokeCallbackMethod(Object[] instances, String methodName, Object service) {
         for (int i = 0; i < instances.length; i++) {

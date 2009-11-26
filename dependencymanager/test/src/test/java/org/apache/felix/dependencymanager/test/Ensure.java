@@ -26,8 +26,16 @@ import junit.framework.Assert;
  * can also have threads wait until you arrive at a certain step.
  */
 public class Ensure {
+    private static final boolean DEBUG = true;
+    private static long INSTANCE = 0;
     private static final int RESOLUTION = 100;
-    int step = 1;
+    int step = 0;
+    
+    public Ensure() {
+        if (DEBUG) {
+            INSTANCE++;
+        }
+    }
 
     /**
      * Mark this point as step <code>nr</code>.
@@ -35,8 +43,11 @@ public class Ensure {
      * @param nr the step we are in
      */
     public synchronized void step(int nr) {
-        Assert.assertEquals(nr, step);
         step++;
+        Assert.assertEquals(nr, step);
+        if (DEBUG) {
+            System.out.println("[Ensure " + INSTANCE + "] step " + step);
+        }
         notifyAll();
     }
 
@@ -51,15 +62,21 @@ public class Ensure {
      */
     public synchronized void waitForStep(int nr, int timeout) {
         final int initialTimeout = timeout;
-        while (step <= nr && timeout > 0) {
+        if (DEBUG) {
+            System.out.println("[Ensure " + INSTANCE + "] waiting for step " + nr);
+        }
+        while (step < nr && timeout > 0) {
             try {
                 wait(RESOLUTION);
                 timeout -= RESOLUTION;
             }
             catch (InterruptedException e) {}
         }
-        if (step <= nr) {
+        if (step < nr) {
             throw new IllegalStateException("Timed out waiting for " + initialTimeout + " ms for step " + nr + ", we are still at step " + step);
+        }
+        if (DEBUG) {
+            System.out.println("[Ensure " + INSTANCE + "] arrived at step " + nr);
         }
     }
 }
