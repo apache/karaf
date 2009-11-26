@@ -50,10 +50,20 @@ public class BootstrapLogManager {
             log = new File(filename);
         } else {
             // Make a best effort to log to the default file appender configured for log4j
+            FileInputStream fis = null;
             try {
-                props.load(new FileInputStream("../etc/org.ops4j.pax.logging.cfg"));
+                fis = new FileInputStream("../etc/org.ops4j.pax.logging.cfg");
+                props.load(fis);
             } catch (IOException e) {
                 props.setProperty("log4j.appender.out.file", "${karaf.base}/data/log/karaf.log");
+            } finally {
+                if (fis != null) { 
+                    try {
+                        fis.close(); 
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+                }
             }
             filename = Main.substVars(props.getProperty("log4j.appender.out.file"),"log4j.appender.out.file", null, null);
             log = new File(filename);
@@ -87,7 +97,11 @@ public class BootstrapLogManager {
 
         private void open (File logfile, boolean append) throws IOException {
             if (!logfile.getParentFile().exists()) {
-                logfile.getParentFile().mkdirs();
+                try {
+                    logfile.getParentFile().mkdirs();
+                } catch (SecurityException se) {
+                    throw new IOException(se.getMessage());
+                }
             }
             FileOutputStream fout = new FileOutputStream(logfile, append);
             BufferedOutputStream out = new BufferedOutputStream(fout);
