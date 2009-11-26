@@ -41,7 +41,7 @@ public class CoreTest extends AbstractIntegrationTest {
 
     @Test
     public void testHelp() throws Exception {
-        Thread.sleep(5000);
+        Thread.sleep(10000);
 
         CommandProcessor cp = getOsgiService(CommandProcessor.class);
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
@@ -51,7 +51,7 @@ public class CoreTest extends AbstractIntegrationTest {
 
     @Test
     public void testInstallCommand() throws Exception {
-        Thread.sleep(5000);
+        Thread.sleep(12000);
 
         CommandProcessor cp = getOsgiService(CommandProcessor.class);
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
