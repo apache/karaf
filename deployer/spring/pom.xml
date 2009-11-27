@@ -21,8 +21,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf</groupId>
-        <artifactId>karaf</artifactId>
+        <groupId>org.apache.felix.karaf.deployer</groupId>
+        <artifactId>deployer</artifactId>
         <version>1.3.0-SNAPSHOT</version>
     </parent>
 
