@@ -53,6 +53,8 @@ For an Apache Felix Karaf binary distribution, please read
 RELEASE-NOTES for installation instructions and list of supported 
 and unsupported features.
 
+The PDF manual is the right place to find any information about Karaf.
+
 Alternatively, you can also find out how to get started here:
     http://felix.apache.org/site/apache-felix-karaf.html
 
