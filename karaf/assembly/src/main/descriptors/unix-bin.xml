@@ -61,6 +61,11 @@
 
         <!-- Copy over the examples -->
         <fileSet>
+            <directory>target/classes/demos</directory>
+            <outputDirectory>/demos/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
             <directory>../demos</directory>
             <outputDirectory>/demos/</outputDirectory>
             <lineEnding>unix</lineEnding>

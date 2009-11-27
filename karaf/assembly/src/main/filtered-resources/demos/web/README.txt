@@ -79,14 +79,15 @@ try executing the "features:list" command as follows:
 
 In this case, you should see output similar to the following:
 
-[uninstalled] [2.5.6.SEC01          ] spring     karaf-${version}
-[uninstalled] [1.2.0                ] spring-dm  karaf-${version}
-[uninstalled] [1.1.0.1-fuse-SNAPSHOT] wrapper    karaf-${version}
-[uninstalled] [1.1.0.1-fuse-SNAPSHOT] obr        karaf-${version}
-[uninstalled] [1.1.0.1-fuse-SNAPSHOT] http       karaf-${version}
-[uninstalled] [1.1.0.1-fuse-SNAPSHOT] webconsole karaf-${version}
-[installed  ] [1.1.0.1-fuse-SNAPSHOT] ssh        karaf-${version}
-[installed  ] [1.1.0.1-fuse-SNAPSHOT] management karaf-${version}
+State         Version       Name       Repository
+[uninstalled] [2.5.6.SEC01] spring     karaf-${version}
+[uninstalled] [1.2.0      ] spring-dm  karaf-${version}
+[uninstalled] [${pom.version}] wrapper    karaf-${pom.version}
+[uninstalled] [${pom.version}] obr        karaf-${pom.version}
+[uninstalled] [${pom.version}] http       karaf-${pom.version}
+[uninstalled] [${pom.version}] webconsole karaf-${pom.version}
+[installed  ] [${pom.version}] ssh        karaf-${pom.version}
+[installed  ] [${pom.version}] management karaf-${pom.version}
 
 
 B. Using Your Favorite Web Container
