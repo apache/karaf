@@ -109,6 +109,7 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
                                 }
                             } );
                             project.setBundle( null );
+                            project.rebuildDependencies(monitor);
                         }
                         else if ( isDirty() )
                         {

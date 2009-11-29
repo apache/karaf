@@ -22,6 +22,7 @@ package org.apache.felix.sigil.eclipse.model.project;
 
 import java.util.Collection;
 
+
 import org.apache.felix.sigil.config.IBldProject;
 import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.model.ICompoundModelElement;
@@ -72,6 +73,8 @@ public interface ISigilProjectModel extends ICompoundModelElement
      * @throws CoreException
      */
     void save( IProgressMonitor monitor ) throws CoreException;
+    
+    void rebuildDependencies(IProgressMonitor monitor) throws CoreException;
 
 
     /**

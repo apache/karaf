@@ -109,9 +109,15 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
     {
         SubMonitor progress = SubMonitor.convert( monitor, 100 );
 
-        calculateUses();
-
         bldProjectFile.setContents( buildContents(), IFile.KEEP_HISTORY, progress.newChild( 10 ) );
+        
+        rebuildDependencies(progress.newChild(90));
+    }
+
+    public void rebuildDependencies(IProgressMonitor monitor) throws CoreException {
+        SubMonitor progress = SubMonitor.convert( monitor, 100 );
+        
+        calculateUses();
 
         IRepositoryManager manager = SigilCore.getRepositoryManager( this );
         ResolutionConfig config = new ResolutionConfig( ResolutionConfig.INCLUDE_OPTIONAL );
@@ -130,11 +136,10 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
             throw SigilCore.newCoreException( "Failed to synchronize dependencies", e );
         }
 
-        progress.setWorkRemaining( 40 );
+        progress.setWorkRemaining( 30 );
 
-        SigilCore.rebuildBundleDependencies( this, progress.newChild( 20 ) );
+        SigilCore.rebuildBundleDependencies( this, progress.newChild( 30 ) );
     }
-
 
     /**
      * Returns the project custom preference pool.
