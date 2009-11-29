@@ -283,4 +283,13 @@ public class SvcInstance extends DependencyModel {
         }
     }
 
+    /**
+     * A factory is modified. This should not happen.
+     * @param arg0 the service reference
+     * @see org.apache.felix.ipojo.util.DependencyModel#onServiceModification(org.osgi.framework.ServiceReference)
+     */
+    public void onServiceModification(ServiceReference arg0) {
+        // Nothing to do.
+    }
+
 }

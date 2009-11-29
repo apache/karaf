@@ -290,6 +290,21 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Call bind method with the service reference in parameter (if accepted).
      * @param ref : the service reference of the new service
      */
+    private void callModifyMethod(ServiceReference ref) {
+        if (m_handler.getInstanceManager().getState() > InstanceManager.STOPPED && m_handler.getInstanceManager().getPojoObjects() != null) {
+            for (int i = 0; m_callbacks != null && i < m_callbacks.length; i++) {
+                if (m_callbacks[i].getMethodType() == DependencyCallback.MODIFIED) {
+                    invokeCallback(m_callbacks[i], ref, null); // Call on each created pojo objects.
+                }
+            }
+        }
+    }
+    
+
+    /**
+     * Call 'modify' method with the service reference in parameter (if accepted).
+     * @param ref : the service reference of the modified service
+     */
     private void callBindMethod(ServiceReference ref) {
         // call bind method :
         // if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
@@ -386,6 +401,15 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     public void onServiceArrival(ServiceReference reference) {
         callBindMethod(reference);
         //The method is only called when a new service arrives, or when the used one is replaced.
+    }
+    
+    /**
+     * An already injected service is modified.
+     * @param reference : the modified service reference.
+     * @see org.apache.felix.ipojo.util.DependencyModel#onServiceModification(org.osgi.framework.ServiceReference)
+     */
+    public void onServiceModification(ServiceReference reference) {
+        callModifyMethod(reference);
     }
 
     /**

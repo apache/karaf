@@ -72,6 +72,17 @@ public class Dependency extends OSGiTestCase {
         assertEquals("Check fs2 bind", "bindFS2Inv", bind);
         assertEquals("Check fs2 unbind", "unbindFS2Inv", unbind);
         assertEquals("Check fs2 id", "inv", id);
+        
+        // Check mod
+        dep = getDependencyById(deps, "mod");
+        id = dep.getAttribute("id");
+        bind = getBind(dep);
+        unbind = getUnbind(dep);
+        String mod = getModified(dep);
+        assertEquals("Check mod bind", "bindMod", bind);
+        assertEquals("Check mod unbind", "unbindMod", unbind);
+        assertEquals("Check mod modified", "modifiedMod", mod);
+        assertEquals("Check mod id", "mod", id);
     }
     
     private Element getDependencyById(Element[] deps, String name) {
@@ -103,6 +114,16 @@ public class Dependency extends OSGiTestCase {
         Element[] elem = dep.getElements("callback");
         for (int i = 0; elem != null && i < elem.length; i++) {
             if (elem[i].getAttribute("type").equalsIgnoreCase("unbind")) {
+                return elem[i].getAttribute("method");
+            }
+        }
+        return null;
+    }
+    
+    private String getModified(Element dep) {
+        Element[] elem = dep.getElements("callback");
+        for (int i = 0; elem != null && i < elem.length; i++) {
+            if (elem[i].getAttribute("type").equalsIgnoreCase("modified")) {
                 return elem[i].getAttribute("method");
             }
         }

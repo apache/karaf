@@ -82,6 +82,11 @@ public class Dependency implements HandlerConfiguration {
     private String m_unbind;
     
     /**
+     * Modified method attached to the dependency. 
+     */
+    private String m_modified;
+    
+    /**
      * The dependency binding policy. 
      */
     private int m_policy;
@@ -140,6 +145,12 @@ public class Dependency implements HandlerConfiguration {
             Element cb = new Element("callback", "");
             cb.addAttribute(new Attribute("type", "unbind"));
             cb.addAttribute(new Attribute("method", m_unbind));
+            dep.addElement(cb);
+        }
+        if (m_modified != null) {
+            Element cb = new Element("callback", "");
+            cb.addAttribute(new Attribute("type", "modified"));
+            cb.addAttribute(new Attribute("method", m_modified));
             dep.addElement(cb);
         }
         if (m_comparator != null) {
@@ -256,6 +267,16 @@ public class Dependency implements HandlerConfiguration {
      */
     public Dependency setUnbindMethod(String unbind) {
         m_unbind = unbind;
+        return this;
+    }
+    
+    /**
+     * Sets the dependency modified method.
+     * @param modified the modified method
+     * @return the current dependency object.
+     */
+    public Dependency setModifiedMethod(String modified) {
+        m_modified = modified;
         return this;
     }
     

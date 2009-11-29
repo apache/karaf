@@ -73,6 +73,9 @@ public class MethodCollector extends EmptyVisitor {
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Bind;")) {
             return processBind("bind");
         }
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Modified;")) {
+            return processBind("modified");
+        }
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Unbind;")) {
             return processBind("unbind");
         }
@@ -106,7 +109,7 @@ public class MethodCollector extends EmptyVisitor {
     }
 
     /**
-     * Process @bind & @unbind.
+     * Process @bind, @modified, @unbind.
      * @param type : bind or unbind
      * @return the visitor parsing @bind & @unbind annotations.
      */
@@ -190,7 +193,7 @@ public class MethodCollector extends EmptyVisitor {
         private String m_id;
 
         /**
-         * Bind or Unbind method?
+         * Bind, Modify or Unbind method?
          */
         private String m_type;
         

@@ -2,6 +2,7 @@ package org.apache.felix.ipojo.test.scenarios.component;
 
 import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Modified;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Unbind;
 import org.apache.felix.ipojo.test.scenarios.annotations.service.FooService;
@@ -56,6 +57,21 @@ public class Dependency {
     
     @Unbind(id="inv")
     public void unbindFS2Inv() {
+        
+    }
+    
+    @Bind(id="mod")
+    public void bindMod() {
+        
+    }
+    
+    @Unbind(id="mod")
+    public void unbindMod() {
+        
+    }
+    
+    @Modified(id="mod")
+    public void modifiedMod() {
         
     }
     

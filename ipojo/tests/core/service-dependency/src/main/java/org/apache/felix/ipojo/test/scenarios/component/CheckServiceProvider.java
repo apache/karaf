@@ -28,74 +28,111 @@ import org.osgi.framework.ServiceReference;
 
 public class CheckServiceProvider extends CheckProviderParentClass implements CheckService {
     
-	FooService fs;
-	
-	int simpleB = 0;
-	int objectB = 0;
-	int refB = 0;
-	int bothB = 0;
-	int mapB = 0;
-	int dictB = 0;
+    FooService fs;
+    
+    int simpleB = 0;
+    int objectB = 0;
+    int refB = 0;
+    int bothB = 0;
+    int mapB = 0;
+    int dictB = 0;
+    
+    int modified = 0;
 
-	public boolean check() {
-		return fs.foo();
-	}
+    public boolean check() {
+        return fs.foo();
+    }
 
-	public Properties getProps() {
-		Properties props = new Properties();
-		props.put("voidB", new Integer(simpleB));
-		props.put("objectB", new Integer(objectB));
-		props.put("refB", new Integer(refB));
-		props.put("bothB", new Integer(bothB));
-		props.put("voidU", new Integer(simpleU));
-		props.put("objectU", new Integer(objectU));
-		props.put("refU", new Integer(refU));
-		props.put("bothU", new Integer(bothU));
-		props.put("mapB", new Integer(mapB));
-		props.put("dictB", new Integer(dictB));
-		props.put("mapU", new Integer(mapU));
-		props.put("dictU", new Integer(dictU));
-		if (fs != null) {
-		    props.put("result", new Boolean(fs.foo()));
-		    props.put("boolean", new Boolean(fs.getBoolean()));
-		    props.put("int", new Integer(fs.getInt()));
-		    props.put("long", new Long(fs.getLong()));
-		    props.put("double", new Double(fs.getDouble()));
-		    if(fs.getObject() != null) { props.put("object", fs.getObject()); }
-		}
+    public Properties getProps() {
+        Properties props = new Properties();
+        props.put("voidB", new Integer(simpleB));
+        props.put("objectB", new Integer(objectB));
+        props.put("refB", new Integer(refB));
+        props.put("bothB", new Integer(bothB));
+        props.put("voidU", new Integer(simpleU));
+        props.put("objectU", new Integer(objectU));
+        props.put("refU", new Integer(refU));
+        props.put("bothU", new Integer(bothU));
+        props.put("mapB", new Integer(mapB));
+        props.put("dictB", new Integer(dictB));
+        props.put("mapU", new Integer(mapU));
+        props.put("dictU", new Integer(dictU));
+        if (fs != null) {
+            props.put("result", new Boolean(fs.foo()));
+            props.put("boolean", new Boolean(fs.getBoolean()));
+            props.put("int", new Integer(fs.getInt()));
+            props.put("long", new Long(fs.getLong()));
+            props.put("double", new Double(fs.getDouble()));
+            if(fs.getObject() != null) { props.put("object", fs.getObject()); }
+        }
         props.put("static", CheckService.foo);
         props.put("class", CheckService.class.getName());
-		return props;
-	}
-	
-	private void voidBind() {
-		simpleB++;
-	}
-	
-	protected void objectBind(FooService o) {
-	    if (o == null) {
-	        System.err.println("Bind receive null !!! ");
-	        return;
-	    }
-		if(o != null && o instanceof FooService) { objectB++; }
-	}
-	
-	public void refBind(ServiceReference sr) {
-		if(sr != null) { refB++; }
-	}
-	
+        
+        
+        // Add modified
+        props.put("modified", new Integer(modified));
+        
+        return props;
+    }
+    
+    private void voidBind() {
+        simpleB++;
+    }
+    
+    public void voidModify() {
+        modified ++;
+    }
+    
+    protected void objectBind(FooService o) {
+        if (o == null) {
+            System.err.println("Bind receive null !!! ");
+            return;
+        }
+        if(o != null && o instanceof FooService) { objectB++; }
+    }
+    
+    protected void objectModify(FooService o) {
+        if (o == null) {
+            System.err.println("Bind receive null !!! [" + modified + "]");
+            return;
+        }
+        if(o != null && o instanceof FooService) { modified++; }
+    }
+    
+    public void refBind(ServiceReference sr) {
+        if(sr != null) { refB++; }
+    }
+    
+    public void refModify(ServiceReference sr) {
+        if(sr != null) { modified++; }
+    }
+    
     public void bothBind(FooService o, ServiceReference sr) {
-	    if(sr != null && o != null && o instanceof FooService) { bothB++; }
-	}
+        if(sr != null && o != null && o instanceof FooService) { bothB++; }
+    }
+    
+    public void bothModify(FooService o, ServiceReference sr) {
+        if(sr != null && o != null && o instanceof FooService) { modified++; }
+    }
     
     protected void propertiesDictionaryBind(FooService o, Dictionary props) {
         if(props != null && o != null && o instanceof FooService && props.size() > 0) { dictB++; }
         fs = o;
     }   
     
+    protected void propertiesDictionaryModify(FooService o, Dictionary props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { modified++; }
+        fs = o;
+    }   
+    
     protected void propertiesMapBind(FooService o, Map props) {
         if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapB++; }
         fs = o;
-    }   
+    } 
+    
+    protected void propertiesMapModify(FooService o, Map props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { modified++; }
+        fs = o;
+    } 
 
 }

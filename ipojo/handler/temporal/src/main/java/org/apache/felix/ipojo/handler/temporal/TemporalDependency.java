@@ -159,6 +159,13 @@ public class TemporalDependency extends DependencyModel implements
      * @see org.apache.felix.ipojo.util.DependencyModel#onServiceDeparture(org.osgi.framework.ServiceReference)
      */
     public void onServiceDeparture(ServiceReference arg0) {  }
+    
+    /**
+     * A provider is modified.
+     * @param arg0 leaving service references.
+     * @see org.apache.felix.ipojo.util.DependencyModel#onServiceDeparture(org.osgi.framework.ServiceReference)
+     */
+    public void onServiceModification(ServiceReference arg0) {  }
 
     /**
      * The code require a value of the monitored field. If providers are

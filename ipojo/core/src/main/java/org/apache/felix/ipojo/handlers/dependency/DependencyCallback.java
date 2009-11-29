@@ -45,6 +45,11 @@ public class DependencyCallback extends Callback {
      * Unbind method (called when a service disappears).
      */
     public static final int UNBIND = 1;
+    
+    /**
+     * Updated method (called when a service is modified).
+     */
+    public static final int MODIFIED = 2;
 
     /**
      * Is the method a bind method or an unbind method ?

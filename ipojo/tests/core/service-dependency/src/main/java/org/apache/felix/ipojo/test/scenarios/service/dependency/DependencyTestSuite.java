@@ -26,17 +26,17 @@ import org.osgi.framework.BundleContext;
 
 public class DependencyTestSuite {
 
-	public static Test suite(BundleContext bc) {
-		OSGiTestSuite ots = new OSGiTestSuite("Service Dependencies Test Suite", bc);
-		ots.addTestSuite(SimpleDependencies.class);
-		ots.addTestSuite(OptionalDependencies.class);
-		ots.addTestSuite(OptionalNoNullableDependencies.class);
-		ots.addTestSuite(MultipleDependencies.class);
-		ots.addTestSuite(OptionalMultipleDependencies.class);
-		ots.addTestSuite(DelayedSimpleDependencies.class);
-		ots.addTestSuite(DelayedOptionalDependencies.class);
-		ots.addTestSuite(DelayedMultipleDependencies.class);
-		ots.addTestSuite(DelayedOptionalMultipleDependencies.class);
+    public static Test suite(BundleContext bc) {
+        OSGiTestSuite ots = new OSGiTestSuite("Service Dependencies Test Suite", bc);
+        ots.addTestSuite(SimpleDependencies.class);
+        ots.addTestSuite(OptionalDependencies.class);
+        ots.addTestSuite(OptionalNoNullableDependencies.class);
+        ots.addTestSuite(MultipleDependencies.class);
+        ots.addTestSuite(OptionalMultipleDependencies.class);
+        ots.addTestSuite(DelayedSimpleDependencies.class);
+        ots.addTestSuite(DelayedOptionalDependencies.class);
+        ots.addTestSuite(DelayedMultipleDependencies.class);
+        ots.addTestSuite(DelayedOptionalMultipleDependencies.class);
         ots.addTestSuite(MethodSimpleDependencies.class);
         ots.addTestSuite(MethodOptionalDependencies.class);
         ots.addTestSuite(MethodMultipleDependencies.class);
@@ -51,7 +51,8 @@ public class DependencyTestSuite {
         ots.addTestSuite(VectorMultipleDependencies.class);
         ots.addTestSuite(SetMultipleDependencies.class);
         ots.addTestSuite(CollectionMultipleDependencies.class);
-		return ots;
-	}
+        ots.addTestSuite(ModifyDependencies.class);
+        return ots;
+    }
 
 }

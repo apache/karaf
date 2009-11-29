@@ -494,7 +494,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
                 // The service does not match anymore. Call removedService.
                 manageDeparture(ref, arg1);
             } else {
-                onServiceModification(ref);
+                manageModification(ref);
             }
         } else {
             // The service was not used. Check if it matches.
@@ -585,6 +585,13 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @param ref the leaving service reference.
      */
     public abstract void onServiceDeparture(ServiceReference ref);
+    
+    /**
+     * Concrete dependency callback. 
+     * This method is called when a used service (already injected) is modified.
+     * @param ref the modified service reference.
+     */
+    public abstract void onServiceModification(ServiceReference ref);
 
     /**
      * This method can be override by the concrete dependency to be notified
@@ -592,7 +599,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * This modification is not an arrival or a departure.
      * @param ref the modified service reference.
      */
-    public void onServiceModification(ServiceReference ref) {
+    public void manageModification(ServiceReference ref) {
         if (m_policy == DYNAMIC_PRIORITY_BINDING_POLICY) {
             // Check that the order has changed or not.
             int indexBefore = m_matchingRefs.indexOf(ref);
@@ -603,6 +610,9 @@ public abstract class DependencyModel implements TrackerCustomizer {
                 onServiceArrival(ref);
             }
             
+        } else {
+            // It's a modification...
+            onServiceModification(ref);
         }
     }
 

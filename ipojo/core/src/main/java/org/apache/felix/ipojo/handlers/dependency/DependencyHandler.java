@@ -414,6 +414,8 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                 int methodType = 0;
                 if ("bind".equalsIgnoreCase(type)) {
                     methodType = DependencyCallback.BIND;
+                } else if ("modified".equalsIgnoreCase(type)) {
+                    methodType = DependencyCallback.MODIFIED;
                 } else {
                     methodType = DependencyCallback.UNBIND;
                 }
