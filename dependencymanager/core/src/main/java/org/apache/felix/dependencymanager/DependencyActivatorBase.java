@@ -18,6 +18,7 @@
  */
 package org.apache.felix.dependencymanager;
 
+import java.util.Dictionary;
 import java.util.List;
 
 import org.apache.felix.dependencymanager.dependencies.BundleDependency;
@@ -139,6 +140,10 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      */
     public BundleDependency createBundleDependency() {
         return m_manager.createBundleDependency();
+    }
+
+    public Service createAspectService(Class serviceInterface, String serviceFilter, Object aspectImplementation, Dictionary properties) {
+        return m_manager.createAspectService(serviceInterface, serviceFilter, aspectImplementation, properties);
     }
 
     /**

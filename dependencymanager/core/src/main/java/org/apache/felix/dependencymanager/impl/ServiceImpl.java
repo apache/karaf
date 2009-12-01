@@ -904,23 +904,13 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
                 }
                 catch (Exception e) {
                     m_logger.log(Logger.LOG_ERROR, "Could not obtain instances from the composition manager.", e);
-                    instances = new Object[] { m_serviceInstance };
+                    instances = m_serviceInstance == null ? new Object[] {} : new Object[] { m_serviceInstance };
                 }
             }
         }
         else {
-            instances = new Object[] { m_serviceInstance };
+            instances = m_serviceInstance == null ? new Object[] {} : new Object[] { m_serviceInstance };
         }
-        // TODO remove this test code; there are definitely cases where some instances in this array can be
-        // null, but it's not always harmful (in fact it's not possible to determine that here), this also happens
-        // when you start tracking required dependencies... it's probably safe not to include these null's in the
-        // array in the first place
-//        for (int i = 0; i < instances.length; i++) {
-//            if (instances[i] == null) {
-//                System.out.println("GetCompositionInstances had a null instance at index " + i + " dumping stack:");
-//                Thread.dumpStack();
-//            }
-//        }
         return instances;
     }
 

@@ -20,12 +20,14 @@ package org.apache.felix.dependencymanager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.List;
 
 import org.apache.felix.dependencymanager.dependencies.BundleDependency;
 import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
 import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
 import org.apache.felix.dependencymanager.dependencies.TemporalServiceDependency;
+import org.apache.felix.dependencymanager.impl.AspectImpl;
 import org.apache.felix.dependencymanager.impl.Logger;
 import org.apache.felix.dependencymanager.impl.ServiceImpl;
 import org.osgi.framework.BundleContext;
@@ -108,7 +110,17 @@ public class DependencyManager {
     public BundleDependency createBundleDependency() {
         return new BundleDependency(m_context, m_logger);
     }
-    
+
+    public Service createAspectService(Class serviceInterface, String serviceFilter, Object aspectImplementation, Dictionary properties) {
+        return createService()
+            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, aspectImplementation, properties))
+            .add(createServiceDependency()
+                .setService(serviceInterface, serviceFilter)
+                .setAutoConfig(false)
+                .setCallbacks("added", "removed")
+            );
+    }
+
     /**
      * Returns a list of services.
      * 
@@ -117,5 +129,4 @@ public class DependencyManager {
     public List getServices() {
         return Collections.unmodifiableList(m_services);
     }
-
 }

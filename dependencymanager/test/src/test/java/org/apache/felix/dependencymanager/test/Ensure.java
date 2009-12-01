@@ -79,4 +79,8 @@ public class Ensure {
             System.out.println("[Ensure " + INSTANCE + "] arrived at step " + nr);
         }
     }
+    
+    public static Runnable createRunnableStep(final Ensure ensure, final int nr) {
+        return new Runnable() { public void run() { ensure.step(nr); }};
+    }
 }

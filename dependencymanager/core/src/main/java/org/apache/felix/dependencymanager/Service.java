@@ -36,6 +36,7 @@ public interface Service {
      * @return this service
      */
     public Service add(Dependency dependency);
+    public Service add(List dependencies);
     
     /**
      * Removes a dependency from this service.
