@@ -2003,8 +2003,8 @@ public class ModuleImpl implements IModule
             return null;
         }
 
-        // First, get the bundle ID of the module doing the class loader.
-        long impId = module.getBundle().getBundleId();
+        // First, get the bundle string of the module doing the class loader.
+        String importer = module.getBundle().toString();
 
         // Next, check to see if the module imports the package.
         IWire[] wires = module.getWires();
@@ -2013,22 +2013,22 @@ public class ModuleImpl implements IModule
             if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                 wires[i].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
             {
-                long expId = wires[i].getExporter().getBundle().getBundleId();
+                String exporter = wires[i].getExporter().getBundle().toString();
 
                 StringBuffer sb = new StringBuffer("*** Package '");
                 sb.append(pkgName);
                 sb.append("' is imported by bundle ");
-                sb.append(impId);
+                sb.append(importer);
                 sb.append(" from bundle ");
-                sb.append(expId);
+                sb.append(exporter);
                 sb.append(", but the exported package from bundle ");
-                sb.append(expId);
+                sb.append(exporter);
                 sb.append(" does not contain the requested class '");
                 sb.append(name);
                 sb.append("'. Please verify that the class name is correct in the importing bundle ");
-                sb.append(impId);
+                sb.append(importer);
                 sb.append(" and/or that the exported package is correctly bundled in ");
-                sb.append(expId);
+                sb.append(exporter);
                 sb.append(". ***");
 
                 return sb.toString();
@@ -2097,73 +2097,63 @@ public class ModuleImpl implements IModule
         }
 */
         // Next, check to see if the package is dynamically imported by the module.
-/* TODO: RESOLVER: Need to fix this too.
-        IRequirement[] dynamics = module.getDefinition().getDynamicRequirements();
-        for (int dynIdx = 0; dynIdx < dynamics.length; dynIdx++)
+        IRequirement pkgReq = Resolver.findAllowedDynamicImport(module, pkgName);
+        if (pkgReq != null)
         {
-            IRequirement target = createDynamicRequirement(dynamics[dynIdx], pkgName);
-            if (target != null)
+            // Try to see if there is an exporter available.
+            List exports =
+                resolver.getResolvedCandidates(pkgReq);
+            exports = (exports.size() == 0)
+                ? resolver.getUnresolvedCandidates(pkgReq)
+                : exports;
+
+            // An exporter might be available, but it may have attributes
+            // that do not match the importer's required attributes, so
+            // check that case by simply looking for an exporter of the
+            // desired package without any attributes.
+            if (exports.size() == 0)
             {
-                // Try to see if there is an exporter available.
-                PackageSource[] exporters = getResolvedCandidates(target);
-                exporters = (exporters.length == 0)
-                    ? getUnresolvedCandidates(target) : exporters;
-
-                // An exporter might be available, but it may have attributes
-                // that do not match the importer's required attributes, so
-                // check that case by simply looking for an exporter of the
-                // desired package without any attributes.
-                if (exporters.length == 0)
+                try
                 {
-                    try
-                    {
-                        IRequirement pkgReq = new Requirement(
-                            ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-                        exporters = getResolvedCandidates(pkgReq);
-                        exporters = (exporters.length == 0)
-                            ? getUnresolvedCandidates(pkgReq) : exporters;
-                    }
-                    catch (InvalidSyntaxException ex)
-                    {
-                        // This should never happen.
-                    }
+                    IRequirement req = new Requirement(
+                        ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
+                    exports = resolver.getResolvedCandidates(req);
+                    exports = (exports.size() == 0)
+                        ? resolver.getUnresolvedCandidates(req)
+                        : exports;
                 }
-
-                long expId = (exporters.length == 0)
-                    ? -1 : Util.getBundleIdFromModuleId(exporters[0].m_module.getId());
-
-                StringBuffer sb = new StringBuffer("*** Class '");
-                sb.append(name);
-                sb.append("' was not found, but this is likely normal since package '");
-                sb.append(pkgName);
-                sb.append("' is dynamically imported by bundle ");
-                sb.append(impId);
-                sb.append(".");
-                if (exporters.length > 0)
+                catch (InvalidSyntaxException ex)
                 {
-                    try
-                    {
-                        if (!target.isSatisfied(
-                            Util.getSatisfyingCapability(exporters[0].m_module,
-                                new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")"))))
-                        {
-                            sb.append(" However, bundle ");
-                            sb.append(expId);
-                            sb.append(" does export this package with attributes that do not match.");
-                        }
-                    }
-                    catch (InvalidSyntaxException ex)
-                    {
-                        // This should never happen.
-                    }
+                    // This should never happen.
                 }
-                sb.append(" ***");
-
-                return sb.toString();
             }
+
+            String exporter = (exports.size() == 0)
+                ? null : ((ICapability) exports.get(0)).getModule().getBundle().toString();
+
+            StringBuffer sb = new StringBuffer("*** Class '");
+            sb.append(name);
+            sb.append("' was not found, but this is likely normal since package '");
+            sb.append(pkgName);
+            sb.append("' is dynamically imported by bundle ");
+            sb.append(importer);
+            sb.append(".");
+            if (exports.size() > 0)
+            {
+                if (!pkgReq.isSatisfied((ICapability) exports.get(0)))
+                {
+                    sb.append(" However, bundle ");
+                    sb.append(exporter);
+                    sb.append(" does export this package with attributes that do not match.");
+                }
+            }
+            sb.append(" ***");
+
+            return sb.toString();
         }
-*/
-        IRequirement pkgReq = null;
+
+        // Next, check to see if there are any exporters for the package at all.
+        pkgReq = null;
         try
         {
             pkgReq = new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
@@ -2194,23 +2184,23 @@ public class ModuleImpl implements IModule
                 // Ignore
             }
 
-            long expId = ((ICapability) exports.get(0)).getModule().getBundle().getBundleId();
+            String exporter = ((ICapability) exports.get(0)).getModule().getBundle().toString();
 
             StringBuffer sb = new StringBuffer("*** Class '");
             sb.append(name);
             sb.append("' was not found because bundle ");
-            sb.append(impId);
+            sb.append(importer);
             sb.append(" does not import '");
             sb.append(pkgName);
             sb.append("' even though bundle ");
-            sb.append(expId);
+            sb.append(exporter);
             sb.append(" does export it.");
             if (classpath)
             {
                 sb.append(" Additionally, the class is also available from the system class loader. There are two fixes: 1) Add an import for '");
                 sb.append(pkgName);
                 sb.append("' to bundle ");
-                sb.append(impId);
+                sb.append(importer);
                 sb.append("; imports are necessary for each class directly touched by bundle code or indirectly touched, such as super classes if their methods are used. ");
                 sb.append("2) Add package '");
                 sb.append(pkgName);
@@ -2223,7 +2213,7 @@ public class ModuleImpl implements IModule
                 sb.append(" To resolve this issue, add an import for '");
                 sb.append(pkgName);
                 sb.append("' to bundle ");
-                sb.append(impId);
+                sb.append(importer);
                 sb.append(".");
             }
             sb.append(" ***");
@@ -2240,7 +2230,7 @@ public class ModuleImpl implements IModule
             StringBuffer sb = new StringBuffer("*** Package '");
             sb.append(pkgName);
             sb.append("' is not imported by bundle ");
-            sb.append(impId);
+            sb.append(importer);
             sb.append(", nor is there any bundle that exports package '");
             sb.append(pkgName);
             sb.append("'. However, the class '");
@@ -2250,7 +2240,7 @@ public class ModuleImpl implements IModule
             sb.append("' to the '");
             sb.append(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
             sb.append("' property and modify bundle ");
-            sb.append(impId);
+            sb.append(importer);
             sb.append(" to import this package; this causes the system bundle to export class path packages. 2) Add package '");
             sb.append(pkgName);
             sb.append("' to the '");
@@ -2270,7 +2260,7 @@ public class ModuleImpl implements IModule
         StringBuffer sb = new StringBuffer("*** Class '");
         sb.append(name);
         sb.append("' was not found. Bundle ");
-        sb.append(impId);
+        sb.append(importer);
         sb.append(" does not import package '");
         sb.append(pkgName);
         sb.append("', nor is the package exported by any other bundle or available from the system class loader.");
