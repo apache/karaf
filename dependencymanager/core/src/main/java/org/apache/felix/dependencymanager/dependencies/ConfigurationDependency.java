@@ -20,8 +20,12 @@ package org.apache.felix.dependencymanager.dependencies;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.felix.dependencymanager.Dependency;
 import org.apache.felix.dependencymanager.DependencyService;
@@ -57,11 +61,13 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 	private BundleContext m_context;
 	private String m_pid;
 	private ServiceRegistration m_registration;
-	private volatile DependencyService m_service;
+    protected List m_services = new ArrayList();
 	private Dictionary m_settings;
 	private boolean m_propagate;
 	private final Logger m_logger;
     private String m_callback;
+    private boolean m_isStarted;
+	private final Set m_updateInvokedCache = new HashSet();
 	
 	public ConfigurationDependency(BundleContext context, Logger logger) {
 		m_context = context;
@@ -99,15 +105,34 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 	}
 	
 	public void start(DependencyService service) {
-		m_service = service;
-		Properties props = new Properties();
-		props.put(Constants.SERVICE_PID, m_pid);
-		m_registration = m_context.registerService(ManagedService.class.getName(), this, props);
+	    boolean needsStarting = false;
+	    synchronized (this) {
+	        m_services.add(service);
+	        if (!m_isStarted) {
+	            m_isStarted = true;
+                needsStarting = true;
+	        }
+	    }
+	    if (needsStarting) {
+	        Properties props = new Properties();
+	        props.put(Constants.SERVICE_PID, m_pid);
+	        m_registration = m_context.registerService(ManagedService.class.getName(), this, props);
+	    }
 	}
 
 	public void stop(DependencyService service) {
-		m_registration.unregister();
-		m_service = null;
+        boolean needsStopping = false;
+        synchronized (this) {
+            if (m_services.size() == 1 && m_services.contains(service)) {
+                m_isStarted = false;
+                needsStopping = true;
+            }
+        }
+        if (needsStopping) {
+            m_registration.unregister();
+            m_registration = null;
+            m_services.remove(service);
+        }
 	}
 
         public Dependency setCallback(String callback) {
@@ -116,36 +141,71 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 	}
 
 	public void updated(Dictionary settings) throws ConfigurationException {
-		// if non-null settings come in, we have to instantiate the service and
-		// apply these settings
-		m_service.initService();
-		Object service = m_service.getService();
-				
-		Dictionary oldSettings = null; 
+	    m_updateInvokedCache.clear();
+	    
+	    Dictionary oldSettings = null; 
+	    synchronized (this) {
+	        oldSettings = m_settings;
+	    }
+	    
+	    if (oldSettings == null && settings == null) {
+	        // CM has started but our configuration is not still present in the CM database: ignore
+	        return;
+	    }
+
+	    Object[] services = m_services.toArray();
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            // if non-null settings come in, we have to instantiate the service and
+            // apply these settings
+            ds.initService();
+            Object service = ds.getService();
+
+            if (service != null) {
+                invokeUpdate(ds, service, settings);
+            }
+            else {
+                m_logger.log(Logger.LOG_ERROR, "Service " + ds + " with configuration dependency " + this + " could not be instantiated.");
+                return;
+            }
+        }
+
 		synchronized (this) {
-			oldSettings = m_settings;
+			m_settings = settings;
 		}
 		
-		if (oldSettings == null && settings == null) {
-	       // CM has started but our configuration is not still present in the CM database: ignore
-	       return;
-		}
-		
-        if (service != null) {
-          	String callback = (m_callback == null) ? "updated" : m_callback;
-      	  	Method m;
-			try {
-			  	m = service.getClass().getDeclaredMethod(callback, new Class[] { Dictionary.class });
-			  	m.setAccessible(true);
-			  	// if exception is thrown here, what does that mean for the
-			  	// state of this dependency? how smart do we want to be??
-			  	// it's okay like this, if the new settings contain errors, we
-			  	// remain in the state we were, assuming that any error causes
-			  	// the "old" configuration to stay in effect.
-			  	// CM will log any thrown exceptions.
-			  	m.invoke(service, new Object[] { settings });
-			} 
-      	  	catch (InvocationTargetException e) {
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            // If these settings did not cause a configuration exception, we determine if they have 
+            // caused the dependency state to change
+            if ((oldSettings == null) && (settings != null)) {
+                ds.dependencyAvailable(this);
+            }
+            if ((oldSettings != null) && (settings == null)) {
+                ds.dependencyUnavailable(this);
+            }
+            if ((oldSettings != null) && (settings != null)) {
+                ds.dependencyChanged(this);
+            }
+        }
+	}
+
+    public void invokeUpdate(DependencyService ds, Object service, Dictionary settings) throws ConfigurationException {
+        if (m_updateInvokedCache.add(ds)) {
+            String callback = (m_callback == null) ? "updated" : m_callback;
+            Method m;
+            try {
+                m = service.getClass().getDeclaredMethod(callback, new Class[] { Dictionary.class });
+                m.setAccessible(true);
+                // if exception is thrown here, what does that mean for the
+                // state of this dependency? how smart do we want to be??
+                // it's okay like this, if the new settings contain errors, we
+                // remain in the state we were, assuming that any error causes
+                // the "old" configuration to stay in effect.
+                // CM will log any thrown exceptions.
+                m.invoke(service, new Object[] { settings });
+            } 
+            catch (InvocationTargetException e) {
                 // The component has thrown an exception during it's callback invocation.
                 if (e.getTargetException() instanceof ConfigurationException) {
                     // the callback threw an OSGi ConfigurationException: just re-throw it.
@@ -153,35 +213,15 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
                 }
                 else {
                     // wrap the callback exception into a ConfigurationException.
-                    throw new ConfigurationException(null, "Service " + m_service + " with " + this.toString() + " could not be updated", e.getTargetException());
+                    throw new ConfigurationException(null, "Service " + ds + " with " + this.toString() + " could not be updated", e.getTargetException());
                 }
             }
             catch (Throwable t) {
                 // wrap any other exception as a ConfigurationException.
-                throw new ConfigurationException(null, "Service " + m_service + " with " + this.toString() + " could not be updated", t);
+                throw new ConfigurationException(null, "Service " + ds + " with " + this.toString() + " could not be updated", t);
             }
         }
-        else {
-            m_logger.log(Logger.LOG_ERROR, "Service " + m_service + " with configuration dependency " + this + " could not be instantiated.");
-            return;
-        }
-
-		// If these settings did not cause a configuration exception, we determine if they have 
-		// caused the dependency state to change
-		synchronized (this) {
-			m_settings = settings;
-		}
-
-		if ((oldSettings == null) && (settings != null)) {
-			m_service.dependencyAvailable(this);
-		}
-		if ((oldSettings != null) && (settings == null)) {
-			m_service.dependencyUnavailable(this);
-		}
-		if ((oldSettings != null) && (settings != null)) {
-			m_service.dependencyChanged(this);
-		}
-	}
+    }
 
 	/**
 	 * Sets the <code>service.pid</code> of the configuration you
@@ -205,7 +245,7 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
 	}
 	
 	private void ensureNotActive() {
-	  	if (m_service != null) {
+	  	if (m_services != null && m_services.size() > 0) {
 	  	  throw new IllegalStateException("Cannot modify state while active.");
 	  	}
     }

@@ -361,8 +361,7 @@ public class ServiceDependency extends AbstractDependency implements Dependency,
     public void stop(DependencyService service) {
         boolean needsStopping = false;
         synchronized (this) {
-            m_services.remove(service);
-            if (m_services.size() == 0) {
+            if (m_services.size() == 1 && m_services.contains(service)) {
                 m_isStarted = false;
                 needsStopping = true;
             }
@@ -370,6 +369,7 @@ public class ServiceDependency extends AbstractDependency implements Dependency,
         if (needsStopping) {
             m_tracker.close();
             m_tracker = null;
+            m_services.remove(service);
         }
     }
 
@@ -718,6 +718,7 @@ public class ServiceDependency extends AbstractDependency implements Dependency,
         StringBuilder sb = new StringBuilder();
         sb.append(m_trackedServiceName.getName());
         if (m_trackedServiceFilterUnmodified != null) {
+            sb.append(' ');
             sb.append(m_trackedServiceFilterUnmodified);
         }
         return sb.toString();

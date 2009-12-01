@@ -18,12 +18,13 @@
  */
 package org.apache.felix.dependencymanager.dependencies;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.felix.dependencymanager.Dependency;
 import org.apache.felix.dependencymanager.DependencyService;
 import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.impl.ServiceImpl;
 import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
 import org.apache.felix.dependencymanager.tracker.BundleTracker;
 import org.apache.felix.dependencymanager.tracker.BundleTrackerCustomizer;
@@ -38,7 +39,7 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
 	private boolean m_isStarted;
 	private BundleTracker m_tracker;
 	private int m_stateMask = Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE;
-	private DependencyService m_service;
+	private List m_services = new ArrayList();
 	private boolean m_isAvailable;
 	
     private Object m_callbackInstance;
@@ -66,32 +67,47 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
 
 
     public void start(DependencyService service) {
+        boolean needsStarting = false;
 		synchronized (this) {
-			if (m_isStarted) {
-				throw new IllegalStateException("Dependency was already started." + getName());
-			}
-			m_service = service;
-			m_tracker = new BundleTracker(m_context, m_stateMask, this);
-			m_isStarted = true;
+		    m_services.add(service);
+		    if (!m_isStarted) {
+    			m_tracker = new BundleTracker(m_context, m_stateMask, this);
+    			m_isStarted = true;
+    			needsStarting = true;
+		    }
 		}
-		m_tracker.open();
-		System.out.println("START BD " + m_tracker);
+		if (needsStarting) {
+		    m_tracker.open();
+		}
 	}
 
 	public void stop(DependencyService service) {
+	    boolean needsStopping = false;
         synchronized (this) {
-            if (!m_isStarted) {
-                throw new IllegalStateException("Dependency was not started.");
+            if (m_services.size() == 1 && m_services.contains(service)) {
+                m_isStarted = false;
+                needsStopping = true;
             }
-            m_isStarted = false;
         }
-        m_tracker.close();
-        m_tracker = null;
+        if (needsStopping) {
+            m_tracker.close();
+            m_tracker = null;
+            m_services.remove(service);
+        }            
 	}
 
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+        StringBuilder sb = new StringBuilder();
+        sb.append(m_bundleInstance.getSymbolicName());
+        sb.append(' ');
+        sb.append(m_bundleInstance.getVersion());
+        sb.append(' ');
+        sb.append(Integer.toString(m_stateMask, 2));
+        if (m_filter != null) {
+            sb.append(' ');
+            sb.append(m_filter.toString());
+        }
+        return sb.toString();
 	}
 
 	public int getState() {
@@ -100,12 +116,10 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
 	}
 
 	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
+		return "bundle";
 	}
 
 	public Object addingBundle(Bundle bundle, BundleEvent event) {
-		System.out.println("ADDING " + bundle + " " + event);
 		// if we don't like a bundle, we could reject it here by returning null
 		if (m_bundleId >= 0 && m_bundleId != bundle.getBundleId()) {
 			return null;
@@ -113,9 +127,7 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
 		Filter filter = m_filter;
 		if (filter != null) {
 			Dictionary headers = bundle.getHeaders();
-//			System.out.println("HEADERS: " + headers);
 			if (!m_filter.match(headers)) {
-			    System.out.println("NO MATCH: " + bundle);
 				return null;
 			}
 		}
@@ -123,39 +135,49 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
 	}
 	
 	public void addedBundle(Bundle bundle, BundleEvent event, Object object) {
-		System.out.println("ADDED " + bundle + " " + event);
-        if (makeAvailable()) {
-            m_service.dependencyAvailable(this);
-            if (!isRequired()) {
-                invokeAdded(bundle);
-            }
-        }
-        else {
-            m_service.dependencyChanged(this);
-            invokeAdded(bundle);
-        }
+	    boolean makeAvailable = makeAvailable();
+	    Object[] services = m_services.toArray();
+	    for (int i = 0; i < services.length; i++) {
+	        DependencyService ds = (DependencyService) services[i];
+	        if (makeAvailable) {
+	            ds.dependencyAvailable(this);
+	            if (!isRequired()) {
+	                invokeAdded(ds, bundle);
+	            }
+	        }
+	        else {
+	            ds.dependencyChanged(this);
+	            invokeAdded(ds, bundle);
+	        }
+	    }
 	}
 
 	public void modifiedBundle(Bundle bundle, BundleEvent event, Object object) {
-		System.out.println("MODIFIED " + bundle + " " + event);
-        m_service.dependencyChanged(this);
-        // only invoke the changed callback if the service itself is "active"
-        if (m_service.isRegistered()) {
-            invokeChanged(bundle);
+		Object[] services = m_services.toArray();
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            ds.dependencyChanged(this);
+            if (ds.isRegistered()) {
+                invokeChanged(ds, bundle);
+            }
         }
 	}
 
 	public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-		System.out.println("REMOVED " + bundle + " " + event);
-        if (makeUnavailable()) {
-            m_service.dependencyUnavailable(this);
-            if (!isRequired()) {
-                invokeRemoved(bundle);
+		boolean makeUnavailable = makeUnavailable();
+        Object[] services = m_services.toArray();
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            if (makeUnavailable) {
+                ds.dependencyUnavailable(this);
+                if (!isRequired()) {
+                    invokeRemoved(ds, bundle);
+                }
             }
-        }
-        else {
-            m_service.dependencyChanged(this);
-            invokeRemoved(bundle);
+            else {
+                ds.dependencyChanged(this);
+                invokeRemoved(ds, bundle);
+            }
         }
 	}
 	
@@ -170,18 +192,13 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
     private synchronized boolean makeUnavailable() {
         if ((isAvailable()) && (m_tracker.getTrackingCount() == 0)) {
             m_isAvailable = false;
-
             return true;
         }
         return false;
     }
     
-    public void invokeAdded() {
-        invokeAdded(m_bundleInstance);
-    }
-    
-    public void invokeAdded(Bundle service) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeAdded(DependencyService dependencyService, Bundle service) {
+        Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackAdded != null)) {
             invokeCallbackMethod(callbackInstances, m_callbackAdded, 
                 new Class[][] {{Bundle.class}, {Object.class}, {}},
@@ -190,8 +207,8 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
         }
     }
 
-    public void invokeChanged(Bundle service) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeChanged(DependencyService dependencyService, Bundle service) {
+        Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackChanged != null)) {
             invokeCallbackMethod(callbackInstances, m_callbackChanged, 
                 new Class[][] {{Bundle.class}, {Object.class}, {}},
@@ -200,12 +217,8 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
         }
     }
     
-    public void invokeRemoved() {
-        invokeRemoved(m_bundleInstance);
-    }
-    
-    public void invokeRemoved(Bundle service) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeRemoved(DependencyService dependencyService, Bundle service) {
+        Object[] callbackInstances = getCallbackInstances(dependencyService);
         if ((callbackInstances != null) && (m_callbackRemoved != null)) {
             invokeCallbackMethod(callbackInstances, m_callbackRemoved,
               new Class[][] {{Bundle.class}, {Object.class}, {}},
@@ -213,17 +226,16 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
             );
         }
     }
-    
-    private synchronized Object[] getCallbackInstances() {
-        Object[] callbackInstances = ((ServiceImpl) m_service).getCompositionInstances();
+
+    private synchronized Object[] getCallbackInstances(DependencyService dependencyService) {
         if (m_callbackInstance == null) {
-            return callbackInstances;
+            return dependencyService.getCompositionInstances();
         }
-        Object[] res = new Object[callbackInstances.length + 1];
-        res[0] = m_callbackInstance; //this could also be extended to an array...?
-        System.arraycopy(callbackInstances, 0, res, 1, callbackInstances.length);
-        return res;
+        else {
+            return new Object[] { m_callbackInstance };
+        }
     }
+    
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
      * dependency is added or removed. When you specify callbacks, the auto configuration 

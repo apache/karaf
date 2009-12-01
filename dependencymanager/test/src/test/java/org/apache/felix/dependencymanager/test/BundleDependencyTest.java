@@ -55,7 +55,7 @@ public class BundleDependencyTest {
     }
     
     static class Consumer {
-        private int m_count = 0;
+        private volatile int m_count = 0;
 
         public void add(Bundle b) {
             Assert.assertNotNull("bundle instance must not be null", b);
@@ -71,7 +71,7 @@ public class BundleDependencyTest {
         }
         
         public void doubleCheck() {
-            Assert.assertTrue("all bundles we found should have been removed again", m_count == 0);
+            Assert.assertEquals("all bundles we found should have been removed again", 0, m_count);
         }
     }
     

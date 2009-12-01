@@ -48,6 +48,7 @@ import org.apache.felix.dependencymanager.resources.Resource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ConfigurationException;
 
 /**
  * Service implementation.
@@ -910,6 +911,16 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         else {
             instances = new Object[] { m_serviceInstance };
         }
+        // TODO remove this test code; there are definitely cases where some instances in this array can be
+        // null, but it's not always harmful (in fact it's not possible to determine that here), this also happens
+        // when you start tracking required dependencies... it's probably safe not to include these null's in the
+        // array in the first place
+//        for (int i = 0; i < instances.length; i++) {
+//            if (instances[i] == null) {
+//                System.out.println("GetCompositionInstances had a null instance at index " + i + " dumping stack:");
+//                Thread.dumpStack();
+//            }
+//        }
         return instances;
     }
 
@@ -947,12 +958,13 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
                     else {
                         // for optional services, we do an "ad-hoc" lookup to inject the service if it is
                         // already available even though the tracker has not yet been started
+                        
                         // TODO !!! configureImplementation(sd.getInterface(), sd.lookupService(), sd.getAutoConfigName());
                     }
                 }
                 // for required dependencies, we invoke any callbacks here
                 if (bd.isRequired()) {
-                    bd.invokeAdded();
+                    bd.invokeAdded(this, bd.getBundle());
                 }
             }
             else if (dependency instanceof ResourceDependency) {
@@ -964,12 +976,26 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
                     else {
                         // for optional services, we do an "ad-hoc" lookup to inject the service if it is
                         // already available even though the tracker has not yet been started
+                        
                         // TODO !!! configureImplementation(sd.getInterface(), sd.lookupService(), sd.getAutoConfigName());
                     }
                 }
                 // for required dependencies, we invoke any callbacks here
                 if (bd.isRequired()) {
                     bd.invokeAdded();
+                }
+            }
+            else if (dependency instanceof ConfigurationDependency) {
+                ConfigurationDependency cd = (ConfigurationDependency) dependency;
+                // for configuration dependencies, we invoke updated
+                try {
+                    cd.invokeUpdate(this, this.getService(), cd.getConfiguration());
+                }
+                catch (ConfigurationException e) {
+                    // if this happens, it's definitely an inconsistency
+                    // when sharing configuration dependencies between services, all implementations
+                    // should accept the same configurations
+                    e.printStackTrace();
                 }
             }
         }
