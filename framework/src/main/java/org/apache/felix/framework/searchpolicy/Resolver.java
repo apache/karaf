@@ -206,6 +206,12 @@ public class Resolver
 
     public static IRequirement findAllowedDynamicImport(IModule importer, String pkgName)
     {
+        // We cannot import the default package, so return null in that case.
+        if (pkgName.length() == 0)
+        {
+            return null;
+        }
+
         // If any of the module exports this package, then we cannot
         // attempt to dynamically import it.
         ICapability[] caps = importer.getCapabilities();

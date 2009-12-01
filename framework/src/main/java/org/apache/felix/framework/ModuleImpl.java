@@ -1667,7 +1667,9 @@ public class ModuleImpl implements IModule
                     if (m_logger.getLogLevel() >= Logger.LOG_DEBUG)
                     {
                         msg = diagnoseClassLoadError(m_resolver, ModuleImpl.this, name);
-                        ex = new ClassNotFoundException(msg, cnfe);
+                        ex = (msg != null)
+                            ? new ClassNotFoundException(msg, cnfe)
+                            : ex;
                     }
                     throw ex;
                 }
@@ -1996,6 +1998,10 @@ public class ModuleImpl implements IModule
 
         // Get package name.
         String pkgName = Util.getClassPackage(name);
+        if (pkgName.length() == 0)
+        {
+            return null;
+        }
 
         // First, get the bundle ID of the module doing the class loader.
         long impId = module.getBundle().getBundleId();
