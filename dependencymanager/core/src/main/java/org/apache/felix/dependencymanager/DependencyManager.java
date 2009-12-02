@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.felix.dependencymanager.dependencies.BundleDependency;
 import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
+import org.apache.felix.dependencymanager.dependencies.ResourceDependency;
 import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
 import org.apache.felix.dependencymanager.dependencies.TemporalServiceDependency;
 import org.apache.felix.dependencymanager.impl.AspectImpl;
@@ -102,15 +103,43 @@ public class DependencyManager {
     public TemporalServiceDependency createTemporalServiceDependency() {
         return new TemporalServiceDependency(m_context, m_logger);
     }
-    
+
+    /**
+     * Creates a new configuration dependency.
+     * 
+     * @return
+     */
     public ConfigurationDependency createConfigurationDependency() {
         return new ConfigurationDependency(m_context, m_logger);
     }
     
+    /**
+     * Creates a new bundle dependency.
+     * 
+     * @return
+     */
     public BundleDependency createBundleDependency() {
         return new BundleDependency(m_context, m_logger);
     }
+    
+    /**
+     * Creates a new resource dependency.
+     * 
+     * @return
+     */
+    public ResourceDependency createResourceDependency() {
+        return new ResourceDependency(m_context, m_logger);
+    }
 
+    /**
+     * Creates a new aspect.
+     * 
+     * @param serviceInterface
+     * @param serviceFilter
+     * @param aspectImplementation
+     * @param properties
+     * @return
+     */
     public Service createAspectService(Class serviceInterface, String serviceFilter, Object aspectImplementation, Dictionary properties) {
         return createService()
             .setImplementation(new AspectImpl(serviceInterface, serviceFilter, aspectImplementation, properties))

@@ -18,7 +18,9 @@
  */
 package org.apache.felix.dependencymanager.resources;
 
-/** Service interface for anybody wanting to be notified of changes to resources. */
+/** 
+ * Service interface for anybody wanting to be notified of changes to resources. 
+ */
 public interface ResourceHandler {
 	void added(Resource resource);
 	void changed(Resource resource);

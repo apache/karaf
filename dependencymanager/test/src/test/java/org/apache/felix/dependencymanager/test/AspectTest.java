@@ -48,7 +48,7 @@ public class AspectTest {
     }    
 
     @Test
-    public void testServiceRegistrationAndConsumption(BundleContext context) {
+    public void testDynamicallyAddAndRemoveAspect(BundleContext context) {
         DependencyManager m = new DependencyManager(context, new Logger(context));
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();

@@ -21,8 +21,11 @@ package org.apache.felix.dependencymanager.resources;
 import java.io.IOException;
 import java.io.InputStream;
 
-/** Interface that defines a resource. */
+/** 
+ * Interface that defines a resource. 
+ */
 public interface Resource {
+    public static final String FILTER = "filter";
 	public static final String PATH = "path";
 	public static final String NAME = "name";
 	public static final String REPOSITORY = "repository";
