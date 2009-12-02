@@ -61,6 +61,8 @@ public class BundleRepositoryRender extends BaseWebConsolePlugin
 
     private static final String ALL_CATEGORIES_OPTION = "*";
 
+    private static final String NO_CATEGORIES_OPTION = "---";
+
     private static final String PAR_CATEGORIES = "category";
 
     private String[] repoURLs;
@@ -243,13 +245,21 @@ public class BundleRepositoryRender extends BaseWebConsolePlugin
 
                 // get categories and check whether we should actually
                 // ignore this resource
-                boolean useResource = false;
-                String[] cats = res.getCategories();
-                for ( int ci = 0; cats != null && ci < cats.length; ci++ )
+                boolean useResource;
+                final String[] cats = res.getCategories();
+                if ( cats == null )
                 {
-                    String cat = cats[ci];
-                    categories.add( cat );
-                    useResource |= ( category == null || cat.equals( category ) );
+                    useResource = NO_CATEGORIES_OPTION.equals( category );
+                }
+                else
+                {
+                    useResource = false;
+                    for ( int ci = 0; cats != null && ci < cats.length; ci++ )
+                    {
+                        String cat = cats[ci];
+                        categories.add( cat );
+                        useResource |= ( category == null || cat.equals( category ) );
+                    }
                 }
 
                 if ( useResource )
@@ -319,6 +329,7 @@ public class BundleRepositoryRender extends BaseWebConsolePlugin
             Util.endScript( pw );
             pw.println( "<select class='select' name='__ignoreoption__' onChange='reloadWithCat(this);'>" );
             pw.print( "<option value='" + ALL_CATEGORIES_OPTION + "'>all</option>" );
+            pw.print( "<option value='" + NO_CATEGORIES_OPTION + "'>none</option>" );
             for ( Iterator ci = categories.iterator(); ci.hasNext(); )
             {
                 String category = ( String ) ci.next();
