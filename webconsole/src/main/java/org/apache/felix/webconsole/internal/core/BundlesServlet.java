@@ -332,7 +332,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             super.doPost( req, resp );
         }
     }
-    
+
     private String getServicesRoot(HttpServletRequest request)
     {
         return ( ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT ) ) +
@@ -688,7 +688,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         jw.array();
         keyVal( jw, "Symbolic Name", bundle.getSymbolicName() );
         keyVal( jw, "Version", headers.get( Constants.BUNDLE_VERSION ) );
-        keyVal( jw, "Location", bundle.getLocation() );
+        keyVal( jw, "Bundle Location", bundle.getLocation() );
         keyVal( jw, "Last Modification", new Date( bundle.getLastModified() ) );
 
         String docUrl = ( String ) headers.get( Constants.BUNDLE_DOCURL );
@@ -955,11 +955,11 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             }
         }
     }
-    
+
     private String getServiceID(ServiceReference ref, final String servicesRoot) {
         String id = ref.getProperty( Constants.SERVICE_ID ).toString();
         StringBuffer val = new StringBuffer();
-        
+
         if ( servicesRoot != null ) {
             val.append( "<a href='" ).append( servicesRoot ).append( id ).append( "'>" );
             val.append( id );
@@ -981,8 +981,8 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
         for ( int i = 0; i < refs.length; i++ )
         {
-            
-            
+
+
             String key = "Service ID " + getServiceID( refs[i], servicesRoot );
 
             JSONArray val = new JSONArray();
