@@ -9,15 +9,15 @@
  * or implied. See the License for the specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.dependencies;
+package org.apache.felix.dm.impl.dependencies;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import org.apache.felix.dependencymanager.DependencyActivatorBase;
-import org.apache.felix.dependencymanager.DependencyService;
-import org.apache.felix.dependencymanager.impl.Logger;
+import org.apache.felix.dm.DependencyActivatorBase;
+import org.apache.felix.dm.dependencies.TemporalServiceDependency;
+import org.apache.felix.dm.impl.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -77,7 +77,7 @@ import org.osgi.framework.ServiceReference;
 * 
 * </blockquote>
 */
-public class TemporalServiceDependency extends ServiceDependency implements InvocationHandler {
+public class TemporalServiceDependencyImpl extends ServiceDependencyImpl implements TemporalServiceDependency, InvocationHandler {
     // Max millis to wait for service availability.
     private long m_timeout = 30000;
 
@@ -88,7 +88,7 @@ public class TemporalServiceDependency extends ServiceDependency implements Invo
      * @param logger the logger our Internal logger for logging events.
      * @see DependencyActivatorBase#createTemporalServiceDependency()
      */
-    public TemporalServiceDependency(BundleContext context, Logger logger) {
+    public TemporalServiceDependencyImpl(BundleContext context, Logger logger) {
         super(context, logger);
         super.setRequired(true);
     }
