@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.impl;
+package org.apache.felix.dm.impl;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -33,18 +33,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.felix.dependencymanager.Dependency;
-import org.apache.felix.dependencymanager.DependencyManager;
-import org.apache.felix.dependencymanager.DependencyService;
-import org.apache.felix.dependencymanager.Service;
-import org.apache.felix.dependencymanager.ServiceStateListener;
-import org.apache.felix.dependencymanager.dependencies.BundleDependency;
-import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
-import org.apache.felix.dependencymanager.dependencies.ResourceDependency;
-import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
-import org.apache.felix.dependencymanager.management.ServiceComponent;
-import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
-import org.apache.felix.dependencymanager.resources.Resource;
+import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.dependencies.Dependency;
+import org.apache.felix.dm.impl.dependencies.BundleDependencyImpl;
+import org.apache.felix.dm.impl.dependencies.ConfigurationDependencyImpl;
+import org.apache.felix.dm.impl.dependencies.DependencyActivation;
+import org.apache.felix.dm.impl.dependencies.DependencyService;
+import org.apache.felix.dm.impl.dependencies.ResourceDependencyImpl;
+import org.apache.felix.dm.impl.dependencies.ServiceDependencyImpl;
+import org.apache.felix.dm.management.ServiceComponent;
+import org.apache.felix.dm.management.ServiceComponentDependency;
+import org.apache.felix.dm.resources.Resource;
+import org.apache.felix.dm.service.Service;
+import org.apache.felix.dm.service.ServiceStateListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -235,7 +236,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             m_dependencies.add(dependency);
         }
         if (oldState.isAllRequiredAvailable() || (oldState.isWaitingForRequired() && dependency.isRequired())) {
-        	dependency.start(this);
+        	((DependencyActivation) dependency).start(this);
         }
         synchronized (m_dependencies) {
             newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
@@ -260,7 +261,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             m_dependencies.remove(dependency);
         }
         if (oldState.isAllRequiredAvailable() || (oldState.isWaitingForRequired() && dependency.isRequired())) {
-        	dependency.stop(this);
+        	((DependencyActivation) dependency).stop(this);
         }
         synchronized (m_dependencies) {
             newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
@@ -613,7 +614,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         while (i.hasNext()) {
             Dependency dependency = (Dependency) i.next();
             if (!dependency.isRequired()) {
-                dependency.start(this);
+                ((DependencyActivation) dependency).start(this);
             }
         }
     }
@@ -623,7 +624,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         while (i.hasNext()) {
             Dependency dependency = (Dependency) i.next();
             if (!dependency.isRequired()) {
-                dependency.stop(this);
+                ((DependencyActivation) dependency).stop(this);
             }
         }
     }
@@ -633,7 +634,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         while (i.hasNext()) {
             Dependency dependency = (Dependency) i.next();
             if (dependency.isRequired()) {
-                dependency.start(this);
+                ((DependencyActivation) dependency).start(this);
             }
         }
     }
@@ -643,7 +644,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         while (i.hasNext()) {
             Dependency dependency = (Dependency) i.next();
             if (dependency.isRequired()) {
-                dependency.stop(this);
+                ((DependencyActivation) dependency).stop(this);
             }
         }
     }
@@ -781,8 +782,8 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 		addTo(properties, m_serviceProperties);
 		for (int i = 0; i < m_dependencies.size(); i++) {
 			Dependency d = (Dependency) m_dependencies.get(i);
-			if (d instanceof ConfigurationDependency) {
-				ConfigurationDependency cd = (ConfigurationDependency) d;
+			if (d instanceof ConfigurationDependencyImpl) {
+				ConfigurationDependencyImpl cd = (ConfigurationDependencyImpl) d;
 				if (cd.isPropagated()) {
 					Dictionary dict = cd.getConfiguration();
 					addTo(properties, dict);
@@ -817,16 +818,16 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
     }
 
     private void updateInstance(Dependency dependency) {
-        if (dependency instanceof ServiceDependency) {
-            ServiceDependency sd = (ServiceDependency) dependency;
+        if (dependency instanceof ServiceDependencyImpl) {
+            ServiceDependencyImpl sd = (ServiceDependencyImpl) dependency;
             // update the dependency in the service instance (it will use
             // a null object if necessary)
             if (sd.isAutoConfig()) {
                 configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
             }
         }
-        else if (dependency instanceof ConfigurationDependency) {
-        	ConfigurationDependency cd = (ConfigurationDependency) dependency;
+        else if (dependency instanceof ConfigurationDependencyImpl) {
+        	ConfigurationDependencyImpl cd = (ConfigurationDependencyImpl) dependency;
         	if (cd.isPropagated()) {
         		// change service properties accordingly, but only if the service was already registered
         	    if (m_registration != null) {
@@ -835,14 +836,14 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         	    }
         	}
         }
-        else if (dependency instanceof BundleDependency) {
-            BundleDependency bd = (BundleDependency) dependency;
+        else if (dependency instanceof BundleDependencyImpl) {
+            BundleDependencyImpl bd = (BundleDependencyImpl) dependency;
             if (bd.isAutoConfig()) {
                 configureImplementation(Bundle.class, bd.getBundle()); // TODO support AutoConfigName
             }
         }
-        else if (dependency instanceof ResourceDependency) {
-            ResourceDependency rd = (ResourceDependency) dependency;
+        else if (dependency instanceof ResourceDependencyImpl) {
+            ResourceDependencyImpl rd = (ResourceDependencyImpl) dependency;
             if (rd.isAutoConfig()) {
                 configureImplementation(Resource.class, rd.getResource()); // TODO support AutoConfigName
             }
@@ -922,8 +923,8 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         Iterator i = state.getDependencies().iterator();
         while (i.hasNext()) {
             Dependency dependency = (Dependency) i.next();
-            if (dependency instanceof ServiceDependency) {
-                ServiceDependency sd = (ServiceDependency) dependency;
+            if (dependency instanceof ServiceDependencyImpl) {
+                ServiceDependencyImpl sd = (ServiceDependencyImpl) dependency;
                 if (sd.isAutoConfig()) {
                     if (sd.isRequired()) {
                         configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
@@ -939,8 +940,8 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
                     sd.invokeAdded(this, sd.lookupServiceReference(), sd.lookupService());
                 }
             }
-            else if (dependency instanceof BundleDependency) {
-                BundleDependency bd = (BundleDependency) dependency;
+            else if (dependency instanceof BundleDependencyImpl) {
+                BundleDependencyImpl bd = (BundleDependencyImpl) dependency;
                 if (bd.isAutoConfig()) {
                     if (bd.isRequired()) {
                         configureImplementation(Bundle.class, bd.getBundle()); // TODO AutoConfigName support
@@ -957,8 +958,8 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
                     bd.invokeAdded(this, bd.getBundle());
                 }
             }
-            else if (dependency instanceof ResourceDependency) {
-                ResourceDependency bd = (ResourceDependency) dependency;
+            else if (dependency instanceof ResourceDependencyImpl) {
+                ResourceDependencyImpl bd = (ResourceDependencyImpl) dependency;
                 if (bd.isAutoConfig()) {
                     if (bd.isRequired()) {
                         configureImplementation(Resource.class, bd.getResource()); // TODO AutoConfigName support
@@ -975,8 +976,8 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
                     bd.invokeAdded(this, bd.getResource());
                 }
             }
-            else if (dependency instanceof ConfigurationDependency) {
-                ConfigurationDependency cd = (ConfigurationDependency) dependency;
+            else if (dependency instanceof ConfigurationDependencyImpl) {
+                ConfigurationDependencyImpl cd = (ConfigurationDependencyImpl) dependency;
                 // for configuration dependencies, we invoke updated
                 try {
                     cd.invokeUpdate(this, this.getService(), cd.getConfiguration());
@@ -995,8 +996,8 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         Iterator i = state.getDependencies().iterator();
         while (i.hasNext()) {
             Dependency dependency = (Dependency) i.next();
-            if (dependency instanceof ServiceDependency) {
-                ServiceDependency sd = (ServiceDependency) dependency;
+            if (dependency instanceof ServiceDependencyImpl) {
+                ServiceDependencyImpl sd = (ServiceDependencyImpl) dependency;
                 // for required dependencies, we invoke any callbacks here
                 if (sd.isRequired()) {
                     sd.invokeRemoved(this, sd.lookupServiceReference(), sd.lookupService());
