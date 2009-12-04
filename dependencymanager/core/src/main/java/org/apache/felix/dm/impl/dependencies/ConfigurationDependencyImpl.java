@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.dependencies;
+package org.apache.felix.dm.impl.dependencies;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,10 +27,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.felix.dependencymanager.Dependency;
-import org.apache.felix.dependencymanager.DependencyService;
-import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
+import org.apache.felix.dm.dependencies.ConfigurationDependency;
+import org.apache.felix.dm.dependencies.Dependency;
+import org.apache.felix.dm.dependencies.ServiceDependency;
+import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.management.ServiceComponentDependency;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -57,7 +58,7 @@ import org.osgi.service.cm.ManagedService;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ConfigurationDependency implements Dependency, ManagedService, ServiceComponentDependency {
+public class ConfigurationDependencyImpl implements ConfigurationDependency, ManagedService, ServiceComponentDependency, DependencyActivation {
 	private BundleContext m_context;
 	private String m_pid;
 	private ServiceRegistration m_registration;
@@ -69,7 +70,7 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
     private boolean m_isStarted;
 	private final Set m_updateInvokedCache = new HashSet();
 	
-	public ConfigurationDependency(BundleContext context, Logger logger) {
+	public ConfigurationDependencyImpl(BundleContext context, Logger logger) {
 		m_context = context;
 		m_logger = logger;
 	}
@@ -135,7 +136,7 @@ public class ConfigurationDependency implements Dependency, ManagedService, Serv
         }
 	}
 
-        public Dependency setCallback(String callback) {
+    public ConfigurationDependency setCallback(String callback) {
 		m_callback = callback;
 		return this;
 	}
