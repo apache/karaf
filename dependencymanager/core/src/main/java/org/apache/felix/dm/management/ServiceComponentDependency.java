@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.management;
+package org.apache.felix.dm.management;
 
 /**
  * Describes a service component dependency. They form descriptions of dependencies
