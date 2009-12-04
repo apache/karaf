@@ -584,40 +584,43 @@ class ExtensionManager extends URLStreamHandler implements IContent
         // attempt to load resource default.properties instead.
         URL propURL = ExtensionManager.class.getClassLoader()
             .getResource(DEFAULT_PROPERTIES_FILE_VALUE);
-        InputStream is = null;
-        try
+        if (propURL != null)
         {
-            // Load properties from URL.
-            is = propURL.openConnection().getInputStream();
-            Properties props = new Properties();
-            props.load(is);
-            is.close();
-            // Perform variable substitution for system properties.
-            for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
-            {
-                String name = (String) e.nextElement();
-                props.setProperty(name,
-                    Util.substVars(props.getProperty(name), name, null, props));
-            }
-            // Return system packages property.
-            return props.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
-        }
-        catch (Exception ex)
-        {
-            // Try to close input stream if we have one.
+            InputStream is = null;
             try
             {
-                if (is != null) is.close();
+                // Load properties from URL.
+                is = propURL.openConnection().getInputStream();
+                Properties props = new Properties();
+                props.load(is);
+                is.close();
+                // Perform variable substitution for system properties.
+                for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
+                {
+                    String name = (String) e.nextElement();
+                    props.setProperty(name,
+                        Util.substVars(props.getProperty(name), name, null, props));
+                }
+                // Return system packages property.
+                return props.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
             }
-            catch (IOException ex2)
+            catch (Exception ex)
             {
-                // Nothing we can do.
-            }
+                // Try to close input stream if we have one.
+                try
+                {
+                    if (is != null) is.close();
+                }
+                catch (IOException ex2)
+                {
+                    // Nothing we can do.
+                }
 
-            logger.log(
-                Logger.LOG_ERROR, "Unable to load any configuration properties.", ex);
-            return "";
+                logger.log(
+                    Logger.LOG_ERROR, "Unable to load any configuration properties.", ex);
+            }
         }
+        return "";
     }
 
     class ExtensionManagerModule extends ModuleImpl
