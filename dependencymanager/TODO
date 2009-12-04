@@ -1,6 +1,7 @@
 - compat: 
 
   * Add javadoc; export the compat package using version 2.0.2; import new dm api using version range [3.0.0, 4.0.0)
+  * add suport for ServiceComponent/ServiceComponentDependency classes (but it's only used by the old dm shell).
 
 - core: 
 
