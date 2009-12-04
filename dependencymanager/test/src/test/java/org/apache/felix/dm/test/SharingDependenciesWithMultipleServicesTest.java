@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.test;
+package org.apache.felix.dm.test;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
@@ -27,15 +27,14 @@ import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Properties;
 
-import org.apache.felix.dependencymanager.DependencyManager;
-import org.apache.felix.dependencymanager.Service;
-import org.apache.felix.dependencymanager.dependencies.BundleDependency;
-import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
-import org.apache.felix.dependencymanager.dependencies.ResourceDependency;
-import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
-import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.resources.Resource;
-import org.apache.felix.dependencymanager.resources.ResourceHandler;
+import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.service.Service;
+import org.apache.felix.dm.dependencies.BundleDependency;
+import org.apache.felix.dm.dependencies.ConfigurationDependency;
+import org.apache.felix.dm.dependencies.ResourceDependency;
+import org.apache.felix.dm.dependencies.ServiceDependency;
+import org.apache.felix.dm.resources.Resource;
+import org.apache.felix.dm.resources.ResourceHandler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -64,7 +63,7 @@ public class SharingDependenciesWithMultipleServicesTest {
     
     @Test
     public void testShareServiceDependencyWithMultipleServices(BundleContext context) {
-        DependencyManager m = new DependencyManager(context, new Logger(context));
+        DependencyManager m = new DependencyManager(context);
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
         // create a service provider and consumer
@@ -85,7 +84,7 @@ public class SharingDependenciesWithMultipleServicesTest {
     
     @Test
     public void testShareConfigurationDependencyWithMultipleServices(BundleContext context) {
-        DependencyManager m = new DependencyManager(context, new Logger(context));
+        DependencyManager m = new DependencyManager(context);
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
         // create a service provider and consumer
@@ -110,7 +109,7 @@ public class SharingDependenciesWithMultipleServicesTest {
     
     @Test
     public void testShareBundleDependencyWithMultipleServices(BundleContext context) {
-        DependencyManager m = new DependencyManager(context, new Logger(context));
+        DependencyManager m = new DependencyManager(context);
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
         // create a service provider and consumer
@@ -128,7 +127,7 @@ public class SharingDependenciesWithMultipleServicesTest {
     
     @Test
     public void testShareResourceDependencyWithMultipleServices(BundleContext context) {
-        DependencyManager m = new DependencyManager(context, new Logger(context));
+        DependencyManager m = new DependencyManager(context);
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
         // create a service provider and consumer
@@ -228,7 +227,7 @@ public class SharingDependenciesWithMultipleServicesTest {
             m_ensure.step(m_step);
         }
     }
-    
+
     static class ResourceConsumer {
         private final Ensure m_ensure;
         private int m_step;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.test;
+package org.apache.felix.dm.test;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
@@ -32,11 +32,10 @@ import java.util.Map.Entry;
 
 import junit.framework.Assert;
 
-import org.apache.felix.dependencymanager.DependencyManager;
-import org.apache.felix.dependencymanager.Service;
-import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.resources.Resource;
-import org.apache.felix.dependencymanager.resources.ResourceHandler;
+import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.service.Service;
+import org.apache.felix.dm.resources.Resource;
+import org.apache.felix.dm.resources.ResourceHandler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -61,7 +60,7 @@ public class ResourceDependencyTest {
     
     @Test
     public void testResourceDependency(BundleContext context) {
-        DependencyManager m = new DependencyManager(context, new Logger(context));
+        DependencyManager m = new DependencyManager(context);
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
         // create a service provider and consumer
@@ -139,12 +138,12 @@ public class ResourceDependencyTest {
             synchronized (m_handlers) {
                 m_handlers.put(handler, filter);
             }
-            for (int i = 0; i < m_resources.length; i++) {
-                if (filter.match(m_resources[i].getProperties())) {
-                    handler.added(m_resources[i]);
+                for (int i = 0; i < m_resources.length; i++) {
+                    if (filter.match(m_resources[i].getProperties())) {
+                        handler.added(m_resources[i]);
+                    }
                 }
             }
-        }
 
         public void remove(ServiceReference ref, ResourceHandler handler) {
             Filter filter;
@@ -155,13 +154,13 @@ public class ResourceDependencyTest {
         }
 
         private void removeResources(ResourceHandler handler, Filter filter) {
-            for (int i = 0; i < m_resources.length; i++) {
-                if (filter.match(m_resources[i].getProperties())) {
-                    handler.removed(m_resources[i]);
+                for (int i = 0; i < m_resources.length; i++) {
+                    if (filter.match(m_resources[i].getProperties())) {
+                        handler.removed(m_resources[i]);
+                    }
                 }
             }
-        }
-        
+
         public void destroy() {
             Entry[] handlers;
             synchronized (m_handlers) {

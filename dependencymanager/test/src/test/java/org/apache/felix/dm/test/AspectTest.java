@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.test;
+package org.apache.felix.dm.test;
 
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
@@ -24,9 +24,8 @@ import static org.ops4j.pax.exam.CoreOptions.provision;
 
 import java.util.Properties;
 
-import org.apache.felix.dependencymanager.DependencyManager;
-import org.apache.felix.dependencymanager.Service;
-import org.apache.felix.dependencymanager.impl.Logger;
+import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.service.Service;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -49,7 +48,7 @@ public class AspectTest {
 
     @Test
     public void testDynamicallyAddAndRemoveAspect(BundleContext context) {
-        DependencyManager m = new DependencyManager(context, new Logger(context));
+        DependencyManager m = new DependencyManager(context);
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
         // create a service provider and consumer

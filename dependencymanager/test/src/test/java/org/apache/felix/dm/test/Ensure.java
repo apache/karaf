@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.test;
+package org.apache.felix.dm.test;
 
 import junit.framework.Assert;
 
