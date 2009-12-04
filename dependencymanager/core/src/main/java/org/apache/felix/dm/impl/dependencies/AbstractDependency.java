@@ -1,13 +1,13 @@
-package org.apache.felix.dependencymanager.dependencies;
+package org.apache.felix.dm.impl.dependencies;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.apache.felix.dependencymanager.Dependency;
-import org.apache.felix.dependencymanager.impl.Logger;
+import org.apache.felix.dm.dependencies.Dependency;
+import org.apache.felix.dm.impl.Logger;
 
-public abstract class AbstractDependency implements Dependency {
+public abstract class AbstractDependency implements Dependency, DependencyActivation {
     private boolean m_isRequired;
     protected final Logger m_logger;
 
