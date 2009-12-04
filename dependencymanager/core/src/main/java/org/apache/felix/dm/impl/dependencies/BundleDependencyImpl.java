@@ -16,25 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.dependencies;
+package org.apache.felix.dm.impl.dependencies;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 
-import org.apache.felix.dependencymanager.Dependency;
-import org.apache.felix.dependencymanager.DependencyService;
-import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
-import org.apache.felix.dependencymanager.tracker.BundleTracker;
-import org.apache.felix.dependencymanager.tracker.BundleTrackerCustomizer;
+import org.apache.felix.dm.dependencies.BundleDependency;
+import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.impl.tracker.BundleTracker;
+import org.apache.felix.dm.impl.tracker.BundleTrackerCustomizer;
+import org.apache.felix.dm.management.ServiceComponentDependency;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 
-public class BundleDependency extends AbstractDependency implements Dependency, BundleTrackerCustomizer, ServiceComponentDependency {
+public class BundleDependencyImpl extends AbstractDependency implements BundleDependency, BundleTrackerCustomizer, ServiceComponentDependency {
 	private final BundleContext m_context;
 	private boolean m_isStarted;
 	private BundleTracker m_tracker;
@@ -51,7 +50,7 @@ public class BundleDependency extends AbstractDependency implements Dependency, 
 	private Filter m_filter;
 	private long m_bundleId = -1;
     
-    public BundleDependency(BundleContext context, Logger logger) {
+    public BundleDependencyImpl(BundleContext context, Logger logger) {
         super(logger);
 		m_context = context;
 		m_autoConfig = true;
