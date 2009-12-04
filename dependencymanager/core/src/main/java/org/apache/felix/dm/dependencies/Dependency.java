@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dm.dependencies;
 
 /**
  * Generic dependency for a service. A dependency can be required or not.
@@ -55,22 +55,4 @@ public interface Dependency {
      * @return <code>true</code> if the dependency is instance bound
      */
     public boolean isInstanceBound();
-    
-    /**
-     * Starts tracking the dependency. This activates some implementation
-     * specific mechanism to do the actual tracking. If the tracking discovers
-     * that the dependency becomes available, it should call 
-     * <code>dependencyAvailable()</code> on the service.
-     * 
-     * @param service the service that is associated with this dependency
-     */
-    public void start(DependencyService service);
-    
-    /**
-     * Stops tracking the dependency. This deactivates the tracking. If the
-     * dependency was available, the tracker should call 
-     * <code>dependencyUnavaible()</code> before stopping itself to ensure
-     * that dependencies that aren't "active" are unavailable.
-     */
-    public void stop(DependencyService service);
 }
