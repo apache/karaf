@@ -25,7 +25,10 @@ import static org.ops4j.pax.exam.CoreOptions.provision;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 import junit.framework.Assert;
 
@@ -76,6 +79,7 @@ public class ResourceDependencyTest {
     static class ResourceConsumer {
         private volatile int m_counter;
         public void add(Resource resource) {
+            System.out.println("RC:ADD " + resource);
             m_counter++;
             try {
                 resource.openStream();
@@ -85,6 +89,7 @@ public class ResourceDependencyTest {
             }
         }
         public void remove(Resource resource) {
+            System.out.println("RC:REMOVE " + resource);
             m_counter--;
         }
         public void ensure() {
@@ -95,6 +100,7 @@ public class ResourceDependencyTest {
     static class ResourceProvider {
         private volatile BundleContext m_context;
         private final Ensure m_ensure;
+        private final Map m_handlers = new HashMap();
         private StaticResource[] m_resources = {
             new StaticResource("test1.txt", "/test", "TestRepository") {
                 public InputStream openStream() throws IOException {
@@ -122,32 +128,50 @@ public class ResourceDependencyTest {
         
         public void add(ServiceReference ref, ResourceHandler handler) {
             String filterString = (String) ref.getProperty("filter");
+            Filter filter;
             try {
-                Filter filter = m_context.createFilter(filterString);
-                for (int i = 0; i < m_resources.length; i++) {
-                    if (filter.match(m_resources[i].getProperties())) {
-                        handler.added(m_resources[i]);
-                    }
-                }
+                filter = m_context.createFilter(filterString);
             }
             catch (InvalidSyntaxException e) {
-                e.printStackTrace();
+                Assert.fail("Could not create filter for resource handler: " + e);
+                return;
+            }
+            synchronized (m_handlers) {
+                m_handlers.put(handler, filter);
+            }
+            for (int i = 0; i < m_resources.length; i++) {
+                if (filter.match(m_resources[i].getProperties())) {
+                    handler.added(m_resources[i]);
+                }
             }
         }
 
         public void remove(ServiceReference ref, ResourceHandler handler) {
-            String filterString = (String) ref.getProperty("filter");
-            try {
-                Filter filter = m_context.createFilter(filterString);
-                for (int i = 0; i < m_resources.length; i++) {
-                    if (filter.match(m_resources[i].getProperties())) {
-                        handler.removed(m_resources[i]);
-                    }
+            Filter filter;
+            synchronized (m_handlers) {
+                filter = (Filter) m_handlers.remove(handler);
+            }
+            removeResources(handler, filter);
+        }
+
+        private void removeResources(ResourceHandler handler, Filter filter) {
+            for (int i = 0; i < m_resources.length; i++) {
+                if (filter.match(m_resources[i].getProperties())) {
+                    handler.removed(m_resources[i]);
                 }
             }
-            catch (InvalidSyntaxException e) {
-                e.printStackTrace();
+        }
+        
+        public void destroy() {
+            Entry[] handlers;
+            synchronized (m_handlers) {
+                handlers = (Entry[]) m_handlers.entrySet().toArray(new Entry[m_handlers.size()]);
             }
+            for (int i = 0; i < handlers.length; i++) {
+                removeResources((ResourceHandler) handlers[i].getKey(), (Filter) handlers[i].getValue());
+            }
+            
+            System.out.println("DESTROY..." + m_handlers.size());
         }
     }
     

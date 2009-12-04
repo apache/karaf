@@ -22,6 +22,8 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Properties;
 
@@ -29,14 +31,20 @@ import org.apache.felix.dependencymanager.DependencyManager;
 import org.apache.felix.dependencymanager.Service;
 import org.apache.felix.dependencymanager.dependencies.BundleDependency;
 import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
+import org.apache.felix.dependencymanager.dependencies.ResourceDependency;
 import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
 import org.apache.felix.dependencymanager.impl.Logger;
+import org.apache.felix.dependencymanager.resources.Resource;
+import org.apache.felix.dependencymanager.resources.ResourceHandler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -117,6 +125,27 @@ public class SharingDependenciesWithMultipleServicesTest {
         m.remove(consumer2);
         m.remove(consumer1);
     }
+    
+    @Test
+    public void testShareResourceDependencyWithMultipleServices(BundleContext context) {
+        DependencyManager m = new DependencyManager(context, new Logger(context));
+        // helper class that ensures certain steps get executed in sequence
+        Ensure e = new Ensure();
+        // create a service provider and consumer
+        ResourceDependency dependency = m.createResourceDependency().setFilter("(" + Resource.REPOSITORY + "=TestRepository)").setRequired(true);
+        Service consumer1 = m.createService().setImplementation(new ResourceConsumer(e, 1)).add(dependency);
+        Service consumer2 = m.createService().setImplementation(new ResourceConsumer(e, 2)).add(dependency);
+        Service resourceProvider = m.createService().setImplementation(new ResourceProvider()).add(m.createServiceDependency().setService(ResourceHandler.class).setCallbacks("add", "remove"));;
+        m.add(resourceProvider);
+        m.add(consumer1);
+        e.waitForStep(1, 2000);
+        m.add(consumer2);
+        e.waitForStep(2, 2000);
+        m.remove(consumer2);
+        m.remove(consumer1);
+        m.remove(resourceProvider);
+    }
+    
     
     static interface ServiceInterface {
         public void invoke(Runnable r);
@@ -199,4 +228,93 @@ public class SharingDependenciesWithMultipleServicesTest {
             m_ensure.step(m_step);
         }
     }
+    
+    static class ResourceConsumer {
+        private final Ensure m_ensure;
+        private int m_step;
+
+        public ResourceConsumer(Ensure e, int step) {
+            m_ensure = e;
+            m_step = step;
+        }
+        
+        public void start() {
+            m_ensure.step(m_step);
+        }
+    }
+    
+    static class ResourceProvider {
+        private volatile BundleContext m_context;
+        private StaticResource[] m_resources = {
+            new StaticResource("test1.txt", "/test", "TestRepository"),
+            new StaticResource("test2.txt", "/test", "TestRepository")
+        };
+
+        public void add(ServiceReference ref, ResourceHandler handler) {
+            String filterString = (String) ref.getProperty("filter");
+            try {
+                Filter filter = m_context.createFilter(filterString);
+                for (int i = 0; i < m_resources.length; i++) {
+                    if (filter.match(m_resources[i].getProperties())) {
+                        handler.added(m_resources[i]);
+                    }
+                }
+            }
+            catch (InvalidSyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void remove(ServiceReference ref, ResourceHandler handler) {
+            String filterString = (String) ref.getProperty("filter");
+            try {
+                Filter filter = m_context.createFilter(filterString);
+                for (int i = 0; i < m_resources.length; i++) {
+                    if (filter.match(m_resources[i].getProperties())) {
+                        handler.removed(m_resources[i]);
+                    }
+                }
+            }
+            catch (InvalidSyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    static class StaticResource implements Resource {
+        private String m_name;
+        private String m_path;
+        private String m_repository;
+
+        public StaticResource(String name, String path, String repository) {
+            m_name = name;
+            m_path = path;
+            m_repository = repository;
+        }
+
+        public String getName() {
+            return m_name;
+        }
+
+        public String getPath() {
+            return m_path;
+        }
+
+        public String getRepository() {
+            return m_repository;
+        }
+        
+        public Dictionary getProperties() {
+            return new Properties() {{
+                put(Resource.NAME, getName());
+                put(Resource.PATH, getPath());
+                put(Resource.REPOSITORY, getRepository());
+            }};
+        }
+
+        public InputStream openStream() throws IOException {
+            return null;
+        }
+    }
+
 }

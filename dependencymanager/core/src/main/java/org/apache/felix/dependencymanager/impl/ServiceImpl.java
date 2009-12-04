@@ -972,7 +972,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
                 }
                 // for required dependencies, we invoke any callbacks here
                 if (bd.isRequired()) {
-                    bd.invokeAdded();
+                    bd.invokeAdded(this, bd.getResource());
                 }
             }
             else if (dependency instanceof ConfigurationDependency) {

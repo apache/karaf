@@ -21,12 +21,13 @@ package org.apache.felix.dependencymanager.dependencies;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.dependencymanager.Dependency;
 import org.apache.felix.dependencymanager.DependencyService;
 import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.impl.ServiceImpl;
 import org.apache.felix.dependencymanager.resources.Resource;
 import org.apache.felix.dependencymanager.resources.ResourceHandler;
 import org.osgi.framework.BundleContext;
@@ -44,11 +45,13 @@ public class ResourceDependency implements Dependency, ResourceHandler {
     private boolean m_autoConfig;
     private final Logger m_logger;
     private String m_autoConfigInstance;
-    private DependencyService m_service;
+//    private DependencyService m_service;
+    protected List m_services = new ArrayList();
 	private boolean m_isRequired;
 	private String m_resourceFilter;
 	private Resource m_resource;
 	private Resource m_trackedResource;
+    private boolean m_isStarted;
 
 	
     public ResourceDependency(BundleContext context, Logger logger) {
@@ -70,101 +73,115 @@ public class ResourceDependency implements Dependency, ResourceHandler {
 	}
 
 	public void start(DependencyService service) {
-		m_service = service;
-		Properties props = new Properties();
-		// TODO create constant for this key
-		props.setProperty("filter", m_resourceFilter);
-		m_registration = m_context.registerService(ResourceHandler.class.getName(), this, props);
-		
+	    boolean needsStarting = false;
+	    synchronized (this) {
+	        m_services.add(service);
+	        if (!m_isStarted) {
+	            m_isStarted = true;
+	            needsStarting = true;
+	        }
+	    }
+	    if (needsStarting) {
+	        Properties props = new Properties();
+	        props.setProperty(Resource.FILTER, m_resourceFilter);
+	        m_registration = m_context.registerService(ResourceHandler.class.getName(), this, props);
+	    }
 	}
 
 	public void stop(DependencyService service) {
-		m_registration.unregister();
-		m_registration = null;
+	    boolean needsStopping = false;
+	    synchronized (this) {
+            if (m_services.size() == 1 && m_services.contains(service)) {
+                m_isStarted = false;
+                needsStopping = true;
+                m_services.remove(service);
+            }
+	    }
+	    if (needsStopping) {
+	        m_registration.unregister();
+	        m_registration = null;
+	    }
 	}
 
 	public void added(Resource resource) {
-		System.out.println("RD ADDED " + resource);
 		long counter;
+		Object[] services;
 		synchronized (this) {
 			m_resourceCounter++;
 			counter = m_resourceCounter;
 			m_resource = resource; // TODO this really sucks as a way to track a single resource
+			services = m_services.toArray();
 		}
-        if (counter == 1) {
-            m_service.dependencyAvailable(this);
-        }
-        else {
-            m_service.dependencyChanged(this);
-        }
-        // try to invoke callback, if specified, but only for optional dependencies
-        // because callbacks for required dependencies are handled differently
-        if (!isRequired()) {
-            invokeAdded(resource);
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            if (counter == 1) {
+                ds.dependencyAvailable(this);
+                if (!isRequired()) {
+                    invokeAdded(ds, resource);
+                }
+            }
+            else {
+                ds.dependencyChanged(this);
+                invokeAdded(ds, resource);
+            }
         }
 	}
 
 	public void changed(Resource resource) {
-		invokeChanged(resource);
+        Object[] services;
+        synchronized (this) {
+            services = m_services.toArray();
+        }
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            invokeChanged(ds, resource);
+        }
 	}
 
 	public void removed(Resource resource) {
 		long counter;
+		Object[] services;
 		synchronized (this) {
 			m_resourceCounter--;
 			counter = m_resourceCounter;
+			services = m_services.toArray();
 		}
-        if (counter == 0) {
-            m_service.dependencyUnavailable(this);
-        }
-        // try to invoke callback, if specified, but only for optional dependencies
-        // because callbacks for required dependencies are handled differently
-        if (!isRequired()) {
-            invokeRemoved(resource);
+        for (int i = 0; i < services.length; i++) {
+            DependencyService ds = (DependencyService) services[i];
+            if (counter == 0) {
+                ds.dependencyUnavailable(this);
+                if (!isRequired()) {
+                    invokeRemoved(ds, resource);
+                }
+            }
+            else {
+                ds.dependencyChanged(this);
+                invokeRemoved(ds, resource);
+            }
         }
 	}
 	
-    public void invokeAdded() {
-    	// TODO fixme
-        //invokeAdded(m_bundleInstance);
-    }
-
-    public void invokeAdded(Resource serviceInstance) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeAdded(DependencyService ds, Resource serviceInstance) {
+        Object[] callbackInstances = getCallbackInstances(ds);
         if ((callbackInstances != null) && (m_callbackAdded != null)) {
-                invokeCallbackMethod(callbackInstances, m_callbackAdded, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackAdded, serviceInstance);
         }
     }
 
-    public void invokeChanged(Resource serviceInstance) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeChanged(DependencyService ds, Resource serviceInstance) {
+        Object[] callbackInstances = getCallbackInstances(ds);
         if ((callbackInstances != null) && (m_callbackChanged != null)) {
-//                if (m_reference == null) {
-//                    Thread.dumpStack();
-//                }
-                invokeCallbackMethod(callbackInstances, m_callbackChanged, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackChanged, serviceInstance);
         }
     }
 
-    
-    public void invokeRemoved() {
-    	// TODO fixme
-        //invokeRemoved(m_bundleInstance);
-    }
-    
-    public void invokeRemoved(Resource serviceInstance) {
-        Object[] callbackInstances = getCallbackInstances();
+    public void invokeRemoved(DependencyService ds, Resource serviceInstance) {
+        Object[] callbackInstances = getCallbackInstances(ds);
         if ((callbackInstances != null) && (m_callbackRemoved != null)) {
-//                if (m_reference == null) {
-//                    Thread.dumpStack();
-//                }
-                invokeCallbackMethod(callbackInstances, m_callbackRemoved, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackRemoved, serviceInstance);
         }
     }
 
-
-
-	
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
      * dependency is added or removed. When you specify callbacks, the auto configuration 
@@ -325,15 +342,14 @@ public class ResourceDependency implements Dependency, ResourceHandler {
         }
         return false;
     }
-    private synchronized Object[] getCallbackInstances() {
-        Object[] callbackInstances = ((ServiceImpl) m_service).getCompositionInstances();
+    
+    private synchronized Object[] getCallbackInstances(DependencyService ds) {
         if (m_callbackInstance == null) {
-            return callbackInstances;
+            return ds.getCompositionInstances();
         }
-        Object[] res = new Object[callbackInstances.length + 1];
-        res[0] = m_callbackInstance; //this could also be extended to an array...?
-        System.arraycopy(callbackInstances, 0, res, 1, callbackInstances.length);
-        return res;
+        else {
+            return new Object[] { m_callbackInstance };
+        }
     }
 
 	public ResourceDependency setResource(Resource resource) {

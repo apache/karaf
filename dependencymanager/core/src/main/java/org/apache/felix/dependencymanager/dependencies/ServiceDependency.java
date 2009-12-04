@@ -365,11 +365,11 @@ public class ServiceDependency extends AbstractDependency implements Dependency,
                 m_isStarted = false;
                 needsStopping = true;
             }
+            m_services.remove(service);
         }
         if (needsStopping) {
             m_tracker.close();
             m_tracker = null;
-            m_services.remove(service);
         }
     }
 
@@ -389,7 +389,10 @@ public class ServiceDependency extends AbstractDependency implements Dependency,
     public void addedService(ServiceReference ref, Object service) {
         boolean makeAvailable = makeAvailable();
         
-        Object[] services = m_services.toArray();
+        Object[] services;
+        synchronized (this) {
+            services = m_services.toArray();
+        }
         for (int i = 0; i < services.length; i++) {
             DependencyService ds = (DependencyService) services[i];
             if (makeAvailable) {
@@ -419,7 +422,10 @@ public class ServiceDependency extends AbstractDependency implements Dependency,
         m_reference = ref;
         m_serviceInstance = service;
         
-        Object[] services = m_services.toArray();
+        Object[] services;
+        synchronized (this) {
+            services = m_services.toArray();
+        }
         for (int i = 0; i < services.length; i++) {
             DependencyService ds = (DependencyService) services[i];
             ds.dependencyChanged(this);
@@ -442,7 +448,10 @@ public class ServiceDependency extends AbstractDependency implements Dependency,
     public void removedService(ServiceReference ref, Object service) {
         boolean makeUnavailable = makeUnavailable();
         
-        Object[] services = m_services.toArray();
+        Object[] services;
+        synchronized (this) {
+            services = m_services.toArray();
+        }
         for (int i = 0; i < services.length; i++) {
             DependencyService ds = (DependencyService) services[i];
             if (makeUnavailable) {
