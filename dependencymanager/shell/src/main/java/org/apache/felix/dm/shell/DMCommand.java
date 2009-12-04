@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.shell;
+package org.apache.felix.dm.shell;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.StringTokenizer;
 
-import org.apache.felix.dependencymanager.management.ServiceComponent;
-import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
+import org.apache.felix.dm.management.ServiceComponent;
+import org.apache.felix.dm.management.ServiceComponentDependency;
 import org.apache.felix.shell.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

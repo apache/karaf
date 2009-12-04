@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.shell;
+package org.apache.felix.dm.shell;
 
 import org.apache.felix.shell.Command;
 import org.osgi.framework.BundleActivator;
