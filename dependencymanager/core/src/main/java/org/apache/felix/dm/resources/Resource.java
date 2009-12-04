@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.resources;
+package org.apache.felix.dm.resources;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.resources;
+package org.apache.felix.dm.resources;
 
 /** 
  * Service interface for anybody wanting to be notified of changes to resources. 
