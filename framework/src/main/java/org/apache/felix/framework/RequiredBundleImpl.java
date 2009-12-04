@@ -63,8 +63,9 @@ class RequiredBundleImpl implements RequiredBundle
         }
 
         // We need to find all modules that require any of the modules
-        // associated with this bundle.
-        List moduleList = new ArrayList();
+        // associated with this bundle and save the associated bundle
+        // of the dependent modules.
+        Set bundleSet = new HashSet();
         // Loop through all of this bundle's modules.
         IModule[] modules = m_bundle.getModules();
         for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
@@ -74,20 +75,13 @@ class RequiredBundleImpl implements RequiredBundle
             IModule[] dependents = ((ModuleImpl) modules[modIdx]).getDependentRequirers();
             for (int depIdx = 0; (dependents != null) && (depIdx < dependents.length); depIdx++)
             {
-                moduleList.add(dependents[modIdx]);
+                if (dependents[depIdx].getBundle() != null)
+                {
+                    bundleSet.add(dependents[depIdx].getBundle());
+                }
             }
         }
-        // Convert the list of dependent modules into a non-duplicated
-        // array of bundles.
-        Set bundleSet = new HashSet();
-        for (int modIdx = 0; modIdx < moduleList.size(); modIdx++)
-        {
-            Bundle bundle = ((IModule) moduleList.get(modIdx)).getBundle();
-            if (bundle != null)
-            {
-                bundleSet.add(bundle);
-            }
-        }
+        // Convert to an array.
         return (Bundle[]) bundleSet.toArray(new Bundle[bundleSet.size()]);
     }
 
