@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.dependencies;
+package org.apache.felix.dm.impl.dependencies;
 
 import java.lang.reflect.Proxy;
 import java.util.AbstractMap;
@@ -28,13 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.dependencymanager.Dependency;
-import org.apache.felix.dependencymanager.DependencyService;
-import org.apache.felix.dependencymanager.impl.DefaultNullObject;
-import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.management.ServiceComponentDependency;
-import org.apache.felix.dependencymanager.tracker.ServiceTracker;
-import org.apache.felix.dependencymanager.tracker.ServiceTrackerCustomizer;
+import org.apache.felix.dm.dependencies.Dependency;
+import org.apache.felix.dm.dependencies.ServiceDependency;
+import org.apache.felix.dm.impl.DefaultNullObject;
+import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.impl.tracker.ServiceTracker;
+import org.apache.felix.dm.impl.tracker.ServiceTrackerCustomizer;
+import org.apache.felix.dm.management.ServiceComponentDependency;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -45,7 +45,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceDependency extends AbstractDependency implements Dependency, ServiceTrackerCustomizer, ServiceComponentDependency {
+public class ServiceDependencyImpl extends AbstractDependency implements ServiceDependency, ServiceTrackerCustomizer, ServiceComponentDependency {
     protected List m_services = new ArrayList();
     protected volatile ServiceTracker m_tracker;
     protected BundleContext m_context;
@@ -173,7 +173,7 @@ public class ServiceDependency extends AbstractDependency implements Dependency,
      * @param context the bundle context
      * @param logger the logger
      */
-    public ServiceDependency(BundleContext context, Logger logger) {
+    public ServiceDependencyImpl(BundleContext context, Logger logger) {
         super(logger);
         m_context = context;
         m_autoConfig = true;
