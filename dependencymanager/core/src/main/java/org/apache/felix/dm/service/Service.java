@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dm.service;
 
 import java.util.Dictionary;
 import java.util.List;
 
+import org.apache.felix.dm.dependencies.Dependency;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -165,29 +166,6 @@ public interface Service {
      */
     public void removeStateListener(ServiceStateListener listener);
     
-    // events, must be fired when the dependency is started/active
-    
-    /**
-     * Will be called when the dependency becomes available.
-     * 
-     * @param dependency the dependency
-     */
-    public void dependencyAvailable(Dependency dependency);
-    
-    /**
-     * Will be called when the dependency changes.
-     * 
-     * @param dependency the dependency
-     */
-    public void dependencyUnavailable(Dependency dependency);
-    
-    /**
-     * Will be called when the dependency becomes unavailable.
-     * 
-     * @param dependency the dependency
-     */
-    public void dependencyChanged(Dependency dependency);
-
     /**
      * Starts the service. This activates the dependency tracking mechanism
      * for this service.
@@ -212,7 +190,7 @@ public interface Service {
      * @param factory the factory instance or class
      * @param createMethod the name of the create method
      */
-	public Service setFactory(Object factory, String createMethod);
+    public Service setFactory(Object factory, String createMethod);
 	
 	/**
 	 * Sets the factory to use to create the implementation. You specify the
