@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dm.service;
+
 
 /**
  * This interface can be used to register a service state listener. Service
