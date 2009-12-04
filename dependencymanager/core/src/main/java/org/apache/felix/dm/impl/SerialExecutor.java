@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.impl;
+package org.apache.felix.dm.impl;
 
 import java.util.LinkedList;
 import java.util.NoSuchElementException;

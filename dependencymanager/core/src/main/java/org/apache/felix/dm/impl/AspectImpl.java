@@ -1,4 +1,4 @@
-package org.apache.felix.dependencymanager.impl;
+package org.apache.felix.dm.impl;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -7,8 +7,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.felix.dependencymanager.DependencyManager;
-import org.apache.felix.dependencymanager.Service;
+import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.service.Service;
 import org.osgi.framework.ServiceReference;
 
 public class AspectImpl {

@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.impl;
+package org.apache.felix.dm.impl;
 
 import java.util.List;
 
-import org.apache.felix.dependencymanager.Dependency;
+import org.apache.felix.dm.dependencies.Dependency;
 
 /**
  * Encapsulates the current state of the dependencies of a service. A state is

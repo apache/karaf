@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.impl;
+package org.apache.felix.dm.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
