@@ -124,6 +124,10 @@
             <artifactId>org.apache.felix.karaf.shell.ssh</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix.karaf.shell</groupId>
+            <artifactId>org.apache.felix.karaf.shell.dev</artifactId>
+        </dependency>      
+        <dependency>
             <groupId>org.apache.felix.karaf.jaas</groupId>
             <artifactId>org.apache.felix.karaf.jaas.boot</artifactId>
         </dependency>

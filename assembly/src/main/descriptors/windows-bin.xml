@@ -211,6 +211,7 @@
             <outputFileNameMapping>org/apache/felix/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.dev</include>
                 <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.osgi</include>
                 <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.log</include>
                 <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.config</include>

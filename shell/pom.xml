@@ -42,6 +42,7 @@
         <module>packages</module>
         <module>ssh</module>
         <module>wrapper</module>
+        <module>dev</module>
     </modules>
 
 </project>
