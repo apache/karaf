@@ -53,8 +53,9 @@
             <Bundle-Description>A bundle that provides a run-time
               service dependency manager.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Export-Package>org.apache.felix.dependencymanager,org.apache.felix.dependencymanager.management,org.apache.felix.dependencymanager.tracker,org.apache.felix.dependencymanager.impl,org.apache.felix.dependencymanager.dependencies,org.apache.felix.dependencymanager.resources</Export-Package>
-            <Import-Package>!org.apache.felix.dependencymanager,*</Import-Package>
+            <Export-Package>org.apache.felix.dm,org.apache.felix.dm.service,org.apache.felix.dm.management,org.apache.felix.dm.dependencies,org.apache.felix.dm.resources</Export-Package>
+            <Import-Package>!org.apache.felix.dm,!org.apache.felix.dm.service,!org.apache.felix.dm.management,!org.apache.felix.dm.dependencies,!org.apache.felix.dm.resources,*</Import-Package>
+	    <Private-Package>org.apache.felix.dm.impl,org.apache.felix.dm.impl.dependencies,org.apache.felix.dm.impl.tracker</Private-Package>
           </instructions>
         </configuration>
       </plugin>
