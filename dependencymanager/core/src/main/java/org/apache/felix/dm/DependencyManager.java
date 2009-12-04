@@ -16,21 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dm;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 
-import org.apache.felix.dependencymanager.dependencies.BundleDependency;
-import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
-import org.apache.felix.dependencymanager.dependencies.ResourceDependency;
-import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
-import org.apache.felix.dependencymanager.dependencies.TemporalServiceDependency;
-import org.apache.felix.dependencymanager.impl.AspectImpl;
-import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.impl.ServiceImpl;
+import org.apache.felix.dm.dependencies.BundleDependency;
+import org.apache.felix.dm.dependencies.ConfigurationDependency;
+import org.apache.felix.dm.dependencies.ResourceDependency;
+import org.apache.felix.dm.dependencies.ServiceDependency;
+import org.apache.felix.dm.dependencies.TemporalServiceDependency;
+import org.apache.felix.dm.impl.AspectImpl;
+import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.impl.ServiceImpl;
+import org.apache.felix.dm.impl.dependencies.BundleDependencyImpl;
+import org.apache.felix.dm.impl.dependencies.ConfigurationDependencyImpl;
+import org.apache.felix.dm.impl.dependencies.ResourceDependencyImpl;
+import org.apache.felix.dm.impl.dependencies.ServiceDependencyImpl;
+import org.apache.felix.dm.impl.dependencies.TemporalServiceDependencyImpl;
+import org.apache.felix.dm.service.Service;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -49,11 +55,21 @@ public class DependencyManager {
      * @param context the bundle context
      * @param logger 
      */
+    public DependencyManager(BundleContext context) {
+        this(context, new Logger(context));
+    }
+    
+    /**
+     * Creates a new dependency manager.
+     * 
+     * @param context the bundle context
+     * @param logger 
+     */
     public DependencyManager(BundleContext context, Logger logger) {
         m_context = context;
         m_logger = logger;
     }
-    
+
     /**
      * Adds a new service to the dependency manager. After the service was added
      * it will be started immediately.
@@ -91,7 +107,7 @@ public class DependencyManager {
      * @return the service dependency
      */
     public ServiceDependency createServiceDependency() {
-        return new ServiceDependency(m_context, m_logger);
+        return new ServiceDependencyImpl(m_context, m_logger);
     }
     
     /**
@@ -101,7 +117,7 @@ public class DependencyManager {
      * @return the service dependency
      */
     public TemporalServiceDependency createTemporalServiceDependency() {
-        return new TemporalServiceDependency(m_context, m_logger);
+        return new TemporalServiceDependencyImpl(m_context, m_logger);
     }
 
     /**
@@ -110,7 +126,7 @@ public class DependencyManager {
      * @return
      */
     public ConfigurationDependency createConfigurationDependency() {
-        return new ConfigurationDependency(m_context, m_logger);
+        return new ConfigurationDependencyImpl(m_context, m_logger);
     }
     
     /**
@@ -119,7 +135,7 @@ public class DependencyManager {
      * @return
      */
     public BundleDependency createBundleDependency() {
-        return new BundleDependency(m_context, m_logger);
+        return new BundleDependencyImpl(m_context, m_logger);
     }
     
     /**
@@ -128,7 +144,7 @@ public class DependencyManager {
      * @return
      */
     public ResourceDependency createResourceDependency() {
-        return new ResourceDependency(m_context, m_logger);
+        return new ResourceDependencyImpl(m_context, m_logger);
     }
 
     /**

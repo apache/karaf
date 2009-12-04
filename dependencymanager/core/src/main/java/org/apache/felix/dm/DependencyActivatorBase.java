@@ -16,17 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager;
+package org.apache.felix.dm;
 
 import java.util.Dictionary;
 import java.util.List;
 
-import org.apache.felix.dependencymanager.dependencies.BundleDependency;
-import org.apache.felix.dependencymanager.dependencies.ConfigurationDependency;
-import org.apache.felix.dependencymanager.dependencies.ServiceDependency;
-import org.apache.felix.dependencymanager.dependencies.TemporalServiceDependency;
-import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.impl.ServiceImpl;
+import org.apache.felix.dm.dependencies.BundleDependency;
+import org.apache.felix.dm.dependencies.ConfigurationDependency;
+import org.apache.felix.dm.dependencies.ServiceDependency;
+import org.apache.felix.dm.dependencies.TemporalServiceDependency;
+import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.impl.ServiceImpl;
+import org.apache.felix.dm.service.Service;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
