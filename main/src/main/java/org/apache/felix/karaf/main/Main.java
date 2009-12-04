@@ -697,8 +697,8 @@ public class Main {
         // Perform variable substitution on specified properties.
         for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
-            System.setProperty(name,
-                    substVars(props.getProperty(name), name, null, null));
+            String value = System.getProperty(name, props.getProperty(name));
+            System.setProperty(name, substVars(value, name, null, null));
         }
     }
 
