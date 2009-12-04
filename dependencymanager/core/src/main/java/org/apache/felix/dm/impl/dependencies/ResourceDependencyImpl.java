@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dependencymanager.dependencies;
+package org.apache.felix.dm.impl.dependencies;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,15 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.felix.dependencymanager.Dependency;
-import org.apache.felix.dependencymanager.DependencyService;
-import org.apache.felix.dependencymanager.impl.Logger;
-import org.apache.felix.dependencymanager.resources.Resource;
-import org.apache.felix.dependencymanager.resources.ResourceHandler;
+import org.apache.felix.dm.dependencies.ResourceDependency;
+import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.resources.Resource;
+import org.apache.felix.dm.resources.ResourceHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-public class ResourceDependency implements Dependency, ResourceHandler {
+public class ResourceDependencyImpl implements ResourceDependency, ResourceHandler, DependencyActivation {
 	private volatile BundleContext m_context;
 	private volatile ServiceRegistration m_registration;
 	private long m_resourceCounter;
@@ -54,7 +53,7 @@ public class ResourceDependency implements Dependency, ResourceHandler {
     private boolean m_isStarted;
 
 	
-    public ResourceDependency(BundleContext context, Logger logger) {
+    public ResourceDependencyImpl(BundleContext context, Logger logger) {
     	m_context = context;
     	m_logger = logger;
     	m_autoConfig = true;
