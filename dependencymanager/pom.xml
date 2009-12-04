@@ -35,6 +35,7 @@
   <modules>
     <module>core</module>
     <module>shell</module>
+    <module>compat</module>
     <module>test</module>
   </modules>
 </project>
