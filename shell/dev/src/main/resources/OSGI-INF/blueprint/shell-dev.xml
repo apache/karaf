@@ -23,6 +23,9 @@
         <command name="dev/show-tree">
             <action class="org.apache.felix.karaf.shell.dev.ShowBundleTree"/>
         </command>
+        <command name="dev/framework">
+            <action class="org.apache.felix.karaf.shell.dev.FrameworkDebug" />
+        </command>
     </command-bundle>
 
 </blueprint>
