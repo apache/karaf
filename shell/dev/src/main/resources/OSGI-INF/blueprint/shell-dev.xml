@@ -26,6 +26,9 @@
         <command name="dev/framework">
             <action class="org.apache.felix.karaf.shell.dev.FrameworkDebug" />
         </command>
+        <command name="dev/dynamic-import">
+            <action class="org.apache.felix.karaf.shell.dev.DynamicImport" />
+        </command>
     </command-bundle>
 
 </blueprint>

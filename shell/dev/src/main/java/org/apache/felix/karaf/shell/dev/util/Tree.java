@@ -45,7 +45,8 @@ public class Tree<T> extends Node<T> {
     }
 
     /**
-     * Write the tree to a PrintStream
+     * Write the tree to a PrintStream, using the default toString() method to output the node values
+     *
      * @param stream
      */
     public void write(PrintStream stream) {
@@ -53,14 +54,50 @@ public class Tree<T> extends Node<T> {
     }
 
     /**
-     * Write the tree to a PrintWriter
+     * Write the tree to a PrintStream, using the provided converter to output the node values
+     *
+     * @param stream
+     * @param converter
+     */
+    public void write(PrintStream stream, Converter<T> converter) {
+        write(new PrintWriter(stream), converter);
+    }
+
+    /**
+     * Write the tree to a PrintWriter, using the default toString() method to output the node values
+     *
      * @param writer
      */
     public void write(PrintWriter writer) {
-        writer.printf("%s%n", getValue());
+        write(writer, new Converter() {
+            public String toString(Node node) {
+                return node.getValue().toString();
+            }
+        });
+    }
+
+    /**
+     * Write the tree to a PrintWriter, using the provided converter to output the node values
+     *
+     * @param writer
+     * @param converter
+     */
+    public void write(PrintWriter writer, Converter<T> converter) {
+        writer.printf("%s%n", converter.toString(this));
         for (Node<T> child : getChildren()) {
-            child.write(writer);
+            child.write(writer, converter);
         }
         writer.flush();
+    }
+
+    /**
+     * Interface to convert node values to string
+     *
+     * @param <T> the object type for the node value
+     */
+    public static interface Converter<T> {
+
+        public String toString(Node<T> node);
+
     }
 }

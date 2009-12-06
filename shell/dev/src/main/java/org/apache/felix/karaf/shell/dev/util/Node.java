@@ -99,13 +99,13 @@ public class Node<T> {
      * array is <code>true</code>, there should be a | to connect to the next
      * sibling.
      */
-    protected void write(PrintWriter writer, boolean... indents) {
+    protected void write(PrintWriter writer, Tree.Converter<T> converter, boolean... indents) {
         for (boolean indent : indents) {
             writer.printf("%-3s", indent ? "|" : "");
         }
-        writer.printf("+- %s%n", value);
+        writer.printf("+- %s%n", converter.toString(this));
         for (Node<T> child : getChildren()) {
-            child.write(writer, concat(indents, hasNextSibling()));
+            child.write(writer, converter, concat(indents, hasNextSibling()));
         }
     }
 
