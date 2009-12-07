@@ -122,6 +122,7 @@
         <module>webconsole</module>
         <module>webconsole-plugins/event</module>
         <module>fileinstall</module>
+        <module>useradmin</module>
 
         <module>ipojo</module>
 
