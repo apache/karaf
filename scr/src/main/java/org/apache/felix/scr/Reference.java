@@ -115,4 +115,13 @@ public interface Reference
      */
     String getUnbindMethodName();
 
+
+    /**
+     * Returns the name of the method called if a bound service updates its
+     * service registration properties or <code>null</code> if no such method
+     * is configued. This method provides access to the <code>updated</code>
+     * attribute of the <code>reference</code> element.
+     */
+    String getUpdatedMethodName();
+
 }

@@ -487,6 +487,12 @@ public class DependencyManager implements ServiceListener, Reference
     }
 
 
+    public String getUpdatedMethodName()
+    {
+        return m_dependencyMetadata.getUpdated();
+    }
+
+
     //---------- Service tracking support -------------------------------------
 
     /**
