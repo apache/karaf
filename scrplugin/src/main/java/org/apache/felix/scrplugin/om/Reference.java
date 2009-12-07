@@ -39,6 +39,7 @@ public class Reference extends AbstractObject {
     protected String policy;
     protected String bind;
     protected String unbind;
+    protected String updated;
 
     /** @since 1.0.9 */
     protected String strategy;
@@ -118,6 +119,14 @@ public class Reference extends AbstractObject {
 
     public void setUnbind(String unbind) {
         this.unbind = unbind;
+    }
+
+    public String getUpdated() {
+        return this.updated;
+    }
+
+    public void setUpdated(String updated) {
+        this.updated = updated;
     }
 
     public boolean isChecked() {
@@ -221,6 +230,14 @@ public class Reference extends AbstractObject {
             this.bind = null;
             this.unbind = null;
         }
+
+        // validate updated method
+        if ( this.updated != null ) {
+            if ( specVersion < Constants.VERSION_1_1_FELIX ) {
+                this.logError( iLog, "Updated method declaration requires namespace "
+                    + Constants.COMPONENT_DS_SPEC_VERSION_11_FELIX + " or newer" );
+            }
+        }
     }
 
     protected String validateMethod(final int      specVersion,
@@ -263,7 +280,7 @@ public class Reference extends AbstractObject {
         JavaMethod method = this.javaClassDescription.getMethodBySignature(realMethodName, sig);
         if (method == null) {
             method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
-            if ( specVersion == Constants.VERSION_1_1 && method == null ) {
+            if ( specVersion >= Constants.VERSION_1_1 && method == null ) {
                 method = this.javaClassDescription.getMethodBySignature(realMethodName, sig3);
             }
         }
@@ -277,7 +294,7 @@ public class Reference extends AbstractObject {
         }
         if (method == null) {
             method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
-            if ( specVersion == Constants.VERSION_1_1 && method == null ) {
+            if ( specVersion >= Constants.VERSION_1_1 && method == null ) {
                 method = this.javaClassDescription.getMethodBySignature(realMethodName, sig3);
             }
         }
@@ -291,7 +308,7 @@ public class Reference extends AbstractObject {
         }
         if (method == null) {
             method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
-            if ( specVersion == Constants.VERSION_1_1 && method == null ) {
+            if ( specVersion >= Constants.VERSION_1_1 && method == null ) {
                 method = this.javaClassDescription.getMethodBySignature(realMethodName, sig3);
             }
         }

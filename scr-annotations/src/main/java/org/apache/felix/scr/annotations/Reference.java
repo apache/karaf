@@ -95,6 +95,12 @@ public @interface Reference {
     String unbind() default "";
 
     /**
+     * The name of the method to be called when the bound service updates its
+     * service registration properties. By default this is not set.
+     */
+    String updated() default "";
+
+    /**
      * The reference strategy for the reference. This can either be
      * {@link ReferenceStrategy#EVENT} in which case the bind and unbind
      * methods are used or it can be {@link ReferenceStrategy#LOOKUP}

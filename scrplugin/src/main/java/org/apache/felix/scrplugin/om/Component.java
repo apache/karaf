@@ -105,7 +105,10 @@ public class Component extends AbstractObject {
      * Set the spec version.
      */
     public void setSpecVersion(int value) {
-        this.specVersion = value;
+        // only set a higher version, never "downgrade"
+        if (this.specVersion < value) {
+            this.specVersion = value;
+        }
     }
 
     /**
@@ -289,7 +292,7 @@ public class Component extends AbstractObject {
                     this.checkLifecycleMethod(specVersion, javaClass, activateName, true, iLog);
                     this.checkLifecycleMethod(specVersion, javaClass, deactivateName, false, iLog);
 
-                    if ( this.modified != null && specVersion == Constants.VERSION_1_1 ) {
+                    if ( this.modified != null && specVersion >= Constants.VERSION_1_1 ) {
                         this.checkLifecycleMethod(specVersion, javaClass, this.modified, true, iLog);
                     }
                     // ensure public default constructor
@@ -346,7 +349,7 @@ public class Component extends AbstractObject {
             }
         }
         // check additional stuff if version is 1.1
-        if ( specVersion == Constants.VERSION_1_1 ) {
+        if ( specVersion >= Constants.VERSION_1_1 ) {
             final String cp = this.getConfigurationPolicy();
             if ( cp != null
                  && !Constants.COMPONENT_CONFIG_POLICY_IGNORE.equals(cp)
@@ -380,7 +383,7 @@ public class Component extends AbstractObject {
         // first candidate is (de)activate(ComponentContext)
         JavaMethod method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_COMPONENT_CONTEXT});
         if ( method == null ) {
-            if ( specVersion == Constants.VERSION_1_1) {
+            if ( specVersion >= Constants.VERSION_1_1) {
                 // second candidate is (de)activate(BundleContext)
                 method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_BUNDLE_CONTEXT});
                 if ( method == null ) {

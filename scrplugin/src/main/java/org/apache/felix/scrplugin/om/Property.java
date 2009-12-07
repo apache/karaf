@@ -112,7 +112,7 @@ public class Property extends AbstractObject {
             if ( specVersion == Constants.VERSION_1_0 && type.equals(Constants.PROPERTY_TYPE_CHAR_1_1) ) {
                 type = Constants.PROPERTY_TYPE_CHAR;
             }
-            if ( specVersion == Constants.VERSION_1_1 && type.equals(Constants.PROPERTY_TYPE_CHAR) ) {
+            if ( specVersion >= Constants.VERSION_1_1 && type.equals(Constants.PROPERTY_TYPE_CHAR) ) {
                 type = Constants.PROPERTY_TYPE_CHAR_1_1;
             }
         }

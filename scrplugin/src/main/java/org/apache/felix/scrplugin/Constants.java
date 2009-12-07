@@ -33,6 +33,9 @@ public interface Constants {
     /** Version 1.1 (R4.2) */
     public static final int VERSION_1_1 = 1;
 
+    /** Version 1.1-felix (R4.2 + FELIX-1893) */
+    public static final int VERSION_1_1_FELIX = 2;
+
     /**
      * The name of the Bundle manifest header providing the list of service
      * component descriptor files.
@@ -69,6 +72,9 @@ public interface Constants {
 
     // Specification version identifier for SCR 1.1 (R 4.2)
     public static final String COMPONENT_DS_SPEC_VERSION_11 = "1.1";
+
+    // Specification version identifier for SCR 1.1-felix (R 4.2+FELIX-1893)
+    public static final String COMPONENT_DS_SPEC_VERSION_11_FELIX = "1.1-felix";
 
     public static final String COMPONENT_CREATE_PID = "create-pid";
 
@@ -150,6 +156,8 @@ public interface Constants {
     public static final String REFERENCE_BIND = "bind";
 
     public static final String REFERENCE_UNDBIND = "unbind";
+
+    public static final String REFERENCE_UPDATED = "updated";
 
     public static final String REFERENCE_CHECKED = "checked";
 

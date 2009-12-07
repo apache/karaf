@@ -909,6 +909,11 @@ public class SCRDescriptorGenerator
         {
             ref.setUnbind( unbindValue );
         }
+        final String updatedValue = reference.getNamedParameter( Constants.REFERENCE_UPDATED );
+        if ( updatedValue != null )
+        {
+            ref.setUpdated( updatedValue );
+        }
         final String isChecked = reference.getNamedParameter( Constants.REFERENCE_CHECKED );
         if ( isChecked != null )
         {
@@ -939,6 +944,7 @@ public class SCRDescriptorGenerator
      * <tr><td><code>null</code></td><td>0</td></tr>
      * <tr><td>1.0</td><td>0</td></tr>
      * <tr><td>1.1</td><td>1</td></tr>
+     * <tr><td>1.1-felix</td><td>2</td></tr>
      * </table>
      *
      * @param specVersion The specification version to convert. This may be
@@ -958,6 +964,10 @@ public class SCRDescriptorGenerator
         else if ( specVersion.equals( Constants.COMPONENT_DS_SPEC_VERSION_11 ) )
         {
             return Constants.VERSION_1_1;
+        }
+        else if ( specVersion.equals( Constants.COMPONENT_DS_SPEC_VERSION_11_FELIX ) )
+        {
+            return Constants.VERSION_1_1_FELIX;
         }
 
         // unknown specVersion string

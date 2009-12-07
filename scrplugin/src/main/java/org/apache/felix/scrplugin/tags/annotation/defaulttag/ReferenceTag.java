@@ -76,6 +76,10 @@ public class ReferenceTag extends AbstractTag {
                 return Util.getStringValue(annotation, desc, "unbind", Reference.class);
             }
 
+            public String updated() {
+                return Util.getStringValue(annotation, desc, "updated", Reference.class);
+            }
+
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
                 return null;
             }
@@ -103,6 +107,7 @@ public class ReferenceTag extends AbstractTag {
         map.put(Constants.REFERENCE_TARGET, emptyToNull(this.annotation.target()));
         map.put(Constants.REFERENCE_BIND, emptyToNull(this.annotation.bind()));
         map.put(Constants.REFERENCE_UNDBIND, emptyToNull(this.annotation.unbind()));
+        map.put(Constants.REFERENCE_UPDATED, emptyToNull(this.annotation.updated()));
         map.put(Constants.REFERENCE_STRATEGY, this.annotation.strategy().getStrategyString());
 
         return map;

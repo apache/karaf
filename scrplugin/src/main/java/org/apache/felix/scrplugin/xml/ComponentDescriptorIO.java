@@ -54,6 +54,9 @@ public class ComponentDescriptorIO {
     /** The namespace for R4.2 - Version 1.1 */
     public static final String NAMESPACE_URI_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0";
 
+    /** The namespace for R4.2+FELIX-1893 - Version 1.1-felix */
+    public static final String NAMESPACE_URI_1_1_FELIX = "http://www.osgi.org/xmlns/scr/v1.1.0-felix";
+
     /** The inner namespace - used for all inner elements. */
     public static final String INNER_NAMESPACE_URI = "";
 
@@ -156,8 +159,10 @@ public class ComponentDescriptorIO {
         final String namespace;
         if ( components.getSpecVersion() == Constants.VERSION_1_0 ) {
             namespace = NAMESPACE_URI_1_0;
-        } else {
+        } else if ( components.getSpecVersion() == Constants.VERSION_1_1 ) {
             namespace = NAMESPACE_URI_1_1;
+        } else {
+            namespace = NAMESPACE_URI_1_1_FELIX;
         }
         contentHandler.startDocument();
         contentHandler.startPrefixMapping(PREFIX, namespace);
@@ -196,7 +201,7 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, COMPONENT_ATTR_FACTORY, component.getFactory());
 
         // attributes new in 1.1
-        if ( NAMESPACE_URI_1_1.equals(namespace) ) {
+        if ( NAMESPACE_URI_1_1.equals( namespace ) || NAMESPACE_URI_1_1_FELIX.equals( namespace ) ) {
             IOUtils.addAttribute(ai, COMPONENT_ATTR_POLICY, component.getConfigurationPolicy());
             IOUtils.addAttribute(ai, COMPONENT_ATTR_ACTIVATE, component.getActivate());
             IOUtils.addAttribute(ai, COMPONENT_ATTR_DEACTIVATE, component.getDeactivate());
@@ -217,7 +222,7 @@ public class ComponentDescriptorIO {
         }
         if ( component.getReferences() != null ) {
             for(final Reference reference : component.getReferences()) {
-                generateXML(reference, contentHandler, isScrPrivateFile);
+                generateXML(namespace, reference, contentHandler, isScrPrivateFile);
             }
         }
         IOUtils.indent(contentHandler, 1);
@@ -327,7 +332,7 @@ public class ComponentDescriptorIO {
      * @param contentHandler
      * @throws SAXException
      */
-    protected static void generateXML(Reference reference, ContentHandler contentHandler, boolean isScrPrivateFile)
+    protected static void generateXML(final String namespace,Reference reference, ContentHandler contentHandler, boolean isScrPrivateFile)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "name", reference.getName());
@@ -337,6 +342,12 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, "target", reference.getTarget());
         IOUtils.addAttribute(ai, "bind", reference.getBind());
         IOUtils.addAttribute(ai, "unbind", reference.getUnbind());
+
+        // attributes new in 1.1-felix (FELIX-1893)
+        if ( NAMESPACE_URI_1_1_FELIX.equals( namespace ) ) {
+            IOUtils.addAttribute(ai, "updated", reference.getUpdated());
+        }
+
         if ( isScrPrivateFile ) {
             IOUtils.addAttribute(ai, "checked", String.valueOf(reference.isChecked()));
         }
@@ -397,10 +408,13 @@ public class ComponentDescriptorIO {
             }
 
             // from here on, uri has the namespace regardless of the used xml format
-            if ( NAMESPACE_URI_1_0.equals(uri) || NAMESPACE_URI_1_1.equals(uri) ) {
+            if ( NAMESPACE_URI_1_0.equals( uri ) || NAMESPACE_URI_1_1.equals( uri )
+                || NAMESPACE_URI_1_1_FELIX.equals( uri ) ) {
 
                 if ( NAMESPACE_URI_1_1.equals(uri) ) {
                     components.setSpecVersion(Constants.VERSION_1_1);
+                } else if ( NAMESPACE_URI_1_1_FELIX.equals(uri) ) {
+                    components.setSpecVersion(Constants.VERSION_1_1_FELIX);
                 }
 
                 if (localName.equals(COMPONENT)) {
@@ -516,7 +530,9 @@ public class ComponentDescriptorIO {
                 uri = NAMESPACE_URI_1_0;
             }
 
-            if ( NAMESPACE_URI_1_0.equals(uri) || NAMESPACE_URI_1_1.equals(uri) ) {
+            if ( NAMESPACE_URI_1_0.equals( uri ) || NAMESPACE_URI_1_1.equals( uri )
+                || NAMESPACE_URI_1_1_FELIX.equals( uri ) )
+            {
                 if (localName.equals(COMPONENT) ) {
                     this.components.addComponent(this.currentComponent);
                     this.currentComponent = null;
