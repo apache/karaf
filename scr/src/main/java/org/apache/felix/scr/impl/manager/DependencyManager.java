@@ -30,6 +30,7 @@ import java.util.Map;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.impl.helper.BindMethod;
 import org.apache.felix.scr.impl.helper.UnbindMethod;
+import org.apache.felix.scr.impl.helper.UpdatedMethod;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -75,6 +76,9 @@ public class DependencyManager implements ServiceListener, Reference
 
     // the bind method
     private BindMethod m_bind;
+
+    // the updated method
+    private UpdatedMethod m_updated;
 
     // the unbind method
     private UnbindMethod m_unbind;
@@ -123,6 +127,12 @@ public class DependencyManager implements ServiceListener, Reference
                                  m_componentInstance.getClass(),
                                  m_dependencyMetadata.getName(),
                                  m_dependencyMetadata.getInterface()
+        );
+        m_updated = new UpdatedMethod( m_componentManager,
+                m_dependencyMetadata.getUpdated(),
+                m_componentInstance.getClass(),
+                m_dependencyMetadata.getName(),
+                m_dependencyMetadata.getInterface()
         );
         m_unbind = new UnbindMethod( m_componentManager,
             m_dependencyMetadata.getUnbind(),
@@ -922,24 +932,18 @@ public class DependencyManager implements ServiceListener, Reference
     /**
      * Handles an update in the service reference properties of a bound service.
      * <p>
-     * For now this just calls the bind method with the service again if
-     * the <code>ds.rebind.enabled</code> configuration property is set to
-     * <code>true</code>. If the property is not set to <code>true</code> this
-     * method does nothing.
+     * This just calls the {@link #invokeUpdatedMethod(ServiceReference)}
+     * method if the method has been configured in the component metadata. If
+     * the method is not configured, this method does nothing.
      *
      * @param ref The <code>ServiceReference</code> representing the updated
      *      service.
      */
     private void update( final ServiceReference ref )
     {
-        if ( m_componentManager.getActivator().getConfiguration().isRebindEnabled() )
+        if ( m_dependencyMetadata.getUpdated() != null )
         {
-            // The updated method is only invoked if the implementation object is not
-            // null. This is valid for both immediate and delayed components
-            if ( m_dependencyMetadata.getBind() != null )
-            {
-                invokeBindMethod( ref );
-            }
+            invokeUpdatedMethod( ref );
         }
     }
 
@@ -1045,6 +1049,43 @@ public class DependencyManager implements ServiceListener, Reference
 
 
     /**
+     * Calls the updated method.
+     *
+     * @param ref A service reference corresponding to the service whose service
+     *      registration properties have been updated
+     */
+    private void invokeUpdatedMethod( final ServiceReference ref )
+    {
+        // The updated method is only invoked if the implementation object is not
+        // null. This is valid for both immediate and delayed components
+        if ( m_componentInstance != null )
+        {
+            m_updated.invoke( m_componentInstance, new BindMethod.Service()
+            {
+                public ServiceReference getReference()
+                {
+                    return ref;
+                }
+
+
+                public Object getInstance()
+                {
+                    return getService( ref );
+                }
+            } );
+        }
+        else
+        {
+            // don't care whether we can or cannot call the unbind method
+            // if the component instance has already been cleared by the
+            // close() method
+            m_componentManager.log( LogService.LOG_DEBUG,
+                "DependencyManager : Component not set, no need to call updated method", null );
+        }
+    }
+
+
+    /**
      * Calls the unbind method.
      * <p>
      * If the reference is singular and the given service is not the one bound
@@ -1053,7 +1094,6 @@ public class DependencyManager implements ServiceListener, Reference
      *
      * @param ref A service reference corresponding to the service that will be
      *            unbound
-     * @return true if the call was successful, false otherwise
      */
     private void invokeUnbindMethod( final ServiceReference ref )
     {

@@ -21,6 +21,9 @@ package org.apache.felix.scr.impl.metadata;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.felix.scr.impl.helper.Logger;
+import org.osgi.service.log.LogService;
+
 /**
  * Information associated to a dependency
  *
@@ -65,6 +68,9 @@ public class ReferenceMetadata
 
     // Name of the bind method (optional)
     private String m_bind = null;
+
+    // Name of the updated method (optional, since DS 1.1-felix)
+    private String m_updated = null;
 
     // Name of the unbind method (optional)
     private String m_unbind = null;
@@ -201,6 +207,22 @@ public class ReferenceMetadata
 
 
     /**
+     * Setter for the updated method attribute
+     *
+     * @param updated
+     */
+    public void setUpdated( String updated )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
+
+        m_updated = updated;
+    }
+
+
+    /**
      * Setter for the unbind method attribute
      *
      * @param unbind
@@ -287,6 +309,18 @@ public class ReferenceMetadata
 
     /**
      * Get the name of a method in the component implementation class that is used to notify that
+     * the service properties of a bound service have been updated
+     *
+     * @return a String with the name of the updated method
+     **/
+    public String getUpdated()
+    {
+        return m_updated;
+    }
+
+
+    /**
+     * Get the name of a method in the component implementation class that is used to notify that
      * a service is unbound from the component configuration
      *
      * @return a String with the name of the unbind method
@@ -349,7 +383,7 @@ public class ReferenceMetadata
      *  Method used to verify if the semantics of this metadata are correct
      *
      */
-    void validate( ComponentMetadata componentMetadata )
+    void validate( final ComponentMetadata componentMetadata, final Logger logger )
     {
         if ( m_name == null )
         {
@@ -383,6 +417,16 @@ public class ReferenceMetadata
         else if ( !POLICY_VALID.contains( m_policy ) )
         {
             throw componentMetadata.validationFailure( "Policy must be one of " + POLICY_VALID );
+        }
+
+        // updated method is only supported in namespace xxx and later
+        if ( m_updated != null && !componentMetadata.isDS11Felix() )
+        {
+            logger
+                .log( LogService.LOG_WARNING,
+                    "Ignoring updated method definition, DS 1.1-felix or later namespace required", componentMetadata,
+                    null );
+            m_updated = null;
         }
     }
 

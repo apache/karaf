@@ -482,6 +482,55 @@ public class ComponentMetadataTest extends TestCase
     }
 
 
+    public void test_reference_updated_ds10()
+    {
+        // updated method ignored for DS 1.0
+        final ReferenceMetadata rm3 = createReferenceMetadata( "test" );
+        rm3.setUpdated( "my_updated_method" );
+        final ComponentMetadata cm3 = createComponentMetadata( Boolean.TRUE, null );
+        cm3.addDependency( rm3 );
+
+        // validates fine (though logging a warning) and sets field to null
+        cm3.validate( logger );
+
+        assertTrue( "Expected warning for unsupported updated method name", logger
+            .messageContains( "Ignoring updated method definition" ) );
+        assertNull( rm3.getUpdated() );
+    }
+
+
+    public void test_reference_updated_ds11()
+    {
+        // updated method ignored for DS 1.1
+        final ReferenceMetadata rm3 = createReferenceMetadata( "test" );
+        rm3.setUpdated( "my_updated_method" );
+        final ComponentMetadata cm3 = createComponentMetadata11( Boolean.TRUE, null );
+        cm3.addDependency( rm3 );
+
+        // validates fine (though logging a warning) and sets field to null
+        cm3.validate( logger );
+
+        assertTrue( "Expected warning for unsupported updated method name", logger
+            .messageContains( "Ignoring updated method definition" ) );
+        assertNull( rm3.getUpdated() );
+    }
+
+
+    public void test_reference_updated_ds11_felix()
+    {
+        // updated method accepted for DS 1.1-felix
+        final ReferenceMetadata rm3 = createReferenceMetadata( "test" );
+        rm3.setUpdated( "my_updated_method" );
+        final ComponentMetadata cm3 = createComponentMetadata( XmlHandler.DS_VERSION_1_1_FELIX, Boolean.TRUE, null );
+        cm3.addDependency( rm3 );
+
+        // validates fine and logs no message
+        cm3.validate( logger );
+
+        assertEquals( "my_updated_method", rm3.getUpdated() );
+    }
+
+
     public void test_duplicate_implementation_ds10()
     {
         final ComponentMetadata cm = createComponentMetadata( Boolean.TRUE, null );
@@ -636,10 +685,10 @@ public class ComponentMetadataTest extends TestCase
 
     //---------- Helper methods
 
-    // Creates DS 1.0 Component Metadata
-    private ComponentMetadata createComponentMetadata( Boolean immediate, String factory )
+    // Creates Component Metadata for the given namespace
+    private ComponentMetadata createComponentMetadata( int nameSpaceCode, Boolean immediate, String factory )
     {
-        ComponentMetadata meta = new ComponentMetadata( XmlHandler.DS_VERSION_1_0 );
+        ComponentMetadata meta = new ComponentMetadata( nameSpaceCode );
         meta.setName( "place.holder" );
         meta.setImplementationClassName( "place.holder.implementation" );
         if ( immediate != null )
@@ -653,22 +702,17 @@ public class ComponentMetadataTest extends TestCase
         return meta;
     }
 
+    // Creates DS 1.0 Component Metadata
+    private ComponentMetadata createComponentMetadata( Boolean immediate, String factory )
+    {
+        return createComponentMetadata( XmlHandler.DS_VERSION_1_0, immediate, factory );
+    }
+
 
     // Creates DS 1.1 Component Metadata
     private ComponentMetadata createComponentMetadata11( Boolean immediate, String factory )
     {
-        ComponentMetadata meta = new ComponentMetadata( XmlHandler.DS_VERSION_1_1 );
-        meta.setName( "place.holder" );
-        meta.setImplementationClassName( "place.holder.implementation" );
-        if ( immediate != null )
-        {
-            meta.setImmediate( immediate.booleanValue() );
-        }
-        if ( factory != null )
-        {
-            meta.setFactoryIdentifier( factory );
-        }
-        return meta;
+        return createComponentMetadata( XmlHandler.DS_VERSION_1_1, immediate, factory );
     }
 
 

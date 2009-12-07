@@ -363,6 +363,18 @@ public class ComponentMetadata
 
 
     /**
+     * Returns <code>true</code> if the metadata declaration has used the
+     * Declarative Services version 1.1-felixnamespace or a later namespace.
+     *
+     * @see <a href="https://issues.apache.org/jira/browse/FELIX-1893">FELIX-1893</a>
+     */
+    public boolean isDS11Felix()
+    {
+        return getNamespaceCode() >= XmlHandler.DS_VERSION_1_1_FELIX;
+    }
+
+
+    /**
      * Returns the name of the component
      *
      * @return A string containing the name of the component
@@ -707,7 +719,7 @@ public class ComponentMetadata
         while ( referenceIterator.hasNext() )
         {
             ReferenceMetadata refMeta = ( ReferenceMetadata ) referenceIterator.next();
-            refMeta.validate( this );
+            refMeta.validate( this, logger );
 
             // flag duplicates
             if ( !refs.add( refMeta.getName() ) )

@@ -52,14 +52,20 @@ public class XmlHandler implements KXml2SAXHandler
     // Namespace URI of DS 1.1
     public static final String NAMESPACE_URI_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0";
 
+    // Namespace URI of DS 1.1-felix (see FELIX-1893)
+    public static final String NAMESPACE_URI_1_1_FELIX = "http://felix.apache.org/xmlns/scr/v1.1.0-felix";
+
     // namespace code for non-DS namespace
     public static final int DS_VERSION_NONE = -1;
 
     // namespace code for the DS 1.0 specification
     public static final int DS_VERSION_1_0 = 0;
 
-    // namespace code for the DS 1.0 specification
+    // namespace code for the DS 1.1 specification
     public static final int DS_VERSION_1_1 = 1;
+
+    // namespace code for the DS 1.1-felix specification
+    public static final int DS_VERSION_1_1_FELIX = 2;
 
     // mapping of namespace URI to namespace code
     private static final Map NAMESPACE_CODE_MAP;
@@ -97,6 +103,7 @@ public class XmlHandler implements KXml2SAXHandler
         NAMESPACE_CODE_MAP.put( NAMESPACE_URI_EMPTY, new Integer( DS_VERSION_1_0 ) );
         NAMESPACE_CODE_MAP.put( NAMESPACE_URI, new Integer( DS_VERSION_1_0 ) );
         NAMESPACE_CODE_MAP.put( NAMESPACE_URI_1_1, new Integer( DS_VERSION_1_1 ) );
+        NAMESPACE_CODE_MAP.put( NAMESPACE_URI_1_1_FELIX, new Integer( DS_VERSION_1_1_FELIX ) );
     }
 
 
@@ -306,6 +313,7 @@ public class XmlHandler implements KXml2SAXHandler
                     //if
                     ref.setTarget( attrib.getProperty( "target" ) );
                     ref.setBind( attrib.getProperty( "bind" ) );
+                    ref.setUpdated( attrib.getProperty( "updated" ) );
                     ref.setUnbind( attrib.getProperty( "unbind" ) );
 
                     m_currentComponent.addDependency( ref );
