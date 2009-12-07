@@ -45,8 +45,6 @@ public class ScrConfiguration
 
     private static final String PROP_FACTORY_ENABLED = "ds.factory.enabled";
 
-    private static final String PROP_REBIND_ENABLED = "ds.rebind.enabled";
-
     private static final String PROP_LOGLEVEL = "ds.loglevel";
 
     private static final String LOG_LEVEL_DEBUG = "debug";
@@ -116,13 +114,11 @@ public class ScrConfiguration
 
             logLevel = getLogLevel( bundleContext );
             factoryEnabled = VALUE_TRUE.equals( bundleContext.getProperty( PROP_FACTORY_ENABLED ) );
-            rebindEnabled = VALUE_TRUE.equals( bundleContext.getProperty( PROP_REBIND_ENABLED ) );
         }
         else
         {
             logLevel = ( ( Integer ) config.get( PROP_LOGLEVEL ) ).intValue();
             factoryEnabled = ( ( Boolean ) config.get( PROP_FACTORY_ENABLED ) ).booleanValue();
-            rebindEnabled = ( ( Boolean ) config.get( PROP_REBIND_ENABLED ) ).booleanValue();
         }
     }
 
@@ -136,12 +132,6 @@ public class ScrConfiguration
     public boolean isFactoryEnabled()
     {
         return factoryEnabled;
-    }
-
-
-    public boolean isRebindEnabled()
-    {
-        return rebindEnabled;
     }
 
 

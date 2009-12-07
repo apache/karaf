@@ -355,7 +355,6 @@ public class ScrCommand implements Command
         out.print( "Component Factory with Factory Configuration: " );
         out.println( scrConfiguration.isFactoryEnabled() ? "Supported" : "Unsupported" );
         out.print( "Update bound Service Properties: " );
-        out.println( scrConfiguration.isRebindEnabled() ? "Yes" : "No" );
     }
 
 
