@@ -73,11 +73,6 @@ public class ScrConfiguration
      */
     private boolean factoryEnabled;
 
-    /**
-     * @scr.property nameRef="PROP_REBIND_ENABLED" value="false" type="Boolean"
-     */
-    private boolean rebindEnabled;
-
 
     public ScrConfiguration( BundleContext bundleContext )
     {
