@@ -83,16 +83,17 @@ public class SigilProjectWizard extends SigilNewResourceWizard implements IExecu
 
             selectRevealAndShow( file );
 
-            new Job( "Check OSGi Install" )
-            {
-                @Override
-                protected IStatus run( IProgressMonitor monitor )
-                {
-                    // prompt for osgi home if not already set.
-                    SigilCore.getInstallManager().getDefaultInstall();
-                    return Status.OK_STATUS;
-                }
-            }.schedule();
+            // don't do this check for now - see FELIX-1924
+//            new Job( "Check OSGi Install" )
+//            {
+//                @Override
+//                protected IStatus run( IProgressMonitor monitor )
+//                {
+//                    // prompt for osgi home if not already set.
+//                    SigilCore.getInstallManager().getDefaultInstall();
+//                    return Status.OK_STATUS;
+//                }
+//            }.schedule();
         }
     }
 
