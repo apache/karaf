@@ -214,7 +214,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
         if ( descriptorFile.exists() )
         {
             String svcComp = project.getProperties().getProperty( "Service-Component" );
-            svcComp = ( svcComp == null ) ? "OSGI-INF/" + finalName : svcComp + ", " + "OSGI-INF/" + finalName;
+            final String svcPath = "OSGI-INF/" + finalName;
+            svcComp = ( svcComp == null ) ? svcPath :
+                svcComp.contains(svcPath) ? svcComp : svcComp + ", " + svcPath;
             project.getProperties().setProperty( "Service-Component", svcComp );
         }
     }
