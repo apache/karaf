@@ -80,8 +80,11 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
 	        }
 	    }
 	    if (needsStarting) {
-	        Properties props = new Properties();
-	        props.setProperty(Resource.FILTER, m_resourceFilter);
+	        Properties props = null;
+	        if (m_resourceFilter != null) {
+	            props = new Properties();
+	            props.setProperty(Resource.FILTER, m_resourceFilter);
+	        }
 	        m_registration = m_context.registerService(ResourceHandler.class.getName(), this, props);
 	    }
 	}
