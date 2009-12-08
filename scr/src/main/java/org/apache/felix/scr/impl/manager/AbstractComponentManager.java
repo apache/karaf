@@ -33,6 +33,7 @@ import org.apache.felix.scr.impl.BundleComponentActivator;
 import org.apache.felix.scr.impl.ComponentActivatorTask;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
+import org.apache.felix.scr.impl.metadata.ServiceMetadata;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServicePermission;
@@ -534,18 +535,22 @@ public abstract class AbstractComponentManager implements Component
         boolean allowed = true;
         if ( System.getSecurityManager() != null )
         {
-            final String[] services = getComponentMetadata().getServiceMetadata().getProvides();
-            if ( services != null && services.length > 0 )
+            final ServiceMetadata serviceMetadata = getComponentMetadata().getServiceMetadata();
+            if ( serviceMetadata != null )
             {
-                final Bundle bundle = getBundle();
-                for ( int i = 0; i < services.length; i++ )
+                final String[] services = serviceMetadata.getProvides();
+                if ( services != null && services.length > 0 )
                 {
-                    final Permission perm = new ServicePermission( services[i], ServicePermission.REGISTER );
-                    if ( !bundle.hasPermission( perm ) )
+                    final Bundle bundle = getBundle();
+                    for ( int i = 0; i < services.length; i++ )
                     {
-                        log( LogService.LOG_INFO, "Permission to register service {0} is denied", new Object[]
-                            { services[i] }, null );
-                        allowed = false;
+                        final Permission perm = new ServicePermission( services[i], ServicePermission.REGISTER );
+                        if ( !bundle.hasPermission( perm ) )
+                        {
+                            log( LogService.LOG_INFO, "Permission to register service {0} is denied", new Object[]
+                                { services[i] }, null );
+                            allowed = false;
+                        }
                     }
                 }
             }
