@@ -28,8 +28,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
-import org.apache.felix.dm.dependencies.Dependency;
-import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.impl.Logger;
 import org.apache.felix.dm.management.ServiceComponentDependency;
 import org.osgi.framework.BundleContext;
@@ -265,5 +263,39 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
 
     public String getType() {
         return "configuration";
+    }
+
+    public Object getAutoConfigInstance() {
+        return getConfiguration();
+    }
+
+    public String getAutoConfigName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Class getAutoConfigType() {
+        return Dictionary.class;
+    }
+
+    public void invokeAdded(DependencyService service) {
+        try {
+            invokeUpdate(service, service.getService(), getConfiguration());
+        }
+        catch (ConfigurationException e) {
+            // if this happens, it's definitely an inconsistency, since we
+            // asked the instance the same question before (if this is a
+            // valid configuration) and then it was
+            e.printStackTrace();
+        }
+    }
+
+    public void invokeRemoved(DependencyService service) {
+        // TODO Auto-generated method stub
+    }
+
+    public boolean isAutoConfig() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

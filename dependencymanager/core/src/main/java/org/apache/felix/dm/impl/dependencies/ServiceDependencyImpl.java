@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.impl.DefaultNullObject;
 import org.apache.felix.dm.impl.Logger;
@@ -196,7 +195,7 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
         if (m_isStarted) {
             service = m_tracker.getService();
         }
-        if (service == null) {
+        if (service == null && isAutoConfig()) {
             service = getDefaultImplementation();
             if (service == null) {
                 service = getNullObject();
@@ -208,7 +207,7 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
     public Object lookupService() {
         Object service = null;
         if (m_isStarted) {
-            service = m_tracker.getService();
+            service = getService();
         }
         else {
             ServiceReference[] refs = null;
@@ -240,7 +239,7 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
                 throw new IllegalStateException("Could not lookup dependency, no service name specified.");
             }
         }
-        if (service == null) {
+        if (service == null && isAutoConfig()) {
             service = getDefaultImplementation();
             if (service == null) {
                 service = getNullObject();
@@ -379,10 +378,6 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
         if (!m_trackedServiceName.isInstance(service)) {
             return null;
         }
-            
-        // we remember these for future reference, needed for required service callbacks
-        m_reference = ref;
-        m_serviceInstance = service;
         return service;
     }
 
@@ -419,9 +414,6 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
     }
 
     public void modifiedService(ServiceReference ref, Object service) {
-        m_reference = ref;
-        m_serviceInstance = service;
-        
         Object[] services;
         synchronized (this) {
             services = m_services.toArray();
@@ -722,6 +714,14 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
     public String getAutoConfigName() {
         return m_autoConfigInstance;
     }
+    
+    public Object getAutoConfigInstance() {
+        return lookupService();
+    }
+    
+    public Class getAutoConfigType() {
+        return getInterface();
+    }
 
     public String getName() {
         StringBuilder sb = new StringBuilder();
@@ -739,5 +739,18 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
 
     public String getType() {
         return "service";
+    }
+
+    public void invokeAdded(DependencyService service) {
+        // we remember these for future reference, needed for required service callbacks
+        m_reference = lookupServiceReference();
+        m_serviceInstance = lookupService();
+        invokeAdded(service, m_reference, m_serviceInstance);
+    }
+
+    public void invokeRemoved(DependencyService service) {
+        invokeRemoved(service, m_reference, m_serviceInstance);
+        m_reference = null;
+        m_serviceInstance = null;
     }
 }

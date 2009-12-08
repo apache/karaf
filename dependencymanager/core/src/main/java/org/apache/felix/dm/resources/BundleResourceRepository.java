@@ -56,7 +56,7 @@ public class BundleResourceRepository {
 			URL entry = (URL) entries.nextElement();
 
 			Properties props = new Properties();
-			props.setProperty(Resource.REPOSITORY, bundle.getSymbolicName() + "_" + bundle.getVersion());
+			props.setProperty(Resource.REPOSITORY, bundle.getSymbolicName() + "_" + bundle.getHeaders().get("Bundle-Version"));
 			props.setProperty(Resource.PATH, entry.getPath());
 			props.setProperty(Resource.NAME, entry.getFile());
 
@@ -84,7 +84,7 @@ public class BundleResourceRepository {
 			URL entry = (URL) entries.nextElement();
 
 			Properties props = new Properties();
-			props.setProperty(Resource.REPOSITORY, bundle.getSymbolicName() + "_" + bundle.getVersion());
+			props.setProperty(Resource.REPOSITORY, bundle.getSymbolicName() + "_" + bundle.getHeaders().get("Bundle-Version"));
 			props.setProperty(Resource.PATH, entry.getPath());
 			props.setProperty(Resource.NAME, entry.getFile());
 
@@ -112,7 +112,7 @@ public class BundleResourceRepository {
 
 		public String getRepository() {
 
-			return bundle.getSymbolicName() + "_" + bundle.getVersion();
+			return bundle.getSymbolicName() + "_" + bundle.getHeaders().get("Bundle-Version");
 		}
 
 		public InputStream openStream() throws IOException {

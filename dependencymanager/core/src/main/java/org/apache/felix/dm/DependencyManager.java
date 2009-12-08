@@ -28,8 +28,11 @@ import org.apache.felix.dm.dependencies.ConfigurationDependency;
 import org.apache.felix.dm.dependencies.ResourceDependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.dependencies.TemporalServiceDependency;
+import org.apache.felix.dm.impl.AdapterImpl;
 import org.apache.felix.dm.impl.AspectImpl;
+import org.apache.felix.dm.impl.BundleAdapterImpl;
 import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.impl.ResourceAdapterImpl;
 import org.apache.felix.dm.impl.ServiceImpl;
 import org.apache.felix.dm.impl.dependencies.BundleDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.ConfigurationDependencyImpl;
@@ -164,6 +167,41 @@ public class DependencyManager {
                 .setAutoConfig(false)
                 .setCallbacks("added", "removed")
             );
+    }
+    
+    //TODO rename iface en iface2 to adaptor en adaptee o.i.d.
+    public Service createAdapterService(Class iface, Class iface2, Class impl) {
+        return createService()
+            .setImplementation(new AdapterImpl(iface, iface2, impl))
+            .add(createServiceDependency()
+                .setService(iface)
+                .setAutoConfig(false)
+                .setCallbacks("added", "removed")
+                );
+    }
+    
+    // TODO note to self, there are Dependency's and DependencyCollections 
+    // (being a dependency on more than one, fi ServiceDendency, ResourceDependency
+    public Service createResourceAdapterService(String resourceFilter, Class iface2, Object impl) {
+        return createService()
+            .setImplementation(new ResourceAdapterImpl(impl, iface2))
+            .add(createResourceDependency()
+                .setFilter(resourceFilter)
+                .setAutoConfig(false)
+                .setCallbacks("added", "removed")
+                )
+                ;
+    }
+    
+    public Service createBundleAdapterService(int stateMask, String filter, Object impl, Class iface) {
+        return createService()
+            .setImplementation(new BundleAdapterImpl(stateMask, filter, impl, iface))
+            .add(createBundleDependency()
+                .setFilter(filter)
+                .setStateMask(stateMask)
+                .setCallbacks("added", "removed")
+                )
+            ;
     }
 
     /**

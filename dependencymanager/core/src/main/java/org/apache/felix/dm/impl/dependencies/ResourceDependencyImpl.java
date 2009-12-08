@@ -44,7 +44,6 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     private boolean m_autoConfig;
     private final Logger m_logger;
     private String m_autoConfigInstance;
-//    private DependencyService m_service;
     protected List m_services = new ArrayList();
 	private boolean m_isRequired;
 	private String m_resourceFilter;
@@ -363,6 +362,7 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     }
 
 	public ResourceDependency setFilter(String resourceFilter) {
+        ensureNotActive();
 		m_resourceFilter = resourceFilter;
 		return this;
 	}
@@ -373,5 +373,29 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     public Resource getResource() {
     	System.out.println("Fetching resource");
     	return m_resource;
+    }
+
+    public Object getAutoConfigInstance() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getAutoConfigName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Class getAutoConfigType() {
+        return Resource.class;
+    }
+
+    public void invokeAdded(DependencyService service) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void invokeRemoved(DependencyService service) {
+        // TODO Auto-generated method stub
+        
     }
 }

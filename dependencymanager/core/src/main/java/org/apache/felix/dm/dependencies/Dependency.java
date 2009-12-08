@@ -18,6 +18,8 @@
  */
 package org.apache.felix.dm.dependencies;
 
+import org.apache.felix.dm.impl.dependencies.DependencyService;
+
 /**
  * Generic dependency for a service. A dependency can be required or not.
  * A dependency will be activated by the service it belongs to. The service
@@ -55,4 +57,51 @@ public interface Dependency {
      * @return <code>true</code> if the dependency is instance bound
      */
     public boolean isInstanceBound();
+
+    /**
+     * Returns <code>true>code> if auto configuration is enabled for this dependency.
+     * Auto configuration means that a dependency is injected in the service instance
+     * when it's available, and if it's unavailable, a "null object" will be inserted
+     * instead.
+     * 
+     * @return <code>true>code> if auto configuration is enabled for this dependency
+     */
+    public boolean isAutoConfig();
+    
+    /**
+     * Returns the type of the instance that is injected.
+     * 
+     * @return the type of the instance that is injected
+     */
+    public Class getAutoConfigType();
+    
+    /**
+     * Returns the instance that is injected.
+     * 
+     * @return the instance that is injected
+     */
+    public Object getAutoConfigInstance();
+    
+    /**
+     * Returns the name of the member in the class of the service instance
+     * to inject into. If you specify this, not all members of the right
+     * type will be injected, only the member whose name matches.
+     * 
+     * @return
+     */
+    public String getAutoConfigName();
+    
+    /**
+     * Invoke the "added" callback on a required dependency.
+     * 
+     * @param service
+     */
+    public void invokeAdded(DependencyService service);
+    
+    /**
+     * Invoke the "removed" callback on a required dependency.
+     * 
+     * @param service
+     */
+    public void invokeRemoved(DependencyService service);
 }

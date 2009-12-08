@@ -863,7 +863,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 						}
 					}
 					break;
-				case ServiceEvent.MODIFIED_ENDMATCH :
+                case 8 /* ServiceEvent.MODIFIED_ENDMATCH */ :
 				case ServiceEvent.UNREGISTERING :
 					untrack(reference, event);
 					/*

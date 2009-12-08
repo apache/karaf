@@ -97,10 +97,12 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
 
 	public String getName() {
         StringBuilder sb = new StringBuilder();
-        sb.append(m_bundleInstance.getSymbolicName());
-        sb.append(' ');
-        sb.append(m_bundleInstance.getVersion());
-        sb.append(' ');
+        if (m_bundleInstance != null) {
+            sb.append(m_bundleInstance.getSymbolicName());
+            sb.append(' ');
+            sb.append(m_bundleInstance.getHeaders().get("Bundle-Version"));
+            sb.append(' ');
+        }
         sb.append(Integer.toString(m_stateMask, 2));
         if (m_filter != null) {
             sb.append(' ');
@@ -120,7 +122,8 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
 
 	public Object addingBundle(Bundle bundle, BundleEvent event) {
 		// if we don't like a bundle, we could reject it here by returning null
-		if (m_bundleId >= 0 && m_bundleId != bundle.getBundleId()) {
+		long bundleId = bundle.getBundleId();
+        if (m_bundleId >= 0 && m_bundleId != bundleId) {
 			return null;
 		}
 		Filter filter = m_filter;
@@ -353,5 +356,37 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
     		return bundles[0];
     	}
     	return null;
+    }
+
+    public Object getAutoConfigInstance() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getAutoConfigName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Class getAutoConfigType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void invokeAdded(DependencyService service) {
+        // we remember these for future reference, needed for required service callbacks
+        if (m_isStarted) {
+            // use the tracker
+        }
+        else {
+            // do a manual lookup
+        }
+        m_bundleInstance = null; // TODO save what we looked up here
+        invokeAdded(service, m_bundleInstance);
+    }
+
+    public void invokeRemoved(DependencyService service) {
+        invokeRemoved(service, m_bundleInstance);
+        m_bundleInstance = null;
     }
 }
