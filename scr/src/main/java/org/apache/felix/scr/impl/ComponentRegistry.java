@@ -64,7 +64,7 @@ public class ComponentRegistry implements ScrService
      * @see #registerComponent(String, ComponentHolder)
      * @see #unregisterComponent(String)
      */
-    private Map m_componentsByName;
+    private final Map m_componentsByName;
 
     /**
      * Map of components by component ID. This map indexed by the component
@@ -74,7 +74,7 @@ public class ComponentRegistry implements ScrService
      * @see #registerComponentId(AbstractComponentManager)
      * @see #unregisterComponentId(long)
      */
-    private Map m_componentsById;
+    private final Map m_componentsById;
 
     /**
      * Counter to setup the component IDs as issued by the
@@ -119,13 +119,16 @@ public class ComponentRegistry implements ScrService
 
     public Component[] getComponents()
     {
-        if ( m_componentsById.isEmpty() )
+        synchronized ( m_componentsById )
         {
-            return null;
-        }
+            if ( m_componentsById.isEmpty() )
+            {
+                return null;
+            }
 
-        return ( org.apache.felix.scr.Component[] ) m_componentsById.values().toArray(
-            new Component[m_componentsById.size()] );
+            return ( org.apache.felix.scr.Component[] ) m_componentsById.values().toArray(
+                new Component[m_componentsById.size()] );
+        }
     }
 
 
@@ -162,7 +165,10 @@ public class ComponentRegistry implements ScrService
 
     public Component getComponent( long componentId )
     {
-        return ( Component ) m_componentsById.get( new Long( componentId ) );
+        synchronized ( m_componentsById )
+        {
+            return ( Component ) m_componentsById.get( new Long( componentId ) );
+        }
     }
 
 
@@ -180,13 +186,13 @@ public class ComponentRegistry implements ScrService
     final long registerComponentId( final AbstractComponentManager componentManager )
     {
         long componentId;
-        synchronized ( this )
+        synchronized ( m_componentsById )
         {
             m_componentCounter++;
             componentId = m_componentCounter;
-        }
 
-        m_componentsById.put( new Long( componentId ), componentManager );
+            m_componentsById.put( new Long( componentId ), componentManager );
+        }
 
         return componentId;
     }
@@ -202,7 +208,10 @@ public class ComponentRegistry implements ScrService
      */
     final void unregisterComponentId( final long componentId )
     {
-        m_componentsById.remove( new Long( componentId ) );
+        synchronized ( m_componentsById )
+        {
+            m_componentsById.remove( new Long( componentId ) );
+        }
     }
 
 
@@ -222,14 +231,26 @@ public class ComponentRegistry implements ScrService
      */
     final void checkComponentName( String name )
     {
-        if ( m_componentsByName.containsKey( name ) )
+        // register the name if no registration for that name exists already
+        final Object existingRegistration;
+        synchronized ( m_componentsByName )
+        {
+            existingRegistration = m_componentsByName.get( name );
+            if ( existingRegistration == null )
+            {
+                m_componentsByName.put( name, name );
+            }
+        }
+
+        // there was a registration already, throw an exception and use the
+        // existing registration to provide more information if possible
+        if ( existingRegistration != null )
         {
             String message = "The component name '" + name + "' has already been registered";
 
-            Object co = m_componentsByName.get( name );
-            if ( co instanceof ComponentHolder )
+            if ( existingRegistration instanceof ComponentHolder )
             {
-                ComponentHolder c = ( ComponentHolder ) co;
+                ComponentHolder c = ( ComponentHolder ) existingRegistration;
                 Bundle cBundle = c.getActivator().getBundleContext().getBundle();
                 ComponentMetadata cMeta = c.getComponentMetadata();
 
@@ -245,9 +266,6 @@ public class ComponentRegistry implements ScrService
 
             throw new ComponentException( message );
         }
-
-        // reserve the name
-        m_componentsByName.put( name, name );
     }
 
 
@@ -264,14 +282,17 @@ public class ComponentRegistry implements ScrService
      */
     final void registerComponent( String name, ComponentHolder component )
     {
-        // only register the component if there is a m_registration for it !
-        if ( !name.equals( m_componentsByName.get( name ) ) )
+        synchronized ( m_componentsByName )
         {
-            // this is not expected if all works ok
-            throw new ComponentException( "The component name '" + name + "' has already been registered." );
-        }
+            // only register the component if there is a m_registration for it !
+            if ( !name.equals( m_componentsByName.get( name ) ) )
+            {
+                // this is not expected if all works ok
+                throw new ComponentException( "The component name '" + name + "' has already been registered." );
+            }
 
-        m_componentsByName.put( name, component );
+            m_componentsByName.put( name, component );
+        }
     }
 
 
@@ -281,7 +302,11 @@ public class ComponentRegistry implements ScrService
      */
     public final ComponentHolder getComponent( String name )
     {
-        Object entry = m_componentsByName.get( name );
+        Object entry;
+        synchronized ( m_componentsByName )
+        {
+            entry = m_componentsByName.get( name );
+        }
 
         // only return the entry if non-null and not a reservation
         if ( entry instanceof ComponentHolder )
@@ -301,7 +326,10 @@ public class ComponentRegistry implements ScrService
      */
     final void unregisterComponent( String name )
     {
-        m_componentsByName.remove( name );
+        synchronized ( m_componentsByName )
+        {
+            m_componentsByName.remove( name );
+        }
     }
 
 
