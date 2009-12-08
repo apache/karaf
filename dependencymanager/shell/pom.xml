@@ -70,7 +70,9 @@
             <Bundle-Name>Apache Felix Dependency Manager Shell</Bundle-Name>
             <Bundle-Description>Shell command for the dependency manager.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Import-Package>org.apache.felix.dm.management;version="3.0",org.apache.felix.dm.shell,org.apache.felix.shell;version="1.0";resolution:=optional,org.osgi.framework;version="1.3",org.eclipse.osgi.framework.console;resolution:=optional</Import-Package>
+            <Export-Package></Export-Package>
+            <Private-Package>org.apache.felix.dm.shell</Private-Package>
+            <Import-Package>org.apache.felix.dm.management;version="[3.0.0,4.0.0)",org.apache.felix.shell;version="1.0";resolution:=optional,org.osgi.framework;version="1.3",org.eclipse.osgi.framework.console;resolution:=optional</Import-Package>
           </instructions>
         </configuration>
       </plugin>
