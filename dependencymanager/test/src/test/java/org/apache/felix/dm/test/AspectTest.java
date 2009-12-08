@@ -53,25 +53,44 @@ public class AspectTest {
         Ensure e = new Ensure();
         // create a service provider and consumer
         Service sp = m.createService().setImplementation(new ServiceProvider(e)).setInterface(ServiceInterface.class.getName(), null);
+        Service sp2 = m.createService().setImplementation(new ServiceProvider2(e)).setInterface(ServiceInterface2.class.getName(), null);
         Service sc = m.createService().setImplementation(new ServiceConsumer(e)).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(true));
         Service sa = m.createAspectService(ServiceInterface.class, "(|(!(" + Constants.SERVICE_RANKING + "=*))(" + Constants.SERVICE_RANKING + "<=0))", new ServiceAspect(e), new Properties() {{ put(Constants.SERVICE_RANKING, Integer.valueOf(1)); }} );
         m.add(sc);
         m.add(sp);
+        m.add(sp2);
         e.waitForStep(3, 2000);
         m.add(sa);
         e.waitForStep(4, 2000);
         e.step(5);
         e.waitForStep(8, 2000);
         m.remove(sa);
-        e.waitForStep(9, 2000);
-        e.step(10);
-        e.waitForStep(11, 2000);
+        e.waitForStep(10, 2000);
+        e.step(11);
+        e.waitForStep(12, 2000);
+        m.remove(sp2);
         m.remove(sp);
         m.remove(sc);
     }
     
     static interface ServiceInterface {
         public void invoke(Runnable run);
+    }
+    
+    static interface ServiceInterface2 {
+        public void invoke();
+    }
+    
+    static class ServiceProvider2 implements ServiceInterface2 {
+        private final Ensure m_ensure;
+
+        public ServiceProvider2(Ensure ensure) {
+            m_ensure = ensure;
+        }
+
+        public void invoke() {
+            m_ensure.step(8);
+        }
     }
 
     static class ServiceProvider implements ServiceInterface {
@@ -87,9 +106,15 @@ public class AspectTest {
     static class ServiceAspect implements ServiceInterface {
         private final Ensure m_ensure;
         private volatile ServiceInterface m_originalService;
+        private volatile ServiceInterface2 m_injectedService;
+        private volatile Service m_service;
+        private volatile DependencyManager m_manager;
         
         public ServiceAspect(Ensure e) {
             m_ensure = e;
+        }
+        public void init() {
+            m_service.add(m_manager.createServiceDependency().setInstanceBound(true).setRequired(true).setService(ServiceInterface2.class));
         }
         public void start() {
             m_ensure.step(4);
@@ -97,10 +122,11 @@ public class AspectTest {
         public void invoke(Runnable run) {
             m_ensure.step(6);
             m_originalService.invoke(run);
+            m_injectedService.invoke();
         }
         
         public void stop() {
-            m_ensure.step(9);
+            m_ensure.step(10);
         }
     }
 
@@ -123,9 +149,9 @@ public class AspectTest {
             m_ensure.step(3);
             m_ensure.waitForStep(5, 2000);
             m_service.invoke(Ensure.createRunnableStep(m_ensure, 7));
-            m_ensure.step(8);
-            m_ensure.waitForStep(10, 2000);
-            m_service.invoke(Ensure.createRunnableStep(m_ensure, 11));
+            m_ensure.step(9);
+            m_ensure.waitForStep(11, 2000);
+            m_service.invoke(Ensure.createRunnableStep(m_ensure, 12));
         }
     }
 }
