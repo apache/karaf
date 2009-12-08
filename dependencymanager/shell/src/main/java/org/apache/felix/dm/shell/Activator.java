@@ -18,10 +18,8 @@
  */
 package org.apache.felix.dm.shell;
 
-import org.apache.felix.shell.Command;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * Bundle activator for the dependency manager shell command.
@@ -29,13 +27,19 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Activator implements BundleActivator {
-    private ServiceRegistration m_serviceRegistration;
-
     public void start(BundleContext context) throws Exception {
-        m_serviceRegistration = context.registerService(Command.class.getName(), new DMCommand(context), null);
+        try {
+            context.registerService("org.apache.felix.shell.Command", new DMCommand(context), null);
+        }
+        catch (Throwable t) {
+        }
+        try {
+            context.registerService("org.eclipse.osgi.framework.console.CommandProvider", new EquinoxDMCommand(context), null);
+        }
+        catch (Throwable t) {
+        }
     }
 
     public void stop(BundleContext context) throws Exception {
-        m_serviceRegistration.unregister();
     }
 }
