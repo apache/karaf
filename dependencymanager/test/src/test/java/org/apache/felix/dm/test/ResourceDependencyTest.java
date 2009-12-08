@@ -33,9 +33,9 @@ import java.util.Map.Entry;
 import junit.framework.Assert;
 
 import org.apache.felix.dm.DependencyManager;
-import org.apache.felix.dm.service.Service;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.resources.ResourceHandler;
+import org.apache.felix.dm.service.Service;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
@@ -52,7 +52,7 @@ public class ResourceDependencyTest {
     public static Option[] configuration() {
         return options(
             provision(
-                mavenBundle().groupId("org.osgi").artifactId("org.osgi.compendium").version("4.2.0"),
+                mavenBundle().groupId("org.osgi").artifactId("org.osgi.compendium").version("4.1.0"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.dependencymanager").versionAsInProject()
             )
         );
