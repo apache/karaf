@@ -151,4 +151,6 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @return this service dependency
      */
     ServiceDependency setCallbacks(Object instance, String added, String changed, String removed);
+    
+    public ServiceDependency setInstanceBound(boolean isInstanceBound);
 }
