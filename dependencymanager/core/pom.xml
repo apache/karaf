@@ -50,12 +50,11 @@
           <instructions>
             <Bundle-SymbolicName>org.apache.felix.dependencymanager</Bundle-SymbolicName>
             <Bundle-Name>Apache Felix Dependency Manager</Bundle-Name>
-            <Bundle-Description>A bundle that provides a run-time
-              service dependency manager.</Bundle-Description>
+            <Bundle-Description>A bundle that provides a run-time service dependency manager.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Export-Package>org.apache.felix.dm,org.apache.felix.dm.service,org.apache.felix.dm.management,org.apache.felix.dm.dependencies,org.apache.felix.dm.resources</Export-Package>
+            <Export-Package>org.apache.felix.dm;version="3.0.0",org.apache.felix.dm.service;version="3.0.0",org.apache.felix.dm.management;version="3.0.0",org.apache.felix.dm.dependencies;version="3.0.0",org.apache.felix.dm.resources;version="3.0.0"</Export-Package>
             <Import-Package>!org.apache.felix.dm,!org.apache.felix.dm.service,!org.apache.felix.dm.management,!org.apache.felix.dm.dependencies,!org.apache.felix.dm.resources,*</Import-Package>
-	    <Private-Package>org.apache.felix.dm.impl,org.apache.felix.dm.impl.dependencies,org.apache.felix.dm.impl.tracker</Private-Package>
+	        <Private-Package>org.apache.felix.dm.impl,org.apache.felix.dm.impl.dependencies,org.apache.felix.dm.impl.tracker</Private-Package>
           </instructions>
         </configuration>
       </plugin>
