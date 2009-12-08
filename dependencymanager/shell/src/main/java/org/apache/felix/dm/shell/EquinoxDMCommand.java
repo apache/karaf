@@ -13,7 +13,7 @@ public class EquinoxDMCommand extends DMCommand implements CommandProvider {
     }
     
     public void _dm(CommandInterpreter ci) {
-        StringBuffer line = new StringBuffer("");
+        StringBuffer line = new StringBuffer("dm ");
         String arg = ci.nextArgument();
         while (arg != null) {
             if (line.length() > 0) {
@@ -24,8 +24,16 @@ public class EquinoxDMCommand extends DMCommand implements CommandProvider {
         }
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         ByteArrayOutputStream errorBytes = new ByteArrayOutputStream();
-        super.execute(line.toString(), new PrintStream(bytes), new PrintStream(errorBytes));
-        ci.print(new String(bytes.toByteArray()));
+        PrintStream out = new PrintStream(bytes);
+        PrintStream err = new PrintStream(errorBytes);
+        super.execute(line.toString(), out, err);
+        if (bytes.size() > 0) {
+            ci.print(new String(bytes.toByteArray()));
+        }
+        if (errorBytes.size() > 0) {
+            ci.print("Error:\n");
+            ci.print(new String(errorBytes.toByteArray()));
+        }
     }
 
     public String getHelp() {
