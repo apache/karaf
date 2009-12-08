@@ -374,7 +374,6 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     }
 
     public Resource getResource() {
-    	System.out.println("Fetching resource");
     	return m_resource;
     }
 
