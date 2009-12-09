@@ -449,6 +449,5 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
                 addCapability(cap);
             }
         }
-
     }
 }

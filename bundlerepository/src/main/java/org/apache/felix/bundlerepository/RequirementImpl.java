@@ -122,4 +122,9 @@ public class RequirementImpl implements Requirement
     {
         return m_filter.toString().hashCode();
     }
+
+    public synchronized String toString()
+    {
+        return m_name + ": " + getFilter();
+    }
 }

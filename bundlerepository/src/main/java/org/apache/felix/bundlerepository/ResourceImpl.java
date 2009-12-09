@@ -145,6 +145,7 @@ public class ResourceImpl implements Resource
 
     protected void addCapability(Capability cap)
     {
+        ((CapabilityImpl) cap).setResource(this);
         m_capList.add(cap);
     }
 

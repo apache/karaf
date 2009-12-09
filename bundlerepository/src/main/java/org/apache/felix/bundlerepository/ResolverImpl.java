@@ -186,14 +186,14 @@ public class ResolverImpl implements Resolver
                         // the local resources are preferred over the remote
                         // resources. Currently, we are just putting them at
                         // the beginning of the candidate list.
-                        List possibleCandidates = searchLocalResources(reqs[reqIdx]); 
-                        possibleCandidates.addAll(searchRemoteResources(reqs[reqIdx]));
+                        List candidateCapabilities = searchLocalResources(reqs[reqIdx]);
+                        candidateCapabilities.addAll(searchRemoteResources(reqs[reqIdx]));
 
                         // Determine the best candidate available that
                         // can resolve.
-                        while ((candidate == null) && !possibleCandidates.isEmpty())
+                        while ((candidate == null) && !candidateCapabilities.isEmpty())
                         {
-                            Resource bestResource = (Resource) getBestResource(possibleCandidates);
+                            Resource bestResource = (Resource) getBestCandidate(candidateCapabilities);
 
                             // Try to resolve the best resource.
                             if (resolve(bestResource))
@@ -202,7 +202,7 @@ public class ResolverImpl implements Resolver
                             }
                             else
                             {
-                                possibleCandidates.remove(bestResource);
+                                candidateCapabilities.remove(bestResource);
                             }
                         }
                     }
@@ -314,7 +314,7 @@ public class ResolverImpl implements Resolver
      */
     private List searchLocalResources(Requirement req)
     {
-        List matchingCandidates = new ArrayList();
+        List matchingCapabilities = new ArrayList();
         Resource[] resources = m_local.getResources();
         for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
         {
@@ -328,13 +328,13 @@ public class ResolverImpl implements Resolver
                     if (caps[capIdx].getName().equals(req.getName())
                         && req.isSatisfied(caps[capIdx]))
                     {
-                        matchingCandidates.add(resources[resIdx]);
+                        matchingCapabilities.add(caps[capIdx]);
                     }
                 }
             }
         }
 
-        return matchingCandidates;
+        return matchingCapabilities;
     }
 
     /**
@@ -344,7 +344,7 @@ public class ResolverImpl implements Resolver
      */
     private List searchRemoteResources(Requirement req)
     {
-        List matchingCandidates = new ArrayList();
+        List matchingCapabilities = new ArrayList();
 
         Repository[] repos = m_admin.listRepositories();
         for (int repoIdx = 0; (repos != null) && (repoIdx < repos.length); repoIdx++)
@@ -362,36 +362,37 @@ public class ResolverImpl implements Resolver
                         if (caps[capIdx].getName().equals(req.getName())
                                 && req.isSatisfied(caps[capIdx]))
                         {
-                            matchingCandidates.add(resources[resIdx]);
+                            matchingCapabilities.add(caps[capIdx]);
                         }
                     }
                 }
             }
         }
 
-        return matchingCandidates;
+        return matchingCapabilities;
     }
 
     /**
      * Determines which resource is preferred to deliver the required capability.
-     * This implementation will select the resource with the newest version. If two resources have
-     * the same version will the one with the largest number of cabailities be preferred
+     * This method selects the resource providing the highest version of the capability.
+     * If two resources provide the same version of the capability, the resource with
+     * the largest number of cabailities be preferred
      * @param resources
      * @return
      */
-    private Resource getBestResource(List resources)
+    private Resource getBestCandidate(List caps)
     {
         Version bestVersion = null;
-        Resource best = null;
+        Capability best = null;
 
-        for(int resIdx = 0; resIdx < resources.size(); resIdx++)
+        for(int capIdx = 0; capIdx < caps.size(); capIdx++)
         {
-            Resource currentResource = (Resource) resources.get(resIdx);
+            Capability current = (Capability) caps.get(capIdx);
 
             if (best == null)
             {
-                best = currentResource;
-                Object v = currentResource.getProperties().get(Resource.VERSION);
+                best = current;
+                Object v = current.getProperties().get(Resource.VERSION);
                 if ((v != null) && (v instanceof Version))
                 {
                     bestVersion = (Version) v;
@@ -399,14 +400,16 @@ public class ResolverImpl implements Resolver
             }
             else
             {
-                Object v = currentResource.getProperties().get(Resource.VERSION);
+                Object v = current.getProperties().get(Resource.VERSION);
 
                 // If there is no version, then select the resource
                 // with the greatest number of capabilities.
-                if ((v == null) && (bestVersion == null) && (best.getCapabilities().length < currentResource.getCapabilities().length))
+                if ((v == null) && (bestVersion == null)
+                    && (((CapabilityImpl) best).getResource().getCapabilities().length
+                        < ((CapabilityImpl) current).getResource().getCapabilities().length))
                 {
-                    best = currentResource;
-                    bestVersion = (Version) v;
+                    best = current;
+                    bestVersion = null;
                 }
                 else if ((v != null) && (v instanceof Version))
                 {
@@ -414,23 +417,24 @@ public class ResolverImpl implements Resolver
                     // resource's version is lower, then select it.
                     if ((bestVersion == null) || (bestVersion.compareTo(v) < 0))
                     {
-                        best = currentResource;
+                        best = current;
                         bestVersion = (Version) v;
                     }
                     // If the current resource version is equal to the
                     // best, then select the one with the greatest
                     // number of capabilities.
                     else if ((bestVersion != null) && (bestVersion.compareTo(v) == 0)
-                            && (best.getCapabilities().length < currentResource.getCapabilities().length))
+                            && (((CapabilityImpl) best).getResource().getCapabilities().length
+                                < ((CapabilityImpl) current).getResource().getCapabilities().length))
                     {
-                        best = currentResource;
+                        best = current;
                         bestVersion = (Version) v;
                     }
                 }   
             }
         }
 
-        return best;
+        return (best == null) ? null : ((CapabilityImpl) best).getResource();
     }
 
     public synchronized void deploy(boolean start)

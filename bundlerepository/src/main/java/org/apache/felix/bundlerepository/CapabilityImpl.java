@@ -21,9 +21,11 @@ package org.apache.felix.bundlerepository;
 import java.util.*;
 
 import org.osgi.service.obr.Capability;
+import org.osgi.service.obr.Resource;
 
 public class CapabilityImpl implements Capability
 {
+    private Resource m_resource;
     private String m_name = null;
     private Map m_map = null;
 
@@ -35,6 +37,16 @@ public class CapabilityImpl implements Capability
                 return o1.toString().compareToIgnoreCase(o2.toString());
             }
         });
+    }
+
+    public Resource getResource()
+    {
+        return m_resource;
+    }
+
+    public void setResource(Resource resource)
+    {
+        m_resource = resource;
     }
 
     public String getName()
