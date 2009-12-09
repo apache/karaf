@@ -145,7 +145,8 @@ public class ShowBundleTree extends AbstractBundleCommand {
      */
     private void createNode(Node<Bundle> node, Set<Bundle> trail) {
         Bundle bundle = node.getValue();
-        Collection<Bundle> exporters = getWiredBundles(bundle).values();
+        Collection<Bundle> exporters = new HashSet<Bundle>();
+        exporters.addAll(getWiredBundles(bundle).values());
 
         for (Bundle exporter : exporters) {
             if (trail.contains(exporter)) {
