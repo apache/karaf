@@ -960,9 +960,8 @@ ex.printStackTrace();
             // with each other.
 
             // Determine if we are lowering or raising the
-            // active start level, then udpate active start level.
+            // active start level.
             boolean lowering = (requestedLevel < getActiveStartLevel());
-            m_activeStartLevel = requestedLevel;
 
             synchronized (m_installedBundleLock_Priority2)
             {
@@ -1065,8 +1064,14 @@ ex.printStackTrace();
                     if (((impl.getPersistentState() == Bundle.ACTIVE)
                         || (impl.getPersistentState() == Bundle.STARTING))
                         && (impl.getStartLevel(getInitialBundleStartLevel())
-                            <= getActiveStartLevel()))
+                            <= requestedLevel))
                     {
+
+                        if (m_activeStartLevel != impl.getStartLevel(getInitialBundleStartLevel()))
+                        {
+                            m_activeStartLevel = impl.getStartLevel(getInitialBundleStartLevel());
+                        }
+                        
                         try
                         {
 // TODO: LAZY - Not sure if this is the best way...
@@ -1088,8 +1093,14 @@ ex.printStackTrace();
                     else if (((impl.getState() == Bundle.ACTIVE)
                         || (impl.getState() == Bundle.STARTING))
                         && (impl.getStartLevel(getInitialBundleStartLevel())
-                            > getActiveStartLevel()))
+                            > requestedLevel))
                     {
+
+                        if (m_activeStartLevel != impl.getStartLevel(getInitialBundleStartLevel()))
+                        {
+                            m_activeStartLevel = impl.getStartLevel(getInitialBundleStartLevel());
+                        }
+
                         try
                         {
                             stopBundle(impl, false);
@@ -1112,6 +1123,9 @@ ex.printStackTrace();
                 // is necessary, but it appears to help.
                 bundles[i] = null;
             }
+
+            m_activeStartLevel = requestedLevel;
+
         }
 
         if (getState() == Bundle.ACTIVE)
