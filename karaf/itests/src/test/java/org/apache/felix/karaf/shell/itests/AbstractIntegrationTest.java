@@ -16,7 +16,11 @@
  */
 package org.apache.felix.karaf.shell.itests;
 
+import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Inject;
@@ -65,15 +69,14 @@ public abstract class AbstractIntegrationTest {
             // This is buggy, as the service reference may change i think
             Object svc = type.cast(tracker.waitForService(timeout));
             if (svc == null) {
-
                 Dictionary dic = bundleContext.getBundle().getHeaders();
-                System.err.println("Test bundle headers: " + dic);
-                ServiceReference[] refs = bundleContext.getAllServiceReferences(null, null);
-                for (ServiceReference ref : refs) {
+                System.err.println("Test bundle headers: " + explode(dic));
+
+                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, null))) {
                     System.err.println("ServiceReference: " + ref);
                 }
-                refs = bundleContext.getAllServiceReferences(null, flt);
-                for (ServiceReference ref : refs) {
+
+                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, flt))) {
                     System.err.println("Filtered ServiceReference: " + ref);
                 }
 
@@ -103,6 +106,35 @@ public abstract class AbstractIntegrationTest {
 
     public static MavenArtifactProvisionOption mavenBundle(String groupId, String artifactId) {
         return CoreOptions.mavenBundle().groupId(groupId).artifactId(artifactId).versionAsInProject();
+    }
+
+    /*
+     * Explode the dictionary into a ,-delimited list of key=value pairs
+     */
+    private static String explode(Dictionary dictionary) {
+        Enumeration keys = dictionary.keys();
+        StringBuffer result = new StringBuffer();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            result.append(String.format("%s=%s", key, dictionary.get(key)));
+            if (keys.hasMoreElements()) {
+                result.append(", ");
+            }
+        }
+        return result.toString();
+    }
+
+    /*
+     * Provides an iterable collection of references, even if the original array is null
+     */
+    private static final Collection<ServiceReference> asCollection(ServiceReference[] references) {
+        List<ServiceReference> result = new LinkedList<ServiceReference>();
+        if (references != null) {
+            for (ServiceReference reference : references) {
+                result.add(reference);
+            }
+        }
+        return result;
     }
 
 }
