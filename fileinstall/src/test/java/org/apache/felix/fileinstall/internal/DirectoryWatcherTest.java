@@ -150,7 +150,7 @@ public class DirectoryWatcherTest extends TestCase
     public void testParameterAfterInitialization()
     {
         props.put( DirectoryWatcher.POLL, "500" );
-        props.put( DirectoryWatcher.DEBUG, "1" );
+        props.put( DirectoryWatcher.LOG_LEVEL, "1" );
         props.put( DirectoryWatcher.START_NEW_BUNDLES, "false" );
         props.put( DirectoryWatcher.DIR, new File( "src/test/resources" ).getAbsolutePath() );
         props.put( DirectoryWatcher.TMPDIR, new File( "src/test/resources" ).getAbsolutePath() );
@@ -161,7 +161,7 @@ public class DirectoryWatcherTest extends TestCase
         dw = new DirectoryWatcher( props, mockBundleContext );
 
         assertEquals( "POLL parameter correctly read", 500l, dw.poll );
-        assertEquals( "DEBUG parameter correctly read", 1l, dw.debug );
+        assertEquals( "LOG_LEVEL parameter correctly read", 1, dw.logLevel );
         assertTrue( "DIR parameter correctly read", dw.watchedDirectory.getAbsolutePath().endsWith(
             "src" + File.separatorChar + "test" + File.separatorChar + "resources" ) );
         assertTrue( "TMPDIR parameter correctly read", dw.tmpDir.getAbsolutePath().endsWith(
@@ -182,7 +182,7 @@ public class DirectoryWatcherTest extends TestCase
         assertTrue( "DIR parameter correctly read", dw.watchedDirectory.getAbsolutePath().endsWith(
             "src" + File.separatorChar + "test" + File.separatorChar + "resources" ) );
         assertEquals( "Default POLL parameter correctly read", 2000l, dw.poll );
-        assertEquals( "Default DEBUG parameter correctly read", -1l, dw.debug );
+        assertEquals( "Default LOG_LEVEL parameter correctly read", 0, dw.logLevel );
         assertTrue( "Default TMPDIR parameter correctly read", dw.tmpDir.getAbsolutePath().startsWith(
                 new File(System.getProperty("java.io.tmpdir")).getAbsolutePath()) );
         assertEquals( "Default START_NEW_BUNDLES parameter correctly read", true, dw.startBundles );

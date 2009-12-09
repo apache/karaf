@@ -26,6 +26,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.apache.felix.fileinstall.internal.Util.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -155,7 +156,8 @@ public class ConfigInstaller implements ArtifactInstaller
         Configuration oldConfiguration = findExistingConfiguration(pid, factoryPid);
         if (oldConfiguration != null)
         {
-            Util.log(context, 0, "Updating configuration from " + pid
+            Util.log(context, Util.getGlobalLogLevel(context),
+                Logger.LOG_DEBUG, "Updating configuration from " + pid
                 + (factoryPid == null ? "" : "-" + factoryPid) + ".cfg", null);
             return oldConfiguration;
         }

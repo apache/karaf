@@ -30,6 +30,7 @@ import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.felix.fileinstall.ArtifactTransformer;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
+import org.apache.felix.fileinstall.internal.Util.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -73,7 +74,8 @@ public class FileInstall implements BundleActivator
         }
         catch (NoClassDefFoundError e)
         {
-            Util.log(context, 0, "ConfigAdmin is not available, some features will be disabled", e);
+            Util.log(context, Util.getGlobalLogLevel(context), Logger.LOG_DEBUG,
+                "ConfigAdmin is not available, some features will be disabled", e);
         }
 
         padmin = new ServiceTracker(context, PackageAdmin.class.getName(), null);
@@ -103,7 +105,7 @@ public class FileInstall implements BundleActivator
 
         set(ht, DirectoryWatcher.POLL);
         set(ht, DirectoryWatcher.DIR);
-        set(ht, DirectoryWatcher.DEBUG);
+        set(ht, DirectoryWatcher.LOG_LEVEL);
         set(ht, DirectoryWatcher.FILTER);
         set(ht, DirectoryWatcher.TMPDIR);
         set(ht, DirectoryWatcher.START_NEW_BUNDLES);

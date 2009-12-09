@@ -45,6 +45,7 @@ import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.ArtifactListener;
 import org.apache.felix.fileinstall.ArtifactTransformer;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
+import org.apache.felix.fileinstall.internal.Util.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -82,7 +83,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
 	public final static String FILENAME = "felix.fileinstall.filename";
     public final static String POLL = "felix.fileinstall.poll";
     public final static String DIR = "felix.fileinstall.dir";
-    public final static String DEBUG = "felix.fileinstall.debug";
+    public final static String LOG_LEVEL = "felix.fileinstall.log.level";
     public final static String TMPDIR = "felix.fileinstall.tmpdir";
     public final static String FILTER = "felix.fileinstall.filter";
     public final static String START_NEW_BUNDLES = "felix.fileinstall.bundles.new.start";
@@ -96,7 +97,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
     File watchedDirectory;
     File tmpDir;
     long poll;
-    long debug;
+    int logLevel;
     boolean startBundles;
     String filter;
     BundleContext context;
@@ -121,7 +122,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
         this.properties = properties;
         this.context = context;
         poll = getLong(properties, POLL, 2000);
-        debug = getLong(properties, DEBUG, -1);
+        logLevel = getInt(properties, LOG_LEVEL, 0);
         originatingFileName = (String) properties.get(FILENAME);
         watchedDirectory = getFile(properties, DIR, new File("./load"));
         prepareDir(watchedDirectory);
@@ -156,7 +157,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
     public void start() {
         if (noInitialDelay)
         {
-            log("Starting initial scan", null);
+            log(Logger.LOG_DEBUG, "Starting initial scan", null);
             initializeCurrentManagedBundles();
             Set/*<File>*/ files = scanner.scan(true);
             if (files != null)
@@ -174,9 +175,10 @@ public class DirectoryWatcher extends Thread implements BundleListener
      */
     public void run()
     {
-        log("{" + POLL + " (ms) = " + poll + ", "
+        log(Logger.LOG_DEBUG,
+            "{" + POLL + " (ms) = " + poll + ", "
                 + DIR + " = " + watchedDirectory.getAbsolutePath() + ", "
-                + DEBUG + " = " + debug + ", "
+                + LOG_LEVEL + " = " + logLevel + ", "
                 + START_NEW_BUNDLES + " = " + startBundles + ", "
                 + TMPDIR + " = " + tmpDir + ", "
                 + FILTER + " = " + filter + "}", null);
@@ -225,7 +227,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     // FileInstall bundle has been uninstalled, exiting loop
                     return;
                 }
-                log("In main loop, we have serious trouble", e);
+                log(Logger.LOG_ERROR, "In main loop, we have serious trouble", e);
             }
         }
     }
@@ -240,7 +242,9 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 Artifact artifact = (Artifact) entry.getValue();
                 if (artifact.getBundleId() == bundleEvent.getBundle().getBundleId())
                 {
-                    log("Bundle " + bundleEvent.getBundle().getBundleId() + " has been uninstalled", null);
+                    log(Logger.LOG_DEBUG,
+                        "Bundle " + bundleEvent.getBundle().getBundleId()
+                            + " has been uninstalled", null);
                     currentManagedArtifacts.remove(entry.getKey());
                     break;
                 }
@@ -299,7 +303,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     }
                     catch (IOException e)
                     {
-                        log("Unable to create jar for: " + file.getAbsolutePath(), e);
+                        log(Logger.LOG_WARNING,
+                            "Unable to create jar for: " + file.getAbsolutePath(), e);
                         continue;
                     }
                 }
@@ -428,7 +433,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
             }
             catch (Exception e)
             {
-                log("Unable to transform artifact: " + artifact.getPath().getAbsolutePath(), e);
+                log(Logger.LOG_WARNING,
+                    "Unable to transform artifact: " + artifact.getPath().getAbsolutePath(), e);
             }
             return false;
         }
@@ -446,7 +452,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
             }
             catch (Exception e)
             {
-                log("Unable to transform artifact: " + artifact.getPath().getAbsolutePath(), e);
+                log(Logger.LOG_WARNING,
+                    "Unable to transform artifact: " + artifact.getPath().getAbsolutePath(), e);
             }
             return false;
         }
@@ -459,7 +466,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 && !artifact.getTransformed().equals(artifact.getPath())
                 && !artifact.getTransformed().delete())
         {
-            log("Unable to delete transformed artifact: " + artifact.getTransformed().getAbsolutePath(), null);
+            log(Logger.LOG_WARNING,
+                "Unable to delete transformed artifact: " + artifact.getTransformed().getAbsolutePath(), null);
         }
     }
 
@@ -469,7 +477,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 && !artifact.getJaredDirectory().equals(artifact.getPath())
                 && !artifact.getJaredDirectory().delete())
         {
-            log("Unable to delete jared artifact: " + artifact.getJaredDirectory().getAbsolutePath(), null);
+            log(Logger.LOG_WARNING,
+                "Unable to delete jared artifact: " + artifact.getJaredDirectory().getAbsolutePath(), null);
         }
     }
 
@@ -506,7 +515,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
     {
         if (!dir.exists() && !dir.mkdirs())
         {
-            log("Cannot create folder "
+            log(Logger.LOG_ERROR,
+                "Cannot create folder "
                 + dir
                 + ". Is the folder write-protected?", null);
             throw new RuntimeException("Cannot create folder: " + dir);
@@ -514,7 +524,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
 
         if (!dir.isDirectory())
         {
-            log("Cannot use "
+            log(Logger.LOG_ERROR,
+                "Cannot use "
                 + dir
                 + " because it's not a directory", null);
             throw new RuntimeException(
@@ -531,9 +542,9 @@ public class DirectoryWatcher extends Thread implements BundleListener
      * @param e
      *            The throwable to log
      */
-    void log(String message, Throwable e)
+    void log(int msgLevel, String message, Throwable e)
     {
-        Util.log(context, debug, message, e);
+        Util.log(context, logLevel, msgLevel, message, e);
     }
 
     /**
@@ -572,6 +583,31 @@ public class DirectoryWatcher extends Thread implements BundleListener
      * @param dflt the default value
      * @return the property as a long or the default value
      */
+    int getInt(Dictionary properties, String property, int dflt)
+    {
+        String value = (String) properties.get(property);
+        if (value != null)
+        {
+            try
+            {
+                return Integer.parseInt(value);
+            }
+            catch (Exception e)
+            {
+                log(Logger.LOG_WARNING, property + " set, but not a int: " + value, null);
+            }
+        }
+        return dflt;
+    }
+
+    /**
+     * Retrieve a property as a long.
+     *
+     * @param properties the properties to retrieve the value from
+     * @param property the name of the property to retrieve
+     * @param dflt the default value
+     * @return the property as a long or the default value
+     */
     long getLong(Dictionary properties, String property, long dflt)
     {
         String value = (String) properties.get(property);
@@ -583,7 +619,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
             }
             catch (Exception e)
             {
-                log(property + " set, but not a long: " + value, null);
+                log(Logger.LOG_WARNING, property + " set, but not a long: " + value, null);
             }
         }
         return dflt;
@@ -825,11 +861,11 @@ public class DirectoryWatcher extends Thread implements BundleListener
             }
             installationFailures.remove(path);
             currentManagedArtifacts.put(path, artifact);
-            log("Installed " + path, null);
+            log(Logger.LOG_DEBUG, "Installed " + path, null);
         }
         catch (Exception e)
         {
-            log("Failed to install artifact: " + path, e);
+            log(Logger.LOG_WARNING, "Failed to install artifact: " + path, e);
 
             // Add it our bad jars list, so that we don't
             // attempt to install it again and again until the underlying
@@ -855,7 +891,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 if (v.equals(bv)) {
                     is.reset();
                     if (Util.loadChecksum(b, context) != checksum) {
-                        log("A bundle with the same symbolic name (" + sn + ") and version (" + vStr + ") is already installed.  Updating this bundle instead.", null);
+                        log(Logger.LOG_WARNING,
+                            "A bundle with the same symbolic name (" + sn + ") and version (" + vStr + ") is already installed.  Updating this bundle instead.", null);
                         Util.storeChecksum(b, checksum, context);
                         b.update(is);
                     }
@@ -898,20 +935,22 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 bundle = context.getBundle(artifact.getBundleId());
                 if (bundle == null)
                 {
-                    log("Failed to uninstall bundle: "
+                    log(Logger.LOG_WARNING,
+                        "Failed to uninstall bundle: "
                         + path + " with id: "
                         + artifact.getBundleId()
                         + ". The bundle has already been uninstalled", null);
                     return null;
                 }
-                log("Uninstalling bundle " + bundle.getBundleId() + " (" + bundle.getSymbolicName() + ")", null);
+                log(Logger.LOG_DEBUG,
+                    "Uninstalling bundle " + bundle.getBundleId() + " (" + bundle.getSymbolicName() + ")", null);
                 bundle.uninstall();
             }
-            log("Uninstalled " + path, null);
+            log(Logger.LOG_DEBUG, "Uninstalled " + path, null);
         }
         catch (Exception e)
         {
-            log("Failed to uninstall artifact: " + artifact.getPath(), e);
+            log(Logger.LOG_WARNING, "Failed to uninstall artifact: " + artifact.getPath(), e);
         }
         return bundle;
     }
@@ -934,7 +973,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 bundle = context.getBundle(artifact.getBundleId());
                 if (bundle == null)
                 {
-                    log("Failed to update bundle: "
+                    log(Logger.LOG_WARNING,
+                        "Failed to update bundle: "
                         + path + " with ID "
                         + artifact.getBundleId()
                         + ". The bundle has been uninstalled", null);
@@ -958,7 +998,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 bundle = context.getBundle(artifact.getBundleId());
                 if (bundle == null)
                 {
-                    log("Failed to update bundle: "
+                    log(Logger.LOG_WARNING,
+                        "Failed to update bundle: "
                         + path + " with ID "
                         + artifact.getBundleId()
                         + ". The bundle has been uninstalled", null);
@@ -975,11 +1016,11 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     in.close();
                 }
             }
-            log("Updated " + path, null);
+            log(Logger.LOG_DEBUG, "Updated " + path, null);
         }
         catch (Throwable t)
         {
-            log("Failed to update artifact " + artifact.getPath(), t);
+            log(Logger.LOG_WARNING, "Failed to update artifact " + artifact.getPath(), t);
         }
         return bundle;
     }
@@ -1026,13 +1067,12 @@ public class DirectoryWatcher extends Thread implements BundleListener
             try
             {
                 bundle.start();
-                log("Started bundle: " + bundle.getLocation(), null);
+                log(Logger.LOG_DEBUG, "Started bundle: " + bundle.getLocation(), null);
             }
             catch (BundleException e)
             {
-                log("Error while starting bundle: " + bundle.getLocation(), e);
+                log(Logger.LOG_WARNING, "Error while starting bundle: " + bundle.getLocation(), e);
             }
         }
     }
-
 }

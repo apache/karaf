@@ -170,6 +170,24 @@ public class Util
         return val;
     }
 
+    public static int getGlobalLogLevel(BundleContext context)
+    {
+        String s = (String) context.getProperty(DirectoryWatcher.LOG_LEVEL);
+        s = (s == null)
+            ? System.getProperty(DirectoryWatcher.LOG_LEVEL.toUpperCase().replace('.', '_'))
+            : s;
+        s = (s == null) ? "1" : s;
+        int logLevel = 1;
+        try
+        {
+            logLevel = Integer.parseInt(s);
+        }
+        catch (NumberFormatException ex)
+        {
+        }
+        return logLevel;
+    }
+
     /**
      * Log a message and optional throwable. If there is a log service we use
      * it, otherwise we log to the console
@@ -179,9 +197,10 @@ public class Util
      * @param e
      *            The throwable to log
      */
-    public static void log(BundleContext context, long debug, String message, Throwable e)
+    public static void log(BundleContext context, int logLevel,
+        int msgLevel, String message, Throwable e)
     {
-        getLogger(context).log(debug > 0, message, e);
+        getLogger(context).log(logLevel, msgLevel, message, e);
     }
 
     private static Logger getLogger(BundleContext context)
@@ -206,8 +225,13 @@ public class Util
 
     interface Logger
     {
+        static final int LOG_ERROR = 1;
+        static final int LOG_WARNING = 2;
+        static final int LOG_INFO = 3;
+        static final int LOG_DEBUG = 4;
+
         boolean isValidLogger(BundleContext context);
-        void log(boolean debug, java.lang.String message, java.lang.Throwable throwable);
+        void log(int logLevel, int msgLevel, String message, Throwable throwable);
     }
 
     static class StdOutLogger implements Logger
@@ -216,19 +240,25 @@ public class Util
         {
             return true;
         }
-        public void log(boolean debug, String message, Throwable throwable)
+
+        public void log(int logLevel, int msgLevel, String message, Throwable throwable)
         {
-            System.out.println(message + (throwable == null ? "" : ": " + throwable));
-            if (debug && throwable != null)
+            // Only print the message if logging is enabled and
+            // the message level is less than or equal to the log
+            // level.
+            if ((logLevel > 0) && (msgLevel <= logLevel))
             {
-                throwable.printStackTrace(System.out);
+                System.out.println(message + ((throwable == null) ? "" : ": " + throwable));
+                if (throwable != null)
+                {
+                    throwable.printStackTrace(System.out);
+                }
             }
         }
     }
 
     static class OsgiLogger extends StdOutLogger
     {
-
         private BundleContext context;
 
         OsgiLogger(BundleContext context)
@@ -250,27 +280,22 @@ public class Util
             return context == this.context;
         }
 
-        public void log(boolean debug, String message, Throwable throwable)
+        public void log(int logLevel, int msgLevel, String message, Throwable throwable)
         {
-            LogService log = getLogService();
-            if (log != null)
+            // Only print the message if logging is enabled and
+            // the message level is less than or equal to the log
+            // level.
+            if ((logLevel > 0) && (msgLevel <= logLevel))
             {
-                if (throwable != null)
+                LogService log = getLogService();
+                if (log != null)
                 {
-                    log.log(LogService.LOG_ERROR, message, throwable);
-                    if (debug)
-                    {
-                        throwable.printStackTrace();
-                    }
+                    log.log(msgLevel, message, throwable);
                 }
                 else
                 {
-                    log.log(LogService.LOG_INFO, message);
+                    super.log(logLevel, msgLevel, message, throwable);
                 }
-            }
-            else
-            {
-                super.log(debug, message, throwable);
             }
         }
 
@@ -285,7 +310,6 @@ public class Util
             return null;
         }
     }
-
 
     /**
      * Jar up a directory
