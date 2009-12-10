@@ -35,18 +35,12 @@ import java.util.Properties;
 
 import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.dependencies.Dependency;
-import org.apache.felix.dm.impl.dependencies.BundleDependencyImpl;
-import org.apache.felix.dm.impl.dependencies.ConfigurationDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.DependencyActivation;
 import org.apache.felix.dm.impl.dependencies.DependencyService;
-import org.apache.felix.dm.impl.dependencies.ResourceDependencyImpl;
-import org.apache.felix.dm.impl.dependencies.ServiceDependencyImpl;
 import org.apache.felix.dm.management.ServiceComponent;
 import org.apache.felix.dm.management.ServiceComponentDependency;
-import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
 import org.apache.felix.dm.service.ServiceStateListener;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
@@ -421,7 +415,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 
 	public synchronized void setServiceProperties(Dictionary serviceProperties) {
 	    m_serviceProperties = serviceProperties;
-	    if (isBound() && (m_serviceName != null)) {
+	    if ((m_registration != null) && (m_serviceName != null)) {
 	        m_registration.setProperties(calculateServiceProperties());
 	    }
 	}
@@ -814,36 +808,44 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
     }
 
     private void updateInstance(Dependency dependency) {
-        if (dependency instanceof ServiceDependencyImpl) {
-            ServiceDependencyImpl sd = (ServiceDependencyImpl) dependency;
-            // update the dependency in the service instance (it will use
-            // a null object if necessary)
-            if (sd.isAutoConfig()) {
-                configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
+        
+        if (dependency.isAutoConfig()) {
+            configureImplementation(dependency.getAutoConfigType(), dependency.getAutoConfigInstance(), dependency.getAutoConfigName());
+            if (dependency.isPropagated() && m_registration != null) {
+                m_registration.setProperties(calculateServiceProperties());
             }
         }
-        else if (dependency instanceof ConfigurationDependencyImpl) {
-        	ConfigurationDependencyImpl cd = (ConfigurationDependencyImpl) dependency;
-        	if (cd.isPropagated()) {
-        		// change service properties accordingly, but only if the service was already registered
-        	    if (m_registration != null) {
-            		Dictionary props = calculateServiceProperties();
-            		m_registration.setProperties(props);
-        	    }
-        	}
-        }
-        else if (dependency instanceof BundleDependencyImpl) {
-            BundleDependencyImpl bd = (BundleDependencyImpl) dependency;
-            if (bd.isAutoConfig()) {
-                configureImplementation(Bundle.class, bd.getBundle()); // TODO support AutoConfigName
-            }
-        }
-        else if (dependency instanceof ResourceDependencyImpl) {
-            ResourceDependencyImpl rd = (ResourceDependencyImpl) dependency;
-            if (rd.isAutoConfig()) {
-                configureImplementation(Resource.class, rd.getResource()); // TODO support AutoConfigName
-            }
-        }
+        
+//        if (dependency instanceof ServiceDependencyImpl) {
+//            ServiceDependencyImpl sd = (ServiceDependencyImpl) dependency;
+//            // update the dependency in the service instance (it will use
+//            // a null object if necessary)
+//            if (sd.isAutoConfig()) {
+//                configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
+//            }
+//        }
+//        else if (dependency instanceof ConfigurationDependencyImpl) {
+//        	ConfigurationDependencyImpl cd = (ConfigurationDependencyImpl) dependency;
+//        	if (cd.isPropagated()) {
+//        		// change service properties accordingly, but only if the service was already registered
+//        	    if (m_registration != null) {
+//            		Dictionary props = calculateServiceProperties();
+//            		m_registration.setProperties(props);
+//        	    }
+//        	}
+//        }
+//        else if (dependency instanceof BundleDependencyImpl) {
+//            BundleDependencyImpl bd = (BundleDependencyImpl) dependency;
+//            if (bd.isAutoConfig()) {
+//                configureImplementation(Bundle.class, bd.getBundle()); // TODO support AutoConfigName
+//            }
+//        }
+//        else if (dependency instanceof ResourceDependencyImpl) {
+//            ResourceDependencyImpl rd = (ResourceDependencyImpl) dependency;
+//            if (rd.isAutoConfig()) {
+//                configureImplementation(Resource.class, rd.getResource()); // TODO support AutoConfigName
+//            }
+//        }
     }
 
     /**
@@ -1031,14 +1033,6 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         return (state.isAllRequiredAvailable());
     }
     
-    private boolean isBound() {
-        State state;
-        synchronized (m_dependencies) {
-            state = m_state;
-        }
-        return (state.isBound());
-    }
-
     // ServiceComponent interface
     
     static class SCDImpl implements ServiceComponentDependency {

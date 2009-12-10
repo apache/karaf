@@ -34,7 +34,6 @@ public class ResourceAdapterImpl {
 	}
 
 	public void added(Resource resource) {
-		System.out.println("ADDED " + resource);
 		m_manager.add(m_manager.createService()
 			.setInterface(m_iface.getName(), null)
 			.setImplementation(m_impl)
@@ -48,5 +47,4 @@ public class ResourceAdapterImpl {
 
 	public void removed(Resource resource) {
 	}
-
 }
