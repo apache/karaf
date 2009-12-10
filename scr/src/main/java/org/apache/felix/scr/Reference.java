@@ -121,6 +121,9 @@ public interface Reference
      * service registration properties or <code>null</code> if no such method
      * is configued. This method provides access to the <code>updated</code>
      * attribute of the <code>reference</code> element.
+     * <p>
+     * For a component declared in a Declarative Services 1.0 and 1.1
+     * descriptor, this method always returns <code>null</code>.
      */
     String getUpdatedMethodName();
 
