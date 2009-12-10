@@ -99,4 +99,6 @@ public interface ResourceDependency extends Dependency, ResourceHandler {
      ResourceDependency setRequired(boolean required);
 
      ResourceDependency setFilter(String resourceFilter);
+     
+     ResourceDependency setPropagate(boolean propagate);
 }

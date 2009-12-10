@@ -182,9 +182,9 @@ public class DependencyManager {
     
     // TODO note to self, there are Dependency's and DependencyCollections 
     // (being a dependency on more than one, fi ServiceDendency, ResourceDependency
-    public Service createResourceAdapterService(String resourceFilter, Class iface2, Object impl) {
+    public Service createResourceAdapterService(String resourceFilter, Class iface2, Object impl, boolean propagate) {
         return createService()
-            .setImplementation(new ResourceAdapterImpl(impl, iface2))
+            .setImplementation(new ResourceAdapterImpl(impl, iface2, propagate))
             .add(createResourceDependency()
                 .setFilter(resourceFilter)
                 .setAutoConfig(false)

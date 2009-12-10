@@ -25,10 +25,12 @@ public class ResourceAdapterImpl {
 	private volatile DependencyManager m_manager;
 	private final Object m_impl;
 	private final Class m_iface;
+    private final boolean m_propagate;
 
-	public ResourceAdapterImpl(Object impl, Class iface) {
+	public ResourceAdapterImpl(Object impl, Class iface, boolean propagate) {
 		m_impl = impl;
 		m_iface = iface;
+		m_propagate = propagate;
 	}
 
 	public void added(Resource resource) {
@@ -39,6 +41,7 @@ public class ResourceAdapterImpl {
 			.add(m_manager.createResourceDependency()
 				.setResource(resource)
 				.setRequired(true)
+				.setPropagate(m_propagate)
 				)
 			);
 	}
