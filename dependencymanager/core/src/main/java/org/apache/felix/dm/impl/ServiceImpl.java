@@ -514,11 +514,11 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         // now is the time to configure the service, meaning all required
         // dependencies will be set and any callbacks called
         configureService(state);
+        // flag that our instance has been created
+        m_isInstantiated = true;
         // then we invoke the init callback so the service can further initialize
         // itself
         invoke(init);
-        // flag that our instance has been created
-        m_isInstantiated = true;
         // see if any of this caused further state changes
         calculateStateChanges();
     }
@@ -563,12 +563,12 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         synchronized (this) {
             destroy = m_callbackDestroy;
         }
+        // flag that our instance was destroyed
+        m_isInstantiated = false;
         // invoke the destroy callback
         invoke(destroy);
         // destroy the service instance
         destroyService(state);
-        // flag that our instance was destroyed
-        m_isInstantiated = false;
     }
     
     private void invoke(String name) {

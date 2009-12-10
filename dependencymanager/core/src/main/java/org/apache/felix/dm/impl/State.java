@@ -116,12 +116,16 @@ public final class State {
         if (m_stringValue == null) {
             // we only need to determine this once, but we do it lazily
             StringBuffer buf = new StringBuffer();
-            buf.append("State[" + STATES[m_state] + "|");
+            buf.append("State[" + STATES[m_state]);
             List deps = m_deps;
             for (int i = 0; i < deps.size(); i++) {
+                if (i == 0) {
+                    buf.append("|");
+                }
                 Dependency dep = (Dependency) deps.get(i);
-                buf.append("(" + dep + (dep.isRequired() ? " R" : " O") + (dep.isAvailable() ? " +" : " -") + ")");
+                buf.append("(" + (dep.isRequired() ? "Req " : "   ") + (dep.isAvailable() ? "Avl " : "    ") + (dep.isInstanceBound() ? "InB " : "    ") + (dep.isPropagated() ? "Prp " : "    ") + dep + ")");
             }
+            buf.append("]");
             m_stringValue = buf.toString();
         }
         return m_stringValue;

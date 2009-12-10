@@ -18,6 +18,8 @@
  */
 package org.apache.felix.dm.test;
 
+import java.io.PrintStream;
+
 import junit.framework.Assert;
 
 /**
@@ -29,6 +31,7 @@ public class Ensure {
     private static final boolean DEBUG = true;
     private static long INSTANCE = 0;
     private static final int RESOLUTION = 100;
+    private static PrintStream STREAM = System.out;
     int step = 0;
     
     public Ensure() {
@@ -37,6 +40,10 @@ public class Ensure {
         }
     }
 
+    public void setStream(PrintStream output) {
+        STREAM = output;
+    }
+    
     /**
      * Mark this point as step <code>nr</code>.
      * 
@@ -46,7 +53,7 @@ public class Ensure {
         step++;
         Assert.assertEquals(nr, step);
         if (DEBUG) {
-            System.out.println("[Ensure " + INSTANCE + "] step " + step);
+            STREAM.println("[Ensure " + INSTANCE + "] step " + step);
         }
         notifyAll();
     }
@@ -63,7 +70,7 @@ public class Ensure {
     public synchronized void waitForStep(int nr, int timeout) {
         final int initialTimeout = timeout;
         if (DEBUG) {
-            System.out.println("[Ensure " + INSTANCE + "] waiting for step " + nr);
+            STREAM.println("[Ensure " + INSTANCE + "] waiting for step " + nr);
         }
         while (step < nr && timeout > 0) {
             try {
@@ -76,7 +83,7 @@ public class Ensure {
             throw new IllegalStateException("Timed out waiting for " + initialTimeout + " ms for step " + nr + ", we are still at step " + step);
         }
         if (DEBUG) {
-            System.out.println("[Ensure " + INSTANCE + "] arrived at step " + nr);
+            STREAM.println("[Ensure " + INSTANCE + "] arrived at step " + nr);
         }
     }
     
