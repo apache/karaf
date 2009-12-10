@@ -35,7 +35,7 @@ import org.osgi.framework.ServiceRegistration;
 public class ResourceDependencyImpl implements ResourceDependency, ResourceHandler, DependencyActivation {
 	private volatile BundleContext m_context;
 	private volatile ServiceRegistration m_registration;
-	private long m_resourceCounter;
+//	private long m_resourceCounter;
 
     private Object m_callbackInstance;
     private String m_callbackAdded;
@@ -47,10 +47,11 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     protected List m_services = new ArrayList();
 	private boolean m_isRequired;
 	private String m_resourceFilter;
-	private Resource m_resource;
+//	private Resource m_resource;
 	private Resource m_trackedResource;
     private boolean m_isStarted;
-
+    private List m_resources = new ArrayList();
+    private Resource m_resourceInstance;
 	
     public ResourceDependencyImpl(BundleContext context, Logger logger) {
     	m_context = context;
@@ -59,7 +60,7 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     }
     
 	public synchronized boolean isAvailable() {
-		return m_resourceCounter > 0;
+		return m_resources.size() > 0;
 	}
 
 	public boolean isRequired() {
@@ -105,59 +106,64 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
 	}
 
 	public void added(Resource resource) {
-		long counter;
-		Object[] services;
-		synchronized (this) {
-			m_resourceCounter++;
-			counter = m_resourceCounter;
-			m_resource = resource; // TODO this really sucks as a way to track a single resource
-			services = m_services.toArray();
-		}
-        for (int i = 0; i < services.length; i++) {
-            DependencyService ds = (DependencyService) services[i];
-            if (counter == 1) {
-                ds.dependencyAvailable(this);
-                if (!isRequired()) {
+	    if (m_trackedResource == null || m_trackedResource.equals(resource)) {
+    		long counter;
+    		Object[] services;
+    		synchronized (this) {
+    		    m_resources.add(resource);
+    			counter = m_resources.size();
+    			services = m_services.toArray();
+    		}
+            for (int i = 0; i < services.length; i++) {
+                DependencyService ds = (DependencyService) services[i];
+                if (counter == 1) {
+                    ds.dependencyAvailable(this);
+                    if (!isRequired()) {
+                        invokeAdded(ds, resource);
+                    }
+                }
+                else {
+                    ds.dependencyChanged(this);
                     invokeAdded(ds, resource);
                 }
             }
-            else {
-                ds.dependencyChanged(this);
-                invokeAdded(ds, resource);
-            }
-        }
+	    }
 	}
 
 	public void changed(Resource resource) {
-        Object[] services;
-        synchronized (this) {
-            services = m_services.toArray();
-        }
-        for (int i = 0; i < services.length; i++) {
-            DependencyService ds = (DependencyService) services[i];
-            invokeChanged(ds, resource);
+        if (m_trackedResource == null || m_trackedResource.equals(resource)) {
+            Object[] services;
+            synchronized (this) {
+                services = m_services.toArray();
+            }
+            for (int i = 0; i < services.length; i++) {
+                DependencyService ds = (DependencyService) services[i];
+                invokeChanged(ds, resource);
+            }
         }
 	}
 
 	public void removed(Resource resource) {
-		long counter;
-		Object[] services;
-		synchronized (this) {
-			m_resourceCounter--;
-			counter = m_resourceCounter;
-			services = m_services.toArray();
-		}
-        for (int i = 0; i < services.length; i++) {
-            DependencyService ds = (DependencyService) services[i];
-            if (counter == 0) {
-                ds.dependencyUnavailable(this);
-                if (!isRequired()) {
+        if (m_trackedResource == null || m_trackedResource.equals(resource)) {
+    		long counter;
+    		Object[] services;
+    		synchronized (this) {
+    		    m_resources.remove(resource);
+    			counter = m_resources.size();
+    			services = m_services.toArray();
+    		}
+            for (int i = 0; i < services.length; i++) {
+                DependencyService ds = (DependencyService) services[i];
+                if (counter == 0) {
+                    ds.dependencyUnavailable(this);
+                    if (!isRequired()) {
+                        invokeRemoved(ds, resource);
+                    }
+                }
+                else {
+                    ds.dependencyChanged(this);
                     invokeRemoved(ds, resource);
                 }
-            }
-            else {
-                ds.dependencyChanged(this);
-                invokeRemoved(ds, resource);
             }
         }
 	}
@@ -372,19 +378,26 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     public synchronized boolean isAutoConfig() {
         return m_autoConfig;
     }
-
+    
     public Resource getResource() {
-    	return m_resource;
+    	return lookupResource();
     }
 
+    private Resource lookupResource() {
+        try {
+            return (Resource) m_resources.get(0);
+        }
+        catch (IndexOutOfBoundsException e) {
+            return null;
+        }
+    }
+    
     public Object getAutoConfigInstance() {
-        // TODO Auto-generated method stub
-        return null;
+        return lookupResource();
     }
 
     public String getAutoConfigName() {
-        // TODO Auto-generated method stub
-        return null;
+        return m_autoConfigInstance;
     }
 
     public Class getAutoConfigType() {
@@ -392,12 +405,13 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     }
 
     public void invokeAdded(DependencyService service) {
-        // TODO Auto-generated method stub
-        
+        // we remember these for future reference, needed for required callbacks
+        m_resourceInstance = lookupResource();
+        invokeAdded(service, m_resourceInstance);
     }
 
     public void invokeRemoved(DependencyService service) {
-        // TODO Auto-generated method stub
-        
+        invokeRemoved(service, m_resourceInstance);
+        m_resourceInstance = null;
     }
 }
