@@ -421,7 +421,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 
 	public synchronized void setServiceProperties(Dictionary serviceProperties) {
 	    m_serviceProperties = serviceProperties;
-	    if (isRegistered() && (m_serviceName != null)) {
+	    if (isBound() && (m_serviceName != null)) {
 	        m_registration.setProperties(calculateServiceProperties());
 	    }
 	}
@@ -1028,6 +1028,14 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
     	synchronized (m_dependencies) {
     		state = m_state;
     	}
+        return (state.isAllRequiredAvailable());
+    }
+    
+    private boolean isBound() {
+        State state;
+        synchronized (m_dependencies) {
+            state = m_state;
+        }
         return (state.isBound());
     }
 
