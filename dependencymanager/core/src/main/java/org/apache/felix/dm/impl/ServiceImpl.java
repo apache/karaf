@@ -1028,7 +1028,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
     	synchronized (m_dependencies) {
     		state = m_state;
     	}
-        return (state.isAllRequiredAvailable());
+        return (state.isBound());
     }
 
     // ServiceComponent interface
