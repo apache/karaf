@@ -298,4 +298,8 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
         // TODO Auto-generated method stub
         return false;
     }
+
+    public Dictionary getProperties() {
+        return getConfiguration();
+    }
 }

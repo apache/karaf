@@ -781,12 +781,9 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 		addTo(properties, m_serviceProperties);
 		for (int i = 0; i < m_dependencies.size(); i++) {
 			Dependency d = (Dependency) m_dependencies.get(i);
-			if (d instanceof ConfigurationDependencyImpl) {
-				ConfigurationDependencyImpl cd = (ConfigurationDependencyImpl) d;
-				if (cd.isPropagated()) {
-					Dictionary dict = cd.getConfiguration();
-					addTo(properties, dict);
-				}
+			if (d.isPropagated()) {
+				Dictionary dict = d.getProperties();
+				addTo(properties, dict);
 			}
 		}
 		if (properties.size() == 0) {

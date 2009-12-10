@@ -23,6 +23,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -752,5 +753,15 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
         invokeRemoved(service, m_reference, m_serviceInstance);
         m_reference = null;
         m_serviceInstance = null;
+    }
+
+    public Dictionary getProperties() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean isPropagated() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

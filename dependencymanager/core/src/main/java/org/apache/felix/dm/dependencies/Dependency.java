@@ -18,6 +18,8 @@
  */
 package org.apache.felix.dm.dependencies;
 
+import java.util.Dictionary;
+
 import org.apache.felix.dm.impl.dependencies.DependencyService;
 
 /**
@@ -104,4 +106,7 @@ public interface Dependency {
      * @param service
      */
     public void invokeRemoved(DependencyService service);
+    
+    public boolean isPropagated();
+    public Dictionary getProperties();
 }

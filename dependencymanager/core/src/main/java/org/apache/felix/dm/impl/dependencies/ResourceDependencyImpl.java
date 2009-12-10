@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.Properties;
 
@@ -47,11 +48,11 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     protected List m_services = new ArrayList();
 	private boolean m_isRequired;
 	private String m_resourceFilter;
-//	private Resource m_resource;
 	private Resource m_trackedResource;
     private boolean m_isStarted;
     private List m_resources = new ArrayList();
     private Resource m_resourceInstance;
+    private boolean m_propagate;
 	
     public ResourceDependencyImpl(BundleContext context, Logger logger) {
     	m_context = context;
@@ -413,5 +414,29 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     public void invokeRemoved(DependencyService service) {
         invokeRemoved(service, m_resourceInstance);
         m_resourceInstance = null;
+    }
+
+    public ResourceDependency setPropagate(boolean propagate) {
+        ensureNotActive();
+        m_propagate = propagate;
+        return this;
+    }
+    
+    public Dictionary getProperties() {
+        Resource resource = lookupResource();
+        if (resource != null) {
+            Properties props = new Properties();
+            props.put(Resource.NAME, resource.getName());
+            props.put(Resource.PATH, resource.getPath());
+            props.put(Resource.REPOSITORY, resource.getRepository());
+            return props;
+        }
+        else {
+            throw new IllegalStateException("cannot find resource");
+        }
+    }
+
+    public boolean isPropagated() {
+        return m_propagate;
     }
 }

@@ -389,4 +389,14 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
         invokeRemoved(service, m_bundleInstance);
         m_bundleInstance = null;
     }
+
+    public Dictionary getProperties() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean isPropagated() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }
