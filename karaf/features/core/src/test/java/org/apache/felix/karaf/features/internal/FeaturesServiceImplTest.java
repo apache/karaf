@@ -21,9 +21,6 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import org.apache.felix.karaf.features.Feature;
-import org.easymock.EasyMock;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
