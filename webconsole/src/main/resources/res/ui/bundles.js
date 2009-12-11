@@ -40,11 +40,17 @@ function renderData( eventData )  {
 	$(".statusline").empty().append(eventData.status);
 	$("#plugin_table > tbody > tr").remove();
     for ( var idx in eventData.data ) {
-        entry( eventData.data[idx] );
+    	if ( currentBundle == null || !drawDetails || currentBundle == eventData.data[idx].id) {
+            entry( eventData.data[idx] );
+    	}
     }
     $("#plugin_table").trigger("update");
-    if ( drawDetails ) {
-	    renderDetails(eventData);
+    if ( drawDetails && eventData.data.length == 1 ) {
+	    renderDetails(eventData.data[0]);    
+    } else if ( currentBundle != null ) {
+    	var id = currentBundle;
+    	hideDetails(id);
+    	showDetails(id);
     }
 }
 
@@ -139,12 +145,14 @@ function refreshPackages() {
 }
 
 function showDetails( id ) {
+	currentBundle = id;
     $.get(pluginRoot + "/" + id + ".json", null, function(data) {
-    	renderDetails(data);
+    	renderDetails(data.data[0]);
     }, "json");
 }
 
 function hideDetails( id ) {
+	currentBundle = null;
 	$("#img" + id).each(function() {
 		$("#pluginInlineDetails").remove();
 		$(this).attr("src", appRoot + "/res/imgs/arrow_right.png");
@@ -155,7 +163,6 @@ function hideDetails( id ) {
 }
 
 function renderDetails( data ) {
-	data = data.data[0];
 	$("#pluginInlineDetails").remove();
 	$("#entry" + data.id + " > td").eq(1).append("<div id='pluginInlineDetails'/>");
 	$("#img" + data.id).each(function() {
