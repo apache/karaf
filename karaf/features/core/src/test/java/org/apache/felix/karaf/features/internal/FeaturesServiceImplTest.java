@@ -21,6 +21,14 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 import org.apache.felix.karaf.features.Feature;
+import org.easymock.EasyMock;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
+import org.osgi.service.prefs.PreferencesService;
+
+import static org.easymock.EasyMock.*;
 
 /**
  * Test cases for {@link FeaturesServiceImpl}
@@ -85,4 +93,25 @@ public class FeaturesServiceImplTest extends TestCase {
         assertSame("2.0.0", impl.getFeature("transaction", FeatureImpl.DEFAULT_VERSION).getVersion());
     }
 
+    public void testStartDoesNotFailWithOneInvalidUri() throws BackingStoreException {
+        PreferencesService preferencesService = createNiceMock(PreferencesService.class);
+        Preferences prefs = createNiceMock(Preferences.class);
+        Preferences emptyPrefs = createNiceMock(Preferences.class);
+        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
+        replay(preferencesService);
+
+        expect(prefs.node("repositories")).andReturn(emptyPrefs);
+        expect(prefs.node("features")).andReturn(emptyPrefs);
+        replay(prefs);
+
+        FeaturesServiceImpl service = new FeaturesServiceImpl();
+        service.setPreferences(preferencesService);
+
+        try {
+            service.setUrls("mvn:inexistent/features/1.0/xml/features");
+            service.start();
+        } catch (Exception e) {
+            fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
+        }
+    }
 }

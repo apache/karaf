@@ -62,6 +62,8 @@ import org.osgi.service.startlevel.StartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.lang.String.format;
+
 /**
  * The Features service implementation.
  * Adding a repository url will load the features contained in this repository and
@@ -630,7 +632,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         if (!loadState()) {
             if (uris != null) {
                 for (URI uri : uris) {
-                    internalAddRepository(uri);
+                    try {
+                        internalAddRepository(uri);
+                    } catch (Exception e) {
+                        LOGGER.warn(format("Unable to add features repository %s at startup", uri), e);    
+                    }
                 }
             }
             saveState();
