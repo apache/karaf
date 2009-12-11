@@ -243,13 +243,20 @@ function renderBundles(data) {
             }
             return node.innerHTML;
         };
+        // check for cookie
+        var cv = $.cookies.get("webconsolebundlelist");
+        var lo = (cv ? cv.split(",") : [1,0]);
         $("#plugin_table").tablesorter({
             headers: {
         	    0: { sorter:"digit"},
                 5: { sorter: false }
             },
-            sortList: [[1,0]],
+            sortList: [cv],
             textExtraction:extractMethod 
+        });
+        $("#plugin_table").bind("sortEnd", function() {
+        	var table = $("#plugin_table").eq(0).attr("config");
+        	$.cookies.set("webconsolebundlelist", table.sortList.toString());
         });
     });
 }

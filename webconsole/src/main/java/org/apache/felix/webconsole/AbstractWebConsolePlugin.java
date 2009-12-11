@@ -620,6 +620,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         + "    </script>"
 
         + "    <script src=\"{2}/res/ui/jquery-1.3.2.min.js\" language=\"JavaScript\"></script>"
+        + "    <script src=\"{2}/res/ui/jquery.cookies-2.1.0.min.js\" language=\"JavaScript\"></script>"
         + "    <script src=\"{2}/res/ui/jquery.tablesorter-2.0.3.min.js\" language=\"JavaScript\"></script>"
 
         + "    <script src=\"{2}/res/ui/admin.js\" language=\"JavaScript\"></script>"
