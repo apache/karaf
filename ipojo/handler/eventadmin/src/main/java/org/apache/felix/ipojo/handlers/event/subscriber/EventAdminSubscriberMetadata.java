@@ -166,7 +166,14 @@ class EventAdminSubscriberMetadata {
         if (t == null) { // Alternative configuration
             t = subscriber.getAttribute("data_type");
         }
+        
         if (t != null) {
+            // Check that the data-key attribute is set.
+            if (m_dataKey == null) {
+                throw new ConfigurationException(
+                        "Missing attribute in component configuration : "
+                                + DATA_KEY_ATTRIBUTE);
+            }
             Class type;
             try {
                 type = m_bundleContext.getBundle().loadClass(t);
