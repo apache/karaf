@@ -103,6 +103,21 @@
         />
     </scr:component>
 
+    <scr:component name="test_required_multiple_dynamic_factory"
+        enabled="false"
+        configuration-policy="ignore"
+        factory="factory_test_required_multiple_dynamic_factory">
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <reference
+            name="ref"
+            interface="org.apache.felix.scr.integration.components.SimpleService"
+            cardinality="1..n"
+            policy="dynamic"
+            bind="bindSimpleService"
+            unbind="unbindSimpleService"
+        />
+    </scr:component>
+
     <scr:component name="test_optional_multiple_static"
         enabled="false"
         configuration-policy="ignore">

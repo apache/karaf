@@ -19,6 +19,8 @@
 package org.apache.felix.scr.integration;
 
 
+import java.util.Hashtable;
+
 import junit.framework.TestCase;
 
 import org.apache.felix.scr.Component;
@@ -27,11 +29,19 @@ import org.apache.felix.scr.integration.components.SimpleServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.component.ComponentFactory;
+import org.osgi.service.component.ComponentInstance;
 
 
 @RunWith(JUnit4TestRunner.class)
 public class ServiceBindTest extends ComponentTestBase
 {
+
+    private static final String PROP_NAME_FACTORY = ComponentTestBase.PROP_NAME + ".factory";
+
     static
     {
         // uncomment to enable debugging of this test class
@@ -546,6 +556,142 @@ public class ServiceBindTest extends ComponentTestBase
         TestCase.assertTrue( comp32.m_multiRef.contains( srv5 ) );
         TestCase.assertFalse( comp32.m_multiRef.contains( srv6 ) );
         TestCase.assertTrue( comp32.m_multiRef.contains( srv7 ) );
+    }
+
+
+    @Test
+    public void test_required_multiple_dynamic_factory() throws InvalidSyntaxException
+    {
+        final String pid = "test_required_multiple_dynamic_factory";
+        final String factoryPid = "factory_" + pid;
+
+        final Component component = findComponentByName( pid );
+        TestCase.assertNotNull( component );
+        TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
+
+        // async enabling (unsatisfied)
+        component.enable();
+        delay();
+        TestCase.assertEquals( Component.STATE_UNSATISFIED, component.getState() );
+
+        // register service, satisfying
+        final SimpleServiceImpl srv1 = SimpleServiceImpl.create( bundleContext, "srv1" );
+        delay();
+        TestCase.assertEquals( Component.STATE_FACTORY, component.getState() );
+
+        // create a component instance
+        final ServiceReference[] refs = bundleContext.getServiceReferences( ComponentFactory.class.getName(), "("
+            + ComponentConstants.COMPONENT_FACTORY + "=" + factoryPid + ")" );
+        TestCase.assertNotNull( refs );
+        TestCase.assertEquals( 1, refs.length );
+        final ComponentFactory factory = ( ComponentFactory ) bundleContext.getService( refs[0] );
+        TestCase.assertNotNull( factory );
+
+        Hashtable<String, String> props = new Hashtable<String, String>();
+        props.put( PROP_NAME_FACTORY, PROP_NAME_FACTORY );
+        final ComponentInstance instance = factory.newInstance( props );
+        TestCase.assertNotNull( instance );
+        TestCase.assertNotNull( instance.getInstance() );
+        TestCase.assertEquals( SimpleComponent.INSTANCE, instance.getInstance() );
+
+        // ensure instance is bound
+        final SimpleComponent sc = SimpleComponent.INSTANCE;
+        TestCase.assertEquals( 1, sc.m_multiRef.size() );
+        TestCase.assertTrue( sc.m_multiRef.contains( srv1 ) );
+
+        // ensure factory is not bound
+        TestCase.assertNull( component.getReferences()[0].getServiceReferences() );
+
+        // assert two components managed
+        final Component[] allFactoryComponents = findComponentsByName( pid );
+        TestCase.assertNotNull( allFactoryComponents );
+        TestCase.assertEquals( 2, allFactoryComponents.length );
+        for ( int i = 0; i < allFactoryComponents.length; i++ )
+        {
+            final Component c = allFactoryComponents[i];
+            if ( c.getId() == component.getId() )
+            {
+                TestCase.assertEquals( Component.STATE_FACTORY, c.getState() );
+            }
+            else if ( c.getId() == SimpleComponent.INSTANCE.m_id )
+            {
+                TestCase.assertEquals( Component.STATE_ACTIVE, c.getState() );
+            }
+            else
+            {
+                TestCase.fail( "Unexpected Component " + c );
+            }
+        }
+
+        // register second service
+        final SimpleServiceImpl srv11 = SimpleServiceImpl.create( bundleContext, "srv11" );
+        delay();
+
+        // ensure instance is bound
+        TestCase.assertEquals( 2, sc.m_multiRef.size() );
+        TestCase.assertTrue( sc.m_multiRef.contains( srv1 ) );
+        TestCase.assertTrue( sc.m_multiRef.contains( srv11 ) );
+
+        // ensure factory is not bound
+        TestCase.assertNull( component.getReferences()[0].getServiceReferences() );
+
+        // drop second service and ensure unbound (and active)
+        srv11.drop();
+        delay();
+        TestCase.assertNotNull( instance.getInstance() );
+        TestCase.assertEquals( SimpleComponent.INSTANCE, instance.getInstance() );
+        TestCase.assertEquals( 1, sc.m_multiRef.size() );
+        TestCase.assertTrue( sc.m_multiRef.contains( srv1 ) );
+        TestCase.assertNull( component.getReferences()[0].getServiceReferences() );
+
+
+        // remove the service, expect factory to deactivate and instance to dispose
+        srv1.drop();
+        delay();
+
+        TestCase.assertEquals( Component.STATE_UNSATISFIED, component.getState() );
+        TestCase.assertNull( instance.getInstance() );
+
+        // assert component factory only managed
+        final Component[] allFactoryComponents2 = findComponentsByName( pid );
+        TestCase.assertNotNull( allFactoryComponents2 );
+        TestCase.assertEquals( 1, allFactoryComponents2.length );
+        for ( int i = 0; i < allFactoryComponents2.length; i++ )
+        {
+            final Component c = allFactoryComponents2[i];
+            if ( c.getId() == component.getId() )
+            {
+                TestCase.assertEquals( Component.STATE_UNSATISFIED, c.getState() );
+            }
+            else
+            {
+                TestCase.fail( "Unexpected Component " + c );
+            }
+        }
+
+        // registeranother service, factory must come back, instance not
+        final SimpleServiceImpl srv2 = SimpleServiceImpl.create( bundleContext, "srv2" );
+        delay();
+
+        TestCase.assertEquals( Component.STATE_FACTORY, component.getState() );
+        TestCase.assertNull( instance.getInstance() );
+
+        // assert component factory only managed
+        final Component[] allFactoryComponents3 = findComponentsByName( pid );
+        TestCase.assertNotNull( allFactoryComponents3 );
+        TestCase.assertEquals( 1, allFactoryComponents3.length );
+        for ( int i = 0; i < allFactoryComponents3.length; i++ )
+        {
+            final Component c = allFactoryComponents3[i];
+            if ( c.getId() == component.getId() )
+            {
+                TestCase.assertEquals( Component.STATE_FACTORY, c.getState() );
+            }
+            else
+            {
+                TestCase.fail( "Unexpected Component " + c );
+            }
+        }
     }
 
 
