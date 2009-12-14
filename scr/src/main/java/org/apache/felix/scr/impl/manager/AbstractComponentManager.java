@@ -379,6 +379,10 @@ public abstract class AbstractComponentManager implements Component
     {
         if ( m_componentMetadata.isFactory() )
         {
+            if ( getInstance() != null )
+            {
+                return FactoryInstance.getInstance();
+            }
             return Factory.getInstance();
         }
         else if ( m_componentMetadata.isImmediate() )
@@ -767,9 +771,9 @@ public abstract class AbstractComponentManager implements Component
      * There are 12 states in all. They are: Disabled, Unsatisfied,
      * Registered, Factory, Active, Disposed, as well as the transient states
      * Enabling, Activating, Deactivating, Disabling, and Disposing.
-     * The Registered, Factory and Active states are the "Satisfied" state in
-     * concept. The tansient states will be changed to other states
-     * automatically when work is done.
+     * The Registered, Factory, FactoryInstance and Active states are the
+     * "Satisfied" state in concept. The tansient states will be changed to
+     * other states automatically when work is done.
      * <p>
      * The transition cases are listed below.
      * <ul>
@@ -1071,6 +1075,12 @@ public abstract class AbstractComponentManager implements Component
         }
     }
 
+    /**
+     * The <code>Active</code> state is the satisified state of an immediate
+     * component after activation. Dealyed and service factory components switch
+     * to this state from the {@link Registered} state once the service
+     * object has (first) been requested.
+     */
     protected static final class Active extends Satisfied
     {
         private static final Active m_inst = new Active();
@@ -1101,6 +1111,12 @@ public abstract class AbstractComponentManager implements Component
         }
     }
 
+    /**
+     * The <code>Registered</code> state is the statisfied state of a delayed or
+     * service factory component before the actual service instance is
+     * (first) retrieved. After getting the actualo service instance the
+     * component switches to the {@link Active} state.
+     */
     protected static final class Registered extends Satisfied
     {
         private static final Registered m_inst = new Registered();
@@ -1143,6 +1159,10 @@ public abstract class AbstractComponentManager implements Component
         }
     }
 
+    /**
+     * The <code>Factory</code> state is the satisfied state of component
+     * factory components.
+     */
     protected static final class Factory extends Satisfied
     {
         private static final Factory m_inst = new Factory();
@@ -1157,6 +1177,42 @@ public abstract class AbstractComponentManager implements Component
         static State getInstance()
         {
             return m_inst;
+        }
+    }
+
+
+    /**
+     * The <code>FactoryInstance</code> state is the satisfied state of
+     * instances of component factory components created with the
+     * <code>ComponentFactory.newInstance</code> method. This state acts the
+     * same as the {@link Active} state except that the
+     * {@link #deactivate(AbstractComponentManager, int)} switches to the
+     * real {@link Active} state before actually disposing off the component
+     * because component factory instances are never reactivated after
+     * deactivated due to not being satisified any longer. See section 112.5.5,
+     * Factory Component, for full details.
+     */
+    protected static final class FactoryInstance extends Satisfied
+    {
+        private static final FactoryInstance m_inst = new FactoryInstance();
+
+
+        private FactoryInstance()
+        {
+            super( "Active", STATE_ACTIVE );
+        }
+
+
+        static State getInstance()
+        {
+            return m_inst;
+        }
+
+
+        void deactivate( AbstractComponentManager acm, int reason )
+        {
+            acm.changeState( Active.getInstance() );
+            acm.dispose( reason );
         }
     }
 
