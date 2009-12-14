@@ -88,5 +88,13 @@
         factory="factory.component.factory" >
         <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
     </scr:component>
+    
+    <!-- Component Factory Instances, requiring configuration -->
+    <scr:component name="factory.component.configuration"
+        enabled="false"
+        configuration-policy="require"
+        factory="factory.component.factory.configuration" >
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+    </scr:component>
 
 </components>
