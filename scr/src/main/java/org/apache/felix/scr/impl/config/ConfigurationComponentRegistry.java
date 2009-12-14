@@ -51,7 +51,7 @@ public class ConfigurationComponentRegistry extends ComponentRegistry implements
     {
         super( context );
 
-        // register as ScrService
+        // register as listener for configurations
         Dictionary props = new Hashtable();
         props.put( Constants.SERVICE_DESCRIPTION, "Declarative Services Configuration Support Listener" );
         props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
