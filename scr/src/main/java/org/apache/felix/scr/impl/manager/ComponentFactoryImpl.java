@@ -93,6 +93,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         super( activator, metadata );
         m_componentInstances = new IdentityHashMap();
         m_isConfigurationFactory = activator.getConfiguration().isFactoryEnabled();
+        m_configuration = new Hashtable();
     }
 
 
@@ -178,7 +179,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     public boolean hasConfiguration()
     {
-        return true;
+        return m_configuration != null;
     }
 
 
@@ -224,18 +225,27 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     {
         if ( pid.equals( getComponentMetadata().getName() ) )
         {
-            m_configuration = null;
-            reconfigureComponents( null );
+            // deleting configuration of a component factory is like
+            // providing an empty configuration
+            m_configuration = new Hashtable();
         }
-        else if ( m_isConfigurationFactory && m_configuredServices != null )
+        else if ( m_isConfigurationFactory )
         {
-            ImmediateComponentManager cm = ( ImmediateComponentManager ) m_configuredServices.remove( pid );
-            if ( cm != null )
+            if ( m_configuredServices != null )
             {
-                log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", null );
+                ImmediateComponentManager cm = ( ImmediateComponentManager ) m_configuredServices.remove( pid );
+                if ( cm != null )
+                {
+                    log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", null );
 
-                cm.dispose();
+                    cm.dispose();
+                }
             }
+        }
+        else
+        {
+            // 112.7 Factory Configuration not allowed for factory component
+            log( LogService.LOG_ERROR, "Component Factory cannot be configured by factory configuration", null );
         }
     }
 
@@ -245,7 +255,6 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         if ( pid.equals( getComponentMetadata().getName() ) )
         {
             m_configuration = configuration;
-            reconfigureComponents( configuration );
         }
         else if ( m_isConfigurationFactory )
         {
@@ -300,28 +309,6 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     public void enableComponents()
     {
         enable();
-    }
-
-
-    /**
-     * Reconfigure all components created calling the
-     * {@link #newInstance(Dictionary)} method to update them with the new
-     * configuration from the configuration admin.
-     * <p>
-     * This method is not used to reconfigure components created as part of
-     * backwards compatible support for configuration factories since they
-     * are reconfigured directly by {@link #configurationUpdated(String, Dictionary)}
-     * and {@link #configurationDeleted(String)}
-     *
-     * @param configuration the new configuration
-     */
-    private void reconfigureComponents( Dictionary configuration )
-    {
-        ImmediateComponentManager[] cms = getComponentManagers( m_componentInstances );
-        for ( int i = 0; i < cms.length; i++ )
-        {
-            cms[i].reconfigure( configuration );
-        }
     }
 
 
