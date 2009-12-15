@@ -124,6 +124,8 @@ public interface Reference
      * <p>
      * For a component declared in a Declarative Services 1.0 and 1.1
      * descriptor, this method always returns <code>null</code>.
+     *
+     * @since 1.4
      */
     String getUpdatedMethodName();
 
