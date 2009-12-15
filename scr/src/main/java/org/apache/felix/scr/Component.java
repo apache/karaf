@@ -231,6 +231,8 @@ public interface Component
      * Returns the <code>org.osgi.service.component.ComponentInstance</code>
      * representing this component or <code>null</code> if this component
      * is not been activated yet.
+     *
+     * @since 1.2
      */
     ComponentInstance getComponentInstance();
 
@@ -242,6 +244,8 @@ public interface Component
      * This method never returns <code>null</code>, that is, if this method is
      * not declared in the component descriptor this method returns the
      * default value <i>activate</i>.
+     *
+     * @since 1.2
      */
     String getActivate();
 
@@ -253,6 +257,8 @@ public interface Component
      * <p>
      * For a component declared in a Declarative Services 1.0 descriptor, this
      * method always returns <code>false</code>.
+     *
+     * @since 1.2
      */
     boolean isActivateDeclared();
 
@@ -264,6 +270,8 @@ public interface Component
      * This method never returns <code>null</code>, that is, if this method is
      * not declared in the component descriptor this method returns the
      * default value <i>deactivate</i>.
+     *
+     * @since 1.2
      */
     String getDeactivate();
 
@@ -275,6 +283,8 @@ public interface Component
      * <p>
      * For a component declared in a Declarative Services 1.0 descriptor, this
      * method always returns <code>false</code>.
+     *
+     * @since 1.2
      */
     boolean isDeactivateDeclared();
 
@@ -286,6 +296,8 @@ public interface Component
      * <p>
      * For a component declared in a Declarative Services 1.0 descriptor, this
      * method always returns <code>null</code>.
+     *
+     * @since 1.2
      */
     String getModified();
 
@@ -311,6 +323,8 @@ public interface Component
      * <dd>Configuration is ignored. No Configuration Admin service
      * configuration is supplied to the component.</dd>
      * </dl>
+     *
+     * @since 1.2
      */
     String getConfigurationPolicy();
 
