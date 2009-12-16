@@ -58,6 +58,7 @@ public class DirectoryWatcherTest extends TestCase
         mockPackageAdmin = ( PackageAdmin ) mockPackageAdminControl.getMock();
         mockBundleControl = MockControl.createControl( Bundle.class );
         mockBundle = ( Bundle ) mockBundleControl.getMock();
+        props.put( DirectoryWatcher.DIR, new File( "target/load" ).getAbsolutePath() );
     }
 
 
