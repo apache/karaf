@@ -18,43 +18,71 @@
  */
 package org.apache.felix.dm.impl;
 
-import java.util.List;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Properties;
 
-import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.ServiceReference;
 
-public class AdapterImpl {
-	private volatile DependencyManager m_manager;
+public class AdapterImpl extends AbstractDecorator {
 	private volatile Service m_service;
-	private final Class m_iface;
-	private final Class m_iface2;
-	private final Class m_impl;
+    private final Class m_serviceInterface;
+    private final String m_serviceFilter;
+    private final Object m_adapterImplementation;
+    private final Object m_adapterInterface;
+    private final Dictionary m_adapterProperties;
 	
-	// TODO adapts a "dependency" ... making it sort of a decorator factory
-	public AdapterImpl(Class iface, Class iface2, Class impl) {
-		m_iface = iface;
-		m_iface2 = iface2;
-		m_impl = impl;
-	}
+    public AdapterImpl(Class serviceInterface, String serviceFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties) {
+        m_serviceInterface = serviceInterface;
+        m_serviceFilter = serviceFilter;
+        m_adapterImplementation = adapterImplementation;
+        m_adapterInterface = adapterInterface;
+        m_adapterProperties = adapterProperties;
+    }
+
+    public AdapterImpl(Class serviceInterface, String serviceFilter, Object adapterImplementation, String[] adapterInterfaces, Dictionary adapterProperties) {
+        m_serviceInterface = serviceInterface;
+        m_serviceFilter = serviceFilter;
+        m_adapterImplementation = adapterImplementation;
+        m_adapterInterface = adapterInterfaces;
+        m_adapterProperties = adapterProperties;
+    }
 	
-	public void added(ServiceReference ref, Object service) {
-		// TODO decorator be smarter:
-		
-		// get any "global" dependencies
-		List dependencies = m_service.getDependencies();
-
-		m_manager.add(m_manager.createService()
-			.setInterface(m_iface2.getName(), null)
-			.setImplementation(m_impl)
-			.add(dependencies)
-			.add(m_manager.createServiceDependency()
-				.setService(m_iface, ref)
-				.setRequired(true)
-				)
-			);
-	}
-
-	public void removed(ServiceReference ref, Object service) {
+    public Service createService(Object[] properties) {
+        ServiceReference ref = (ServiceReference) properties[0]; 
+        Object service = properties[1];
+        Properties props = new Properties();
+        String[] keys = ref.getPropertyKeys();
+        for (int i = 0; i < keys.length; i++) {
+            props.put(keys[i], ref.getProperty(keys[i]));
+        }
+        if (m_adapterProperties != null) {
+            Enumeration e = m_adapterProperties.keys();
+            while (e.hasMoreElements()) {
+                Object key = e.nextElement();
+                props.put(key, m_adapterProperties.get(key));
+            }
+        }
+        if (m_adapterInterface instanceof String) {
+            return m_manager.createService()
+                .setInterface((String) m_adapterInterface, props)
+                .setImplementation(m_adapterImplementation)
+                .add(m_service.getDependencies())
+                .add(m_manager.createServiceDependency()
+                    .setService(m_serviceInterface, ref)
+                    .setRequired(true)
+                );
+        }
+        else {
+            return m_manager.createService()
+            .setInterface((String[]) m_adapterInterface, props)
+            .setImplementation(m_adapterImplementation)
+            .add(m_service.getDependencies())
+            .add(m_manager.createServiceDependency()
+                .setService(m_serviceInterface, ref)
+                .setRequired(true)
+            );
+        }
 	}
 }

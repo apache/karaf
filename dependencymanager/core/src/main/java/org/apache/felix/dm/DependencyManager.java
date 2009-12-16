@@ -170,11 +170,11 @@ public class DependencyManager {
     }
     
     //TODO rename iface en iface2 to adaptor en adaptee o.i.d.
-    public Service createAdapterService(Class iface, Class iface2, Class impl) {
+    public Service createAdapterService(Class serviceInterface, String serviceFilter, Class adapterInterface, Class impl, Dictionary adapterProperties) {
         return createService()
-            .setImplementation(new AdapterImpl(iface, iface2, impl))
+            .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, impl, adapterInterface.getName(), adapterProperties))
             .add(createServiceDependency()
-                .setService(iface)
+                .setService(serviceInterface)
                 .setAutoConfig(false)
                 .setCallbacks("added", "removed")
                 );
@@ -184,7 +184,7 @@ public class DependencyManager {
     // (being a dependency on more than one, fi ServiceDendency, ResourceDependency
     public Service createResourceAdapterService(String resourceFilter, Class iface2, Object impl, boolean propagate) {
         return createService()
-            .setImplementation(new ResourceAdapterImpl(impl, iface2, propagate))
+            .setImplementation(new ResourceAdapterImpl(resourceFilter, impl, iface2.getName(), null, propagate))
             .add(createResourceDependency()
                 .setFilter(resourceFilter)
                 .setAutoConfig(false)

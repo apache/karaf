@@ -18,33 +18,68 @@
  */
 package org.apache.felix.dm.impl;
 
-import org.apache.felix.dm.DependencyManager;
-import org.apache.felix.dm.resources.Resource;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Properties;
 
-public class ResourceAdapterImpl {
-	private volatile DependencyManager m_manager;
-	private final Object m_impl;
-	private final Class m_iface;
+import org.apache.felix.dm.resources.Resource;
+import org.apache.felix.dm.service.Service;
+
+public class ResourceAdapterImpl extends AbstractDecorator {
+    private volatile Service m_service;
+    private final String m_resourceFilter;
+    private final Object m_adapterImplementation;
+    private final Object m_adapterInterface;
+    private final Dictionary m_adapterProperties;
     private final boolean m_propagate;
 
-	public ResourceAdapterImpl(Object impl, Class iface, boolean propagate) {
-		m_impl = impl;
-		m_iface = iface;
-		m_propagate = propagate;
-	}
+    public ResourceAdapterImpl(String resourceFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
+        m_resourceFilter = resourceFilter;
+        m_adapterImplementation = adapterImplementation;
+        m_adapterInterface = adapterInterface;
+        m_adapterProperties = adapterProperties;
+        m_propagate = propagate;
+    }
 
-	public void added(Resource resource) {
-		m_manager.add(m_manager.createService()
-			.setInterface(m_iface.getName(), null)
-			.setImplementation(m_impl)
-			.add(m_manager.createResourceDependency()
-				.setResource(resource)
-				.setRequired(true)
-				.setPropagate(m_propagate)
-				)
-			);
-	}
+    public ResourceAdapterImpl(String resourceFilter, Object adapterImplementation, String[] adapterInterfaces, Dictionary adapterProperties, boolean propagate) {
+        m_resourceFilter = resourceFilter;
+        m_adapterImplementation = adapterImplementation;
+        m_adapterInterface = adapterInterfaces;
+        m_adapterProperties = adapterProperties;
+        m_propagate = propagate;
+    }	    
 
-	public void removed(Resource resource) {
-	}
+    public Service createService(Object[] properties) {
+        Resource resource = (Resource) properties[0]; 
+        Properties props = new Properties();
+        if (m_adapterProperties != null) {
+            Enumeration e = m_adapterProperties.keys();
+            while (e.hasMoreElements()) {
+                Object key = e.nextElement();
+                props.put(key, m_adapterProperties.get(key));
+            }
+        }
+        if (m_adapterInterface instanceof String) {
+            return m_manager.createService()
+                .setInterface((String) m_adapterInterface, props)
+                .setImplementation(m_adapterImplementation)
+                .add(m_service.getDependencies())
+                .add(m_manager.createResourceDependency()
+                    .setResource(resource)
+                    .setPropagate(m_propagate)
+                    .setRequired(true)
+                );
+        }
+        else {
+            return m_manager.createService()
+                .setInterface((String[]) m_adapterInterface, props)
+                .setImplementation(m_adapterImplementation)
+                .add(m_service.getDependencies())
+                .add(m_manager.createResourceDependency()
+                    .setResource(resource)
+                    .setPropagate(m_propagate)
+                    .setRequired(true)
+                );
+        }
+    }
 }
