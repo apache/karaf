@@ -390,8 +390,6 @@ public class DirectoryWatcher extends Thread implements BundleListener
         if (uninstalledBundles.size() > 0 || updatedBundles.size() > 0)
         {
             // Refresh if any bundle got uninstalled or updated.
-            // This can lead to restart of recently updated bundles, but
-            // don't worry about that at this point of time.
             refresh();
         }
 
@@ -893,6 +891,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     if (Util.loadChecksum(b, context) != checksum) {
                         log(Logger.LOG_WARNING,
                             "A bundle with the same symbolic name (" + sn + ") and version (" + vStr + ") is already installed.  Updating this bundle instead.", null);
+                        stopTransient(b);
                         Util.storeChecksum(b, checksum, context);
                         b.update(is);
                     }
@@ -980,6 +979,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                         + ". The bundle has been uninstalled", null);
                     return null;
                 }
+                stopTransient(bundle);
                 Util.storeChecksum(bundle, artifact.getChecksum(), context);
                 InputStream in = (transformed != null) ? transformed.openStream() : new FileInputStream(path);
                 try
@@ -1005,6 +1005,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                         + ". The bundle has been uninstalled", null);
                     return null;
                 }
+                stopTransient(bundle);
                 Util.storeChecksum(bundle, artifact.getChecksum(), context);
                 InputStream in = new FileInputStream(transformed != null ? transformed : path);
                 try
@@ -1023,6 +1024,15 @@ public class DirectoryWatcher extends Thread implements BundleListener
             log(Logger.LOG_WARNING, "Failed to update artifact " + artifact.getPath(), t);
         }
         return bundle;
+    }
+
+    private void stopTransient(Bundle bundle) throws BundleException {
+        // Stop the bundle transiently so that it will be restarted when startAllBundles() is called
+        // but this avoids the need to restart the bundle twice (once for the update and another one
+        // when refreshing packages).
+        if (startBundles) {
+            bundle.stop(Bundle.STOP_TRANSIENT);
+        }
     }
 
     private void startAllBundles()
