@@ -491,6 +491,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 if (!f.exists() && f.mkdirs())
                 {
                     tmpDir = f;
+                    tmpDir.deleteOnExit();
                     break;
                 }
             }
@@ -663,6 +664,12 @@ public class DirectoryWatcher extends Thread implements BundleListener
     {
         this.context.removeBundleListener(this);
         interrupt();
+        for (Iterator iter = currentManagedArtifacts.values().iterator(); iter.hasNext();)
+        {
+            Artifact artifact = (Artifact) iter.next();
+            deleteTransformedFile(artifact);
+            deleteJaredDirectory(artifact);
+        }
         try
         {
             join(10000);
