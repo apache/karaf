@@ -170,7 +170,7 @@ public class DependencyManager {
     }
     
     //TODO rename iface en iface2 to adaptor en adaptee o.i.d.
-    public Service createAdapterService(Class serviceInterface, String serviceFilter, Class adapterInterface, Class impl, Dictionary adapterProperties) {
+    public Service createAdapterService(Class serviceInterface, String serviceFilter, Class adapterInterface, Object impl, Dictionary adapterProperties) {
         return createService()
             .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, impl, adapterInterface.getName(), adapterProperties))
             .add(createServiceDependency()

@@ -232,6 +232,9 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         	((DependencyActivation) dependency).start(this);
         }
         synchronized (m_dependencies) {
+            // starting the dependency above might have triggered another state change, so
+            // we have to fetch the current state again
+            oldState = m_state;
             newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
         }
@@ -257,6 +260,9 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         	((DependencyActivation) dependency).stop(this);
         }
         synchronized (m_dependencies) {
+            // starting the dependency above might have triggered another state change, so
+            // we have to fetch the current state again
+            oldState = m_state;
             newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
         }
@@ -285,15 +291,18 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
         }
-        calculateStateChanges(oldState, newState);
         if (newState.isAllRequiredAvailable()) {
         	m_executor.enqueue(new Runnable() {
         		public void run() {
         			updateInstance(dependency);
         		}
+        		public String toString() {
+        		    return "update instance " + dependency;
+        		}
         	});
         	m_executor.execute();
         }
+        calculateStateChanges(oldState, newState);
     }
 
     public void dependencyChanged(final Dependency dependency) {
@@ -318,7 +327,6 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
         }
-        calculateStateChanges(oldState, newState);
         if (newState.isAllRequiredAvailable()) {
         	m_executor.enqueue(new Runnable() {
         		public void run() {
@@ -327,6 +335,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         	});
         	m_executor.execute();
         }
+        calculateStateChanges(oldState, newState);
     }
 
     public synchronized void start() {
@@ -808,44 +817,12 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
     }
 
     private void updateInstance(Dependency dependency) {
-        
         if (dependency.isAutoConfig()) {
             configureImplementation(dependency.getAutoConfigType(), dependency.getAutoConfigInstance(), dependency.getAutoConfigName());
             if (dependency.isPropagated() && m_registration != null) {
                 m_registration.setProperties(calculateServiceProperties());
             }
         }
-        
-//        if (dependency instanceof ServiceDependencyImpl) {
-//            ServiceDependencyImpl sd = (ServiceDependencyImpl) dependency;
-//            // update the dependency in the service instance (it will use
-//            // a null object if necessary)
-//            if (sd.isAutoConfig()) {
-//                configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
-//            }
-//        }
-//        else if (dependency instanceof ConfigurationDependencyImpl) {
-//        	ConfigurationDependencyImpl cd = (ConfigurationDependencyImpl) dependency;
-//        	if (cd.isPropagated()) {
-//        		// change service properties accordingly, but only if the service was already registered
-//        	    if (m_registration != null) {
-//            		Dictionary props = calculateServiceProperties();
-//            		m_registration.setProperties(props);
-//        	    }
-//        	}
-//        }
-//        else if (dependency instanceof BundleDependencyImpl) {
-//            BundleDependencyImpl bd = (BundleDependencyImpl) dependency;
-//            if (bd.isAutoConfig()) {
-//                configureImplementation(Bundle.class, bd.getBundle()); // TODO support AutoConfigName
-//            }
-//        }
-//        else if (dependency instanceof ResourceDependencyImpl) {
-//            ResourceDependencyImpl rd = (ResourceDependencyImpl) dependency;
-//            if (rd.isAutoConfig()) {
-//                configureImplementation(Resource.class, rd.getResource()); // TODO support AutoConfigName
-//            }
-//        }
     }
 
     /**
