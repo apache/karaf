@@ -20,6 +20,7 @@ package org.apache.felix.dm.impl;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.dm.resources.Resource;
@@ -59,11 +60,15 @@ public class ResourceAdapterImpl extends AbstractDecorator {
                 props.put(key, m_adapterProperties.get(key));
             }
         }
+        List dependencies = m_service.getDependencies();
+        // the first dependency is always the dependency on the resource, which
+        // will be replaced with a more specific dependency below
+        dependencies.remove(0);
         if (m_adapterInterface instanceof String) {
             return m_manager.createService()
                 .setInterface((String) m_adapterInterface, props)
                 .setImplementation(m_adapterImplementation)
-                .add(m_service.getDependencies())
+                .add(dependencies)
                 .add(m_manager.createResourceDependency()
                     .setResource(resource)
                     .setPropagate(m_propagate)
@@ -74,7 +79,7 @@ public class ResourceAdapterImpl extends AbstractDecorator {
             return m_manager.createService()
                 .setInterface((String[]) m_adapterInterface, props)
                 .setImplementation(m_adapterImplementation)
-                .add(m_service.getDependencies())
+                .add(dependencies)
                 .add(m_manager.createResourceDependency()
                     .setResource(resource)
                     .setPropagate(m_propagate)
