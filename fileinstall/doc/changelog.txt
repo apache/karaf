@@ -1,3 +1,19 @@
+Version 2.0.6
+-------------
+** Bug
+    * [FELIX-1775] - fileinstall release archives contains an empty "load"
+                     folder which should be removed
+    * [FELIX-1789] - FileInstall is too verbose
+    * [FELIX-1851] - FileInstall watched bundles are restarted twice upon update
+    * [FELIX-1861] - FileInstall created temp directories are never deleted
+    * [FELIX-1862] - fileinstall thread name as printed in log messages need
+                     to be less verbose
+    * [FELIX-1928] - File installer starts bundles too early on restart
+
+** Task
+    * [FELIX-1811] - fileinstall should depend on the official osgi artifacts
+
+
 Version 2.0.4
 -------------
 ** Bug
