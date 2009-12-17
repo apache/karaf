@@ -65,6 +65,7 @@ final class OBRHandler extends DefaultHandler
     private Locator locator;
     private ISigilBundle bundle;
     private IPackageExport export;
+    private int depth;
 
 
     public OBRHandler( URL obrURL, File bundleCache, OBRListener listener )
@@ -83,7 +84,10 @@ final class OBRHandler extends DefaultHandler
 
     public void startElement( String uri, String localName, String qName, Attributes attributes ) throws SAXException
     {
-        if ( "resource".equals( qName ) )
+        if ( depth++ == 0 && !"repository".equals( qName ) ) {
+            throw new SAXParseException("Invalid OBR document, expected repository top level element", locator);
+        }
+        else if ( "resource".equals( qName ) )
         {
             startResource( attributes );
         }
@@ -104,6 +108,7 @@ final class OBRHandler extends DefaultHandler
 
     public void endElement( String uri, String localName, String qName ) throws SAXException
     {
+        depth--;
         if ( "resource".equals( qName ) )
         {
             endResource();
