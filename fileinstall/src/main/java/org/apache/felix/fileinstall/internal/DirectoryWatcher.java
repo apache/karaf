@@ -118,7 +118,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
 
     public DirectoryWatcher(Dictionary properties, BundleContext context)
     {
-        super(properties.toString());
+        super("fileinstall-" + getThreadName(properties));
         this.properties = properties;
         this.context = context;
         poll = getLong(properties, POLL, 2000);
@@ -148,6 +148,10 @@ public class DirectoryWatcher extends Thread implements BundleListener
             flt = null;
         }
         scanner = new Scanner(watchedDirectory, flt);
+    }
+
+    public static String getThreadName(Dictionary properties) {
+        return (properties.get(DIR) != null ? properties.get(DIR) : "./load").toString();
     }
 
     public Dictionary getProperties() {
