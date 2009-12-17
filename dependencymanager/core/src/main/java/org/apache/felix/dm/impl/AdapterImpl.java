@@ -20,6 +20,7 @@ package org.apache.felix.dm.impl;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.dm.service.Service;
@@ -64,11 +65,13 @@ public class AdapterImpl extends AbstractDecorator {
                 props.put(key, m_adapterProperties.get(key));
             }
         }
+        List dependencies = m_service.getDependencies();
+        dependencies.remove(0);
         if (m_adapterInterface instanceof String) {
             return m_manager.createService()
                 .setInterface((String) m_adapterInterface, props)
                 .setImplementation(m_adapterImplementation)
-                .add(m_service.getDependencies())
+                .add(dependencies)
                 .add(m_manager.createServiceDependency()
                     .setService(m_serviceInterface, ref)
                     .setRequired(true)
@@ -78,7 +81,7 @@ public class AdapterImpl extends AbstractDecorator {
             return m_manager.createService()
             .setInterface((String[]) m_adapterInterface, props)
             .setImplementation(m_adapterImplementation)
-            .add(m_service.getDependencies())
+            .add(dependencies)
             .add(m_manager.createServiceDependency()
                 .setService(m_serviceInterface, ref)
                 .setRequired(true)

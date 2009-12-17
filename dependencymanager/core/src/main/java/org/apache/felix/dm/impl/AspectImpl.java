@@ -20,6 +20,7 @@ package org.apache.felix.dm.impl;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.dm.service.Service;
@@ -54,10 +55,12 @@ public class AspectImpl extends AbstractDecorator {
                 props.put(key, m_aspectProperties.get(key));
             }
         }
+        List dependencies = m_service.getDependencies();
+        dependencies.remove(0);
         return m_manager.createService()
             .setInterface(m_serviceInterface.getName(), props)
             .setImplementation(m_aspectImplementation)
-            .add(m_service.getDependencies())
+            .add(dependencies)
             .add(m_manager.createServiceDependency()
                 .setService(m_serviceInterface, ref)
                 .setRequired(true));
