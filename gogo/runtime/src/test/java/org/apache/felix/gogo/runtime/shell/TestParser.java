@@ -151,8 +151,8 @@ public class TestParser extends TestCase
         assertEquals("3", c.execute("[a=2 b=3] get b"));
         assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
         assertEquals(5, c.execute("[1 2 [3 4] 5 6] size"));
-        assertEquals("a", c.execute("e = { echo $0 } ; e a   b"));
-        assertEquals("b", c.execute("e = { echo $1 } ; e a   b"));
+        assertEquals("a", c.execute("e = { echo $1 } ; e a   b"));
+        assertEquals("b", c.execute("e = { echo $2 } ; e a   b"));
         assertEquals("b", c.execute("e = { $args } ; e echo  b"));
         assertEquals("ca b", c.execute("e = { echo c$args } ; e a  b"));
         assertEquals("c a b", c.execute("e = { echo c $args } ; e a  b"));

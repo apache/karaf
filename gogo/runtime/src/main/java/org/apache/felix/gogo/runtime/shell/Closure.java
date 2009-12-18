@@ -464,7 +464,9 @@ public class Closure extends Reflective implements Function
 
             if (name.length() == 1 && Character.isDigit(name.charAt(0)))
             {
-                return parms.get(name.charAt(0) - '0');
+                int i = name.charAt(0) - '0';
+                if (i > 0)
+                    return parms.get(i - 1);
             }
         }
         return session.get(name);
