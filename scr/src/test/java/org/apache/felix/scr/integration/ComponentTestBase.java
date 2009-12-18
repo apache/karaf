@@ -22,6 +22,7 @@ package org.apache.felix.scr.integration;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
 import java.io.File;
@@ -110,7 +111,8 @@ public abstract class ComponentTestBase
                 CoreOptions.bundle( bundleFile.toURI().toString() ),
                 mavenBundle( "org.ops4j.pax.swissbox", "pax-swissbox-tinybundles", "1.0.0" ),
                 mavenBundle( "org.apache.felix", "org.apache.felix.configadmin", "1.0.10" )
-             )
+             ),
+             systemProperty( "ds.factory.enabled" ).value( "true" )
         );
         final Option vmOption = ( paxRunnerVmOption != null ) ? PaxRunnerOptions.vmOption( paxRunnerVmOption ) : null;
         return OptionUtils.combine( base, vmOption );

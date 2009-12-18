@@ -381,8 +381,14 @@ public abstract class AbstractComponentManager implements Component
         {
             if ( getInstance() != null )
             {
+                if ( this instanceof ComponentFactoryImpl.ComponentFactoryConfiguredInstance )
+                {
+                    return Active.getInstance();
+                }
+
                 return FactoryInstance.getInstance();
             }
+
             return Factory.getInstance();
         }
         else if ( m_componentMetadata.isImmediate() )

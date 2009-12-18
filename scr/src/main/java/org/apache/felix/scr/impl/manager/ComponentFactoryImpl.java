@@ -102,7 +102,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     public ComponentInstance newInstance( Dictionary dictionary )
     {
-        final ImmediateComponentManager cm = createComponentManager();
+        final ImmediateComponentManager cm = createComponentManager( true );
 
         cm.setFactoryProperties( dictionary );
         cm.reconfigure( m_configuration );
@@ -272,7 +272,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             if ( cm == null )
             {
                 // create a new instance with the current configuration
-                cm = createComponentManager();
+                cm = createComponentManager( false );
 
                 // this should not call component reactivation because it is
                 // not active yet
@@ -368,9 +368,14 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      * instance. The component manager is kept in the internal set of created
      * components. The component is neither configured nor enabled.
      */
-    private ImmediateComponentManager createComponentManager()
+    private ImmediateComponentManager createComponentManager( final boolean newInstance )
     {
-        return new ImmediateComponentManager( getActivator(), this, getComponentMetadata() );
+        if ( newInstance )
+        {
+            return new ComponentFactoryNewInstance( getActivator(), this, getComponentMetadata() );
+        }
+
+        return new ComponentFactoryConfiguredInstance( getActivator(), this, getComponentMetadata() );
     }
 
 
@@ -387,5 +392,25 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         }
 
         return new ImmediateComponentManager[0];
+    }
+
+    static class ComponentFactoryNewInstance extends ImmediateComponentManager {
+
+        public ComponentFactoryNewInstance( BundleComponentActivator activator, ComponentHolder componentHolder,
+            ComponentMetadata metadata )
+        {
+            super( activator, componentHolder, metadata );
+        }
+
+    }
+
+    static class ComponentFactoryConfiguredInstance extends ImmediateComponentManager {
+
+        public ComponentFactoryConfiguredInstance( BundleComponentActivator activator, ComponentHolder componentHolder,
+            ComponentMetadata metadata )
+        {
+            super( activator, componentHolder, metadata );
+        }
+
     }
 }
