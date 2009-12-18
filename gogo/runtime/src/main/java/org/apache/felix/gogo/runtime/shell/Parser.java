@@ -137,11 +137,15 @@ public class Parser
         ws();
         if (!eof())
         {
-            program.add(statements());
-            while (peek() == '|')
+            program.add(pipeline());
+            while (peek() == ';')
             {
                 current++;
-                program.add(statements());
+                List<List<CharSequence>> pipeline = pipeline();
+                if (pipeline.get(0).get(0).length() != 0)
+                {
+                    program.add(pipeline);
+                }
             }
         }
         if (!eof())
@@ -157,18 +161,21 @@ public class Parser
         return text.subSequence(Math.max(0, current - 20), Math.min(text.length(), current + 4));
     }
 
-    public List<List<CharSequence>> statements()
+    public List<List<CharSequence>> pipeline()
     {
         List<List<CharSequence>> statements = new ArrayList<List<CharSequence>>();
         statements.add(statement());
-        while (peek() == ';')
+        while (peek() == '|')
         {
             current++;
-            // derek: BUGFIX: allow trailing ;
             ws();
             if (!eof())
             {
                 statements.add(statement());
+            }
+            else
+            {
+                throw new RuntimeException("Eof found after pipe |");
             }
         }
         return statements;

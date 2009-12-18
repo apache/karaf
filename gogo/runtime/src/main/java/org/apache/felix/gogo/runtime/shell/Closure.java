@@ -18,10 +18,14 @@
  */
 package org.apache.felix.gogo.runtime.shell;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
-
-import java.util.*;
 
 public class Closure extends Reflective implements Function
 {
@@ -42,65 +46,75 @@ public class Closure extends Reflective implements Function
     {
         parms = values;
         Parser parser = new Parser(source);
-        ArrayList<Pipe> pipes = new ArrayList<Pipe>();
         List<List<List<CharSequence>>> program = parser.program();
+        Pipe last = null;
 
-        for (List<List<CharSequence>> statements : program)
+        for (List<List<CharSequence>> pipeline : program)
         {
-            Pipe current = new Pipe(this, statements);
+            ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
-            if (pipes.isEmpty())
-            {
-		if (current.out == null)
+	    for (List<CharSequence> statement : pipeline)
+	    {
+		Pipe current = new Pipe(this, statement);
+
+		if (pipes.isEmpty())
 		{
-		    current.setIn(session.in);
-		    current.setOut(session.out);
-		    current.setErr(session.err);
+		    if (current.out == null)
+		    {
+			current.setIn(session.in);
+			current.setOut(session.out);
+			current.setErr(session.err);
+		    }
 		}
-            }
-            else
-            {
-                Pipe previous = pipes.get(pipes.size() - 1);
-                previous.connect(current);
-            }
-            pipes.add(current);
-        }
-        if (pipes.size() == 0)
-        {
-            return null;
-        }
+		else
+		{
+		    Pipe previous = pipes.get(pipes.size() - 1);
+		    previous.connect(current);
+		}
+		pipes.add(current);
+	    }
 
-        if (pipes.size() == 1)
-        {
-            pipes.get(0).run();
-        }
-        else
-        {
-            for (Pipe pipe : pipes)
-            {
-                pipe.start();
-            }
-            for (Pipe pipe : pipes)
-            {
-                pipe.join();
-            }
-        }
+	    if (pipes.size() == 1)
+	    {
+		pipes.get(0).run();
+	    }
+	    else if (pipes.size() > 1)
+	    {
+		for (Pipe pipe : pipes)
+		{
+		    pipe.start();
+		}
+		for (Pipe pipe : pipes)
+		{
+		    pipe.join();
+		}
+	    }
 
-        Pipe last = pipes.remove(pipes.size() - 1);
+	    last = pipes.remove(pipes.size() - 1);
 
-        for (Pipe pipe : pipes)
-        {
-            if (pipe.exception != null)
-            {
-                // can't throw exception, as result is defined by last pipe
-                session.err.println("pipe: " + pipe.exception);
-            }
-        }
+	    for (Pipe pipe : pipes)
+	    {
+		if (pipe.exception != null)
+		{
+		    // can't throw exception, as result is defined by last pipe
+		    session.err.println("pipe: " + pipe.exception);
+		    session.put("pipe-exception", pipe.exception);
+		}
+	    }
 
-        if (last.exception != null)
-        {
-            throw last.exception;
-        }
+	    if (last.exception != null)
+	    {
+		Pipe.reset();
+		throw last.exception;
+	    }
+	}
+
+	Pipe.reset();   // reset IO in case sshd uses same thread for new client
+
+	if (last == null)
+	{
+	    return null;
+	}
 
         if (last.result instanceof Object[])
         {

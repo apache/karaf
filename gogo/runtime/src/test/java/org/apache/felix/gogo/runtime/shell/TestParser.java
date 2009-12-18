@@ -113,9 +113,10 @@ public class TestParser extends TestCase
         assertEquals("def", c.execute("echo def|grep d.*|capture"));
         assertEquals("def", c.execute("echoout def|grep d.*|capture"));
         assertEquals("def", c.execute("myecho def|grep d.*|capture"));
-        assertEquals("def", c.execute("echo abc; echo def; echo ghi|grep d.*|capture"));
+        assertEquals("def", c.execute("(echoout abc; echoout def; echoout ghi)|grep d.*|capture"));
+        assertEquals("", c.execute("echoout def; echoout ghi | grep d.* | capture"));
         assertEquals("hello world", c.execute("echo hello world|capture"));
-        assertEquals("defghi", c.execute("echo abc; echo def; echo ghi|grep 'def|ghi'|capture"));
+        assertEquals("defghi", c.execute("(echoout abc; echoout def; echoout ghi)|grep 'def|ghi'|capture"));
     }
 
     public void testAssignment() throws Exception
@@ -320,17 +321,17 @@ public class TestParser extends TestCase
         List<List<List<CharSequence>>> x = new Parser("abc def|ghi jkl;mno pqr|stu vwx").program();
         assertEquals("abc", x.get(0).get(0).get(0));
         assertEquals("def", x.get(0).get(0).get(1));
-        assertEquals("ghi", x.get(1).get(0).get(0));
-        assertEquals("jkl", x.get(1).get(0).get(1));
-        assertEquals("mno", x.get(1).get(1).get(0));
-        assertEquals("pqr", x.get(1).get(1).get(1));
-        assertEquals("stu", x.get(2).get(0).get(0));
-        assertEquals("vwx", x.get(2).get(0).get(1));
+        assertEquals("ghi", x.get(0).get(1).get(0));
+        assertEquals("jkl", x.get(0).get(1).get(1));
+        assertEquals("mno", x.get(1).get(0).get(0));
+        assertEquals("pqr", x.get(1).get(0).get(1));
+        assertEquals("stu", x.get(1).get(1).get(0));
+        assertEquals("vwx", x.get(1).get(1).get(1));
     }
 
     public void testStatements()
     {
-        List<List<CharSequence>> x = new Parser("abc def;ghi jkl;mno pqr").statements();
+        List<List<CharSequence>> x = new Parser("abc def|ghi jkl|mno pqr").pipeline();
         assertEquals("abc", x.get(0).get(0));
         assertEquals("def", x.get(0).get(1));
         assertEquals("ghi", x.get(1).get(0));

@@ -39,17 +39,28 @@ public class Pipe extends Thread
     Closure closure;
     Exception exception;
     Object result;
-    List<List<CharSequence>> statements;
-
-    public Pipe(Closure closure, List<List<CharSequence>> statements)
+    List<CharSequence> statement;
+    
+    public static void reset()
     {
-        super("pipe-" + statements);
+        tIn.set(null);
+        tOut.set(null);
+        tErr.set(null);
+    }
+
+    public Pipe(Closure closure, List<CharSequence> statement)
+    {
+        super("pipe-" + statement);
         this.closure = closure;
-        this.statements = statements;
+        this.statement = statement;
 
         in = tIn.get();
         out = tOut.get();
         err = tErr.get();
+    }
+    
+    public String toString() {
+        return "pipe<" + statement + "> out=" + out;
     }
 
     public void setIn(InputStream in)
@@ -86,13 +97,10 @@ public class Pipe extends Thread
 
         try
         {
-            for (List<CharSequence> statement : statements)
+            result = closure.executeStatement(statement);
+            if (result != null && pout != null)
             {
-                result = closure.executeStatement(statement);
-                if (result != null && pout != null)
-                {
-                    out.println(closure.session.format(result, Converter.INSPECT));
-                }
+                out.println(closure.session.format(result, Converter.INSPECT));
             }
         }
         catch (Exception e)
@@ -119,11 +127,6 @@ public class Pipe extends Thread
             {
                 e.printStackTrace();
             }
-
-            tIn.set(null);
-            tOut.set(null);
-            tErr.set(null);
-
         }
     }
 }
