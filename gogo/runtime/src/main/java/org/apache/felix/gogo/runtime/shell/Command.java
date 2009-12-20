@@ -35,7 +35,8 @@ public class Command extends Reflective implements Function
         this.target = target;
     }
 
-    public Object execute(CommandSession session, List<Object> arguments) throws Exception
+    public Object execute(CommandSession session, List<Object> arguments)
+        throws Exception
     {
         return method(session, target, function, arguments);
     }

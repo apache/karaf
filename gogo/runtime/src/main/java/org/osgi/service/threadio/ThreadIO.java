@@ -53,5 +53,5 @@ public interface ThreadIO
      * <p/>
      * This method will not do anything when no streams are associated.
      */
-	void close();
+    void close();
 }

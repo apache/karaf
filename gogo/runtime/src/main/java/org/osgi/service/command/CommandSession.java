@@ -88,9 +88,9 @@ public interface CommandSession
      */
     CharSequence format(Object target, int level);
 
-	/**
-	 * Convert an object to another type.
-	 */
-	
-	Object convert(Class<?> type, Object instance);
+    /**
+     * Convert an object to another type.
+     */
+
+    Object convert(Class<?> type, Object instance);
 }

@@ -18,16 +18,15 @@
  */
 package org.apache.felix.gogo.runtime.cpeg;
 
-
 import org.osgi.framework.Bundle;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
 
-
 public class Procedural
 {
 
-    public Object _if(CommandSession session, Function condition, Function ifTrue, Function ifFalse) throws Exception
+    public Object _if(CommandSession session, Function condition, Function ifTrue,
+        Function ifFalse) throws Exception
     {
         Object result = condition.execute(session, null);
         if (isTrue(result))

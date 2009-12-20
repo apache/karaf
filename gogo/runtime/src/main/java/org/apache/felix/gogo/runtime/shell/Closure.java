@@ -53,68 +53,68 @@ public class Closure extends Reflective implements Function
         {
             ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
-	    for (List<CharSequence> statement : pipeline)
-	    {
-		Pipe current = new Pipe(this, statement);
+            for (List<CharSequence> statement : pipeline)
+            {
+                Pipe current = new Pipe(this, statement);
 
-		if (pipes.isEmpty())
-		{
-		    if (current.out == null)
-		    {
-			current.setIn(session.in);
-			current.setOut(session.out);
-			current.setErr(session.err);
-		    }
-		}
-		else
-		{
-		    Pipe previous = pipes.get(pipes.size() - 1);
-		    previous.connect(current);
-		}
-		pipes.add(current);
-	    }
+                if (pipes.isEmpty())
+                {
+                    if (current.out == null)
+                    {
+                        current.setIn(session.in);
+                        current.setOut(session.out);
+                        current.setErr(session.err);
+                    }
+                }
+                else
+                {
+                    Pipe previous = pipes.get(pipes.size() - 1);
+                    previous.connect(current);
+                }
+                pipes.add(current);
+            }
 
-	    if (pipes.size() == 1)
-	    {
-		pipes.get(0).run();
-	    }
-	    else if (pipes.size() > 1)
-	    {
-		for (Pipe pipe : pipes)
-		{
-		    pipe.start();
-		}
-		for (Pipe pipe : pipes)
-		{
-		    pipe.join();
-		}
-	    }
+            if (pipes.size() == 1)
+            {
+                pipes.get(0).run();
+            }
+            else if (pipes.size() > 1)
+            {
+                for (Pipe pipe : pipes)
+                {
+                    pipe.start();
+                }
+                for (Pipe pipe : pipes)
+                {
+                    pipe.join();
+                }
+            }
 
-	    last = pipes.remove(pipes.size() - 1);
+            last = pipes.remove(pipes.size() - 1);
 
-	    for (Pipe pipe : pipes)
-	    {
-		if (pipe.exception != null)
-		{
-		    // can't throw exception, as result is defined by last pipe
-		    session.err.println("pipe: " + pipe.exception);
-		    session.put("pipe-exception", pipe.exception);
-		}
-	    }
+            for (Pipe pipe : pipes)
+            {
+                if (pipe.exception != null)
+                {
+                    // can't throw exception, as result is defined by last pipe
+                    session.err.println("pipe: " + pipe.exception);
+                    session.put("pipe-exception", pipe.exception);
+                }
+            }
 
-	    if (last.exception != null)
-	    {
-		Pipe.reset();
-		throw last.exception;
-	    }
-	}
+            if (last.exception != null)
+            {
+                Pipe.reset();
+                throw last.exception;
+            }
+        }
 
-	Pipe.reset();   // reset IO in case sshd uses same thread for new client
+        Pipe.reset(); // reset IO in case sshd uses same thread for new client
 
-	if (last == null)
-	{
-	    return null;
-	}
+        if (last == null)
+        {
+            return null;
+        }
 
         if (last.result instanceof Object[])
         {
@@ -126,11 +126,12 @@ public class Closure extends Reflective implements Function
     Object executeStatement(List<CharSequence> statement) throws Exception
     {
         // add set -x facility if echo is set
-        if (Boolean.TRUE.equals(session.get("echo"))) {
+        if (Boolean.TRUE.equals(session.get("echo")))
+        {
             StringBuilder buf = new StringBuilder("+");
             for (CharSequence token : statement)
             {
-		buf.append(' ');
+                buf.append(' ');
                 buf.append(token);
             }
             session.err.println(buf);
@@ -153,7 +154,8 @@ public class Closure extends Reflective implements Function
                     values.add(p);
                 }
             }
-            else {
+            else
+            {
                 values.add(v);
             }
         }
@@ -202,7 +204,8 @@ public class Closure extends Reflective implements Function
                 }
                 else
                 {
-                    Object value = execute(values.get(1), values.subList(2, values.size()));
+                    Object value = execute(values.get(1),
+                        values.subList(2, values.size()));
                     return assignment(scmd, value);
                 }
             }
@@ -219,7 +222,8 @@ public class Closure extends Reflective implements Function
                     x = get(scopedFunction);
                     if (x == null || !(x instanceof Function))
                     {
-                        throw new IllegalArgumentException("Command not found:  " + scopedFunction);
+                        throw new IllegalArgumentException("Command not found:  "
+                            + scopedFunction);
                     }
                 }
                 return ((Function) x).execute(session, values);
@@ -310,13 +314,15 @@ public class Closure extends Reflective implements Function
                             continue;
                         case '(':
                             p.next();
-                            Closure cl = new Closure(session, this, p.text.subSequence(start + 1, p.find(')', '(') - 1));
+                            Closure cl = new Closure(session, this, p.text.subSequence(
+                                start + 1, p.find(')', '(') - 1));
                             res = cl.execute(session, parms);
                             start = p.current;
                             continue;
                         case '{':
                             p.next();
-                            res = new Closure(session, this, p.text.subSequence(start + 1, p.find('}', '{') - 1));
+                            res = new Closure(session, this, p.text.subSequence(
+                                start + 1, p.find('}', '{') - 1));
                             start = p.current;
                             continue;
                         case '$':
@@ -435,7 +441,8 @@ public class Closure extends Reflective implements Function
 
         if (map.size() != 0 && list.size() != 0)
         {
-            throw new IllegalArgumentException("You can not mix maps and arrays: " + array);
+            throw new IllegalArgumentException("You can not mix maps and arrays: "
+                + array);
         }
 
         if (map.size() > 0)

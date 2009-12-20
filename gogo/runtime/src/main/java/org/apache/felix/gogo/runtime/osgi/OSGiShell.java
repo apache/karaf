@@ -42,7 +42,8 @@ public class OSGiShell extends CommandShellImpl
         setConverter(commands);
         if (bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STARTING)
         {
-            addCommand("osgi", commands.service(PackageAdmin.class.getName(), null), PackageAdmin.class);
+            addCommand("osgi", commands.service(PackageAdmin.class.getName(), null),
+                PackageAdmin.class);
             addCommand("osgi", commands.getContext(), BundleContext.class);
 
             try
@@ -101,7 +102,9 @@ public class OSGiShell extends CommandShellImpl
                     return null;
                 }
 
-                String filter = String.format("(&(osgi.command.scope=%s)(osgi.command.function=%s))", service, function);
+                String filter = String.format(
+                    "(&(osgi.command.scope=%s)(osgi.command.function=%s))", service,
+                    function);
                 ServiceReference refs[] = context.getServiceReferences(null, filter);
                 if (refs == null || refs.length == 0)
                 {
@@ -110,7 +113,9 @@ public class OSGiShell extends CommandShellImpl
 
                 if (refs.length > 1)
                 {
-                    throw new IllegalArgumentException("Command name is not unambiguous: " + name + ", found multiple impls");
+                    throw new IllegalArgumentException(
+                        "Command name is not unambiguous: " + name
+                            + ", found multiple impls");
                 }
 
                 return new ServiceCommand(this, refs[0], function);

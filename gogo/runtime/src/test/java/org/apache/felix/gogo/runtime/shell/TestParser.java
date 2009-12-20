@@ -113,10 +113,12 @@ public class TestParser extends TestCase
         assertEquals("def", c.execute("echo def|grep d.*|capture"));
         assertEquals("def", c.execute("echoout def|grep d.*|capture"));
         assertEquals("def", c.execute("myecho def|grep d.*|capture"));
-        assertEquals("def", c.execute("(echoout abc; echoout def; echoout ghi)|grep d.*|capture"));
+        assertEquals("def",
+            c.execute("(echoout abc; echoout def; echoout ghi)|grep d.*|capture"));
         assertEquals("", c.execute("echoout def; echoout ghi | grep d.* | capture"));
         assertEquals("hello world", c.execute("echo hello world|capture"));
-        assertEquals("defghi", c.execute("(echoout abc; echoout def; echoout ghi)|grep 'def|ghi'|capture"));
+        assertEquals("defghi",
+            c.execute("(echoout abc; echoout def; echoout ghi)|grep 'def|ghi'|capture"));
     }
 
     public void testAssignment() throws Exception
@@ -147,7 +149,8 @@ public class TestParser extends TestCase
         c.addCommand("echo", this);
         c.addCommand("capture", this);
 
-        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0"));
+        assertEquals("http://www.aqute.biz?com=2&biz=1",
+            c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0"));
         assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
         assertEquals("3", c.execute("[a=2 b=3] get b"));
         assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
@@ -163,7 +166,8 @@ public class TestParser extends TestCase
     public void testArray() throws Exception
     {
         Context c = new Context();
-        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0"));
+        assertEquals("http://www.aqute.biz?com=2&biz=1",
+            c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0"));
         assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
         assertEquals("3", c.execute("[a=2 b=3] get b"));
         assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
@@ -257,8 +261,8 @@ public class TestParser extends TestCase
         {
             if (arg != null)
             {
-		if (sb.length() > 0)
-		    sb.append(' ');
+                if (sb.length() > 0)
+                    sb.append(' ');
                 sb.append(arg);
             }
         }
@@ -342,7 +346,8 @@ public class TestParser extends TestCase
 
     public void testSimpleValue()
     {
-        List<CharSequence> x = new Parser("abc def.ghi http://www.osgi.org?abc=&x=1 [1,2,3] {{{{{{{xyz}}}}}}} (immediate) {'{{{{{'} {\\}} 'abc{}'").statement();
+        List<CharSequence> x = new Parser(
+            "abc def.ghi http://www.osgi.org?abc=&x=1 [1,2,3] {{{{{{{xyz}}}}}}} (immediate) {'{{{{{'} {\\}} 'abc{}'").statement();
         assertEquals("abc", x.get(0));
         assertEquals("def.ghi", x.get(1));
         assertEquals("http://www.osgi.org?abc=&x=1", x.get(2));
@@ -354,7 +359,8 @@ public class TestParser extends TestCase
         assertEquals("'abc{}'", x.get(8));
     }
 
-    void each(CommandSession session, Collection<Object> list, Function closure) throws Exception
+    void each(CommandSession session, Collection<Object> list, Function closure)
+        throws Exception
     {
         List<Object> args = new ArrayList<Object>();
         args.add(null);

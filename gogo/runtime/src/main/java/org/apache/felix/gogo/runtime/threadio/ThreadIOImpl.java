@@ -52,7 +52,7 @@ public class ThreadIOImpl implements ThreadIO
     }
 
     private void checkIO()
-    {    // derek
+    { // derek
         if (System.in != in)
         {
             log.fine("ThreadIO: eek! who's set System.in=" + System.in);

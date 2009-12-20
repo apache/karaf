@@ -40,7 +40,7 @@ public class Pipe extends Thread
     Exception exception;
     Object result;
     List<CharSequence> statement;
-    
+
     public static void reset()
     {
         tIn.set(null);
@@ -58,8 +58,9 @@ public class Pipe extends Thread
         out = tOut.get();
         err = tErr.get();
     }
-    
-    public String toString() {
+
+    public String toString()
+    {
         return "pipe<" + statement + "> out=" + out;
     }
 

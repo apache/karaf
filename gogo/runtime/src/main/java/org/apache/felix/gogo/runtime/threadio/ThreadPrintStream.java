@@ -92,12 +92,12 @@ public class ThreadPrintStream extends PrintStream
 
     public void setError()
     {
-//        getCurrent().setError();
+        //        getCurrent().setError();
     }
 
     public void clearError()
     {
-//        getCurrent().clearError();
+        //        getCurrent().clearError();
     }
 
     public void write(int b)

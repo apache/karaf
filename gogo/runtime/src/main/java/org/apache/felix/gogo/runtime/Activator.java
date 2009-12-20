@@ -63,7 +63,8 @@ public class Activator implements BundleActivator
         shell.setThreadio(threadio);
         shell.setConverter(new Support());
         shell.start();
-        converterTracker = new ServiceTracker(context, Converter.class.getName(), null) {
+        converterTracker = new ServiceTracker(context, Converter.class.getName(), null)
+        {
             @Override
             public Object addingService(ServiceReference reference)
             {
@@ -80,28 +81,33 @@ public class Activator implements BundleActivator
             }
         };
         converterTracker.open();
-        
-        commandTracker = new ServiceTracker(context, context.createFilter("(&(osgi.command.scope=*)(osgi.command.function=*))"), null) {
+
+        commandTracker = new ServiceTracker(context,
+            context.createFilter("(&(osgi.command.scope=*)(osgi.command.function=*))"),
+            null)
+        {
             @Override
             public Object addingService(ServiceReference reference)
             {
                 Object scope = reference.getProperty("osgi.command.scope");
                 Object function = reference.getProperty("osgi.command.function");
                 List<Object> commands = new ArrayList<Object>();
-                if(scope != null && function != null)
+                if (scope != null && function != null)
                 {
                     if (function.getClass().isArray())
                     {
                         for (Object f : ((Object[]) function))
                         {
-                            Function target = new CommandProxy(context, reference, f.toString());
+                            Function target = new CommandProxy(context, reference,
+                                f.toString());
                             shell.addCommand(scope.toString(), target, f.toString());
                             commands.add(target);
                         }
                     }
                     else
                     {
-                        Function target = new CommandProxy(context, reference, function.toString());
+                        Function target = new CommandProxy(context, reference,
+                            function.toString());
                         shell.addCommand(scope.toString(), target, function.toString());
                         commands.add(target);
                     }
@@ -114,31 +120,40 @@ public class Activator implements BundleActivator
             public void removedService(ServiceReference reference, Object service)
             {
                 List<Object> commands = (List<Object>) service;
-                for (Object cmd : commands) {
+                for (Object cmd : commands)
+                {
                     shell.removeCommand(cmd);
                 }
                 super.removedService(reference, service);
             }
         };
         commandTracker.open();
-        
-        felixTracker = new ServiceTracker(context, FelixCommandAdaptor.FELIX_COMMAND, null) {
+
+        felixTracker = new ServiceTracker(context, FelixCommandAdaptor.FELIX_COMMAND,
+            null)
+        {
             @Override
-            public Object addingService(ServiceReference ref) {
+            public Object addingService(ServiceReference ref)
+            {
                 Object felixCommand = super.addingService(ref);
-                try {
+                try
+                {
                     FelixCommandAdaptor adaptor = new FelixCommandAdaptor(felixCommand);
-                    regs.put(ref, context.registerService(FelixCommandAdaptor.class.getName(), adaptor,
-                            adaptor.getAttributes()));
+                    regs.put(ref, context.registerService(
+                        FelixCommandAdaptor.class.getName(), adaptor,
+                        adaptor.getAttributes()));
                     return felixCommand;
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     System.err.println("felixcmd: " + e);
                     return null;
                 }
             }
 
             @Override
-            public void removedService(ServiceReference reference, Object service) {
+            public void removedService(ServiceReference reference, Object service)
+            {
                 ServiceRegistration reg = regs.remove(reference);
                 if (reg != null)
                     reg.unregister();
@@ -146,14 +161,18 @@ public class Activator implements BundleActivator
             }
         };
         felixTracker.open();
-        
-        threadioRegistration = context.registerService(ThreadIO.class.getName(), threadio, new Hashtable());
-        shellRegistration = context.registerService(CommandProcessor.class.getName(), shell, new Hashtable());
+
+        threadioRegistration = context.registerService(ThreadIO.class.getName(),
+            threadio, new Hashtable());
+        shellRegistration = context.registerService(CommandProcessor.class.getName(),
+            shell, new Hashtable());
     }
 
-    private String getProperty(BundleContext context, String name, String def) {
+    private String getProperty(BundleContext context, String name, String def)
+    {
         String v = context.getProperty(name);
-        if (v == null) {
+        if (v == null)
+        {
             v = def;
         }
         return v;

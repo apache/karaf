@@ -39,7 +39,8 @@ public class ServiceCommand extends Reflective implements Function
         this.name = name;
     }
 
-    public Object execute(CommandSession session, List<Object> arguments) throws Exception
+    public Object execute(CommandSession session, List<Object> arguments)
+        throws Exception
     {
         try
         {
@@ -55,7 +56,8 @@ public class ServiceCommand extends Reflective implements Function
                 {
                     return result;
                 }
-                throw new IllegalArgumentException("Service does not implement promised command " + ref + " " + name);
+                throw new IllegalArgumentException(
+                    "Service does not implement promised command " + ref + " " + name);
             }
         }
         finally

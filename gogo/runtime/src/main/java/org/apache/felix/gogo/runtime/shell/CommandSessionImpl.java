@@ -42,7 +42,7 @@ public class CommandSessionImpl implements CommandSession, Converter
     PrintStream err;
     CommandShellImpl service;
     final Map<Object, Object> variables = new HashMap<Object, Object>();
-    private boolean closed;    // derek
+    private boolean closed; // derek
 
     CommandSessionImpl(CommandShellImpl service, InputStream in, PrintStream out, PrintStream err)
     {
@@ -54,7 +54,7 @@ public class CommandSessionImpl implements CommandSession, Converter
 
     public void close()
     {
-        this.closed = true;    // derek
+        this.closed = true; // derek
     }
 
     public Object execute(CharSequence commandline) throws Exception
@@ -64,7 +64,7 @@ public class CommandSessionImpl implements CommandSession, Converter
 
         if (closed)
         {
-            throw new IllegalStateException("session is closed");    // derek
+            throw new IllegalStateException("session is closed"); // derek
         }
 
         Closure impl = new Closure(this, null, commandline);
@@ -98,7 +98,8 @@ public class CommandSessionImpl implements CommandSession, Converter
         // XXX: derek: add SCOPE support
         if (name.startsWith("*:"))
         {
-            String path = variables.containsKey("SCOPE") ? variables.get("SCOPE").toString() : "osgi:*";
+            String path = variables.containsKey("SCOPE") ? variables.get("SCOPE").toString()
+                : "osgi:*";
             String func = name.substring(2);
             for (String scope : path.split(":"))
             {
@@ -124,7 +125,8 @@ public class CommandSessionImpl implements CommandSession, Converter
     }
 
     @SuppressWarnings("unchecked")
-    public CharSequence format(Object target, int level, Converter escape) throws Exception
+    public CharSequence format(Object target, int level, Converter escape)
+        throws Exception
     {
         if (target == null)
         {
@@ -303,7 +305,9 @@ public class CommandSessionImpl implements CommandSession, Converter
             try
             {
                 String name = m.getName();
-                if (m.getName().startsWith("get") && !m.getName().equals("getClass") && m.getParameterTypes().length == 0 && Modifier.isPublic(m.getModifiers()))
+                if (m.getName().startsWith("get") && !m.getName().equals("getClass")
+                    && m.getParameterTypes().length == 0
+                    && Modifier.isPublic(m.getModifiers()))
                 {
                     found = true;
                     name = name.substring(3);

@@ -59,6 +59,5 @@ public interface CommandProcessor
      * @param err The stream used for System.err
      * @return A new session.
      */
-    CommandSession createSession(InputStream in, PrintStream out,
-			PrintStream err);
+    CommandSession createSession(InputStream in, PrintStream out, PrintStream err);
 }

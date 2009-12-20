@@ -42,14 +42,14 @@ public class OSGiCommands implements Converter
         this.bundle = bundle;
     }
 
-//	Bundle[] getBundles() {
-//		return getContext().getBundles();
-//	}
+    //	Bundle[] getBundles() {
+    //		return getContext().getBundles();
+    //	}
 
     public BundleContext getContext()
     {
         if (bundle.getState() != Bundle.ACTIVE && bundle.getState() != Bundle.STARTING
-                && bundle.getState() != Bundle.STOPPING)
+            && bundle.getState() != Bundle.STOPPING)
         {
             throw new IllegalStateException("Framework is not started yet");
         }
@@ -63,7 +63,8 @@ public class OSGiCommands implements Converter
         {
             version = "0.0.0";
         }
-        return String.format("%06d %s %s-%s", bundle.getBundleId(), getState(bundle), bundle.getSymbolicName(), version);
+        return String.format("%06d %s %s-%s", bundle.getBundleId(), getState(bundle),
+            bundle.getSymbolicName(), version);
     }
 
     CharSequence print(ServiceReference ref)
@@ -78,7 +79,9 @@ public class OSGiCommands implements Converter
             spid = pid.toString();
         }
 
-        f.format("%06d %3s %-40s %s", ref.getProperty("service.id"), ref.getBundle().getBundleId(), getShortNames((String[]) ref.getProperty("objectclass")), spid);
+        f.format("%06d %3s %-40s %s", ref.getProperty("service.id"),
+            ref.getBundle().getBundleId(),
+            getShortNames((String[]) ref.getProperty("objectclass")), spid);
         return sb;
     }
 
@@ -177,7 +180,8 @@ public class OSGiCommands implements Converter
         return sb;
     }
 
-    public void each(CommandSession session, Collection<Object> list, Function closure) throws Exception
+    public void each(CommandSession session, Collection<Object> list, Function closure)
+        throws Exception
     {
         List<Object> args = new ArrayList<Object>();
         args.add(null);
@@ -282,7 +286,8 @@ public class OSGiCommands implements Converter
                 }
                 else
                 {
-                    if (desiredType.isAssignableFrom(String.class) && in instanceof InputStream)
+                    if (desiredType.isAssignableFrom(String.class)
+                        && in instanceof InputStream)
                     {
                         return read(((InputStream) in));
                     }
@@ -298,14 +303,16 @@ public class OSGiCommands implements Converter
         String s = in.toString();
         if (s.startsWith("(") && s.endsWith(")"))
         {
-            ServiceReference refs[] = getContext().getServiceReferences(null, String.format("(|(service.id=%s)(service.pid=%s))", in, in));
+            ServiceReference refs[] = getContext().getServiceReferences(null,
+                String.format("(|(service.id=%s)(service.pid=%s))", in, in));
             if (refs != null && refs.length > 0)
             {
                 return refs[0];
             }
         }
 
-        ServiceReference refs[] = getContext().getServiceReferences(null, String.format("(|(service.id=%s)(service.pid=%s))", in, in));
+        ServiceReference refs[] = getContext().getServiceReferences(null,
+            String.format("(|(service.id=%s)(service.pid=%s))", in, in));
         if (refs != null && refs.length > 0)
         {
             return refs[0];
@@ -343,7 +350,8 @@ public class OSGiCommands implements Converter
         return null;
     }
 
-    public CharSequence format(Object target, int level, Converter converter) throws IOException
+    public CharSequence format(Object target, int level, Converter converter)
+        throws IOException
     {
         if (level == INSPECT && target instanceof InputStream)
         {

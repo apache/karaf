@@ -32,10 +32,20 @@ import org.osgi.service.command.CommandSession;
 public class Reflective
 {
     public final static Object NO_MATCH = new Object();
-    public final static Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[]{"abstract", "continue", "for", "new", "switch", "assert", "default", "goto", "package", "synchronized", "boolean", "do", "if", "private", "this", "break", "double", "implements", "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile", "const", "float", "native", "super", "while"}));
+    public final static Set<String> KEYWORDS = new HashSet<String>(
+        Arrays.asList(new String[] { "abstract", "continue", "for", "new", "switch",
+                "assert", "default", "goto", "package", "synchronized", "boolean", "do",
+                "if", "private", "this", "break", "double", "implements", "protected",
+                "throw", "byte", "else", "import", "public", "throws", "case", "enum",
+                "instanceof", "return", "transient", "catch", "extends", "int", "short",
+                "try", "char", "final", "interface", "static", "void", "class",
+                "finally", "long", "strictfp", "volatile", "const", "float", "native",
+                "super", "while" }));
     public final static String MAIN = "_main";
-    
-    public Object method(CommandSession session, Object target, String name, List<Object> args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, Exception
+
+    public Object method(CommandSession session, Object target, String name,
+        List<Object> args) throws IllegalArgumentException, IllegalAccessException,
+        InvocationTargetException, Exception
     {
         Method[] methods = target.getClass().getMethods();
         name = name.toLowerCase();
@@ -48,14 +58,15 @@ public class Reflective
         {
             name = "_" + name;
         }
-        
+
         if (target instanceof Class)
         {
-            Method[] staticMethods = ((Class<?>)target).getMethods();
+            Method[] staticMethods = ((Class<?>) target).getMethods();
             for (Method m : staticMethods)
             {
                 String mname = m.getName().toLowerCase();
-                if (mname.equals(name) || mname.equals(get) || mname.equals(set) || mname.equals(is) || mname.equals(MAIN))
+                if (mname.equals(name) || mname.equals(get) || mname.equals(set)
+                    || mname.equals(is) || mname.equals(MAIN))
                 {
                     methods = staticMethods;
                     break;
@@ -71,7 +82,8 @@ public class Reflective
         for (Method m : methods)
         {
             String mname = m.getName().toLowerCase();
-            if (mname.equals(name) || mname.equals(get) || mname.equals(set) || mname.equals(is) || mname.equals(MAIN))
+            if (mname.equals(name) || mname.equals(get) || mname.equals(set)
+                || mname.equals(is) || mname.equals(MAIN))
             {
                 Class<?>[] types = m.getParameterTypes();
                 ArrayList<Object> xargs = new ArrayList<Object>(args);
@@ -92,7 +104,7 @@ public class Reflective
                 // if (types.length >= args.size() ) {
                 int local = coerce(session, target, types, parms, xargs);
                 if ((local >= xargs.size()) && (local >= types.length))
-                {       // derek - stop no-args
+                { // derek - stop no-args
                     boolean exact = (local == xargs.size() && local == types.length);
                     if (exact || local > match)
                     {
@@ -159,7 +171,8 @@ public class Reflective
                 list.add(buf.toString());
             }
 
-            throw new IllegalArgumentException(String.format("Cannot coerce %s%s to any of %s", name, args, list));
+            throw new IllegalArgumentException(String.format(
+                "Cannot coerce %s%s to any of %s", name, args, list));
             // } derek
         }
     }
@@ -179,7 +192,8 @@ public class Reflective
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    private int coerce(CommandSession session, Object target, Class<?> types[], Object out[], List<Object> in) throws Exception
+    private int coerce(CommandSession session, Object target, Class<?> types[],
+        Object out[], List<Object> in) throws Exception
     {
         int i = 0;
         while (i < out.length)
@@ -226,7 +240,7 @@ public class Reflective
                         {
                             ++i;
                         }
-                        return i;    // derek - return number of args converted
+                        return i; // derek - return number of args converted
                     }
                     return -1;
                 }
@@ -246,7 +260,8 @@ public class Reflective
         return i;
     }
 
-    Object coerce(CommandSession session, Object target, Class<?> type, Object arg) throws Exception
+    Object coerce(CommandSession session, Object target, Class<?> type, Object arg)
+        throws Exception
     {
         if (arg == null)
         {

@@ -25,21 +25,26 @@ import org.osgi.service.command.CommandSession;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.BundleContext;
 
-public class CommandProxy extends Reflective implements Function {
+public class CommandProxy extends Reflective implements Function
+{
 
     BundleContext context;
     ServiceReference reference;
     String function;
 
-    public CommandProxy(BundleContext context, ServiceReference reference, String function) {
+    public CommandProxy(BundleContext context, ServiceReference reference, String function)
+    {
         this.context = context;
         this.reference = reference;
         this.function = function;
     }
 
-    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+    public Object execute(CommandSession session, List<Object> arguments)
+        throws Exception
+    {
         Object target = context.getService(reference);
-        try {
+        try
+        {
             if (target instanceof Function)
             {
                 return ((Function) target).execute(session, arguments);

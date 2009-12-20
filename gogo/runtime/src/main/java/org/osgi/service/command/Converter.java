@@ -18,7 +18,6 @@
  */
 package org.osgi.service.command;
 
-
 /**
  * A converter is a service that can help create specific object types from a
  * string, and vice versa.

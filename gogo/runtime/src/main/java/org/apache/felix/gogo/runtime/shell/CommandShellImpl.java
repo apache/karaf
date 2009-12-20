@@ -42,7 +42,7 @@ public class CommandShellImpl implements CommandProcessor
     public CommandShellImpl()
     {
         addCommand("shell", this, "addCommand");
-        addCommand("shell", this, "removeCommand");    // derek
+        addCommand("shell", this, "removeCommand"); // derek
     }
 
     public CommandSession createSession(InputStream in, PrintStream out, PrintStream err)
@@ -177,7 +177,7 @@ public class CommandShellImpl implements CommandProcessor
         Method methods[] = target.getMethods();
         for (Method m : methods)
         {
-            if (m.getDeclaringClass().equals(Object.class))    // derek
+            if (m.getDeclaringClass().equals(Object.class)) // derek
             {
                 continue;
             }

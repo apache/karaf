@@ -26,29 +26,32 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
-
 public class Support implements Converter
 {
 
     public Object convert(Class<?> desiredType, final Object in) throws Exception
     {
-        if (in instanceof Function && desiredType.isInterface() && desiredType.getDeclaredMethods().length == 1)
+        if (in instanceof Function && desiredType.isInterface()
+            && desiredType.getDeclaredMethods().length == 1)
         {
-            return Proxy.newProxyInstance(desiredType.getClassLoader(), new Class[]{desiredType}, new InvocationHandler()
-            {
-                Function command = ((Function) in);
-
-                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+            return Proxy.newProxyInstance(desiredType.getClassLoader(),
+                new Class[] { desiredType }, new InvocationHandler()
                 {
-                    return command.execute(null, Arrays.asList(args));
-                }
+                    Function command = ((Function) in);
 
-            });
+                    public Object invoke(Object proxy, Method method, Object[] args)
+                        throws Throwable
+                    {
+                        return command.execute(null, Arrays.asList(args));
+                    }
+
+                });
         }
         return null;
     }
 
-    public CharSequence format(Object target, int level, Converter escape) throws Exception
+    public CharSequence format(Object target, int level, Converter escape)
+        throws Exception
     {
         return null;
     }

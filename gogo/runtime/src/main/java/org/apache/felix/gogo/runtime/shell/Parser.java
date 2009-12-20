@@ -45,7 +45,8 @@ public class Parser
             {
                 current++;
             }
-            if (peek() == '/' && current < text.length() - 2 && text.charAt(current + 1) == '/')
+            if (peek() == '/' && current < text.length() - 2
+                && text.charAt(current + 1) == '/')
             {
                 comment();
             }
@@ -125,7 +126,8 @@ public class Parser
                     // but have the escaped flag set, important for {},[] etc
             }
         }
-        if (!increment) {
+        if (!increment)
+        {
             current = last;
         }
         return c;
@@ -158,7 +160,8 @@ public class Parser
 
     CharSequence context(int around)
     {
-        return text.subSequence(Math.max(0, current - 20), Math.min(text.length(), current + 4));
+        return text.subSequence(Math.max(0, current - 20), Math.min(text.length(),
+            current + 4));
     }
 
     public List<List<CharSequence>> pipeline()
@@ -230,7 +233,8 @@ public class Parser
 
         int start = current;
         char c = next();
-        if (!escaped) {
+        if (!escaped)
+        {
             switch (c)
             {
                 case '{':
@@ -245,7 +249,8 @@ public class Parser
                     return text.subSequence(start, current);
                 case '"':
                 case '\'':
-                    quote(c); break;
+                    quote(c);
+                    break;
             }
         }
 
@@ -255,22 +260,43 @@ public class Parser
             c = peek();
             if (!escaped)
             {
-                if (Character.isWhitespace(c) || c == ';' || c =='|' || c == '=') {
+                if (Character.isWhitespace(c) || c == ';' || c == '|' || c == '=')
+                {
                     break;
-                } else if (c == '{') {
-                    next(); find('}', '{');
-                } else if (c == '(') {
-                    next(); find(')', '(');
-                } else if (c == '<') {
-                    next(); find('>', '<');
-                } else if (c == '[') {
-                    next(); find(']', '[');
-                } else if (c == '\'' || c == '"') {
-                    next(); quote(c); next();
-                } else {
+                }
+                else if (c == '{')
+                {
+                    next();
+                    find('}', '{');
+                }
+                else if (c == '(')
+                {
+                    next();
+                    find(')', '(');
+                }
+                else if (c == '<')
+                {
+                    next();
+                    find('>', '<');
+                }
+                else if (c == '[')
+                {
+                    next();
+                    find(']', '[');
+                }
+                else if (c == '\'' || c == '"')
+                {
+                    next();
+                    quote(c);
                     next();
                 }
-            } else {
+                else
+                {
+                    next();
+                }
+            }
+            else
+            {
                 next();
             }
         }
@@ -291,7 +317,8 @@ public class Parser
     {
         if (current + 4 > text.length())
         {
-            throw new IllegalArgumentException("Unicode \\u escape at eof at pos ..." + context(current) + "...");
+            throw new IllegalArgumentException("Unicode \\u escape at eof at pos ..."
+                + context(current) + "...");
         }
 
         String s = text.subSequence(current, current + 4).toString();
@@ -308,7 +335,8 @@ public class Parser
         {
             if (eof())
             {
-                throw new RuntimeException("Eof found in the middle of a compound for '" + target + deeper + "', begins at " + context(start));
+                throw new RuntimeException("Eof found in the middle of a compound for '"
+                    + target + deeper + "', begins at " + context(start));
             }
 
             char c = next();
@@ -381,7 +409,8 @@ public class Parser
 
         if (Character.isJavaIdentifierPart(c))
         {
-            while (c == '$') {
+            while (c == '$')
+            {
                 c = next();
             }
             while (!eof() && (Character.isJavaIdentifierPart(c) || c == '.') && c != '$')
@@ -391,7 +420,9 @@ public class Parser
             }
             return text.subSequence(start, current);
         }
-        throw new IllegalArgumentException("Reference to variable does not match syntax of a variable: " + context(start));
+        throw new IllegalArgumentException(
+            "Reference to variable does not match syntax of a variable: "
+                + context(start));
     }
 
     public String toString()
