@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -63,8 +63,8 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
     /**
      * True if the visited class is a component type declaration (i.e. contains the @component annotation).
      */
-    private boolean m_containsAnnotation = false;
-
+    private boolean m_containsComponentAnnotation = false;
+    
     /**
      * Map of [element ids, element].
      * This map is used to easily get an already created element.
@@ -73,25 +73,34 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
 
     /**
      * Map of [element, referto].
-     * This map is used to recreate the element hierarchie.
+     * This map is used to recreate the element hierarchy.
      * Stored element are added under referred element.
      */
     private Map m_elements = new HashMap();
+    
+    /**
+     * Instance declaration.
+     */
+    private Element m_instance;
 
     /**
      * XML document parser.
      */
     private DocumentBuilder m_builder;
 
-    public Element getElem() {
+
+    public Element getComponentTypeDeclaration() {
         return m_elem;
     }
-
-    public boolean isAnnotated() {
-        return m_containsAnnotation;
+    
+    public Element getInstanceDeclaration() {
+        return m_instance;
     }
-
-
+    
+    public boolean isComponentType() {
+        return m_containsComponentAnnotation;
+    }
+    
     /**
      * Start visiting a class.
      * Initialize the getter/setter generator, add the _cm field, add the pojo interface.
@@ -123,7 +132,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         if (desc.equals("Lorg/apache/felix/ipojo/annotations/Component;")) {
             // It is a component
             m_elem =  new Element("component", "");
-            m_containsAnnotation = true;
+            m_containsComponentAnnotation = true;
             m_elem.addAttribute(new Attribute("className", m_className.replace('/', '.')));
             return new ComponentVisitor();
         }
@@ -132,7 +141,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         if (desc.equals("Lorg/apache/felix/ipojo/annotations/Handler;")) {
             // It is a handler, change the root element
             m_elem = new Element("handler", "");
-            m_containsAnnotation = true;
+            m_containsComponentAnnotation = true;
             m_elem.addAttribute(new Attribute("classname", m_className.replace('/', '.')));
             return new HandlerVisitor();
         }
@@ -146,6 +155,11 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         if (desc.equals("Lorg/apache/felix/ipojo/annotations/HandlerDeclaration;")) {
             return new HandlerDeclarationVisitor();
         }
+        
+        // @Instantiate
+        if (desc.equals("Lorg/apache/felix/ipojo/annotations/Instantiate;")) {
+            return new InstantiateVisitor();
+        }
 
         if (CustomAnnotationVisitor.isCustomAnnotation(desc)) {
             Element elem = CustomAnnotationVisitor.buildElement(desc);
@@ -154,7 +168,6 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
 
         return null;
     }
-
 
 
     /**
@@ -327,7 +340,45 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         }
 
     }
+    
+    /**
+     * Parse the @Instantitate annotation.
+     */
+    private class InstantiateVisitor extends EmptyVisitor implements AnnotationVisitor {
+        /**
+         * Instance name. 
+         */
+        private String m_name;
+        
+        /**
+         * Visit an annotation attribute.
+         * @param arg0 the attribute name
+         * @param arg1 the attribute value
+         * @see org.objectweb.asm.commons.EmptyVisitor#visit(java.lang.String, java.lang.Object)
+         */
+        public void visit(String arg0, Object arg1) {
+            if (arg0.equals("name")) {
+                m_name = arg1.toString();
+                return;
+            }
+        }
+        
+        /**
+         * End of the visit. Creates the instance element.
+         * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
+         */
+        public void visitEnd() {
+            m_instance = new Element("instance", "");
+            if (m_className != null) { // Should not be null.
+                m_instance.addAttribute(new Attribute("component", m_className));
+            }
+            if (m_name != null) {
+                m_instance.addAttribute(new Attribute("name", m_name));
+            }
+        }
+    }
 
+    
     /**
      * Parse the @component annotation.
      */
@@ -577,8 +628,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             // Add converted element as a root's child
             root.addElement(converted);
         }
-
-
     }
+
 }
 

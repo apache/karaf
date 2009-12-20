@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -76,7 +77,7 @@ public class Pojoization {
     /**
      * Metadata (in internal format).
      */
-    private Element[] m_metadata = new Element[0];
+    private List/*Element*/ m_metadata = new ArrayList/*Element*/();
 
     /**
      * Errors which occur during the manipulation.
@@ -291,35 +292,37 @@ public class Pojoization {
         ClassReader cr = new ClassReader(inC);
         MetadataCollector xml = new MetadataCollector();
         cr.accept(xml, 0);
-        if (xml.isAnnotated()) {
+        if (xml.isComponentType()) {
             boolean toskip = false;
-            for (int i = 0; !toskip && i < m_metadata.length; i++) {
-                if (! m_metadata[i].getName().equals("instance") // Only if its a component type definition, 
+            for (int i = 0; !toskip && i < m_metadata.size(); i++) {
+                Element meta = (Element)  m_metadata.get(i);
+                if (! meta.getName().equals("instance") // Only if its a component type definition, 
                                                                  // so skip instance declaration 
-                        && m_metadata[i].containsAttribute("name")
-                        && m_metadata[i].getAttribute("name").equalsIgnoreCase(xml.getElem().getAttribute("name"))) {
+                        && meta.containsAttribute("name")
+                        && meta.getAttribute("name").equalsIgnoreCase(xml.getComponentTypeDeclaration().getAttribute("name"))) {
                     toskip = true;
-                    warn("The component type " + xml.getElem().getAttribute("name") + " is overriden by the metadata file");
+                    warn("The component type " + xml.getComponentTypeDeclaration().getAttribute("name") + " is overriden by the metadata file");
                 }
             }
             if (!toskip) {
                 // if no metadata or empty one, create a new array.
-                if (m_metadata != null && m_metadata.length > 0) {
-                    Element[] newElementsList = new Element[m_metadata.length + 1];
-                    System.arraycopy(m_metadata, 0, newElementsList, 0, m_metadata.length);
-                    newElementsList[m_metadata.length] = xml.getElem();
-                    m_metadata = newElementsList;
-                } else {
-                    m_metadata = new Element[] { xml.getElem() };
-                }
-                String name = m_metadata[m_metadata.length - 1].getAttribute("classname");
+                Element elem = xml.getComponentTypeDeclaration();
+                m_metadata.add(elem);
+                
+                String name = elem.getAttribute("classname");
                 name = name.replace('.', '/');
                 name += ".class";
 
                 // Creates the ComponentInfo and store bytecode
-                ComponentInfo info = new ComponentInfo(name, m_metadata[m_metadata.length - 1]);
+                ComponentInfo info = new ComponentInfo(name, elem);
                 info.m_bytecode = inC;
                 m_components.add(info);
+                
+                // Instantiate ?
+                if (xml.getInstanceDeclaration() != null) {
+                    warn("Declaring an empty instance of " + elem.getAttribute("classname"));
+                    m_metadata.add(xml.getInstanceDeclaration());
+                }
             }
         }
     }
@@ -760,12 +763,13 @@ public class Pojoization {
      */
     private void computeDeclaredComponents() {
         List componentClazzes = new ArrayList();
-        for (int i = 0; i < m_metadata.length; i++) {
-            String name = m_metadata[i].getAttribute("classname");
+        for (int i = 0; i < m_metadata.size(); i++) {
+            Element meta = (Element) m_metadata.get(i);
+            String name = meta.getAttribute("classname");
             if (name != null) { // Only handler and component have a classname attribute
                 name = name.replace('.', '/');
                 name += ".class";
-                componentClazzes.add(new ComponentInfo(name, m_metadata[i]));
+                componentClazzes.add(new ComponentInfo(name, meta));
             }
         }
         m_components = componentClazzes;
@@ -911,8 +915,9 @@ public class Pojoization {
      */
     private void setPOJOMetadata(Attributes att) {
         StringBuffer meta = new StringBuffer();
-        for (int i = 0; i < m_metadata.length; i++) {
-            meta.append(buildManifestMetadata(m_metadata[i], new StringBuffer()));
+        for (int i = 0; i < m_metadata.size(); i++) {
+            Element metadata = (Element) m_metadata.get(i);
+            meta.append(buildManifestMetadata(metadata, new StringBuffer()));
         }
         if (meta.length() != 0) {
             att.putValue("iPOJO-Components", meta.toString());
@@ -1013,10 +1018,10 @@ public class Pojoization {
     private void parseXMLMetadata(File metadataFile) {
         try {
             InputStream stream = null;
-            URL url = metadataFile.toURL();
+            URL url = metadataFile.toURI().toURL();
             if (url == null) {
                 warn("Cannot find the metadata file : " + metadataFile.getAbsolutePath());
-                m_metadata = new Element[0];
+                m_metadata = new ArrayList/*Element*/();
             } else {
                 stream = url.openStream();
                 parseXMLMetadata(stream); // m_metadata is set by the method.
@@ -1074,7 +1079,7 @@ public class Pojoization {
             warn("Neither component types, nor instances in the metadata");
         }
 
-        m_metadata = meta;
+        m_metadata.addAll(Arrays.asList(meta));
     }
 
     /**
@@ -1083,8 +1088,8 @@ public class Pojoization {
      */
     private List getReferredPackages() {
         List referred = new ArrayList();
-        for (int i = 0; i < m_metadata.length; i++) {
-            Element[] elems = m_metadata[i].getElements();
+        for (int i = 0; i < m_metadata.size(); i++) {
+            Element[] elems = ((Element) m_metadata.get(i)).getElements();
             for (int j = 0; j < elems.length; j++) {
                 String att = elems[j].getAttribute("specification");
                 if (att != null) {
