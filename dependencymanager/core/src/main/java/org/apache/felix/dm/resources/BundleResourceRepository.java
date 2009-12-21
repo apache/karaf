@@ -21,8 +21,8 @@ package org.apache.felix.dm.resources;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Filter;
@@ -31,92 +31,149 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 public class BundleResourceRepository {
-
-	private final Bundle bundle;
+	private final Bundle m_bundle;
 
 	public BundleResourceRepository(Bundle bundle) {
-		this.bundle = bundle;
+		this.m_bundle = bundle;
 	}
 
 	public synchronized void addHandler(ServiceReference ref, ResourceHandler handler) {
-
 		String filter = (String) ref.getProperty("filter"); // "(&(repository=a)(path=b)(name=*.xml))"
-
 		Filter filterObject = null;
-
 		try {
 			filterObject = FrameworkUtil.createFilter(filter);
-		} catch (InvalidSyntaxException e) {
+		} 
+		catch (InvalidSyntaxException e) {
 			e.printStackTrace();
 			return;
 		}
-
-		Enumeration entries = bundle.findEntries("/", null, true);
+		Enumeration entries = m_bundle.findEntries("/", null, true);
 		while (entries.hasMoreElements()) {
-			URL entry = (URL) entries.nextElement();
-
-			Properties props = new Properties();
-			props.setProperty(Resource.REPOSITORY, bundle.getSymbolicName() + "_" + bundle.getHeaders().get("Bundle-Version"));
-			props.setProperty(Resource.PATH, entry.getPath());
-			props.setProperty(Resource.NAME, entry.getFile());
-
-			if (filterObject.match(props))
-				handler.added(new EntryResource(entry));
-
+			EntryResource resource = new EntryResource(m_bundle, (URL) entries.nextElement());
+			if (filterObject.match(resource)) {
+                handler.added(resource);
+			}
 		}
 	}
 
 	public synchronized void removeHandler(ServiceReference ref, ResourceHandler handler) {
-
 		String filter = (String) ref.getProperty("filter"); // "(&(repository=a)(path=b)(name=*.xml))"
-
 		Filter filterObject = null;
-
 		try {
 			filterObject = FrameworkUtil.createFilter(filter);
-		} catch (InvalidSyntaxException e) {
+		}
+		catch (InvalidSyntaxException e) {
 			e.printStackTrace();
 			return;
 		}
-
-		Enumeration entries = bundle.findEntries("/", null, true);
-		while (entries.hasMoreElements()) {
-			URL entry = (URL) entries.nextElement();
-
-			Properties props = new Properties();
-			props.setProperty(Resource.REPOSITORY, bundle.getSymbolicName() + "_" + bundle.getHeaders().get("Bundle-Version"));
-			props.setProperty(Resource.PATH, entry.getPath());
-			props.setProperty(Resource.NAME, entry.getFile());
-
-			if (filterObject.match(props))
-				handler.removed(new EntryResource(entry));
-
-		}
+		Enumeration entries = m_bundle.findEntries("/", null, true);
+        while (entries.hasMoreElements()) {
+            EntryResource resource = new EntryResource(m_bundle, (URL) entries.nextElement());
+            if (filterObject.match(resource)) {
+                handler.removed(resource);
+            }
+        }
 	}
 
-	class EntryResource implements Resource {
+	static class EntryResource extends Dictionary implements Resource {
+		private final URL m_entry;
+        private final String m_id;
+        private final String m_repository;
+        private final String m_path;
+        private final String m_name;
+        private static Object[] m_keys;
+        private Object[] m_values;
 
-		URL entry;
-
-		EntryResource(URL entry) {
-			this.entry = entry;
+		public EntryResource(Bundle bundle, URL entry) {
+			m_entry = entry;
+			// TODO is this unique? can we have the same url in more than one repository?
+			m_id = m_entry.toString();
+			m_repository = bundle.getSymbolicName() + "_" + bundle.getHeaders().get("Bundle-Version");
+			m_path = entry.getPath();
+			m_name = entry.getFile();
 		}
 
-		public String getName() {
-			return entry.getFile();
+		public final String getID() {
+		    return m_id;
+		}
+		
+		public final String getName() {
+			return m_name;
 		}
 
-		public String getPath() {
-			return entry.getPath();
+		public final String getPath() {
+			return m_path;
+		}
+		
+		public final String getRepository() {
+			return m_repository;
 		}
 
-		public String getRepository() {
-
-			return bundle.getSymbolicName() + "_" + bundle.getHeaders().get("Bundle-Version");
+		public final InputStream openStream() throws IOException {
+			return m_entry.openStream();
 		}
 
-		public InputStream openStream() throws IOException {
-			return entry.openStream();
-		}
+        public Enumeration elements() {
+            if (m_values == null) {
+                m_values = new Object[] { m_id, m_repository, m_path, m_name };
+            }
+            return new ArrayEnumeration(m_values);
+        }
+
+        public Object get(Object key) {
+            if (Resource.ID.equals(key)) {
+                return m_id;
+            }
+            else if (Resource.REPOSITORY.equals(key)) {
+                return m_repository;
+            }
+            else if (Resource.PATH.equals(key)) {
+                return m_path;
+            }
+            else if (Resource.NAME.equals(key)) {
+                return m_name;
+            }
+            return null;
+        }
+
+        public boolean isEmpty() {
+            return false;
+        }
+
+        public Enumeration keys() {
+            if (m_keys == null) {
+                m_keys = new Object[] { Resource.ID, Resource.REPOSITORY, Resource.PATH, Resource.NAME };
+            }
+            return new ArrayEnumeration(m_keys);
+        }
+
+        public Object put(Object key, Object value) {
+            return null;
+        }
+
+        public Object remove(Object key) {
+            return null;
+        }
+
+        public int size() {
+            return 4;
+        }
+	}
+	
+	static class ArrayEnumeration implements Enumeration {
+	    private int m_counter = 0;
+	    private Object[] m_elements;
+	    
+	    public ArrayEnumeration(Object[] array) {
+	        m_elements = array;
+	    }
+	    
+	    public boolean hasMoreElements() {
+	        return (m_counter < m_elements.length);
+	    }
+	    
+	    public Object nextElement() {
+	        return m_elements[m_counter++];
+	    }
 	}
 }

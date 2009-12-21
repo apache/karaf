@@ -22,19 +22,26 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /** 
- * Interface that defines a resource. 
+ * Interface that defines a resource. Each resource has a unique ID, which should be
+ * used for equality tests. Resources also have a repository name, path and name, which
+ * can all be used to filter on. To access a resource, use the <code>openStream()</code>
+ * method.
  */
 public interface Resource {
+    public static final String ID = "id";
     public static final String FILTER = "filter";
 	public static final String PATH = "path";
 	public static final String NAME = "name";
 	public static final String REPOSITORY = "repository";
 	
-	String getName();
-	
-	String getPath();
-	
-	String getRepository();
-	
-	InputStream openStream() throws IOException;
+	/** Returns the unique identification of this resource. */
+	public String getID();
+	/** Returns the name of this resource. */
+	public String getName();
+	/** Returns the path of this resource. */
+	public String getPath();
+	/** Returns the repository of this resource. */
+	public String getRepository();
+	/**	Returns an input stream containing all data behind this resource. */
+	public InputStream openStream() throws IOException;
 }

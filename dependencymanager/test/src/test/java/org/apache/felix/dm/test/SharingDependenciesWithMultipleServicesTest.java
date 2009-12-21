@@ -281,14 +281,20 @@ public class SharingDependenciesWithMultipleServicesTest {
     }
     
     static class StaticResource implements Resource {
+        private String m_id;
         private String m_name;
         private String m_path;
         private String m_repository;
 
         public StaticResource(String name, String path, String repository) {
+            m_id = repository + ":" + path + "/" + name;
             m_name = name;
             m_path = path;
             m_repository = repository;
+        }
+        
+        public String getID() {
+            return m_id;
         }
 
         public String getName() {

@@ -78,7 +78,6 @@ public class ResourceDependencyTest {
     static class ResourceConsumer {
         private volatile int m_counter;
         public void add(Resource resource) {
-            System.out.println("RC:ADD " + resource);
             m_counter++;
             try {
                 resource.openStream();
@@ -88,7 +87,6 @@ public class ResourceDependencyTest {
             }
         }
         public void remove(Resource resource) {
-            System.out.println("RC:REMOVE " + resource);
             m_counter--;
         }
         public void ensure() {
@@ -175,14 +173,20 @@ public class ResourceDependencyTest {
     }
     
     static class StaticResource implements Resource {
+        private String m_id;
         private String m_name;
         private String m_path;
         private String m_repository;
 
         public StaticResource(String name, String path, String repository) {
+            m_id = repository + ":" + path + "/" + name;
             m_name = name;
             m_path = path;
             m_repository = repository;
+        }
+        
+        public String getID() {
+            return m_id;
         }
 
         public String getName() {
@@ -199,6 +203,7 @@ public class ResourceDependencyTest {
         
         public Dictionary getProperties() {
             return new Properties() {{
+                put(Resource.ID, getID());
                 put(Resource.NAME, getName());
                 put(Resource.PATH, getPath());
                 put(Resource.REPOSITORY, getRepository());

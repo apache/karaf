@@ -22,7 +22,10 @@ package org.apache.felix.dm.resources;
  * Service interface for anybody wanting to be notified of changes to resources. 
  */
 public interface ResourceHandler {
-	void added(Resource resource);
-	void changed(Resource resource);
-	void removed(Resource resource);
+    /** Invoked whenever a new resource is added. */
+	public void added(Resource resource);
+	/** Invoked whenever an existing resource changes. */
+	public void changed(Resource resource);
+	/** Invoked whenever an existing resource is removed. */
+	public void removed(Resource resource);
 }
