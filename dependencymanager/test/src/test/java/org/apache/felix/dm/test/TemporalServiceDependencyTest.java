@@ -56,13 +56,13 @@ public class TemporalServiceDependencyTest {
         m.add(sc);
         // now add the first provider
         m.add(sp);
-        e.waitForStep(2, 1000);
+        e.waitForStep(2, 15000);
         // and remove it again (this should not affect the consumer yet)
         m.remove(sp);
         // now add the second provider
         m.add(sp2);
         e.step(3);
-        e.waitForStep(4, 1000);
+        e.waitForStep(4, 15000);
         // and remove it again
         m.remove(sp2);
         // finally remove the consumer
@@ -111,7 +111,7 @@ public class TemporalServiceDependencyTest {
         
         public void run() {
             m_service.invoke();
-            m_ensure.waitForStep(3, 1000);
+            m_ensure.waitForStep(3, 15000);
             m_service.invoke();
         }
         

@@ -65,7 +65,7 @@ public class ConfigurationDependencyTest {
         m.add(s1);
         m.add(s2);
         m.add(s3);
-        e.waitForStep(4, 2000);
+        e.waitForStep(4, 15000);
         m.remove(s1);
         m.remove(s2);
         m.remove(s3);

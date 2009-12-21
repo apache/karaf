@@ -58,13 +58,13 @@ public class MultipleServiceDependencyTest {
        m.add(provider);
        m.add(providerWithHighRank);
        m.add(consumer);
-       e.waitForStep(3, 1000);
+       e.waitForStep(3, 15000);
        m.remove(providerWithHighRank);
        e.step(4);
-       e.waitForStep(5, 1000);
+       e.waitForStep(5, 15000);
        m.remove(provider);
        m.remove(consumer);
-       e.waitForStep(6, 1000);
+       e.waitForStep(6, 15000);
    }
 
    @Test
@@ -78,14 +78,14 @@ public class MultipleServiceDependencyTest {
        Service consumer = m.createService().setImplementation(new ServiceConsumer(e)).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(true));
        m.add(provider2);
        m.add(consumer);
-       e.waitForStep(3, 1000);
+       e.waitForStep(3, 15000);
        m.add(provider);
        m.remove(provider2);
        e.step(4);
-       e.waitForStep(5, 1000);
+       e.waitForStep(5, 15000);
        m.remove(provider);
        m.remove(consumer);
-       e.waitForStep(6, 1000);
+       e.waitForStep(6, 15000);
    }
 
    @Test
@@ -103,14 +103,14 @@ public class MultipleServiceDependencyTest {
               .setCallbacks("add", "remove"));
        m.add(provider2);
        m.add(consumer);
-       e.waitForStep(3, 1000);
+       e.waitForStep(3, 15000);
        m.add(provider);
        m.remove(provider2);
        e.step(4);
-       e.waitForStep(5, 1000);
+       e.waitForStep(5, 15000);
        m.remove(provider);
        m.remove(consumer);
-       e.waitForStep(6, 1000);
+       e.waitForStep(6, 15000);
    }
 
    static interface ServiceInterface {
@@ -154,7 +154,7 @@ public class MultipleServiceDependencyTest {
            m_ensure.step(1);
            m_service.invoke();
            m_ensure.step(3);
-           m_ensure.waitForStep(4, 1000);
+           m_ensure.waitForStep(4, 15000);
            m_service.invoke();
        }
 

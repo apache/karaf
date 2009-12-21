@@ -58,17 +58,17 @@ public class AspectTest {
         Service sa = m.createAspectService(ServiceInterface.class, "(|(!(" + Constants.SERVICE_RANKING + "=*))(" + Constants.SERVICE_RANKING + "<=0))", new ServiceAspect(e), new Properties() {{ put(Constants.SERVICE_RANKING, Integer.valueOf(1)); }} );
         m.add(sc);
         m.add(sp);
-        e.waitForStep(3, 2000);
+        e.waitForStep(3, 15000);
         m.add(sa);
-        e.waitForStep(4, 2000);
+        e.waitForStep(4, 15000);
         m.add(sp2);
-        e.waitForStep(5, 2000);
+        e.waitForStep(5, 15000);
         e.step(6);
-        e.waitForStep(9, 2000);
+        e.waitForStep(9, 15000);
         m.remove(sa);
-        e.waitForStep(11, 2000);
+        e.waitForStep(11, 15000);
         e.step(12);
-        e.waitForStep(13, 2000);
+        e.waitForStep(13, 15000);
         m.remove(sp2);
         m.remove(sp);
         m.remove(sc);
@@ -149,10 +149,10 @@ public class AspectTest {
             m_ensure.step(1);
             m_service.invoke(Ensure.createRunnableStep(m_ensure, 2));
             m_ensure.step(3);
-            m_ensure.waitForStep(6, 2000);
+            m_ensure.waitForStep(6, 15000);
             m_service.invoke(Ensure.createRunnableStep(m_ensure, 8));
             m_ensure.step(10);
-            m_ensure.waitForStep(12, 2000);
+            m_ensure.waitForStep(12, 15000);
             m_service.invoke(Ensure.createRunnableStep(m_ensure, 13));
         }
     }

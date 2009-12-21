@@ -57,7 +57,7 @@ public class AdapterTest {
         m.add(sp);
         m.add(sp2);
         m.add(sa);
-        e.waitForStep(5, 2000);
+        e.waitForStep(5, 15000);
         m.remove(sa);
         m.remove(sp2);
         m.remove(sp);

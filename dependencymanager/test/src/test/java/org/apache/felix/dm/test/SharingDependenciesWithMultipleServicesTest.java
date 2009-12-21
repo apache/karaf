@@ -74,9 +74,9 @@ public class SharingDependenciesWithMultipleServicesTest {
         
         m.add(provider);
         m.add(consumer1);
-        e.waitForStep(3, 2000);
+        e.waitForStep(3, 15000);
         m.add(consumer2);
-        e.waitForStep(6, 2000);
+        e.waitForStep(6, 15000);
         m.remove(provider);
         m.remove(consumer1);
         m.remove(consumer2);
@@ -97,10 +97,10 @@ public class SharingDependenciesWithMultipleServicesTest {
         m.add(provider);
         // add the first consumer, and wait until its updated() method is invoked
         m.add(consumer1);
-        e.waitForStep(2, 2000);
+        e.waitForStep(2, 15000);
         // add the second consumer, and wait until its updated() method is invoked
         m.add(consumer2);
-        e.waitForStep(3, 2000);
+        e.waitForStep(3, 15000);
         // break down the test again
         m.remove(provider);
         m.remove(consumer1);
@@ -118,9 +118,9 @@ public class SharingDependenciesWithMultipleServicesTest {
         Service consumer2 = m.createService().setImplementation(new BundleConsumer(e, 2)).add(dependency);
         
         m.add(consumer1);
-        e.waitForStep(1, 2000);
+        e.waitForStep(1, 15000);
         m.add(consumer2);
-        e.waitForStep(2, 2000);
+        e.waitForStep(2, 15000);
         m.remove(consumer2);
         m.remove(consumer1);
     }
@@ -137,9 +137,9 @@ public class SharingDependenciesWithMultipleServicesTest {
         Service resourceProvider = m.createService().setImplementation(new ResourceProvider()).add(m.createServiceDependency().setService(ResourceHandler.class).setCallbacks("add", "remove"));;
         m.add(resourceProvider);
         m.add(consumer1);
-        e.waitForStep(1, 2000);
+        e.waitForStep(1, 15000);
         m.add(consumer2);
-        e.waitForStep(2, 2000);
+        e.waitForStep(2, 15000);
         m.remove(consumer2);
         m.remove(consumer1);
         m.remove(resourceProvider);
@@ -321,5 +321,4 @@ public class SharingDependenciesWithMultipleServicesTest {
             return null;
         }
     }
-
 }
