@@ -32,9 +32,9 @@ import org.osgi.framework.ServiceReference;
 
 public class BundleResourceRepository {
 	private final Bundle m_bundle;
-
+	
 	public BundleResourceRepository(Bundle bundle) {
-		this.m_bundle = bundle;
+		m_bundle = bundle;
 	}
 
 	public synchronized void addHandler(ServiceReference ref, ResourceHandler handler) {
@@ -89,8 +89,22 @@ public class BundleResourceRepository {
 			// TODO is this unique? can we have the same url in more than one repository?
 			m_id = m_entry.toString();
 			m_repository = bundle.getSymbolicName() + "_" + bundle.getHeaders().get("Bundle-Version");
-			m_path = entry.getPath();
-			m_name = entry.getFile();
+			String path = entry.getPath();
+			int i = path.lastIndexOf('/');
+			if (i == -1) {
+			    m_path = "/";
+			    m_name = path;
+			}
+			else {
+			    if (path.length() > (i + 1)) {
+    			    m_path = path.substring(0, i);
+    			    m_name = path.substring(i + 1);
+			    }
+			    else {
+			        m_path = path;
+			        m_name = "";
+			    }
+			}
 		}
 
 		public final String getID() {

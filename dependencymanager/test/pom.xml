@@ -76,7 +76,6 @@
          <compilerArgument>-g</compilerArgument>
           <compilerVersion>1.5</compilerVersion>
         </configuration> 
-
         <executions>
           <execution>
             <id>default-testCompile</id>
