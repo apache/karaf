@@ -40,6 +40,7 @@ import org.apache.felix.dm.impl.dependencies.ResourceDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.ServiceDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.TemporalServiceDependencyImpl;
 import org.apache.felix.dm.service.Service;
+import org.osgi.framework.BundleContext;
 
 /**
  * The dependency manager. Manages all services and their dependencies.
