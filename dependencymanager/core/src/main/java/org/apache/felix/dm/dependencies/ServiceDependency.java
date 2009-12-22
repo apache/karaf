@@ -47,6 +47,16 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @return this service dependency
      */
     ServiceDependency setService(Class serviceName, String serviceFilter);
+    
+    /**
+     * Sets the filter for the services that should be tracked. Any service object
+     * matching the filter will be returned, without any additional filter on the
+     * class.
+     * 
+     * @param serviceFilter the filter condition
+     * @return this service dependency
+     */
+    ServiceDependency setService(String serviceFilter);
 
     /**
      * Sets the name of the service that should be tracked. You can either specify

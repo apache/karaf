@@ -545,6 +545,20 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
         m_trackedServiceReference = null;
         return this;
     }
+    
+    public synchronized ServiceDependency setService(String serviceFilter) {
+        ensureNotActive();
+        if (serviceFilter == null) {
+            throw new IllegalArgumentException("Service filter cannot be null.");
+        }
+        m_trackedServiceName = Object.class;
+        if (serviceFilter != null) {
+            m_trackedServiceFilterUnmodified = serviceFilter;
+            m_trackedServiceFilter = serviceFilter;
+        }
+        m_trackedServiceReference = null;
+        return this;
+    }
 
     /**
      * Sets the name of the service that should be tracked. You can either specify
