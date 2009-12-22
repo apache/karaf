@@ -40,7 +40,6 @@ import org.apache.felix.dm.impl.dependencies.ResourceDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.ServiceDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.TemporalServiceDependencyImpl;
 import org.apache.felix.dm.service.Service;
-import org.osgi.framework.BundleContext;
 
 /**
  * The dependency manager. Manages all services and their dependencies.
@@ -177,20 +176,19 @@ public class DependencyManager {
                 .setService(serviceInterface)
                 .setAutoConfig(false)
                 .setCallbacks("added", "removed")
-                );
+            );
     }
     
     // TODO note to self, there are Dependency's and DependencyCollections 
     // (being a dependency on more than one, fi ServiceDendency, ResourceDependency
-    public Service createResourceAdapterService(String resourceFilter, Class iface2, Object impl, boolean propagate) {
+    public Service createResourceAdapterService(String resourceFilter, Class adapterInterface, Dictionary adapterProperties, Object impl, boolean propagate) {
         return createService()
-            .setImplementation(new ResourceAdapterImpl(resourceFilter, impl, iface2.getName(), null, propagate))
+            .setImplementation(new ResourceAdapterImpl(resourceFilter, impl, adapterInterface.getName(), adapterProperties, propagate))
             .add(createResourceDependency()
                 .setFilter(resourceFilter)
                 .setAutoConfig(false)
                 .setCallbacks("added", "removed")
-                )
-                ;
+            );
     }
     
     public Service createBundleAdapterService(int stateMask, String filter, Object impl, Class iface) {
@@ -200,8 +198,7 @@ public class DependencyManager {
                 .setFilter(filter)
                 .setStateMask(stateMask)
                 .setCallbacks("added", "removed")
-                )
-            ;
+            );
     }
 
     /**
