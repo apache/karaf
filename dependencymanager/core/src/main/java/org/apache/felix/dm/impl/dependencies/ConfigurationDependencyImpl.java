@@ -140,8 +140,9 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
 	}
 
 	public void updated(Dictionary settings) throws ConfigurationException {
-	    m_updateInvokedCache.clear();
-	    
+	    synchronized (m_updateInvokedCache) {
+	        m_updateInvokedCache.clear();
+	    }
 	    Dictionary oldSettings = null; 
 	    synchronized (this) {
 	        oldSettings = m_settings;
@@ -190,7 +191,11 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
 	}
 
     public void invokeUpdate(DependencyService ds, Object service, Dictionary settings) throws ConfigurationException {
-        if (m_updateInvokedCache.add(ds)) {
+        boolean wasAdded;
+        synchronized (m_updateInvokedCache) {
+            wasAdded = m_updateInvokedCache.add(ds);
+        }
+        if (wasAdded) {
             String callback = (m_callback == null) ? "updated" : m_callback;
             Method m;
             try {

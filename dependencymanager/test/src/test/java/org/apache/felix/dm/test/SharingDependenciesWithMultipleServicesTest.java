@@ -102,9 +102,9 @@ public class SharingDependenciesWithMultipleServicesTest {
         m.add(consumer2);
         e.waitForStep(3, 15000);
         // break down the test again
-        m.remove(provider);
-        m.remove(consumer1);
         m.remove(consumer2);
+        m.remove(consumer1);
+        m.remove(provider);
     }
     
     @Test
