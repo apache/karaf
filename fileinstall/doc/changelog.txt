@@ -1,4 +1,4 @@
-Version 2.0.6
+Version 2.0.8
 -------------
 ** Bug
     * [FELIX-1775] - fileinstall release archives contains an empty "load"
