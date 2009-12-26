@@ -116,6 +116,11 @@ public class Dependency implements HandlerConfiguration {
      * Does the dependency supports nullable? 
      */
     private boolean m_nullable = true;
+    
+    /**
+     * Does the dependency enables proxy. 
+     */
+    private boolean m_proxy = true;
 
     /**
      * Gets the dependency metadata.
@@ -173,6 +178,9 @@ public class Dependency implements HandlerConfiguration {
         }
         if (m_aggregate) {
             dep.addAttribute(new Attribute("aggregate", "true"));
+        }
+        if (! m_proxy) {
+            dep.addAttribute(new Attribute("proxy", "false"));
         }
         if (m_policy != -1) {
             if (m_policy == DYNAMIC) {
@@ -247,6 +255,17 @@ public class Dependency implements HandlerConfiguration {
      */
     public Dependency setNullable(boolean nullable) {
         m_nullable = nullable;
+        return this;
+    }
+    
+    /**
+     * Sets if the dependency injects proxies.
+     * @param proxy <code>false</code> if the dependency does not
+     * inject proxies but uses direct references.
+     * @return the current dependency object.
+     */
+    public Dependency setProxy(boolean proxy) {
+        m_proxy = proxy;
         return this;
     }
     

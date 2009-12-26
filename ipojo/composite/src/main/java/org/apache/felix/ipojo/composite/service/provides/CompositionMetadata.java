@@ -273,6 +273,7 @@ public class CompositionMetadata {
                 Element dep = new Element("requires", "");
                 dep.addAttribute(new Attribute("field", field.getName()));
                 dep.addAttribute(new Attribute("scope", "composite"));
+                dep.addAttribute(new Attribute("proxy", "false"));
                 if (field.getSpecification().isOptional()) {
                     dep.addAttribute(new Attribute("optional", "true"));
                 }

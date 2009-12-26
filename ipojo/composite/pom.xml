@@ -80,6 +80,7 @@
               org.apache.felix.ipojo.metadata,
               org.apache.felix.ipojo.parser,
               org.apache.felix.ipojo.util,
+              org.objectweb.asm*;version=3.0,
               org.osgi.framework;version=1.3 </Import-Package>
             <Private-Package>
               org.apache.felix.ipojo.composite.architecture,
@@ -90,7 +91,7 @@
             <Export-Package>
               org.apache.felix.ipojo.composite; version="${ipojo.package.version}" ,
               !org.objectweb.asm.xml*,
-              org.objectweb.asm*;-split-package:=merge-first ,
+              org.objectweb.asm*;version=3.0;-split-package:=merge-first ,
               org.apache.felix.ipojo.manipulation
             </Export-Package>
             <Include-Resource> META-INF/LICENSE=LICENSE,

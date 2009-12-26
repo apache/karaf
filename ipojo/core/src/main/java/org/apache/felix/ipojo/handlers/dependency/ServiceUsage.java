@@ -41,10 +41,24 @@ public class ServiceUsage extends ThreadLocal {
         Object m_object;
         
         /**
-         * Increment the stack level.
+         * Tracks the number of component method called
+         * in the current thread.
+         */
+        int m_componentStack = 0;
+        
+        /**
+         * Increment the stack level from the first
+         * service get.
          */
         public void inc() {
             m_stack++;
+        }
+        
+        /**
+         * Increment the component stack level.
+         */
+        public void incComponentStack() {
+            m_componentStack++;
         }
         
         /**
@@ -54,6 +68,15 @@ public class ServiceUsage extends ThreadLocal {
         public boolean dec() {
             m_stack--;
             return m_stack == 0;
+        }
+        
+        /**
+         * Decrement the component stack level.
+         * @return  true if the stack is 0 after the decrement.
+         */
+        public boolean decComponentStack() {
+            m_componentStack--;
+            return m_componentStack == 0;
         }
         
         /**

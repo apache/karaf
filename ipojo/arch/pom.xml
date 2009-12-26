@@ -84,9 +84,9 @@
             <ipojo>
               <component classname="org.apache.felix.ipojo.arch.ArchCommandImpl" public="false">
                 <Provides />
-                <requires field="m_archs" optional="true" />
-                <requires field="m_factories" optional="true" />
-                <requires field="m_handlers" optional="true" />
+                <requires field="m_archs" optional="true" proxy="false"/>
+                <requires field="m_factories" optional="true" proxy="false"/>
+                <requires field="m_handlers" optional="true" proxy="false"/>
               </component>
               <instance component="org.apache.felix.ipojo.arch.ArchCommandImpl" name="ArchCommand" />
             </ipojo>

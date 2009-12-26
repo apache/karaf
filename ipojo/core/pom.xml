@@ -57,6 +57,17 @@
       <artifactId>org.apache.felix.ipojo.metadata</artifactId>
       <version>${pom.version}</version>
     </dependency>
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm-all</artifactId>
+      <version>3.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>asm</groupId>
+          <artifactId>asm-tree</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -102,11 +113,12 @@
               org.apache.felix.ipojo.handlers.configuration; version="${ipojo.package.version}",
               org.apache.felix.ipojo.context; version="${ipojo.package.version}",
               org.osgi.service.cm,
-              org.osgi.service.log
+              org.osgi.service.log,
+              org.objectweb.asm; version=3.0
             </Export-Package>
             <Include-Resource>
               META-INF/LICENSE=LICENSE,
-              META-INF/NOTICE=NOTICE
+              META-INF/NOTICE=NOTICE, META-INF/LICENSE.asm=LICENSE.asm
             </Include-Resource>
             <_donotcopy> (CVS|.svn|.+.bak|~.+|metadata.xml) </_donotcopy>
           </instructions>

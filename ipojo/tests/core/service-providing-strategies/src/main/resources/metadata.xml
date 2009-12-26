@@ -3,33 +3,33 @@
     xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/SNAPSHOT/core.xsd"
     xmlns="org.apache.felix.ipojo"
 >
-	<!-- Simple provider  -->
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooProviderType1"
-		name="PSS-FooProviderType-Instance" architecture="true">
-		<provides strategy="instance"/>
-	</component>
-	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.Consumer"
-		name="PSS-Cons" architecture="true">
-		<requires field="fs"/>
-		<provides/>
-	</component>
-	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.BarConsumer"
-		name="PSS-ConsBar" architecture="true">
-		<requires field="bs"/>
-		<provides/>
-	</component>
-	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooBarProviderType1"
-		name="PSS-FooBarProviderType-Instance" architecture="true">
-		<provides strategy="instance"/>
-	</component>
-	
+  <!-- Simple provider  -->
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooProviderType1"
+    name="PSS-FooProviderType-Instance" architecture="true">
+    <provides strategy="instance"/>
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.strategies.Consumer"
+    name="PSS-Cons" architecture="true">
+    <requires field="fs" proxy="false"/>
+    <provides/>
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.strategies.BarConsumer"
+    name="PSS-ConsBar" architecture="true">
+    <requires field="bs" proxy="false"/>
+    <provides/>
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooBarProviderType1"
+    name="PSS-FooBarProviderType-Instance" architecture="true">
+    <provides strategy="instance"/>
+  </component>
+  
     <component
         classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooProviderType1"
         name="PSS-FooProviderType-Custom" architecture="true">

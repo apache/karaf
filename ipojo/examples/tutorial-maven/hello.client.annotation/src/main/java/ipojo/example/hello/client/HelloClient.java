@@ -20,6 +20,8 @@ package ipojo.example.hello.client;
 
 import ipojo.example.hello.Hello;
 
+import java.util.Set;
+
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Requires;
@@ -38,8 +40,8 @@ public class HelloClient implements Runnable {
     /**
      * Hello services. Injected by the container.
      */
-    @Requires
-    private Hello[] m_hello;
+    @Requires(specification="ipojo.example.hello.Hello", optional=true, defaultimplementation=MyDummyHello.class)
+    private Hello m_hello;
 
     /**
      *  End flag.
@@ -65,9 +67,11 @@ public class HelloClient implements Runnable {
      * Invoke hello services.
      */
     public void invokeHelloServices() {
-        for (int i = 0; i < m_hello.length; i++) {
-            System.out.println(i + " :" + m_hello[i].sayHello("Clement"));
-        }
+        System.out.println(m_hello);
+        Hello hello = m_hello;
+        //for (Hello hello : m_hello) {
+            System.out.println(hello.sayHello("Clement ") + hello);
+        //}
     }
 
     /**

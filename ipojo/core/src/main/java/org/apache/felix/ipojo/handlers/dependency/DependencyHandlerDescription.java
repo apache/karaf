@@ -40,7 +40,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
      */
     private DependencyDescription[] m_dependencies = new DependencyDescription[0];
     
-    // TODO Definie the DependencyStateListener Interface (in ipojo utils)
+    // TODO Define the DependencyStateListener Interface (in ipojo utils)
     
     // TODO Add the list of listener.
     
@@ -121,6 +121,12 @@ public class DependencyHandlerDescription extends HandlerDescription {
                 dep.addAttribute(new Attribute("Aggregate", "true"));
             } else {
                 dep.addAttribute(new Attribute("Aggregate", "false"));
+            }
+            
+            if (m_dependencies[i].isProxy()) {
+                dep.addAttribute(new Attribute("Proxy", "true"));
+            } else {
+                dep.addAttribute(new Attribute("Proxy", "false"));
             }
             
             String policy = "dynamic";

@@ -211,7 +211,7 @@ public class MethodCollector extends EmptyVisitor {
          * From attribute.
          */
         private String m_from;
-
+        
         /**
          * Constructor.
          * @param bind : method name.
@@ -379,7 +379,6 @@ public class MethodCollector extends EmptyVisitor {
                         System.err.println("The from attribute is not always the same");
                         return;
                     }
-                    
                 }
                 
             }

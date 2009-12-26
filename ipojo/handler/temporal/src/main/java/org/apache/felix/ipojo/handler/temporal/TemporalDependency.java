@@ -125,7 +125,7 @@ public class TemporalDependency extends DependencyModel implements
         if (! proxy) { // No proxy => initialize the Thread local.
             m_usage = new ServiceUsage();
         } else if (proxy && ! agg) { // Scalar proxy => Create the proxy.
-            ProxyFactory proxyFactory = new ProxyFactory(this.getSpecification().getClassLoader(), this.getClass().getClassLoader());
+            ProxyFactory proxyFactory = new ProxyFactory(this.getClass().getClassLoader());
             m_proxyObject = proxyFactory.getProxy(getSpecification(), this);
         }
     }
@@ -495,23 +495,16 @@ public class TemporalDependency extends DependencyModel implements
     private class ProxyFactory extends ClassLoader {
         
         /**
-         * Instance classloader, used to load specification and dependent classes.
-         */
-        private ClassLoader m_instanceCL;
-        
-        /**
          * Handler classloader, used to load the temporal dependency class. 
          */
         private ClassLoader m_handlerCL;
         
         /**
          * Creates the proxy classloader.
-         * @param parent1 the instance classloader.
-         * @param parent2 the handler classloader.
+         * @param parent the handler classloader.
          */
-        public ProxyFactory(ClassLoader parent1, ClassLoader parent2) {
-            this.m_instanceCL = parent1;
-            this.m_handlerCL = parent2;
+        public ProxyFactory(ClassLoader parent) {
+            this.m_handlerCL = parent;
         }
         
         /**
@@ -554,7 +547,7 @@ public class TemporalDependency extends DependencyModel implements
          */
         public Class loadClass(String name) throws ClassNotFoundException {
             try {
-                return m_instanceCL.loadClass(name);
+                return m_handler.getInstanceManager().getContext().getBundle().loadClass(name);
             } catch (ClassNotFoundException e) {
                 return m_handlerCL.loadClass(name);
             }

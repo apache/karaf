@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.annotations;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Target;
 import java.util.Comparator;
 
@@ -27,6 +28,7 @@ import java.util.Comparator;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 @Target(ElementType.FIELD)
+@Inherited
 public @interface Requires {
     
     /**
@@ -84,4 +86,11 @@ public @interface Requires {
      * This attribute is required for Collection field.
      */
     String specification() default "";
+    
+    /**
+     * Set to true if the service dependency is injected
+     * as a proxy.
+     * Default: true
+     */
+    boolean proxy() default true;
 }

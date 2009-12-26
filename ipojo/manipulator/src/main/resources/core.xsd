@@ -260,6 +260,13 @@ The 'instance.name' property has a special semantic as it will be used as the in
                       <xs:documentation>Specific service provider. The dependency can only be fulfilled by the component with the matching name, or by the service with a matching PID.</xs:documentation>
                     </xs:annotation>
         </xs:attribute>
+        
+        <xs:attribute name="proxy" type="xs:boolean"
+          use="optional">
+                    <xs:annotation>
+                      <xs:documentation>Enables or Disable the proxy injection (on field injection)</xs:documentation>
+                    </xs:annotation>
+        </xs:attribute>
 
         <xs:attribute name="scope" use="optional">
           <xs:simpleType>

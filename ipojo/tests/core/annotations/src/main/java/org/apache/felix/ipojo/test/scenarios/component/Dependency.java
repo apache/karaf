@@ -76,5 +76,8 @@ public class Dependency {
     }
     
     
+    @Requires(proxy=false, id="notproxied")
+    FooService myFoo;
+    
     
 }

@@ -35,9 +35,9 @@
       <version>${pom.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <version>1.0.1</version>
+        <groupId>org.osgi</groupId>
+       <artifactId>org.osgi.core</artifactId>
+        <version>4.2.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -98,7 +98,6 @@
         </configuration>
       </plugin>
       
-      <!--
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-junit4osgi-plugin</artifactId>
@@ -116,7 +115,6 @@
           </execution>
         </executions>
       </plugin>
-      -->
       </plugins>
   </build>
 </project>

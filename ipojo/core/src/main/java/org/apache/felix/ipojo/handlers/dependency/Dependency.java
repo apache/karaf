@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -111,6 +112,16 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Immutable once set.
      */
     private String m_id;
+    
+    /**
+     * Do we have to inject proxy?
+     */
+    private boolean m_isProxy;
+    
+    /**
+     * Proxy Object.
+     */
+    private Object m_proxyObject;
 
     /**
      * Dependency constructor. After the creation the dependency is not started.
@@ -122,22 +133,25 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @param isOptional : is the dependency an optional dependency ?
      * @param isAggregate : is the dependency an aggregate dependency
      * @param nullable : describe if the nullable ability is enable or disable
+     * @param isProxy : is the proxied dependency
      * @param identity : id of the dependency, may be null
      * @param context : bundle context (or service context) to use.
      * @param policy : resolution policy
      * @param cmp : comparator to sort references
      * @param defaultImplem : default-implementation class
      */
-    public Dependency(DependencyHandler handler, String field, Class spec, Filter filter, boolean isOptional, boolean isAggregate, boolean nullable, String identity, BundleContext context, int policy, Comparator cmp, String defaultImplem) {
+    public Dependency(DependencyHandler handler, String field, Class spec, Filter filter, boolean isOptional, boolean isAggregate, boolean nullable, boolean isProxy, String identity, BundleContext context, int policy, Comparator cmp, String defaultImplem) {
         super(spec, isAggregate, isOptional, filter, cmp, policy, context, handler, handler.getInstanceManager());
         m_handler = handler;
         m_field = field;
+        m_isProxy = isProxy;
+
         if (field != null) {
             m_usage = new ServiceUsage();
         } else {
             m_usage = null;
         }
-
+        
         m_supportNullable = nullable;
         m_di = defaultImplem;
 
@@ -321,6 +335,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Start the dependency.
      */
     public void start() {
+        
         if (isOptional() && !isAggregate()) {
             if (m_di == null) {
                 // If nullable are supported, create the nullable object.
@@ -355,6 +370,15 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                 } catch (Throwable e) { // Catch any other exception
                     throw new IllegalStateException("Cannot load the default-implementation (unexpected exception) " + m_di + " : " + e.getMessage());
                 }
+            }
+        }
+        
+        if (m_isProxy) {
+            if (isAggregate()) {
+                m_proxyObject = new ServiceCollection(this);
+            } else {
+                ProxyFactory proxyFactory = new ProxyFactory(this.getClass().getClassLoader());
+                m_proxyObject = proxyFactory.getProxy(getSpecification(), this);
             }
         }
 
@@ -463,6 +487,84 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             return Arrays.asList(refs);
         }
     }
+    
+    /**
+     * Called by the proxy to get  service objects to delegate a method.
+     * On aggregate dependencies, it returns a list.
+     * @return a service object or a nullable/default-implementation object.
+     * For aggregate dependencies it returns a list or an empty list.
+     */
+    public Object getService() {
+        // Check that we're in proxy mode.
+        if (! m_isProxy) {
+            throw new IllegalStateException("The dependency is not a proxied dependency");
+        }
+        
+        Usage usage = (Usage) m_usage.get();
+        if (usage.m_stack == 0) { // uninitialized usage.
+            if (usage.m_componentStack > 0) {
+                // We comes from the component who didn't touch the service.
+                // So we initialize the usage.
+                createServiceObject(usage);
+                usage.inc(); // Start the caching, so set the stack level to 1
+                m_usage.set(usage);
+                if (isAggregate()) {
+                    Object obj =  usage.m_object;
+                    if (obj instanceof Set) {
+                        List list = new ArrayList();
+                        list.addAll((Set) obj);
+                        return list;
+                    } else {
+                        // We already have a list
+                        return obj;
+                    }
+                } else {
+                    return usage.m_object;
+                }
+            } else {
+                // External access => Immediate get.
+                if (isAggregate()) {
+                    ServiceReference[] refs = getServiceReferences();
+                    if (refs == null) {
+                        return new ArrayList(0); // Create an empty list.
+                    } else {
+                        List objs = new ArrayList(refs.length);
+                        for (int i = 0; refs != null && i < refs.length; i++) {
+                            ServiceReference ref = refs[i];
+                            objs.add(getService(ref));
+                        }
+                        return objs;
+                    } 
+                } else { // Scalar dependency.
+                    ServiceReference ref = getServiceReference();
+                    if (ref != null) {
+                        return getService(ref);
+                    } else {
+                        // No service available.
+                        // TODO Decide what we have to do.
+                        throw new RuntimeException("Service " + getSpecification() + " unavailable"); 
+                    }
+                }
+            }
+        } else {
+            // Use the copy.
+            // if the copy is a set, transform to a list
+            if (isAggregate()) {
+                Object obj =  usage.m_object;
+                if (obj instanceof Set) {
+                    List list = new ArrayList();
+                    list.addAll((Set) obj);
+                    return list;
+                } else {
+                    // We already have a list
+                    return obj;
+                }
+            } else {
+                return usage.m_object;
+            }
+            
+        }
+    }
 
     /**
      * This method is called by the replaced code in the component
@@ -474,6 +576,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
      */
     public Object onGet(Object pojo, String fieldName, Object value) {
+        
         // Initialize the thread local object is not already touched.
         Usage usage = (Usage) m_usage.get();
         if (usage.m_stack == 0) { // uninitialized usage.
@@ -481,8 +584,11 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             usage.inc(); // Start the caching, so set the stack level to 1
             m_usage.set(usage);
         }
-
-        return usage.m_object;
+        if (! m_isProxy) {
+            return usage.m_object;
+        } else {
+            return m_proxyObject;
+        }
 
     }
 
@@ -584,6 +690,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     public void onEntry(Object pojo, Method method, Object[] args) {
         if (m_usage != null) {
             Usage usage = (Usage) m_usage.get();
+            usage.incComponentStack(); // Increment the number of component access.
             if (usage.m_stack > 0) {
                 usage.inc();
                 m_usage.set(usage); // Set the Thread local as value has been modified
@@ -623,6 +730,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     public void onFinally(Object pojo, Method method) {
         if (m_usage != null) {
             Usage usage = (Usage) m_usage.get();
+            usage.decComponentStack();
             if (usage.m_stack > 0) {
                 if (usage.dec()) {
                     // Exit the method flow => Release all objects
@@ -645,6 +753,14 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         return m_di;
     }
 
+    public boolean isProxy() {
+        return m_isProxy;
+    }
+    
+    public void setProxy(boolean proxy) {
+        m_isProxy = proxy;
+    }
+
     /**
      * Set the type to inject.
      * This method set the dependency as aggregate.
@@ -654,5 +770,74 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         setAggregate(true);
         m_type = type;
     }
+    
+    /**
+     * Creates proxy object for proxied scalar dependencies.
+     */
+    private class ProxyFactory extends ClassLoader {
+        
+        /**
+         * Handler classloader, used to load the temporal dependency class. 
+         */
+        private ClassLoader m_handlerCL;
+
+        /**
+         * Creates the proxy classloader.
+         * @param parent the handler classloader.
+         */
+        public ProxyFactory(ClassLoader parent) {
+            super(getHandler().getInstanceManager().getFactory().getBundleClassLoader());
+            m_handlerCL = parent;
+        }
+        
+        /**
+         * Loads a proxy class generated for the given (interface) class.
+         * @param clazz the service specification to proxy
+         * @return the Class object of the proxy.
+         */
+        protected Class getProxyClass(Class clazz) {
+            byte[] clz = ProxyGenerator.dumpProxy(clazz); // Generate the proxy.
+            return defineClass(clazz.getName() + "$$Proxy", clz, 0, clz.length);
+        }
+        
+        /**
+         * Create a proxy object for the given specification. The proxy
+         * uses the given dependency to get the service object.  
+         * @param spec the service specification (interface)
+         * @param dep the temporal dependency used to get the service
+         * @return the proxy object.
+         */
+        public Object getProxy(Class spec, Dependency dep) {
+            try {
+                Class clazz = getProxyClass(getSpecification());
+                Constructor constructor = clazz.getConstructor(
+                        new Class[]{clazz.getClassLoader().loadClass(Dependency.class.getName())});                                               
+                return constructor.newInstance(new Object[] {dep});
+            } catch (Throwable e) {
+                m_handler.error("Cannot create the proxy object", e);
+                m_handler.getInstanceManager().stop();
+                return null;
+            }
+        }
+        
+        /**
+         * Loads the given class.
+         * This class use the classloader of the specification class
+         * or the handler class loader.
+         * @param name the class name
+         * @return the class object
+         * @throws ClassNotFoundException if the class is not found by the two classloaders.
+         * @see java.lang.ClassLoader#loadClass(java.lang.String)
+         */
+        public Class loadClass(String name) throws ClassNotFoundException {
+            try {
+                return getHandler().getInstanceManager().getContext().getBundle().loadClass(name);
+            } catch (ClassNotFoundException e) {
+                return m_handlerCL.loadClass(name);
+            }
+        }
+    }
+    
+    
 
 }

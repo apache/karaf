@@ -54,6 +54,9 @@ public class DependencyDescription {
     
     public String getId() { return m_dependency.getId(); }
     
+    public boolean isProxy() { return m_dependency.isProxy(); }
+
+    
     /**
      * Gets <code>true</code> if the dependency uses Nullable objects.
      * @return true if the dependency is optional and supports nullable object.

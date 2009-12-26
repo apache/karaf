@@ -83,6 +83,10 @@ public class Dependency extends OSGiTestCase {
         assertEquals("Check mod unbind", "unbindMod", unbind);
         assertEquals("Check mod modified", "modifiedMod", mod);
         assertEquals("Check mod id", "mod", id);
+        
+        // Check not proxied
+        dep = getDependencyById(deps, "notproxied");
+        assertEquals("Check not proxied", "false", dep.getAttribute("proxy"));
     }
     
     private Element getDependencyById(Element[] deps, String name) {

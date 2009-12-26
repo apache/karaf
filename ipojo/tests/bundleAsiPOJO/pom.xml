@@ -24,7 +24,7 @@
   <name>Apache Felix iPOJO TinyBundles Extension</name>
   <packaging>pom</packaging>
   
-   <profiles>
+  <profiles>
   <profile>
     <id>java5</id>
     <activation>

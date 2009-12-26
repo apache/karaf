@@ -316,7 +316,6 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
             }
         }
         
-        
         mv.visitMaxs(0, 0);
         mv.visitEnd();
     }
@@ -348,7 +347,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
                 ad.visit(mv);
             }
         }
-        
+
         mv.visitMaxs(0, 0);
         mv.visitEnd();
     }
@@ -657,7 +656,6 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         }
 
         mv.visitLabel(endif2);
-
         mv.visitInsn(RETURN);
 
         mv.visitMaxs(0, 0);

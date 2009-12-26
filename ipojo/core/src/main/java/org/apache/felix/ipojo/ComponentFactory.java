@@ -407,6 +407,10 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     public String getVersion() {
         return m_version;
     }
+    
+    public ClassLoader getBundleClassLoader() {
+        return m_classLoader;
+    }
 
     /**
      * this class defines the classloader attached to a factory.

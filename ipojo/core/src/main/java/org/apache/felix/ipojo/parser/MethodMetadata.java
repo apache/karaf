@@ -28,6 +28,21 @@ import org.apache.felix.ipojo.metadata.Element;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MethodMetadata {
+    
+    /**
+     * Empty Constructor Method Id.
+     */
+    public static final String EMPTY_CONSTRUCTOR_ID = "$init";
+
+    /**
+     * Bundle Context Constructor Method Id.
+     */
+    public static final String BC_CONSTRUCTOR_ID = "$init$org_osgi_framework_BundleContext";
+    
+    /**
+     * Constructor Prefix.
+     */
+    public static final String CONSTRUCTOR_PREFIX = "$init";
 
     /**
      * The name of the method.
@@ -125,5 +140,4 @@ public class MethodMetadata {
         }
         return identifier.toString();
     }
-
 }

@@ -67,7 +67,6 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.handler.extender</artifactId>
       <version>1.5.0-SNAPSHOT</version>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

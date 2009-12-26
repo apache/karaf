@@ -49,6 +49,21 @@ import org.osgi.framework.ServiceReference;
 public class DependencyHandler extends PrimitiveHandler implements DependencyStateListener {
 
     /**
+     * Proxy settings property.
+     */
+    public static final String PROXY_SETTINGS_PROPERTY = "ipojo.proxy";
+    
+    /**
+     * Proxy settings value: enabled.
+     */
+    public static final String PROXY_ENABLED = "enabled";
+    
+    /**
+     * Proxy settings value: disabled.
+     */
+    public static final String PROXY_DISABLED = "disabled";
+    
+    /**
      * Dependency field type : Vector
      * The dependency will be injected as a vector.
      */
@@ -174,7 +189,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
      * @return true if the dependency is valid
      * @throws ConfigurationException : the checked dependency is not correct
      */
-    private boolean checkDependency(Dependency dep, PojoMetadata manipulation) throws ConfigurationException {
+    private boolean checkDependency(Dependency dep, PojoMetadata manipulation) throws ConfigurationException {       
         // Check the internal type of dependency
         String field = dep.getField();
         DependencyCallback[] callbacks = dep.getCallbacks();
@@ -225,6 +240,10 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             }
             String type = meta.getFieldType();
             if (type.endsWith("[]")) {
+                if (dep.isProxy()) {
+                    warn("Arrays cannot be used for proxied dependencies - Disable the proxy mode");
+                    dep.setProxy(false);
+                }
                 // Set the dependency to multiple
                 dep.setAggregate(true);
                 type = type.substring(0, type.length() - 2);
@@ -233,6 +252,10 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                 type = null;
             } else if (type.equals(Vector.class.getName())) {
                 dep.setType(VECTOR);
+                if (dep.isProxy()) {
+                    warn("Vectors cannot be used for proxied dependencies - Disable the proxy mode");
+                    dep.setProxy(false);
+                }
                 type = null;
             } else if (type.equals(Set.class.getName())) {
                 dep.setType(SET);
@@ -245,6 +268,12 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                 }
             }
             setSpecification(dep, type, true); // Throws an exception if the field type mismatch.
+        }
+        
+        // Disables proxy on null (nullable=false)
+        if (dep.isProxy()  && dep.isOptional() && ! dep.supportsNullable()) {
+            dep.setProxy(false);
+            warn("Optional Null Dependencies do not support proxying - Disable the proxy mode");
         }
 
         // Check that all required info are set
@@ -342,7 +371,29 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             
             String nul = deps[i].getAttribute("nullable");
             boolean nullable = nul == null || nul.equalsIgnoreCase("true");
-
+            
+            boolean isProxy = true;
+            // Detect proxy default value.
+            String setting = getInstanceManager().getContext().getProperty(PROXY_SETTINGS_PROPERTY);
+            if (setting == null || PROXY_ENABLED.equals(setting)) { // If not set => Enabled
+                isProxy = true;
+            } else if (setting != null  && PROXY_DISABLED.equals(setting)) {
+                isProxy = false;
+            }
+            
+            String proxy = deps[i].getAttribute("proxy");
+            // If proxy == null, use default value
+            if (proxy != null) {
+                if (proxy.equals("false")) {
+                    isProxy = false;
+                } else if (proxy.equals("true")) {
+                    if (! isProxy) { // The configuration overrides the system setting
+                        warn("The configuration of a service dependency overides the proxy mode");
+                    }
+                    isProxy = true;
+                }   
+            }
+            
             String scope = deps[i].getAttribute("scope");
             BundleContext context = getInstanceManager().getContext(); // Get the default bundle context.
             if (scope != null) {
@@ -401,7 +452,9 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
 
             int policy = DependencyModel.getPolicy(deps[i]);
             Comparator cmp = DependencyModel.getComparator(deps[i], getInstanceManager().getGlobalContext());
-            Dependency dep = new Dependency(this, field, spec, fil, optional, aggregate, nullable, identitity, context, policy, cmp, defaultImplem);
+
+            
+            Dependency dep = new Dependency(this, field, spec, fil, optional, aggregate, nullable, isProxy, identitity, context, policy, cmp, defaultImplem);
 
             // Look for dependency callback :
             Element[] cbs = deps[i].getElements("Callback");

@@ -29,14 +29,20 @@ public class DependencyTestSuite {
     public static Test suite(BundleContext bc) {
         OSGiTestSuite ots = new OSGiTestSuite("Service Dependencies Test Suite", bc);
         ots.addTestSuite(SimpleDependencies.class);
+        ots.addTestSuite(ProxiedSimpleDependencies.class);
         ots.addTestSuite(OptionalDependencies.class);
+        ots.addTestSuite(ProxiedOptionalDependencies.class);
         ots.addTestSuite(OptionalNoNullableDependencies.class);
         ots.addTestSuite(MultipleDependencies.class);
         ots.addTestSuite(OptionalMultipleDependencies.class);
         ots.addTestSuite(DelayedSimpleDependencies.class);
+        ots.addTestSuite(ProxiedDelayedSimpleDependencies.class);
         ots.addTestSuite(DelayedOptionalDependencies.class);
+        ots.addTestSuite(ProxiedDelayedOptionalDependencies.class);
         ots.addTestSuite(DelayedMultipleDependencies.class);
+        ots.addTestSuite(ProxiedDelayedMultipleDependencies.class);
         ots.addTestSuite(DelayedOptionalMultipleDependencies.class);
+        ots.addTestSuite(ProxiedDelayedOptionalMultipleDependencies.class);
         ots.addTestSuite(MethodSimpleDependencies.class);
         ots.addTestSuite(MethodOptionalDependencies.class);
         ots.addTestSuite(MethodMultipleDependencies.class);
@@ -48,10 +54,14 @@ public class DependencyTestSuite {
         ots.addTest(DefaultImplementationTestSuite.suite(bc));
         ots.addTestSuite(DependencyArchitectureTest.class);
         ots.addTestSuite(ListMultipleDependencies.class);
+        ots.addTestSuite(ProxiedListMultipleDependencies.class);
         ots.addTestSuite(VectorMultipleDependencies.class);
         ots.addTestSuite(SetMultipleDependencies.class);
+        ots.addTestSuite(ProxiedSetMultipleDependencies.class);
         ots.addTestSuite(CollectionMultipleDependencies.class);
+        ots.addTestSuite(ProxiedCollectionMultipleDependencies.class);
         ots.addTestSuite(ModifyDependencies.class);
+        ots.addTestSuite(ProxyTest.class);
         return ots;
     }
 

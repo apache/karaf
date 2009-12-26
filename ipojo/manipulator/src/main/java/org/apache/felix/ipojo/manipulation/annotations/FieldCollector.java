@@ -157,6 +157,11 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
         private String m_from;
         
         /**
+         * Proxy attribute.
+         */
+        private String m_proxy;
+        
+        /**
          * Constructor.
          * @param name : field name.
          */
@@ -209,6 +214,10 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
                 m_from = arg1.toString();
                 return;
             }
+            if (arg0.equals("proxy")) {
+                m_proxy = arg1.toString();
+                return;
+            }
         }
 
         /**
@@ -255,6 +264,9 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             }
             if (m_from != null) {
                 req.addAttribute(new Attribute("from", m_from));
+            }
+            if (m_proxy != null) {
+                req.addAttribute(new Attribute("proxy", m_proxy));
             }
             
             if (m_id != null) { 

@@ -1,8 +1,8 @@
-<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/SNAPSHOT/core.xsd"
-  xmlns="org.apache.felix.ipojo">
+<ipojo>
 <!-- 
-
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/SNAPSHOT/core.xsd"
+  xmlns="org.apache.felix.ipojo"
  -->
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
@@ -14,13 +14,13 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="SimpleCheckServiceProvider" architecture="true">
-    <requires field="fs" />
+    <requires field="fs" proxy="false"/>
     <provides />
   </component>
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="VoidCheckServiceProvider" architecture="true">
-    <requires field="fs">
+    <requires field="fs" proxy="false">
       <callback type="bind" method="voidBind" />
       <callback type="unbind" method="voidUnbind" />
     </requires>
@@ -29,7 +29,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="ObjectCheckServiceProvider" architecture="true">
-    <requires field="fs">
+    <requires field="fs" proxy="false">
       <callback type="bind" method="objectBind" />
       <callback type="unbind" method="objectUnbind" />
     </requires>
@@ -38,7 +38,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="RefCheckServiceProvider" architecture="true">
-    <requires field="fs">
+    <requires field="fs" proxy="false">
       <callback type="bind" method="refBind" />
       <callback type="unbind" method="refUnbind" />
     </requires>
@@ -47,7 +47,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="BothCheckServiceProvider" architecture="true">
-    <requires field="fs">
+    <requires field="fs" proxy="false">
       <callback type="bind" method="bothBind" />
       <callback type="unbind" method="bothUnbind" />
     </requires>
@@ -56,7 +56,7 @@
     <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="MapCheckServiceProvider" architecture="true">
-    <requires field="fs">
+    <requires field="fs" proxy="false">
       <callback type="bind" method="propertiesMapBind" />
       <callback type="unbind" method="propertiesMapUnbind" />
     </requires>
@@ -65,16 +65,88 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="DictCheckServiceProvider" architecture="true">
+    <requires field="fs" proxy="false">
+      <callback type="bind" method="propertiesDictionaryBind" />
+      <callback type="unbind" method="propertiesDictionaryUnbind" />
+    </requires>
+    <provides />
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedSimpleCheckServiceProvider" architecture="true">
+    <requires field="fs" />
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedVoidCheckServiceProvider" architecture="true">
+    <requires field="fs">
+      <callback type="bind" method="voidBind" />
+      <callback type="unbind" method="voidUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedObjectCheckServiceProvider" architecture="true">
+    <requires field="fs">
+      <callback type="bind" method="objectBind" />
+      <callback type="unbind" method="objectUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedRefCheckServiceProvider" architecture="true">
+    <requires field="fs">
+      <callback type="bind" method="refBind" />
+      <callback type="unbind" method="refUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedBothCheckServiceProvider" architecture="true">
+    <requires field="fs">
+      <callback type="bind" method="bothBind" />
+      <callback type="unbind" method="bothUnbind" />
+    </requires>
+    <provides />
+  </component>
+    <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedMapCheckServiceProvider" architecture="true">
+    <requires field="fs">
+      <callback type="bind" method="propertiesMapBind" />
+      <callback type="unbind" method="propertiesMapUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedDictCheckServiceProvider" architecture="true">
     <requires field="fs">
       <callback type="bind" method="propertiesDictionaryBind" />
       <callback type="unbind" method="propertiesDictionaryUnbind" />
     </requires>
     <provides />
   </component>
+  
 
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="DoubleCheckServiceProvider" architecture="true">
+    <requires>
+      <callback type="bind" method="objectBind" />
+      <callback type="unbind" method="objectUnbind" />
+    </requires>
+    <requires field="fs" proxy="true"/>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedDoubleCheckServiceProvider" architecture="true">
     <requires>
       <callback type="bind" method="objectBind" />
       <callback type="unbind" method="objectUnbind" />
@@ -134,7 +206,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="SimpleOptionalCheckServiceProvider" architecture="true">
-    <requires field="fs" optional="true" id="FooService"/>
+    <requires field="fs" optional="true" id="FooService" proxy="false"/>
     <provides />
   </component>
   <component
@@ -146,7 +218,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="VoidOptionalCheckServiceProvider" architecture="true">
-    <requires field="fs" optional="true">
+    <requires field="fs" optional="true" proxy="false">
       <callback type="bind" method="voidBind" />
       <callback type="unbind" method="voidUnbind" />
     </requires>
@@ -164,7 +236,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="ObjectOptionalCheckServiceProvider" architecture="true">
-    <requires field="fs" optional="true">
+    <requires field="fs" optional="true" proxy="false">
       <callback type="bind" method="objectBind" />
       <callback type="unbind" method="objectUnbind" />
     </requires>
@@ -182,7 +254,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="RefOptionalCheckServiceProvider" architecture="true">
-    <requires field="fs" optional="true">
+    <requires field="fs" optional="true" proxy="false">
       <callback type="bind" method="refBind" />
       <callback type="unbind" method="refUnbind" />
     </requires>
@@ -200,7 +272,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="BothOptionalCheckServiceProvider" architecture="true">
-    <requires field="fs" optional="true">
+    <requires field="fs" optional="true" proxy="false">
       <callback type="bind" method="bothBind" />
       <callback type="unbind" method="bothUnbind" />
     </requires>
@@ -209,7 +281,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="MapOptionalCheckServiceProvider" architecture="true">
-    <requires field="fs" optional="true">
+    <requires field="fs" optional="true" proxy="false">
       <callback type="bind" method="propertiesMapBind" />
       <callback type="unbind" method="propertiesMapUnbind" />
     </requires>
@@ -218,6 +290,67 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
     name="DictOptionalCheckServiceProvider" architecture="true">
+    <requires field="fs" optional="true" proxy="false">
+      <callback type="bind" method="propertiesDictionaryBind" />
+      <callback type="unbind" method="propertiesDictionaryUnbind" />
+    </requires>
+    <provides />
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedSimpleOptionalCheckServiceProvider" architecture="true">
+    <requires field="fs" optional="true" id="FooService"/>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedVoidOptionalCheckServiceProvider" architecture="true">
+    <requires field="fs" optional="true">
+      <callback type="bind" method="voidBind" />
+      <callback type="unbind" method="voidUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedObjectOptionalCheckServiceProvider" architecture="true">
+    <requires field="fs" optional="true">
+      <callback type="bind" method="objectBind" />
+      <callback type="unbind" method="objectUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedRefOptionalCheckServiceProvider" architecture="true">
+    <requires field="fs" optional="true">
+      <callback type="bind" method="refBind" />
+      <callback type="unbind" method="refUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedBothOptionalCheckServiceProvider" architecture="true">
+    <requires field="fs" optional="true">
+      <callback type="bind" method="bothBind" />
+      <callback type="unbind" method="bothUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedMapOptionalCheckServiceProvider" architecture="true">
+    <requires field="fs" optional="true">
+      <callback type="bind" method="propertiesMapBind" />
+      <callback type="unbind" method="propertiesMapUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+    name="ProxiedDictOptionalCheckServiceProvider" architecture="true">
     <requires field="fs" optional="true">
       <callback type="bind" method="propertiesDictionaryBind" />
       <callback type="unbind" method="propertiesDictionaryUnbind" />
@@ -440,12 +573,28 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="SimpleMultipleCheckServiceProvider" architecture="true">
-    <requires field="fs" />
+    <requires field="fs" proxy="false"/>
     <provides />
   </component>
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedSimpleMultipleCheckServiceProvider" architecture="true">
+    <requires field="fs" />
+    <provides />
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="VoidMultipleCheckServiceProvider" architecture="true">
+    <requires field="fs" proxy="false">
+      <callback type="bind" method="voidBind" />
+      <callback type="unbind" method="voidUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedVoidMultipleCheckServiceProvider" architecture="true">
     <requires field="fs">
       <callback type="bind" method="voidBind" />
       <callback type="unbind" method="voidUnbind" />
@@ -455,6 +604,15 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="ObjectMultipleCheckServiceProvider" architecture="true">
+    <requires field="fs" proxy="false">
+      <callback type="bind" method="objectBind" />
+      <callback type="unbind" method="objectUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedObjectMultipleCheckServiceProvider" architecture="true">
     <requires field="fs">
       <callback type="bind" method="objectBind" />
       <callback type="unbind" method="objectUnbind" />
@@ -464,7 +622,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="RefMultipleCheckServiceProvider" architecture="true">
-    <requires field="fs">
+    <requires field="fs" proxy="false">
       <callback type="bind" method="refBind" />
       <callback type="unbind" method="refUnbind" />
     </requires>
@@ -472,7 +630,26 @@
   </component>
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedRefMultipleCheckServiceProvider" architecture="true">
+    <requires field="fs">
+      <callback type="bind" method="refBind" />
+      <callback type="unbind" method="refUnbind" />
+    </requires>
+    <provides />
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="BothMultipleCheckServiceProvider" architecture="true">
+    <requires field="fs" proxy="false">
+      <callback type="bind" method="bothBind" />
+      <callback type="unbind" method="bothUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedBothMultipleCheckServiceProvider" architecture="true">
     <requires field="fs">
       <callback type="bind" method="bothBind" />
       <callback type="unbind" method="bothUnbind" />
@@ -482,7 +659,7 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="MapMultipleCheckServiceProvider" architecture="true">
-    <requires field="fs">
+    <requires field="fs" proxy="false">
       <callback type="bind" method="propertiesMapBind" />
       <callback type="unbind" method="propertiesMapUnbind" />
     </requires>
@@ -490,7 +667,26 @@
   </component>
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
-    name="DictMultipleCheckServiceProvider" architecture="true">
+    name="ProxiedMapMultipleCheckServiceProvider" architecture="true">
+    <requires field="fs">
+      <callback type="bind" method="propertiesMapBind" />
+      <callback type="unbind" method="propertiesMapUnbind" />
+    </requires>
+    <provides />
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="DictMultipleCheckServiceProvider" architecture="true" >
+    <requires field="fs" proxy="false">
+      <callback type="bind" method="propertiesDictionaryBind" />
+      <callback type="unbind" method="propertiesDictionaryUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedDictMultipleCheckServiceProvider" architecture="true">
     <requires field="fs">
       <callback type="bind" method="propertiesDictionaryBind" />
       <callback type="unbind" method="propertiesDictionaryUnbind" />
@@ -551,14 +747,14 @@
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="SimpleOptionalMultipleCheckServiceProvider"
     architecture="true">
-    <requires field="fs" optional="true" />
+    <requires field="fs" optional="true" proxy="false"/>
     <provides />
   </component>
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="VoidOptionalMultipleCheckServiceProvider"
     architecture="true">
-    <requires field="fs" optional="true">
+    <requires field="fs" optional="true" proxy="false">
       <callback type="bind" method="voidBind" />
       <callback type="unbind" method="voidUnbind" />
     </requires>
@@ -568,7 +764,7 @@
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="ObjectOptionalMultipleCheckServiceProvider"
     architecture="true">
-    <requires field="fs" optional="true">
+    <requires field="fs" optional="true" proxy="false">
       <callback type="bind" method="objectBind" />
       <callback type="unbind" method="objectUnbind" />
     </requires>
@@ -578,12 +774,51 @@
     classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
     name="RefOptionalMultipleCheckServiceProvider"
     architecture="true">
+    <requires field="fs" optional="true" proxy="false">
+      <callback type="bind" method="refBind" />
+      <callback type="unbind" method="refUnbind" />
+    </requires>
+    <provides />
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedSimpleOptionalMultipleCheckServiceProvider"
+    architecture="true">
+    <requires field="fs" optional="true" />
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedVoidOptionalMultipleCheckServiceProvider"
+    architecture="true">
+    <requires field="fs" optional="true">
+      <callback type="bind" method="voidBind" />
+      <callback type="unbind" method="voidUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedObjectOptionalMultipleCheckServiceProvider"
+    architecture="true">
+    <requires field="fs" optional="true">
+      <callback type="bind" method="objectBind" />
+      <callback type="unbind" method="objectUnbind" />
+    </requires>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+    name="ProxiedRefOptionalMultipleCheckServiceProvider"
+    architecture="true">
     <requires field="fs" optional="true">
       <callback type="bind" method="refBind" />
       <callback type="unbind" method="refUnbind" />
     </requires>
     <provides />
   </component>
+  
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
     name="MObjectOptionalMultipleCheckServiceProvider"
@@ -611,12 +846,27 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.ListCheckService"
     name="SimpleListCheckServiceProvider" architecture="true">
-    <requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
+    <requires proxy="false"
+      field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
     <provides />
   </component>
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.ListCheckService"
     name="OptionalListCheckServiceProvider"
+    architecture="true">
+    <requires proxy="false" 
+      specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+    <provides />
+  </component>
+   <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.ListCheckService"
+    name="ProxiedSimpleListCheckServiceProvider" architecture="true">
+    <requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.ListCheckService"
+    name="ProxiedOptionalListCheckServiceProvider"
     architecture="true">
     <requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
     <provides />
@@ -644,12 +894,25 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.SetCheckService"
     name="SimpleSetCheckServiceProvider" architecture="true">
-    <requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
+    <requires proxy="false" field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
     <provides />
   </component>
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.SetCheckService"
     name="OptionalSetCheckServiceProvider"
+    architecture="true">
+    <requires proxy="false" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.SetCheckService"
+    name="ProxiedSimpleSetCheckServiceProvider" architecture="true">
+    <requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.SetCheckService"
+    name="ProxiedOptionalSetCheckServiceProvider"
     architecture="true">
     <requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
     <provides />
@@ -659,6 +922,12 @@
   <component
     classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckService"
     name="SimpleCollectionCheckServiceProvider" architecture="true">
+    <requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" proxy="false"/>
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckService"
+    name="ProxiedSimpleCollectionCheckServiceProvider" architecture="true">
     <requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
     <provides />
   </component>
@@ -666,7 +935,18 @@
     classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckService"
     name="OptionalCollectionCheckServiceProvider"
     architecture="true">
-    <requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+    <requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" 
+      proxy="false"
+    />
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckService"
+    name="ProxiedOptionalCollectionCheckServiceProvider"
+    architecture="true">
+    <requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" 
+      proxy="false"
+    />
     <provides />
   </component>
   
@@ -739,6 +1019,22 @@
       <callback type="modified" method="propertiesDictionaryModify" />
     </requires>
     <provides />
+  </component>
+
+  <!--  Proxy Tests -->
+  <component classname="org.apache.felix.ipojo.test.scenarios.service.dependency.proxy.CheckServiceDelegator">
+    <provides/>
+    <requires field="fs" optional="true"/>
+  </component>
+  <component classname="org.apache.felix.ipojo.test.scenarios.service.dependency.proxy.CheckServiceGetAndDelegate">
+    <provides/>
+    <requires field="fs" optional="true"/>
+  </component>
+  <component classname="org.apache.felix.ipojo.test.scenarios.service.dependency.proxy.CheckServiceNoDelegate">
+      <provides/>
+      <requires field="fs" optional="true"/>
+      <callback transition="validate" method="start"/>
+    <callback transition="invalidate" method="stop"/>  
   </component>
   
 </ipojo>

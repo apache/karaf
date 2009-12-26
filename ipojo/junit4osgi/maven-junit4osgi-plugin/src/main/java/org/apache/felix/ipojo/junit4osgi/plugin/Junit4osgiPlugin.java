@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,11 +35,13 @@ import java.util.jar.JarFile;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestFailure;
 import junit.framework.TestListener;
 import junit.framework.TestResult;
 
 import org.apache.felix.framework.Felix;
+import org.apache.felix.ipojo.junit4osgi.OSGiJunitRunner;
 import org.apache.felix.ipojo.junit4osgi.plugin.log.LogServiceImpl;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -52,153 +55,153 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Goal starting Felix and executing junit4osgi tests.
- *  
+ *
  * @goal test
  * @phase integration-test
  * @requiresDependencyResolution runtime
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
- * 
+ *
  */
 public class Junit4osgiPlugin extends AbstractMojo {
 
     /**
      * The Maven project.
-     * 
+     *
      * @parameter expression="${project}"
      * @required
      * @readonly
      */
     private MavenProject m_project;
-    
+
     /**
-     * Dependencies of the current plugin. 
+     * Dependencies of the current plugin.
      * @parameter expression="${plugin.artifacts}"
      */
     private java.util.List m_pluginArtifacts;
-    
+
     /**
      * Base directory where all reports are written to.
-     * 
+     *
      * @parameter expression="${project.build.directory}/surefire-reports"
      */
     private File m_reportsDirectory;
-    
+
     /**
      * Base directory where all reports are written to.
-     * 
+     *
      * @parameter expression="${project.build.directory}"
      */
     private File m_targetDir;
-    
+
     /**
      * Must the current artifact be deployed?
-     * 
+     *
      * @parameter expression="${deployProjectArtifact}" default-value="true"
      */
     private boolean m_deployProjectArtifact;
-    
+
     /**
      * Required bundles.
-     * 
+     *
      * @parameter
      */
     private List bundles;
-    
+
     /**
      * Felix configuration.
-     * 
+     *
      * @parameter
      */
     private Map configuration;
-    
+
     /**
      * Enables / Disables the log service provided by the plugin.
-     * 
+     *
      * @parameter expression="${logService}" default-value="true"
      */
     private boolean m_logEnable;
-    
+
     /**
      * Number of executed test case.
      */
     private int m_total;
-    
+
     /**
      * Number of failing test case.
      */
     private int m_totalFailures;
-    
+
     /**
      * Number of test case in error .
      */
     private int m_totalErrors;
-    
+
     /**
      * Test results in error.
      */
     private List m_errors = new ArrayList();
-    
+
     /**
-     * Failing test results. 
+     * Failing test results.
      */
     private List m_failures = new ArrayList();
-    
+
     /**
      * Test results.
      */
     private List m_results = new ArrayList();
-    
+
     /**
      * Log Service exposed by the plug-in framework.
      */
     private LogServiceImpl m_logService;
-    
+
     /**
      * Set this to 'true' to bypass unit tests entirely. Its use is NOT RECOMMENDED, especially if you
      * enable it using the "maven.test.skip" property, because maven.test.skip disables both running the
      * tests and compiling the tests.  Consider using the skipTests parameter instead.
-     * 
+     *
      * @parameter expression="${maven.test.skip}"
      */
     private boolean skip;
-    
+
     /**
      * Set this to true to ignore a failure during testing. Its use is NOT RECOMMENDED, but quite convenient on
      * occasion.
-     * 
+     *
      * @parameter expression="${maven.test.failure.ignore}"
      */
     private boolean testFailureIgnore;
-    
+
     /**
      * Set this to avoid printing test execution trace on System.out and System.err. This will be written in the
      * reports.
-     * @parameter 
+     * @parameter
      */
     private boolean hideOutputs;
-    
+
     /**
      * Felix configuration.
      */
     private Map felixConf;
-    
-   
+
+
     /**
      * Executes the plug-in.
      * @throws MojoFailureException when the test execution failed.
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */
     public void execute() throws MojoFailureException {
-        
+
         if (skip) {
             getLog().info("Tests are skipped");
             return;
         }
-       
-        
+
+
         List bundles = parseBundleList();
         bundles.addAll(getTestBundle());
-        
+
         List activators = new ArrayList();
         m_logService = new LogServiceImpl();
         if (m_logEnable) { // Starts the log service if enabled
@@ -213,13 +216,13 @@ public class Junit4osgiPlugin extends AbstractMojo {
         felixConf.put("ipojo.log.level", "WARNING");
         // Use a boot delagation to share classes between the host and the embedded Felix.
         // The cobertura package is used during code coverage collection
-        //felixConf.put("org.osgi.framework.bootdelegation", "net.sourceforge.cobertura.coveragedata"); 
+        //felixConf.put("org.osgi.framework.bootdelegation", "net.sourceforge.cobertura.coveragedata");
         felixConf.put("org.osgi.framework.system.packages.extra", "org.osgi.service.log;version=1.3, junit.framework;version=1.3");
 
         //felixConf.put("org.osgi.framework.system.packages.extra", "org.osgi.service.log, junit.framework");
-        
-        felixConf.put("org.osgi.framework.storage", m_targetDir.getAbsolutePath() + "/felix-cache"); 
-        
+
+        felixConf.put("org.osgi.framework.storage", m_targetDir.getAbsolutePath() + "/felix-cache");
+
         felixConf.put(Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK);
 
         if (configuration != null) {
@@ -236,25 +239,35 @@ public class Junit4osgiPlugin extends AbstractMojo {
 //                bd.concat(", net.sourceforge.cobertura.coveragedata");
 //            }
         }
-        
+
         System.out.println("");
         System.out.println("-------------------------------------------------------");
-        System.out.println(" T E S T S");        
+        System.out.println(" T E S T S");
         System.out.println("-------------------------------------------------------");
-        
+
         Felix felix = new Felix(felixConf);
         try {
             felix.start();
         } catch (BundleException e) {
             e.printStackTrace();
         }
-        
+
+        getLog().info("Felix started - Waiting for stability");
+
         waitForStability(felix.getBundleContext());
-        
+
+        getLog().info("Bundle Stability Reached - Waiting for runner service");
 
         Object runner = waitForRunnerService(felix.getBundleContext());
+
+        if (runner == null) {
+            throw new MojoFailureException("Cannot intialize the testing framework");
+        }
+
+        getLog().info("Runner Service available");
+
         invokeRun(runner, felix.getBundleContext());
-                
+
         try {
             felix.stop();
             felix.waitForStop(5000);
@@ -264,7 +277,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
         } catch (Exception e) {
             getLog().error(e);
         }
-        
+
         if (m_totalErrors > 0 || m_totalFailures > 0) {
             if (! testFailureIgnore) {
             throw new MojoFailureException("There are test failures. \n\n"
@@ -278,7 +291,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
         }
 
     }
-    
+
     /**
      * Waits for stability:
      * <ul>
@@ -303,13 +316,22 @@ public class Junit4osgiPlugin extends AbstractMojo {
             count++;
             bundleStability = getBundleStability(context);
         }
-        
+
         if (count == 500) {
             getLog().error("Bundle stability isn't reached after 500 tries");
             dumpBundles(context);
             throw new MojoFailureException("Cannot reach the bundle stability");
         }
-        
+
+        //DEBUG
+        Bundle[] bundles = context.getBundles();
+        getLog().debug("Bundles List");
+        for (int i = 0; i < bundles.length; i++) {
+            getLog().debug(bundles[i].getSymbolicName() + " - " + bundles[i].getVersion() + " - " + bundles[i].getState());
+        }
+        getLog().debug("--------------");
+        // END DEBUG
+
         boolean serviceStability = false;
         count = 0;
         int count1 = 0;
@@ -329,15 +351,30 @@ public class Junit4osgiPlugin extends AbstractMojo {
             }
             count++;
         }
-        
+
         if (count == 500) {
             getLog().error("Service stability isn't reached after 500 tries (" + count1 + " != " + count2);
             dumpBundles(context);
             throw new MojoFailureException("Cannot reach the service stability");
         }
-        
+
+        try {
+            ServiceReference[] refs = context.getServiceReferences(null, null);
+            getLog().debug("Service List");
+            for (int i = 0; i < refs.length; i++) {
+                String[] itfs = (String[]) refs[i].getProperty(Constants.OBJECTCLASS);
+                List list = Arrays.asList(itfs); 
+                if (list.contains("org.apache.felix.ipojo.architecture.Architecture")) {
+                    getLog().debug(list.toString() + " - " + refs[i].getProperty("architecture.instance"));
+                } else {
+                    getLog().debug(list.toString());
+                }
+            }
+            getLog().debug("--------------");
+        } catch (Exception e) {}
+
     }
-    
+
     /**
      * Are bundle stables.
      * @param bc the bundle context
@@ -362,7 +399,6 @@ public class Junit4osgiPlugin extends AbstractMojo {
         if (bundles == null) {
             return toDeploy;
         }
-        System.out.println("Deploy URL bundles " + bundles); // TODO
         for (int i = 0; i < bundles.size(); i++) {
             String bundle = (String) bundles.get(i);
             try {
@@ -373,12 +409,12 @@ public class Junit4osgiPlugin extends AbstractMojo {
                 getLog().error(bundle + " is not a valid url, bundle ignored");
             }
         }
-        
+
         return toDeploy;
     }
-    
+
     /**
-     * Computes the URL list of bundles to install from 
+     * Computes the URL list of bundles to install from
      * <code>test</code> scoped dependencies.
      * @return the list of url of bundles to install.
      */
@@ -394,7 +430,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
                         if (file.getName().endsWith("jar")) {
                             JarFile jar = new JarFile(file);
                             if (jar.getManifest().getMainAttributes().getValue("Bundle-ManifestVersion") != null) {
-                                toDeploy.add(file.toURL());
+                                toDeploy.add(file.toURI().toURL());
                             }
                         } // else {
 //                            getLog().info("The artifact " + artifact.getFile().getName() + " is not a Jar file.");
@@ -409,7 +445,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
         }
         return toDeploy;
     }
-    
+
     /**
      * Waits until the {@link OSGiJunitRunner} service
      * is published.
@@ -422,6 +458,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
         while (ref == null && count < 1000) {
             try {
                 Thread.sleep(5);
+                count++;
             } catch (InterruptedException e) {
                 // Nothing to do
             }
@@ -433,7 +470,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
         getLog().error("Junit Runner service unavailable");
         return null;
     }
-    
+
     /**
      * Executes tests by using reflection.
      * @param runner the {@link OSGiJunitRunner} service object
@@ -441,7 +478,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
      */
     private void invokeRun(Object runner, BundleContext bc) {
         Method getTest;
-        
+
         try {
             getTest = runner.getClass().getMethod("getTests", new Class[0]);
             List tests = (List) getTest.invoke(runner, new Object[0]);
@@ -461,7 +498,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
                     }
                 }
             }
-            
+
             if (m_failures.size() > 0) {
                 System.out.println("\nTests in error:");
                 for (int i = 0; i < m_errors.size(); i++) {
@@ -473,15 +510,15 @@ public class Junit4osgiPlugin extends AbstractMojo {
                     }
                 }
             }
-            
-            System.out.println("\nTests run: " + m_total + ", Failures: " + m_totalFailures + ", Errors:" + m_totalErrors + "\n");          
+
+            System.out.println("\nTests run: " + m_total + ", Failures: " + m_totalFailures + ", Errors:" + m_totalErrors + "\n");
         } catch (Exception e) {
             getLog().error(e);
-        } 
+        }
     }
-    
+
     /**
-     * Gets the {@link OSGiJunitRunner#run(long)} method from the 
+     * Gets the {@link OSGiJunitRunner#run(long)} method from the
      * {@link OSGiJunitRunner} service object.
      * @param runner the {@link OSGiJunitRunner} service object.
      * @return the Method object for the <code>run</code> method.
@@ -489,7 +526,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
     private Method getRunMethod(Object runner) {
         Method[] methods = runner.getClass().getMethods();
         for (int i = 0; i < methods.length; i++) {
-            if (methods[i].getName().equals("run") 
+            if (methods[i].getName().equals("run")
                     && methods[i].getParameterTypes().length == 1
                     && ! methods[i].getParameterTypes()[0].equals(Long.TYPE)) {
                 return methods[i];
@@ -498,7 +535,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
         getLog().error("Cannot find the run method");
         return null;
     }
-    
+
     /**
      * Computes the name of the given test.
      * This method calls the {@link TestCase#getName()}
@@ -519,9 +556,9 @@ public class Junit4osgiPlugin extends AbstractMojo {
             getLog().error(e);
             return null;
         }
-            
+
     }
-    
+
     /**
      * Executes the given test.
      * @param runner the {@link OSGiJunitRunner} service object
@@ -580,7 +617,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
         }
 
     }
-    
+
     /**
      * Prints the bundle list.
      * @param bc the bundle context.
@@ -592,45 +629,45 @@ public class Junit4osgiPlugin extends AbstractMojo {
             getLog().info(bundles[i].getSymbolicName() + " - " + bundles[i].getState());
         }
     }
-    
+
     public LogServiceImpl getLogService() {
         return m_logService;
     }
-    
-    
+
+
     private class ResultListener implements TestListener {
-        
+
         /**
          * The XML Report.
          */
         private XMLReport m_report;
-        
+
         /**
          * Check if the test has failed or thrown an
          * error.
          */
         private boolean m_abort;
-        
+
         /**
          * Backup of the {@link System#out} stream.
          */
         private PrintStream m_outBackup = System.out;
-        
+
         /**
          * Backup of the {@link System#err} stream.
          */
         private PrintStream m_errBackup = System.err;
-        
+
         /**
-         * The output stream used during the test execution. 
+         * The output stream used during the test execution.
          */
         private StringOutputStream m_out = new StringOutputStream();
-        
+
         /**
-         * The error stream used during the test execution. 
+         * The error stream used during the test execution.
          */
         private StringOutputStream m_err = new StringOutputStream();;
-        
+
         /**
          * Creates a ResultListener.
          * @param report the XML report
@@ -660,7 +697,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
                 AssertionFailedError assertionfailederror) {
             m_report.testFailed(test, assertionfailederror, m_out.toString(), m_err.toString(), getLogService().getLoggedMessages());
             m_abort = true;
-            
+
         }
 
         /**
@@ -689,7 +726,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
             System.setOut(new ReportPrintStream(m_out, m_outBackup, hideOutputs));
             getLogService().enableOutputStream();
         }
-        
+
     }
-    
+
 }
