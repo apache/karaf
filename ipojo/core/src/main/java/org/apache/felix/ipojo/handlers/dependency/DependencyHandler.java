@@ -54,6 +54,21 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
     public static final String PROXY_SETTINGS_PROPERTY = "ipojo.proxy";
     
     /**
+     * Proxy type property.
+     */
+    public static final String PROXY_TYPE_PROPERTY = "ipojo.proxy.type";
+    
+    /**
+     * Proxy type value: smart.
+     */
+    public static final String SMART_PROXY = "smart";
+    
+    /**
+     * Proxy type value: dynamic-proxy.
+     */
+    public static final String DYNAMIC_PROXY = "dynamic-proxy";
+    
+    /**
      * Proxy settings value: enabled.
      */
     public static final String PROXY_ENABLED = "enabled";

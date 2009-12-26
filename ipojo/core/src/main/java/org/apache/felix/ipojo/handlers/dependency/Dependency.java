@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -112,12 +113,12 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Immutable once set.
      */
     private String m_id;
-    
+
     /**
      * Do we have to inject proxy?
      */
     private boolean m_isProxy;
-    
+
     /**
      * Proxy Object.
      */
@@ -151,7 +152,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         } else {
             m_usage = null;
         }
-        
+
         m_supportNullable = nullable;
         m_di = defaultImplem;
 
@@ -313,7 +314,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             }
         }
     }
-    
+
 
     /**
      * Call 'modify' method with the service reference in parameter (if accepted).
@@ -335,7 +336,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Start the dependency.
      */
     public void start() {
-        
+
         if (isOptional() && !isAggregate()) {
             if (m_di == null) {
                 // If nullable are supported, create the nullable object.
@@ -372,13 +373,19 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                 }
             }
         }
-        
+
         if (m_isProxy) {
             if (isAggregate()) {
                 m_proxyObject = new ServiceCollection(this);
             } else {
-                ProxyFactory proxyFactory = new ProxyFactory(this.getClass().getClassLoader());
-                m_proxyObject = proxyFactory.getProxy(getSpecification(), this);
+                String type = getHandler().getInstanceManager().getContext().getProperty(DependencyHandler.PROXY_TYPE_PROPERTY);
+                if (type == null || type.equals(DependencyHandler.SMART_PROXY)) {
+                    SmartProxyFactory proxyFactory = new SmartProxyFactory(this.getClass().getClassLoader());
+                    m_proxyObject = proxyFactory.getProxy(getSpecification(), this);
+                } else {
+                    DynamicProxyFactory proxyFactory = new DynamicProxyFactory();
+                    m_proxyObject = proxyFactory.getProxy(getSpecification());
+                }
             }
         }
 
@@ -426,7 +433,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         callBindMethod(reference);
         //The method is only called when a new service arrives, or when the used one is replaced.
     }
-    
+
     /**
      * An already injected service is modified.
      * @param reference : the modified service reference.
@@ -487,7 +494,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             return Arrays.asList(refs);
         }
     }
-    
+
     /**
      * Called by the proxy to get  service objects to delegate a method.
      * On aggregate dependencies, it returns a list.
@@ -499,7 +506,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         if (! m_isProxy) {
             throw new IllegalStateException("The dependency is not a proxied dependency");
         }
-        
+
         Usage usage = (Usage) m_usage.get();
         if (usage.m_stack == 0) { // uninitialized usage.
             if (usage.m_componentStack > 0) {
@@ -534,7 +541,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                             objs.add(getService(ref));
                         }
                         return objs;
-                    } 
+                    }
                 } else { // Scalar dependency.
                     ServiceReference ref = getServiceReference();
                     if (ref != null) {
@@ -542,7 +549,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                     } else {
                         // No service available.
                         // TODO Decide what we have to do.
-                        throw new RuntimeException("Service " + getSpecification() + " unavailable"); 
+                        throw new RuntimeException("Service " + getSpecification() + " unavailable");
                     }
                 }
             }
@@ -562,7 +569,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             } else {
                 return usage.m_object;
             }
-            
+
         }
     }
 
@@ -576,7 +583,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
      */
     public Object onGet(Object pojo, String fieldName, Object value) {
-        
+
         // Initialize the thread local object is not already touched.
         Usage usage = (Usage) m_usage.get();
         if (usage.m_stack == 0) { // uninitialized usage.
@@ -756,7 +763,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     public boolean isProxy() {
         return m_isProxy;
     }
-    
+
     public void setProxy(boolean proxy) {
         m_isProxy = proxy;
     }
@@ -770,14 +777,14 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         setAggregate(true);
         m_type = type;
     }
-    
+
     /**
-     * Creates proxy object for proxied scalar dependencies.
+     * Creates smart proxy object for proxied scalar dependencies.
      */
-    private class ProxyFactory extends ClassLoader {
-        
+    private class SmartProxyFactory extends ClassLoader {
+
         /**
-         * Handler classloader, used to load the temporal dependency class. 
+         * Handler classloader, used to load the temporal dependency class.
          */
         private ClassLoader m_handlerCL;
 
@@ -785,11 +792,11 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
          * Creates the proxy classloader.
          * @param parent the handler classloader.
          */
-        public ProxyFactory(ClassLoader parent) {
+        public SmartProxyFactory(ClassLoader parent) {
             super(getHandler().getInstanceManager().getFactory().getBundleClassLoader());
             m_handlerCL = parent;
         }
-        
+
         /**
          * Loads a proxy class generated for the given (interface) class.
          * @param clazz the service specification to proxy
@@ -799,19 +806,19 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             byte[] clz = ProxyGenerator.dumpProxy(clazz); // Generate the proxy.
             return defineClass(clazz.getName() + "$$Proxy", clz, 0, clz.length);
         }
-        
+
         /**
          * Create a proxy object for the given specification. The proxy
-         * uses the given dependency to get the service object.  
+         * uses the given dependency to get the service object.
          * @param spec the service specification (interface)
-         * @param dep the temporal dependency used to get the service
+         * @param dep the dependency used to get the service
          * @return the proxy object.
          */
         public Object getProxy(Class spec, Dependency dep) {
             try {
                 Class clazz = getProxyClass(getSpecification());
                 Constructor constructor = clazz.getConstructor(
-                        new Class[]{clazz.getClassLoader().loadClass(Dependency.class.getName())});                                               
+                        new Class[]{clazz.getClassLoader().loadClass(Dependency.class.getName())});
                 return constructor.newInstance(new Object[] {dep});
             } catch (Throwable e) {
                 m_handler.error("Cannot create the proxy object", e);
@@ -819,7 +826,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                 return null;
             }
         }
-        
+
         /**
          * Loads the given class.
          * This class use the classloader of the specification class
@@ -837,7 +844,85 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             }
         }
     }
-    
-    
+
+    /**
+     * Creates java dynamic proxy object for proxied scalar dependencies.
+     */
+    private class DynamicProxyFactory implements InvocationHandler {
+
+        /**
+         * HashCode method.
+         */
+        private Method m_hashCodeMethod;
+        
+        /**
+         * Equals method.
+         */
+        private Method m_equalsMethod;
+        
+        /**
+         * toStirng method. 
+         */
+        private Method m_toStringMethod;
+        
+        /**
+         * Creates a DynamicProxyFactory.
+         */
+        public DynamicProxyFactory() {
+            try {
+                m_hashCodeMethod = Object.class.getMethod("hashCode", null);
+                m_equalsMethod = Object.class
+                    .getMethod("equals", new Class[] { Object.class });
+                m_toStringMethod = Object.class.getMethod("toString", null);
+            } catch (NoSuchMethodException e) {
+                throw new NoSuchMethodError(e.getMessage());
+            }
+        }
+        
+        /**
+         * Creates a proxy object for the given specification. The proxy
+         * uses the given dependency to get the service object.
+         * @param spec the service specification (interface)
+         * @return the proxy object.
+         */
+        public Object getProxy(Class spec) {
+            return java.lang.reflect.Proxy.newProxyInstance(
+                    getHandler().getInstanceManager().getClazz().getClassLoader(),
+                    new Class[] {spec},
+                    this);
+        }
+
+        /**
+         * Invocation Handler delegating invocation on the
+         * service object.
+         * @param proxy the proxy object
+         * @param method the method
+         * @param args the arguments
+         * @return a proxy object.
+         * @throws Exception if the invocation throws an exception
+         * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+         */
+        public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
+            Object svc = getService();
+            Class declaringClass = method.getDeclaringClass();
+            if (declaringClass == Object.class) {
+                if (method.equals(m_hashCodeMethod)) {
+                    return new Integer(this.hashCode());
+                } else if (method.equals(m_equalsMethod)) {
+                    return proxy == args[0] ? Boolean.TRUE : Boolean.FALSE;
+                } else if (method.equals(m_toStringMethod)) {
+                    return this.toString();
+                } else {
+                    throw new InternalError(
+                            "Unexpected Object method dispatched: " + method);
+                }
+            }
+            
+            return method.invoke(svc, args);
+        }
+
+    }
+
+
 
 }

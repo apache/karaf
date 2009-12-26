@@ -192,5 +192,42 @@ public class ProxyTest extends OSGiTestCase {
         System.setProperty(DependencyHandler.PROXY_SETTINGS_PROPERTY, DependencyHandler.PROXY_ENABLED);
 
     }
+    
+    public void testDynamicProxy() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
+        // Dynamic proxy
+        System.setProperty(DependencyHandler.PROXY_TYPE_PROPERTY, DependencyHandler.DYNAMIC_PROXY);
+        Properties prov = new Properties();
+        prov.put("instance.name","FooProvider1-Proxy");
+        ComponentInstance fooProvider1 = Utils.getFactoryByName(getContext(), "FooProviderType-1").createComponentInstance(prov);
+        
+        
+        Properties i1 = new Properties();
+        i1.put("instance.name","Delegator");
+        ComponentInstance instance1 = Utils.getFactoryByName(getContext(), 
+                "org.apache.felix.ipojo.test.scenarios.service.dependency.proxy.CheckServiceDelegator").createComponentInstance(i1);
+        
+        
+        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        assertNotNull(ref);
+        CheckService cs = (CheckService) context.getService(ref);
+        
+        Properties props = cs.getProps();
+        FooService helper = (FooService) props.get("helper.fs");
+        assertNotNull(helper);
+        assertFalse(helper.toString().contains("$$Proxy")); // Dynamic proxy.
+        assertTrue(helper.toString().contains("DynamicProxyFactory"));
+        assertTrue(helper.hashCode() > 0);
+        
+        assertTrue(helper.equals(helper));
+        assertFalse(helper.equals(i1)); // This is a quite stupid test...
+
+        assertTrue(cs.check());
+        
+        fooProvider1.dispose();
+        instance1.dispose();
+        System.setProperty(DependencyHandler.PROXY_TYPE_PROPERTY, DependencyHandler.SMART_PROXY);
+
+    }
+
 
 }
