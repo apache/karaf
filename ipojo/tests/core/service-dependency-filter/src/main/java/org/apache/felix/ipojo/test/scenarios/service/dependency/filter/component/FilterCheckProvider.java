@@ -31,7 +31,7 @@ public class FilterCheckProvider implements CheckService, FooService {
     
     private int unbind;
     
-    public FilterCheckProvider(){
+    public FilterCheckProvider() {
         m_toto = "A";
     }
     

@@ -48,6 +48,8 @@ public class AnnotationsTestSuite extends TestSuite {
         ots.addTestSuite(Extender.class);
         ots.addTestSuite(EventAdmin.class);
 
+        // Instantiate
+        ots.addTestSuite(Instantiate.class);
 
         return ots;
     }

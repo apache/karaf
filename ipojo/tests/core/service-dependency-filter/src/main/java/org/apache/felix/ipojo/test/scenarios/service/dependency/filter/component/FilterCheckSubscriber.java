@@ -29,7 +29,7 @@ public class FilterCheckSubscriber implements CheckService {
     
     private FooService m_foo;
     
-    private int binded;
+    private int bound;
     
     public FilterCheckSubscriber(){
     }
@@ -41,16 +41,16 @@ public class FilterCheckSubscriber implements CheckService {
 
     public Properties getProps() {
         Properties props = new Properties();
-        props.put("Bind", new Integer(binded));
+        props.put("Bind", new Integer(bound));
         props.put("Nullable", new Boolean(m_foo instanceof Nullable));
         return props;
     }
     
     private void Bind() {
-        binded++;
+        bound++;
     }
     private void Unbind() {
-        binded--;
+        bound--;
     }
 
 }

@@ -70,11 +70,11 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      */
     private void addProvidedService(ProvidedService svc) {
         // Verify that the provided service is not already in the array.
-        for (int i = 0; (m_providedServices != null) && (i < m_providedServices.length); i++) {
+        for (int i = 0; i < m_providedServices.length; i++) {
             if (m_providedServices[i] == svc) { return; }
         }
 
-        if (m_providedServices != null && m_providedServices.length > 0) { //TODO check here if we can avoid one test
+        if (m_providedServices.length > 0) {
             ProvidedService[] newPS = new ProvidedService[m_providedServices.length + 1];
             System.arraycopy(m_providedServices, 0, newPS, 0, m_providedServices.length);
             newPS[m_providedServices.length] = svc;

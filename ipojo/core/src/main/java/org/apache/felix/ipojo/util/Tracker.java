@@ -672,7 +672,8 @@ public class Tracker implements TrackerCustomizer {
         }
 
         /**
-         * Common logic to add a service to the tracker used by track and trackInitialServices. The specified reference must have been placed in the adding list before calling this method.
+         * Common logic to add a service to the tracker used by track and trackInitialServices. 
+         * The specified reference must have been placed in the adding list before calling this method.
          * @param reference the Reference to a service to be tracked.
          */
         private void trackAdding(ServiceReference reference) {

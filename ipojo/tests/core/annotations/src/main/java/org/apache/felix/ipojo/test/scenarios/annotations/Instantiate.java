@@ -9,6 +9,7 @@ import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ParseException;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 public class Instantiate extends OSGiTestCase {
@@ -20,7 +21,7 @@ public class Instantiate extends OSGiTestCase {
     }
 
     public void testInstantiateSimple() {
-        Element[] meta = getInstanceMetadata(context.getBundle(), "org.apache.felix.ipojo.test.scenarios.component.Instantiate");
+        Element[] meta = getInstanceMetadata(context.getBundle(), "org.apache.felix.ipojo.test.scenarios.component.InstantiateSimple");
         assertNotNull(meta);
         assertEquals(1, meta.length);
         assertNull(meta[0].getAttribute("name"));
@@ -32,19 +33,22 @@ public class Instantiate extends OSGiTestCase {
         Element[] meta = getInstanceMetadata(context.getBundle(), "org.apache.felix.ipojo.test.scenarios.component.InstantiateWithName");
         assertNotNull(meta);
         assertEquals(1, meta.length);
-        assertNull(meta[0].getAttribute("name"));
+        assertNotNull(meta[0].getAttribute("name"));
+        assertEquals("myInstantiatedInstance", meta[0].getAttribute("name"));
         assertEquals(0, meta[0].getElements().length);
     }
     
-    public void testInstanceCreation() {
-        String in = "org.apache.felix.ipojo.test.scenarios.component.Instantiate-0";
-        ServiceReference ref = helper.getServiceReferenceByName(Architecture.class.getName(), in);
+    public void testInstanceCreation() throws InvalidSyntaxException {
+        String in = "org.apache.felix.ipojo.test.scenarios.component.InstantiateSimple-0";
+        ServiceReference ref = helper.getServiceReferenceByName(org.apache.felix.ipojo.architecture.Architecture.class.getName(), 
+                in);
         assertNotNull(ref);
     }
     
     public void testInstanceCreationWithName() {
         String in = "myInstantiatedInstance";
-        ServiceReference ref = helper.getServiceReferenceByName(Architecture.class.getName(), in);
+        ServiceReference ref = helper.getServiceReferenceByName(org.apache.felix.ipojo.architecture.Architecture.class.getName(), 
+                in);
         assertNotNull(ref);
     }
 
@@ -70,7 +74,7 @@ public class Instantiate extends OSGiTestCase {
 
         // Parses the retrieved description and find the component with the
         // given name.
-        List list = new ArrayList();
+        List<Element> list = new ArrayList<Element>();
         try {
             Element element = ManifestMetadataParser.parseHeaderMetadata(elem);
             Element[] childs = element.getElements("instance");

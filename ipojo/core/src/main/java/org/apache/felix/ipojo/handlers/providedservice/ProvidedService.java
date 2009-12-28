@@ -106,6 +106,11 @@ public class ProvidedService implements ServiceFactory {
      * Service Object creation policy.
      */
     private CreationStrategy m_strategy;
+    
+    /**
+     * Were the properties updated during the processing.
+     */
+    private volatile boolean m_wasUpdated;
 
     /**
      * Creates a provided service object.
@@ -305,6 +310,11 @@ public class ProvidedService implements ServiceFactory {
             Properties serviceProperties = getServiceProperties();
             m_strategy.onPublication(getInstanceManager(), m_serviceSpecification, serviceProperties);
             m_serviceRegistration = m_handler.getInstanceManager().getContext().registerService(m_serviceSpecification, this, serviceProperties);
+            // An update may happen during the registration, re-check and apply.
+            if (m_wasUpdated) {
+                m_serviceRegistration.setProperties(getServiceProperties());
+                m_wasUpdated = false;
+            }      
         }
     }
 
@@ -371,6 +381,9 @@ public class ProvidedService implements ServiceFactory {
         // Update the service registration
         if (m_serviceRegistration != null) {
             m_serviceRegistration.setProperties(getServiceProperties());
+        } else {
+            // Need to be updated later.
+            m_wasUpdated = true;
         }
     }
 

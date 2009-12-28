@@ -370,7 +370,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         public void visitEnd() {
             m_instance = new Element("instance", "");
             if (m_className != null) { // Should not be null.
-                m_instance.addAttribute(new Attribute("component", m_className));
+                m_instance.addAttribute(new Attribute("component", m_className.replace('/', '.')));
             }
             if (m_name != null) {
                 m_instance.addAttribute(new Attribute("name", m_name));
