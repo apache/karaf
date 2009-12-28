@@ -384,7 +384,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         pw.println( "var imgRoot = '" + appRoot + "/res/imgs';");
         pw.println( "var startLevel = " + getStartLevel().getInitialBundleStartLevel() + ";");
         pw.println( "var drawDetails = " + reqInfo.bundleRequested + ";");
-        pw.println( "var currentBundle = " + (reqInfo.bundleRequested ? String.valueOf(reqInfo.bundle.getBundleId()) : "null") + ";");
+        pw.println( "var currentBundle = " + (reqInfo.bundleRequested && reqInfo.bundle != null ? String.valueOf(reqInfo.bundle.getBundleId()) : "null") + ";");
         Util.endScript( pw );
 
         Util.script(pw, appRoot, "bundles.js");
