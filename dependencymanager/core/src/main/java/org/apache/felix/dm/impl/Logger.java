@@ -39,8 +39,9 @@ import org.osgi.framework.ServiceReference;
  * This class also tracks log services and will use the highest ranking 
  * log service, if present, as a back end instead of printing to standard
  * out. The class uses reflection to invoking the log service's method to 
- * avoid a dependency on the log interface. This class is in many ways similar
- * to the one used in the system bundle for that same purpose.
+ * avoid a dependency on the log interface, which is also why it does not
+ * actually implement <code>LogService</code>. This class is in many ways 
+ * similar to the one used in the system bundle for that same purpose.
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -144,16 +145,16 @@ public class Logger implements ServiceListener {
      * started before every other bundle.
      */
     private synchronized void startListeningForLogService() {
-        // Add a service listener for log services.
         try {
+            // add a service listener for log services, carefully avoiding any code dependency on it
             m_context.addServiceListener(this, "(objectClass=org.osgi.service.log.LogService)");
         }
         catch (InvalidSyntaxException ex) {
-            // This will never happen since the filter is hard coded.
+            // this will never happen since the filter is hard coded
         }
-        // Try to get an existing log service.
+        // try to get an existing log service
         m_logRef = m_context.getServiceReference("org.osgi.service.log.LogService");
-        // Get the service object if available and set it in the logger.
+        // get the service object if available and set it in the logger
         if (m_logRef != null) {
             setLogger(m_context.getService(m_logRef));
         }
@@ -169,14 +170,14 @@ public class Logger implements ServiceListener {
      * to the higher ranking log service.
      */
     public final synchronized void serviceChanged(ServiceEvent event) {
-        // If no logger is in use, then grab this one.
+        // if no logger is in use, then grab this one
         if ((event.getType() == ServiceEvent.REGISTERED) && (m_logRef == null)) {
             m_logRef = event.getServiceReference();
-            // Get the service object and set it in the logger.
+            // get the service object and set it in the logger
             setLogger(m_context.getService(m_logRef));
         }
-        // If a logger is in use, but this one has a higher ranking, then swap
-        // it for the existing logger.
+        // if a logger is in use, but this one has a higher ranking, then swap
+        // it for the existing logger
         else if ((event.getType() == ServiceEvent.REGISTERED) && (m_logRef != null)) {
             ServiceReference ref = m_context.getServiceReference("org.osgi.service.log.LogService");
             if (!ref.equals(m_logRef)) {
@@ -185,14 +186,14 @@ public class Logger implements ServiceListener {
                 setLogger(m_context.getService(m_logRef));
             }
         }
-        // If the current logger is going away, release it and try to
-        // find another one.
+        // if the current logger is going away, release it and try to
+        // find another one
         else if ((event.getType() == ServiceEvent.UNREGISTERING) && m_logRef.equals(event.getServiceReference())) {
             // Unget the service object.
             m_context.ungetService(m_logRef);
             // Try to get an existing log service.
             m_logRef = m_context.getServiceReference("org.osgi.service.log.LogService");
-            // Get the service object if available and set it in the logger.
+            // get the service object if available and set it in the logger
             if (m_logRef != null) {
                 setLogger(m_context.getService(m_logRef));
             }
