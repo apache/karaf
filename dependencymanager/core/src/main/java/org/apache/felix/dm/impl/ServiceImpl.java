@@ -293,15 +293,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             m_state = newState;
         }
         if (newState.isAllRequiredAvailable()) {
-        	m_executor.enqueue(new Runnable() {
-        		public void run() {
-        			updateInstance(dependency);
-        		}
-        		public String toString() {
-        		    return "update instance " + dependency;
-        		}
-        	});
-        	m_executor.execute();
+        	updateInstance(dependency);
         }
         calculateStateChanges(oldState, newState);
     }
@@ -312,12 +304,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         	state = m_state;
         }
         if (state.isAllRequiredAvailable()) {
-        	m_executor.enqueue(new Runnable() {
-        		public void run() {
-        			updateInstance(dependency);
-        		}
-        	});
-        	m_executor.execute();
+        	updateInstance(dependency);
         }
     }
 
@@ -329,12 +316,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             m_state = newState;
         }
         if (newState.isAllRequiredAvailable()) {
-        	m_executor.enqueue(new Runnable() {
-        		public void run() {
-        			updateInstance(dependency);
-        		}
-        	});
-        	m_executor.execute();
+        	updateInstance(dependency);
         }
         calculateStateChanges(oldState, newState);
     }
