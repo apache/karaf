@@ -39,11 +39,17 @@ import org.apache.felix.dm.impl.dependencies.ConfigurationDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.ResourceDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.ServiceDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.TemporalServiceDependencyImpl;
+import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.BundleContext;
 
 /**
- * The dependency manager. Manages all services and their dependencies.
+ * The dependency manager manages all services and their dependencies. Using 
+ * this API you can declare all services and their dependencies. Under normal
+ * circumstances, you get passed an instance of this class through the
+ * <code>DependencyActivatorBase</code> subclass you use as your
+ * <code>BundleActivator</code>, but it is also possible to create your
+ * own instance.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -53,22 +59,18 @@ public class DependencyManager {
     private List m_services = Collections.synchronizedList(new ArrayList());
 
     /**
-     * Creates a new dependency manager.
+     * Creates a new dependency manager. You need to supply the
+     * <code>BundleContext</code> to be used by the dependency
+     * manager to register services and communicate with the 
+     * framework.
      * 
      * @param context the bundle context
-     * @param logger 
      */
     public DependencyManager(BundleContext context) {
         this(context, new Logger(context));
     }
     
-    /**
-     * Creates a new dependency manager.
-     * 
-     * @param context the bundle context
-     * @param logger 
-     */
-    public DependencyManager(BundleContext context, Logger logger) {
+    DependencyManager(BundleContext context, Logger logger) {
         m_context = context;
         m_logger = logger;
     }
@@ -126,7 +128,7 @@ public class DependencyManager {
     /**
      * Creates a new configuration dependency.
      * 
-     * @return
+     * @return the configuration dependency
      */
     public ConfigurationDependency createConfigurationDependency() {
         return new ConfigurationDependencyImpl(m_context, m_logger);
@@ -144,24 +146,30 @@ public class DependencyManager {
     /**
      * Creates a new resource dependency.
      * 
-     * @return
+     * @return the resource dependency
      */
     public ResourceDependency createResourceDependency() {
         return new ResourceDependencyImpl(m_context, m_logger);
     }
 
     /**
-     * Creates a new aspect.
+     * Creates a new aspect. The aspect will be applied to any service that
+     * matches the specified interface and filter. For each matching service
+     * an aspect will be created based on the aspect implementation class.
+     * The aspect will be registered with the same interface and properties
+     * as the original service, plus any extra properties you supply here.
+     * It will also inherit all dependencies, and if you declare the original
+     * service as a member it will be injected.
      * 
-     * @param serviceInterface
-     * @param serviceFilter
-     * @param aspectImplementation
-     * @param properties
-     * @return
+     * @param serviceInterface the service interface to apply the aspect to
+     * @param serviceFilter the filter condition to use with the service interface
+     * @param aspectImplementation the implementation of the aspect
+     * @param aspectProperties additional properties to use with the aspect service registration
+     * @return a service that acts as a factory for generating aspects
      */
-    public Service createAspectService(Class serviceInterface, String serviceFilter, Object aspectImplementation, Dictionary properties) {
+    public Service createAspectService(Class serviceInterface, String serviceFilter, Object aspectImplementation, Dictionary aspectProperties) {
         return createService()
-            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, aspectImplementation, properties))
+            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, aspectImplementation, aspectProperties))
             .add(createServiceDependency()
                 .setService(serviceInterface, serviceFilter)
                 .setAutoConfig(false)
@@ -169,10 +177,25 @@ public class DependencyManager {
             );
     }
     
-    //TODO rename iface en iface2 to adaptor en adaptee o.i.d.
-    public Service createAdapterService(Class serviceInterface, String serviceFilter, Class adapterInterface, Object impl, Dictionary adapterProperties) {
+    /**
+     * Creates a new adapter. The adapter will be applied to any service that
+     * matches the specified interface and filter. For each matching service
+     * an adapter will be created based on the adapter implementation class.
+     * The adapter will be registered with the specified interface and existing properties
+     * from the original service plus any extra properties you supply here.
+     * It will also inherit all dependencies, and if you declare the original
+     * service as a member it will be injected.
+     * 
+     * @param serviceInterface the service interface to apply the aspect to
+     * @param serviceFilter the filter condition to use with the service interface
+     * @param adapterInterface the interface to use when registering adapters
+     * @param adapterImplementation the implementation of the adapter
+     * @param adapterProperties additional properties to use with the adapter service registration
+     * @return a service that acts as a factory for generating adapters
+     */
+    public Service createAdapterService(Class serviceInterface, String serviceFilter, Class adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
         return createService()
-            .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, impl, adapterInterface.getName(), adapterProperties))
+            .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, adapterImplementation, adapterInterface.getName(), adapterProperties))
             .add(createServiceDependency()
                 .setService(serviceInterface)
                 .setAutoConfig(false)
@@ -180,24 +203,55 @@ public class DependencyManager {
             );
     }
     
-    // TODO note to self, there are Dependency's and DependencyCollections 
-    // (being a dependency on more than one, fi ServiceDendency, ResourceDependency
-    public Service createResourceAdapterService(String resourceFilter, Class adapterInterface, Dictionary adapterProperties, Object impl, boolean propagate) {
+    /**
+     * Creates a new resource adapter. The adapter will be applied to any resource that
+     * matches the specified filter condition. For each matching resource
+     * an adapter will be created based on the adapter implementation class.
+     * The adapter will be registered with the specified interface and existing properties
+     * from the original resource plus any extra properties you supply here.
+     * It will also inherit all dependencies, and if you declare the original
+     * service as a member it will be injected.
+     * 
+     * @param resourceFilter the filter condition to use with the resource
+     * @param adapterInterface the interface to use when registering adapters
+     * @param adapterProperties additional properties to use with the adapter service registration
+     * @param adapterImplementation the implementation of the adapter
+     * @param propagate <code>true</code> if properties from the resource should be propagated to the service
+     * @return a service that acts as a factory for generating resource adapters
+     * @see Resource
+     */
+    public Service createResourceAdapterService(String resourceFilter, Class adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
         return createService()
-            .setImplementation(new ResourceAdapterImpl(resourceFilter, impl, adapterInterface.getName(), adapterProperties, propagate))
+            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterImplementation, adapterInterface.getName(), adapterProperties, propagate))
             .add(createResourceDependency()
                 .setFilter(resourceFilter)
                 .setAutoConfig(false)
                 .setCallbacks("added", "removed")
             );
     }
-    
-    public Service createBundleAdapterService(int stateMask, String filter, Object impl, Class iface) {
+
+    /**
+     * Creates a new bundle adapter. The adapter will be applied to any bundle that
+     * matches the specified bundle state mask and filter condition. For each matching
+     * bundle an adapter will be created based on the adapter implementation class.
+     * The adapter will be registered with the specified interface
+     * 
+     * TODO and existing properties from the original resource plus any extra properties you supply here.
+     * It will also inherit all dependencies, and if you declare the original
+     * service as a member it will be injected.
+     * 
+     * @param bundleStateMask the bundle state mask to apply
+     * @param bundleFilter the filter to apply to the bundle manifest
+     * @param adapterImplementation the implementation of the adapter
+     * @param adapterInterface the interface to use when registering adapters
+     * @return a service that acts as a factory for generating bundle adapters
+     */
+    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, Class adapterInterface) {
         return createService()
-            .setImplementation(new BundleAdapterImpl(stateMask, filter, impl, iface))
+            .setImplementation(new BundleAdapterImpl(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface))
             .add(createBundleDependency()
-                .setFilter(filter)
-                .setStateMask(stateMask)
+                .setFilter(bundleFilter)
+                .setStateMask(bundleStateMask)
                 .setCallbacks("added", "removed")
             );
     }

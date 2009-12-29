@@ -228,9 +228,10 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         	oldState = m_state;
             m_dependencies.add(dependency);
         }
-        if (oldState.isAllRequiredAvailable() || (oldState.isWaitingForRequired() && dependency.isRequired())) {
+        if (oldState.isAllRequiredAvailable() || (oldState.isWaitingForRequiredInstantiated() && dependency.isRequired()) || (oldState.isWaitingForRequired() && dependency.isRequired())) {
         	((DependencyActivation) dependency).start(this);
         }
+
         synchronized (m_dependencies) {
             // starting the dependency above might have triggered another state change, so
             // we have to fetch the current state again
