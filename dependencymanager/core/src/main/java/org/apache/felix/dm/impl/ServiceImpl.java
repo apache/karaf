@@ -292,7 +292,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             newState = new State((List) m_dependencies.clone(), !oldState.isInactive(), m_isInstantiated, m_isBound);
             m_state = newState;
         }
-        if (newState.isAllRequiredAvailable()) {
+        if (newState.isAllRequiredAvailable() || newState.isWaitingForRequiredInstantiated()) {
         	updateInstance(dependency);
         }
         calculateStateChanges(oldState, newState);
