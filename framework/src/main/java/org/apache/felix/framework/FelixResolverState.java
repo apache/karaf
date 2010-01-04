@@ -361,9 +361,8 @@ public class FelixResolverState implements Resolver.ResolverState
             reqs = fragment.getRequirements();
             Map ipFragment = new HashMap();
             Map rbFragment = new HashMap();
-            boolean conflicting = false;
             for (int reqIdx = 0;
-                !conflicting && (reqs != null) && (reqIdx < reqs.length);
+                (reqs != null) && (reqIdx < reqs.length);
                 reqIdx++)
             {
                 if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
@@ -384,10 +383,6 @@ public class FelixResolverState implements Resolver.ResolverState
                     else if (isRequirementConflicting(
                         (Requirement) existing[REQ_IDX], (Requirement) reqs[reqIdx]))
                     {
-                        conflicting = true;
-                    }
-                    if (conflicting)
-                    {
                         ipFragment.clear();
                         rbFragment.clear();
                         it.remove();
@@ -400,6 +395,8 @@ public class FelixResolverState implements Resolver.ResolverState
                                 ? "imported package " : "required bundle ")
                             + targetName + " from "
                             + ((IModule) existing[MODULE_IDX]).getSymbolicName());
+                        // No need to finish processing current fragment.
+                        break;
                     }
                 }
             }
