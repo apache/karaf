@@ -322,25 +322,30 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
     }
 
     public synchronized void start() {
-        m_serviceRegistration = m_context.registerService(ServiceComponent.class.getName(), this, null);
-    	State oldState, newState;
-        synchronized (m_dependencies) {
-        	oldState = m_state;
-            newState = new State((List) m_dependencies.clone(), true, m_isInstantiated, m_isBound);
-            m_state = newState;
-        }
-        calculateStateChanges(oldState, newState);
+    	if (m_serviceRegistration == null) {
+	        m_serviceRegistration = m_context.registerService(ServiceComponent.class.getName(), this, null);
+	    	State oldState, newState;
+	        synchronized (m_dependencies) {
+	        	oldState = m_state;
+	            newState = new State((List) m_dependencies.clone(), true, m_isInstantiated, m_isBound);
+	            m_state = newState;
+	        }
+	        calculateStateChanges(oldState, newState);
+    	}
     }
 
     public synchronized void stop() {
-    	State oldState, newState;
-        synchronized (m_dependencies) {
-        	oldState = m_state;
-            newState = new State((List) m_dependencies.clone(), false, m_isInstantiated, m_isBound);
-            m_state = newState;
-        }
-        calculateStateChanges(oldState, newState);
-        m_serviceRegistration.unregister();
+    	if (m_serviceRegistration != null) {
+	    	State oldState, newState;
+	        synchronized (m_dependencies) {
+	        	oldState = m_state;
+	            newState = new State((List) m_dependencies.clone(), false, m_isInstantiated, m_isBound);
+	            m_state = newState;
+	        }
+	        calculateStateChanges(oldState, newState);
+	        m_serviceRegistration.unregister();
+	        m_serviceRegistration = null;
+    	}
     }
 
     public synchronized Service setInterface(String serviceName, Dictionary properties) {
