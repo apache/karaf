@@ -175,10 +175,10 @@ public class Main {
         BootstrapLogManager.setProperties(configProps);
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
         
-        updateClassLoader(configProps);
-
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
+
+        updateClassLoader(configProps);
 
         processSecurityProperties(configProps);
 
