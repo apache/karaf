@@ -276,14 +276,19 @@ public class ProvidedService implements ServiceFactory {
     }
 
     /**
-     * Return a service object for the dependency.
+     * Returns a service object for the dependency.
      * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration)
      * @param bundle : the bundle
-     * @param registration : the service registration of the registred service
-     * @return : a new service object or a already created service object (in the case of singleton)
+     * @param registration : the service registration of the registered service
+     * @return a new service object or a already created service object (in the case of singleton) or <code>null</code>
+     * if the instance is no more valid.
      */
     public Object getService(Bundle bundle, ServiceRegistration registration) {
-        return m_strategy.getService(bundle, registration);
+        if (getInstanceManager().getState() == InstanceManager.VALID) {
+            return m_strategy.getService(bundle, registration);
+        } else {
+            return null;
+        }
     }
 
     /**

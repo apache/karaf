@@ -29,87 +29,87 @@ import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 public class CallbackTestCase extends OSGiTestCase {
-	
-	ComponentInstance instance; // Instance under test
-	ComponentInstance fooProvider;
+    
+    ComponentInstance instance; // Instance under test
+    ComponentInstance fooProvider;
 
-	public void setUp() {
-		Properties p2 = new Properties();
-		p2.put("instance.name","fooProvider");
-		fooProvider = Utils.getComponentInstance(getContext(), "LFCB-FooProviderType-1", p2);
-		fooProvider.stop();
-		
-		Properties p1 = new Properties();
-		p1.put("instance.name","callback");
-		instance = Utils.getComponentInstance(getContext(), "LFCB-CallbackCheckService", p1);
-		
-	}
-	
-	public void tearDown() {
-		instance.dispose();
-		fooProvider.dispose();
-		instance= null;
-		fooProvider = null;
-	}
-	
-	public void testCallback() {
-		// Check instance is invalid
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance.getInstanceName());
-		assertNotNull("Check architecture availability", arch_ref);
-		PrimitiveInstanceDescription id_dep = (PrimitiveInstanceDescription) ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-		assertTrue("Check instance invalidity - 1", id_dep.getState() == ComponentInstance.INVALID);
-		assertEquals("Check pojo count - 1", id_dep.getCreatedObjects().length, 0);
-		
-		// Start fooprovider
-		fooProvider.start();
-		
-		// Check instance validity
-		//id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-		assertTrue("Check instance validity - 1", id_dep.getState() == ComponentInstance.VALID);
-		
-		// Check service providing
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
-		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) getContext().getService(cs_ref);
-		assertTrue("check CheckService invocation", cs.check());
-		
-		// Check int property
-		Integer index = (Integer) (cs.getProps().get("int"));
-		assertEquals("Check int property - 1", index.intValue(), 1);
-		
-		assertEquals("Check pojo count - 2", id_dep.getCreatedObjects().length, 1);
-		
-		fooProvider.stop();
-		
-		//id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-		assertTrue("Check instance invalidity - 2", id_dep.getState() == ComponentInstance.INVALID);
-		
-		assertEquals("Check pojo count - 3", id_dep.getCreatedObjects().length, 1);
-		
-		fooProvider.start();
-		
-		// Check instance validity
-		//id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-		assertTrue("Check instance validity - 2", id_dep.getState() == ComponentInstance.VALID);
-		
-		// Check service providing
-		cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
-		assertNotNull("Check CheckService availability", cs_ref);
-		cs = (CheckService) getContext().getService(cs_ref);
-		assertTrue("check CheckService invocation", cs.check());
-		
-		// Check int property
-		index = (Integer) (cs.getProps().get("int"));
-		assertEquals("Check int property - 2 ("+index.intValue()+")", index.intValue(), 3);
-		
-		assertEquals("Check pojo count - 4 ", id_dep.getCreatedObjects().length, 1);
-		
-		// Clean up
-		getContext().ungetService(arch_ref);
-		getContext().ungetService(cs_ref);
-		cs = null;
-		id_dep = null;
-	}
-		
+    public void setUp() {
+        Properties p2 = new Properties();
+        p2.put("instance.name","fooProvider");
+        fooProvider = Utils.getComponentInstance(getContext(), "LFCB-FooProviderType-1", p2);
+        fooProvider.stop();
+        
+        Properties p1 = new Properties();
+        p1.put("instance.name","callback");
+        instance = Utils.getComponentInstance(getContext(), "LFCB-CallbackCheckService", p1);
+        
+    }
+    
+    public void tearDown() {
+        instance.dispose();
+        fooProvider.dispose();
+        instance= null;
+        fooProvider = null;
+    }
+    
+    public void testCallback() {
+        // Check instance is invalid
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance.getInstanceName());
+        assertNotNull("Check architecture availability", arch_ref);
+        PrimitiveInstanceDescription id_dep = (PrimitiveInstanceDescription) ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
+        assertTrue("Check instance invalidity - 1", id_dep.getState() == ComponentInstance.INVALID);
+        assertEquals("Check pojo count - 1", id_dep.getCreatedObjects().length, 0);
+        
+        // Start fooprovider
+        fooProvider.start();
+        
+        // Check instance validity
+        //id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
+        assertTrue("Check instance validity - 1", id_dep.getState() == ComponentInstance.VALID);
+        
+        // Check service providing
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
+        assertNotNull("Check CheckService availability", cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
+        assertTrue("check CheckService invocation", cs.check());
+        
+        // Check int property
+        Integer index = (Integer) (cs.getProps().get("int"));
+        assertEquals("Check int property - 1", index.intValue(), 1);
+        
+        assertEquals("Check pojo count - 2", id_dep.getCreatedObjects().length, 1);
+        
+        fooProvider.stop();
+        
+        //id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
+        assertTrue("Check instance invalidity - 2", id_dep.getState() == ComponentInstance.INVALID);
+        
+        assertEquals("Check pojo count - 3", id_dep.getCreatedObjects().length, 1);
+        
+        fooProvider.start();
+        
+        // Check instance validity
+        //id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
+        assertTrue("Check instance validity - 2", id_dep.getState() == ComponentInstance.VALID);
+        
+        // Check service providing
+        cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
+        assertNotNull("Check CheckService availability", cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
+        assertTrue("check CheckService invocation", cs.check());
+        
+        // Check int property
+        index = (Integer) (cs.getProps().get("int"));
+        assertEquals("Check int property - 2 ("+index.intValue()+")", index.intValue(), 3);
+        
+        assertEquals("Check pojo count - 4 ", id_dep.getCreatedObjects().length, 1);
+        
+        // Clean up
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
+        cs = null;
+        id_dep = null;
+    }
+        
 
 }

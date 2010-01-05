@@ -16,27 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.test.scenarios.lifecycle.callback;
+package org.apache.felix.ipojo.test.scenarios.component;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Properties;
 
-import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
-import org.osgi.framework.BundleContext;
+import org.apache.felix.ipojo.test.scenarios.lifecycle.callback.service.CheckService;
 
-public class LifeCycleCallbackTest extends TestSuite {
-    
+public class CallbackWithErrorCheckService extends ParentClass implements CheckService {
 
-    public static Test suite(BundleContext bc) {
-        OSGiTestSuite ots = new OSGiTestSuite("Lifecycle callbacks Test Suite", bc);
-        ots.addTestSuite(CallbackTestCase.class);
-        ots.addTestSuite(ParentCallbackTestCase.class);
-        ots.addTestSuite(ImmediateCallbackTest.class);
-        ots.addTestSuite(ImmediateCallbackSingletonFactoryTest.class);
-        ots.addTestSuite(ImmediateCallbackSeveralFactoryTest.class);
-        ots.addTestSuite(ErrorCallbackTestCase.class);
-        return ots;
+
+    public void start() {
+        throw new NullPointerException();
+    }
+
+    public void stop() {
+    }
+
+    public boolean check() {
+        return true;
+    }
+
+    public Properties getProps() {
+        Properties p = new Properties();
+        return p;
     }
 
 }
-

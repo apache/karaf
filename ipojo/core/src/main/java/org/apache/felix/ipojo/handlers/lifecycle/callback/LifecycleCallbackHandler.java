@@ -168,7 +168,7 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
                     throw new IllegalStateException(e.getMessage());
                 } catch (InvocationTargetException e) {
                     error("[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has thrown an exception : " + e.getTargetException().getMessage(), e.getTargetException());
-                    getInstanceManager().setState(ComponentInstance.INVALID);
+                    throw new IllegalStateException(e.getTargetException().getMessage());
                 }
             }
         }
