@@ -72,6 +72,8 @@ public class ResourceAdapterImpl extends AbstractDecorator {
                 .add(m_manager.createResourceDependency()
                     .setResource(resource)
                     .setPropagate(m_propagate)
+                    .setCallbacks(null, "changed", null)
+                    .setAutoConfig(true)
                     .setRequired(true)
                 );
         }
@@ -83,6 +85,8 @@ public class ResourceAdapterImpl extends AbstractDecorator {
                 .add(m_manager.createResourceDependency()
                     .setResource(resource)
                     .setPropagate(m_propagate)
+                    .setCallbacks(null, "changed", null)
+                    .setAutoConfig(true)
                     .setRequired(true)
                 );
         }
