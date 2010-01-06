@@ -128,13 +128,14 @@ public @interface Property {
      * the Wrapper class), if the cardinality is positive, the property is
      * stored in an array (primitve types are unboxed, that is Boolean type
      * values are stored in boolean[]). The actual value defines the maximum
-     * number of elements in the vector or array, where Integer.MIN_INT
-     * describes an unbounded Vector and Integer.MAX_INT describes an unbounded
-     * array. If the cardinality is zero, the property is a scalar value. If the
-     * defined value of the property is set in the value attribute, the
-     * cardinality defaults to 0 (zero for scalar value). If the property is
-     * defined in one or more properties starting with values, the cardinality
-     * defaults to Integer.MAX_INT, that is an unbounded array.
+     * number of elements in the vector or array, where −2147483648
+     * (Integer.MIN_INT) describes an unbounded Vector and 2147483647
+     * (Integer.MAX_INT) describes an unbounded array. If the cardinality is
+     * zero, the property is a scalar value. If the defined value of the
+     * property is set in the value attribute, the cardinality defaults to0
+     * (zero for scalar value). If the property is defined in one or more
+     * properties starting with values, the cardinality defaults to
+     * 2147483647 (Integer.MAX_INT), that is an unbounded array.
      */
     int cardinality() default 0;
 
