@@ -136,12 +136,14 @@ public class R4LibraryClause
     {
         boolean win32 = currentOSName.startsWith("win") &&
             (currentOSName.equals("windows95") ||
-            currentOSName.equals("windows98") ||
-            currentOSName.equals("windowsnt") ||
-            currentOSName.equals("windows2000") ||
-            currentOSName.equals("windowsxp") ||
-            currentOSName.equals("windowsce") ||
-            currentOSName.equals("windowsvista"));
+             currentOSName.equals("windows98") ||
+             currentOSName.equals("windowsnt") ||
+             currentOSName.equals("windows2000") ||
+             currentOSName.equals("windows2003") ||
+             currentOSName.equals("windowsxp") ||
+             currentOSName.equals("windowsce") ||
+             currentOSName.equals("windowsvista") ||
+             currentOSName.equals("windows7"));
 
         for (int i = 0; (osnames != null) && (i < osnames.length); i++)
         {
@@ -372,6 +374,10 @@ public class R4LibraryClause
             {
                 os = "windows2000";
             }
+            else if (value.indexOf("2003") >= 0)
+            {
+                os = "windows2003";
+            }
             else if (value.indexOf("xp") >= 0)
             {
                 os = "windowsxp";
@@ -383,6 +389,11 @@ public class R4LibraryClause
             else if (value.indexOf("vista") >= 0)
             {
                 os = "windowsvista";
+            }
+            // will need better test here if any future Windows version has a 7 in it!
+            else if (value.indexOf("7") >= 0)
+            {
+                os = "windows7";
             }
             return os;
         }
