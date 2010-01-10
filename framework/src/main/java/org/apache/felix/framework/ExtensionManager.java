@@ -387,7 +387,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
                 bundle.setBundleContext(context);
 
-                if (felix.getState() == Bundle.ACTIVE)
+                if ((felix.getState() == Bundle.ACTIVE) || (felix.getState() == Bundle.STARTING))
                 {
                     Felix.m_secureAction.startActivator(activator, context);
                 }
