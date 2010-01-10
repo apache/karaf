@@ -30,22 +30,23 @@ import java.util.Map;
 import org.apache.felix.framework.security.condpermadmin.ConditionalPermissionAdminImpl;
 import org.apache.felix.framework.security.util.Permissions;
 import org.apache.felix.framework.security.util.PropertiesCache;
+import org.apache.felix.moduleloader.IContent;
 import org.osgi.framework.Bundle;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
- * This class is a relatively straight forward implementation of the PermissionAdmin service.
- * The only somewhat involved thing is that it respects the presents of a
- * conditionalpermissionadmin service as per spec.
+ * This class is a relatively straight forward implementation of the
+ * PermissionAdmin service. The only somewhat involved thing is that it respects
+ * the presents of a conditionalpermissionadmin service as per spec.
  */
-// TODO: Do we need this class at all or can we just emulate it using the condpermadmin?
+// TODO: Do we need this class at all or can we just emulate it using the
+// condpermadmin?
 public final class PermissionAdminImpl implements PermissionAdmin
 {
-    private static final PermissionInfo[] ALL_PERMISSION =
-        new PermissionInfo[] { new PermissionInfo(
-            AllPermission.class.getName(), "", "") };
-    
+    private static final PermissionInfo[] ALL_PERMISSION = new PermissionInfo[] { new PermissionInfo(
+        AllPermission.class.getName(), "", "") };
+
     private final Map m_store = new HashMap();
 
     private final PropertiesCache m_cache;
@@ -59,11 +60,7 @@ public final class PermissionAdminImpl implements PermissionAdmin
     {
         m_permissions = permissions;
         m_cache = cache;
-        Map old = m_cache.read(PermissionInfo[].class);
-        if (old != null)
-        {
-            m_store.putAll(old);
-        }
+        m_cache.read(PermissionInfo[].class, m_store);
     }
 
     public PermissionInfo[] getDefaultPermissions()
@@ -106,71 +103,76 @@ public final class PermissionAdminImpl implements PermissionAdmin
     }
 
     /**
-     * This will do the actual permission check as described in the core spec 10.2
-     * It will respect a present condpermadmin service as described in 9.10.
+     * This will do the actual permission check as described in the core spec
+     * 10.2 It will respect a present condpermadmin service as described in
+     * 9.10.
      * 
-     * @param location the location of the bundle.
-     * @param bundle the bundle in question.
-     * @param permission the permission to check.
-     * @param cpai A condpermadmin if one is present else null.
-     * @param pd the protectiondomain
-     * @return Boolean.TRUE if the location is bound and the permission is 
-     *  granted or if there is no cpa and the default permissions imply the 
-     *  permission Boolean.FALSE otherwise unless the location is not bound and 
-     *  their is a cpa in which case null is returned.
+     * @param location
+     *            the location of the bundle.
+     * @param bundle
+     *            the bundle in question.
+     * @param permission
+     *            the permission to check.
+     * @param cpai
+     *            A condpermadmin if one is present else null.
+     * @param pd
+     *            the protectiondomain
+     * @return Boolean.TRUE if the location is bound and the permission is
+     *         granted or if there is no cpa and the default permissions imply
+     *         the permission Boolean.FALSE otherwise unless the location is not
+     *         bound and their is a cpa in which case null is returned.
      */
     public Boolean hasPermission(String location, Bundle bundle,
         Permission permission, ConditionalPermissionAdminImpl cpai,
-        ProtectionDomain pd)
+        ProtectionDomain pd, IContent content)
     {
         PermissionInfo[] permissions = null;
-        boolean file = false;
+        PermissionInfo[] defaults = null;
+        boolean contains = false;
         synchronized (m_store)
         {
-            if (m_store.containsKey(location))
-            {
-                permissions = (PermissionInfo[]) m_store.get(location);
-                file = true;
-            }
-            else if ((cpai == null) || (cpai.isEmpty()))
-            {
-                if (m_default != null)
-                {
-                    permissions = m_default;
-                }
-                else
-                {
-                    permissions = ALL_PERMISSION;
-                }
-            }
+            contains = m_store.containsKey(location);
+            permissions = (PermissionInfo[]) m_store.get(location);
+            defaults = m_default;
         }
-        if ((cpai == null) || cpai.isEmpty() || file)
+        if (contains)
         {
-            if (check(permissions, permission, file ? bundle : null))
+            if (check(permissions, permission, bundle))
+            {
+                return Boolean.TRUE;
+            }
+            return check(m_permissions.getImplicit(bundle), permission, bundle) ? Boolean.TRUE
+                : Boolean.FALSE;
+        }
+        else if (cpai == null
+            || (cpai.isEmpty() && cpai
+                .impliesLocal(bundle, content, permission)))
+        {
+            if (defaults != null)
+            {
+                if (check(defaults, permission, null))
+                {
+                    return Boolean.TRUE;
+                }
+                return check(m_permissions.getImplicit(bundle), permission,
+                    bundle) ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else
             {
                 return Boolean.TRUE;
             }
         }
-
-        permissions = m_permissions.getImplicit(bundle);
-
-        if (check(permissions, permission, bundle))
-        {
-            return Boolean.TRUE;
-        }
-
-        if ((cpai != null) && !file)
+        else
         {
             return null;
         }
-        return Boolean.FALSE;
     }
 
     private boolean check(PermissionInfo[] permissions, Permission permission,
         Bundle bundle)
     {
-        Permissions permissionsObject =
-            m_permissions.getPermissions(permissions);
+        Permissions permissionsObject = m_permissions
+            .getPermissions(permissions);
 
         return permissionsObject.implies(permission, bundle);
     }

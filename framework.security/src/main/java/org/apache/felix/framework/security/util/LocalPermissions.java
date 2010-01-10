@@ -25,13 +25,9 @@ import java.io.InputStreamReader;
 import java.security.AllPermission;
 import java.security.Permission;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.WeakHashMap;
 
-import org.apache.felix.framework.security.util.Permissions;
-import org.apache.felix.framework.security.util.PropertiesCache;
 import org.apache.felix.moduleloader.IContent;
 import org.osgi.framework.Bundle;
 import org.osgi.service.permissionadmin.PermissionInfo;
@@ -43,31 +39,15 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 // TODO: maybe use bundle events to clean thing up or weak/soft references
 public final class LocalPermissions
 {
-    private static final PermissionInfo[] ALL_PERMISSION =
-        new PermissionInfo[] { new PermissionInfo(
-            AllPermission.class.getName(), "", "") };
-    
-    private final Map m_cache = new HashMap();
+    private static final PermissionInfo[] ALL_PERMISSION = new PermissionInfo[] { new PermissionInfo(
+        AllPermission.class.getName(), "", "") };
+
+    private final Map m_cache = new WeakHashMap();
     private final Permissions m_permissions;
 
-    public LocalPermissions(Permissions permissions, PropertiesCache cache)
-        throws IOException
+    public LocalPermissions(Permissions permissions) throws IOException
     {
         m_permissions = permissions;
-        for (Iterator iter =
-            cache.read(PermissionInfo[].class).entrySet().iterator(); iter
-            .hasNext();)
-        {
-            Entry entry = (Entry) iter.next();
-            PermissionInfo[] value = (PermissionInfo[]) entry.getValue();
-            if ((value.length == 1)
-                && (AllPermission.class.getName().equals(value[0].getType())))
-            {
-                value = ALL_PERMISSION;
-            }
-
-            m_cache.put(entry.getKey(), value);
-        }
     }
 
     /**
@@ -75,20 +55,24 @@ public final class LocalPermissions
      * permissions of the given bundle or if there are none otherwise, false.
      * See core spec 9.2.1.
      * 
-     * @param root the root to use for cacheing as a key
-     * @param loader the loader to get the content of the bundle from
-     * @param bundle the bundle in quesiton
-     * @param permission the permission to check
+     * @param root
+     *            the root to use for cacheing as a key
+     * @param loader
+     *            the loader to get the content of the bundle from
+     * @param bundle
+     *            the bundle in quesiton
+     * @param permission
+     *            the permission to check
      * @return true if implied by local permissions.
      */
-    public boolean implies(String root, IContent content, Bundle bundle,
+    public boolean implies(IContent content, Bundle bundle,
         Permission permission)
     {
         PermissionInfo[] permissions = null;
 
         synchronized (m_cache)
         {
-            if (!m_cache.containsKey(root))
+            if (!m_cache.containsKey(content))
             {
                 InputStream in = null;
                 try
@@ -98,28 +82,26 @@ public final class LocalPermissions
                     {
                         ArrayList perms = new ArrayList();
 
-                        BufferedReader reader =
-                            new BufferedReader(new InputStreamReader(in,
-                                "UTF-8"));
-                        for (String line = reader.readLine(); line != null; line =
-                            reader.readLine())
+                        BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(in, "UTF-8"));
+                        for (String line = reader.readLine(); line != null; line = reader
+                            .readLine())
                         {
                             String trim = line.trim();
-                            if (trim.startsWith("#") || trim.startsWith("//"))
+                            if (trim.startsWith("#") || trim.startsWith("//")
+                                || (trim.length() == 0))
                             {
                                 continue;
                             }
                             perms.add(new PermissionInfo(line));
                         }
 
-                        permissions =
-                            (PermissionInfo[]) perms
-                                .toArray(new PermissionInfo[perms.size()]);
+                        permissions = (PermissionInfo[]) perms
+                            .toArray(new PermissionInfo[perms.size()]);
                     }
                 }
                 catch (Exception ex)
                 {
-                    ex.printStackTrace();
                 }
                 finally
                 {
@@ -142,23 +124,15 @@ public final class LocalPermissions
                     permissions = ALL_PERMISSION;
                 }
 
-                m_cache.put(root, permissions);
+                m_cache.put(content, permissions);
             }
             else
             {
-                permissions = (PermissionInfo[]) m_cache.get(root);
+                permissions = (PermissionInfo[]) m_cache.get(content);
             }
         }
 
         return m_permissions.getPermissions(permissions).implies(permission,
             bundle);
-    }
-
-    public Map getStore() 
-    {
-        synchronized (m_cache)
-        {
-            return new HashMap(m_cache);
-        }
     }
 }

@@ -30,15 +30,17 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
  * Simple storage class for condperminfos. Additionally, this class can be used
- * to encode and decode infos. 
+ * to encode and decode infos.
  */
-public final class ConditionalPermissionInfoImpl implements ConditionalPermissionInfo
+public final class ConditionalPermissionInfoImpl implements
+    ConditionalPermissionInfo
 {
     private static final Random RANDOM = new Random();
     static final ConditionInfo[] CONDITION_INFO = new ConditionInfo[0];
     static final PermissionInfo[] PERMISSION_INFO = new PermissionInfo[0];
     private final Object m_lock = new Object();
     private final String m_name;
+    private final boolean m_allow;
     private volatile ConditionalPermissionAdminImpl m_cpai;
     private ConditionInfo[] m_conditions;
     private PermissionInfo[] m_permissions;
@@ -46,16 +48,18 @@ public final class ConditionalPermissionInfoImpl implements ConditionalPermissio
     public ConditionalPermissionInfoImpl(String encoded)
     {
         StringTokenizer tok = new StringTokenizer(encoded, "\n");
-        if (!tok.nextToken().trim().equals("{"))
+        String access = tok.nextToken().trim();
+        if (!(access.equals("ALLOW {") || access.equals("DENY {")))
         {
             throw new IllegalArgumentException();
         }
+        m_allow = access.equals("ALLOW {");
         m_cpai = null;
         m_name = tok.nextToken().trim().substring(1);
         List conditions = new ArrayList();
         List permissions = new ArrayList();
-        for (String current = tok.nextToken().trim();; current =
-            tok.nextToken().trim())
+        for (String current = tok.nextToken().trim();; current = tok
+            .nextToken().trim())
         {
             if (current.equals("}"))
             {
@@ -78,19 +82,18 @@ public final class ConditionalPermissionInfoImpl implements ConditionalPermissio
             }
         }
 
-        m_conditions =
-            conditions.isEmpty() ? CONDITION_INFO
-                : (ConditionInfo[]) conditions
-                    .toArray(new ConditionInfo[conditions.size()]);
-        m_permissions =
-            permissions.isEmpty() ? PERMISSION_INFO
-                : (PermissionInfo[]) permissions
-                    .toArray(new PermissionInfo[permissions.size()]);
+        m_conditions = conditions.isEmpty() ? CONDITION_INFO
+            : (ConditionInfo[]) conditions.toArray(new ConditionInfo[conditions
+                .size()]);
+        m_permissions = permissions.isEmpty() ? PERMISSION_INFO
+            : (PermissionInfo[]) permissions
+                .toArray(new PermissionInfo[permissions.size()]);
     }
 
     public ConditionalPermissionInfoImpl(ConditionalPermissionAdminImpl cpai,
-        String name)
+        String name, boolean access)
     {
+        m_allow = access;
         m_name = name;
         m_cpai = cpai;
         m_conditions = CONDITION_INFO;
@@ -98,8 +101,10 @@ public final class ConditionalPermissionInfoImpl implements ConditionalPermissio
     }
 
     public ConditionalPermissionInfoImpl(ConditionInfo[] conditions,
-        PermissionInfo[] permisions, ConditionalPermissionAdminImpl cpai)
+        PermissionInfo[] permisions, ConditionalPermissionAdminImpl cpai,
+        boolean access)
     {
+        m_allow = access;
         m_name = Long.toString(RANDOM.nextLong() ^ System.currentTimeMillis());
         m_cpai = cpai;
         m_conditions = conditions;
@@ -108,9 +113,11 @@ public final class ConditionalPermissionInfoImpl implements ConditionalPermissio
 
     public ConditionalPermissionInfoImpl(String name,
         ConditionInfo[] conditions, PermissionInfo[] permisions,
-        ConditionalPermissionAdminImpl cpai)
+        ConditionalPermissionAdminImpl cpai, boolean access)
     {
-        m_name = name;
+        m_allow = access;
+        m_name = (name != null) ? name : Long.toString(RANDOM.nextLong()
+            ^ System.currentTimeMillis());
         m_conditions = conditions;
         m_permissions = permisions;
         m_cpai = cpai;
@@ -182,6 +189,7 @@ public final class ConditionalPermissionInfoImpl implements ConditionalPermissio
     public String getEncoded()
     {
         StringBuffer buffer = new StringBuffer();
+        buffer.append(m_allow ? "ALLOW " : "DENY ");
         buffer.append('{');
         buffer.append('\n');
         buffer.append('#');
@@ -208,5 +216,16 @@ public final class ConditionalPermissionInfoImpl implements ConditionalPermissio
     public String toString()
     {
         return getEncoded();
+    }
+
+    public String getAccessDecision()
+    {
+        return m_allow ? ConditionalPermissionInfo.ALLOW
+            : ConditionalPermissionInfo.DENY;
+    }
+
+    public boolean isAllow()
+    {
+        return m_allow;
     }
 }

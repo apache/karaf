@@ -33,27 +33,27 @@ import org.apache.felix.framework.util.IteratorToEnumeration;
 import org.apache.felix.moduleloader.IContent;
 
 /**
- * This class makes a given content available as a inputstream with a jar content.
- * In other words the stream can be used as input to a JarInputStream. 
+ * This class makes a given content available as a inputstream with a jar
+ * content. In other words the stream can be used as input to a JarInputStream.
  */
 public final class BundleInputStream extends InputStream
 {
     private final IContent m_root;
     private final Enumeration m_content;
     private final OutputStreamBuffer m_outputBuffer = new OutputStreamBuffer();
-    
+
     private ByteArrayInputStream m_buffer = null;
     private JarOutputStream m_output = null;
-    
-    public BundleInputStream(IContent root) throws IOException 
+
+    public BundleInputStream(IContent root) throws IOException
     {
         m_root = root;
-        
+
         List entries = new ArrayList();
-        
+
         int count = 0;
         String manifest = null;
-        for (Enumeration e = m_root.getEntries();e.hasMoreElements();)
+        for (Enumeration e = m_root.getEntries(); e.hasMoreElements();)
         {
             String entry = (String) e.nextElement();
             if (entry.equalsIgnoreCase("META-INF/MANIFEST.MF"))
@@ -77,16 +77,16 @@ public final class BundleInputStream extends InputStream
             manifest = "META-INF/MANIFEST.MF";
         }
         m_content = new IteratorToEnumeration(entries.iterator());
-        
+
         try
         {
             m_output = new JarOutputStream(m_outputBuffer);
             readNext(manifest);
-            m_buffer = new ByteArrayInputStream(
-                m_outputBuffer.m_outBuffer.toByteArray());
+            m_buffer = new ByteArrayInputStream(m_outputBuffer.m_outBuffer
+                .toByteArray());
 
             m_outputBuffer.m_outBuffer = null;
-        } 
+        }
         catch (IOException ex)
         {
             // TODO: figure out what is wrong
@@ -111,24 +111,24 @@ public final class BundleInputStream extends InputStream
                 m_buffer = null;
                 return read();
             }
-            
+
             return result;
         }
 
         if (m_content.hasMoreElements())
         {
             String current = (String) m_content.nextElement();
-            
+
             readNext(current);
-            
+
             if (!m_content.hasMoreElements())
             {
                 m_output.close();
                 m_output = null;
             }
 
-            m_buffer = new ByteArrayInputStream(
-                m_outputBuffer.m_outBuffer.toByteArray());
+            m_buffer = new ByteArrayInputStream(m_outputBuffer.m_outBuffer
+                .toByteArray());
 
             m_outputBuffer.m_outBuffer = null;
         }
@@ -149,7 +149,7 @@ public final class BundleInputStream extends InputStream
             {
                 throw new IOException("Missing entry");
             }
-            
+
             JarEntry entry = new JarEntry(path);
 
             m_output.putNextEntry(entry);
@@ -169,7 +169,7 @@ public final class BundleInputStream extends InputStream
                 {
                     in.close();
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     // Not much we can do
                 }
@@ -180,7 +180,7 @@ public final class BundleInputStream extends InputStream
 
         m_output.flush();
     }
-    
+
     private static final class OutputStreamBuffer extends OutputStream
     {
         ByteArrayOutputStream m_outBuffer = null;
@@ -189,12 +189,12 @@ public final class BundleInputStream extends InputStream
         {
             m_outBuffer.write(b);
         }
-        
+
         public void write(byte[] buffer) throws IOException
         {
             m_outBuffer.write(buffer);
-        }       
-        
+        }
+
         public void write(byte[] buffer, int offset, int length)
         {
             m_outBuffer.write(buffer, offset, length);

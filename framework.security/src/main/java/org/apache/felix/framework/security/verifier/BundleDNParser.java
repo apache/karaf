@@ -30,13 +30,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.apache.felix.framework.cache.BundleRevision;
 import org.apache.felix.framework.security.util.BundleInputStream;
 import org.apache.felix.framework.security.util.TrustManager;
 import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.moduleloader.IModule;
+import org.osgi.framework.Bundle;
 
 public final class BundleDNParser
 {
@@ -51,15 +53,12 @@ public final class BundleDNParser
         Method getCertificates = null;
         try
         {
-            getCodeSigners =
-                Class.forName("java.util.jar.JarEntry").getMethod(
-                    "getCodeSigners", null);
-            getSignerCertPath =
-                Class.forName("java.security.CodeSigner").getMethod(
-                    "getSignerCertPath", null);
-            getCertificates =
-                Class.forName("java.security.cert.CertPath").getMethod(
-                    "getCertificates", null);
+            getCodeSigners = Class.forName("java.util.jar.JarEntry").getMethod(
+                "getCodeSigners", null);
+            getSignerCertPath = Class.forName("java.security.CodeSigner")
+                .getMethod("getSignerCertPath", null);
+            getCertificates = Class.forName("java.security.cert.CertPath")
+                .getMethod("getCertificates", null);
         }
         catch (Exception ex)
         {
@@ -73,7 +72,9 @@ public final class BundleDNParser
         m_getCertificates = getCertificates;
     }
 
-    private final Map m_cache = new HashMap();
+    private final Map m_cache = new WeakHashMap();
+    private final Map m_allCache = new WeakHashMap();
+
     private final TrustManager m_manager;
 
     public BundleDNParser(TrustManager manager)
@@ -89,7 +90,7 @@ public final class BundleDNParser
         }
     }
 
-    public void put(String root, String[] dnChains)
+    public void put(String root, X509Certificate[] dnChains)
     {
         synchronized (m_cache)
         {
@@ -97,35 +98,65 @@ public final class BundleDNParser
         }
     }
 
-    public void checkDNChains(String root, IContent content) throws Exception
+    public void checkDNChains(IModule root, IContent content, int signersType)
+        throws Exception
     {
-        synchronized (m_cache)
+        if (signersType == Bundle.SIGNERS_TRUSTED)
         {
-            if (m_cache.containsKey(root))
+            synchronized (m_cache)
             {
-                String[] result = (String[]) m_cache.get(root);
-                if ((result != null) && (result.length == 0))
+                if (m_cache.containsKey(root))
                 {
-                    throw new IOException("Bundle not properly signed");
+                    Map result = (Map) m_cache.get(root);
+                    if ((result != null) && (result.isEmpty()))
+                    {
+                        throw new IOException("Bundle not properly signed");
+                    }
+                    return;
                 }
-                return;
+            }
+        }
+        else
+        {
+            synchronized (m_allCache)
+            {
+                if (m_allCache.containsKey(root))
+                {
+                    Map result = (Map) m_allCache.get(root);
+                    if ((result != null) && (result.isEmpty()))
+                    {
+                        throw new IOException("Bundle not properly signed");
+                    }
+                    return;
+                }
             }
         }
 
-        String[] result = new String[0];
+        Map result = null;
         Exception org = null;
         try
         {
-            result = _getDNChains(root, content);
+            result = _getDNChains(content,
+                signersType == Bundle.SIGNERS_TRUSTED);
         }
         catch (Exception ex)
         {
             org = ex;
         }
 
-        synchronized (m_cache)
+        if (signersType == Bundle.SIGNERS_TRUSTED)
         {
-            m_cache.put(root, result);
+            synchronized (m_cache)
+            {
+                m_cache.put(root, result);
+            }
+        }
+        else
+        {
+            synchronized (m_allCache)
+            {
+                m_allCache.put(root, result);
+            }
         }
 
         if (org != null)
@@ -134,46 +165,70 @@ public final class BundleDNParser
         }
     }
 
-    public String[] getDNChains(String root, IContent bundleRevision)
+    public Map getDNChains(IModule root, IContent bundleRevision,
+        int signersType)
     {
-        synchronized (m_cache)
+        if (signersType == Bundle.SIGNERS_TRUSTED)
         {
-            if (m_cache.containsKey(root))
+            synchronized (m_cache)
             {
-                String[] result = (String[]) m_cache.get(root);
-                if ((result != null) && (result.length == 0))
+                if (m_cache.containsKey(root))
                 {
-                    return null;
+                    Map result = (Map) m_cache.get(root);
+                    return (result == null) ? new HashMap() : new HashMap(
+                        result);
                 }
-                return result;
+            }
+        }
+        else
+        {
+            synchronized (m_allCache)
+            {
+                if (m_allCache.containsKey(root))
+                {
+                    Map result = (Map) m_allCache.get(root);
+                    return (result == null) ? new HashMap() : new HashMap(
+                        result);
+                }
             }
         }
 
-        String[] result = new String[0];
-        
+        Map result = null;
+
         try
         {
-            result = _getDNChains(root, bundleRevision);
+            result = _getDNChains(bundleRevision,
+                signersType == Bundle.SIGNERS_TRUSTED);
         }
         catch (Exception ex)
         {
             // Ignore
         }
 
-        synchronized (m_cache)
+        if (signersType == Bundle.SIGNERS_TRUSTED)
         {
-            m_cache.put(root, result);
+            synchronized (m_cache)
+            {
+                m_cache.put(root, result);
+            }
+        }
+        else
+        {
+            synchronized (m_allCache)
+            {
+                m_allCache.put(root, result);
+            }
         }
 
-        return result;
-    } 
+        return (result == null) ? new HashMap() : new HashMap(result);
+    }
 
-    private String[] _getDNChains(String root, IContent content)
+    private Map _getDNChains(IContent content, boolean check)
         throws IOException
     {
         X509Certificate[] certificates = null;
 
-        certificates = getCertificates(new BundleInputStream(content));
+        certificates = getCertificates(new BundleInputStream(content), check);
 
         if (certificates == null)
         {
@@ -182,11 +237,9 @@ public final class BundleDNParser
 
         List rootChains = new ArrayList();
 
-        getRootChains(certificates, rootChains);
+        getRootChains(certificates, rootChains, check);
 
-        List result = new ArrayList();
-
-        SubjectDNParser parser = new SubjectDNParser();
+        Map result = new HashMap();
 
         for (Iterator rootIter = rootChains.iterator(); rootIter.hasNext();)
         {
@@ -198,42 +251,18 @@ public final class BundleDNParser
 
             X509Certificate current = (X509Certificate) iter.next();
 
-            try
-            {
-                buffer.append(parser
-                    .parseSubjectDN(current.getTBSCertificate()));
-
-                while (iter.hasNext())
-                {
-                    buffer.append(';');
-
-                    current = (X509Certificate) iter.next();
-
-                    buffer.append(parser.parseSubjectDN(current
-                        .getTBSCertificate()));
-                }
-
-                result.add(buffer.toString());
-
-            }
-            catch (Exception ex)
-            {
-                // something went wrong during parsing -
-                // it might be that the cert contained an unsupported OID
-                // TODO: log this or something
-                ex.printStackTrace();
-            }
+            result.put(current, chain);
         }
 
         if (!result.isEmpty())
         {
-            return (String[]) result.toArray(new String[result.size()]);
+            return result;
         }
 
         throw new IOException();
     }
 
-    private X509Certificate[] getCertificates(InputStream input)
+    private X509Certificate[] getCertificates(InputStream input, boolean check)
         throws IOException
     {
         JarInputStream bundle = new JarInputStream(input, true);
@@ -250,9 +279,9 @@ public final class BundleDNParser
         // This is tricky: jdk1.3 doesn't say anything about what is happening
         // if a bad sig is detected on an entry - later jdk's do say that they
         // will throw a security Exception. The below should cater for both
-        // behaviors. 
-        for (JarEntry entry = bundle.getNextJarEntry(); entry != null; entry =
-            bundle.getNextJarEntry())
+        // behaviors.
+        for (JarEntry entry = bundle.getNextJarEntry(); entry != null; entry = bundle
+            .getNextJarEntry())
         {
 
             if (entry.isDirectory() || entry.getName().startsWith("META-INF"))
@@ -277,8 +306,8 @@ public final class BundleDNParser
             {
                 try
                 {
-                    Object[] signers =
-                        (Object[]) m_getCodeSigners.invoke(entry, null);
+                    Object[] signers = (Object[]) m_getCodeSigners.invoke(
+                        entry, null);
 
                     if (signers != null)
                     {
@@ -286,16 +315,15 @@ public final class BundleDNParser
 
                         for (int i = 0; i < signers.length; i++)
                         {
-                            Object path =
-                                m_getSignerCertPath.invoke(signers[i], null);
+                            Object path = m_getSignerCertPath.invoke(
+                                signers[i], null);
 
                             certChains.addAll((List) m_getCertificates.invoke(
                                 path, null));
                         }
 
-                        certificates =
-                            (Certificate[]) certChains
-                                .toArray(new Certificate[certChains.size()]);
+                        certificates = (Certificate[]) certChains
+                            .toArray(new Certificate[certChains.size()]);
                     }
                 }
                 catch (Exception ex)
@@ -312,7 +340,7 @@ public final class BundleDNParser
 
             List chains = new ArrayList();
 
-            getRootChains(certificates, chains);
+            getRootChains(certificates, chains, check);
 
             if (certificateChains.isEmpty())
             {
@@ -324,13 +352,13 @@ public final class BundleDNParser
                 for (Iterator iter2 = certificateChains.iterator(); iter2
                     .hasNext();)
                 {
-                    X509Certificate cert =
-                        (X509Certificate) ((List) iter2.next()).get(0);
+                    X509Certificate cert = (X509Certificate) ((List) iter2
+                        .next()).get(0);
                     boolean found = false;
                     for (Iterator iter3 = chains.iterator(); iter3.hasNext();)
                     {
-                        X509Certificate cert2 =
-                            (X509Certificate) ((List) iter3.next()).get(0);
+                        X509Certificate cert2 = (X509Certificate) ((List) iter3
+                            .next()).get(0);
 
                         if (cert.getSubjectDN().equals(cert2.getSubjectDN())
                             && cert.equals(cert2))
@@ -380,7 +408,8 @@ public final class BundleDNParser
         return false;
     }
 
-    private void getRootChains(Certificate[] certificates, List chains)
+    private void getRootChains(Certificate[] certificates, List chains,
+        boolean check)
     {
         List chain = new ArrayList();
 
@@ -394,11 +423,14 @@ public final class BundleDNParser
             {
                 revoked = true;
             }
-            else if (!revoked)
+            if (!check || !revoked)
             {
                 try
                 {
-                    certificate.checkValidity();
+                    if (check)
+                    {
+                        certificate.checkValidity();
+                    }
 
                     chain.add(certificate);
                 }
@@ -412,7 +444,7 @@ public final class BundleDNParser
             if (!((X509Certificate) certificates[i + 1]).getSubjectDN().equals(
                 certificate.getIssuerDN()))
             {
-                if (!revoked && trusted(certificate))
+                if (!check || (!revoked && trusted(certificate)))
                 {
                     chains.add(chain);
                 }
@@ -427,10 +459,11 @@ public final class BundleDNParser
         }
         // The final entry in the certs array is always
         // a "root" certificate
-        if (!revoked)
+        if (!check || !revoked)
         {
             chain.add(certificates[certificates.length - 1]);
-            if (trusted((X509Certificate) certificates[certificates.length - 1]))
+            if (!check
+                || trusted((X509Certificate) certificates[certificates.length - 1]))
             {
                 chains.add(chain);
             }

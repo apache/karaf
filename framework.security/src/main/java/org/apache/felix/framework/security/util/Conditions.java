@@ -18,21 +18,20 @@
  */
 package org.apache.felix.framework.security.util;
 
-import java.util.ArrayList;
+import java.security.Permission;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.Map.Entry;
 
-import org.apache.felix.framework.security.verifier.SignerMatcher;
+import org.apache.felix.framework.security.condpermadmin.ConditionalPermissionInfoImpl;
 import org.apache.felix.framework.util.SecureAction;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
-import org.osgi.service.condpermadmin.BundleSignerCondition;
 import org.osgi.service.condpermadmin.Condition;
 import org.osgi.service.condpermadmin.ConditionInfo;
 
@@ -44,11 +43,11 @@ import org.osgi.service.condpermadmin.ConditionInfo;
 public final class Conditions
 {
     private static final ThreadLocal m_conditionStack = new ThreadLocal();
+    private static final Map m_conditionCache = new WeakHashMap();
 
     private final Map m_cache = new WeakHashMap();
-    
-    private final Bundle m_bundle;
-    private final String[] m_signers;
+
+    private final IModule m_module;
 
     private final ConditionInfo[] m_conditionInfos;
     private final Condition[] m_conditions;
@@ -56,21 +55,44 @@ public final class Conditions
 
     public Conditions(SecureAction action)
     {
-        this(null, null, null, action);
+        this(null, null, action);
     }
-    
-    private Conditions(Bundle bundle, String[] signers,
-        ConditionInfo[] conditions, SecureAction action)
+
+    private Conditions(IModule module, ConditionInfo[] conditionInfos,
+        SecureAction action)
     {
-        m_bundle = bundle;
-        m_signers = signers;
-        m_conditionInfos = conditions;
-        m_conditions = ((conditions != null) && (bundle != null)) ? new Condition[m_conditionInfos.length] : null;
+        m_module = module;
+        m_conditionInfos = conditionInfos;
+        if ((module != null) && (conditionInfos != null))
+        {
+            synchronized (m_conditionCache)
+            {
+                Map conditionMap = (Map) m_conditionCache.get(module);
+                if (conditionMap == null)
+                {
+                    conditionMap = new HashMap();
+                    conditionMap.put(m_conditionInfos,
+                        new Condition[m_conditionInfos.length]);
+                    m_conditionCache.put(module, conditionMap);
+                }
+                Condition[] conditions = (Condition[]) conditionMap
+                    .get(m_conditionInfos);
+                if (conditions == null)
+                {
+                    conditions = new Condition[m_conditionInfos.length];
+                    conditionMap.put(m_conditionInfos, conditions);
+                }
+                m_conditions = conditions;
+            }
+        }
+        else
+        {
+            m_conditions = null;
+        }
         m_action = action;
     }
 
-    public Conditions getConditions(Bundle bundle, String[] signers,
-        ConditionInfo[] conditions)
+    public Conditions getConditions(IModule key, ConditionInfo[] conditions)
     {
         Conditions result = null;
         Map index = null;
@@ -85,90 +107,85 @@ public final class Conditions
         }
         synchronized (index)
         {
-            if (bundle != null)
+            if (key != null)
             {
-                result = (Conditions) index.get(bundle);
+                result = (Conditions) index.get(key);
             }
         }
-        
+
         if (result == null)
         {
-            result = new Conditions(bundle, signers, conditions, m_action);
+            result = new Conditions(key, conditions, m_action);
             synchronized (index)
             {
-                index.put(bundle, result);
+                index.put(key, result);
             }
         }
-        
+
         return result;
     }
 
     // See whether the given list is satisfied or not
-    public boolean isSatisfied(List posts)
+    public boolean isSatisfied(List posts, Permissions permissions,
+        Permission permission)
     {
-        for (int i = 0; i < m_conditions.length; i++)
+        boolean check = true;
+        for (int i = 0; i < m_conditionInfos.length; i++)
         {
-            if (m_bundle == null)
+            if (m_module == null)
             {
-                if (!m_conditionInfos[i].getType().equals(
-                    BundleSignerCondition.class.getName()))
-                {
-                    return false;
-                }
-                String[] args = m_conditionInfos[i].getArgs();
-
-                boolean match = false;
-                if (args.length == 0)
-                {
-                    for (int j = 0; j < m_signers.length; j++)
-                    {
-                        if (SignerMatcher.match(args[0], m_signers[j]))
-                        {
-                            match = true;
-                            break;
-                        }
-                    }
-                }
-                if (!match)
-                {
-                    return false;
-                }
-                continue;
+                // TODO: check whether this is correct!
+                break;
             }
             try
             {
                 Condition condition = null;
                 boolean add = false;
                 Class clazz = Class.forName(m_conditionInfos[i].getType());
-                
-                synchronized (m_conditionInfos)
+
+                synchronized (m_conditions)
                 {
+                    if (m_conditions[i] == null)
+                    {
+                        m_conditions[i] = createCondition(m_module.getBundle(),
+                            clazz, m_conditionInfos[i]);
+                    }
                     condition = m_conditions[i];
                 }
-                
-                if (condition == null)
+
+                Object current = m_conditionStack.get();
+                if (current != null)
                 {
-                    add = true;
-                    condition = createCondition(m_bundle, clazz, m_conditionInfos[i]);
-                }
-                
-                if (condition.isPostponed())
-                {
-                    posts.add(condition);
-                    if (add)
+                    if (current instanceof HashSet)
                     {
-                        synchronized (m_conditionInfos)
+                        if (((HashSet) current).contains(clazz))
                         {
-                            if (m_conditions[i] == null)
-                            {
-                                m_conditions[i] = condition;
-                            }
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (current == clazz)
+                        {
+                            return false;
                         }
                     }
                 }
+
+                if (condition.isPostponed())
+                {
+                    if (check && !permissions.implies(permission, null))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        check = false;
+                    }
+                    posts.add(new Object[] { condition, new Integer(i) });
+                }
                 else
                 {
-                    Object current = m_conditionStack.get();
 
                     if (current == null)
                     {
@@ -199,20 +216,16 @@ public final class Conditions
                     }
                     try
                     {
+                        boolean mutable = condition.isMutable();
                         boolean result = condition.isSatisfied();
 
-                        if (!condition.isMutable() && ((condition != Condition.TRUE) && (condition != Condition.FALSE)))
+                        if (!mutable
+                            && ((condition != Condition.TRUE) && (condition != Condition.FALSE)))
                         {
-                            synchronized (m_conditionInfos)
+                            synchronized (m_conditions)
                             {
-                                m_conditions[i] = result ? Condition.TRUE : Condition.FALSE;
-                            }
-                        }
-                        else
-                        {
-                            synchronized (m_conditionInfos)
-                            {
-                                m_conditions[i] = condition;
+                                m_conditions[i] = result ? Condition.TRUE
+                                    : Condition.FALSE;
                             }
                         }
                         if (!result)
@@ -249,121 +262,99 @@ public final class Conditions
 
     public boolean evalRecursive(List entries)
     {
-        return _evalRecursive(entries, 0, new ArrayList(), new HashMap());
-    }
-
-    private boolean _evalRecursive(List entries, int pos, List acc, Map contexts)
-    {
-        if (pos == entries.size())
+        Map contexts = new HashMap();
+        outer: for (Iterator iter = entries.iterator(); iter.hasNext();)
         {
-            // we need to group by type by tuple
-            Map conditions = new HashMap();
-            for (Iterator iter = acc.iterator(); iter.hasNext();)
+            List tuples = (List) iter.next();
+            inner: for (Iterator inner = tuples.iterator(); inner.hasNext();)
             {
-                for (Iterator iter2 = ((List) iter.next()).iterator(); iter2
-                    .hasNext();)
+                Object[] entry = (Object[]) inner.next();
+                List conditions = (List) entry[1];
+                if (conditions == null)
                 {
-                    Object entry = iter2.next();
-                    Set group = (Set) conditions.get(entry.getClass());
-
-                    if (group == null)
-                    {
-                        group = new HashSet();
-                    }
-                    group.add(entry);
-
-                    conditions.put(entry.getClass(), group);
-                }
-            }
-
-            // and then eval per group
-            for (Iterator iter = conditions.entrySet().iterator(); iter.hasNext();)
-            {
-                Entry entry = (Entry) iter.next();
-                Class key = (Class) entry.getKey();
-                
-                Hashtable context = (Hashtable) contexts.get(key);
-                if (context == null)
-                {
-                    context = new Hashtable();
-                    contexts.put(key, context);
-                }
-                Set set = (Set) entry.getValue();
-                Condition[] current =
-                    (Condition[]) set.toArray(new Condition[set.size()]);
-
-                // We must be catching recursive evaluation as per spec, hence use a thread
-                // local stack to do so
-                Object currentCond = m_conditionStack.get();
-
-                if (currentCond == null)
-                {
-                    m_conditionStack.set(key);
-                }
-                else
-                {
-                    if (currentCond instanceof HashSet)
-                    {
-                        if (((HashSet) currentCond).contains(key))
-                        {
-                            return false;
-                        }
-                        ((HashSet) currentCond).add(key);
-                    }
-                    else
-                    {
-                        if (currentCond == key)
-                        {
-                            return false;
-                        }
-                        HashSet frame = new HashSet();
-                        frame.add(current);
-                        frame.add(key);
-                        m_conditionStack.set(frame);
-                        currentCond = frame;
-                    }
-                }
-                try
-                {
-                    if (!current[0].isSatisfied(current, context))
+                    if (!((ConditionalPermissionInfoImpl) entry[0]).isAllow())
                     {
                         return false;
                     }
+                    continue outer;
                 }
-                finally
+                for (Iterator iter2 = conditions.iterator(); iter2.hasNext();)
                 {
-                    if (currentCond == null)
+                    Object[] condEntry = (Object[]) iter2.next();
+                    Condition cond = (Condition) condEntry[0];
+                    Dictionary context = (Dictionary) contexts.get(cond
+                        .getClass());
+                    if (context == null)
                     {
-                        m_conditionStack.set(null);
+                        context = new Hashtable();
+                        contexts.put(cond.getClass(), context);
+                    }
+                    Object current = m_conditionStack.get();
+                    if (current == null)
+                    {
+                        m_conditionStack.set(cond.getClass());
                     }
                     else
                     {
-                        ((HashSet) currentCond).remove(key);
-                        if (((HashSet) currentCond).isEmpty())
+                        if (current instanceof HashSet)
+                        {
+                            ((HashSet) current).add(cond.getClass());
+                        }
+                        else
+                        {
+                            HashSet frame = new HashSet();
+                            frame.add(current);
+                            frame.add(cond.getClass());
+                            m_conditionStack.set(frame);
+                            current = frame;
+                        }
+                    }
+                    boolean result;
+                    boolean mutable = cond.isMutable();
+                    try
+                    {
+                        result = cond.isSatisfied(new Condition[] { cond },
+                            context);
+                    }
+                    finally
+                    {
+                        if (current == null)
                         {
                             m_conditionStack.set(null);
                         }
+                        else
+                        {
+                            ((HashSet) current).remove(cond.getClass());
+                            if (((HashSet) current).isEmpty())
+                            {
+                                m_conditionStack.set(null);
+                            }
+                        }
+                    }
+                    if (!mutable && (cond != Condition.TRUE)
+                        && (cond != Condition.FALSE))
+                    {
+                        synchronized (((Conditions) entry[2]).m_conditions)
+                        {
+                            ((Conditions) entry[2]).m_conditions[((Integer) condEntry[1])
+                                .intValue()] = result ? Condition.TRUE
+                                : Condition.FALSE;
+                        }
+                    }
+                    if (!result)
+                    {
+                        continue inner;
                     }
                 }
+                if (!((ConditionalPermissionInfoImpl) entry[0]).isAllow())
+                {
+                    return false;
+                }
+                continue outer;
             }
-            return true;
+            return false;
         }
-
-        List entry = (List) entries.get(pos);
-
-        for (int i = 0; i < entry.size(); i++)
-        {
-            acc.add(entry.get(i));
-
-            if (_evalRecursive(entries, pos + 1, acc, contexts))
-            {
-                return true;
-            }
-
-            acc.remove(acc.size() - 1);
-        }
-
-        return false;
+        return true;
     }
 
     private Condition createCondition(final Bundle bundle, final Class clazz,

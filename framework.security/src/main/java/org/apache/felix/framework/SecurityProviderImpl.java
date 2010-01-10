@@ -26,13 +26,13 @@ import org.apache.felix.framework.security.condpermadmin.ConditionalPermissionAd
 import org.apache.felix.framework.security.permissionadmin.PermissionAdminImpl;
 import org.apache.felix.framework.security.util.TrustManager;
 import org.apache.felix.framework.security.verifier.BundleDNParser;
-import org.apache.felix.framework.security.verifier.SignerMatcher;
 import org.apache.felix.framework.util.SecureAction;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
 
 /**
- * This class is the entry point to the security. It is used to determine whether
- * a given bundle is signed correctely and has permissions based on 
+ * This class is the entry point to the security. It is used to determine
+ * whether a given bundle is signed correctely and has permissions based on
  * PermissionAdmin or ConditionalPermissionAdmin.
  */
 public final class SecurityProviderImpl implements SecurityProvider
@@ -42,69 +42,49 @@ public final class SecurityProviderImpl implements SecurityProvider
     private final ConditionalPermissionAdminImpl m_cpai;
     private final SecureAction m_action;
 
-    SecurityProviderImpl(String crlList, String typeList,
-        String passwdList, String storeList, PermissionAdminImpl pai,
+    SecurityProviderImpl(String crlList, String typeList, String passwdList,
+        String storeList, PermissionAdminImpl pai,
         ConditionalPermissionAdminImpl cpai, SecureAction action)
     {
         m_pai = pai;
         m_cpai = cpai;
         m_action = action;
-        m_parser =
-            new BundleDNParser(new TrustManager(crlList, typeList, passwdList,
-                storeList, m_action));
-    }
-
-    BundleDNParser getParser()
-    {
-        return m_parser;
+        m_parser = new BundleDNParser(new TrustManager(crlList, typeList,
+            passwdList, storeList, m_action));
     }
 
     /**
-     * If the given bundle is signed but can not be verified (e.g., missing files)
-     * then throw an exception.
+     * If the given bundle is signed but can not be verified (e.g., missing
+     * files) then throw an exception.
      */
     public void checkBundle(Bundle bundle) throws Exception
     {
-        m_parser.checkDNChains(
-            (Long.toString(bundle.getBundleId()) + "-" + bundle.getLastModified()), 
-            ((BundleImpl) bundle).getCurrentModule().getContent());
+        IModule module = ((BundleImpl) bundle).getCurrentModule();
+        m_parser.checkDNChains(module, module.getContent(),
+            Bundle.SIGNERS_TRUSTED);
     }
 
     /**
      * Get a signer matcher that can be used to match digital signed bundles.
      */
-    public Object getSignerMatcher(final Bundle bundle)
+    public Object getSignerMatcher(final Bundle bundle, int signersType)
     {
-        return new SignerMatcher(Long.toString(bundle.getBundleId()), 
-            bundle.getLastModified(),
-            ((BundleImpl) bundle).getCurrentModule().getContent(), 
-            m_parser);
+        IModule module = ((BundleImpl) bundle).getCurrentModule();
+        return m_parser.getDNChains(module, module.getContent(), signersType);
     }
 
-    ThreadLocal loopCheck = new ThreadLocal();
-    
     /**
-     * If we have a permissionadmin then ask that one first and have it
-     * decide in case there is a location bound. If not then either use its 
-     * default permission in case there is no conditional permission admin
-     * or else ask that one. 
+     * If we have a permissionadmin then ask that one first and have it decide
+     * in case there is a location bound. If not then either use its default
+     * permission in case there is no conditional permission admin or else ask
+     * that one.
      */
     public boolean hasBundlePermission(ProtectionDomain bundleProtectionDomain,
         Permission permission, boolean direct)
     {
-    	if (loopCheck.get() != null)
-    	{
-    		return true;
-    	}
-    	else
-    	{
-    	    loopCheck.set(this);
-    	}
-    	try
-    	{
-        BundleProtectionDomain pd =
-            (BundleProtectionDomain) bundleProtectionDomain;
+        BundleProtectionDomain pd = (BundleProtectionDomain) bundleProtectionDomain;
         BundleImpl bundle = pd.getBundle();
+        IModule module = pd.getModule();
 
         if (bundle.getBundleId() == 0)
         {
@@ -116,13 +96,22 @@ public final class SecurityProviderImpl implements SecurityProvider
         Boolean result = null;
         if (m_pai != null)
         {
-            result =
-                m_pai.hasPermission(bundle.getLocation(), pd.getBundle(),
-                    permission, m_cpai, pd);
+            result = m_pai.hasPermission(bundle._getLocation(), pd.getBundle(),
+                permission, m_cpai, pd, bundle.getCurrentModule().getContent());
         }
 
         if (result != null)
         {
+            if ((m_cpai != null) && !direct)
+            {
+                boolean allow = result.booleanValue();
+                if (!allow)
+                {
+                    m_cpai.clearPD();
+                    return false;
+                }
+                return m_cpai.handlePAHandle(pd);
+            }
             return result.booleanValue();
         }
 
@@ -130,10 +119,7 @@ public final class SecurityProviderImpl implements SecurityProvider
         {
             try
             {
-                return m_cpai.hasPermission(bundle, 
-                    bundle.getCurrentModule().getContent(), 
-                    bundle.getBundleId() + "-" + 
-                    bundle.getLastModified(),null, pd,
+                return m_cpai.hasPermission(module, module.getContent(), pd,
                     permission, direct, m_pai);
             }
             catch (Exception e)
@@ -144,8 +130,5 @@ public final class SecurityProviderImpl implements SecurityProvider
         }
 
         return false;
-    	} finally {
-    		loopCheck.set(null);
-    	}
     }
 }

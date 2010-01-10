@@ -31,19 +31,19 @@ import java.util.List;
 import org.apache.felix.framework.BundleProtectionDomain;
 
 /**
- * This class is a hack to get all BundleProtectionDomains currently on the 
+ * This class is a hack to get all BundleProtectionDomains currently on the
  * security stack. This way we don't need to have our own security manager set.
  */
 final class DomainGripper implements DomainCombiner, PrivilegedAction
 {
-    private static final ProtectionDomain[] ALL_PERMISSION_PD =
-        new ProtectionDomain[] { new ProtectionDomain(null, null)
+    private static final ProtectionDomain[] ALL_PERMISSION_PD = new ProtectionDomain[] { new ProtectionDomain(
+        null, null)
+    {
+        public boolean implies(Permission perm)
         {
-            public boolean implies(Permission perm)
-            {
-                return true;
-            }
-        } };
+            return true;
+        }
+    } };
 
     // A per thread cache of DomainGripper objects. We might want to wrap them
     // in a softreference eventually
@@ -56,8 +56,8 @@ final class DomainGripper implements DomainCombiner, PrivilegedAction
     private AccessControlContext m_system = null;
 
     /**
-     * Get all bundle protection domains and add them to the m_domains. Then 
-     * return the ALL_PERMISSION_PD. 
+     * Get all bundle protection domains and add them to the m_domains. Then
+     * return the ALL_PERMISSION_PD.
      */
     public ProtectionDomain[] combine(ProtectionDomain[] current,
         ProtectionDomain[] assigned)
@@ -84,7 +84,7 @@ final class DomainGripper implements DomainCombiner, PrivilegedAction
     }
 
     /**
-     * Get the current bundle protection domains on the stack up to the last 
+     * Get the current bundle protection domains on the stack up to the last
      * privileged call.
      */
     public static List grab()
@@ -107,8 +107,8 @@ final class DomainGripper implements DomainCombiner, PrivilegedAction
         gripper.m_system = AccessController.getContext();
 
         // and merge it with the current combiner (i.e., gripper)
-        AccessControlContext context =
-            (AccessControlContext) AccessController.doPrivileged(gripper);
+        AccessControlContext context = (AccessControlContext) AccessController
+            .doPrivileged(gripper);
 
         gripper.m_system = null;
 

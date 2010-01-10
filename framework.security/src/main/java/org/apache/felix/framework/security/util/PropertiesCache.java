@@ -26,10 +26,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import org.apache.felix.framework.util.SecureAction;
@@ -66,11 +66,13 @@ public final class PropertiesCache
 
                 Properties store = new Properties();
 
+                int count = 0;
+
                 for (Iterator iter = data.entrySet().iterator(); iter.hasNext();)
                 {
                     Entry entry = (Entry) iter.next();
-                    store.setProperty((String) entry.getKey(), getEncoded(entry
-                        .getValue()));
+                    store.setProperty(count++ + "-" + (String) entry.getKey(),
+                        getEncoded(entry.getValue()));
                 }
 
                 store.store(out, null);
@@ -126,15 +128,15 @@ public final class PropertiesCache
         }
     }
 
-    public Map read(Class target) throws IOException
+    public void read(Class target, Map map) throws IOException
     {
         if (!m_file.isFile())
         {
-            return null;
+            return;
         }
         InputStream in = null;
         Exception other = null;
-        Map result = new HashMap();
+        Map result = new TreeMap();
         try
         {
             in = m_action.getFileInputStream(m_file);
@@ -171,7 +173,12 @@ public final class PropertiesCache
                 }
             }
         }
-        return result;
+        for (Iterator iter = result.entrySet().iterator(); iter.hasNext();)
+        {
+            Entry entry = (Entry) iter.next();
+            String key = (String) entry.getKey();
+            map.put(key.substring(key.indexOf("-")), entry.getValue());
+        }
     }
 
     private String getEncoded(Object target) throws IOException
@@ -204,26 +211,25 @@ public final class PropertiesCache
                 Properties props = new Properties();
                 props.load(new ByteArrayInputStream(encoded.getBytes()));
                 Class componentType = target.getComponentType();
-                Constructor constructor =
-                    m_action.getConstructor(componentType,
-                        new Class[] { String.class });
+                Constructor constructor = m_action.getConstructor(
+                    componentType, new Class[] { String.class });
                 Object[] params = new Object[1];
-                Object[] result =
-                    (Object[]) Array.newInstance(componentType, props.size());
+                Object[] result = (Object[]) Array.newInstance(componentType,
+                    props.size());
 
                 for (Iterator iter = props.entrySet().iterator(); iter
                     .hasNext();)
                 {
                     Entry entry = (Entry) iter.next();
                     params[0] = entry.getValue();
-                    result[Integer.parseInt((String) entry.getKey())] =
-                        constructor.newInstance(params);
+                    result[Integer.parseInt((String) entry.getKey())] = constructor
+                        .newInstance(params);
                 }
 
                 return result;
             }
 
-            return m_action.invoke(m_action.getConstructor(target, 
+            return m_action.invoke(m_action.getConstructor(target,
                 new Class[] { String.class }), new Object[] { encoded });
         }
         catch (Exception ex)

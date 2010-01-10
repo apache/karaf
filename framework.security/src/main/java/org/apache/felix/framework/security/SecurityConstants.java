@@ -18,38 +18,29 @@
  */
 package org.apache.felix.framework.security;
 
-import java.io.File;
-
 public interface SecurityConstants
 {
     public static final String KEYSTORE_FILE_PROP = "felix.keystore";
 
-    public static final String KEYSTORE_FILE_VALUE = "file:" +
-        System.getProperty("java.home") + File.separatorChar + "lib"
-            + File.separatorChar + "security" + File.separatorChar + "cacerts"
-            + "|file:" + System.getProperty("user.home") + File.separatorChar
-            + ".keystore";
+    public static final String KEYSTORE_FILE_VALUE = "";
 
     public static final String KEYSTORE_TYPE_PROP = "felix.keystore.type";
 
-    public static final String KEYSTORE_TYPE_VALUE = "JKS" + "|" + "JKS";
+    public static final String KEYSTORE_TYPE_VALUE = "";
 
     public static final String KEYSTORE_PASS_PROP = "felix.keystore.pass";
 
-    public static final String KEYSTORE_PASS_VALUE =
-        "changeit" + "|" + "changeit";
+    public static final String KEYSTORE_PASS_VALUE = "";
 
     public static final String CRL_FILE_PROP = "felix.crl";
 
     public static final String CRL_FILE_VALUE = "";
 
-    public static final String ENABLE_CONDPERMADMIN_PROP =
-        "felix.security.conpermadmin";
+    public static final String ENABLE_CONDPERMADMIN_PROP = "felix.security.conpermadmin";
 
     public static final String ENABLE_CONDPERMADMIN_VALUE = "true";
 
-    public static final String ENABLE_PERMISSIONADMIN_PROP =
-        "felix.security.permissionadmin";
+    public static final String ENABLE_PERMISSIONADMIN_PROP = "felix.security.permissionadmin";
 
     public static final String ENABLE_PERMISSIONADMIN_VALUE = "true";
 }

@@ -23,10 +23,11 @@ import java.io.FilePermission;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.security.AccessController;
 import java.security.AllPermission;
 import java.security.Permission;
 import java.security.PermissionCollection;
-import java.security.*;
+import java.security.PrivilegedAction;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,19 +45,18 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
- * A permission cache that uses permisssion infos as keys. Permission are created
- * from the parent classloader or any exported package. 
+ * A permission cache that uses permisssion infos as keys. Permission are
+ * created from the parent classloader or any exported package.
  */
 // TODO: maybe use bundle events instead of soft/weak references
 public final class Permissions
 {
-    private static final ClassLoader m_classLoader =
-        Permissions.class.getClassLoader();
+    private static final ClassLoader m_classLoader = Permissions.class
+        .getClassLoader();
 
     private static final Map m_permissionCache = new HashMap();
     private static final Map m_permissions = new HashMap();
-    private static final ReferenceQueue m_permissionsQueue =
-        new ReferenceQueue();
+    private static final ReferenceQueue m_permissionsQueue = new ReferenceQueue();
 
     private static final ThreadLocal m_stack = new ThreadLocal();
 
@@ -69,9 +69,8 @@ public final class Permissions
 
     public static final AllPermission ALL_PERMISSION = new AllPermission();
 
-    private static final PermissionInfo[] IMPLICIT =
-        new PermissionInfo[] { new PermissionInfo(FilePermission.class
-            .getName(), "-", "read,write,delete") };
+    private static final PermissionInfo[] IMPLICIT = new PermissionInfo[] { new PermissionInfo(
+        FilePermission.class.getName(), "-", "read,write,delete") };
 
     Permissions(PermissionInfo[] permissionInfos, BundleContext context,
         SecureAction action)
@@ -102,13 +101,17 @@ public final class Permissions
         m_allPermission = true;
         m_action = action;
     }
-    
+
     public PermissionInfo[] getImplicit(Bundle bundle)
     {
         return new PermissionInfo[] {
             IMPLICIT[0],
             new PermissionInfo(AdminPermission.class.getName(), "(id="
-                + bundle.getBundleId() + ")", AdminPermission.METADATA) };
+                + bundle.getBundleId() + ")", AdminPermission.METADATA),
+            new PermissionInfo(AdminPermission.class.getName(), "(id="
+                + bundle.getBundleId() + ")", AdminPermission.RESOURCE),
+            new PermissionInfo(AdminPermission.class.getName(), "(id="
+                + bundle.getBundleId() + ")", AdminPermission.CONTEXT) };
     }
 
     public Permissions getPermissions(PermissionInfo[] permissionInfos)
@@ -177,11 +180,11 @@ public final class Permissions
                 return false;
             }
 
-            if (o instanceof Entry) 
+            if (o instanceof Entry)
             {
-                return entry.equals(((Entry)o).get());
-            } 
-            else 
+                return entry.equals(((Entry) o).get());
+            }
+            else
             {
                 return false;
             }
@@ -237,8 +240,8 @@ public final class Permissions
 
     private void cleanUp(ReferenceQueue queue, Map cache)
     {
-        for (Entry entry = (Entry) queue.poll(); entry != null; entry =
-            (Entry) queue.poll())
+        for (Entry entry = (Entry) queue.poll(); entry != null; entry = (Entry) queue
+            .poll())
         {
             synchronized (cache)
             {
@@ -248,12 +251,14 @@ public final class Permissions
     }
 
     /**
-     * @param target the permission to be implied
-     * @param bundle if not null then allow implicit permissions like file 
-     *     access to local data area
+     * @param target
+     *            the permission to be implied
+     * @param bundle
+     *            if not null then allow implicit permissions like file access
+     *            to local data area
      * @return true if the permission is implied by this permissions object.
      */
-    public boolean implies(Permission target, Bundle bundle)
+    public boolean implies(Permission target, final Bundle bundle)
     {
         if (m_allPermission)
         {
@@ -273,7 +278,7 @@ public final class Permissions
                 {
                     String postfix = "";
                     String name = m_permissionInfos[i].getName();
-                    if (!"<<ALL FILES>>".equals(name)) 
+                    if (!"<<ALL FILES>>".equals(name))
                     {
                         if (name.endsWith("*") || name.endsWith("-"))
                         {
@@ -282,13 +287,20 @@ public final class Permissions
                         }
                         if (!(new File(name)).isAbsolute())
                         {
-                            BundleContext context = bundle.getBundleContext();
+                            BundleContext context = (BundleContext) AccessController
+                                .doPrivileged(new PrivilegedAction()
+                                {
+                                    public Object run()
+                                    {
+                                        return bundle.getBundleContext();
+                                    }
+                                });
                             if (context == null)
                             {
                                 break;
                             }
-                            name =
-                                m_action.getAbsolutePath(new File(context.getDataFile(""), name));
+                            name = m_action.getAbsolutePath(new File(context
+                                .getDataFile(""), name));
                         }
                         if (postfix.length() > 0)
                         {
@@ -302,10 +314,54 @@ public final class Permissions
                             }
                         }
                     }
-                    return createPermission(
+                    Permission source = createPermission(new PermissionInfo(
+                        FilePermission.class.getName(), name,
+                        m_permissionInfos[i].getActions()), targetClass);
+                    postfix = "";
+                    name = target.getName();
+                    if (!"<<ALL FILES>>".equals(name))
+                    {
+                        if (name.endsWith("*") || name.endsWith("-"))
+                        {
+                            postfix = name.substring(name.length() - 1);
+                            name = name.substring(0, name.length() - 1);
+                        }
+                        if (!(new File(name)).isAbsolute())
+                        {
+                            BundleContext context = (BundleContext) AccessController
+                                .doPrivileged(new PrivilegedAction()
+                                {
+                                    public Object run()
+                                    {
+                                        return bundle.getBundleContext();
+                                    }
+                                });
+                            if (context == null)
+                            {
+                                break;
+                            }
+                            name = m_action.getAbsolutePath(new File(context
+                                .getDataFile(""), name));
+                        }
+                        if (postfix.length() > 0)
+                        {
+                            if ((name.length() > 0) && !name.endsWith("/"))
+                            {
+                                name += "/" + postfix;
+                            }
+                            else
+                            {
+                                name += postfix;
+                            }
+                        }
+                    }
+                    Permission realTarget = createPermission(
                         new PermissionInfo(FilePermission.class.getName(),
-                            name, m_permissionInfos[i].getActions()),
-                        targetClass).implies(target);
+                            name, target.getActions()), targetClass);
+                    if (source.implies(realTarget))
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -374,8 +430,8 @@ public final class Permissions
 
                     if (infoType.equals(permissionType))
                     {
-                        Permission permission =
-                            createPermission(permissionInfo, targetClass);
+                        Permission permission = createPermission(
+                            permissionInfo, targetClass);
 
                         if (permission != null)
                         {
@@ -478,86 +534,94 @@ public final class Permissions
     private Permission createPermission(final PermissionInfo permissionInfo,
         final Class target)
     {
-        return (Permission) AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run()
+        return (Permission) AccessController
+            .doPrivileged(new PrivilegedAction()
             {
-        Permission cached = getFromCache(permissionInfo.getEncoded(), target);
-
-        if (cached != null)
-        {
-            return cached;
-        }
-
-        try
-        {
-            if (m_classLoader.loadClass(target.getName()) == target)
-            {
-                return addToCache(permissionInfo.getEncoded(),
-                    createPermission(permissionInfo.getName(), permissionInfo
-                        .getActions(), target));
-            }
-        }
-        catch (ClassNotFoundException e1)
-        {
-        }
-
-        ServiceReference[] refs = null;
-        try
-        {
-            refs =
-                m_context.getServiceReferences(PackageAdmin.class.getName(),
-                    null);
-        }
-        catch (InvalidSyntaxException e)
-        {
-        }
-        if (refs != null)
-        {
-            for (int i = 0; i < refs.length; i++)
-            {
-                PackageAdmin admin =
-                    (PackageAdmin) m_context.getService(refs[i]);
-
-                if (admin != null)
+                public Object run()
                 {
-                    Permission result = null;
-                    Bundle bundle = admin.getBundle(target);
-                    if (bundle != null)
-                    {
-                        ExportedPackage[] exports =
-                            admin.getExportedPackages(bundle);
-                        if (exports != null)
-                        {
-                            String name = target.getName();
-                            name = name.substring(0, name.lastIndexOf('.'));
+                    Permission cached = getFromCache(permissionInfo
+                        .getEncoded(), target);
 
-                            for (int j = 0; j < exports.length; j++)
+                    if (cached != null)
+                    {
+                        return cached;
+                    }
+
+                    try
+                    {
+                        if (m_classLoader.loadClass(target.getName()) == target)
+                        {
+                            return addToCache(permissionInfo.getEncoded(),
+                                createPermission(permissionInfo.getName(),
+                                    permissionInfo.getActions(), target));
+                        }
+                    }
+                    catch (ClassNotFoundException e1)
+                    {
+                    }
+
+                    ServiceReference[] refs = null;
+                    try
+                    {
+                        refs = m_context.getServiceReferences(
+                            PackageAdmin.class.getName(), null);
+                    }
+                    catch (InvalidSyntaxException e)
+                    {
+                    }
+                    if (refs != null)
+                    {
+                        for (int i = 0; i < refs.length; i++)
+                        {
+                            PackageAdmin admin = (PackageAdmin) m_context
+                                .getService(refs[i]);
+
+                            if (admin != null)
                             {
-                                if (exports[j].getName().equals(name))
+                                Permission result = null;
+                                Bundle bundle = admin.getBundle(target);
+                                if (bundle != null)
                                 {
-                                    result =
-                                        createPermission(permissionInfo
-                                            .getName(), permissionInfo
-                                            .getActions(), target);
-                                    break;
+                                    ExportedPackage[] exports = admin
+                                        .getExportedPackages(bundle);
+                                    if (exports != null)
+                                    {
+                                        String name = target.getName();
+                                        name = name.substring(0, name
+                                            .lastIndexOf('.'));
+
+                                        for (int j = 0; j < exports.length; j++)
+                                        {
+                                            if (exports[j].getName().equals(
+                                                name))
+                                            {
+                                                result = createPermission(
+                                                    permissionInfo.getName(),
+                                                    permissionInfo.getActions(),
+                                                    target);
+                                                break;
+                                            }
+                                        }
+                                    }
                                 }
+
+                                m_context.ungetService(refs[i]);
+
+                                return addToCache(permissionInfo.getEncoded(),
+                                    result);
                             }
                         }
                     }
 
-                    m_context.ungetService(refs[i]);
-
-                    return addToCache(permissionInfo.getEncoded(), result);
+                    return null;
                 }
-            }
-        }
-
-        return null;
-        }});
+            });
     }
 
     private Permission createPermission(String name, String action, Class target)
     {
+        // System.out.println("\n\n|" + name + "|\n--\n|" + action + "|\n--\n" +
+        // target + "\n\n");
         try
         {
             return (Permission) m_action.getConstructor(target,
@@ -566,7 +630,7 @@ public final class Permissions
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            // TODO: log this or something
         }
 
         return null;

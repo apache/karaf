@@ -78,19 +78,17 @@ public final class TrustManager
 
         if (m_crlList.trim().length() != 0)
         {
-            CertificateFactory fac =
-                CertificateFactory.getInstance("X509");
-            
+            CertificateFactory fac = CertificateFactory.getInstance("X509");
+
             for (StringTokenizer tok = new StringTokenizer(m_crlList, "|"); tok
                 .hasMoreElements();)
             {
                 InputStream input = null;
                 try
                 {
-                    input =
-                        m_action.getURLConnectionInputStream(m_action
-                            .createURL(null, tok.nextToken(), null)
-                            .openConnection());
+                    input = m_action.getURLConnectionInputStream(m_action
+                        .createURL(null, tok.nextToken(), null)
+                        .openConnection());
                     result.addAll(fac.generateCRLs(input));
                 }
                 catch (Exception ex)
@@ -137,20 +135,18 @@ public final class TrustManager
                 InputStream input = null;
                 try
                 {
-                    input =
-                        m_action.getURLConnectionInputStream(m_action
-                            .createURL(null, storeTok.nextToken().trim(), null)
-                            .openConnection());
+                    input = m_action.getURLConnectionInputStream(m_action
+                        .createURL(null, storeTok.nextToken().trim(), null)
+                        .openConnection());
+                    String pass = passwdTok.nextToken().trim();
 
-                    ks.load(input, passwdTok.nextToken().trim().toCharArray());
+                    ks.load(input, (pass.length() > 0) ? pass.toCharArray()
+                        : null);
 
                     for (Enumeration e = ks.aliases(); e.hasMoreElements();)
                     {
                         String alias = (String) e.nextElement();
-                        if (ks.isCertificateEntry(alias))
-                        {
-                            result.add(ks.getCertificate(alias));
-                        }
+                        result.add(ks.getCertificate(alias));
                     }
                 }
                 catch (Exception ex)
