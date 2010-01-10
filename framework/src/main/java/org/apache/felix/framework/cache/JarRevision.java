@@ -144,7 +144,7 @@ class JarRevision extends BundleRevision
                     {
                         // Do it the manual way to have a chance to
                         // set request properties such as proxy auth.
-                        URL url = new URL(getLocation());
+                        URL url = BundleCache.getSecureAction().createURL(null, getLocation(), null);
                         URLConnection conn = url.openConnection();
 
                         // Support for http proxy authentication.

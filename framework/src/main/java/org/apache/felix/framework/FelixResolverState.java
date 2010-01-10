@@ -18,6 +18,7 @@
  */
 package org.apache.felix.framework;
 
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IRequirement;
 import org.apache.felix.moduleloader.IWire;
+import org.osgi.framework.BundlePermission;
 import org.osgi.framework.Constants;
 import org.osgi.framework.PackagePermission;
 import org.osgi.framework.Version;
@@ -294,6 +296,15 @@ public class FelixResolverState implements Resolver.ResolverState
 
         // Create a list of all matching hosts for this fragment.
         List matchingHosts = new ArrayList();
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null)
+        {
+            if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(new BundlePermission(
+                fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
+            {
+                return matchingHosts;
+            }
+        }
         for (int hostIdx = 0; (hostReq != null) && (hostIdx < m_moduleList.size()); hostIdx++)
         {
             IModule host = (IModule) m_moduleList.get(hostIdx);
@@ -314,6 +325,15 @@ public class FelixResolverState implements Resolver.ResolverState
             if (hostCap == null)
             {
                 continue;
+            }
+            
+            if (sm != null)
+            {
+                if (!((BundleProtectionDomain) host.getSecurityContext()).impliesDirect(new BundlePermission(host.getSymbolicName(), 
+                    BundlePermission.HOST)))
+                {
+                    continue;
+                }
             }
 
             matchingHosts.add(hostCap);
@@ -633,6 +653,14 @@ public class FelixResolverState implements Resolver.ResolverState
         // If we have a host capability, then loop through all fragments trying to
         // find ones that match.
         List fragmentList = new ArrayList();
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null)
+        {
+            if (!((BundleProtectionDomain) host.getSecurityContext()).impliesDirect(new BundlePermission(host.getSymbolicName(), BundlePermission.HOST)))
+            {
+                return fragmentList;
+            }
+        }
         for (Iterator it = m_fragmentMap.entrySet().iterator(); (hostCap != null) && it.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) it.next();
@@ -652,7 +680,14 @@ public class FelixResolverState implements Resolver.ResolverState
             {
                 continue;
             }
-
+            
+            if (sm != null)
+            {
+                if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(new BundlePermission(fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
+                {
+                    continue;
+                }
+            }
             IRequirement hostReq = getFragmentHostRequirement(fragment);
 
             // If we have a host requirement, then loop through each host and
@@ -880,7 +915,7 @@ public class FelixResolverState implements Resolver.ResolverState
 //dumpPackageIndex(m_resolvedPkgIndex);
     }
 
-    public synchronized List getResolvedCandidates(IRequirement req)
+    public synchronized List getResolvedCandidates(IRequirement req, IModule reqModule)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
@@ -896,20 +931,24 @@ public class FelixResolverState implements Resolver.ResolverState
                 ICapability cap = (ICapability) capList.get(capIdx);
                 if (req.isSatisfied(cap))
                 {
-// TODO: RB - Is this permission check correct.
-                    if ((System.getSecurityManager() != null) &&
-                        !((BundleProtectionDomain) cap.getModule().getSecurityContext())
-                            .impliesDirect(new PackagePermission(pkgName, PackagePermission.EXPORT)))
+                    if (System.getSecurityManager() != null)
                     {
-                        m_logger.log(Logger.LOG_DEBUG,
-                            "PackagePermission.EXPORT denied for "
-                            + pkgName
-                            + "from " + cap.getModule().getId());
+                        if (reqModule != ((ICapability) capList.get(capIdx)).getModule())
+                        {
+                            if ((!((BundleProtectionDomain)((ICapability) 
+                                capList.get(capIdx)).getModule().getSecurityContext()).impliesDirect(
+                                new PackagePermission(((Requirement) req).getTargetName(), PackagePermission.EXPORTONLY))) ||
+                                !((reqModule == null) ||
+                                ((BundleProtectionDomain) reqModule.getSecurityContext()).impliesDirect(
+                                new PackagePermission(((Requirement) req).getTargetName(), ((ICapability) 
+                                capList.get(capIdx)).getModule().getBundle(),PackagePermission.IMPORT))
+                                ))
+                            {
+                                continue;
+                            }
+                        }
                     }
-                    else
-                    {
-                        candidates.add(cap);
-                    }
+                    candidates.add(cap);
                 }
             }
         }
@@ -926,23 +965,33 @@ public class FelixResolverState implements Resolver.ResolverState
                     ICapability cap = (ICapability) caps.get(capIdx);
                     if (req.isSatisfied(cap))
                     {
-// TODO: RB - Is this permission check correct.
-                        if (cap.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-                            (System.getSecurityManager() != null) &&
-                            !((BundleProtectionDomain) module.getSecurityContext()).impliesDirect(
-                                new PackagePermission(
-                                    (String) cap.getProperties().get(ICapability.PACKAGE_PROPERTY),
-                                    PackagePermission.EXPORT)))
+                        if (System.getSecurityManager() != null)
                         {
-                            m_logger.log(Logger.LOG_DEBUG,
-                                "PackagePermission.EXPORT denied for "
-                                + cap.getProperties().get(ICapability.PACKAGE_PROPERTY)
-                                + "from " + module.getId());
+                            if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) && (
+                                !((BundleProtectionDomain) cap.getModule().getSecurityContext()).impliesDirect(
+                                new PackagePermission((String) cap.getProperties().get(ICapability.PACKAGE_PROPERTY), PackagePermission.EXPORTONLY)) ||
+                                !((reqModule == null) ||
+                                ((BundleProtectionDomain) reqModule.getSecurityContext()).impliesDirect(
+                                new PackagePermission((String) cap.getProperties().get(ICapability.PACKAGE_PROPERTY), cap.getModule().getBundle(),PackagePermission.IMPORT))
+                                )))
+                            {
+                                if (reqModule != cap.getModule())
+                                {
+                                    continue;
+                                }
+                            }
+                            if (req.getNamespace().equals(ICapability.MODULE_NAMESPACE) && (
+                                !((BundleProtectionDomain) cap.getModule().getSecurityContext()).impliesDirect(
+                                new BundlePermission(cap.getModule().getSymbolicName(), BundlePermission.PROVIDE)) ||
+                                !((reqModule == null) ||
+                                ((BundleProtectionDomain) reqModule.getSecurityContext()).impliesDirect(
+                                new BundlePermission(reqModule.getSymbolicName(), BundlePermission.REQUIRE))
+                                )))
+                            {
+                                continue;
+                            }
                         }
-                        else
-                        {
-                            candidates.add(cap);
-                        }
+                        candidates.add(cap);
                     }
                 }
             }
@@ -951,7 +1000,7 @@ public class FelixResolverState implements Resolver.ResolverState
         return candidates;
     }
 
-    public synchronized List getUnresolvedCandidates(IRequirement req)
+    public synchronized List getUnresolvedCandidates(IRequirement req, IModule reqModule)
     {
         // Get all matching unresolved capabilities.
         List candidates = new ArrayList();
@@ -965,6 +1014,23 @@ public class FelixResolverState implements Resolver.ResolverState
                 // the unresolved candidate to the list.
                 if (req.isSatisfied((ICapability) capList.get(capIdx)))
                 {
+                    if (System.getSecurityManager() != null)
+                    {
+                        if (reqModule != ((ICapability) capList.get(capIdx)).getModule())
+                        {
+                            if (!((BundleProtectionDomain)((ICapability) 
+                                capList.get(capIdx)).getModule().getSecurityContext()).impliesDirect(
+                                new PackagePermission(((Requirement) req).getTargetName(), PackagePermission.EXPORTONLY)) ||
+                                !((reqModule == null) ||
+                                ((BundleProtectionDomain) reqModule.getSecurityContext()).impliesDirect(
+                                new PackagePermission(((Requirement) req).getTargetName(), ((ICapability) 
+                                capList.get(capIdx)).getModule().getBundle(),PackagePermission.IMPORT))
+                                ))
+                            {
+                                continue;
+                            }
+                        }
+                    }
                     candidates.add(capList.get(capIdx));
                 }
             }
@@ -980,6 +1046,32 @@ public class FelixResolverState implements Resolver.ResolverState
                 // the unresolved candidate to the list.
                 if ((cap != null) && !modules[modIdx].isResolved())
                 {
+                    if (System.getSecurityManager() != null)
+                    {
+                        if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) && (
+                            !((BundleProtectionDomain) cap.getModule().getSecurityContext()).impliesDirect(
+                            new PackagePermission((String) cap.getProperties().get(ICapability.PACKAGE_PROPERTY), PackagePermission.EXPORTONLY)) ||
+                            !((reqModule == null) ||
+                            ((BundleProtectionDomain) reqModule.getSecurityContext()).impliesDirect(
+                            new PackagePermission((String) cap.getProperties().get(ICapability.PACKAGE_PROPERTY), cap.getModule().getBundle(),PackagePermission.IMPORT))
+                            )))
+                        {
+                            if (reqModule != cap.getModule())
+                            {
+                                continue;
+                            }
+                        }
+                        if (req.getNamespace().equals(ICapability.MODULE_NAMESPACE) && (
+                                !((BundleProtectionDomain) cap.getModule().getSecurityContext()).impliesDirect(
+                                new BundlePermission(cap.getModule().getSymbolicName(), BundlePermission.PROVIDE)) ||
+                                !((reqModule == null) ||
+                                ((BundleProtectionDomain) reqModule.getSecurityContext()).impliesDirect(
+                                new BundlePermission(reqModule.getSymbolicName(), BundlePermission.REQUIRE))
+                                )))
+                            {
+                                continue;
+                            }
+                    }
                     candidates.add(cap);
                 }
             }

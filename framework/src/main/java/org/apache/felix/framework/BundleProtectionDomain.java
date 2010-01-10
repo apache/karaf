@@ -26,24 +26,39 @@ import java.security.Permission;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 
+import org.apache.felix.moduleloader.IModule;
+
 public class BundleProtectionDomain extends ProtectionDomain
 {
     private final WeakReference m_felix;
     private final WeakReference m_bundle;
     private final int m_hashCode;
     private final String m_toString;
+    private final WeakReference m_module;
 
     // TODO: SECURITY - This should probably take a module, not a bundle.
     BundleProtectionDomain(Felix felix, BundleImpl bundle)
         throws MalformedURLException
     {
-        super(new CodeSource(new URL(new URL(null, "location:", 
-            new FakeURLStreamHandler()), bundle._getLocation(),
-            new FakeURLStreamHandler()), (Certificate[]) null), null);
+        super(
+            new CodeSource(
+                Felix.m_secureAction.createURL(
+                    Felix.m_secureAction.createURL(null, "location:", new FakeURLStreamHandler()), 
+                    bundle._getLocation(),
+                    new FakeURLStreamHandler()
+                    ), 
+                (Certificate[]) null), 
+            null);
         m_felix = new WeakReference(felix);
         m_bundle = new WeakReference(bundle);
+        m_module = new WeakReference(bundle.getCurrentModule());
         m_hashCode = bundle.hashCode();
         m_toString = "[" + bundle + "]";
+    }
+
+    IModule getModule() 
+    {
+        return (IModule) m_module.get();
     }
 
     public boolean implies(Permission permission)

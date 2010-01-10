@@ -819,89 +819,75 @@ public class EventDispatcher
         // one of the service interfaces; the objectClass property
         // of the service stores its service interfaces.
         ServiceReference ref = ((ServiceEvent) event).getServiceReference();
-        String[] objectClass = (String[]) ref.getProperty(Constants.OBJECTCLASS);
 
-        // On the safe side, if there is no objectClass property
-        // then ignore event altogether.
-        if (objectClass != null)
+        boolean hasPermission = true;
+        Object sm = System.getSecurityManager();
+        if ((acc != null) && (sm != null))
         {
-            boolean hasPermission = false;
-
-            Object sm = System.getSecurityManager();
-            if ((acc != null) && (sm != null))
+            try
             {
-                for (int i = 0;
-                    !hasPermission && (i < objectClass.length);
-                    i++)
+                ServicePermission perm =
+                    new ServicePermission(
+                        ref, ServicePermission.GET);
+                ((SecurityManager) sm).checkPermission(perm, acc);
+            }
+            catch (Exception ex)
+            {
+                hasPermission = false;
+            }
+        }
+
+        if (hasPermission)
+        {
+            // Dispatch according to the filter.
+            boolean matched = (filter == null)
+                || filter.match(((ServiceEvent) event).getServiceReference());
+
+            if (matched)
+            {
+                if ((l instanceof AllServiceListener) ||
+                    Util.isServiceAssignable(bundle, ((ServiceEvent) event).getServiceReference()))
                 {
-                    try
+                    if (System.getSecurityManager() != null)
                     {
-                        ServicePermission perm =
-                            new ServicePermission(
-                                objectClass[i], ServicePermission.GET);
-                        ((SecurityManager) sm).checkPermission(perm, acc);
-                        hasPermission = true;
+                        AccessController.doPrivileged(new PrivilegedAction() 
+                        {
+                            public Object run()
+                            {
+                                ((ServiceListener) l).serviceChanged((ServiceEvent) event);
+                                return null;
+                            }
+                        });
                     }
-                    catch (Exception ex)
+                    else
                     {
+                        ((ServiceListener) l).serviceChanged((ServiceEvent) event);
                     }
                 }
             }
-            else
+            // We need to send an MODIFIED_ENDMATCH event if the listener
+            // matched previously.
+            else if (((ServiceEvent) event).getType() == ServiceEvent.MODIFIED)
             {
-                hasPermission = true;
-            }
-
-            if (hasPermission)
-            {
-                // Dispatch according to the filter.
-                boolean matched = (filter == null)
-                    || filter.match(((ServiceEvent) event).getServiceReference());
-
-                if (matched)
+                if (filter.match(oldProps))
                 {
-                    if ((l instanceof AllServiceListener) ||
-                        Util.isServiceAssignable(bundle, ((ServiceEvent) event).getServiceReference()))
+                    final ServiceEvent se = new ServiceEvent(
+                        ServiceEvent.MODIFIED_ENDMATCH,
+                        ((ServiceEvent) event).getServiceReference());
+                    if (System.getSecurityManager() != null)
                     {
-                        if (System.getSecurityManager() != null)
+                        AccessController.doPrivileged(new PrivilegedAction() 
                         {
-                            AccessController.doPrivileged(new PrivilegedAction() {
-                                public Object run()
-                                {
-                                    ((ServiceListener) l).serviceChanged((ServiceEvent) event);
-                                    return null;
-                                }
-                            });
-                        }
-                        else
-                        {
-                            ((ServiceListener) l).serviceChanged((ServiceEvent) event);
-                        }
+                            public Object run()
+                            {
+                                ((ServiceListener) l).serviceChanged(se);
+                                return null;
+                            }
+                        });
                     }
-                }
-                // We need to send an MODIFIED_ENDMATCH event if the listener
-                // matched previously.
-                else if (((ServiceEvent) event).getType() == ServiceEvent.MODIFIED)
-                {
-                    if (filter.match(oldProps))
+                    else
                     {
-                        final ServiceEvent se = new ServiceEvent(
-                            ServiceEvent.MODIFIED_ENDMATCH,
-                            ((ServiceEvent) event).getServiceReference());
-                        if (System.getSecurityManager() != null)
-                        {
-                            AccessController.doPrivileged(new PrivilegedAction() {
-                                public Object run()
-                                {
-                                    ((ServiceListener) l).serviceChanged(se);
-                                    return null;
-                                }
-                            });
-                        }
-                        else
-                        {
-                            ((ServiceListener) l).serviceChanged(se);
-                        }
+                        ((ServiceListener) l).serviceChanged(se);
                     }
                 }
             }

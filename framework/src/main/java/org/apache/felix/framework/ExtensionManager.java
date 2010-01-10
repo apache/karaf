@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.security.AccessControlException;
 import java.security.AllPermission;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -277,8 +278,16 @@ class ExtensionManager extends URLStreamHandler implements IContent
         Object sm = System.getSecurityManager();
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(
-                new AdminPermission(bundle, AdminPermission.EXTENSIONLIFECYCLE));
+            try
+            {
+                ((SecurityManager) sm).checkPermission(
+                    new AdminPermission(bundle, AdminPermission.EXTENSIONLIFECYCLE));
+            }
+            catch (SecurityException ex)
+            {
+                // TODO: security - we need to throw this exception because of the 4.2.0 ct
+                throw new AccessControlException(ex.getMessage());
+            }
         }
 
         if (!((BundleProtectionDomain) bundle.getProtectionDomain()).impliesDirect(new AllPermission()))
@@ -374,7 +383,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
 // TODO: KARL - This is kind of hacky, can we improve it?
                 felix.m_activatorList.add(activator);
 
-                BundleContext context = felix.getBundleContext();
+                BundleContext context = felix._getBundleContext();
 
                 bundle.setBundleContext(context);
 

@@ -157,8 +157,8 @@ public class Resolver
             {
                 // Get "resolved" and "unresolved" candidates and put
                 // the "resolved" candidates first.
-                List candidates = state.getResolvedCandidates(target);
-                candidates.addAll(state.getUnresolvedCandidates(target));
+                List candidates = state.getResolvedCandidates(target, importer);
+                candidates.addAll(state.getUnresolvedCandidates(target, importer));
 
                 // Take the first candidate that can resolve.
                 for (int candIdx = 0;
@@ -381,8 +381,8 @@ public class Resolver
             // package maps. The "resolved" candidates have higher priority
             // than "unresolved" ones, so put the "resolved" candidates
             // at the front of the list of candidates.
-            List candidates = state.getResolvedCandidates(reqs[reqIdx]);
-            candidates.addAll(state.getUnresolvedCandidates(reqs[reqIdx]));
+            List candidates = state.getResolvedCandidates(reqs[reqIdx], targetModule);
+            candidates.addAll(state.getUnresolvedCandidates(reqs[reqIdx], targetModule));
 
             // If we have candidates, then we need to recursively populate
             // the resolver map with each of them.
@@ -1731,7 +1731,7 @@ public class Resolver
     public static interface ResolverState
     {
         IModule[] getModules();
-        List getResolvedCandidates(IRequirement req);
-        List getUnresolvedCandidates(IRequirement req);
+        List getResolvedCandidates(IRequirement req, IModule reqModule);
+        List getUnresolvedCandidates(IRequirement req, IModule reqModule);
     }
 }

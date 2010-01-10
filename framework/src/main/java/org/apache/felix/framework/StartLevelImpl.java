@@ -157,7 +157,7 @@ public class StartLevelImpl implements StartLevel, Runnable
         if (sm != null)
         {
             ((SecurityManager) sm).checkPermission(
-                new AdminPermission(bundle, AdminPermission.STARTLEVEL));
+                new AdminPermission(bundle, AdminPermission.EXECUTE));
         }
         
         if (bundle.getBundleId() == 0)

@@ -40,7 +40,7 @@ class BundleImpl implements Bundle
     private volatile int m_state;
     private boolean m_useDeclaredActivationPolicy;
     private BundleActivator m_activator = null;
-    private BundleContext m_context = null;
+    private volatile BundleContext m_context = null;
     private final Map m_cachedHeaders = new HashMap();
     private long m_cachedHeadersTimestamp;
 
@@ -181,13 +181,19 @@ class BundleImpl implements Bundle
         m_activator = activator;
     }
 
-    public synchronized BundleContext getBundleContext()
+    public BundleContext getBundleContext()
     {
-// TODO: SECURITY - We need a security check here.
+        Object sm = System.getSecurityManager();
+
+        if (sm != null)
+        {
+           ((SecurityManager) sm).checkPermission(new AdminPermission(this, AdminPermission.CONTEXT));
+        }
+
         return m_context;
     }
 
-    synchronized void setBundleContext(BundleContext context)
+    void setBundleContext(BundleContext context)
     {
         m_context = context;
     }
@@ -620,29 +626,16 @@ class BundleImpl implements Bundle
 
             for (int i = 0; i < refs.length; i++)
             {
-                String[] objectClass = (String[]) refs[i].getProperty(
-                    Constants.OBJECTCLASS);
-
-                if (objectClass == null)
+                try
                 {
-                    continue;
+                    ((SecurityManager) sm).checkPermission(new ServicePermission(
+                        refs[i], ServicePermission.GET));
+
+                    result.add(refs[i]);
                 }
-
-                for (int j = 0; j < objectClass.length; j++)
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        ((SecurityManager) sm).checkPermission(new ServicePermission(
-                            objectClass[j], ServicePermission.GET));
-
-                        result.add(refs[i]);
-
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        // Silently ignore.
-                    }
+                    // Silently ignore.
                 }
             }
 
@@ -676,29 +669,16 @@ class BundleImpl implements Bundle
 
             for (int i = 0; i < refs.length; i++)
             {
-                String[] objectClass = (String[]) refs[i].getProperty(
-                    Constants.OBJECTCLASS);
-
-                if (objectClass == null)
+                try
                 {
-                    continue;
+                    ((SecurityManager) sm).checkPermission(new ServicePermission(
+                        refs[i], ServicePermission.GET));
+
+                    result.add(refs[i]);
                 }
-
-                for (int j = 0; j < objectClass.length; j++)
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        ((SecurityManager) sm).checkPermission(new ServicePermission(
-                            objectClass[j], ServicePermission.GET));
-
-                        result.add(refs[i]);
-
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        // Silently ignore.
-                    }
+                    // Silently ignore.
                 }
             }
 
@@ -864,12 +844,7 @@ class BundleImpl implements Bundle
     public Map getSignerCertificates(int signersType)
     {
         // TODO: SECURITY - This needs to be adapted to our security mechanisms.
-        return new HashMap();
-    }
-
-    Object getSignerMatcher()
-    {
-        return getFramework().getSignerMatcher(this);
+        return (Map) getFramework().getSignerMatcher(this, signersType);
     }
 
     public Class loadClass(String name) throws ClassNotFoundException
@@ -1061,8 +1036,16 @@ class BundleImpl implements Bundle
     {
         // This operation will increase the revision count for the bundle.
         m_archive.revise(location, is);
-        IModule module = createModule();
-        addModule(module);
+        try
+        {
+            IModule module = createModule();
+            addModule(module);
+        }
+        catch (Exception ex)
+        {
+            m_archive.rollbackRevise();
+            throw ex;
+        }
     }
 
     synchronized boolean rollbackRevise() throws Exception
@@ -1076,13 +1059,7 @@ class BundleImpl implements Bundle
     // be created, which is the normal case.
     synchronized void addModule(IModule module) throws Exception
     {
-        SecurityProvider sp = getFramework().getSecurityProvider();
-        if (sp != null)
-        {
-            // TODO: Security
-            // sp.checkBundle(this);
-        }
-
+        IModule[] backup = m_modules;
         IModule[] dest = new IModule[m_modules.length + 1];
         System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
         dest[m_modules.length] = module;
@@ -1091,6 +1068,20 @@ class BundleImpl implements Bundle
         // Set protection domain after adding the module to the bundle,
         // since this requires that the bundle has a module.
         module.setSecurityContext(new BundleProtectionDomain(getFramework(), this));
+
+        SecurityProvider sp = getFramework().getSecurityProvider();
+        if ((sp != null) && (System.getSecurityManager() != null))
+        {
+            try
+            {
+                sp.checkBundle(this);
+            }
+            catch (Exception ex) 
+            {
+                m_modules = backup;
+                throw ex;
+            }
+        }
 
         // TODO: REFACTOR - consider moving ModuleImpl into the framework package
         // so we can null module capabilities for extension bundles so we don't
@@ -1151,11 +1142,6 @@ class BundleImpl implements Bundle
         return module;
     }
 
-    void setProtectionDomain(ProtectionDomain pd)
-    {
-        getCurrentModule().setSecurityContext(pd);
-    }
-
     synchronized ProtectionDomain getProtectionDomain()
     {
         ProtectionDomain pd = null;
@@ -1207,5 +1193,10 @@ class BundleImpl implements Bundle
         {
             m_lockThread = null;
         }
+    }
+
+    BundleContext _getBundleContext() 
+    {
+        return m_context;
     }
 }

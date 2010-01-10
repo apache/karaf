@@ -23,6 +23,9 @@ import java.lang.reflect.Constructor;
 import java.net.*;
 
 import org.apache.felix.framework.util.SecureAction;
+import org.apache.felix.framework.util.Util;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
 
 class URLHandlersBundleStreamHandler extends URLStreamHandler
 {
@@ -43,6 +46,10 @@ class URLHandlersBundleStreamHandler extends URLStreamHandler
 
     protected synchronized URLConnection openConnection(URL url) throws IOException
     {
+        if (!"felix".equals(url.getAuthority()))
+        {
+            checkPermission(url);
+        }
         if (m_framework != null)
         {
             return new URLHandlersBundleURLConnection(url, m_framework);
@@ -73,5 +80,45 @@ class URLHandlersBundleStreamHandler extends URLStreamHandler
             }
         }
         throw new IOException("No framework context found");
+    }
+
+    protected void parseURL(URL u, String spec, int start, int limit) 
+    {
+        super.parseURL(u, spec, start, limit);
+
+        if (checkPermission(u))
+        {
+            super.setURL(u, u.getProtocol(), u.getHost(), u.getPort(), "felix", u.getUserInfo(), u.getPath(), u.getQuery(), u.getRef());
+        }
+    }
+    
+    private boolean checkPermission(URL u)
+    {
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null)
+        {
+            Object framework = m_framework;
+            if (framework == null)
+            {
+                framework = URLHandlers.getFrameworkFromContext();
+                if (!(framework instanceof Felix))
+                {
+                    return false;
+                }
+            }
+            Felix felix = (Felix) framework;
+            long bundleId = Util.getBundleIdFromModuleId(u.getHost());
+            Bundle bundle = felix.getBundle(bundleId);
+            if (bundle != null)
+            {
+                sm.checkPermission(new AdminPermission(bundle, AdminPermission.RESOURCE));
+                return true;
+            }
+        }
+        else
+        {
+            return true;
+        }
+        return false;
     }
 }

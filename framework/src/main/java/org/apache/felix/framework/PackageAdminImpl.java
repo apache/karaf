@@ -246,7 +246,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
      * @param bundles array of bundles to refresh or <tt>null</tt> to refresh
      *                any bundles in need of refreshing.
     **/
-    public synchronized void refreshPackages(Bundle[] bundles)
+    public void refreshPackages(Bundle[] bundles)
         throws SecurityException
     {
         Object sm = System.getSecurityManager();
@@ -256,21 +256,23 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             ((SecurityManager) sm).checkPermission(
                 new AdminPermission(m_systemBundle, AdminPermission.RESOLVE));
         }
-        
-        // Save our request parameters and notify all.
-        if (m_reqBundles == null)
+        synchronized (this)
         {
-            m_reqBundles = new Bundle[][] { bundles };
+            // Save our request parameters and notify all.
+            if (m_reqBundles == null)
+            {
+                m_reqBundles = new Bundle[][] { bundles };
+            }
+            else
+            {
+                Bundle[][] newReqBundles = new Bundle[m_reqBundles.length + 1][];
+                System.arraycopy(m_reqBundles, 0,
+                    newReqBundles, 0, m_reqBundles.length);
+                newReqBundles[m_reqBundles.length] = bundles;
+                m_reqBundles = newReqBundles;
+            }
+            notifyAll();
         }
-        else
-        {
-            Bundle[][] newReqBundles = new Bundle[m_reqBundles.length + 1][];
-            System.arraycopy(m_reqBundles, 0,
-                newReqBundles, 0, m_reqBundles.length);
-            newReqBundles[m_reqBundles.length] = bundles;
-            m_reqBundles = newReqBundles;
-        }
-        notifyAll();
     }
 
     public boolean resolveBundles(Bundle[] bundles)

@@ -32,7 +32,6 @@ import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
-import org.osgi.framework.BundleReference;
 import org.osgi.framework.hooks.service.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.startlevel.StartLevel;
@@ -120,6 +119,9 @@ public class Felix extends BundleImpl implements Framework
     // Shutdown thread.
     private Thread m_shutdownThread = null;
     private volatile ThreadGate m_shutdownGate = null;
+    
+    // Security Manager created by the framework
+    private SecurityManager m_securityManager = null;
 
     /**
      * <p>
@@ -479,6 +481,46 @@ public class Felix extends BundleImpl implements Framework
             Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
         try
         {
+            String security = (String) m_configMap.get(Constants.FRAMEWORK_SECURITY);
+            if (security != null)
+            {
+                if (System.getSecurityManager() != null)
+                {
+                    throw new SecurityException("SecurityManager already installed");
+                }
+                security = security.trim();
+                if (Constants.FRAMEWORK_SECURITY_OSGI.equalsIgnoreCase(security) || (security.length() == 0))
+                {
+                    // TODO: security - we only need our own security manager to convert the exceptions
+                    //       because the 4.2.0 ct does expect them like this in one case. 
+                    System.setSecurityManager(m_securityManager = new SecurityManager()
+                    {
+                        public void checkPermission(Permission perm) 
+                        {
+                            try
+                            {
+                                super.checkPermission(perm);
+                            }
+                            catch (AccessControlException ex)
+                            {
+                                throw new SecurityException(ex);
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    try 
+                    {
+                        System.setSecurityManager(m_securityManager = 
+                            (SecurityManager) Class.forName(security).newInstance());
+                    } 
+                    catch (Throwable t)
+                    {
+                        throw new SecurityException("Unable to install custom SecurityManager: " + security, t); 
+                    }
+                }
+            }
             if ((getState() == Bundle.INSTALLED) || (getState() == Bundle.RESOLVED))
             {
                 // Get any system bundle activators.
@@ -640,7 +682,7 @@ ex.printStackTrace();
                 try
                 {
                     Felix.m_secureAction.startActivator(
-                        getActivator(), getBundleContext());
+                        getActivator(), _getBundleContext());
                 }
                 catch (Throwable ex)
                 {
@@ -651,7 +693,7 @@ ex.printStackTrace();
 
                 // Now that the system bundle is successfully created we can give
                 // its bundle context to the logger so that it can track log services.
-                m_logger.setSystemBundleContext(getBundleContext());
+                m_logger.setSystemBundleContext(_getBundleContext());
             }
         }
         finally
@@ -1712,7 +1754,7 @@ ex.printStackTrace();
                 if (bundle.getActivator() != null)
                 {
                     m_secureAction.startActivator(
-                        bundle.getActivator(), bundle.getBundleContext());
+                        bundle.getActivator(), bundle._getBundleContext());
                 }
 
                 setBundleStateAndNotify(bundle, Bundle.ACTIVE);
@@ -1742,7 +1784,7 @@ ex.printStackTrace();
                 m_dispatcher.removeListeners(bundle);
 
                 // Clean up the bundle context.
-                ((BundleContextImpl) bundle.getBundleContext()).invalidate();
+                ((BundleContextImpl) bundle._getBundleContext()).invalidate();
                 bundle.setBundleContext(null);
 
                 // The spec says to expect BundleException or
@@ -1750,10 +1792,6 @@ ex.printStackTrace();
                 if (th instanceof BundleException)
                 {
                     throw (BundleException) th;
-                }
-                else if (th instanceof SecurityException)
-                {
-                    throw (SecurityException) th;
                 }
                 else if ((System.getSecurityManager() != null) &&
                     (th instanceof java.security.PrivilegedActionException))
@@ -1969,13 +2007,14 @@ ex.printStackTrace();
             // If update failed, rethrow exception.
             if (rethrow != null)
             {
-                if ((System.getSecurityManager() != null) &&
-                    (rethrow instanceof SecurityException))
+                if (rethrow instanceof AccessControlException)
                 {
-                    throw (SecurityException) rethrow;
+                    throw (AccessControlException) rethrow;
                 }
-
-                throw new BundleException("Update of bundle " + bundle + " failed.", rethrow);
+                else
+                {
+                    throw new BundleException("Update of bundle " + bundle + " failed.", rethrow);
+                }
             }
         }
         finally
@@ -2082,7 +2121,7 @@ ex.printStackTrace();
                 {
                     if (bundle.getActivator() != null)
                     {
-                        m_secureAction.stopActivator(bundle.getActivator(), bundle.getBundleContext());
+                        m_secureAction.stopActivator(bundle.getActivator(), bundle._getBundleContext());
                     }
                 }
                 catch (Throwable th)
@@ -2110,7 +2149,7 @@ ex.printStackTrace();
                 m_dispatcher.removeListeners(bundle);
 
                 // Clean up the bundle context.
-                ((BundleContextImpl) bundle.getBundleContext()).invalidate();
+                ((BundleContextImpl) bundle._getBundleContext()).invalidate();
                 bundle.setBundleContext(null);
 
                 setBundleStateAndNotify(bundle, Bundle.RESOLVED);
@@ -2127,10 +2166,6 @@ ex.printStackTrace();
                 if (rethrow instanceof BundleException)
                 {
                     throw (BundleException) rethrow;
-                }
-                else if (rethrow instanceof SecurityException)
-                {
-                    throw (SecurityException) rethrow;
                 }
                 else if ((System.getSecurityManager() != null) &&
                     (rethrow instanceof java.security.PrivilegedActionException))
@@ -2197,7 +2232,7 @@ ex.printStackTrace();
             BundleImpl target = null;
             synchronized (m_installedBundleLock_Priority2)
             {
-                target = (BundleImpl) m_installedBundleMap.remove(bundle.getLocation());
+                target = (BundleImpl) m_installedBundleMap.remove(bundle._getLocation());
                 m_installedBundleIndex.remove(new Long(target.getBundleId()));
             }
 
@@ -2431,17 +2466,13 @@ ex.printStackTrace();
                     }
                 }
 
-                if ((System.getSecurityManager() != null) &&
-                    (ex instanceof SecurityException))
-                {
-                    throw (SecurityException) ex;
-                }
-
-                ex.printStackTrace();
-
                 if (ex instanceof BundleException)
                 {
                     throw (BundleException) ex;
+                }
+                else if (ex instanceof AccessControlException)
+                {
+                    throw (AccessControlException) ex;
                 }
                 else
                 {
@@ -2595,7 +2626,7 @@ ex.printStackTrace();
         if (oldFilter != null)
         {
             final Collection removed = Collections.singleton(
-                new ListenerHookInfoImpl(bundle.getBundleContext(), l, oldFilter.toString(), true));
+                new ListenerHookInfoImpl(((BundleImpl) bundle)._getBundleContext(), l, oldFilter.toString(), true));
             InvokeHookCallback removedCallback = new ListenerHookRemovedCallback(removed);
             for (int i = 0; i < listenerHooks.size(); i++)
             {
@@ -2605,7 +2636,7 @@ ex.printStackTrace();
 
         // Invoke the ListenerHook.added() on all hooks.
         final Collection added = Collections.singleton(
-            new ListenerHookInfoImpl(bundle.getBundleContext(), l, f, false));
+            new ListenerHookInfoImpl(((BundleImpl) bundle)._getBundleContext(), l, f, false));
         InvokeHookCallback addedCallback = new InvokeHookCallback()
         {
             public void invokeHook(Object hook)
@@ -2802,7 +2833,7 @@ ex.printStackTrace();
         {
             public void invokeHook(Object hook)
             {
-                ((FindHook) hook).find(bundle.getBundleContext(),
+                ((FindHook) hook).find(bundle._getBundleContext(),
                     className,
                     expr,
                     !checkAssignable,
@@ -2851,26 +2882,14 @@ ex.printStackTrace();
 
         for (int i = 0; i < refs.length; i++)
         {
-            String[] objectClass = (String[]) refs[i].getProperty(Constants.OBJECTCLASS);
-
-            if (objectClass == null)
+            try
             {
-                continue;
+                ((SecurityManager) sm).checkPermission(new ServicePermission(refs[i], ServicePermission.GET));
+                result.add(refs[i]);
             }
-
-            for (int j = 0; j < objectClass.length; j++)
+            catch (Exception ex)
             {
-                try
-                {
-                    ((SecurityManager) sm).checkPermission(new ServicePermission(
-                        objectClass[j], ServicePermission.GET));
-                    result.add(refs[i]);
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    // Ignore, since we are just testing permission.
-                }
+                // Ignore, since we are just testing permission.
             }
         }
 
@@ -2972,7 +2991,7 @@ ex.printStackTrace();
                 new Requirement(
                     ICapability.PACKAGE_NAMESPACE,
                     null,
-                    new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }));
+                    new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }), null);
 
         if (exports != null)
         {
@@ -3104,7 +3123,7 @@ ex.printStackTrace();
                             new Requirement(
                                 ICapability.PACKAGE_NAMESPACE,
                                 null,
-                                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }));
+                                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }), null);
 
                         // Search through the current providers to find the target module.
                         for (int i = 0; (resolvedCaps != null) && (i < resolvedCaps.size()); i++)
@@ -3184,12 +3203,7 @@ ex.printStackTrace();
         }
 
         // Return the results.
-        if (list.size() > 0)
-        {
-            return (Bundle[]) list.toArray(new Bundle[list.size()]);
-        }
-
-        return null;
+        return (Bundle[]) list.toArray(new Bundle[list.size()]);
     }
 
     boolean resolveBundles(Bundle[] targets)
@@ -3489,13 +3503,13 @@ ex.printStackTrace();
         m_securityProvider = securityProvider;
     }
 
-    Object getSignerMatcher(BundleImpl bundle)
+    Object getSignerMatcher(BundleImpl bundle, int signersType)
     {
         if ((bundle != this) && (m_securityProvider != null))
         {
-            return m_securityProvider.getSignerMatcher(bundle);
+            return m_securityProvider.getSignerMatcher(bundle, signersType);
         }
-        return null;
+        return new HashMap();
     }
 
     boolean impliesBundlePermission(BundleProtectionDomain bundleProtectionDomain, Permission permission, boolean direct)
@@ -3820,55 +3834,6 @@ ex.printStackTrace();
                         return;
                     }
 
-                    // If a security manager is installed, then check for permission
-                    // to import the necessary packages.
-                    if (System.getSecurityManager() != null)
-                    {
-                        BundleProtectionDomain pd = (BundleProtectionDomain)
-                            bundle.getProtectionDomain();
-
-/*
- TODO: SECURITY - We need to fix this import check by looking at the wire
-            associated with it, not the import since we don't know the
-            package name associated with the import since it is a filter.
-
-                    IRequirement[] imports = bundle.getInfo().getCurrentModule().getRequirements();
-                    for (int i = 0; i < imports.length; i++)
-                    {
-                        if (imports[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                        {
-                            PackagePermission perm = new PackagePermission(
-                                imports[i].???,
-                                PackagePermission.IMPORT);
-
-                            if (!pd.impliesDirect(perm))
-                            {
-                                throw new java.security.AccessControlException(
-                                    "PackagePermission.IMPORT denied for import: " +
-                                    imports[i].getName(), perm);
-                            }
-                        }
-                    }
-*/
-                        // Check export permission for all exports of the current module.
-                        ICapability[] exports = rootModule.getCapabilities();
-                        for (int i = 0; i < exports.length; i++)
-                        {
-                            if (exports[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                            {
-                                PackagePermission perm = new PackagePermission(
-                                    (String) exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), PackagePermission.EXPORT);
-
-                                if (!pd.impliesDirect(perm))
-                                {
-                                    throw new java.security.AccessControlException(
-                                        "PackagePermission.EXPORT denied for export: " +
-                                        exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), perm);
-                                }
-                            }
-                        }
-                    }
-
                     // If the root module to resolve is a fragment, then we
                     // must find a host to attach it to and resolve the host
                     // instead, since the underlying resolver doesn't know
@@ -3966,14 +3931,14 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             return candidateWire;
         }
 
-        public synchronized List getResolvedCandidates(IRequirement req)
+        public synchronized List getResolvedCandidates(IRequirement req, IModule reqModule)
         {
-            return m_resolverState.getResolvedCandidates(req);
+            return m_resolverState.getResolvedCandidates(req, reqModule);
         }
 
-        public synchronized List getUnresolvedCandidates(IRequirement req)
+        public synchronized List getUnresolvedCandidates(IRequirement req, IModule reqModule)
         {
-            return m_resolverState.getUnresolvedCandidates(req);
+            return m_resolverState.getUnresolvedCandidates(req, reqModule);
         }
 
         private void markResolvedModules(Map resolvedModuleWireMap)
@@ -4185,7 +4150,7 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
                 try
                 {
                     Felix.m_secureAction.stopActivator((BundleActivator)
-                        m_activatorList.get(i), getBundleContext());
+                        m_activatorList.get(i), _getBundleContext());
                 }
                 catch (Throwable throwable)
                 {
@@ -4194,6 +4159,12 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
                         "Exception stopping a system bundle activator.",
                         throwable);
                 }
+            }
+
+            if (m_securityManager != null)
+            {
+                System.setSecurityManager(null);
+                m_securityManager = null;
             }
 
             if (m_extensionManager != null)
@@ -4206,7 +4177,7 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             try
             {
                 // Clean up the bundle context.
-                ((BundleContextImpl) getBundleContext()).invalidate();
+                ((BundleContextImpl) _getBundleContext()).invalidate();
                 setBundleContext(null);
 
                 // Set the framework state to resolved and open

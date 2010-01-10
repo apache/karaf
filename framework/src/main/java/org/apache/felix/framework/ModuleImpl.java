@@ -2102,9 +2102,9 @@ public class ModuleImpl implements IModule
         {
             // Try to see if there is an exporter available.
             List exports =
-                resolver.getResolvedCandidates(pkgReq);
+                resolver.getResolvedCandidates(pkgReq, module);
             exports = (exports.size() == 0)
-                ? resolver.getUnresolvedCandidates(pkgReq)
+                ? resolver.getUnresolvedCandidates(pkgReq, module)
                 : exports;
 
             // An exporter might be available, but it may have attributes
@@ -2117,9 +2117,9 @@ public class ModuleImpl implements IModule
                 {
                     IRequirement req = new Requirement(
                         ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-                    exports = resolver.getResolvedCandidates(req);
+                    exports = resolver.getResolvedCandidates(req, module);
                     exports = (exports.size() == 0)
-                        ? resolver.getUnresolvedCandidates(req)
+                        ? resolver.getUnresolvedCandidates(req, module)
                         : exports;
                 }
                 catch (InvalidSyntaxException ex)
@@ -2163,9 +2163,9 @@ public class ModuleImpl implements IModule
             // This should never happen.
         }
         List exports =
-            resolver.getResolvedCandidates(pkgReq);
+            resolver.getResolvedCandidates(pkgReq, module);
         exports = (exports.size() == 0)
-            ? resolver.getUnresolvedCandidates(pkgReq)
+            ? resolver.getUnresolvedCandidates(pkgReq, module)
             : exports;
         if (exports.size() > 0)
         {

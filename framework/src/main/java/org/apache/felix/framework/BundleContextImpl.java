@@ -324,34 +324,7 @@ class BundleContextImpl implements FelixBundleContext
 
         if (sm != null)
         {
-            String[] objectClass = (String[]) ref.getProperty(Constants.OBJECTCLASS);
-
-            if (objectClass == null)
-            {
-                return null;
-            }
-
-            boolean hasPermission = false;
-
-            for (int i = 0;(i < objectClass.length) && !hasPermission;i++)
-            {
-                try
-                {
-                    ((SecurityManager) sm).checkPermission(
-                        new ServicePermission(objectClass[i], ServicePermission.GET));
-
-                    hasPermission = true;
-                }
-                catch (Exception ex)
-                {
-
-                }
-            }
-
-            if (!hasPermission)
-            {
-                throw new SecurityException("No permission");
-            }
+           ((SecurityManager) sm).checkPermission(new ServicePermission(ref, ServicePermission.GET));
         }
 
         return m_felix.getService(m_bundle, ref);
