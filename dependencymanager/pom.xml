@@ -36,7 +36,11 @@
     <module>core</module>
     <module>shell</module>
     <module>compat</module>
+    <module>annotation</module>
+    <module>runtime</module>
     <module>samples</module>
+    <module>samples.annotation</module>
+    <module>test.annotation</module>
     <module>test</module>
   </modules>
 </project>
