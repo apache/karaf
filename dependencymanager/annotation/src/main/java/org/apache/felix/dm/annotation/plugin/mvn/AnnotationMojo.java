@@ -19,6 +19,7 @@
 package org.apache.felix.dm.annotation.plugin.mvn;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -98,10 +99,7 @@ public class AnnotationMojo extends AbstractMojo
                 {
                     jar.putResource(entry.getKey(), entry.getValue());
                 }
-                output = File.createTempFile(getClass().getName(), m_artifactExtension);
-                jar.write(output);
-                jar.close();
-                output.renameTo(target);
+                copy(jar, target);
             }
 
             // Check if some errors have to be logged.
@@ -119,7 +117,7 @@ public class AnnotationMojo extends AbstractMojo
             {
                 for (Iterator<String> e = analyzer.getWarnings().iterator(); e.hasNext();)
                 {
-                    getLog().warn(e.next());
+                    getLog().info(e.next());
                 }
             }
         }
@@ -139,7 +137,7 @@ public class AnnotationMojo extends AbstractMojo
         {
             if (output != null && output.exists())
             {
-                output.delete();
+                //output.delete();
             }
 
             if (jar != null)
@@ -158,5 +156,38 @@ public class AnnotationMojo extends AbstractMojo
         Build build = m_project.getBuild();
         return new File(build.getDirectory() + File.separator + build.getFinalName() + "."
             + m_artifactExtension);
+    }
+
+    /**
+     * Copy the generated jar into our target bundle.
+     * @param jar the jar with the generated component descriptors
+     * @param target our target bundle
+     * @throws MojoExecutionException on any errors
+     * @throws Exception on any error
+     */
+    private void copy(Jar jar, File target) throws MojoExecutionException, Exception
+    {
+        File tmp = new File(getBundleName() + ".tmp");
+        try
+        {
+            if (tmp.exists())
+            {
+                if (! tmp.delete()) {
+                    throw new MojoExecutionException("Could not remove " + tmp);
+                }
+            }
+            jar.write(tmp);
+            jar.close();
+            
+            if (!tmp.renameTo(target))
+            {
+                throw new MojoExecutionException("Could not rename " + tmp + " to " + target);
+            }
+        }
+        finally
+        {
+            jar.close();
+            tmp.delete();
+        }
     }
 }
