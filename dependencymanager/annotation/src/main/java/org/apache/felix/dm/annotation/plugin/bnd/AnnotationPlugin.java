@@ -25,7 +25,7 @@ import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Resource;
 
 /**
- * This class is a BND plugin. It will scans the target bundle for DependencyManager annotations.
+ * This class is a BND plugin. It scans the target bundle and look for DependencyManager annotations.
  * It can be directly used when using ant and can be referenced inside the ".bnd" descriptor, using
  * the "-plugin" parameter.
  */
@@ -35,7 +35,7 @@ public class AnnotationPlugin implements AnalyzerPlugin
      * This plugin is called after analysis of the JAR but before manifest
      * generation. When some DM annotations are found, the plugin will add the corresponding 
      * DM component descriptors under OSGI-INF/ directory. It will also set the  
-     * "DependencyManager-Component" manifest header (which references the descriptors paths).
+     * "DependencyManager-Component" manifest header (which references the descriptor paths).
      * 
      * @param analyzer the object that is used to retrieve classes containing DM annotations.
      * @return true if the classpace has been modified so that the bundle classpath must be reanalyzed

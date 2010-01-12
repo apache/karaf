@@ -81,9 +81,6 @@ import org.osgi.service.log.LogService;
  *    strings := string ( ',' string )*
  *    attributes := string ':' string ( ',' string : string )*
  *    string := [alphanum string]
- * 
- * </pre>
- * </blockquote>
  */
 public class DescriptorParser
 {
@@ -142,7 +139,7 @@ public class DescriptorParser
                     }
                 }
             }
-            
+
             m_logService.log(LogService.LOG_DEBUG, "Parsed " + entry + ": " + toString());
             return entry;
         }
@@ -194,13 +191,14 @@ public class DescriptorParser
             return def;
         }
     }
-    
+
     /**
      * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
      * @param param
      * @return
      */
-    public String[] getStrings(DescriptorParam param) {
+    public String[] getStrings(DescriptorParam param)
+    {
         Object value = m_params.get(param);
         if (value == null)
         {
@@ -229,14 +227,15 @@ public class DescriptorParser
             return def;
         }
     }
-    
+
     /**
      * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
      * @param param
      * @return
      */
     @SuppressWarnings("unchecked")
-    public Dictionary<String, String> getDictionary(DescriptorParam param, Dictionary<String, String> def) {
+    public Dictionary<String, String> getDictionary(DescriptorParam param, Dictionary<String, String> def)
+    {
         Object value = m_params.get(param);
         if (value == null)
         {
@@ -248,19 +247,26 @@ public class DescriptorParser
         }
         return (Dictionary<String, String>) value;
     }
-    
+
     @Override
-    public String toString() {
+    public String toString()
+    {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<DescriptorParam, Object> entry : m_params.entrySet()) {
+        for (Map.Entry<DescriptorParam, Object> entry : m_params.entrySet())
+        {
             sb.append(entry.getKey());
             sb.append("=");
             Object val = entry.getValue();
-            if (val instanceof String || val instanceof Dictionary<?, ?>) {
+            if (val instanceof String || val instanceof Dictionary<?, ?>)
+            {
                 sb.append(val.toString());
-            } else if (val instanceof String[]) {
+            }
+            else if (val instanceof String[])
+            {
                 sb.append(Arrays.toString((String[]) val));
-            } else {
+            }
+            else
+            {
                 sb.append(val.toString());
             }
             sb.append(";");
