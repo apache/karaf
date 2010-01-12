@@ -44,7 +44,8 @@ import aQute.lib.osgi.Verifier;
 import aQute.libg.reporter.Reporter;
 
 /**
- * This is the scanner which does all the annotation parsing on a given class. 
+ * This is the scanner which does all the annotation parsing on a given class.
+ * To start the parsing, just invoke the parseClassFileWithCollector and finish methods.
  * Once parsed, the corresponding component descriptors can be built using the "writeTo" method.
  */
 public class AnnotationCollector extends ClassDataCollector
@@ -121,14 +122,24 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private class Info
     {
+        /** The component descriptor entry type (either Service, ServiceDependency, or ConfigurationDependency) */
         EntryTypes m_entry;
+        
+        /** The component descriptor entry parameters (init/start/stop ...) */
         Map<Params, Object> m_params = new HashMap<Params, Object>();
 
+        /**
+         * Makes a new component descriptor entry.
+         * @param entry the component descriptor entry type (either Service, ServiceDependency, or ConfigurationDependency)
+         */
         Info(EntryTypes entry)
         {
             m_entry = entry;
         }
 
+        /**
+         * Returns a string representation for the given component descriptor line entry.
+         */
         @Override
         public String toString()
         {
@@ -145,6 +156,11 @@ public class AnnotationCollector extends ClassDataCollector
             return sb.toString();
         }
 
+        /**
+         * Adds a parameter to this component descriptor entry.
+         * @param param the param name
+         * @param value the param value
+         */
         void addParam(Params param, String value)
         {
             String old = (String) m_params.get(param);
@@ -155,6 +171,12 @@ public class AnnotationCollector extends ClassDataCollector
             m_params.put(param, value);
         }
 
+        /**
+         * Adds an annotation parameter to this component descriptor entry.
+         * @param annotation the annotation where the parameter has been parsed
+         * @param param the param name
+         * @param def the default value to add, if the param is not present in the parsed annotation.
+         */
         void addParam(Annotation annotation, Params param, Object def)
         {
             Object value = annotation.get(param.toString());
@@ -178,9 +200,16 @@ public class AnnotationCollector extends ClassDataCollector
             }
         }
 
-        void addClassParam(Annotation annotation, Params param, Object def,
-            Pattern pattern, int group)
+        /**
+         * Adds a annotation parameter of type 'class' to this component descriptor entry.
+         * The parsed class parameter has the format "Lfull.package.ClassName;"
+         * @param annotation the annotation where the class parameter has been parsed
+         * @param param the annotation class param name
+         * @param def the default class name to add if the param is not present in the parsed annotation.
+         */
+        void addClassParam(Annotation annotation, Params param, Object def)
         {
+            Pattern pattern = m_classPattern;
             Object value = annotation.get(param.toString());
             if (value == null && def != null)
             {
@@ -195,7 +224,7 @@ public class AnnotationCollector extends ClassDataCollector
                     {
                         if (pattern != null)
                         {
-                            v = parseClass(v.toString(), pattern, group);
+                            v = parseClass(v.toString(), pattern, 1);
                         }
                         addParam(param, v.toString());
                     }
@@ -204,7 +233,7 @@ public class AnnotationCollector extends ClassDataCollector
                 {
                     if (pattern != null)
                     {
-                        value = parseClass(value.toString(), pattern, group);
+                        value = parseClass(value.toString(), pattern, 1);
                     }
                     addParam(param, value.toString());
                 }
@@ -213,17 +242,30 @@ public class AnnotationCollector extends ClassDataCollector
         }
     }
 
+    /**
+     * Makes a new Collector for parsing a given class.
+     * @param reporter the object used to report logs.
+     */
     public AnnotationCollector(Reporter reporter)
     {
         m_reporter = reporter;
         m_infos.add(new Info(EntryTypes.Service));
     }
 
+    /**
+     * Returns the log reporter.
+     * @return the log reporter.
+     */
     public Reporter getReporter()
     {
         return m_reporter;
     }
 
+    /**
+     * Parses the name of the class.
+     * @param access the class access
+     * @param name the class name (package are "/" separated).
+     */
     @Override
     public void classBegin(int access, String name)
     {
@@ -231,6 +273,9 @@ public class AnnotationCollector extends ClassDataCollector
         m_reporter.trace("class name: " + m_className);
     }
 
+    /**
+     * Parses the implemented interfaces ("/" separated).
+     */
     @Override
     public void implementsInterfaces(String[] interfaces)
     {
@@ -313,6 +358,10 @@ public class AnnotationCollector extends ClassDataCollector
         }
     }
 
+    /**
+     * Parses a Service annotation.
+     * @param annotation The Service annotation.
+     */
     private void parseServiceAnnotation(Annotation annotation)
     {
         Info info = m_infos.get(0);
@@ -331,15 +380,19 @@ public class AnnotationCollector extends ClassDataCollector
         }
 
         // provide attribute
-        info.addClassParam(annotation, Params.provide, m_interfaces, m_classPattern, 1);
+        info.addClassParam(annotation, Params.provide, m_interfaces);
 
         // factory attribute
-        info.addClassParam(annotation, Params.factory, null, m_classPattern, 1);
+        info.addClassParam(annotation, Params.factory, null);
 
         // factoryMethod attribute
         info.addParam(annotation, Params.factoryMethod, null);
     }
 
+    /**
+     * Parses a ServiceDependency Annotation.
+     * @param annotation the ServiceDependency Annotation.
+     */
     private void parseServiceDependencyAnnotation(Annotation annotation)
     {
         Info info = new Info(EntryTypes.ServiceDependency);
@@ -379,7 +432,7 @@ public class AnnotationCollector extends ClassDataCollector
         }
 
         // defaultImpl attribute
-        info.addClassParam(annotation, Params.defaultImpl, null, m_classPattern, 1);
+        info.addClassParam(annotation, Params.defaultImpl, null);
 
         // required attribute
         info.addParam(annotation, Params.required, null);
@@ -394,6 +447,10 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.removed, null);
     }
 
+    /**
+     * Parses a ConfigurationDependency annotation.
+     * @param annotation the ConfigurationDependency annotation.
+     */
     private void parseConfigurationDependencyAnnotation(Annotation annotation)
     {
         Info info = new Info(EntryTypes.ConfigurationDependency);
@@ -406,6 +463,13 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.propagate, null);
     }
 
+    /**
+     * Parses a class.
+     * @param clazz the class to be parsed (the package is "/" separated).
+     * @param pattern the pattern used to match the class.
+     * @param group the pattern group index where the class can be retrieved.
+     * @return the parsed class.
+     */
     private String parseClass(String clazz, Pattern pattern, int group)
     {
         Matcher matcher = pattern.matcher(clazz);
@@ -420,6 +484,11 @@ public class AnnotationCollector extends ClassDataCollector
         }
     }
 
+    /**
+     * Checks if a method descriptor matches a given pattern. 
+     * @param pattern the pattern used to check the method signature descriptor
+     * @throws IllegalArgumentException if the method signature descriptor does not match the given pattern.
+     */
     private void checkMethod(Pattern pattern)
     {
         Matcher matcher = pattern.matcher(m_descriptor);
@@ -431,6 +500,9 @@ public class AnnotationCollector extends ClassDataCollector
         }
     }
 
+    /**
+     * Finishes up the class parsing. This method must be called once the parseClassFileWithCollector method has returned.
+     */
     public void finish()
     {
         StringBuilder sb = new StringBuilder();
@@ -443,6 +515,10 @@ public class AnnotationCollector extends ClassDataCollector
         m_reporter.warning(sb.toString()); 
     }
 
+    /**
+     * Writes the generated component descriptor in the given print writer
+     * @param pw the writer where the component descriptor will be written.
+     */
     public void writeTo(PrintWriter pw)
     {
         for (Info info : m_infos)
