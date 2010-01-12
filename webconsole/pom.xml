@@ -79,7 +79,6 @@
                             javax.portlet;resolution:=optional,
                             javax.servlet.*;version=2.4,*;
                         </Import-Package>
-                        
                         <Embed-Dependency>
                             <!-- Import/Export-Package parsing -->
                             org.apache.felix.bundlerepository;
@@ -96,16 +95,70 @@
                             
                             <!-- File Upload functionality -->
                             commons-fileupload,
-
+    
                             <!-- Required by FileUpload and Util -->
                             commons-io
                         </Embed-Dependency>
+                        
+                        <_donotcopy>NOTICE.bare</_donotcopy>
+                        <_removeheaders>
+                            Embed-Dependency,Private-Package,Include-Resource
+                        </_removeheaders>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
+    <profiles>
+        <!--
+            The "bare-bundle" profile builds a bundle not including certain
+            3rd party libraries and classes, namely: Commons IO, Commons
+            FileUpload, JSON, and the OSGi ServiceTracker. These are imported
+            by this bundle. The classes from the bundlerepository bundle are
+            still included because they are not exported from the
+            bundlerepository bundle and thus cannot be imported.
+            The "bare-bundle" can be used if the non-embedded libraries are
+            provided by the framework in which the web console is installed.
+        -->
+        <profile>
+            <id>bare-bundle</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>maven-bundle-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>bare-bundle</id>
+                                <goals>
+                                    <goal>bundle</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>bare</classifier>
+                                    <instructions>
+                                        <Include-Resource>
+                                            {maven-resources},META-INF/NOTICE=src/main/bare-resources/NOTICE.bare
+                                        </Include-Resource>
+                                        <_donotcopy>LICENSE.json</_donotcopy>
+                                        <!-- <_donotcopy>(LICENSE.json|NOTICE.bare)</_donotcopy> -->
+                                        <Embed-Dependency>
+                                            org.apache.felix.bundlerepository;
+                                                inline=org/apache/felix/bundlerepository/R4*.class|
+                                                    org/apache/felix/bundlerepository/Util.class|
+                                                    org/apache/felix/bundlerepository/VersionRange.class,
+                                        </Embed-Dependency>
+                                    </instructions>
+                                </configuration>
+                            </execution>
+                        </executions>
+                </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
