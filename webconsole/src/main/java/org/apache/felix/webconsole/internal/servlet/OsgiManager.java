@@ -252,6 +252,16 @@ public class OsgiManager extends GenericServlet
                     }
                 }
             }
+            catch ( NoClassDefFoundError ncdfe )
+            {
+                String message = ncdfe.getMessage();
+                if ( message.indexOf( ' ' ) < 0 )
+                {
+                    // message is just a class name, try to be more descriptive
+                    message = "Class " + message + " missing";
+                }
+                log.log( LogService.LOG_INFO, pluginClassName + " not installed. Reason: " + message );
+            }
             catch ( Throwable t )
             {
                 log.log( LogService.LOG_INFO, "Failed to instantiate plugin " + pluginClassName + ". Reason: " + t );
