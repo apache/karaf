@@ -67,7 +67,6 @@ public class AnnotationMojo extends AbstractMojo
     public void execute() throws MojoExecutionException
     {
         Analyzer analyzer = null;
-        File output = null;
         Jar jar = null;
 
         try
@@ -135,11 +134,6 @@ public class AnnotationMojo extends AbstractMojo
 
         finally
         {
-            if (output != null && output.exists())
-            {
-                //output.delete();
-            }
-
             if (jar != null)
             {
                 jar.close();
