@@ -16,6 +16,9 @@
  */
 package org.apache.felix.http.base.internal.handler;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,7 +36,7 @@ final class ServletHandlerRequest
         super(req);
         this.alias = alias;
     }
-    
+
     @Override
     public String getAuthType()
     {
@@ -41,7 +44,7 @@ final class ServletHandlerRequest
         if (authType != null) {
             return authType;
         }
-        
+
         return super.getAuthType();
     }
 
@@ -52,7 +55,7 @@ final class ServletHandlerRequest
             this.pathInfo = calculatePathInfo();
             this.pathInfoCalculated = true;
         }
-        
+
         return this.pathInfo;
     }
 
@@ -62,7 +65,7 @@ final class ServletHandlerRequest
         final String info = getPathInfo();
         return (null == info) ? null : getRealPath(info);
     }
-        
+
     @Override
     public String getRemoteUser()
     {
@@ -70,7 +73,7 @@ final class ServletHandlerRequest
         if (remoteUser != null) {
             return remoteUser;
         }
-        
+
         return super.getRemoteUser();
     }
 
@@ -87,7 +90,7 @@ final class ServletHandlerRequest
     {
         final int servletPathLength = getServletPath().length();
         final String contextPath = getContextPath();
-        
+
         String pathInfo = getRequestURI();
         pathInfo = pathInfo.substring(contextPath.length());
         pathInfo = pathInfo.replaceAll("[/]{2,}", "/");
@@ -98,6 +101,14 @@ final class ServletHandlerRequest
             pathInfo = pathInfo.substring(0, scPos);
         }
 
+        try {
+            pathInfo = URLDecoder.decode(pathInfo, "UTF-8");
+        } catch (UnsupportedEncodingException uee) {
+            // not really expected here, UTF-8 is required
+        } catch (IllegalArgumentException iae) {
+            // illegal encoding used, don't care
+        }
+
         if ("".equals(pathInfo) && servletPathLength != 0) {
             pathInfo = null;
         }
@@ -105,6 +116,8 @@ final class ServletHandlerRequest
         if (pathInfo != null && !pathInfo.startsWith("/")) {
             pathInfo = "/" + pathInfo;
         }
+
+
 
         return pathInfo;
     }
