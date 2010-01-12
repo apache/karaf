@@ -139,7 +139,7 @@
                                     <classifier>bare</classifier>
                                     <instructions>
                                         <Include-Resource>
-                                            {maven-resources},META-INF/NOTICE=src/main/bare-resources/NOTICE.bare
+                                            {maven-resources},META-INF/NOTICE=src/main/bare-resources/NOTICE
                                         </Include-Resource>
                                         <_donotcopy>LICENSE.json</_donotcopy>
                                         <!-- <_donotcopy>(LICENSE.json|NOTICE.bare)</_donotcopy> -->
