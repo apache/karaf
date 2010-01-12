@@ -51,12 +51,6 @@ public class AnnotationTest implements Sequencer
     @Test
     public void testSimpleAnnotations(BundleContext context)
     {
-        /* Temporarily turn off this test because it seems that it disturb the AspectTest junit test. */
-        if (true) {
-            // See http://opensource.bamboo.atlassian.com/browse/FELIX-DEF-3090/test/org.apache.felix.dm.test.AspectTest
-            return;
-        }
-        
         m_ensure = new Ensure();
         DependencyManager m = new DependencyManager(context);
         // We provide ourself as a "Sequencer" service: this will active the "org.apache.felix.dependencymanager.test.annotation" bundle
