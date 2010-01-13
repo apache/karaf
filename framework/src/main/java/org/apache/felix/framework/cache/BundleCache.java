@@ -31,42 +31,34 @@ import org.osgi.framework.Constants;
  * <tt>BundleRevision</tt> subclasses, implement the Felix bundle cache.
  * It is possible to configure the default behavior of this class by
  * passing properties into Felix' constructor. The configuration properties
- * for this class are:
+ * for this class are (properties starting with "<tt>felix</tt>" are specific
+ * to Felix, while those starting with "<tt>org.osgi</tt>" are standard OSGi
+ * properties):
  * </p>
  * <ul>
+ *   <li><tt>org.osgi.framework.storage</tt> - Sets the directory to use as
+ *       the bundle cache; by default bundle cache directory is
+ *       <tt>felix-cache</tt> in the current working directory. The value
+ *       should be a valid directory name. The directory name can be either absolute
+ *       or relative. Relative directory names are relative to the current working
+ *       directory. The specified directory will be created if it does
+ *       not exist.
+ *   </li>
+ *   <li><tt>felix.cache.rootdir</tt> - Sets the root directory to use to
+ *       calculate the bundle cache directory for relative directory names. If
+ *       <tt>org.osgi.framework.storage</tt> is set to a relative name, by
+ *       default it is relative to the current working directory. If this
+ *       property is set, then it will be calculated as being relative to
+ *       the specified root directory.
+ *   </li>
  *   <li><tt>felix.cache.bufsize</tt> - Sets the buffer size to be used by
- *       the cache; the default value is 4096. The integer
- *       value of this string provides control over the size of the
- *       internal buffer of the disk cache for performance reasons.
+ *       the cache; the default value is 4096. The integer value of this
+ *       string provides control over the size of the internal buffer of the
+ *       disk cache for performance reasons.
  *   </li>
- *   <li><tt>felix.cache.dir</tt> - Sets the directory to be used by the
- *       cache as its cache directory. The cache directory is where all
- *       profile directories are stored and a profile directory is where a
- *       set of installed bundles are stored. By default, the cache
- *       directory is <tt>.felix</tt> in the user's home directory. If
- *       this property is specified, then its value will be used as the cache
- *       directory instead of <tt>.felix</tt>. This directory will be created
- *       if it does not exist.
- *   </li>
- *   <li><tt>felix.cache.profile</tt> - Sets the profile name that will be
- *       used to create a profile directory inside of the cache directory.
- *       The created directory will contained all installed bundles associated
- *       with the profile.
- *   </li>
- *   <li><tt>felix.cache.profiledir</tt> - Sets the directory to use as the
- *       profile directory for the bundle cache; by default the profile
- *       name is used to create a directory in the <tt>.felix</tt> cache
- *       directory. If this property is specified, then the cache directory
- *       and profile name properties are ignored. The specified value of this
- *       property is used directly as the directory to contain all cached
- *       bundles. If this property is set, it is not necessary to set the
- *       cache directory or profile name properties. This directory will be
- *       created if it does not exist.
- *   </li>
- * </ul>
  * <p>
- * For specific information on how to configure Felix using system properties,
- * refer to the Felix usage documentation.
+ * For specific information on how to configure the Felix framework, refer
+ * to the Felix framework usage documentation.
  * </p>
  * @see org.apache.felix.framework.util.BundleArchive
 **/
