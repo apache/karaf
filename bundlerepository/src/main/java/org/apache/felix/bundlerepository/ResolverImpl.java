@@ -193,16 +193,16 @@ public class ResolverImpl implements Resolver
                         // can resolve.
                         while ((candidate == null) && !candidateCapabilities.isEmpty())
                         {
-                            Resource bestResource = (Resource) getBestCandidate(candidateCapabilities);
+                            Capability bestCapability = getBestCandidate(candidateCapabilities);
 
                             // Try to resolve the best resource.
-                            if (resolve(bestResource))
+                            if (resolve(((CapabilityImpl) bestCapability).getResource()))
                             {
-                                candidate = bestResource;
+                                candidate = ((CapabilityImpl) bestCapability).getResource();
                             }
                             else
                             {
-                                candidateCapabilities.remove(bestResource);
+                                candidateCapabilities.remove(bestCapability);
                             }
                         }
                     }
@@ -380,7 +380,7 @@ public class ResolverImpl implements Resolver
      * @param resources
      * @return
      */
-    private Resource getBestCandidate(List caps)
+    private Capability getBestCandidate(List caps)
     {
         Version bestVersion = null;
         Capability best = null;
@@ -434,7 +434,7 @@ public class ResolverImpl implements Resolver
             }
         }
 
-        return (best == null) ? null : ((CapabilityImpl) best).getResource();
+        return (best == null) ? null : best;
     }
 
     public synchronized void deploy(boolean start)
