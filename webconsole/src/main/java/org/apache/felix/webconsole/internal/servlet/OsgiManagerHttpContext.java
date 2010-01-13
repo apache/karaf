@@ -136,15 +136,15 @@ final class OsgiManagerHttpContext implements HttpContext
         }
 
         // request authentication
-        response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
         try
         {
-            response.sendError( HttpServletResponse.SC_UNAUTHORIZED );
+            response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
+            response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
+            response.flushBuffer();
         }
         catch ( IOException ioe )
         {
-            // failed sending the error, fall back to setting the status
-            response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
+            // failed sending the response ... cannot do anything about it
         }
 
         // inform HttpService that authentication failed
