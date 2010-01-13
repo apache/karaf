@@ -260,7 +260,7 @@ public class OsgiManager extends GenericServlet
                     // message is just a class name, try to be more descriptive
                     message = "Class " + message + " missing";
                 }
-                log.log( LogService.LOG_INFO, pluginClassName + " not installed. Reason: " + message );
+                log.log( LogService.LOG_INFO, pluginClassName + " not enabled. Reason: " + message );
             }
             catch ( Throwable t )
             {
