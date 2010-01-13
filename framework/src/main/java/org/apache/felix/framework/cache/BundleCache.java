@@ -60,7 +60,7 @@ import org.osgi.framework.Constants;
  * For specific information on how to configure the Felix framework, refer
  * to the Felix framework usage documentation.
  * </p>
- * @see org.apache.felix.framework.util.BundleArchive
+ * @see org.apache.felix.framework.cache.BundleArchive
 **/
 public class BundleCache
 {
