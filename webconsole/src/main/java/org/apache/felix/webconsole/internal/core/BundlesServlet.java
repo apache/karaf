@@ -989,13 +989,30 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             String value = String.valueOf(headers.get( header ));
             // Package headers may be long, support line breaking by
             // ensuring blanks after comma and semicolon.
-            value = value.replaceAll( "([;,])", "$1 " );
+            value = enableLineWrapping(value);
             val.put( header + ": " + value );
         }
 
         keyVal( jw, "Manifest Headers", val );
     }
 
+    private static final String enableLineWrapping(final String value)
+    {
+        StringBuffer sb = new StringBuffer(value.length() * 2 / 3);
+        synchronized (sb)
+        { // faster
+            for (int i = 0; i < value.length(); i++)
+            {
+                final char ch = value.charAt( i );
+                sb.append( ch );
+                if ( ch == ';' || ch == ',' )
+                {
+                    sb.append( ' ' );
+                }
+            }
+            return sb.toString();
+        }
+    }
 
     private void listFragmentInfo( final JSONWriter jw, final Bundle bundle, final String pluginRoot )
         throws JSONException
