@@ -173,8 +173,8 @@ public class ComponentManager implements SynchronousBundleListener
         }
         catch (Throwable t)
         {
-            m_logService.log(LogService.LOG_ERROR, "Error while parsing descriptor " + descriptorURL
-                + " from bundle " + b.getSymbolicName(), t);
+            m_logService.log(LogService.LOG_ERROR, "Error while parsing descriptor "
+                + descriptorURL + " from bundle " + b.getSymbolicName(), t);
         }
         finally
         {
@@ -235,9 +235,22 @@ public class ComponentManager implements SynchronousBundleListener
         throws ClassNotFoundException
     {
         Service service = dm.createService();
-        // Set service impl
-        String impl = parser.getString(DescriptorParam.impl);
-        service.setImplementation(b.loadClass(impl));
+        // Get factory parameters.
+        String factory = parser.getString(DescriptorParam.factory, null);
+        String factoryMethod = parser.getString(DescriptorParam.factoryMethod, "create");
+
+        if (factory == null)
+        {
+            // Set service impl
+            String impl = parser.getString(DescriptorParam.impl);
+            service.setImplementation(b.loadClass(impl));
+        }
+        else
+        {
+            // Set service factory
+            Class<?> factoryClass = b.loadClass(factory);
+            service.setFactory(factoryClass, factoryMethod);
+        }
 
         // Set service callbacks
         String init = parser.getString(DescriptorParam.init, null);
@@ -262,23 +275,6 @@ public class ComponentManager implements SynchronousBundleListener
             service.setComposition(composition);
         }
 
-        // Set service factory
-        String factory = parser.getString(DescriptorParam.factory, null);
-        String factoryMethod = parser.getString(DescriptorParam.factoryMethod, null);
-
-        if (factory != null)
-        {
-            if (factoryMethod == null)
-            {
-                factoryMethod = "create";
-            }
-            Class<?> factoryClass = b.loadClass(factory);
-            service.setFactory(factoryClass, factoryMethod);
-        }
-        else if (factoryMethod != null)
-        {
-            service.setFactory(factoryMethod);
-        }
         return service;
     }
 
