@@ -1,0 +1,17 @@
+<project name="TestDM" default="bnd">
+  <property name="bndjar" value="${user.home}/.m2/repository/biz/aQute/bnd/0.0.389/bnd-0.0.389.jar"/>
+  <property name="annotjar" value="${user.home}/.m2/repository/org/apache/felix/org.apache.felix.dependencymanager.annotation/3.0.0-SNAPSHOT/org.apache.felix.dependencymanager.annotation-3.0.0-SNAPSHOT.jar"/>
+
+  <target name="compile">
+    <delete dir="target/classes" quiet="yes"/>
+    <mkdir dir="target/classes"/>
+    <javac srcdir="src/main/java" destdir="target/classes" classpath="${annotjar}"/>
+  </target>
+
+  <target name="bnd" depends="compile">
+    <mkdir dir="target"/>
+    <mkdir dir="target/classes"/>
+    <taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${annotjar}:${bndjar}"/>
+    <bnd classpath="target/classes" files="directives.bnd" output="target/org.apache.felix.dependencymanager.samples.annotation-3.0.0-SNAPSHOT.jar"/>
+  </target>
+</project>
