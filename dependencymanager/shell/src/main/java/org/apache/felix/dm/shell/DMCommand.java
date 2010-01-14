@@ -26,6 +26,7 @@ import java.util.StringTokenizer;
 
 import org.apache.felix.dm.management.ServiceComponent;
 import org.apache.felix.dm.management.ServiceComponentDependency;
+import org.apache.felix.shell.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -37,7 +38,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class DMCommand {
+public class DMCommand implements Command {
     private static final BundleIdSorter SORTER = new BundleIdSorter();
     private final BundleContext m_context;
 
