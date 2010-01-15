@@ -336,8 +336,14 @@ public class ComponentManager implements SynchronousBundleListener
     {
         ConfigurationDependency cd = dm.createConfigurationDependency();
         String pid = parser.getString(DescriptorParam.pid);
+        if (pid == null) {
+            throw new IllegalArgumentException("pid attribute not provided in ConfigurationDependency declaration");
+        }
+        cd.setPid(pid);
+        
         String propagate = parser.getString(DescriptorParam.propagate, "false");
         cd.setPropagate("true".equals(propagate));
+        
         String callback = parser.getString(DescriptorParam.updated, "updated");
         cd.setCallback(callback);
         return cd;
