@@ -29,7 +29,7 @@ import org.osgi.framework.BundleContext;
 public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         try {
-            context.registerService("org.apache.felix.shell.Command", new DMCommand(context), null);
+            context.registerService("org.apache.felix.shell.Command", new FelixDMCommand(context), null);
         }
         catch (Throwable t) {
         }
