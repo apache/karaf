@@ -18,9 +18,7 @@
  */
 package org.apache.felix.framework;
 
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
