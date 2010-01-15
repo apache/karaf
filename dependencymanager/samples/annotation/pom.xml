@@ -33,7 +33,7 @@
 	<extensions>true</extensions>
         <configuration>
           <instructions>
-	    <Bundle-Name>DM annotation sample</Bundle-Name>
+	    <Bundle-Name>Apache Felix Dependency Manager Annotation Sample</Bundle-Name>
 	    <Bundle-SymbolicName>org.apache.felix.dependencymanager.samples.annotation</Bundle-SymbolicName>
 	    <Import-Package>*</Import-Package>
 	    <Private-Package>org.apache.felix.dm.samples.annotation</Private-Package>
