@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
@@ -515,7 +516,21 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         {
             if ( string.indexOf( '<' ) >= 0 )
             {
-                super.write( string.replaceAll( "<", "&lt;" ) );
+                // TODO: replace with WebConsoleUtil.escapeHtml()
+                // this "convoluted" code replaces "<" by "&lt;"
+                final StringTokenizer tokener = new StringTokenizer( string, "<", true );
+                while ( tokener.hasMoreElements() )
+                {
+                    final String token = tokener.nextToken();
+                    if ( "<".equals( token ) )
+                    {
+                        super.write( "&lt;" );
+                    }
+                    else
+                    {
+                        super.write( token );
+                    }
+                }
             }
             else
             {
