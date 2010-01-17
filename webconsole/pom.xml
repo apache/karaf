@@ -77,7 +77,8 @@
                             org.apache.felix.shell;
                             org.osgi.service.*;resolution:=optional,
                             javax.portlet;resolution:=optional,
-                            javax.servlet.*;version=2.4,*;
+                            javax.servlet.*;version=2.4,
+                            *
                         </Import-Package>
                         <Embed-Dependency>
                             <!-- Import/Export-Package parsing -->
@@ -147,7 +148,7 @@
                                             org.apache.felix.bundlerepository;
                                                 inline=org/apache/felix/bundlerepository/R4*.class|
                                                     org/apache/felix/bundlerepository/Util.class|
-                                                    org/apache/felix/bundlerepository/VersionRange.class,
+                                                    org/apache/felix/bundlerepository/VersionRange.class
                                         </Embed-Dependency>
                                     </instructions>
                                 </configuration>
