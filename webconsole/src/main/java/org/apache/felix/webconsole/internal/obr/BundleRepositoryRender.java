@@ -289,11 +289,14 @@ public class BundleRepositoryRender extends BaseWebConsolePlugin
 
         for ( Iterator ri = labels.iterator(); ri.hasNext(); )
         {
-            String label = (String) ri.next();
-            String[] parts = label.split( "§" );
-            Collection versions = (Collection) resSet.remove(parts[1]);
-            if (versions != null) {
-                this.printResource( pw, parts[1], parts[0], versions );
+            final String label = ( String ) ri.next();
+            final int idx = label.indexOf( '§' );
+            final String presName = label.substring( 0, idx );
+            final String symName = label.substring( idx + 1 );
+            final Collection versions = ( Collection ) resSet.remove( symName );
+            if ( versions != null )
+            {
+                this.printResource( pw, symName, presName, versions );
             }
         }
 
