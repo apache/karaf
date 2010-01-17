@@ -181,20 +181,26 @@ public class LicenseServlet extends AbstractWebConsolePlugin implements OsgiMana
                 jw.key( "Embedded " + getName( url.getPath() ) );
                 jw.array();
 
-                for ( int i = 0; i < patterns.length; i++ )
+                InputStream ins = null;
+                try
                 {
-                    String pattern = ".*/" + patterns[i] + "[^/]*$";
-
-                    InputStream ins = null;
-                    try
+                    ins = url.openStream();
+                    ZipInputStream zin = new ZipInputStream( ins );
+                    for ( ZipEntry zentry = zin.getNextEntry(); zentry != null; zentry = zin.getNextEntry() )
                     {
-                        ins = url.openStream();
-                        ZipInputStream zin = new ZipInputStream( ins );
-                        ZipEntry zentry = zin.getNextEntry();
-                        while ( zentry != null )
+                        String name = zentry.getName();
+
+                        // ignore directory entries
+                        if ( name.endsWith( "/" ) )
                         {
-                            String name = zentry.getName();
-                            if ( !name.endsWith( "/" ) && "/".concat( name ).matches( pattern ) )
+                            continue;
+                        }
+
+                        // cut off path and use file name for checking against patterns
+                        name = name.substring( name.lastIndexOf( '/' ) + 1 );
+                        for ( int i = 0; i < patterns.length; i++ )
+                        {
+                            if ( name.startsWith( patterns[i] ) )
                             {
                                 jw.object();
                                 jw.key( "url" );
@@ -208,22 +214,21 @@ public class LicenseServlet extends AbstractWebConsolePlugin implements OsgiMana
                                     }
                                 } ) );
                                 jw.endObject();
+                                break;
                             }
-
-                            zentry = zin.getNextEntry();
                         }
                     }
-                    finally
+                }
+                finally
+                {
+                    if ( ins != null )
                     {
-                        if ( ins != null )
+                        try
                         {
-                            try
-                            {
-                                ins.close();
-                            }
-                            catch ( IOException ignore )
-                            {
-                            }
+                            ins.close();
+                        }
+                        catch ( IOException ignore )
+                        {
                         }
                     }
                 }
