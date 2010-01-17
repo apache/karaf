@@ -23,7 +23,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.framework.Constants;
@@ -110,7 +110,7 @@ class ConfigurationListener implements ManagedService, MetaTypeProvider
                 "The password for the user allowed to access the OSGi Management Console.",
                 OsgiManager.DEFAULT_PASSWORD ) );
 
-            final LinkedHashMap namesByClassName = new LinkedHashMap();
+            final TreeMap namesByClassName = new TreeMap();
             final ClassLoader loader = getClass().getClassLoader();
             final String[] defaultPluginsClasses = OsgiManager.PLUGIN_CLASSES;
             for ( int i = 0; i < defaultPluginsClasses.length; i++ )
