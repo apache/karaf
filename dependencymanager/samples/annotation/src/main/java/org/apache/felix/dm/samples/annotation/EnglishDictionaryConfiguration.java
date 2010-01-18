@@ -59,11 +59,6 @@ public class EnglishDictionaryConfiguration
         {
             String PID = EnglishDictionary.class.getName();
             Configuration config = m_cm.getConfiguration(PID, null);
-            if (config.getBundleLocation() != null)
-            {
-                config.setBundleLocation(null);
-            }
-
             config.update(new Hashtable<String, List<String>>()
             {
                 {
