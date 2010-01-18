@@ -19,7 +19,6 @@
 package org.apache.felix.dm.samples.annotation;
 
 import java.io.PrintStream;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.dm.annotation.api.Service;
@@ -50,10 +49,8 @@ public class SpellChecker implements Command
      * @param dictionary the new dictionary
      */
     @ServiceDependency(removed = "removeDictionary")
-    protected void addDictionary(Map<String, String> serviceProperties, DictionaryService dictionary)
+    protected void addDictionary(DictionaryService dictionary)
     {
-        m_log.log(LogService.LOG_INFO, "added dictionary: " + dictionary + " (language="
-            + serviceProperties.get("language") + ")");
         m_dictionaries.add(dictionary);
     }
 
@@ -63,7 +60,6 @@ public class SpellChecker implements Command
      */
     protected void removeDictionary(DictionaryService dictionary)
     {
-        m_log.log(LogService.LOG_INFO, "added dictionary: " + dictionary);
         m_dictionaries.remove(dictionary);
     }
 
@@ -93,6 +89,10 @@ public class SpellChecker implements Command
             return;
         }
         String word = tokens[1];
+
+        m_log.log(LogService.LOG_DEBUG, "Checking spelling of word \"" + word
+            + "\" using the following dictionaries: " + m_dictionaries);
+
         for (DictionaryService dictionary : m_dictionaries)
         {
             if (dictionary.checkWord(tokens[1]))
