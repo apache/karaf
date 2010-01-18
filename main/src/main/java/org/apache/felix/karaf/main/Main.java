@@ -18,18 +18,16 @@
  */
 package org.apache.felix.karaf.main;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
+import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessControlException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
@@ -38,11 +36,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.CountDownLatch;
 import java.lang.reflect.Method;
-import java.lang.reflect.Constructor;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.karaf.main.Utils;
 import org.osgi.framework.Bundle;
@@ -134,6 +134,18 @@ public class Main {
     
     public static final String KARAF_FRAMEWORK = "karaf.framework";
 
+    public static final String KARAF_SHUTDOWN_PORT = "karaf.shutdown.port";
+
+    public static final String KARAF_SHUTDOWN_HOST = "karaf.shutdown.host";
+
+    public static final String KARAF_SHUTDOWN_PORT_FILE = "karaf.shutdown.port.file";
+
+    public static final String KARAF_SHUTDOWN_COMMAND = "karaf.shutdown.command";
+
+    public static final String KARAF_SHUTDOWN_PID_FILE = "karaf.shutdown.pid.file";
+
+    public static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
+
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
     Logger LOG = Logger.getLogger(this.getClass().getName());
@@ -166,7 +178,7 @@ public class Main {
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
 
         // Load system properties.
-        loadSystemProperties();
+        loadSystemProperties(karafBase);
 
         updateInstancePid();
 
@@ -654,7 +666,7 @@ public class Main {
      * arbitrary URL.
      * </p>
      */
-    private void loadSystemProperties() {
+    protected static void loadSystemProperties(File karafBase) {
         // The system properties file is either specified by a system
         // property or it is in the same directory as the Felix JAR file.
         // Try to load it from one of these places.
@@ -794,7 +806,7 @@ public class Main {
         return configProps;
     }
 
-    private static Properties loadPropertiesFile(URL configPropURL) throws Exception {
+    protected static Properties loadPropertiesFile(URL configPropURL) throws Exception {
         // Read the properties file.
         Properties configProps = new Properties();
         InputStream is = null;
@@ -823,7 +835,7 @@ public class Main {
         return configProps;
     }
 
-    private static void copySystemProperties(Properties configProps) {
+    protected static void copySystemProperties(Properties configProps) {
         for (Enumeration e = System.getProperties().propertyNames();
              e.hasMoreElements();) {
             String key = (String) e.nextElement();
@@ -1111,6 +1123,7 @@ public class Main {
                         if (lockLogged) {
                             LOG.info("Lock acquired.");
                         }
+                        setupShutdown(props);
                         setStartLevel(defaultStartLevel);
                         for (;;) {
                             if (!lock.isAlive()) {
@@ -1148,6 +1161,122 @@ public class Main {
         ServiceReference[] refs = ctx.getServiceReferences(StartLevel.class.getName(), null);
         StartLevel sl = (StartLevel) ctx.getService(refs[0]);
         sl.setStartLevel(level);
+    }
+
+
+    private Random random = null;
+    private ServerSocket shutdownSocket;
+
+    protected void setupShutdown(Properties props) {
+        try {
+            String pidFile = props.getProperty(KARAF_SHUTDOWN_PID_FILE);
+            if (pidFile != null) {
+                RuntimeMXBean rtb = ManagementFactory.getRuntimeMXBean();
+                String processName = rtb.getName();
+                Pattern pattern = Pattern.compile("^([0-9]+)@.+$", Pattern.CASE_INSENSITIVE);
+                Matcher matcher = pattern.matcher(processName);
+                if (matcher.matches()) {
+                    int pid = Integer.parseInt(matcher.group(1));
+                    Writer w = new OutputStreamWriter(new FileOutputStream(pidFile));
+                    w.write(Integer.toString(pid));
+                    w.close();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
+            String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
+            String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
+            final String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
+            if (port >= 0) {
+                shutdownSocket = new ServerSocket(port, 1, InetAddress.getByName(host));
+                if (port == 0) {
+                    port = shutdownSocket.getLocalPort();
+                }
+                if (portFile != null) {
+                    Writer w = new OutputStreamWriter(new FileOutputStream(portFile));
+                    w.write(Integer.toString(port));
+                    w.close();
+                }
+                Thread thread = new Thread() {
+                    public void run() {
+                        try {
+                            while (true) {
+                                // Wait for the next connection
+                                Socket socket = null;
+                                InputStream stream = null;
+                                try {
+                                    socket = shutdownSocket.accept();
+                                    socket.setSoTimeout(10 * 1000);  // Ten seconds
+                                    stream = socket.getInputStream();
+                                } catch (AccessControlException ace) {
+                                    LOG.log(Level.WARNING, "Karaf shutdown socket: security exception: "
+                                                       + ace.getMessage(), ace);
+                                    continue;
+                                } catch (IOException e) {
+                                    LOG.log(Level.SEVERE, "Karaf shutdown socket: accept: ", e);
+                                    System.exit(1);
+                                }
+
+                                // Read a set of characters from the socket
+                                StringBuilder command = new StringBuilder();
+                                int expected = 1024; // Cut off to avoid DoS attack
+                                while (expected < shutdown.length()) {
+                                    if (random == null) {
+                                        random = new Random();
+                                    }
+                                    expected += (random.nextInt() % 1024);
+                                }
+                                while (expected > 0) {
+                                    int ch = -1;
+                                    try {
+                                        ch = stream.read();
+                                    } catch (IOException e) {
+                                        LOG.log(Level.WARNING, "Karaf shutdown socket:  read: ", e);
+                                        ch = -1;
+                                    }
+                                    if (ch < 32) {  // Control character or EOF terminates loop
+                                        break;
+                                    }
+                                    command.append((char) ch);
+                                    expected--;
+                                }
+
+                                // Close the socket now that we are done with it
+                                try {
+                                    socket.close();
+                                } catch (IOException e) {
+                                    // Ignore
+                                }
+
+                                // Match against our command string
+                                boolean match = command.toString().equals(shutdown);
+                                if (match) {
+                                    framework.stop();
+                                    break;
+                                } else {
+                                    LOG.log(Level.WARNING, "Karaf shutdown socket:  Invalid command '" +
+                                                       command.toString() + "' received");
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            try {
+                                shutdownSocket.close();
+                            } catch (IOException e) {
+                            }
+                        }
+                    }
+                };
+                thread.setDaemon(true);
+                thread.start();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
