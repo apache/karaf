@@ -266,7 +266,12 @@ init() {
 
 run() {
     OPTS="-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=true"
+    MAIN=org.apache.felix.karaf.main.Bootstrap
     case "$1" in
+        'stop')
+            MAIN=org.apache.felix.karaf.main.Stop
+            shift
+            ;;
         'console')
             shift
             ;;
@@ -286,7 +291,7 @@ run() {
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
     cd $KARAF_BASE
-    exec $JAVA $JAVA_OPTS -Dstorage.location="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties $OPTS -classpath "$CLASSPATH" org.apache.felix.karaf.main.Bootstrap "$@"
+    exec $JAVA $JAVA_OPTS -Dstorage.location="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties $OPTS -classpath "$CLASSPATH" $MAIN "$@"
 }
 
 main() {

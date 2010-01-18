@@ -16,9 +16,9 @@ rem    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem    See the License for the specific language governing permissions and
 rem    limitations under the License.
 rem
-rem 
+rem
 rem $Id: karaf.bat 979 2005-11-30 22:50:55Z bsnyder $
-rem 
+rem
 
 if not "%ECHO%" == "" echo %ECHO%
 
@@ -58,77 +58,8 @@ if "%KARAF_BASE%" == "" (
   set KARAF_BASE=%KARAF_HOME%
 )
 
-set LOCAL_CLASSPATH=%CLASSPATH%
-set DEFAULT_JAVA_OPTS=-server -Xmx512M -Dderby.system.home="%KARAF_BASE%\data\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote
-set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
-set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
-
-if "%LOCAL_CLASSPATH%" == "" goto :KARAF_CLASSPATH_EMPTY
-    set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
-    goto :KARAF_CLASSPATH_END
-:KARAF_CLASSPATH_EMPTY
-    set CLASSPATH=%KARAF_BASE%\conf
-:KARAF_CLASSPATH_END
-
-rem Setup Karaf Home
-if exist "%KARAF_HOME%\conf\karaf-rc.cmd" call %KARAF_HOME%\conf\karaf-rc.cmd
-if exist "%HOME%\karaf-rc.cmd" call %HOME%\karaf-rc.cmd
-
-rem Support for loading native libraries
-set PATH=%PATH%;%KARAF_BASE%\lib;%KARAF_HOME%\lib
-
-rem Setup the Java Virtual Machine
-if not "%JAVA%" == "" goto :Check_JAVA_END
-    set JAVA=java
-    if "%JAVA_HOME%" == "" call :warn JAVA_HOME not set; results may vary
-    if not "%JAVA_HOME%" == "" set JAVA=%JAVA_HOME%\bin\java
-    if not exist "%JAVA_HOME%" (
-        call :warn JAVA_HOME is not valid: "%JAVA_HOME%"
-        goto END
-    )
-:Check_JAVA_END
-
-if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
-
-if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
-    rem Use the defaults if JAVA_DEBUG_OPTS was not set
-    if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
-    
-    set "JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
-    call :warn Enabling Java debug options: %JAVA_DEBUG_OPTS%
-:KARAF_DEBUG_END
-
-if "%KARAF_PROFILER%" == "" goto :KARAF_PROFILER_END
-    set KARAF_PROFILER_SCRIPT=%KARAF_HOME%\conf\profiler\%KARAF_PROFILER%.cmd
-    
-    if exist "%KARAF_PROFILER_SCRIPT%" goto :KARAF_PROFILER_END
-    call :warn Missing configuration for profiler '%KARAF_PROFILER%': %KARAF_PROFILER_SCRIPT%
-    goto END
-:KARAF_PROFILER_END
-
-rem Setup the classpath
-pushd "%KARAF_HOME%\lib"
-for %%G in (*.*) do call:APPEND_TO_CLASSPATH %%G
-popd
-goto CLASSPATH_END
-
-: APPEND_TO_CLASSPATH
-set filename=%~1
-set suffix=%filename:~-4%
-if %suffix% equ .jar set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\lib\%filename%
-goto :EOF
-
-:CLASSPATH_END
-
-rem Execute the JVM or the load the profiler
-if "%KARAF_PROFILER%" == "" goto :RUN
-    rem Execute the profiler if it has been configured
-    call :warn Loading profiler script: %KARAF_PROFILER_SCRIPT%
-    call %KARAF_PROFILER_SCRIPT%
-
-:RUN
-    rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" -jar "%KARAF_HOME%\lib\karaf-client.jar" "osgi:shutdown" %ARGS%
+:EXECUTE
+    "%KARAF_HOME%\bin\karaf.bat" stop
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -139,4 +70,3 @@ endlocal
 if not "%PAUSE%" == "" pause
 
 :END_NO_PAUSE
-
