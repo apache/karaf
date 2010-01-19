@@ -99,9 +99,13 @@ public class ModuleImpl implements IModule
     private boolean m_isActivationTriggered = false;
     private ProtectionDomain m_protectionDomain = null;
     private static SecureAction m_secureAction = new SecureAction();
-    // Class load to be used for boot delegation.
-    private final static ClassLoader m_bootClassLoader;
-    // Statically create the class loader for boot delegation.
+
+    // Bundle-specific class loader for boot delegation.
+    private final ClassLoader m_bootClassLoader;
+    // Default class loader for boot delegation.
+    private final static ClassLoader m_defBootClassLoader;
+
+    // Statically define the default class loader for boot delegation.
     static
     {
         ClassLoader cl = null;
@@ -120,7 +124,7 @@ public class ModuleImpl implements IModule
             cl = null;
             System.err.println("Problem creating boot delegation class loader: " + ex);
         }
-        m_bootClassLoader = cl;
+        m_defBootClassLoader = cl;
     }
 
     // Boot delegation packages.
@@ -175,6 +179,7 @@ public class ModuleImpl implements IModule
         m_activationExcludes = null;
         m_activationIncludes = null;
         m_implicitBootDelegation = false;
+        m_bootClassLoader = m_defBootClassLoader;
     }
 
     public ModuleImpl(
@@ -200,6 +205,18 @@ public class ModuleImpl implements IModule
             || Boolean.valueOf(
                 (String) m_configMap.get(
                     FelixConstants.IMPLICIT_BOOT_DELEGATION_PROP)).booleanValue();
+
+        ClassLoader bootLoader = m_defBootClassLoader;
+        Object map = m_configMap.get(FelixConstants.BOOT_CLASSLOADERS_PROP);
+        if (map instanceof Map)
+        {
+            Object l = ((Map) map).get(bundle);
+            if (l instanceof ClassLoader)
+            {
+                bootLoader = (ClassLoader) l;
+            }
+        }
+        m_bootClassLoader = bootLoader;
 
         ManifestParser mp = new ManifestParser(m_logger, m_configMap, this, m_headerMap);
 
@@ -1539,6 +1556,13 @@ public class ModuleImpl implements IModule
 
     private boolean shouldBootDelegate(String pkgName)
     {
+        // Always boot delegate if the bundle has a configured
+        // boot class loader.
+        if (m_classLoader != m_defBootClassLoader)
+        {
+            return true;
+        }
+
         boolean result = false;
 
         // Only consider delegation if we have a package name, since

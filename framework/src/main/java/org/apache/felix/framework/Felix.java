@@ -3687,7 +3687,15 @@ ex.printStackTrace();
         {
             sb.setCharAt(sb.toString().indexOf("-"), '.');
         }
-        return sb.toString();
+        String toRet = sb.toString();
+        if (toRet.contains("${pom"))
+        {
+            return "0.0.0";
+        }
+        else
+        {
+            return toRet;
+        }
     }
 
     //
