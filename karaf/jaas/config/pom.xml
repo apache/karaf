@@ -72,10 +72,10 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>!${pom.artifactId}*,*</Import-Package>
-                        <Private-Package>${artifactId}.impl</Private-Package>
+                        <Private-Package>${pom.artifactId}.impl</Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
