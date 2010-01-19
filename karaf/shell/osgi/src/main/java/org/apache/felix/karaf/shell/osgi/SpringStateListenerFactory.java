@@ -64,7 +64,11 @@ public class SpringStateListenerFactory implements BundleStateListener.Factory {
 
     private BundleStateListener createListener() {
         try {
-            return new SpringApplicationListener(bundleContext);
+            // Use dynamic class loading to make sure we actually try to reload the class for
+            // dynamic imports to kick in   if possible
+            Class cl = getClass().getClassLoader().loadClass("org.apache.felix.karaf.shell.osgi.SpringStateListenerFactory$SpringApplicationListener");
+            return (BundleStateListener) cl.getConstructor(BundleContext.class).newInstance(bundleContext);
+//            return new SpringApplicationListener(bundleContext);
         } catch (Throwable t) {
             return null;
         }
