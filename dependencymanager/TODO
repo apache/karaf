@@ -3,11 +3,6 @@
   * Add javadoc; export the compat package using version 2.0.2; import new dm api using version range [3.0.0, 4.0.0)
   * add suport for ServiceComponent/ServiceComponentDependency classes (but it's only used by the old dm shell).
 
-- core: 
-
-  * export the public package using version 3.0.0
-  * The org.apache.felix.dm.resources.BundleResourceRepository should be exposed as an interface, like dependencies
-
 - test: 
 
   * add test for compatibility library
