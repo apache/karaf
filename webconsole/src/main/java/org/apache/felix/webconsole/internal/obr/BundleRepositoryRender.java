@@ -278,7 +278,7 @@ public class BundleRepositoryRender extends BaseWebConsolePlugin
                         }
                         versions.add( version );
 
-                        labels.add( res.getPresentationName() + "§" + symbolicName );
+                        labels.add( res.getPresentationName() + Character.MAX_VALUE + symbolicName );
                     }
                 }
             }
@@ -290,7 +290,7 @@ public class BundleRepositoryRender extends BaseWebConsolePlugin
         for ( Iterator ri = labels.iterator(); ri.hasNext(); )
         {
             final String label = ( String ) ri.next();
-            final int idx = label.indexOf( '§' );
+            final int idx = label.indexOf( Character.MAX_VALUE );
             final String presName = label.substring( 0, idx );
             final String symName = label.substring( idx + 1 );
             final Collection versions = ( Collection ) resSet.remove( symName );
