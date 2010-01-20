@@ -27,6 +27,7 @@ import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.log.LogService;
+import org.osgi.service.metatype.MetaTypeProvider;
 
 
 /**
@@ -35,17 +36,15 @@ import org.osgi.service.log.LogService;
  * bundle context properties. In addition, this class registers a ManagedService
  * service to receive configuration supplied from the Configuration Admin
  * service overlaying the static context properties.
- *
- * @scr.component ds="false" name="org.apache.felix.scr.ScrService"
  */
 public class ScrConfiguration
 {
 
     private static final String VALUE_TRUE = "true";
 
-    private static final String PROP_FACTORY_ENABLED = "ds.factory.enabled";
+    static final String PROP_FACTORY_ENABLED = "ds.factory.enabled";
 
-    private static final String PROP_LOGLEVEL = "ds.loglevel";
+    static final String PROP_LOGLEVEL = "ds.loglevel";
 
     private static final String LOG_LEVEL_DEBUG = "debug";
 
@@ -61,18 +60,11 @@ public class ScrConfiguration
 
     private final BundleContext bundleContext;
 
-    /**
-     * @scr.property nameRef="PROP_LOGLEVEL" valueRef="LogService.LOG_ERROR"
-     *      type="Integer"
-     *      options 4="Debug" 3="Information" 2="Warnings" 1="Error"
-     */
     private int logLevel;
 
-    /**
-     * @scr.property nameRef="PROP_FACTORY_ENABLED" value="false" type="Boolean"
-     */
     private boolean factoryEnabled;
 
+    static final String PID = "org.apache.felix.scr.ScrService";
 
     public ScrConfiguration( BundleContext bundleContext )
     {
@@ -91,9 +83,21 @@ public class ScrConfiguration
                     configure( properties );
                 }
             };
+            // add meta type provider if interfaces are available
+            Object enhancedService = tryToCreateMetaTypeProvider(service);
+            final String[] interfaceNames;
+            if ( enhancedService == null )
+            {
+                interfaceNames = new String[] {ManagedService.class.getName()};
+            }
+            else
+            {
+                interfaceNames = new String[] {ManagedService.class.getName(), MetaTypeProvider.class.getName()};
+                service = enhancedService;
+            }
             Dictionary props = new Hashtable();
-            props.put( Constants.SERVICE_PID, "org.apache.felix.scr.ScrService" );
-            bundleContext.registerService( ManagedService.class.getName(), service, props );
+            props.put( Constants.SERVICE_PID, PID );
+            bundleContext.registerService( interfaceNames, service, props );
         }
         catch ( Throwable t )
         {
@@ -101,20 +105,23 @@ public class ScrConfiguration
         }
     }
 
-
     void configure( Dictionary config )
     {
         if ( config == null )
         {
 
             logLevel = getLogLevel( bundleContext );
-            factoryEnabled = VALUE_TRUE.equals( bundleContext.getProperty( PROP_FACTORY_ENABLED ) );
+            factoryEnabled = getDefaultFactoryEnabled();
         }
         else
         {
             logLevel = ( ( Integer ) config.get( PROP_LOGLEVEL ) ).intValue();
             factoryEnabled = ( ( Boolean ) config.get( PROP_FACTORY_ENABLED ) ).booleanValue();
         }
+    }
+
+    private boolean getDefaultFactoryEnabled() {
+        return VALUE_TRUE.equals( bundleContext.getProperty( PROP_FACTORY_ENABLED ) );
     }
 
 
@@ -176,5 +183,18 @@ public class ScrConfiguration
 
         // default log level (errors only)
         return LogService.LOG_ERROR;
+    }
+
+    private Object tryToCreateMetaTypeProvider(final Object managedService)
+    {
+        try
+        {
+            return new MetaTypeProviderImpl(getLogLevel( bundleContext ),
+                    getDefaultFactoryEnabled(), (ManagedService)managedService);
+        } catch (Throwable t)
+        {
+            // we simply ignore this
+        }
+        return null;
     }
 }

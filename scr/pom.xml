@@ -140,20 +140,6 @@
     <build>
         <directory>${bundle.build.name}</directory>
         <plugins>
-            <!-- generate the MetaType descriptor for the configuration -->
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <version>1.4.0</version>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -205,6 +191,12 @@
                             -->
                             org.osgi.service.cm;version="[1.2,2)";resolution:=optional,
                             
+                            <!--
+                                Metatype is optional and if it is
+                                present, version 1.1 (from R4.1) is enough  
+                            -->
+                            org.osgi.service.metatype;version="[1.1,2)";resolution:=optional,
+
                             <!--
                                 SCR API is required (we also export it) and must
                                 be of any 1.1 version, because we implement that
