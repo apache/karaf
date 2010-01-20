@@ -11,23 +11,14 @@
  */
 package org.apache.felix.dm.dependencies;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-
-import org.apache.felix.dm.DependencyActivatorBase;
-import org.apache.felix.dm.impl.Logger;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-
 /**
 * A Temporal Service dependency that can block the caller thread between service updates. Only
 * useful for required stateless dependencies that can be replaced transparently.
 * A Dynamic Proxy is used to wrap the actual service dependency. When the dependency goes 
 * away, an attempt is made to replace it with another one which satisfies the service dependency 
 * criteria. If no service replacement is available, then any method invocation (through the 
-* dynamic proxy) will block during a configurable timeout. On timeout, an unchecked ServiceUnavailable 
-* exception is raised (but the service is not deactivated).<p>
+* dynamic proxy) will block during a configurable timeout. On timeout, an unchecked 
+* <code>IllegalStateException</code> exception is raised (but the service is not deactivated).<p>
 * 
 * <b>This class only supports required dependencies, and temporal dependencies must be accessed outside
 * the Activator (OSGi) thread, because method invocations may block the caller thread when dependencies

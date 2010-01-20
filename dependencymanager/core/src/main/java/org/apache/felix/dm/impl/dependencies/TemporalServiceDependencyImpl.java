@@ -22,60 +22,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 /**
-* A Temporal Service dependency that can block the caller thread between service updates. Only
-* useful for required stateless dependencies that can be replaced transparently.
-* A Dynamic Proxy is used to wrap the actual service dependency. When the dependency goes 
-* away, an attempt is made to replace it with another one which satisfies the service dependency 
-* criteria. If no service replacement is available, then any method invocation (through the 
-* dynamic proxy) will block during a configurable timeout. On timeout, an unchecked ServiceUnavailable 
-* exception is raised (but the service is not deactivated).<p>
-* 
-* When an OSGi update takes place, we use the following locking strategy: A Read/Write lock is used
-* to synchronize the updating thread with respect to the other threads which invoke the backed service. 
-* The Updating thread uses an exclusive Write lock and service invokers uses a Read lock. This model
-* allows multiple threads to invoke the backed service concurrently, but the updating thread won't
-* update the dependency if it's currently in use.<p>
-* 
-* <b>This class only supports required dependencies, and temporal dependencies must be accessed outside
-* the Activator (OSGi) thread, because method invocations may block the caller thread when dependencies
-* are not satisfied.
-* </b>
-*
-* <p> Sample Code:<p>
-* <blockquote>
-* 
-* <pre>
-* import org.apache.felix.dependencymanager.*;
-* 
-* public class Activator extends DependencyActivatorBase {
-*   public void init(BundleContext ctx, DependencyManager dm) throws Exception {
-*     dm.add(createService()
-*            .setImplementation(MyServer.class)
-*        .add(createTemporalServiceDependency()
-*            .setService(MyDependency.class)
-*            .setTimeout(15000)));
-*   }
-* 
-*   public void destroy(BundleContext ctx, DependencyManager dm) throws Exception {
-*   }
-* }
-* 
-* class MyServer implements Runnable {
-*   MyDependency _dependency; // Auto-Injected by reflection.
-*   void start() {
-*     (new Thread(this)).start();
-*   }
-*   
-*   public void run() {
-*     try {
-*       _dependency.doWork();
-*     } catch (ServiceUnavailableException e) {
-*       t.printStackTrace();
-*     }
-*   }   
-* </pre>
-* 
-* </blockquote>
+* Temporal Service dependency implementation.
+* (see javadoc in {@link TemporalServiceDependency}).
 */
 public class TemporalServiceDependencyImpl extends ServiceDependencyImpl implements TemporalServiceDependency, InvocationHandler {
     // Max millis to wait for service availability.
