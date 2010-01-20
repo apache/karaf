@@ -35,9 +35,9 @@ package org.apache.felix.dm.dependencies;
 *   public void init(BundleContext ctx, DependencyManager dm) throws Exception {
 *     dm.add(createService()
 *            .setImplementation(MyServer.class)
-*        .add(createTemporalServiceDependency()
-*            .setService(MyDependency.class)
-*            .setTimeout(15000)));
+*            .add(createTemporalServiceDependency()
+*                .setTimeout(15000)
+*                .setService(MyDependency.class)));
 *   }
 * 
 *   public void destroy(BundleContext ctx, DependencyManager dm) throws Exception {
@@ -53,7 +53,7 @@ package org.apache.felix.dm.dependencies;
 *   public void run() {
 *     try {
 *       _dependency.doWork();
-*     } catch (ServiceUnavailableException e) {
+*     } catch (IllegalStateException e) {
 *       t.printStackTrace();
 *     }
 *   }   
