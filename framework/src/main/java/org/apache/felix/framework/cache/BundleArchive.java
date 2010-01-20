@@ -985,7 +985,7 @@ public class BundleArchive
                 }
 
                 // Decode any URL escaped sequences.
-                location = URLDecoder.decode(location);
+                location = URLDecoder.decode(location, "UTF-8");
 
                 // Make sure the referenced file exists.
                 File file = new File(location.substring(FILE_PROTOCOL.length()));
