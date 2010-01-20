@@ -36,13 +36,13 @@
     </repository>
   </repositories>
 
-  <description>DM annotation API, and corresponding scanners</description>
+  <description>DM annotation API, and corresponding scanner plugins</description>
   
   <dependencies>
     <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
-      <version>0.0.389</version>
+      <version>0.0.390</version>
     </dependency>
 
     <dependency>
