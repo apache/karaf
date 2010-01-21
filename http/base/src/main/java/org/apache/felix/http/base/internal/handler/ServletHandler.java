@@ -62,7 +62,9 @@ public final class ServletHandler
 
     public boolean matches(String uri)
     {
-        if (this.alias.equals("/")) {
+        if (uri == null) {
+            return this.alias.equals("/");
+        } else if (this.alias.equals("/")) {
             return uri.startsWith(this.alias);
         } else {
             return uri.equals(this.alias) || uri.startsWith(this.alias + "/");
@@ -95,5 +97,5 @@ public final class ServletHandler
     public int compareTo(ServletHandler other)
     {
         return other.alias.length() - this.alias.length();
-    }    
+    }
 }

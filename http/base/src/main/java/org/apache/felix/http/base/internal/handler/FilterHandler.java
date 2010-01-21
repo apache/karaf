@@ -41,7 +41,7 @@ public final class FilterHandler
     {
         return this.filter;
     }
-    
+
     public void init()
         throws ServletException
     {
@@ -57,6 +57,11 @@ public final class FilterHandler
 
     public boolean matches(String uri)
     {
+        // assume root if uri is null
+        if (uri == null) {
+            uri = "/";
+        }
+
         return uri.matches(this.pattern);
     }
 

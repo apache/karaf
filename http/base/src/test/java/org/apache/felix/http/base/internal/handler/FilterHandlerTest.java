@@ -20,10 +20,6 @@ import org.junit.Test;
 import org.junit.Before;
 import org.junit.Assert;
 import org.mockito.Mockito;
-import org.mockito.MockSettings;
-import org.mockito.stubbing.Answer;
-import org.hamcrest.Matcher;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.FilterChain;
@@ -67,11 +63,23 @@ public class FilterHandlerTest
     {
         FilterHandler h1 = createHandler("/a/b", 0);
         FilterHandler h2 = createHandler("/a/b/.+", 0);
+        FilterHandler h3 = createHandler("/", 0);
+        FilterHandler h4 = createHandler("/.*", 0);
 
+        Assert.assertFalse(h1.matches(null));
+        Assert.assertFalse(h1.matches("/a"));
         Assert.assertTrue(h1.matches("/a/b"));
         Assert.assertFalse(h1.matches("/a/b/c"));
+        Assert.assertFalse(h2.matches(null));
+        Assert.assertFalse(h1.matches("/a"));
         Assert.assertTrue(h2.matches("/a/b/c"));
         Assert.assertFalse(h2.matches("/a/b/"));
+        Assert.assertTrue(h3.matches(null));
+        Assert.assertTrue(h3.matches("/"));
+        Assert.assertFalse(h3.matches("/a/b/"));
+        Assert.assertTrue(h4.matches(null));
+        Assert.assertTrue(h4.matches("/"));
+        Assert.assertTrue(h4.matches("/a/b/"));
     }
 
     @Test
@@ -140,5 +148,38 @@ public class FilterHandlerTest
         Mockito.verify(this.filter, Mockito.never()).doFilter(req, res, chain);
         Mockito.verify(chain, Mockito.never()).doFilter(req, res);
         Mockito.verify(res).sendError(HttpServletResponse.SC_FORBIDDEN);
+    }
+
+    @Test
+    public void testHandleNotFoundContextRoot()
+        throws Exception
+    {
+        FilterHandler h1 = createHandler("/a", 0);
+        HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse res = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
+
+        Mockito.when(req.getPathInfo()).thenReturn(null);
+        h1.handle(req, res, chain);
+
+        Mockito.verify(this.filter, Mockito.never()).doFilter(req, res, chain);
+        Mockito.verify(chain).doFilter(req, res);
+    }
+
+    @Test
+    public void testHandleFoundContextRoot()
+        throws Exception
+    {
+        FilterHandler h1 = createHandler("/", 0);
+        HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse res = Mockito.mock(HttpServletResponse.class);
+        FilterChain chain = Mockito.mock(FilterChain.class);
+        Mockito.when(this.context.handleSecurity(req, res)).thenReturn(true);
+
+        Mockito.when(req.getPathInfo()).thenReturn(null);
+        h1.handle(req, res, chain);
+
+        Mockito.verify(this.filter).doFilter(req, res, chain);
+        Mockito.verify(chain, Mockito.never()).doFilter(req, res);
     }
 }

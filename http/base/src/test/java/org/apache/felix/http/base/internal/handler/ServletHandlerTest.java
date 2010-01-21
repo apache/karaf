@@ -41,12 +41,12 @@ public class ServletHandlerTest
     {
         return createHandler("/dummy");
     }
-    
+
     private ServletHandler createHandler(String alias)
     {
         return new ServletHandler(this.context, this.servlet, alias);
     }
-    
+
     @Test
     public void testCompare()
     {
@@ -62,6 +62,8 @@ public class ServletHandlerTest
     {
         ServletHandler h1 = createHandler("/a/b");
 
+        Assert.assertFalse(h1.matches(null));
+        Assert.assertFalse(h1.matches("/"));
         Assert.assertFalse(h1.matches("/a/"));
         Assert.assertTrue(h1.matches("/a/b"));
         Assert.assertTrue(h1.matches("/a/b/"));
@@ -102,7 +104,7 @@ public class ServletHandlerTest
 
     @Test
     public void testHandleFound()
-        throws Exception
+    throws Exception
     {
         ServletHandler h1 = createHandler("/a");
         HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
@@ -114,7 +116,7 @@ public class ServletHandlerTest
 
         Assert.assertTrue(result);
         Mockito.verify(this.servlet).service(Mockito.any(HttpServletRequest.class),
-                Mockito.any(HttpServletResponse.class));
+            Mockito.any(HttpServletResponse.class));
     }
 
     @Test
@@ -132,5 +134,38 @@ public class ServletHandlerTest
         Assert.assertTrue(result);
         Mockito.verify(this.servlet, Mockito.never()).service(req, res);
         Mockito.verify(res).sendError(HttpServletResponse.SC_FORBIDDEN);
+    }
+
+    @Test
+    public void testHandleNotFoundContextRoot()
+        throws Exception
+    {
+        ServletHandler h1 = createHandler("/a");
+        HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse res = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(this.context.handleSecurity(req, res)).thenReturn(true);
+
+        Mockito.when(req.getPathInfo()).thenReturn(null);
+        boolean result = h1.handle(req, res);
+
+        Assert.assertFalse(result);
+        Mockito.verify(this.servlet, Mockito.never()).service(req, res);
+    }
+
+    @Test
+    public void testHandleFoundContextRoot()
+        throws Exception
+    {
+        ServletHandler h1 = createHandler("/");
+        HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse res = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(this.context.handleSecurity(req, res)).thenReturn(true);
+
+        Mockito.when(req.getPathInfo()).thenReturn(null);
+        boolean result = h1.handle(req, res);
+
+        Assert.assertTrue(result);
+        Mockito.verify(this.servlet).service(Mockito.any(HttpServletRequest.class),
+                Mockito.any(HttpServletResponse.class));
     }
 }
