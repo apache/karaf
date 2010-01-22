@@ -80,8 +80,37 @@ public class VersionRange
         return (version.compareTo(m_low) > 0) && (version.compareTo(m_high) < 0);
     }
 
+    public boolean intersects(VersionRange vr)
+    {
+        // Check to see if the passed in floor is less than or equal to
+        // this ceiling and the passed in ceiling is greater than or
+        // equal to this floor.
+        boolean isFloorLessThanCeiling = false;
+        if ((m_high == null)
+            || (m_high.compareTo(vr.getLow()) > 0)
+            || ((m_high.compareTo(vr.getLow()) == 0)
+                && m_isHighInclusive && vr.isLowInclusive()))
+        {
+            isFloorLessThanCeiling = true;
+        }
+        boolean isCeilingGreaterThanFloor = false;
+        if ((vr.getHigh() == null)
+            || (m_low.compareTo(vr.getHigh()) < 0)
+            || ((m_low.compareTo(vr.getHigh()) == 0)
+                && m_isLowInclusive && vr.isHighInclusive()))
+        {
+            isCeilingGreaterThanFloor = true;
+        }
+        return isFloorLessThanCeiling && isCeilingGreaterThanFloor;
+    }
+
     public VersionRange intersection(VersionRange vr)
     {
+        if (!intersects(vr))
+        {
+            return null;
+        }
+
         VersionRange floor = (m_low.compareTo(vr.getLow()) > 0) ? this : vr;
         boolean floorInclusive = (getLow().equals(vr.getLow()))
             ? (isLowInclusive() & vr.isLowInclusive())

@@ -466,20 +466,8 @@ public class FelixResolverState implements Resolver.ResolverState
         // If the existing version range floor is greater than the additional
         // version range's floor, then they are inconflict since we cannot
         // widen the constraint.
-        if (existing.getTargetVersionRange().getLow().compareTo(
-            additional.getTargetVersionRange().getLow()) > 0)
-        {
-            return true;
-        }
-        // If the existing version range ceiling is less than the additional
-        // version range's ceiling, then they are inconflict since we cannot
-        // widen the constraint.
-        if (((existing.getTargetVersionRange().getHigh() != null)
-            && (additional.getTargetVersionRange().getHigh() == null))
-            || ((existing.getTargetVersionRange().getHigh() != null)
-                && (additional.getTargetVersionRange().getHigh() != null)
-                && (existing.getTargetVersionRange().getHigh().compareTo(
-                    additional.getTargetVersionRange().getHigh()) < 0)))
+        if (!existing.getTargetVersionRange().intersects(
+            additional.getTargetVersionRange()))
         {
             return true;
         }
