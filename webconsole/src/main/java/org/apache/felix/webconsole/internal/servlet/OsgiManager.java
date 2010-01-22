@@ -18,16 +18,42 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
 
-import javax.servlet.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.*;
-import org.apache.felix.webconsole.internal.*;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.Action;
+import org.apache.felix.webconsole.BrandingPlugin;
+import org.apache.felix.webconsole.VariableResolver;
+import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.internal.Logger;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
+import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.internal.WebConsolePluginAdapter;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
-import org.osgi.framework.*;
+import org.apache.felix.webconsole.internal.filter.FilteringResponseWrapper;
+import org.apache.felix.webconsole.internal.i18n.ResourceBundleManager;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
@@ -35,7 +61,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 
 /**
- * The <code>OSGi Manager</code> TODO
+ * The <code>OSGi Manager</code> is the actual Web Console Servlet which
+ * is registered with the OSGi Http Service and which maintains registered
+ * console plugins.
  */
 public class OsgiManager extends GenericServlet
 {
@@ -133,13 +161,17 @@ public class OsgiManager extends GenericServlet
 
     private ServiceRegistration configurationListener;
 
+    // map of plugins: indexed by the plugin label (String), values are
+    // AbstractWebConsolePlugin instances
     private Map plugins = new HashMap();
 
+    // map of labels to plugin titles: indexed by plugin label (String, values
+    // are plugin titles
     private Map labelMap = new HashMap();
 
     private Map operations = new HashMap();
 
-    private Servlet defaultRender;
+    private AbstractWebConsolePlugin defaultPlugin;
 
     private String defaultRenderName;
 
@@ -155,6 +187,7 @@ public class OsgiManager extends GenericServlet
 
     private Set enabledPlugins;
 
+    private ResourceBundleManager resourceBundleManager;
 
     public OsgiManager( BundleContext bundleContext )
     {
@@ -201,7 +234,7 @@ public class OsgiManager extends GenericServlet
             log.dispose();
         }
 
-        this.defaultRender = null;
+        this.defaultPlugin = null;
         this.bundleContext = null;
     }
 
@@ -237,8 +270,7 @@ public class OsgiManager extends GenericServlet
                 }
                 if ( plugin instanceof AbstractWebConsolePlugin )
                 {
-                    AbstractWebConsolePlugin amp = ( AbstractWebConsolePlugin ) plugin;
-                    bindServlet( amp.getLabel(), amp );
+                    bindServlet( ( AbstractWebConsolePlugin ) plugin );
                 }
                 else
                 {
@@ -275,6 +307,9 @@ public class OsgiManager extends GenericServlet
         pluginsTracker.open();
         brandingTracker = new BrandingServiceTracker(this);
         brandingTracker.open();
+
+        // the resource bundle manager
+        resourceBundleManager = new ResourceBundleManager( getBundleContext() );
     }
 
     public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException
@@ -310,7 +345,7 @@ public class OsgiManager extends GenericServlet
         }
 
         label = label.substring( 1, slash );
-        Servlet plugin = ( Servlet ) plugins.get( label );
+        AbstractWebConsolePlugin plugin = ( AbstractWebConsolePlugin ) plugins.get( label );
         if ( plugin != null )
         {
             // the official request attributes
@@ -322,7 +357,10 @@ public class OsgiManager extends GenericServlet
             req.setAttribute( ATTR_LABEL_MAP_OLD, labelMap );
             req.setAttribute( ATTR_APP_ROOT_OLD, request.getContextPath() + request.getServletPath() );
 
-            plugin.service( req, res );
+            // wrap the response for localization and template variable replacement
+            response = wrapResponse( request, response, plugin );
+
+            plugin.service( request, response );
         }
         else
         {
@@ -336,6 +374,13 @@ public class OsgiManager extends GenericServlet
     {
         // base class destroy not needed, since the GenericServlet.destroy
         // is an empty method
+
+        // dispose off the resource bundle manager
+        if ( resourceBundleManager != null )
+        {
+            resourceBundleManager.dispose();
+            resourceBundleManager = null;
+        }
 
         // stop listening for plugins
         if ( operationsTracker != null )
@@ -426,6 +471,16 @@ public class OsgiManager extends GenericServlet
     BundleContext getBundleContext()
     {
         return bundleContext;
+    }
+
+
+    private HttpServletResponse wrapResponse( final HttpServletRequest request, final HttpServletResponse response,
+        final AbstractWebConsolePlugin plugin )
+    {
+        final Locale locale = request.getLocale();
+        final ResourceBundle resourceBundle = resourceBundleManager.getResourceBundle( plugin.getBundle(), locale );
+        final VariableResolver variables = ( plugin instanceof VariableResolver ) ? ( VariableResolver ) plugin : null;
+        return new FilteringResponseWrapper( response, resourceBundle, variables );
     }
 
     private static class HttpServiceTracker extends ServiceTracker
@@ -521,25 +576,39 @@ public class OsgiManager extends GenericServlet
                 {
                     // wrap the servlet if it is not an AbstractWebConsolePlugin
                     // but has a title in the service properties
-                    if ( !( operation instanceof AbstractWebConsolePlugin ) )
+                    final AbstractWebConsolePlugin plugin;
+                    if ( operation instanceof AbstractWebConsolePlugin )
                     {
+                        plugin = ( AbstractWebConsolePlugin ) operation;
+                    }
+                    else
+                    {
+
+                        // define the title from the PLUGIN_TITLE registration
+                        // property, the servlet name or the servlet "toString"
                         Object title = reference.getProperty( WebConsoleConstants.PLUGIN_TITLE );
-                        if ( title instanceof String )
+                        if ( !( title instanceof String ) )
                         {
-                            WebConsolePluginAdapter pluginAdapter = new WebConsolePluginAdapter( ( String ) label,
-                                ( String ) title, ( Servlet ) operation, reference );
+                            if ( operation instanceof GenericServlet )
+                            {
+                                title = ( ( GenericServlet ) operation ).getServletName();
+                            }
 
-                            // ensure the AbstractWebConsolePlugin is correctly setup
-                            Bundle pluginBundle = reference.getBundle();
-                            pluginAdapter.activate( pluginBundle.getBundleContext() );
-
-                            // now use this adapter as the operation
-                            operation = pluginAdapter;
+                            if ( !( title instanceof String ) )
+                            {
+                                title = operation.toString();
+                            }
                         }
+
+                        plugin = new WebConsolePluginAdapter( ( String ) label, ( String ) title,
+                            ( Servlet ) operation, reference );
+
+                        // ensure the AbstractWebConsolePlugin is correctly setup
+                        Bundle pluginBundle = reference.getBundle();
+                        plugin.activate( pluginBundle.getBundleContext() );
                     }
 
-                    // TODO: check reference properties !!
-                    osgiManager.bindServlet( ( String ) label, ( Servlet ) operation );
+                    osgiManager.bindServlet( plugin );
                 }
                 return operation;
             }
@@ -680,58 +749,53 @@ public class OsgiManager extends GenericServlet
     }
 
 
-    protected void bindServlet( String label, Servlet servlet )
+    private void bindServlet( final AbstractWebConsolePlugin plugin )
     {
+        final String label = plugin.getLabel();
+        final String title = plugin.getTitle();
         try
         {
-            servlet.init( getServletConfig() );
-            plugins.put( label, servlet );
+            plugin.init( getServletConfig() );
+            plugins.put( label, plugin );
+            labelMap.put( label, title );
 
-            if ( servlet instanceof GenericServlet )
+            if ( this.defaultPlugin == null )
             {
-                String title = ( ( GenericServlet ) servlet ).getServletName();
-                if ( title != null )
-                {
-                    labelMap.put( label, title );
-                }
-            }
-
-            if ( this.defaultRender == null )
-            {
-                this.defaultRender = servlet;
+                this.defaultPlugin = plugin;
             }
             else if ( label.equals( this.defaultRenderName ) )
             {
-                this.defaultRender = servlet;
+                this.defaultPlugin = plugin;
             }
         }
         catch ( ServletException se )
         {
-            // TODO: log
+            log.log( LogService.LOG_WARNING, "Initialization of plugin '" + title + "' (" + label
+                + ") failed; not using this plugin", se );
         }
     }
 
 
-    protected void unbindServlet( String label )
+    private void unbindServlet( String label )
     {
-        Servlet servlet = ( Servlet ) plugins.remove( label );
-        if ( servlet != null )
+        AbstractWebConsolePlugin plugin = ( AbstractWebConsolePlugin ) plugins.remove( label );
+        if ( plugin != null )
         {
             labelMap.remove( label );
 
-            if ( this.defaultRender == servlet )
+            if ( this.defaultPlugin == plugin )
             {
                 if ( this.plugins.isEmpty() )
                 {
-                    this.defaultRender = null;
+                    this.defaultPlugin = null;
                 }
                 else
                 {
-                    this.defaultRender = ( Servlet ) plugins.values().iterator().next();
+                    this.defaultPlugin = ( AbstractWebConsolePlugin ) plugins.values().iterator().next();
                 }
             }
 
-            servlet.destroy();
+            plugin.destroy();
         }
     }
 
@@ -766,7 +830,7 @@ public class OsgiManager extends GenericServlet
         defaultRenderName = getProperty( config, PROP_DEFAULT_RENDER, DEFAULT_PAGE );
         if ( defaultRenderName != null && plugins.get( defaultRenderName ) != null )
         {
-            defaultRender = ( Servlet ) plugins.get( defaultRenderName );
+            defaultPlugin = ( AbstractWebConsolePlugin ) plugins.get( defaultRenderName );
         }
 
         // get the web manager root path

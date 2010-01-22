@@ -20,6 +20,7 @@ package org.apache.felix.webconsole.internal;
 
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.VariableResolver;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.osgi.framework.ServiceReference;
 
@@ -39,7 +41,7 @@ import org.osgi.framework.ServiceReference;
  * {@link org.apache.felix.webconsole.WebConsoleConstants#PLUGIN_TITLE}
  * service attribute.
  */
-public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
+public class WebConsolePluginAdapter extends AbstractWebConsolePlugin implements VariableResolver
 {
 
     /** serial UID */
@@ -57,6 +59,9 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     // the CSS references (null if none)
     private final String[] cssReferences;
 
+    // the delegatee variable resolver
+    private VariableResolver varResolver;
+
 
     public WebConsolePluginAdapter( String label, String title, Servlet plugin, ServiceReference serviceReference )
     {
@@ -64,6 +69,9 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
         this.title = title;
         this.plugin = plugin;
         this.cssReferences = toStringArray( serviceReference.getProperty( WebConsoleConstants.PLUGIN_CSS_REFERENCES ) );
+
+        // activate this abstract plugin (mainly to set the bundle context)
+        activate( serviceReference.getBundle().getBundleContext() );
     }
 
 
@@ -127,12 +135,27 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
      */
     public void init( ServletConfig config ) throws ServletException
     {
-        // base classe initialization
-        super.init( config );
+        // no need to activate the plugin, this has already been done
+        // when the instance was setup
+        try
+        {
+            // base classe initialization
+            super.init( config );
 
-        // plugin initialization
-        plugin.init( config );
+            // plugin initialization
+            plugin.init( config );
+        }
+        catch ( ServletException se )
+        {
+            // if init fails, the plugin will not be destroyed and thus
+            // the plugin not deactivated. Do it here
+            deactivate();
+
+            // rethrow the exception
+            throw se;
+        }
     }
+
 
     /**
      * Detects whether this request is intended to have the headers and
@@ -178,10 +201,25 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
      */
     public void destroy()
     {
-        plugin.destroy();
-        super.destroy();
+        try
+        {
+            plugin.destroy();
+            super.destroy();
+        }
+        finally
+        {
+            varResolver = null;
+            deactivate();
+        }
     }
 
+
+    //---------- VariableResolver
+
+    public String get( String variable )
+    {
+        return getVariableResolver().get(variable);
+    }
 
     //---------- internal
 
@@ -221,5 +259,70 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
         }
 
         return null;
+    }
+
+
+    private VariableResolver getVariableResolver()
+    {
+        if ( varResolver == null )
+        {
+            if ( plugin instanceof VariableResolver )
+            {
+                varResolver = ( VariableResolver ) plugin;
+            }
+            else
+            {
+                varResolver = VariableResolverProxy.create( plugin );
+            }
+        }
+
+        return varResolver;
+    }
+
+    private static class VariableResolverProxy implements VariableResolver
+    {
+        static VariableResolver create( Object object )
+        {
+            try
+            {
+                final Class stringClass = String.class;
+                final Method getMethod = object.getClass().getMethod( "get", new Class[]
+                    { stringClass } );
+                if ( getMethod.getReturnType() == stringClass )
+                {
+                    return new VariableResolverProxy( object, getMethod );
+                }
+            }
+            catch ( Throwable t )
+            {
+            }
+
+            return VariableResolver.DEFAULT;
+        }
+
+        private final Object object;
+
+        private final Method getMethod;
+
+
+        private VariableResolverProxy( final Object object, final Method getMethod )
+        {
+            this.object = object;
+            this.getMethod = getMethod;
+        }
+
+
+        public String get( String variable )
+        {
+            try
+            {
+                return ( String ) getMethod.invoke( object, new Object[]
+                    { variable } );
+            }
+            catch ( Throwable t )
+            {
+                return null;
+            }
+        }
     }
 }

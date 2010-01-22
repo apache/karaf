@@ -32,7 +32,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
-import org.apache.felix.webconsole.internal.WebConsolePluginAdapter;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
@@ -186,9 +186,29 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     }
 
 
+    /**
+     * Returns the <code>BundleContext</code> with which this plugin has been
+     * activated. If the plugin has not be activated by calling the
+     * {@link #activate(BundleContext)} method, this method returns
+     * <code>null</code>.
+     */
     protected BundleContext getBundleContext()
     {
         return bundleContext;
+    }
+
+
+    /**
+     * Returns the <code>Bundle</code> pertaining to the
+     * {@link #getBundleContext() bundle context} with which this plugin has
+     * been activated. If the plugin has not be activated by calling the
+     * {@link #activate(BundleContext)} method, this method returns
+     * <code>null</code>.
+     */
+    public final Bundle getBundle()
+    {
+        final BundleContext bundleContext = getBundleContext();
+        return ( bundleContext != null ) ? bundleContext.getBundle() : null;
     }
 
 
