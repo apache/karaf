@@ -17,23 +17,9 @@
 package org.apache.felix.webconsole.internal.misc;
 
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.io.*;
+import java.text.*;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -45,6 +31,7 @@ import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 
@@ -98,7 +85,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         {
             response.setContentType( "text/plain; charset=utf-8" );
             ConfigurationWriter pw = new PlainTextConfigurationWriter( response.getWriter() );
-            printConfigurationStatus( pw );
+            printConfigurationStatus( pw, ConfigurationPrinter.MODE_TXT );
             pw.flush();
         }
         else if ( request.getPathInfo().endsWith( ".zip" ) )
@@ -115,7 +102,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             zip.setMethod( ZipOutputStream.DEFLATED );
 
             ConfigurationWriter pw = new ZipConfigurationWriter( zip );
-            printConfigurationStatus( pw );
+            printConfigurationStatus( pw, ConfigurationPrinter.MODE_ZIP );
             pw.flush();
 
             zip.finish();
@@ -172,7 +159,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         pw.println( "<div id='divcfgprttabs' class='divcfgprttabshidden'>" );
         pw.println( "<ul id='cfgprttabs'>" );
 
-        printConfigurationStatus( pw );
+        printConfigurationStatus( pw, ConfigurationPrinter.MODE_WEB );
 
         pw.println( "</ul>" );
         pw.println( "</div>" );
@@ -181,14 +168,18 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     }
 
 
-    private void printConfigurationStatus( ConfigurationWriter pw )
+    private void printConfigurationStatus( ConfigurationWriter pw, final String mode )
     {
         this.printSystemProperties( pw );
         this.printThreads( pw );
 
         for ( Iterator cpi = getConfigurationPrinters().iterator(); cpi.hasNext(); )
         {
-            printConfigurationPrinter( pw, ( ConfigurationPrinter ) cpi.next() );
+            final PrinterDesc desc = (PrinterDesc) cpi.next();
+            if ( desc.match(mode) )
+            {
+                printConfigurationPrinter( pw, desc.printer );
+            }
         }
     }
 
@@ -205,14 +196,16 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         if ( cfgPrinterTrackerCount != cfgPrinterTracker.getTrackingCount() )
         {
             SortedMap cp = new TreeMap();
-            Object[] services = cfgPrinterTracker.getServices();
-            if ( services != null )
+            ServiceReference[] refs = cfgPrinterTracker.getServiceReferences();
+            if ( refs != null )
             {
-                for ( int i = 0; i < services.length; i++ )
+                for ( int i = 0; i < refs.length; i++ )
                 {
-                    Object srv = services[i];
-                    ConfigurationPrinter cfgPrinter = ( ConfigurationPrinter ) srv;
-                    cp.put( cfgPrinter.getTitle(), cfgPrinter );
+                    ConfigurationPrinter cfgPrinter =  ( ConfigurationPrinter ) cfgPrinterTracker.getService(refs[i]);
+                    if ( cfgPrinter != null )
+                    {
+                        cp.put( cfgPrinter.getTitle(), new PrinterDesc(cfgPrinter, refs[i].getProperty(ConfigurationPrinter.PROPERTY_MODES)) );
+                    }
                 }
             }
             configurationPrinters = cp;
@@ -537,6 +530,80 @@ public class ConfigurationRender extends BaseWebConsolePlugin
                 // no filtering needed write as is
                 super.write( string, 0, string.length() );
             }
+        }
+    }
+
+    private static final class PrinterDesc
+    {
+        private final String[] modes;
+        public final ConfigurationPrinter printer;
+
+        private static final List CUSTOM_MODES = new ArrayList();
+        static
+        {
+            CUSTOM_MODES.add(ConfigurationPrinter.MODE_TXT);
+            CUSTOM_MODES.add(ConfigurationPrinter.MODE_WEB);
+            CUSTOM_MODES.add(ConfigurationPrinter.MODE_ZIP);
+        }
+
+        public PrinterDesc(final ConfigurationPrinter printer, final Object modes)
+        {
+            this.printer = printer;
+            if ( modes == null || !(modes instanceof String || modes instanceof String[]) )
+            {
+                this.modes = null;
+            }
+            else
+            {
+                if ( modes instanceof String )
+                {
+                    if ( CUSTOM_MODES.contains(modes) )
+                    {
+                        this.modes = new String[] {modes.toString()};
+                    }
+                    else
+                    {
+                        this.modes = null;
+                    }
+                }
+                else
+                {
+                    final String[] values = (String[])modes;
+                    boolean valid = values.length > 0;
+                    for(int i=0; i<values.length; i++)
+                    {
+                        if ( !CUSTOM_MODES.contains(values[i]) )
+                        {
+                            valid = false;
+                            break;
+                        }
+                    }
+                    if ( valid)
+                    {
+                        this.modes = values;
+                    }
+                    else
+                    {
+                        this.modes = null;
+                    }
+                }
+            }
+        }
+
+        public boolean match(final String mode)
+        {
+            if ( this.modes == null)
+            {
+                return true;
+            }
+            for(int i=0; i<this.modes.length; i++)
+            {
+                if ( this.modes[i].equals(mode) )
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
