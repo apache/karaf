@@ -274,8 +274,10 @@ public class AutoProcessor
                 }
                 catch (Exception ex)
                 {
-                    System.err.println("Auto-properties install: "
-                        + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : ""));
+                    System.err.println("Auto-properties install: " + location + " ("
+                        + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : "") + ")");
+if (ex.getCause() != null)
+    ex.printStackTrace();
                 }
             }
         }
@@ -300,8 +302,8 @@ public class AutoProcessor
                     }
                     catch (Exception ex)
                     {
-                        System.err.println("Auto-properties start: "
-                            + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : ""));
+                        System.err.println("Auto-properties start: " + location + " ("
+                            + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : "") + ")");
                     }
                 }
             }
