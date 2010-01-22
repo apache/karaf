@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.felix.framework.searchpolicy.ResolveException;
 import org.apache.felix.framework.searchpolicy.Resolver;
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.framework.util.manifestparser.R4Attribute;
 import org.apache.felix.framework.util.manifestparser.R4Directive;
 import org.apache.felix.framework.util.manifestparser.Requirement;
@@ -370,9 +371,9 @@ public class FelixResolverState implements Resolver.ResolverState
                     new Object[] { host, reqs[reqIdx] });
             }
         }
-        // Loop through each fragment verifying it does no conflict,
-        // adding its package and bundle dependencies if they do not
-        // conflict and removing the fragment if it does conflict.
+        // Loop through each fragment verifying it does not conflict.
+        // Add its package and bundle dependencies if they do not
+        // conflict or remove the fragment if it does conflict.
         for (Iterator it = fragmentList.iterator(); it.hasNext(); )
         {
             IModule fragment = (IModule) it.next();
@@ -416,6 +417,20 @@ public class FelixResolverState implements Resolver.ResolverState
                         // No need to finish processing current fragment.
                         break;
                     }
+                    else
+                    {
+                        // If there is an overlapping requirement for the existing
+                        // target, then try to calculate the intersecting requirement
+                        // and set the existing requirement to that instead. This
+                        // makes it so version ranges do not have to be exact, just
+                        // overlapping.
+                        Requirement intersection = calculateVersionIntersection(
+                            (Requirement) existing[REQ_IDX], (Requirement) reqs[reqIdx]);
+                        if (intersection != existing[REQ_IDX])
+                        {
+                            existing[REQ_IDX] = intersection;
+                        }
+                    }
                 }
             }
 
@@ -448,8 +463,23 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             return false;
         }
-        // If the target version range is not the same, then they conflict.
-        if (!existing.getTargetVersionRange().equals(additional.getTargetVersionRange()))
+        // If the existing version range floor is greater than the additional
+        // version range's floor, then they are inconflict since we cannot
+        // widen the constraint.
+        if (existing.getTargetVersionRange().getLow().compareTo(
+            additional.getTargetVersionRange().getLow()) > 0)
+        {
+            return true;
+        }
+        // If the existing version range ceiling is less than the additional
+        // version range's ceiling, then they are inconflict since we cannot
+        // widen the constraint.
+        if (((existing.getTargetVersionRange().getHigh() != null)
+            && (additional.getTargetVersionRange().getHigh() == null))
+            || ((existing.getTargetVersionRange().getHigh() != null)
+                && (additional.getTargetVersionRange().getHigh() != null)
+                && (existing.getTargetVersionRange().getHigh().compareTo(
+                    additional.getTargetVersionRange().getHigh()) < 0)))
         {
             return true;
         }
@@ -457,51 +487,33 @@ public class FelixResolverState implements Resolver.ResolverState
         // the existing requirement is not optional, then it doesn't matter
         // what subsequent requirements are since non-optional is stronger
         // than optional.
-        if (existing.isOptional() && (existing.isOptional() != additional.isOptional()))
+        if (existing.isOptional() && !additional.isOptional())
         {
             return true;
         }
         // Verify directives are the same.
-        // This is sort of ugly, but we need to remove
-        // the resolution directive, since it is effectively
-        // test above when checking optionality.
-        // Put directives in a map, since ordering is arbitrary.
         final R4Directive[] exDirs = (existing.getDirectives() == null)
             ? new R4Directive[0] : existing.getDirectives();
+        final R4Directive[] addDirs = (additional.getDirectives() == null)
+            ? new R4Directive[0] : additional.getDirectives();
+        // Put attributes in a map, since ordering is arbitrary.
         final Map exDirMap = new HashMap();
         for (int i = 0; i < exDirs.length; i++)
         {
-            if (!exDirs[i].getName().equals(Constants.RESOLUTION_DIRECTIVE))
-            {
-                exDirMap.put(exDirs[i].getName(), exDirs[i]);
-            }
+            exDirMap.put(exDirs[i].getName(), exDirs[i]);
         }
-        final R4Directive[] addDirs = (additional.getDirectives() == null)
-            ? new R4Directive[0] : additional.getDirectives();
-        final Map addDirMap = new HashMap();
+        // If attribute values do not match, then they conflict.
         for (int i = 0; i < addDirs.length; i++)
         {
+            // Ignore resolution directive, since we've already tested it above.
             if (!addDirs[i].getName().equals(Constants.RESOLUTION_DIRECTIVE))
             {
-                addDirMap.put(addDirs[i].getName(), addDirs[i]);
-            }
-        }
-        // If different number of directives, then they conflict.
-        if (exDirMap.size() != addDirMap.size())
-        {
-            return true;
-        }
-        // If directive values do not match, then they conflict.
-        for (Iterator it = addDirMap.entrySet().iterator(); it.hasNext(); )
-        {
-            final Map.Entry entry = (Map.Entry) it.next();
-            final String name = (String) entry.getKey();
-            final R4Directive addDir = (R4Directive) entry.getValue();
-            final R4Directive exDir = (R4Directive) exDirMap.get(name);
-            if ((exDir == null) ||
-                !exDir.getValue().equals(addDir.getValue()))
-            {
-                return true;
+                final R4Directive exDir = (R4Directive) exDirMap.get(addDirs[i].getName());
+                if ((exDir == null) ||
+                    !exDir.getValue().equals(addDirs[i].getValue()))
+                {
+                    return true;
+                }
             }
         }
         // Verify attributes are the same.
@@ -509,11 +521,6 @@ public class FelixResolverState implements Resolver.ResolverState
             ? new R4Attribute[0] : existing.getAttributes();
         final R4Attribute[] addAttrs = (additional.getAttributes() == null)
             ? new R4Attribute[0] : additional.getAttributes();
-        // If different number of attributes, then they conflict.
-        if (exAttrs.length != addAttrs.length)
-        {
-            return true;
-        }
         // Put attributes in a map, since ordering is arbitrary.
         final Map exAttrMap = new HashMap();
         for (int i = 0; i < exAttrs.length; i++)
@@ -523,16 +530,79 @@ public class FelixResolverState implements Resolver.ResolverState
         // If attribute values do not match, then they conflict.
         for (int i = 0; i < addAttrs.length; i++)
         {
-            final R4Attribute exAttr = (R4Attribute) exAttrMap.get(addAttrs[i].getName());
-            if ((exAttr == null) ||
-                !exAttr.getValue().equals(addAttrs[i].getValue()) ||
-                (exAttr.isMandatory() != addAttrs[i].isMandatory()))
+            // Ignore version property, since we've already tested it above.
+            if (!(additional.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                && addAttrs[i].getName().equals(ICapability.VERSION_PROPERTY))
+                && !(additional.getNamespace().equals(ICapability.MODULE_NAMESPACE)
+                    && addAttrs[i].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE)))
             {
-                return true;
+                final R4Attribute exAttr = (R4Attribute) exAttrMap.get(addAttrs[i].getName());
+                if ((exAttr == null) ||
+                    !exAttr.getValue().equals(addAttrs[i].getValue()) ||
+                    (exAttr.isMandatory() != addAttrs[i].isMandatory()))
+                {
+                    return true;
+                }
             }
         }
         // They do no conflict.
         return false;
+    }
+
+    static Requirement calculateVersionIntersection(
+        Requirement existing, Requirement additional)
+    {
+        Requirement intersection = existing;
+        int existVersionIdx = -1, addVersionIdx = -1;
+
+        // Find the existing version attribute.
+        for (int i = 0; (existVersionIdx < 0) && (i < existing.getAttributes().length); i++)
+        {
+            if ((existing.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                && existing.getAttributes()[i].getName().equals(ICapability.VERSION_PROPERTY))
+                || (existing.getNamespace().equals(ICapability.MODULE_NAMESPACE)
+                    && existing.getAttributes()[i].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE)))
+            {
+                existVersionIdx = i;
+            }
+        }
+
+        // Find the additional version attribute.
+        for (int i = 0; (addVersionIdx < 0) && (i < additional.getAttributes().length); i++)
+        {
+            if ((additional.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                && additional.getAttributes()[i].getName().equals(ICapability.VERSION_PROPERTY))
+                || (additional.getNamespace().equals(ICapability.MODULE_NAMESPACE)
+                    && additional.getAttributes()[i].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE)))
+            {
+                addVersionIdx = i;
+            }
+        }
+
+        // Use the additional requirement's version range if it
+        // has one and the existing requirement does not.
+        if ((existVersionIdx == -1) && (addVersionIdx != -1))
+        {
+            intersection = additional;
+        }
+        // If both requirements have version ranges, then create
+        // a new requirement with an intersecting version range.
+        else if ((existVersionIdx != -1) && (addVersionIdx != -1))
+        {
+            VersionRange vr = ((VersionRange) existing.getAttributes()[existVersionIdx].getValue())
+                .intersection((VersionRange) additional.getAttributes()[addVersionIdx].getValue());
+            R4Attribute[] attrs = existing.getAttributes();
+            R4Attribute[] newAttrs = new R4Attribute[attrs.length];
+            System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
+            newAttrs[existVersionIdx] = new R4Attribute(
+                attrs[existVersionIdx].getName(), vr, false);
+            intersection = new Requirement(
+                existing.getNamespace(),
+                existing.getDirectives(),
+                newAttrs);
+        }
+
+        return intersection;
     }
 
     private void addHost(IModule host)

@@ -80,6 +80,45 @@ public class VersionRange
         return (version.compareTo(m_low) > 0) && (version.compareTo(m_high) < 0);
     }
 
+    public VersionRange intersection(VersionRange vr)
+    {
+        VersionRange floor = (m_low.compareTo(vr.getLow()) > 0) ? this : vr;
+        boolean floorInclusive = (getLow().equals(vr.getLow()))
+            ? (isLowInclusive() & vr.isLowInclusive())
+            : floor.isLowInclusive();
+
+        VersionRange ceiling;
+        boolean ceilingInclusive;
+        if (vr.getHigh() == null)
+        {
+            ceiling = this;
+            ceilingInclusive = ceiling.isHighInclusive();
+        }
+        else if (m_high == null)
+        {
+            ceiling = vr;
+            ceilingInclusive = ceiling.isHighInclusive();
+        }
+        else if (m_high.compareTo(vr.getHigh()) > 0)
+        {
+            ceiling = vr;
+            ceilingInclusive = ceiling.isHighInclusive();
+        }
+        else if (m_high.compareTo(vr.getHigh()) < 0)
+        {
+            ceiling = this;
+            ceilingInclusive = ceiling.isHighInclusive();
+        }
+        else
+        {
+            ceiling = this;
+            ceilingInclusive = (isHighInclusive() & vr.isHighInclusive());
+        }
+
+        return new VersionRange(
+            floor.getLow(), floorInclusive, ceiling.getHigh(), ceilingInclusive);
+    }
+
     public static VersionRange parse(String range)
     {
         // Check if the version is an interval.

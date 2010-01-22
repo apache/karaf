@@ -305,8 +305,13 @@ public class ModuleImpl implements IModule
     {
         if (m_cachedRequirements == null)
         {
-            List reqList = (m_requirements == null)
-                ? new ArrayList() : new ArrayList(Arrays.asList(m_requirements));
+            Map reqMap = new HashMap();
+            for (int i = 0; (m_requirements != null) && i < m_requirements.length; i++)
+            {
+                reqMap.put(((Requirement) m_requirements[i]).getTargetName(), m_requirements[i]);
+            }
+
+            // Aggregate host and fragment requirements.
             for (int fragIdx = 0;
                 (m_fragments != null) && (fragIdx < m_fragments.length);
                 fragIdx++)
@@ -319,12 +324,25 @@ public class ModuleImpl implements IModule
                     if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
                         || reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
                     {
-                        reqList.add(reqs[reqIdx]);
+                        // If the current fragment requirement overlaps a previously
+                        // added requirement, then calculate a new intersecting requirement.
+                        Requirement req = (Requirement) reqMap.get(
+                            ((Requirement) reqs[reqIdx]).getTargetName());
+                        if (req != null)
+                        {
+                            req = FelixResolverState.calculateVersionIntersection(
+                                req, (Requirement) reqs[reqIdx]);
+                        }
+                        else
+                        {
+                            req = (Requirement) reqs[reqIdx];
+                        }
+                        reqMap.put(req.getTargetName(), req);
                     }
                 }
             }
             m_cachedRequirements = (IRequirement[])
-                reqList.toArray(new IRequirement[reqList.size()]);
+                reqMap.values().toArray(new IRequirement[reqMap.size()]);
         }
         return m_cachedRequirements;
     }
