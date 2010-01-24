@@ -87,7 +87,10 @@ public enum DescriptorParam
     propagate,
 
     /* ConfigurationDependency attribute for the updated callback method (the parsed value is a String */
-    updated;
+    updated,
+    
+    /* TemporalServiceDependency attribute for the timeout (the parsed value is a String) */
+    timeout;
     
     /**
      * Indicates if a given attribute is a Service attribute.
@@ -105,6 +108,15 @@ public enum DescriptorParam
      */
     public static boolean isServiceDepependencyAttribute(DescriptorParam attr) {
         return serviceDependencyAttribute.contains(attr);
+    }
+
+    /**
+     * Indicates if a given attribute is a TemporalServiceDependency attribute.
+     * @param attr a Descriptor attribute
+     * @return true if the descriptor is a Temporal Service attribute, false if not
+     */
+    public static boolean isTemporalServiceDepependencyAttribute(DescriptorParam attr) {
+        return serviceDependencyAttribute.contains(attr) || attr == timeout;
     }
 
     /**

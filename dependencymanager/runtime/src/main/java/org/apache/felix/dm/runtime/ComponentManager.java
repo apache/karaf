@@ -31,6 +31,7 @@ import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
 import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
+import org.apache.felix.dm.dependencies.TemporalServiceDependency;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -152,7 +153,12 @@ public class ComponentManager implements SynchronousBundleListener
 
                     case ServiceDependency:
                         checkServiceParsed(service);
-                        service.add(createServiceDependency(b, dm, parser));
+                        service.add(createServiceDependency(b, dm, parser, false));
+                        break;
+
+                    case TemporalServiceDependency:
+                        checkServiceParsed(service);
+                        service.add(createServiceDependency(b, dm, parser, true));
                         break;
 
                     case ConfigurationDependency:
@@ -283,13 +289,15 @@ public class ComponentManager implements SynchronousBundleListener
      * @param b
      * @param dm
      * @param parser
+     * @param temporal true if this dependency is a temporal one, false if not.
      * @return
      * @throws ClassNotFoundException
      */
     private ServiceDependency createServiceDependency(Bundle b, DependencyManager dm,
-        DescriptorParser parser) throws ClassNotFoundException
+        DescriptorParser parser, boolean temporal) throws ClassNotFoundException
     {
-        ServiceDependency sd = dm.createServiceDependency();
+        ServiceDependency sd = temporal ? dm.createTemporalServiceDependency()
+            : dm.createServiceDependency();
 
         // Set service with eventual service filter
         String service = parser.getString(DescriptorParam.service);
@@ -305,9 +313,16 @@ public class ComponentManager implements SynchronousBundleListener
             sd.setDefaultImplementation(defaultServiceImplClass);
         }
 
-        // Set required flag
-        String required = parser.getString(DescriptorParam.required, "true");
-        sd.setRequired("true".equals(required));
+        // Set required flag (always true for a temporal dependency)
+        if (temporal)
+        {
+            sd.setRequired(true);
+        }
+        else
+        {
+            String required = parser.getString(DescriptorParam.required, "true");
+            sd.setRequired("true".equals(required));
+        }
 
         // Set bind/unbind/rebind
         String added = parser.getString(DescriptorParam.added, null);
@@ -320,6 +335,16 @@ public class ComponentManager implements SynchronousBundleListener
         if (autoConfigField != null)
         {
             sd.setAutoConfig(autoConfigField);
+        }
+
+        // Set the timeout value for a temporal service dependency
+        if (temporal)
+        {
+            String timeout = parser.getString(DescriptorParam.timeout, null);
+            if (timeout != null)
+            {
+                ((TemporalServiceDependency) sd).setTimeout(Long.parseLong(timeout));
+            }
         }
         return sd;
     }
@@ -336,14 +361,16 @@ public class ComponentManager implements SynchronousBundleListener
     {
         ConfigurationDependency cd = dm.createConfigurationDependency();
         String pid = parser.getString(DescriptorParam.pid);
-        if (pid == null) {
-            throw new IllegalArgumentException("pid attribute not provided in ConfigurationDependency declaration");
+        if (pid == null)
+        {
+            throw new IllegalArgumentException(
+                "pid attribute not provided in ConfigurationDependency declaration");
         }
         cd.setPid(pid);
-        
+
         String propagate = parser.getString(DescriptorParam.propagate, "false");
         cd.setPropagate("true".equals(propagate));
-        
+
         String callback = parser.getString(DescriptorParam.updated, "updated");
         cd.setCallback(callback);
         return cd;

@@ -37,6 +37,7 @@ import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
+import org.apache.felix.dm.annotation.api.TemporalServiceDependency;
 
 import aQute.lib.osgi.Annotation;
 import aQute.lib.osgi.ClassDataCollector;
@@ -61,6 +62,8 @@ public class AnnotationCollector extends ClassDataCollector
         + ServiceDependency.class.getName().replace('.', '/') + ";";
     private final static String A_CONFIGURATION_DEPENDENCY = "L"
         + ConfigurationDependency.class.getName().replace('.', '/') + ";";
+    private final static String A_TEMPORAL_SERVICE_DEPENDENCY = "L"
+        + TemporalServiceDependency.class.getName().replace('.', '/') + ";";
 
     private Reporter m_reporter;
     private String m_className;
@@ -88,6 +91,7 @@ public class AnnotationCollector extends ClassDataCollector
     enum EntryTypes {
         Service,
         ServiceDependency,
+        TemporalServiceDependency,
         ConfigurationDependency,
     };
     
@@ -113,7 +117,8 @@ public class AnnotationCollector extends ClassDataCollector
         autoConfig,
         pid,
         propagate,
-        updated;
+        updated,
+        timeout
     };
     
     /**
@@ -122,7 +127,7 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private class Info
     {
-        /** The component descriptor entry type (either Service, ServiceDependency, or ConfigurationDependency) */
+        /** The component descriptor entry type: either Service, (Temporal)ServiceDependency, or ConfigurationDependency */
         EntryTypes m_entry;
         
         /** The component descriptor entry parameters (init/start/stop ...) */
@@ -350,11 +355,15 @@ public class AnnotationCollector extends ClassDataCollector
         }
         else if (annotation.getName().equals(A_SERVICE_DEP))
         {
-            parseServiceDependencyAnnotation(annotation);
+            parseServiceDependencyAnnotation(annotation, false);
         }
         else if (annotation.getName().equals(A_CONFIGURATION_DEPENDENCY))
         {
             parseConfigurationDependencyAnnotation(annotation);
+        } 
+        else if (annotation.getName().equals(A_TEMPORAL_SERVICE_DEPENDENCY))
+        {
+            parseServiceDependencyAnnotation(annotation, true);
         }
     }
 
@@ -390,12 +399,12 @@ public class AnnotationCollector extends ClassDataCollector
     }
 
     /**
-     * Parses a ServiceDependency Annotation.
+     * Parses a ServiceDependency or a TemporalServiceDependency Annotation.
      * @param annotation the ServiceDependency Annotation.
      */
-    private void parseServiceDependencyAnnotation(Annotation annotation)
+    private void parseServiceDependencyAnnotation(Annotation annotation, boolean temporal)
     {
-        Info info = new Info(EntryTypes.ServiceDependency);
+        Info info = new Info(temporal ? EntryTypes.TemporalServiceDependency : EntryTypes.ServiceDependency);
         m_infos.add(info);
 
         // service attribute
@@ -434,8 +443,10 @@ public class AnnotationCollector extends ClassDataCollector
         // defaultImpl attribute
         info.addClassParam(annotation, Params.defaultImpl, null);
 
-        // required attribute
-        info.addParam(annotation, Params.required, null);
+        // required attribute (not valid if parsing a temporal service dependency)
+        if (! temporal) {
+            info.addParam(annotation, Params.required, null);
+        }
 
         // added callback
         info.addParam(annotation, Params.added, (!m_isField) ? m_method : null);
@@ -445,6 +456,11 @@ public class AnnotationCollector extends ClassDataCollector
 
         // removed callback
         info.addParam(annotation, Params.removed, null);
+        
+        // timeout attribute (only valid if parsing a temporal service dependency)
+        if (temporal) {
+            info.addParam(annotation, Params.timeout, null);
+        }
     }
 
     /**
