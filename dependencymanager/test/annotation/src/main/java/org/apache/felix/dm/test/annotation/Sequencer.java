@@ -16,5 +16,6 @@ package org.apache.felix.dm.test.annotation;
  */
 public interface Sequencer
 {
-    void next(int step);
+    void step(int step);
+    void waitForStep(int nr, int timeout);
 }

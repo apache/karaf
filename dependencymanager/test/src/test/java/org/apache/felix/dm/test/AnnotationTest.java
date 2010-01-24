@@ -26,6 +26,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.service.Service;
 import org.apache.felix.dm.test.annotation.Sequencer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +62,75 @@ public class AnnotationTest implements Sequencer
         Dictionary props = new Hashtable() {{ put("test", "simple"); }};
         m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
         // Check if the test.annotation components have been initialized orderly
+        m_ensure.waitForStep(3, 10000);
+        // Stop our annotation bundle.
+        stopAnnotationBundle(context);
+        // And check if components have been deactivated orderly.
+        m_ensure.waitForStep(5, 10000);
+    }
+
+    @Test
+    public void testFactoryAnnotation(BundleContext context)
+    {
+        m_ensure = new Ensure();
+        DependencyManager m = new DependencyManager(context);
+        // We provide ourself as a "Sequencer" service: this will active the "org.apache.felix.dependencymanager.test.annotation" bundle
+        Dictionary props = new Hashtable() {{ put("test", "factory"); }};
+        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
+        // Check if the test.annotation components have been initialized orderly
+        m_ensure.waitForStep(1, 10000);
+    }
+        
+    @Test
+    public void testMultipleAnnotations(BundleContext context)
+    {
+        m_ensure = new Ensure();
+        DependencyManager m = new DependencyManager(context);
+        // We provide ourself as a "Sequencer" service: this will active the "org.apache.felix.dependencymanager.test.annotation" bundle
+        Dictionary props = new Hashtable() {{ put("test", "multiple"); }};
+        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
+        // Check if the test.annotation components have been initialized orderly
         m_ensure.waitForStep(7, 10000);
+        // Stop the test.annotation bundle
+        stopAnnotationBundle(context);
+        // And check if the test.annotation bundle has been deactivated orderly
+        m_ensure.waitForStep(11, 10000);
+    }
+
+    @Test
+    public void testTemporalServiceDepedendencyAnnotation(BundleContext context)
+    {
+        m_ensure = new Ensure();
+        DependencyManager m = new DependencyManager(context);
+        // We provide ourself as a "Sequencer" service: this will active the "org.apache.felix.dependencymanager.test.annotation" bundle
+        Dictionary props = new Hashtable() {{ put("test", "temporal"); }};
+        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
+                 
+        Runnable r = Ensure.createRunnableStep(m_ensure, 1);
+        Service s = m.createService().setImplementation(r).setInterface(Runnable.class.getName(), props);        
+        m.add(s);
+        m_ensure.waitForStep(1, 15000);
+        m.remove(s);
+        m_ensure.step(2);
+        sleep(2000);
+        r = Ensure.createRunnableStep(m_ensure, 3);
+        s = m.createService().setImplementation(r).setInterface(Runnable.class.getName(), props);
+        m.add(s);
+        m_ensure.waitForStep(3, 15000);
+        m.remove(s);
+        m_ensure.step(4);
+        sleep(5000);
+        m_ensure.waitForStep(5, 15000);
+    }
+
+    private void sleep(int i)
+    {
+        try {
+            Thread.sleep(i);
+        } catch (InterruptedException e) {}
+    }
+    
+    private void stopAnnotationBundle(BundleContext context) {
         // Stop the test.annotation bundle
         boolean found = false;
         for (Bundle b : context.getBundles())
@@ -83,25 +152,16 @@ public class AnnotationTest implements Sequencer
         {
             throw new IllegalStateException("org.apache.felix.dependencymanager.test.annotation bundle not found");
         }
-        // And check if the test.annotation bundle has been deactivated orderly
-        m_ensure.waitForStep(11, 10000);
     }
+    // ----------------------- Sequencer interface ------------------------------------------
 
-    @Test
-    public void testFactoryAnnotation(BundleContext context)
-    {
-        m_ensure = new Ensure();
-        DependencyManager m = new DependencyManager(context);
-        // We provide ourself as a "Sequencer" service: this will active the "org.apache.felix.dependencymanager.test.annotation" bundle
-        Dictionary props = new Hashtable() {{ put("test", "factory"); }};
-        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
-        // Check if the test.annotation components have been initialized orderly
-        m_ensure.waitForStep(1, 10000);
-    }
-        
-    // The test.annotation bundle will call back us here
-    public void next(int step)
+    public void step(int step)
     {
         m_ensure.step(step);
     }
+
+    public void waitForStep(int nr, int timeout)
+    {
+        m_ensure.waitForStep(nr, timeout);
+    }    
 }

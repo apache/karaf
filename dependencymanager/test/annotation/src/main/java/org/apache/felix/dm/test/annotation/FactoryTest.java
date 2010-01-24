@@ -18,7 +18,7 @@ import org.apache.felix.dm.annotation.api.Start;
 /**
  * Validate DependencyManager Factories declarared with annotations.
  */
-@Service(factory=Factory.class, factoryMethod="createFactoryTest")
+@Service(factory=FactoryTest.Factory.class, factoryMethod="createFactoryTest")
 public class FactoryTest
 {
     String m_id;
@@ -36,6 +36,14 @@ public class FactoryTest
         if (! "factory".equals(m_id)) {
             throw new IllegalStateException();
         }
-        m_sequencer.next(1);
+        m_sequencer.step(1);
+    }
+    
+    public static class Factory
+    {
+        public FactoryTest createFactoryTest()
+        {
+            return new FactoryTest("factory");
+        }
     }
 }
