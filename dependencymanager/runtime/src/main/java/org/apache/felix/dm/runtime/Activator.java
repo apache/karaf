@@ -31,8 +31,6 @@ import org.osgi.service.log.LogService;
  */
 public class Activator extends DependencyActivatorBase
 {
-    private ComponentManager _deployer = new ComponentManager();
-
     @Override
     public void init(BundleContext context, DependencyManager dm) throws Exception
     {
@@ -44,7 +42,7 @@ public class Activator extends DependencyActivatorBase
 
         boolean logActive = "true".equals(context.getProperty("dm.log"));
         dm.add(createService()
-               .setImplementation(_deployer)
+               .setImplementation(ComponentManager.class)
                .add(createServiceDependency()
                    .setService(LogService.class)
                    .setRequired(logActive)
