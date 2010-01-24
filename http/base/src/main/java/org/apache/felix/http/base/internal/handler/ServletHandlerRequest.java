@@ -16,9 +16,6 @@
  */
 package org.apache.felix.http.base.internal.handler;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletRequest;
 
@@ -88,36 +85,31 @@ final class ServletHandlerRequest
 
     private String calculatePathInfo()
     {
-        final int servletPathLength = getServletPath().length();
-        final String contextPath = getContextPath();
+        /*
+         * The pathInfo from the servlet container is
+         *       servletAlias + pathInfo
+         * where pathInfo is either an empty string (in which case the
+         * client directly requested the servlet) or starts with a slash
+         * (in which case the client requested a child of the servlet).
+         *
+         * Note, the servlet container pathInfo may also be null if the
+         * servlet is registered as the root servlet
+         */
 
-        String pathInfo = getRequestURI();
-        pathInfo = pathInfo.substring(contextPath.length());
-        pathInfo = pathInfo.replaceAll("[/]{2,}", "/");
-        pathInfo = pathInfo.substring(servletPathLength);
+        String pathInfo = super.getPathInfo();
+        if (pathInfo != null) {
 
-        int scPos = pathInfo.indexOf(';');
-        if (scPos > 0) {
-            pathInfo = pathInfo.substring(0, scPos);
+            // cut off alias of this servlet (if not the root servlet)
+            if (!"/".equals(alias)) {
+                pathInfo = pathInfo.substring(alias.length());
+            }
+
+            // ensure empty string is coerced to null
+            if (pathInfo.length() == 0) {
+                pathInfo = null;
+            }
+
         }
-
-        try {
-            pathInfo = URLDecoder.decode(pathInfo, "UTF-8");
-        } catch (UnsupportedEncodingException uee) {
-            // not really expected here, UTF-8 is required
-        } catch (IllegalArgumentException iae) {
-            // illegal encoding used, don't care
-        }
-
-        if ("".equals(pathInfo) && servletPathLength != 0) {
-            pathInfo = null;
-        }
-
-        if (pathInfo != null && !pathInfo.startsWith("/")) {
-            pathInfo = "/" + pathInfo;
-        }
-
-
 
         return pathInfo;
     }
