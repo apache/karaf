@@ -1576,7 +1576,7 @@ public class ModuleImpl implements IModule
     {
         // Always boot delegate if the bundle has a configured
         // boot class loader.
-        if (m_classLoader != m_defBootClassLoader)
+        if (m_bootClassLoader != m_defBootClassLoader)
         {
             return true;
         }
