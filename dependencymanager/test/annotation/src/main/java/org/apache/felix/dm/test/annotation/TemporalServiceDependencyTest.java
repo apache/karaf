@@ -21,6 +21,7 @@ package org.apache.felix.dm.test.annotation;
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
+import org.apache.felix.dm.annotation.api.Stop;
 import org.apache.felix.dm.annotation.api.TemporalServiceDependency;
 
 @Service(provide={})
@@ -40,6 +41,7 @@ public class TemporalServiceDependencyTest implements Runnable
         m_thread.start();
     }
     
+    @Stop
     protected void stop() { 
         m_thread.interrupt();
         try
