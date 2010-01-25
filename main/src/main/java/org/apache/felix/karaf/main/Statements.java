@@ -30,6 +30,8 @@ public class Statements {
     private String lockTableName = "KARAF_LOCK";
     private String clusterName = "karaf";
     private String dbName = "sample";
+    private String time = "TIME";
+    private String cluster = "CLUSTER";
     private String lockCreateStatement;
     private String lockDBCreateStatement;
     private String lockPopulateStatement;
@@ -54,6 +56,22 @@ public class Statements {
         this.lockPopulateStatement="insert into " + lockTableName + " (TIME, CLUSTER) values (1, '" + clusterName + "')";
     }
 
+    public void setDBCreateStatement(String createDB) {
+        this.lockDBCreateStatement = createDB;
+    }
+
+    public void setCreateStatement(String createTable) {
+        this.lockCreateStatement = createTable;
+    }
+
+    public void setPopulateStatement(String popTable) {
+        this.lockPopulateStatement = popTable;
+    }
+ 
+    public void setColumnNames(String time, String cluster) {
+        this.time = time;
+        this.cluster = cluster; 
+    } 
 
     public String setUpdateCursor() {
         String test = "SELECT * FROM " + lockTableName + " FOR UPDATE";
@@ -63,8 +81,8 @@ public class Statements {
     public String getLockUpdateStatement(long timeStamp) {
         String lockUpdateStatement = "";
         lockUpdateStatement = "UPDATE " + lockTableName + 
-                              " SET TIME=" + timeStamp + 
-                              " WHERE CLUSTER = '" + clusterName + "'";
+                              " SET " + this.time + "=" + timeStamp + 
+                              " WHERE " + this.cluster + " = '" + clusterName + "'";
         return lockUpdateStatement;
     }
 
