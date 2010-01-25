@@ -39,6 +39,7 @@ import java.lang.annotation.Target;
  * <blockquote>
  * 
  * <pre>
+ * @Service
  * class MyServer implements Runnable {
  *   @TemporalServiceDependency(timeout=15000)
  *   MyDependency _dependency;.
