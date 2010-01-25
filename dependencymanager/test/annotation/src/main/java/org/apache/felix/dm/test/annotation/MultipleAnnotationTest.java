@@ -47,7 +47,7 @@ public class MultipleAnnotationTest
     @Service(factory=Factory.class, factoryMethod="createServiceConsumer")
     static class ServiceConsumer
     {
-        @ServiceDependency
+        @ServiceDependency(filter="(test=multiple)")
         volatile Sequencer m_sequencer;
 
         @ServiceDependency(filter = "(foo=bar)")
