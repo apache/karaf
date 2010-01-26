@@ -122,17 +122,20 @@ class ResourceBundleCache
             HashMap resourceBundleEntries = new HashMap();
 
             Enumeration locales = bundle.findEntries( path, fileName + "*.properties", false );
-            while ( locales.hasMoreElements() )
+            if ( locales != null )
             {
-                URL entry = ( URL ) locales.nextElement();
+                while ( locales.hasMoreElements() )
+                {
+                    URL entry = ( URL ) locales.nextElement();
 
-                // calculate the key
-                String entryPath = entry.getPath();
-                final int start = 1 + file.length(); // leading slash
-                final int end = entryPath.length() - 11; // .properties suffix
-                entryPath = entryPath.substring( start, end );
+                    // calculate the key
+                    String entryPath = entry.getPath();
+                    final int start = 1 + file.length(); // leading slash
+                    final int end = entryPath.length() - 11; // .properties suffix
+                    entryPath = entryPath.substring( start, end );
 
-                resourceBundleEntries.put( entryPath, entry );
+                    resourceBundleEntries.put( entryPath, entry );
+                }
             }
 
             this.resourceBundleEntries = resourceBundleEntries;
