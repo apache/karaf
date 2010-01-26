@@ -112,14 +112,14 @@ public class AnnotationTest implements Sequencer
         m_ensure.waitForStep(1, 15000);
         m.remove(s);
         m_ensure.step(2);
-        sleep(2000);
+        sleep(500);
         r = Ensure.createRunnableStep(m_ensure, 3);
         s = m.createService().setImplementation(r).setInterface(Runnable.class.getName(), props);
         m.add(s);
         m_ensure.waitForStep(3, 15000);
         m.remove(s);
         m_ensure.step(4);
-        sleep(5000);
+        sleep(1500);
         m_ensure.waitForStep(5, 15000);
     }
 

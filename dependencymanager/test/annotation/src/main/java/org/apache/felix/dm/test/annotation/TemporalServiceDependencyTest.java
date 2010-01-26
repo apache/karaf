@@ -32,7 +32,7 @@ public class TemporalServiceDependencyTest implements Runnable
     @ServiceDependency(filter="(test=temporal)")
     Sequencer m_sequencer;
     
-    @TemporalServiceDependency(timeout=4000L,filter="(test=temporal)")
+    @TemporalServiceDependency(timeout=1000L,filter="(test=temporal)")
     Runnable m_service;
     
     @Start
