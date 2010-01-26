@@ -182,10 +182,10 @@ public class ImmediateComponentManager extends AbstractComponentManager
             // may be created by the SCR with the newInstance method on Class
             implementationObject = implementationObjectClass.newInstance();
         }
-        catch ( Exception ex )
+        catch ( Throwable t )
         {
             // failed to instantiate, return null
-            log( LogService.LOG_ERROR, "Error during instantiation of the implementation object", ex );
+            log( LogService.LOG_ERROR, "Error during instantiation of the implementation object", t );
             return null;
         }
 
