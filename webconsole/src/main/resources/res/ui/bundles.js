@@ -251,7 +251,7 @@ function renderBundles(data) {
         	    0: { sorter:"digit"},
                 5: { sorter: false }
             },
-            sortList: [cv],
+            sortList: [lo],
             textExtraction:extractMethod 
         });
         $("#plugin_table").bind("sortEnd", function() {
