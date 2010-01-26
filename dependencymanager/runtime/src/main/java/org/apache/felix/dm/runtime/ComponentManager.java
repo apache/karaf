@@ -313,21 +313,10 @@ public class ComponentManager implements SynchronousBundleListener
             sd.setDefaultImplementation(defaultServiceImplClass);
         }
 
-        // Set required flag (always true for a temporal dependency)
-        if (temporal)
-        {
-            sd.setRequired(true);
-        }
-        else
-        {
-            String required = parser.getString(DescriptorParam.required, "true");
-            sd.setRequired("true".equals(required));
-        }
-
         // Set bind/unbind/rebind
         String added = parser.getString(DescriptorParam.added, null);
-        String changed = parser.getString(DescriptorParam.changed, null);
-        String removed = parser.getString(DescriptorParam.removed, null);
+        String changed = temporal ? null : parser.getString(DescriptorParam.changed, null);
+        String removed = temporal ? null : parser.getString(DescriptorParam.removed, null);
         sd.setCallbacks(added, changed, removed);
 
         // Set AutoConfig
@@ -337,14 +326,22 @@ public class ComponentManager implements SynchronousBundleListener
             sd.setAutoConfig(autoConfigField);
         }
 
-        // Set the timeout value for a temporal service dependency
+        // Do specific parsing for temporal service dependency
         if (temporal)
         {
+            // Set the timeout value for a temporal service dependency
             String timeout = parser.getString(DescriptorParam.timeout, null);
             if (timeout != null)
             {
                 ((TemporalServiceDependency) sd).setTimeout(Long.parseLong(timeout));
             }
+            
+            // Set required flag (always true for a temporal dependency)
+            sd.setRequired(true);
+        } else {
+            // for ServiceDependency, get required flag.
+            String required = parser.getString(DescriptorParam.required, "true");
+            sd.setRequired("true".equals(required));
         }
         return sd;
     }

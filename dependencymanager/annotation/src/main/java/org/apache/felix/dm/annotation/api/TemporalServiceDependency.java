@@ -97,14 +97,4 @@ public @interface TemporalServiceDependency
      * the annotation is applied on a class field.
      */
     String added() default "";
-
-    /**
-     * Returns the callback method to be invoked when the service properties have changed.
-     */
-    String changed() default "";
-
-    /**
-     * Returns the callback method to invoke when the service is lost.
-     */
-    String removed() default "";
 }

@@ -88,39 +88,41 @@ public class AnnotationCollector extends ClassDataCollector
     private final static Pattern m_methodCompoPattern = Pattern.compile("\\(\\)\\[Ljava/lang/Object;");
 
     // List of component descriptor entry types
-    enum EntryTypes {
-        Service,
-        ServiceDependency,
-        TemporalServiceDependency,
+    enum EntryTypes
+    {
+        Service, 
+        ServiceDependency, 
+        TemporalServiceDependency, 
         ConfigurationDependency,
     };
-    
+
     // List of component descriptor parameters
-    enum Params {
-        init,
-        start,
-        stop,
-        destroy,
-        impl,
-        provide,
-        properties,
-        factory,
-        factoryMethod,
-        composition,
-        service,
-        filter,
-        defaultImpl,
-        required,
-        added,
+    enum Params
+    {
+        init, 
+        start, 
+        stop, 
+        destroy, 
+        impl, 
+        provide, 
+        properties, 
+        factory, 
+        factoryMethod, 
+        composition, 
+        service, 
+        filter, 
+        defaultImpl, 
+        required, 
+        added, 
         changed,
         removed,
-        autoConfig,
-        pid,
-        propagate,
-        updated,
+        autoConfig, 
+        pid, 
+        propagate, 
+        updated, 
         timeout
     };
-    
+
     /**
      * This class represents a parsed DependencyManager component descriptor entry.
      * (either a Service, a ServiceDependency, or a ConfigurationDependency descriptor entry).
@@ -129,7 +131,7 @@ public class AnnotationCollector extends ClassDataCollector
     {
         /** The component descriptor entry type: either Service, (Temporal)ServiceDependency, or ConfigurationDependency */
         EntryTypes m_entry;
-        
+
         /** The component descriptor entry parameters (init/start/stop ...) */
         Map<Params, Object> m_params = new HashMap<Params, Object>();
 
@@ -360,7 +362,7 @@ public class AnnotationCollector extends ClassDataCollector
         else if (annotation.getName().equals(A_CONFIGURATION_DEPENDENCY))
         {
             parseConfigurationDependencyAnnotation(annotation);
-        } 
+        }
         else if (annotation.getName().equals(A_TEMPORAL_SERVICE_DEPENDENCY))
         {
             parseServiceDependencyAnnotation(annotation, true);
@@ -404,7 +406,8 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseServiceDependencyAnnotation(Annotation annotation, boolean temporal)
     {
-        Info info = new Info(temporal ? EntryTypes.TemporalServiceDependency : EntryTypes.ServiceDependency);
+        Info info = new Info(temporal ? EntryTypes.TemporalServiceDependency
+            : EntryTypes.ServiceDependency);
         m_infos.add(info);
 
         // service attribute
@@ -443,23 +446,24 @@ public class AnnotationCollector extends ClassDataCollector
         // defaultImpl attribute
         info.addClassParam(annotation, Params.defaultImpl, null);
 
-        // required attribute (not valid if parsing a temporal service dependency)
-        if (! temporal) {
-            info.addParam(annotation, Params.required, null);
-        }
-
         // added callback
         info.addParam(annotation, Params.added, (!m_isField) ? m_method : null);
 
-        // changed callback
-        info.addParam(annotation, Params.changed, null);
-
-        // removed callback
-        info.addParam(annotation, Params.removed, null);
-        
-        // timeout attribute (only valid if parsing a temporal service dependency)
-        if (temporal) {
+        if (temporal)
+        {
+            // timeout attribute (only valid if parsing a temporal service dependency)
             info.addParam(annotation, Params.timeout, null);
+        }
+        else
+        {
+            // required attribute (not valid if parsing a temporal service dependency)
+            info.addParam(annotation, Params.required, null);
+
+            // changed callback
+            info.addParam(annotation, Params.changed, null);
+
+            // removed callback
+            info.addParam(annotation, Params.removed, null);
         }
     }
 
@@ -528,7 +532,7 @@ public class AnnotationCollector extends ClassDataCollector
         {
             sb.append("\n\t").append(info.toString());
         }
-        m_reporter.warning(sb.toString()); 
+        m_reporter.warning(sb.toString());
     }
 
     /**
