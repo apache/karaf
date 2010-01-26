@@ -18,13 +18,19 @@
  */
 package org.apache.felix.ipojo.composite;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
+import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+
 
 /**
  * Composite Instance Description.
@@ -68,6 +74,36 @@ public class CompositeInstanceDescription extends InstanceDescription {
         return new InstanceDescription[0];
     }
 
+    /**
+     * Gets the list of internally published services.
+     * @return the list of published services.
+     */
+    public Element getInternalServices() {
+        Element services = new Element("services", "");
+        ServiceContext internal = ((CompositeManager) m_instance)
+                .getServiceContext();
+        try {
+            ServiceReference[] refs = internal.getServiceReferences(null, "(!(objectclass=" + Factory.class.getName() + "))");
+            for (int i = 0; refs != null && i < refs.length; i++) {
+                Element svc = new Element("service", "");
+                String[] keys = refs[i].getPropertyKeys();
+                for (int j = 0; j < keys.length; j++) {
+                    Object v = refs[i].getProperty(keys[j]);
+                    if (v instanceof String[]) {
+                        List l = Arrays.asList((String[]) v);
+                        svc.addAttribute(new Attribute(keys[j], l.toString()));
+                    } else {
+                        svc.addAttribute(new Attribute(keys[j], v.toString()));
+                    }
+                }
+                services.addElement(svc);
+            }
+
+        } catch (InvalidSyntaxException e) {
+            // Cannot happen
+        }
+        return services;
+    }
     
     /**
      * Gets the instance description.
@@ -76,7 +112,8 @@ public class CompositeInstanceDescription extends InstanceDescription {
      */
     public Element getDescription() {
         Element elem = super.getDescription();
-        // Contained instance (exposing architecture) (empty if primitive)
+        elem.addElement(getInternalServices());
+
         InstanceDescription[] descs = getContainedInstances();
         if (descs.length > 0) {
             Element inst = new Element("ContainedInstances", "");
@@ -85,6 +122,7 @@ public class CompositeInstanceDescription extends InstanceDescription {
             }
             elem.addElement(inst);
         }
+        
         return elem;
     }
 
