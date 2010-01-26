@@ -199,11 +199,20 @@ public class OsgiManager extends GenericServlet
 
         try
         {
-            this.configurationListener = ConfigurationListener.create( this );
+            this.configurationListener = ConfigurationListener2.create( this );
         }
-        catch ( Throwable t )
+        catch ( Throwable t2 )
         {
-            // might be caused by CM not available
+            // might be caused by Metatype API not available
+            // try without MetaTypeProvider
+            try
+            {
+                this.configurationListener = ConfigurationListener.create( this );
+            }
+            catch ( Throwable t )
+            {
+                // might be caused by CM API not available
+            }
         }
 
         // get at the HttpService first, this should initialize
@@ -471,6 +480,16 @@ public class OsgiManager extends GenericServlet
     BundleContext getBundleContext()
     {
         return bundleContext;
+    }
+
+
+    /**
+     * Returns the Service PID used to retrieve configuration and to describe
+     * the configuration properties.
+     */
+    String getConfigurationPid()
+    {
+        return getClass().getName();
     }
 
 

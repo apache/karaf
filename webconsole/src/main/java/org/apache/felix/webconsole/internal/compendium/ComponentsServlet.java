@@ -242,7 +242,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         jw.key( "name" );
         jw.value( name );
         jw.key( "state" );
-        jw.value( toStateString( state ) );
+        jw.value( ComponentConfigurationPrinter.toStateString( state ) );
 
         final String pid = ( String ) component.getProperties().get( Constants.SERVICE_PID );
         if ( pid != null )
@@ -434,33 +434,6 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         }
     }
 
-
-    static String toStateString( int state )
-    {
-        switch ( state )
-        {
-            case Component.STATE_DISABLED:
-                return "disabled";
-            case Component.STATE_ENABLED:
-                return "enabled";
-            case Component.STATE_UNSATISFIED:
-                return "unsatisfied";
-            case Component.STATE_ACTIVATING:
-                return "activating";
-            case Component.STATE_ACTIVE:
-                return "active";
-            case Component.STATE_REGISTERED:
-                return "registered";
-            case Component.STATE_FACTORY:
-                return "factory";
-            case Component.STATE_DEACTIVATING:
-                return "deactivating";
-            case Component.STATE_DESTROYED:
-                return "destroyed";
-            default:
-                return String.valueOf( state );
-        }
-    }
 
     /**
      * Check if the component with the specified pid is
