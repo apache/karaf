@@ -138,6 +138,7 @@ class ResourceFilteringWriter extends FilterWriter
                 }
                 else
                 {
+                    state = STATE_NULL;
                     out.write( '$' );
                     out.write( c );
                 }
@@ -162,6 +163,7 @@ class ResourceFilteringWriter extends FilterWriter
                     out.write( '\\' );
                 }
                 out.write( c );
+                break;
         }
     }
 
