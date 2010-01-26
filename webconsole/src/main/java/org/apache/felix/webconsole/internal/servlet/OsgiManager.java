@@ -853,10 +853,10 @@ public class OsgiManager extends GenericServlet
         }
 
         // get the web manager root path
-        webManagerRoot = this.getProperty( config, PROP_MANAGER_ROOT, DEFAULT_MANAGER_ROOT );
-        if ( !webManagerRoot.startsWith( "/" ) )
+        String newWebManagerRoot = this.getProperty( config, PROP_MANAGER_ROOT, DEFAULT_MANAGER_ROOT );
+        if ( !newWebManagerRoot.startsWith( "/" ) )
         {
-            webManagerRoot = "/" + webManagerRoot;
+            newWebManagerRoot = "/" + newWebManagerRoot;
         }
 
         // get enabled plugins
@@ -881,13 +881,22 @@ public class OsgiManager extends GenericServlet
         }
 
         // might update http service registration
-        HttpService httpService = this.httpService;
-        if ( httpService != null )
+        if ( !newWebManagerRoot.equals( this.webManagerRoot ) )
         {
-            synchronized ( this )
+            HttpService httpService = this.httpService;
+            if ( httpService != null )
             {
-                unbindHttpService( httpService );
-                bindHttpService( httpService );
+                synchronized ( this )
+                {
+                    // unbind old location first
+                    unbindHttpService( httpService );
+
+                    // switch location
+                    this.webManagerRoot = newWebManagerRoot;
+
+                    // bind new location now
+                    bindHttpService( httpService );
+                }
             }
         }
     }
