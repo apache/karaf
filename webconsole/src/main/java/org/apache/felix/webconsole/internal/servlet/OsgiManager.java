@@ -41,7 +41,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.Action;
 import org.apache.felix.webconsole.BrandingPlugin;
-import org.apache.felix.webconsole.VariableResolver;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
@@ -498,8 +497,7 @@ public class OsgiManager extends GenericServlet
     {
         final Locale locale = request.getLocale();
         final ResourceBundle resourceBundle = resourceBundleManager.getResourceBundle( plugin.getBundle(), locale );
-        final VariableResolver variables = ( plugin instanceof VariableResolver ) ? ( VariableResolver ) plugin : null;
-        return new FilteringResponseWrapper( response, resourceBundle, variables );
+        return new FilteringResponseWrapper( response, resourceBundle, request );
     }
 
     private static class HttpServiceTracker extends ServiceTracker

@@ -25,6 +25,7 @@ import java.io.Writer;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.VariableResolver;
 
 
@@ -87,11 +88,11 @@ class ResourceFilteringWriter extends FilterWriter
     private int state = STATE_NULL;
 
 
-    ResourceFilteringWriter( Writer out, ResourceBundle locale, final VariableResolver variables )
+    ResourceFilteringWriter( final Writer out, final ResourceBundle locale, final VariableResolver variables )
     {
         super( out );
         this.locale = locale;
-        this.variables = ( variables != null ) ? variables : VariableResolver.DEFAULT;
+        this.variables = ( variables != null ) ? variables : new DefaultVariableResolver();
     }
 
 
@@ -215,7 +216,7 @@ class ResourceFilteringWriter extends FilterWriter
         final String key = lineBuffer.toString();
         lineBuffer.delete( 0, lineBuffer.length() );
 
-        String value = variables.get( key );
+        String value = variables.resolve( key );
         if ( value == null )
         {
             try

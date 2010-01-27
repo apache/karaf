@@ -20,7 +20,6 @@ package org.apache.felix.webconsole.internal;
 
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -41,7 +40,7 @@ import org.osgi.framework.ServiceReference;
  * {@link org.apache.felix.webconsole.WebConsoleConstants#PLUGIN_TITLE}
  * service attribute.
  */
-public class WebConsolePluginAdapter extends AbstractWebConsolePlugin implements VariableResolver
+public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
 {
 
     /** serial UID */
@@ -214,13 +213,6 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin implements
     }
 
 
-    //---------- VariableResolver
-
-    public String get( String variable )
-    {
-        return getVariableResolver().get(variable);
-    }
-
     //---------- internal
 
     private String[] toStringArray( final Object value )
@@ -259,70 +251,5 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin implements
         }
 
         return null;
-    }
-
-
-    private VariableResolver getVariableResolver()
-    {
-        if ( varResolver == null )
-        {
-            if ( plugin instanceof VariableResolver )
-            {
-                varResolver = ( VariableResolver ) plugin;
-            }
-            else
-            {
-                varResolver = VariableResolverProxy.create( plugin );
-            }
-        }
-
-        return varResolver;
-    }
-
-    private static class VariableResolverProxy implements VariableResolver
-    {
-        static VariableResolver create( Object object )
-        {
-            try
-            {
-                final Class stringClass = String.class;
-                final Method getMethod = object.getClass().getMethod( "get", new Class[]
-                    { stringClass } );
-                if ( getMethod.getReturnType() == stringClass )
-                {
-                    return new VariableResolverProxy( object, getMethod );
-                }
-            }
-            catch ( Throwable t )
-            {
-            }
-
-            return VariableResolver.DEFAULT;
-        }
-
-        private final Object object;
-
-        private final Method getMethod;
-
-
-        private VariableResolverProxy( final Object object, final Method getMethod )
-        {
-            this.object = object;
-            this.getMethod = getMethod;
-        }
-
-
-        public String get( String variable )
-        {
-            try
-            {
-                return ( String ) getMethod.invoke( object, new Object[]
-                    { variable } );
-            }
-            catch ( Throwable t )
-            {
-                return null;
-            }
-        }
     }
 }

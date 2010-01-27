@@ -23,10 +23,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ResourceBundle;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.felix.webconsole.VariableResolver;
+import org.apache.felix.webconsole.WebConsoleUtil;
 
 
 /**
@@ -44,7 +46,9 @@ public class FilteringResponseWrapper extends HttpServletResponseWrapper
     // the resource bundle providing translations for the output
     private final ResourceBundle locale;
 
-    private final VariableResolver variables;
+    // the servlet request providing the variable resolver at the time
+    // the getWriter() method is called
+    private final ServletRequest request;
 
     // the writer sending output in this response
     private PrintWriter writer;
@@ -54,11 +58,12 @@ public class FilteringResponseWrapper extends HttpServletResponseWrapper
      * Creates a wrapper instance using the given resource bundle for
      * translations.
      */
-    public FilteringResponseWrapper( HttpServletResponse response, ResourceBundle locale, VariableResolver variables )
+    public FilteringResponseWrapper( final HttpServletResponse response, final ResourceBundle locale,
+        final ServletRequest request )
     {
         super( response );
         this.locale = locale;
-        this.variables = variables;
+        this.request = request;
     }
 
 
@@ -75,7 +80,8 @@ public class FilteringResponseWrapper extends HttpServletResponseWrapper
             final PrintWriter base = super.getWriter();
             if ( doWrap() )
             {
-                final ResourceFilteringWriter filter = new ResourceFilteringWriter( base, locale, variables );
+                final VariableResolver resolver = WebConsoleUtil.getVariableResolver( request );
+                final ResourceFilteringWriter filter = new ResourceFilteringWriter( base, locale, resolver );
                 writer = new PrintWriter( filter );
             }
             else

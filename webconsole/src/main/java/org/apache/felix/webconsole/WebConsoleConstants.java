@@ -110,4 +110,14 @@ public interface WebConsoleConstants
      */
     public static final String ATTR_LABEL_MAP = "felix.webconsole.labelMap";
 
+    /**
+     * The name of the request attribute holding the {@link VariableResolver}
+     * for the request (value is "felix.webconsole.variable.resolver").
+     *
+     * @see VariableResolver
+     * @see WebConsoleUtil#getVariableResolver(javax.servlet.ServletRequest)
+     * @see WebConsoleUtil#setVariableResolver(javax.servlet.ServletRequest, VariableResolver)
+     * @since 3.0
+     */
+    static final String ATTR_CONSOLE_VARIABLE_RESOLVER = "felix.webconsole.variable.resolver";
 }

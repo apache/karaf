@@ -20,32 +20,31 @@ package org.apache.felix.webconsole;
 
 
 /**
- * The <code>VariableResolver</code> interface is a very simple interface which
- * may be implemented by Web Console plugins to provide replacement values for
+ * The <code>VariableResolver</code> interface defines the API for an object
+ * which may be provided by plugins to provide replacement values for
  * variables in the generated content.
  * <p>
- * The main use of such a variable resolve is when a plugin is using a static
+ * Plugins should call the
+ * {@link WebConsoleUtil#setVariableResolver(javax.servlet.ServletRequest, VariableResolver)}
+ * method to provide their implementation for variable resolution.
+ * <p>
+ * The main use of such a variable resolver is when a plugin is using a static
  * template which provides slots to place dynamically generated content
  * parts.
+ * <p>
+ * <b>Note</b>: The variable resolver must be set in the request <b>before</b>
+ * the response writer is retrieved calling the
+ * <code>ServletRequest.getWriter()</code> method. Otherwise the variable
+ * resolver will not be used for resolving variables.
+ *
+ * @see WebConsoleUtil#getVariableResolver(javax.servlet.ServletRequest)
+ * @see WebConsoleUtil#setVariableResolver(javax.servlet.ServletRequest, VariableResolver)
  */
 public interface VariableResolver
 {
 
     /**
-     * Default implementation of the {@link VariableResolver} interface whose
-     * {@link #get(String)} method always returns <code>null</code>.
-     */
-    VariableResolver DEFAULT = new VariableResolver()
-    {
-        public String get( String variable )
-        {
-            return null;
-        }
-    };
-
-
-    /**
-     * Return a replacement value for the named variable or <code>null</code>
+     * Returns a replacement value for the named variable or <code>null</code>
      * if no replacement is available.
      *
      * @param variable The name of the variable for which to return a
@@ -53,6 +52,6 @@ public interface VariableResolver
      * @return The replacement value or <code>null</code> if no replacement is
      *      available.
      */
-    String get( String variable );
+    String resolve( String variable );
 
 }
