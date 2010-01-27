@@ -23,7 +23,7 @@ package org.apache.felix.webconsole;
  * The <code>BrandingPlugin</code> is the service interface for the most
  * elaborate way of branding the web console.
  *
- * @see #DefaultBrandingPlugin
+ * @see DefaultBrandingPlugin
  */
 public interface BrandingPlugin
 {
