@@ -148,20 +148,28 @@ public abstract class ComponentTestBase
     }
 
 
-    protected Component findComponentByName( String name )
+    protected Component[] getComponents()
     {
         ScrService scr = ( ScrService ) scrTracker.getService();
         if ( scr != null )
         {
-            Component[] components = scr.getComponents();
-            if ( components != null )
+            return scr.getComponents();
+        }
+
+        return null;
+    }
+
+
+    protected Component findComponentByName( String name )
+    {
+        Component[] components = getComponents();
+        if ( components != null )
+        {
+            for ( Component component : components )
             {
-                for ( Component component : components )
+                if ( name.equals( component.getName() ) )
                 {
-                    if ( name.equals( component.getName() ) )
-                    {
-                        return component;
-                    }
+                    return component;
                 }
             }
         }
@@ -172,26 +180,22 @@ public abstract class ComponentTestBase
 
     protected Component[] findComponentsByName( String name )
     {
-        ScrService scr = ( ScrService ) scrTracker.getService();
-        if ( scr != null )
+        List<Component> cList = new ArrayList<Component>();
+        Component[] components = getComponents();
+        if ( components != null )
         {
-            List<Component> cList = new ArrayList<Component>();
-            Component[] components = scr.getComponents();
-            if ( components != null )
+            for ( Component component : components )
             {
-                for ( Component component : components )
+                if ( name.equals( component.getName() ) )
                 {
-                    if ( name.equals( component.getName() ) )
-                    {
-                        cList.add( component );
-                    }
+                    cList.add( component );
                 }
             }
+        }
 
-            if ( !cList.isEmpty() )
-            {
-                return cList.toArray( new Component[cList.size()] );
-            }
+        if ( !cList.isEmpty() )
+        {
+            return cList.toArray( new Component[cList.size()] );
         }
 
         return null;
@@ -342,7 +346,8 @@ public abstract class ComponentTestBase
                 withBnd()
                 .set( Constants.BUNDLE_SYMBOLICNAME, "simplecomponent" )
                 .set( Constants.BUNDLE_VERSION, "0.0.11" )
-                .set( Constants.IMPORT_PACKAGE, "org.apache.felix.scr.integration.components" )
+                .set( Constants.IMPORT_PACKAGE,
+                    "org.apache.felix.scr.integration.components,org.apache.felix.scr.integration.components.activatesignature" )
                 .set( "Service-Component", "OSGI-INF/components.xml" )
             )
             .build( TinyBundles.asStream() );
