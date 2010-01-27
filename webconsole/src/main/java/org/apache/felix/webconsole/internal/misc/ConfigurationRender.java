@@ -27,8 +27,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.ConfigurationPrinter;
-import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.*;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.osgi.framework.ServiceReference;
@@ -178,7 +177,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             final PrinterDesc desc = (PrinterDesc) cpi.next();
             if ( desc.match(mode) )
             {
-                printConfigurationPrinter( pw, desc.printer );
+                printConfigurationPrinter( pw, desc.printer, mode );
             }
         }
     }
@@ -264,10 +263,19 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     //    }
 
 
-    private void printConfigurationPrinter( ConfigurationWriter pw, ConfigurationPrinter cp )
+    private void printConfigurationPrinter( final ConfigurationWriter pw,
+            final ConfigurationPrinter cp,
+            final String mode )
     {
         pw.title(  cp.getTitle() );
-        cp.printConfiguration( pw );
+        if ( cp instanceof ModeAwareConfigurationPrinter )
+        {
+            ((ModeAwareConfigurationPrinter)cp).printConfiguration( pw , mode);
+        }
+        else
+        {
+            cp.printConfiguration( pw );
+        }
         pw.end();
     }
 

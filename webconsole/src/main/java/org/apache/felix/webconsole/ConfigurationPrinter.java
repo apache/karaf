@@ -42,28 +42,28 @@ public interface ConfigurationPrinter
     String SERVICE = ConfigurationPrinter.class.getName();
 
     /** The default mode - this printer is used in the web console and the zip.
-     * @since 2.2 */
+     * @since 3.0 */
     String MODE_ALWAYS = "always";
 
     /** The web mode - this printer is used in the web console.
-     * since 2.2 */
+     * since 3.0 */
     String MODE_WEB = "web";
 
     /** The zip mode - this printer is used in the zip.
-     * @since 2.2 */
+     * @since 3.0 */
     String MODE_ZIP = "zip";
 
     /** The txt mode - this printer is used in the txt.
-     * @since 2.2 */
+     * @since 3.0 */
     String MODE_TXT = "txt";
 
     /**
-     * The service property specifying the modes of the printer. If this
-     * property is missing or contains an unknown value, the default
+     * The optional service property specifying the modes of the printer.
+     * If this property is missing or contains an unknown value, the default
      * {@link #MODE_ALWAYS} is used.
      * The value of this property is either a single string or an
      * array of strings.
-     * @since 2.2
+     * @since 3.0
      */
     String PROPERTY_MODES = "modes";
 
