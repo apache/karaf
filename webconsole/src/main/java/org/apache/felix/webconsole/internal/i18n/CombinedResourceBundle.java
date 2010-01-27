@@ -20,6 +20,7 @@ package org.apache.felix.webconsole.internal.i18n;
 
 
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -29,12 +30,21 @@ class CombinedResourceBundle extends ResourceBundle
 
     private final ResourceBundle resourceBundle;
     private final ResourceBundle defaultResourceBundle;
+    private final Locale locale;
 
 
-    CombinedResourceBundle( final ResourceBundle resourceBundle, final ResourceBundle defaultResourceBundle )
+    CombinedResourceBundle( final ResourceBundle resourceBundle, final ResourceBundle defaultResourceBundle,
+        final Locale locale )
     {
         this.resourceBundle = resourceBundle;
         this.defaultResourceBundle = defaultResourceBundle;
+        this.locale = locale;
+    }
+
+
+    public Locale getLocale()
+    {
+        return locale;
     }
 
 

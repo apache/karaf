@@ -79,7 +79,7 @@ public class ResourceBundleManager implements BundleListener
         }
 
         final ResourceBundle bundleResourceBundle = cache.getResourceBundle( locale );
-        return new CombinedResourceBundle( bundleResourceBundle, defaultResourceBundle );
+        return new CombinedResourceBundle( bundleResourceBundle, defaultResourceBundle, locale );
     }
 
 
