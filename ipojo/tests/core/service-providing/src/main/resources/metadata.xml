@@ -3,160 +3,169 @@
     xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/SNAPSHOT/core.xsd"
     xmlns="org.apache.felix.ipojo"
 >
-	<!-- Simple provider  -->
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		name="PS-FooProviderType-1" architecture="true">
-		<provides />
-	</component>
-	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		name="PS-FooProviderType-itf" architecture="true">
-		<provides
-			specifications="org.apache.felix.ipojo.test.scenarios.ps.service.FooService" />
-	</component>
-	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		name="PS-FooProviderType-3" architecture="true">
-		<provides>
-			<property name="foo" field="m_foo" />
-			<property name="bar" field="m_bar" />
-			<property name="baz" type="java.lang.String" />
-		</provides>
-		<properties propagation="true">
-			<property name="foo" field="m_foo" />
-			<property name="bar" field="m_bar" />
-		</properties>
-	</component>
-	
-	<!-- Providers providing 2 services -->
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
-		name="PS-FooBarProviderType-1" architecture="true">
-		<provides />
-	</component>
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
-		name="PS-FooBarProviderType-2" architecture="true">
-		<provides
-			specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService, org.apache.felix.ipojo.test.scenarios.ps.service.BarService }" />
-	</component>
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
-		name="PS-FooBarProviderType-3" architecture="true">
-		<provides
-			specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService}">
-			<property name="baz" type="java.lang.String" value="foo" />
-		</provides>
-		<provides
-			specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.BarService}">
-			<property name="baz" type="java.lang.String" value="bar" />
-		</provides>
-	</component>
-	
+  <!-- Simple provider  -->
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+    name="PS-FooProviderType-1" architecture="true">
+    <provides />
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+    name="PS-FooProviderType-itf" architecture="true">
+    <provides
+      specifications="org.apache.felix.ipojo.test.scenarios.ps.service.FooService" />
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+    name="PS-FooProviderType-3" architecture="true">
+    <provides>
+      <property name="foo" field="m_foo" />
+      <property name="bar" field="m_bar" />
+      <property name="baz" type="java.lang.String" />
+    </provides>
+    <properties propagation="true">
+      <property name="foo" field="m_foo" />
+      <property name="bar" field="m_bar" />
+    </properties>
+  </component>
+  
+  <!-- Providers providing 2 services -->
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+    name="PS-FooBarProviderType-1" architecture="true">
+    <provides />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+    name="PS-FooBarProviderType-2" architecture="true">
+    <provides
+      specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService, org.apache.felix.ipojo.test.scenarios.ps.service.BarService }" />
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+    name="PS-FooBarProviderType-3" architecture="true">
+    <provides
+      specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService}">
+      <property name="baz" type="java.lang.String" value="foo" />
+    </provides>
+    <provides
+      specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.BarService}">
+      <property name="baz" type="java.lang.String" value="bar" />
+    </provides>
+  </component>
+  
 
-	<!-- Provider with dynamic property -->
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
-		name="PS-FooProviderType-Dyn" architecture="true">
-		<provides>
-			<property name="int" field="intProp" value="2" />
-			<property name="boolean" field="boolProp" value="false" />
-			<property name="string" field="strProp" value="foo" />
-			<property name="strAProp" field="strAProp"
-				value="{foo, bar}" />
-			<property name="intAProp" field="intAProp" value="{ 1,2,3}" />
-		</provides>
-	</component>
-	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		name="PS-FooProviderType-2" architecture="true">
-		<provides>
-			<property name="int" type="int" value="2" />
-			<property name="long" type="long" value="40" />
-			<property name="string" type="java.lang.String" value="foo" />
-			<property name="strAProp" type="java.lang.String[]"
-				value="{foo, bar}" />
-			<property name="intAProp" type="int[]" value="{1,2,3}" />
-		</provides>
-	</component>
-	
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
-		name="PS-FooProviderType-Dyn2" architecture="true">
-		<provides>
-			<property name="int" field="intProp" value="4" />
-			<property name="boolean" field="boolProp" />
-			<property name="string" field="strProp" />
-			<property name="strAProp" field="strAProp" />
-			<property name="intAProp" field="intAProp"
-				value="{1, 2,3 }" />
-		</provides>
-	</component>
-	
-	<!--  Inherited Provides -->
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation1"
-		name="PS-PI1" architecture="true">
-		<provides />
-	</component>
+  <!-- Provider with dynamic property -->
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+    name="PS-FooProviderType-Dyn" architecture="true">
+    <provides>
+      <property name="int" field="intProp" value="2" />
+      <property name="boolean" field="boolProp" value="false" />
+      <property name="string" field="strProp" value="foo" />
+      <property name="strAProp" field="strAProp"
+        value="{foo, bar}" />
+      <property name="intAProp" field="intAProp" value="{1,2,3}" />
+    </provides>
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+    name="PS-FooProviderType-2" architecture="true">
+    <provides>
+      <property name="int" type="int" value="2" />
+      <property name="long" type="long" value="40" />
+      <property name="string" type="java.lang.String" value="foo" />
+      <property name="strAProp" type="java.lang.String[]"
+        value="{foo, bar}" />
+      <property name="intAProp" type="int[]" value="{1,2,3}" />
+    </provides>
+  </component>
+  
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
+    name="PS-FooProviderType-Dyn2" architecture="true">
+    <provides>
+      <property name="int" field="intProp" value="4" />
+      <property name="boolean" field="boolProp" />
+      <property name="string" field="strProp" />
+      <property name="strAProp" field="strAProp" />
+      <property name="intAProp" field="intAProp"
+        value="{1, 2,3 }" />
+    </provides>
+  </component>
+  
+  <!--  Inherited Provides -->
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation1"
+    name="PS-PI1" architecture="true">
+    <provides />
+  </component>
 
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation1"
-		name="PS-PI1-1" architecture="true">
-		<provides
-			specifications="org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface" />
-	</component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation1"
+    name="PS-PI1-1" architecture="true">
+    <provides
+      specifications="org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface" />
+  </component>
 
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation1"
-		name="PS-PI1-2" architecture="true">
-		<provides
-			specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface, org.apache.felix.ipojo.test.scenarios.ps.service.ParentInterface2}" />
-	</component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation1"
+    name="PS-PI1-2" architecture="true">
+    <provides
+      specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface, org.apache.felix.ipojo.test.scenarios.ps.service.ParentInterface2}" />
+  </component>
 
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation2"
-		name="PS-PI2" architecture="true">
-		<provides />
-	</component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation2"
+    name="PS-PI2" architecture="true">
+    <provides />
+  </component>
 
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation2"
-		name="PS-PI2-1" architecture="true">
-		<provides
-			specifications="org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface" />
-	</component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation2"
+    name="PS-PI2-1" architecture="true">
+    <provides
+      specifications="org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface" />
+  </component>
 
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation3"
-		name="PS-PI3" architecture="true">
-		<provides />
-	</component>
-	
-	<!-- Concrete and abstract class -->
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"
-		name="PS-PI4" architecture="true">
-		<provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
-	</component>
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation2"
-		name="PS-PI5" architecture="true">
-		<provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
-	</component>
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation4"
-		name="PS-PI6" architecture="true">
-		<provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
-	</component>
-	<component
-		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation3"
-		name="PS-PI7" architecture="true">
-		<provides specifications="[org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation, 
-					org.apache.felix.ipojo.test.scenarios.ps.service.FooService]"/>
-	</component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation3"
+    name="PS-PI3" architecture="true">
+    <provides />
+  </component>
+  
+  <!-- Concrete and abstract class -->
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"
+    name="PS-PI4" architecture="true">
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation2"
+    name="PS-PI5" architecture="true">
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation4"
+    name="PS-PI6" architecture="true">
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
+  </component>
+  <component
+    classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation3"
+    name="PS-PI7" architecture="true">
+    <provides specifications="[org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation, 
+          org.apache.felix.ipojo.test.scenarios.ps.service.FooService]"/>
+  </component>
+  
+  <!--  Null Check -->
+  <component classname="org.apache.felix.ipojo.test.scenarios.component.NullCheckServiceProvider" immediate="true"
+    name="PS-Null">
+    <provides>
+      <property field="prop1"/>
+      <property field="prop2"/>
+    </provides>
+  </component>
 </ipojo>

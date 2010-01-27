@@ -38,6 +38,7 @@ public class ProvidedServiceTestSuite extends TestSuite {
         ots.addTestSuite(ProvidedServiceArchitectureTest.class);
         ots.addTestSuite(ClassTest.class);
         ots.addTestSuite(OSGiPropertiesTest.class);
+        ots.addTestSuite(NullCheck.class);
         return ots;
     }
 

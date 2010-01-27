@@ -412,8 +412,8 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             for (int j = 0; j < svc.getProperties().length; j++) {
                 Property prop = svc.getProperties()[j];
                 if (fieldName.equals(prop.getField())) {
-                    // it is the associated property
-                    return prop.getValue();
+                    // Manage the No Value case.
+                    return prop.onGet(pojo, fieldName, value); 
                 }
             }
         }
