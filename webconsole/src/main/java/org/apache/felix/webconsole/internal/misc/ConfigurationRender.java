@@ -100,10 +100,11 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             zip.setLevel( 9 );
             zip.setMethod( ZipOutputStream.DEFLATED );
 
-            ConfigurationWriter pw = new ZipConfigurationWriter( zip );
+            final ZipConfigurationWriter pw = new ZipConfigurationWriter( zip );
             printConfigurationStatus( pw, ConfigurationPrinter.MODE_ZIP );
             pw.flush();
 
+            addBinaries( pw );
             zip.finish();
         }
         else
@@ -264,8 +265,8 @@ public class ConfigurationRender extends BaseWebConsolePlugin
 
 
     private void printConfigurationPrinter( final ConfigurationWriter pw,
-            final ConfigurationPrinter cp,
-            final String mode )
+                                            final ConfigurationPrinter cp,
+                                            final String mode )
     {
         pw.title(  cp.getTitle() );
         if ( cp instanceof ModeAwareConfigurationPrinter )
@@ -541,6 +542,35 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         }
     }
 
+    private void addBinaries( final ZipConfigurationWriter cf )
+    throws IOException
+    {
+        final String mode = ConfigurationPrinter.MODE_ZIP;
+        for ( Iterator cpi = getConfigurationPrinters().iterator(); cpi.hasNext(); )
+        {
+            // check if printer supports zip mode
+            final PrinterDesc desc = (PrinterDesc) cpi.next();
+            if ( desc.match(mode) )
+            {
+                // check if printer implements binary configuration printer
+                if ( desc.printer instanceof BinaryConfigurationPrinter )
+                {
+                    final String[] names = ((BinaryConfigurationPrinter)desc.printer).getFilenames(mode);
+                    if ( names != null )
+                    {
+                        for(int i = 0; i < names.length; i++)
+                        {
+                            final OutputStream os = cf.startFile(desc.printer.getTitle(), names[i]);
+                            ((BinaryConfigurationPrinter)desc.printer).writeFile(names[i], mode, os);
+                            cf.end();
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
     private static final class PrinterDesc
     {
         private final String[] modes;
@@ -670,6 +700,21 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             }
         }
 
+        public OutputStream startFile( String title, String name)
+        {
+            final String path = MessageFormat.format( "{0,number,000}-{1}/{2}", new Object[]
+                 { new Integer( counter ), title, name } );
+            ZipEntry entry = new ZipEntry( path );
+            try
+            {
+                zip.putNextEntry( entry );
+            }
+            catch ( IOException ioe )
+            {
+                // should handle
+            }
+            return zip;
+        }
 
         public void end()
         {
