@@ -346,6 +346,14 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
             URLConnection connection = url.openConnection();
             ins = connection.getInputStream();
 
+            // FELIX-2017 Equinox may return an URL for a non-existing
+            // resource but then (instead of throwing) return null on
+            // getInputStream. We should account for this situation and
+            // just assume a non-existing resource in this case.
+            if (ins == null) {
+                return false;
+            }
+
             // check whether we may return 304/UNMODIFIED
             long lastModified = connection.getLastModified();
             if ( lastModified > 0 )
