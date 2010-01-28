@@ -19,42 +19,30 @@
 package org.apache.felix.webconsole;
 
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.net.URL;
 
 
 /**
  * This is an optional extension of the {@link ConfigurationPrinter}.
  * If a configuration printer implements this interface, the printer
- * can add additional files to the output of the configuration rendering.
+ * can add additional attamchemtns to the output of the configuration rendering.
  *
  * Currently this is only supported for the ZIP mode.
  *
  * A service implementing this method must still register itself
  * as a {@link ConfigurationPrinter} but not as a
- * {@link BinaryConfigurationPrinter} service.
+ * {@link AttachmentProvider} service.
  * @since 3.0
  */
-public interface BinaryConfigurationPrinter
-    extends ConfigurationPrinter
+public interface AttachmentProvider
 {
 
     /**
-     * Return a list of filename for the render mode.
-     * The returned list should just contain filenames without
-     * any path information.
-     * @return An array of filenames or null.
+     * Return an array of attachments for the given render mode.
+     * The returned list should contain URLs pointing to the
+     * attachments for this mode.
+     * @param mode The render mode.
+     * @return An array of urls or null.
      */
-    String[] getFilenames(String mode);
-
-    /**
-     * Write the contents of the file to the output stream.
-     * @param name The filename.
-     * @param out The output stream.
-     * @throws IOException If any problem occurs during writing.
-     * @throws IllegalArgumentException If the name is null or not
-     *         one from the list returned by {@link #getFilenames(String)}.
-     */
-    void writeFile(String name, String mode,  OutputStream out)
-    throws IOException;
+    URL[] getAttachments(String mode);
 }

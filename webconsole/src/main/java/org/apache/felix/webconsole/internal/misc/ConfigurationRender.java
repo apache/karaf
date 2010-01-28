@@ -18,6 +18,7 @@ package org.apache.felix.webconsole.internal.misc;
 
 
 import java.io.*;
+import java.net.URL;
 import java.text.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -27,6 +28,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.*;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
@@ -553,15 +555,37 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             if ( desc.match(mode) )
             {
                 // check if printer implements binary configuration printer
-                if ( desc.printer instanceof BinaryConfigurationPrinter )
+                if ( desc.printer instanceof AttachmentProvider )
                 {
-                    final String[] names = ((BinaryConfigurationPrinter)desc.printer).getFilenames(mode);
-                    if ( names != null )
+                    final URL[] attachments = ((AttachmentProvider)desc.printer).getAttachments(mode);
+                    if ( attachments != null )
                     {
-                        for(int i = 0; i < names.length; i++)
+                        for(int i = 0; i < attachments.length; i++)
                         {
-                            final OutputStream os = cf.startFile(desc.printer.getTitle(), names[i]);
-                            ((BinaryConfigurationPrinter)desc.printer).writeFile(names[i], mode, os);
+                            final URL current = attachments[i];
+                            final String path = current.getPath();
+                            final String name;
+                            if ( path == null || path.length() == 0 )
+                            {
+                                // sanity code, we should have a path, but if not let's just create
+                                // some random name
+                                name = UUID.randomUUID().toString();
+                            }
+                            else
+                            {
+                                final int pos = path.lastIndexOf('/');
+                                name = (pos == -1 ? path : path.substring(pos + 1));
+                            }
+                            final OutputStream os = cf.startFile(desc.printer.getTitle(), name);
+                            final InputStream is = current.openStream();
+                            try
+                            {
+                                IOUtils.copy(is, os);
+                            }
+                            finally
+                            {
+                                IOUtils.closeQuietly(is);
+                            }
                             cf.end();
                         }
                     }
