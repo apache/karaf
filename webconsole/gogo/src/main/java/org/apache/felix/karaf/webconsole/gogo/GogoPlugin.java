@@ -135,27 +135,27 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     protected URL getResource( String path )
     {
         path = path.substring( NAME.length() + 1 );
-        if (path.length() == 0) {
-            //it means input parameter path is just plugin name like /gogo but not real resource path.
-            //on felix the return url would be null in this case, which is correct expected behavior.
-            //but on equinox the return url is like bundleresource://184.fwk1674485910/,
-            //which cause NPE in AbstractWebConsolePlugin.spoolResource
-            //so just return null ensure it works both with felix and equinox
-            return null;
-        }
-
         URL url = this.getClass().getClassLoader().getResource( path );
-        try
-        {
-            InputStream ins = url.openStream();
-            if ( ins == null )
-            {
-                this.log.error( "failed to open " + url );
+        if (url != null) {
+            InputStream ins = null;
+            try {
+                ins = url.openStream();
+                if (ins == null) {
+                    this.log.error("failed to open " + url);
+                    url = null;
+                }
+            } catch (IOException e) {
+                this.log.error(e.getMessage(), e);
+                url = null;
+            } finally {
+                if (ins != null) {
+                    try {
+                        ins.close();
+                    } catch (IOException e) {
+                        this.log.error(e.getMessage(), e);
+                    }
+                }
             }
-        }
-        catch ( IOException e )
-        {
-            this.log.error( e.getMessage(), e );
         }
         return url;
     }
