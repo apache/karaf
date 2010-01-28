@@ -93,6 +93,9 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             }
             System.out.println("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
+                if (bundle.startsWith("wrap:")) {
+                    bundle = bundle.substring(5);
+                }
                 if (!bundle.startsWith("mvn:")) {
                     throw new MojoExecutionException("Bundle url is not a maven url: " + bundle);
                 }
