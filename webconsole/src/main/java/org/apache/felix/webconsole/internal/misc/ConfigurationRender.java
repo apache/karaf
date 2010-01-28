@@ -102,11 +102,11 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             zip.setLevel( 9 );
             zip.setMethod( ZipOutputStream.DEFLATED );
 
-            final ZipConfigurationWriter pw = new ZipConfigurationWriter( zip );
+            final ConfigurationWriter pw = new ZipConfigurationWriter( zip );
             printConfigurationStatus( pw, ConfigurationPrinter.MODE_ZIP );
             pw.flush();
 
-            addBinaries( pw );
+            addAttachments( pw, ConfigurationPrinter.MODE_ZIP );
             zip.finish();
         }
         else
@@ -422,6 +422,12 @@ public class ConfigurationRender extends BaseWebConsolePlugin
 
         abstract void end();
 
+        public void handleAttachments(final String title, final URL[] urls)
+        throws IOException
+        {
+            throw new UnsupportedOperationException("handleAttachments not supported by this configuration writer: " + this);
+        }
+
     }
 
     private static class HtmlConfigurationWriter extends ConfigurationWriter
@@ -544,10 +550,9 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         }
     }
 
-    private void addBinaries( final ZipConfigurationWriter cf )
+    private void addAttachments( final ConfigurationWriter cf, final String mode )
     throws IOException
     {
-        final String mode = ConfigurationPrinter.MODE_ZIP;
         for ( Iterator cpi = getConfigurationPrinters().iterator(); cpi.hasNext(); )
         {
             // check if printer supports zip mode
@@ -560,34 +565,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
                     final URL[] attachments = ((AttachmentProvider)desc.printer).getAttachments(mode);
                     if ( attachments != null )
                     {
-                        for(int i = 0; i < attachments.length; i++)
-                        {
-                            final URL current = attachments[i];
-                            final String path = current.getPath();
-                            final String name;
-                            if ( path == null || path.length() == 0 )
-                            {
-                                // sanity code, we should have a path, but if not let's just create
-                                // some random name
-                                name = UUID.randomUUID().toString();
-                            }
-                            else
-                            {
-                                final int pos = path.lastIndexOf('/');
-                                name = (pos == -1 ? path : path.substring(pos + 1));
-                            }
-                            final OutputStream os = cf.startFile(desc.printer.getTitle(), name);
-                            final InputStream is = current.openStream();
-                            try
-                            {
-                                IOUtils.copy(is, os);
-                            }
-                            finally
-                            {
-                                IOUtils.closeQuietly(is);
-                            }
-                            cf.end();
-                        }
+                        cf.handleAttachments(desc.printer.getTitle(), attachments);
                     }
                 }
             }
@@ -724,7 +702,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             }
         }
 
-        public OutputStream startFile( String title, String name)
+        private OutputStream startFile( String title, String name)
         {
             final String path = MessageFormat.format( "{0,number,000}-{1}/{2}", new Object[]
                  { new Integer( counter ), title, name } );
@@ -739,6 +717,40 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             }
             return zip;
         }
+
+        public void handleAttachments( final String title, final URL[] attachments)
+        throws IOException
+        {
+            for(int i = 0; i < attachments.length; i++)
+            {
+                final URL current = attachments[i];
+                final String path = current.getPath();
+                final String name;
+                if ( path == null || path.length() == 0 )
+                {
+                    // sanity code, we should have a path, but if not let's just create
+                    // some random name
+                    name = UUID.randomUUID().toString();
+                }
+                else
+                {
+                    final int pos = path.lastIndexOf('/');
+                    name = (pos == -1 ? path : path.substring(pos + 1));
+                }
+                final OutputStream os = this.startFile(title, name);
+                final InputStream is = current.openStream();
+                try
+                {
+                    IOUtils.copy(is, os);
+                }
+                finally
+                {
+                    IOUtils.closeQuietly(is);
+                }
+                this.end();
+            }
+        }
+
 
         public void end()
         {
