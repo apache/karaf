@@ -134,6 +134,21 @@ class BundleImpl implements Bundle
         }
     }
 
+    /**
+     * This is sort of a hacky method called after uninstalling a bundle.
+     * If the bundle is a fragment, this will unmerge it from any unresolved
+     * hosts. This is necessary since fragments are pre-merged into unresolved
+     * hosts. If uninstalled fragments are not unmerged from unresolved hosts,
+     * any attempts to subsequently resolve the host will result in an exception.
+     */
+    synchronized void cleanAfterUninstall()
+    {
+        for (int i = 0; i < m_modules.length; i++)
+        {
+            getFramework().getResolverState().unmergeFragment(m_modules[i]);
+        }
+    }
+
     synchronized void refresh() throws Exception
     {
         if (isExtension() && (getFramework().getState() != Bundle.STOPPING))

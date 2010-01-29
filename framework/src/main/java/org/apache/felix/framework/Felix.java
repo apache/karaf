@@ -2261,6 +2261,10 @@ ex.printStackTrace();
             // Set state to uninstalled.
             setBundleStateAndNotify(bundle, Bundle.UNINSTALLED);
             bundle.setLastModified(System.currentTimeMillis());
+
+            // If this bundle is a fragment, unmerge it from any
+            // unresolved hosts.
+            bundle.cleanAfterUninstall();
         }
         finally
         {

@@ -288,6 +288,101 @@ public class FelixResolverState implements Resolver.ResolverState
         }
     }
 
+    public void unmergeFragment(IModule module)
+    {
+        if (!Util.isFragment(module))
+        {
+            return;
+        }
+
+        // Get fragment list, which may be null for system bundle fragments.
+        List fragList = (List) m_fragmentMap.get(module.getSymbolicName());
+        if (fragList != null)
+        {
+            // Remove from fragment map.
+            fragList.remove(module);
+            if (fragList.size() == 0)
+            {
+                m_fragmentMap.remove(module.getSymbolicName());
+            }
+
+            // If we have any matching hosts, then remove fragment while
+            // removing any older version of the new fragment. Also remove host's
+            // existing capabilities from the package index and reindex its new
+            // ones after attaching the fragment.
+            List matchingHosts = getMatchingHosts(module);
+            for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
+            {
+                IModule host = ((ICapability) matchingHosts.get(hostIdx)).getModule();
+                // Find any unresolved hosts into which the fragment is merged
+                // and unmerge it.
+                IModule[] fragments = ((ModuleImpl) host).getFragments();
+                for (int fragIdx = 0;
+                    !host.isResolved() && (fragments != null) && (fragIdx < fragments.length);
+                    fragIdx++)
+                {
+                    if (!fragments[fragIdx].equals(module))
+                    {
+                        List fragmentList = getMatchingFragments(host);
+
+                        // Remove host's existing exported packages from index.
+                        ICapability[] caps = host.getCapabilities();
+                        for (int i = 0; (caps != null) && (i < caps.length); i++)
+                        {
+                            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                            {
+                                // Get package name.
+                                String pkgName = (String)
+                                    caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                                // Remove from "unresolved" package map.
+                                List capList = (List) m_unresolvedPkgIndex.get(pkgName);
+                                if (capList != null)
+                                {
+                                    capList.remove(caps[i]);
+                                }
+                            }
+                        }
+
+                        // Check if fragment conflicts with existing metadata.
+                        checkForConflicts(host, fragmentList);
+
+                        // Attach the fragments to the host.
+                        fragments = (fragmentList.size() == 0)
+                            ? null
+                            : (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]);
+                        try
+                        {
+                            ((ModuleImpl) host).attachFragments(fragments);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Try to clean up by removing all fragments.
+                            try
+                            {
+                                ((ModuleImpl) host).attachFragments(null);
+                            }
+                            catch (Exception ex2)
+                            {
+                            }
+                            m_logger.log(Logger.LOG_ERROR,
+                                "Serious error attaching fragments.", ex);
+                        }
+
+                        // Reindex the host's exported packages.
+                        caps = host.getCapabilities();
+                        for (int i = 0; (caps != null) && (i < caps.length); i++)
+                        {
+                            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                            {
+                                indexPackageCapability(m_unresolvedPkgIndex, caps[i]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private List getMatchingHosts(IModule fragment)
     {
         // Find the fragment's host requirement.
