@@ -61,6 +61,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 import static java.lang.String.format;
 
@@ -289,7 +290,17 @@ public class FeaturesServiceImpl implements FeaturesService {
                     if (state.installed.contains(b)
                             || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
                                     && getStartLevel().isBundlePersistentlyStarted(b))) {
-                        b.start();
+                        try {
+                            b.start();
+                        } catch (BundleException be) {
+                            String[] msgdata = new String[]{
+                                b.getLocation(),
+                                getFeaturesContainingBundleList(b),
+                                be.getMessage()
+                            };
+                            String msg = MessageFormatter.arrayFormat("Could not start bundle {} in feature(s) {}: {}", msgdata);
+                            throw new Exception(msg, be);
+                        }
                     }
                 }
             }
@@ -883,4 +894,29 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
+    public Set<Feature> getFeaturesContainingBundle (Bundle bundle) {
+        Set<Feature> features = new HashSet<Feature>();
+        for (Map<String, Feature> featureMap : this.features.values()) {
+            for (Feature f : featureMap.values()) {
+                if (f.getBundles().contains(bundle.getLocation())) {
+                    features.add(f);
+                }
+            }
+        }
+        return features;
+    }
+
+    private String getFeaturesContainingBundleList(Bundle bundle) {
+        Set<Feature> features = getFeaturesContainingBundle(bundle);
+        StringBuilder buffer = new StringBuilder();
+        Iterator<Feature> iter = features.iterator();
+        while (iter.hasNext()) {
+            Feature feature= iter.next();
+            buffer.append(feature.getId());
+            if (iter.hasNext()) {
+                buffer.append(", ");
+            }
+        }
+        return buffer.toString();
+    }
 }
