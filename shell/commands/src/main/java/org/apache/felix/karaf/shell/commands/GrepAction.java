@@ -18,12 +18,11 @@
  */
 package org.apache.felix.karaf.shell.commands;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -115,8 +114,11 @@ public class GrepAction extends OsgiCommandSupport {
             int lineno = 1;
             String line;
             int lineMatch = 0;
-            Reader r = new InputStreamReader(System.in);
-            while ((line = readLine(r)) != null) {
+            BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+            while ((line = r.readLine()) != null) {
+                if (line.length() == 1 && line.charAt(0) == '\n') {
+                    break;
+                }
                 if (p.matcher(line).matches() ^ invertMatch) {
 
                     Matcher matcher2 = p2.matcher(line);
@@ -180,20 +182,6 @@ public class GrepAction extends OsgiCommandSupport {
         } catch (IOException e) {
         }
         return null;
-    }
-
-    private String readLine(Reader in) throws IOException {
-        StringBuffer buf = new StringBuffer();
-        while (true) {
-            int i = in.read();
-            if (i == -1 && buf.length() == 0) {
-                return null;
-            }
-            if (i == -1 || i == '\n' || i == '\r') {
-                return buf.toString();
-            }
-            buf.append((char) i);
-        }
     }
 
 }
