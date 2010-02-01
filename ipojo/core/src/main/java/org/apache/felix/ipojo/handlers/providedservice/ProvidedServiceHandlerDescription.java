@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Iterator;
+import java.util.Properties;
 
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
@@ -86,12 +87,18 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
                 service.addAttribute(new Attribute("state", "unregistered"));
             }
             
-            Iterator iterator = m_providedServices[i].getProperties().keySet().iterator();
+            Properties props = m_providedServices[i].getProperties();
+            Iterator iterator = props.keySet().iterator();
             while (iterator.hasNext()) {
                 Element prop = new Element("property", null);
                 String name = (String) iterator.next();
                 prop.addAttribute(new Attribute("name", name));
-                prop.addAttribute(new Attribute("value", m_providedServices[i].getProperties().getProperty(name)));
+                Object obj = props.get(name);
+                if (obj != null) {
+                    prop.addAttribute(new Attribute("value", obj.toString()));
+                } else {
+                    prop.addAttribute(new Attribute("value", "null"));
+                }
                 service.addElement(prop);
             }
             services.addElement(service);
