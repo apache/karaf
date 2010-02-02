@@ -425,9 +425,10 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
 
         String header = MessageFormat.format( getHeader(), new Object[]
-            { adminTitle, getTitle(), appRoot, getLabel(), brandingPlugin.getFavIcon(),
-                brandingPlugin.getMainStyleSheet(), brandingPlugin.getProductURL(), brandingPlugin.getProductName(),
-                brandingPlugin.getProductImage(), getCssLinks( appRoot ) } );
+            { adminTitle, getTitle(), appRoot, getLabel(), toUrl( brandingPlugin.getFavIcon(), appRoot ),
+                toUrl( brandingPlugin.getMainStyleSheet(), appRoot ), brandingPlugin.getProductURL(),
+                brandingPlugin.getProductName(), toUrl( brandingPlugin.getProductImage(), appRoot ),
+                getCssLinks( appRoot ) } );
         pw.println( header );
 
         return pw;
@@ -635,11 +636,11 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         + "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
         + "  <head>"
         + "    <meta http-equiv=\"Content-Type\" content=\"text/html; utf-8\">"
-        + "    <link rel=\"icon\" href=\"{2}{4}\">"
+        + "    <link rel=\"icon\" href=\"{4}\">"
         + "    <title>{0} - {1}</title>"
 
         + "    <link href=\"{2}/res/ui/admin.css\" rel=\"stylesheet\" type=\"text/css\">"
-        + "    <link href=\"{2}{5}\" rel=\"stylesheet\" type=\"text/css\">"
+        + "    <link href=\"{5}\" rel=\"stylesheet\" type=\"text/css\">"
         + "    {9}"
 
         + "    <script language=\"JavaScript\">"
@@ -662,7 +663,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         + "          {0}<br>{1}"
         + "        </h1>"
         + "        <p>"
-        + "          <a target=\"_blank\" href=\"{6}\" title=\"{7}\"><img src=\"{2}{8}\" border=\"0\"></a>"
+        + "          <a target=\"_blank\" href=\"{6}\" title=\"{7}\"><img src=\"{8}\" border=\"0\"></a>"
         + "        </p>"
         + "      </div>";
         return header;
@@ -693,16 +694,32 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         for ( int i = 0; i < cssRefs.length; i++ )
         {
             buf.append( "<link href='" );
-
-            final String cssRef = cssRefs[i];
-            if ( cssRef.startsWith( "/" ) )
-            {
-                buf.append( appRoot );
-            }
-
-            buf.append( cssRef ).append( "' rel='stylesheet' type='text/css'>" );
+            buf.append( toUrl( cssRefs[i], appRoot ) );
+            buf.append( "' rel='stylesheet' type='text/css'>" );
         }
 
         return buf.toString();
+    }
+
+
+    /**
+     * If the <code>url</code> starts with a slash, it is considered an absolute
+     * path (relative URL) which must be prefixed with the Web Console
+     * application root path. Otherwise the <code>url</code> is assumed to
+     * either be a relative path or an absolute URL, both must not be prefixed.
+     *
+     * @param url The url path to optionally prefix with the application root
+     *          path
+     * @param appRoot The application root path to optionally put in front of
+     *          the url.
+     * @throws NullPointerException if <code>url</code> is <code>null</code>.
+     */
+    private String toUrl( final String url, final String appRoot )
+    {
+        if ( url.startsWith( "/" ) )
+        {
+            return appRoot + url;
+        }
+        return url;
     }
 }
