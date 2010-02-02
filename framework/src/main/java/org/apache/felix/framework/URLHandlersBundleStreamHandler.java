@@ -91,6 +91,31 @@ class URLHandlersBundleStreamHandler extends URLStreamHandler
             super.setURL(u, u.getProtocol(), u.getHost(), u.getPort(), "felix", u.getUserInfo(), u.getPath(), u.getQuery(), u.getRef());
         }
     }
+
+    protected String toExternalForm(URL u) 
+    {
+        StringBuffer result = new StringBuffer();
+        result.append(u.getProtocol());
+        result.append("://");
+        result.append(u.getHost());
+        result.append(':');
+        result.append(u.getPort());
+        if (u.getPath() != null) 
+        {
+            result.append(u.getPath());
+        }
+        if (u.getQuery() != null) 
+        {
+            result.append('?');
+            result.append(u.getQuery());
+        }
+        if (u.getRef() != null) 
+        {
+            result.append("#");
+            result.append(u.getRef());
+        }
+        return result.toString();
+    }
     
     private boolean checkPermission(URL u)
     {

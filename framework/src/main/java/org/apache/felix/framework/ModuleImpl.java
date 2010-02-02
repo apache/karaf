@@ -1104,9 +1104,9 @@ public class ModuleImpl implements IModule
 
          try
          {
-             return m_secureAction.createURL(
-                 FelixConstants.BUNDLE_URL_PROTOCOL,
-                 m_id, port, path, m_streamHandler);
+             return m_secureAction.createURL(null, 
+                 FelixConstants.BUNDLE_URL_PROTOCOL + "://" +  
+                 m_id + ":" + port + path, m_streamHandler);
          }
          catch (MalformedURLException ex)
          {
