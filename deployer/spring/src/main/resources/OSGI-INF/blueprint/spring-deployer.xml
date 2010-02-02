@@ -19,15 +19,22 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <service auto-export="interfaces" depends-on="springUrlHandler">
-        <bean class="org.apache.felix.karaf.deployer.spring.SpringDeploymentListener"/>
-    </service>
-
     <service id="springUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService">
     	<service-properties>
             <entry key="url.handler.protocol" value="spring"/>
         </service-properties>
         <bean class="org.apache.felix.karaf.deployer.spring.SpringURLHandler"/>
     </service>
+
+    <bean id="springDeploymentListener" class="org.apache.felix.karaf.deployer.spring.SpringDeploymentListener"/>
+
+    <!-- Force a reference to the url handler above from the osgi registry to (try to) make sure
+         the url handler is registered inside the framework.  Else we can run into timing issues
+         where fileinstall will use the featureDeploymentListener before the url can be actually
+         used.  In order to not block the bundle, the blueprint.graceperiod=false flag must be
+         set on the SymbolicName osgi header -->
+    <reference id="springUrlHandlerRef" interface="org.osgi.service.url.URLStreamHandlerService" filter="url.handler.protocol=spring" />
+
+    <service ref="springDeploymentListener" auto-export="interfaces" depends-on="springDeploymentListener" />
 
 </blueprint>

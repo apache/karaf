@@ -39,7 +39,7 @@ import org.apache.felix.karaf.features.Repository;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.framework.BundleListener;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -47,7 +47,7 @@ import org.xml.sax.SAXParseException;
 /**
  * A deployment listener able to hot deploy a feature descriptor
  */
-public class FeatureDeploymentListener implements ArtifactUrlTransformer, SynchronousBundleListener {
+public class FeatureDeploymentListener implements ArtifactUrlTransformer, BundleListener {
 
     public static final String FEATURE_PATH = "org.apache.felix.karaf.shell.features";
 
@@ -76,7 +76,9 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Synchr
     public void init() throws Exception {
         bundleContext.addBundleListener(this);
         for (Bundle bundle : bundleContext.getBundles()) {
-            bundleChanged(new BundleEvent(BundleEvent.INSTALLED, bundle));
+            if (bundle.getState() == Bundle.RESOLVED || bundle.getState() == Bundle.STARTING
+                    || bundle.getState() == Bundle.ACTIVE)
+            bundleChanged(new BundleEvent(BundleEvent.RESOLVED, bundle));
         }
     }
 

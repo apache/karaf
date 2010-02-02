@@ -20,7 +20,12 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            default-activation="lazy">
 
-    <service ref="featureDeploymentListener" auto-export="interfaces" depends-on="featureUrlHandler"/>
+    <service id="featureUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService">
+    	<service-properties>
+            <entry key="url.handler.protocol" value="feature"/>
+        </service-properties>
+        <bean class="org.apache.felix.karaf.deployer.features.FeatureURLHandler"/>
+    </service>
 
     <bean id="featureDeploymentListener" class="org.apache.felix.karaf.deployer.features.FeatureDeploymentListener"
           init-method="init" destroy-method="destroy" activation="lazy">
@@ -30,11 +35,13 @@
         </property>
     </bean>
 
-    <service id="featureUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService">
-    	<service-properties>
-            <entry key="url.handler.protocol" value="feature"/>
-        </service-properties>
-        <bean class="org.apache.felix.karaf.deployer.features.FeatureURLHandler"/>
-    </service>
+    <!-- Force a reference to the url handler above from the osgi registry to (try to) make sure
+         the url handler is registered inside the framework.  Else we can run into timing issues
+         where fileinstall will use the featureDeploymentListener before the url can be actually
+         used.  In order to not block the bundle, the blueprint.graceperiod=false flag must be
+         set on the SymbolicName osgi header -->
+    <reference id="featureUrlHandlerRef" interface="org.osgi.service.url.URLStreamHandlerService" filter="url.handler.protocol=feature" />
+
+    <service ref="featureDeploymentListener" auto-export="interfaces" depends-on="featureUrlHandlerRef"/>
 
 </blueprint>
