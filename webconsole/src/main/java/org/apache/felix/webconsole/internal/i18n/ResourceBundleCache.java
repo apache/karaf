@@ -134,7 +134,17 @@ class ResourceBundleCache
                     final int end = entryPath.length() - 11; // .properties suffix
                     entryPath = entryPath.substring( start, end );
 
-                    resourceBundleEntries.put( entryPath, entry );
+                    // the default language is "name.properties" thus the entry
+                    // path is empty and must default to "_"
+                    if (entryPath.length() == 0) {
+                        entryPath = "_";
+                    }
+
+                    // only add this entry, if the "language" is not provided
+                    // by the main bundle or an earlier bound fragment
+                    if (!resourceBundleEntries.containsKey( entryPath )) {
+                        resourceBundleEntries.put( entryPath, entry );
+                    }
                 }
             }
 
@@ -155,7 +165,7 @@ class ResourceBundleCache
         {
             return new Locale( locale.getLanguage() );
         }
-        else if ( locale.getLanguage().equals( DEFAULT_LOCALE.getLanguage() ) )
+        else if ( !locale.getLanguage().equals( DEFAULT_LOCALE.getLanguage() ) )
         {
             return DEFAULT_LOCALE;
         }
