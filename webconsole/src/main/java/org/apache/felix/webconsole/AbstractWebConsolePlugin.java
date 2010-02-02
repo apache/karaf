@@ -34,7 +34,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 
 
 public abstract class AbstractWebConsolePlugin extends HttpServlet
@@ -66,8 +65,6 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     private boolean getResourceMethodChecked;
 
     private BundleContext bundleContext;
-
-    private String adminTitle;
 
     private static BrandingPlugin brandingPlugin = DefaultBrandingPlugin.getInstance();
 
@@ -144,10 +141,6 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     public void activate( BundleContext bundleContext )
     {
         this.bundleContext = bundleContext;
-
-        Dictionary headers = bundleContext.getBundle().getHeaders();
-
-        adminTitle = ( String ) headers.get( Constants.BUNDLE_NAME );
     }
 
 
@@ -425,10 +418,10 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
 
         String header = MessageFormat.format( getHeader(), new Object[]
-            { adminTitle, getTitle(), appRoot, getLabel(), toUrl( brandingPlugin.getFavIcon(), appRoot ),
-                toUrl( brandingPlugin.getMainStyleSheet(), appRoot ), brandingPlugin.getProductURL(),
-                brandingPlugin.getProductName(), toUrl( brandingPlugin.getProductImage(), appRoot ),
-                getCssLinks( appRoot ) } );
+            { brandingPlugin.getBrandName(), getTitle(), appRoot, getLabel(),
+                toUrl( brandingPlugin.getFavIcon(), appRoot ), toUrl( brandingPlugin.getMainStyleSheet(), appRoot ),
+                brandingPlugin.getProductURL(), brandingPlugin.getProductName(),
+                toUrl( brandingPlugin.getProductImage(), appRoot ), getCssLinks( appRoot ) } );
         pw.println( header );
 
         return pw;
@@ -619,7 +612,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     private String getHeader()
     {
         // MessageFormat pattern place holder
-        //  0 main title (plugin providing bundle name)
+        //  0 main title (brand name)
         //  1 console plugin title
         //  2 application root path (ATTR_APP_ROOT)
         //  3 console plugin label (from the URI)

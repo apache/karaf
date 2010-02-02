@@ -35,6 +35,11 @@ import java.util.Properties;
  * <table>
  * <tr><th>Name</th><th>Property Name</th><th>Default Value</th></tr>
  * <tr>
+ *  <td>Brand Name</td>
+ *  <td>webconsole.brand.name</td>
+ *  <td>Apache Felix Web Console</td>
+ * </tr>
+ * <tr>
  *  <td>Product Name</td>
  *  <td>webconsole.product.name</td>
  *  <td>Apache Felix</td>
@@ -92,6 +97,8 @@ public class DefaultBrandingPlugin implements BrandingPlugin
 
     private static DefaultBrandingPlugin instance;
 
+    private final String brandName;
+
     private final String productName;
 
     private final String productURL;
@@ -137,6 +144,7 @@ public class DefaultBrandingPlugin implements BrandingPlugin
         }
 
         // set the fields from the properties now
+        brandName = props.getProperty( "webconsole.brand.name", "Apache Felix Web Console" );
         productName = props.getProperty( "webconsole.product.name", "Apache Felix" );
         productURL = props.getProperty( "webconsole.product.url", "http://felix.apache.org" );
         productImage = props.getProperty( "webconsole.product.image", "/res/imgs/logo.png" );
@@ -160,7 +168,7 @@ public class DefaultBrandingPlugin implements BrandingPlugin
 
     public String getBrandName()
     {
-        return "DefaultBrandingPlugin";
+        return brandName;
     }
 
 

@@ -28,7 +28,9 @@ package org.apache.felix.webconsole;
 public interface BrandingPlugin
 {
     /**
-     * Returns an indicative name of the branding plugin
+     * Returns an indicative name of the branding plugin. This value is used
+     * as the Window/Page title together with the title of the respective
+     * plugin.
      */
     String getBrandName();
 
