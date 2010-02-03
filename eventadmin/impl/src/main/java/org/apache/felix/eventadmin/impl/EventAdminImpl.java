@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,22 +19,22 @@
 package org.apache.felix.eventadmin.impl;
 
 import org.apache.felix.eventadmin.impl.handler.HandlerTasks;
-import org.apache.felix.eventadmin.impl.tasks.DeliverTasks;
+import org.apache.felix.eventadmin.impl.tasks.DeliverTask;
 import org.apache.felix.eventadmin.impl.tasks.HandlerTask;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * This is the actual implementation of the OSGi R4 Event Admin Service (see the 
+ * This is the actual implementation of the OSGi R4 Event Admin Service (see the
  * Compendium 113 for details). The implementation uses a <tt>HandlerTasks</tt>
  * in order to determine applicable <tt>EventHandler</tt> for a specific event and
  * subsequently dispatches the event to the handlers via <tt>DeliverTasks</tt>.
  * To do this, it uses two different <tt>DeliverTasks</tt> one for asynchronous and
  * one for synchronous event delivery depending on whether its <tt>post()</tt> or
- * its <tt>send()</tt> method is called. Note that the actual work is done in the 
+ * its <tt>send()</tt> method is called. Note that the actual work is done in the
  * implementations of the <tt>DeliverTasks</tt>. Additionally, a stop method is
  * provided that prevents subsequent events to be delivered.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class EventAdminImpl implements EventAdmin
@@ -44,42 +44,42 @@ public class EventAdminImpl implements EventAdmin
     private volatile HandlerTasks m_managers;
 
     // The asynchronous event dispatcher
-    private final DeliverTasks m_postManager;
+    private final DeliverTask m_postManager;
 
     // The synchronous event dispatcher
-    private final DeliverTasks m_sendManager;
+    private final DeliverTask m_sendManager;
 
     /**
-     * The constructor of the <tt>EventAdmin</tt> implementation. The 
-     * <tt>HandlerTasks</tt> factory is used to determine applicable 
-     * <tt>EventHandler</tt> for a given event. Additionally, the two 
+     * The constructor of the <tt>EventAdmin</tt> implementation. The
+     * <tt>HandlerTasks</tt> factory is used to determine applicable
+     * <tt>EventHandler</tt> for a given event. Additionally, the two
      * <tt>DeliverTasks</tt> are used to dispatch the event.
-     *  
+     *
      * @param managers The factory used to determine applicable <tt>EventHandler</tt>
      * @param postManager The asynchronous event dispatcher
      * @param sendManager The synchronous event dispatcher
      */
     public EventAdminImpl(final HandlerTasks managers,
-        final DeliverTasks postManager, final DeliverTasks sendManager)
+        final DeliverTask postManager, final DeliverTask sendManager)
     {
         checkNull(managers, "Managers");
         checkNull(postManager, "PostManager");
         checkNull(sendManager, "SendManager");
-        
+
         m_managers = managers;
 
         m_postManager = postManager;
 
         m_sendManager = sendManager;
     }
-    
+
     /**
      * Post an asynchronous event.
-     * 
+     *
      * @param event The event to be posted by this service
-     * 
+     *
      * @throws IllegalStateException - In case we are stopped
-     * 
+     *
      * @see org.osgi.service.event.EventAdmin#postEvent(org.osgi.service.event.Event)
      */
     public void postEvent(final Event event)
@@ -89,11 +89,11 @@ public class EventAdminImpl implements EventAdmin
 
     /**
      * Send a synchronous event.
-     * 
+     *
      * @param event The event to be send by this service
      *
      * @throws IllegalStateException - In case we are stopped
-     * 
+     *
      * @see org.osgi.service.event.EventAdmin#sendEvent(org.osgi.service.event.Event)
      */
     public void sendEvent(final Event event)
@@ -102,24 +102,24 @@ public class EventAdminImpl implements EventAdmin
     }
 
     /**
-     * This method can be used to stop the delivery of events. The m_managers is 
+     * This method can be used to stop the delivery of events. The m_managers is
      * replaced with a null object that throws an IllegalStateException on a call
      * to <tt>createHandlerTasks()</tt>.
      */
     public void stop()
     {
-        // replace the HandlerTasks with a null object that will throw an 
+        // replace the HandlerTasks with a null object that will throw an
         // IllegalStateException on a call to createHandlerTasks
         m_managers = new HandlerTasks()
         {
             /**
-             * This is a null object and this method will throw an 
+             * This is a null object and this method will throw an
              * IllegalStateException due to the bundle being stopped.
-             * 
+             *
              * @param event An event that is not used.
-             * 
+             *
              * @return This method does not return normally
-             * 
+             *
              * @throws IllegalStateException - This is a null object and this method
              *          will always throw an IllegalStateException
              */
@@ -129,13 +129,13 @@ public class EventAdminImpl implements EventAdmin
             }
         };
     }
-    
+
     /*
-     * This is a utility method that uses the given DeliverTasks to create a 
+     * This is a utility method that uses the given DeliverTasks to create a
      * dispatch tasks that subsequently is used to dispatch the given HandlerTasks.
      */
     private void handleEvent(final HandlerTask[] managers,
-        final DeliverTasks manager)
+        final DeliverTask manager)
     {
         if (0 < managers.length)
         {
@@ -145,13 +145,13 @@ public class EventAdminImpl implements EventAdmin
             // events whenever they receive an event from their source.
             // Service importers that call us regardless of the fact that we are
             // stopped deserve an exception anyways
-            manager.createTask().execute(managers);
+            manager.execute(managers);
         }
     }
-    
+
     /*
      * This is a utility method that will throw a <tt>NullPointerException</tt>
-     * in case that the given object is null. The message will be of the form 
+     * in case that the given object is null. The message will be of the form
      * "${name} + may not be null".
      */
     private void checkNull(final Object object, final String name)

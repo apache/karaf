@@ -18,35 +18,15 @@
  */
 package org.apache.felix.eventadmin.impl;
 
-import org.apache.felix.eventadmin.impl.adapter.BundleEventAdapter;
-import org.apache.felix.eventadmin.impl.adapter.FrameworkEventAdapter;
-import org.apache.felix.eventadmin.impl.adapter.LogEventAdapter;
-import org.apache.felix.eventadmin.impl.adapter.ServiceEventAdapter;
-import org.apache.felix.eventadmin.impl.dispatch.CacheThreadPool;
-import org.apache.felix.eventadmin.impl.dispatch.DelayScheduler;
-import org.apache.felix.eventadmin.impl.dispatch.Scheduler;
-import org.apache.felix.eventadmin.impl.dispatch.TaskHandler;
+import org.apache.felix.eventadmin.impl.adapter.*;
+import org.apache.felix.eventadmin.impl.dispatch.DefaultThreadPool;
 import org.apache.felix.eventadmin.impl.dispatch.ThreadPool;
-import org.apache.felix.eventadmin.impl.handler.BlacklistingHandlerTasks;
-import org.apache.felix.eventadmin.impl.handler.CacheFilters;
-import org.apache.felix.eventadmin.impl.handler.CacheTopicHandlerFilters;
-import org.apache.felix.eventadmin.impl.handler.CleanBlackList;
-import org.apache.felix.eventadmin.impl.handler.Filters;
-import org.apache.felix.eventadmin.impl.handler.HandlerTasks;
-import org.apache.felix.eventadmin.impl.handler.TopicHandlerFilters;
-import org.apache.felix.eventadmin.impl.security.CacheTopicPermissions;
-import org.apache.felix.eventadmin.impl.security.SecureEventAdminFactory;
-import org.apache.felix.eventadmin.impl.security.TopicPermissions;
-import org.apache.felix.eventadmin.impl.tasks.AsyncDeliverTasks;
-import org.apache.felix.eventadmin.impl.tasks.BlockTask;
-import org.apache.felix.eventadmin.impl.tasks.DeliverTasks;
-import org.apache.felix.eventadmin.impl.tasks.DispatchTask;
-import org.apache.felix.eventadmin.impl.tasks.SyncDeliverTasks;
+import org.apache.felix.eventadmin.impl.handler.*;
+import org.apache.felix.eventadmin.impl.security.*;
+import org.apache.felix.eventadmin.impl.tasks.*;
 import org.apache.felix.eventadmin.impl.util.LeastRecentlyUsedCacheMap;
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.TopicPermission;
 
@@ -106,15 +86,9 @@ import org.osgi.service.event.TopicPermission;
 public class Activator implements BundleActivator
 {
     // The thread pool used - this is a member because we need to close it on stop
-    private volatile ThreadPool m_pool;
+    private volatile ThreadPool m_sync_pool;
 
-    // The asynchronous event queue - this is a member because we need to close it on
-    // stop
-    private volatile TaskHandler m_asyncQueue;
-
-    // The synchronous event queue - this is a member because we need to close it on
-    // stop
-    private volatile TaskHandler m_syncQueue;
+    private volatile ThreadPool m_async_pool;
 
     // The actual implementation of the service - this is a member because we need to
     // close it on stop. Note, security is not part of this implementation but is
@@ -162,7 +136,7 @@ public class Activator implements BundleActivator
         // the size is reached and no cached thread is available new threads will
         // be created.
         final int threadPoolSize = getIntProperty(
-            "org.apache.felix.eventadmin.ThreadPoolSize", context, 10, 2);
+            "org.apache.felix.eventadmin.ThreadPoolSize", context, 20, 2);
 
         // The timeout in milliseconds - A value of less then 100 turns timeouts off.
         // Any other value is the time in milliseconds granted to each EventHandler
@@ -211,24 +185,18 @@ public class Activator implements BundleActivator
             new CleanBlackList(), topicHandlerFilters, filters,
             subscribePermissions);
 
-        // Either we need a scheduler that will trigger EventHandler blacklisting
-        // (timeout >= 100) or a null object (timeout < 100)
-        final Scheduler scheduler = createScheduler(timeout);
-
         // Note that this uses a lazy thread pool that will create new threads on
         // demand - in case none of its cached threads is free - until threadPoolSize
         // is reached. Subsequently, a threadPoolSize of 2 effectively disables
         // caching of threads.
-        m_pool = new CacheThreadPool(threadPoolSize);
+        m_sync_pool = new DefaultThreadPool(threadPoolSize, true);
+        m_async_pool = new DefaultThreadPool(threadPoolSize > 5 ? threadPoolSize / 2 : 2, false);
 
-        m_asyncQueue = new TaskHandler();
-
-        m_syncQueue = new TaskHandler();
-
+        final DeliverTask syncExecuter = createSyncExecuters( m_sync_pool, timeout);
         m_admin = createEventAdmin(context,
             handlerTasks,
-            createAsyncExecuters(m_asyncQueue, m_syncQueue, scheduler, m_pool),
-            createSyncExecuters(m_syncQueue, scheduler, m_pool));
+            createAsyncExecuters(m_async_pool, syncExecuter),
+            syncExecuter);
 
         // register the admin wrapped in a service factory (SecureEventAdminFactory)
         // that hands-out the m_admin object wrapped in a decorator that checks
@@ -258,39 +226,17 @@ public class Activator implements BundleActivator
 
         m_admin.stop();
 
-        // This tasks will be unblocked once the queues are empty
-        final BlockTask asyncShutdownBlock = new BlockTask();
-
-        final BlockTask syncShutdownBlock = new BlockTask();
-
-        // Now close the queues. Note that already added tasks will be delivered
-        // The given shutdownTask will be executed once the queue is empty
-        m_asyncQueue.close(asyncShutdownBlock);
-
-        m_syncQueue.close(syncShutdownBlock);
-
         m_admin = null;
-
-        m_asyncQueue = null;
-
-        m_syncQueue = null;
 
         m_registration = null;
 
-        final DispatchTask task = m_pool.getTask(Thread.currentThread(), null);
+        m_async_pool.close();
 
-        if(null != task)
-        {
-            task.handover();
-        }
+        m_sync_pool.close();
 
-        asyncShutdownBlock.block();
+        m_async_pool = null;
 
-        syncShutdownBlock.block();
-
-        m_pool.close();
-
-        m_pool = null;
+        m_sync_pool = null;
     }
 
 
@@ -304,8 +250,8 @@ public class Activator implements BundleActivator
      */
     protected EventAdminImpl createEventAdmin(BundleContext context,
                                               HandlerTasks handlerTasks,
-                                              DeliverTasks asyncExecuters,
-                                              DeliverTasks syncExecuters)
+                                              DeliverTask asyncExecuters,
+                                              DeliverTask syncExecuters)
     {
         return new EventAdminImpl(handlerTasks, asyncExecuters, syncExecuters);
     }
@@ -315,17 +261,10 @@ public class Activator implements BundleActivator
      * events. Additionally, the asynchronous dispatch queue is initialized and
      * activated (i.e., a thread is started via the given ThreadPool).
      */
-    private DeliverTasks createAsyncExecuters(final TaskHandler handler,
-        final TaskHandler handoverHandler, final Scheduler scheduler,
-        final ThreadPool pool)
+    private DeliverTask createAsyncExecuters(final ThreadPool pool, final DeliverTask deliverTask)
     {
         // init the queue
-        final AsyncDeliverTasks result = new AsyncDeliverTasks(handler,
-            handoverHandler, pool);
-
-        // set-up the queue for asynchronous event delivery and activate it
-        // (i.e., a thread is started via the pool)
-        result.execute(new DispatchTask(handler, scheduler, result));
+        final AsyncDeliverTasks result = new AsyncDeliverTasks(pool, deliverTask);
 
         return result;
     }
@@ -335,32 +274,12 @@ public class Activator implements BundleActivator
      * Additionally, the synchronous dispatch queue is initialized and activated
      * (i.e., a thread is started via the given ThreadPool).
      */
-    private DeliverTasks createSyncExecuters(final TaskHandler handler,
-        final Scheduler scheduler, final ThreadPool pool)
+    private DeliverTask createSyncExecuters(final ThreadPool pool, final long timeout)
     {
         // init the queue
-        final SyncDeliverTasks result = new SyncDeliverTasks(handler, pool);
-
-        // set-up the queue for synchronous event delivery and activate it
-        // (i.e. a thread is started via the pool)
-        result.execute(new DispatchTask(handler, scheduler, result));
+        final SyncDeliverTasks result = new SyncDeliverTasks(pool, (timeout > 100 ? timeout : 0));
 
         return result;
-    }
-
-    /*
-     * Returns either a new DelayScheduler with a delay of timeout or the
-     * Scheduler.NULL_SCHEDULER in case timeout is < 100 in which case timeout and
-     * subsequently black-listing is disabled.
-     */
-    private Scheduler createScheduler(final int timeout)
-    {
-        if(100 > timeout)
-        {
-            return Scheduler.NULL_SCHEDULER;
-        }
-
-        return new DelayScheduler(timeout);
     }
 
     /*

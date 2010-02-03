@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,7 +24,7 @@ import org.osgi.service.event.Event;
 /**
  * The factory for event handler tasks. Implementations of this interface can be
  * used to create tasks that handle the delivery of events to event handlers.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface HandlerTasks
@@ -32,10 +32,10 @@ public interface HandlerTasks
     /**
      * Create the handler tasks for the event. All matching event handlers must
      * be determined and delivery tasks for them returned.
-     * 
+     *
      * @param event The event for which' handlers delivery tasks must be created
-     * 
+     *
      * @return A delivery task for each handler that matches the given event
      */
-    public HandlerTask[] createHandlerTasks(final Event event);
+    HandlerTask[] createHandlerTasks(final Event event);
 }

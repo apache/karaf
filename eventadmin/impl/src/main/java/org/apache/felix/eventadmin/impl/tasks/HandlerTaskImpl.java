@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -26,7 +26,7 @@ import org.osgi.service.event.EventHandler;
 
 /**
  * An implementation of the <tt>HandlerTask</tt> interface.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class HandlerTaskImpl implements HandlerTask
@@ -40,13 +40,16 @@ public class HandlerTaskImpl implements HandlerTask
     // Used to blacklist the service or get the service object for the reference
     private final BlacklistingHandlerTasks m_handlerTasks;
 
+    // Is this handler finished
+    private volatile boolean m_finished = false;
+
     /**
      * Construct a delivery task for the given service and event.
-     * 
+     *
      * @param eventHandlerRef The servicereference of the handler
      * @param event The event to deliver
      * @param handlerTasks Used to blacklist the service or get the service object
-     *      for the reference 
+     *      for the reference
      */
     public HandlerTaskImpl(final ServiceReference eventHandlerRef,
         final Event event, final BlacklistingHandlerTasks handlerTasks)
@@ -63,7 +66,7 @@ public class HandlerTaskImpl implements HandlerTask
      */
     public void execute()
     {
-        // Get the service object 
+        // Get the service object
         final EventHandler handler = m_handlerTasks
             .getEventHandler(m_eventHandlerRef);
 
@@ -80,7 +83,7 @@ public class HandlerTaskImpl implements HandlerTask
                     + m_eventHandlerRef + " | Bundle("
                     + m_eventHandlerRef.getBundle() + ")]", e);
         }
-        
+        m_finished = true;
         m_handlerTasks.ungetEventHandler(handler, m_eventHandlerRef);
     }
 
@@ -91,4 +94,13 @@ public class HandlerTaskImpl implements HandlerTask
     {
         m_handlerTasks.blackList(m_eventHandlerRef);
     }
+
+    /**
+     * @see org.apache.felix.eventadmin.impl.tasks.HandlerTask#finished()
+     */
+    public boolean finished()
+    {
+        return m_finished;
+    }
+
 }

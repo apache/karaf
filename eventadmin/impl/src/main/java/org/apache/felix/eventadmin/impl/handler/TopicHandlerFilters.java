@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,7 +20,7 @@ package org.apache.felix.eventadmin.impl.handler;
 
 /**
  * The factory for <tt>EventHandler</tt> filters based on a certain topic.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface TopicHandlerFilters
@@ -28,11 +28,11 @@ public interface TopicHandlerFilters
     /**
      * Create a filter that will match all <tt>EventHandler</tt> services that match
      * the given topic.
-     * 
+     *
      * @param topic The topic to match
-     * 
-     * @return A filter that will match all <tt>EventHandler</tt> services for 
+     *
+     * @return A filter that will match all <tt>EventHandler</tt> services for
      *      the given topic.
      */
-    public String createFilterForTopic(final String topic);
+    String createFilterForTopic(final String topic);
 }

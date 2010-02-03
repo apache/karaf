@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,15 +20,13 @@ package org.apache.felix.eventadmin.impl.handler;
 
 import java.util.Dictionary;
 
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 
 /**
  * The factory for <tt>Filter</tt> objects. Additionally, two null filter objects
  * are provided that either always return <tt>true</tt> or <tt>false</tt>,
  * respectively.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface Filters
@@ -36,12 +34,12 @@ public interface Filters
     /**
      * A null filter object that matches any given service reference.
      */
-    public static final Filter TRUE_FILTER = new Filter()
+    Filter TRUE_FILTER = new Filter()
     {
 
         /**
          * This is a null object that always returns <tt>true</tt>.
-         * 
+         *
          * @param reference An unused service reference
          * @return <tt>true</tt>
          */
@@ -52,7 +50,7 @@ public interface Filters
 
         /**
          * This is a null object that always returns <tt>true</tt>.
-         * 
+         *
          * @param dictionary An unused dictionary
          * @return <tt>true</tt>
          */
@@ -63,7 +61,7 @@ public interface Filters
 
         /**
          * This is a null object that always returns <tt>true</tt>.
-         * 
+         *
          * @param dictionary An unused dictionary.
          * @return <tt>true</tt>
          */
@@ -74,14 +72,14 @@ public interface Filters
     };
 
     /**
-     * A null filter object that does not match any given service reference. 
+     * A null filter object that does not match any given service reference.
      */
-    public static final Filter FALSE_FILTER = new Filter()
+    Filter FALSE_FILTER = new Filter()
     {
 
         /**
          * This is a null object that always returns <tt>false</tt>.
-         * 
+         *
          * @param reference An unused reference.
          * @return <tt>false</tt>
          */
@@ -92,7 +90,7 @@ public interface Filters
 
         /**
          * This is a null object that always returns <tt>false</tt>.
-         * 
+         *
          * @param dictionary An unused dictionary
          * @return <tt>false</tt>
          */
@@ -103,7 +101,7 @@ public interface Filters
 
         /**
          * This is a null object that always returns <tt>false</tt>.
-         * 
+         *
          * @param dictionary An unused dictionary.
          * @return <tt>false</tt>
          */
@@ -116,14 +114,14 @@ public interface Filters
     /**
      * Create a filter for the given filter string or return the nullFilter in case
      * the string is <tt>null</tt>.
-     * 
+     *
      * @param filter The filter as a string
      * @param nullFilter The default value to return if filter is <tt>null</tt>
-     * @return The <tt>Filter</tt> of the filter string or the nullFilter if the 
+     * @return The <tt>Filter</tt> of the filter string or the nullFilter if the
      *      filter string was null
      * @throws InvalidSyntaxException if <tt>BundleContext.createFilter()</tt>
      *      throws an <tt>InvalidSyntaxException</tt>
      */
-    public Filter createFilter(final String filter, final Filter nullFilter)
+    Filter createFilter(final String filter, final Filter nullFilter)
         throws InvalidSyntaxException;
 }

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,124 +18,113 @@
  */
 package org.apache.felix.eventadmin.impl.tasks;
 
-import org.apache.felix.eventadmin.impl.dispatch.TaskQueue;
+import java.util.*;
+
 import org.apache.felix.eventadmin.impl.dispatch.ThreadPool;
 
 /**
- * This class does the actual work of the asynchronous event dispatch. 
- * 
- * <p>It serves two purposes: first, it will append tasks to its queue hence, 
- * asynchronous event delivery is executed - second, it will set up a given dispatch 
- * task with its <tt>ThreadPool</tt> in a way that it is associated with a 
- * <tt>DeliverTask</tt> that will block in case the thread hits the 
- * <tt>SyncDeliverTasks</tt>.
- * </p>
- * In other words, if the asynchronous event dispatching thread is used to send a 
- * synchronous event then it will spin-off a new asynchronous dispatching thread
- * while the former waits for the synchronous event to be delivered and then return
- * to its <tt>ThreadPool</tt>.
- *  
+ * This class does the actual work of the asynchronous event dispatch.
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class AsyncDeliverTasks implements DeliverTasks, HandoverTask, DeliverTask
+public class AsyncDeliverTasks implements DeliverTask
 {
-    // The asynchronous event delivery queue
-    private final TaskQueue m_queue;
-
-    // The synchronous event delivery queue needed in case that the asynchronous 
-    // event dispatching thread is used to send a synchronous event. This is a
-    // private member and only default because it is used in an inner class (for
-    // performance reasons)
-    final TaskQueue m_handoverQueue; 
-    
-    // The thread pool to use to spin-off new threads
+    /** The thread pool to use to spin-off new threads. */
     private final ThreadPool m_pool;
-    
+
+    /** The deliver task for actually delivering the events. This
+     * is the sync deliver tasks as this has all the code for timeout
+     * handling etc.
+     */
+    private final DeliverTask m_deliver_task;
+
+    /** A map of running threads currently delivering async events. */
+    private final Map m_running_threads = new HashMap();
+
     /**
-     * The constructor of the class that will use the asynchronous queue to append
-     * event dispatch handlers. Furthermore, a second queue is used to append
-     * the events in case that the asynchronous event dispatching thread is used to
-     * send a synchronous event - in this case the given <tt>ThreadPool</tt> is used
-     * to spin-off a new asynchronous event dispatching thread while the former waits
-     * for the synchronous event to be delivered.
-     * 
-     * @param queue The asynchronous event queue
-     * @param handoverQueue The synchronous event queue, to be used in case that the
-     *      asynchronous event dispatching thread is used to send a synchronous event
-     * @param pool The thread pool used to spin-off new asynchronous event 
-     *      dispatching threads in case of timeout or that the asynchronous event 
+     * The constructor of the class that will use the asynchronous.
+     *
+     * @param pool The thread pool used to spin-off new asynchronous event
+     *      dispatching threads in case of timeout or that the asynchronous event
      *      dispatching thread is used to send a synchronous event
+     * @param deliverTask The deliver tasks for dispatching the event.
      */
-    public AsyncDeliverTasks(final TaskQueue queue, final TaskQueue handoverQueue, 
-        final ThreadPool pool)
+    public AsyncDeliverTasks(final ThreadPool pool, final DeliverTask deliverTask)
     {
-        m_queue = queue;
-     
-        m_handoverQueue = handoverQueue;
-        
         m_pool = pool;
+        m_deliver_task = deliverTask;
     }
-    
+
     /**
-     * Return a <tt>DeliverTask</tt> that can be used to execute asynchronous event
-     * dispatch.
-     * 
-     * @return A task that can be used to execute asynchronous event dispatch
-     * 
-     * @see org.apache.felix.eventadmin.impl.tasks.DeliverTasks#createTask()
-     */
-    public DeliverTask createTask()
-    {
-        return this;
-    }
-    
-    /**
-     * Execute asynchronous event dispatch.
-     * 
-     * @param tasks The event dispatch tasks to execute
-     * 
+     * This does not block an unrelated thread used to send a synchronous event.
+     *
+     * @param tasks The event handler dispatch tasks to execute
+     *
      * @see org.apache.felix.eventadmin.impl.tasks.DeliverTask#execute(org.apache.felix.eventadmin.impl.tasks.HandlerTask[])
      */
     public void execute(final HandlerTask[] tasks)
     {
-        m_queue.append(tasks);
-    }
-    
-    /**
-     * Execute the handover in case of timeout or that the asynchronous event
-     * dispatching thread is used to send a synchronous event.
-     * 
-     * @param task The task to set-up in a new thread
-     *  
-     * @see org.apache.felix.eventadmin.impl.tasks.HandoverTask#execute(org.apache.felix.eventadmin.impl.tasks.DispatchTask)
-     */
-    public void execute(final DispatchTask task)
-    {
-        // This will spin-off a new thread using the thread pool and set it up with
-        // the given task. Additionally, the thread is associated with a callback
-        // that will handover (i.e., yet again call this method) and append the 
-        // tasks given to to the m_handoverQueue (i.e., the synchronous queue). This
-        // will happen in case that the current asynchronous thread is used to 
-        // send a synchronous event. 
-        m_pool.execute(task, new DeliverTask()
+        final Thread currentThread = Thread.currentThread();
+        TaskExecuter executer = null;
+        synchronized (m_running_threads )
         {
-            public void execute(final HandlerTask[] managers)
+            TaskExecuter runningExecutor = (TaskExecuter)m_running_threads.get(currentThread);
+            if ( runningExecutor != null )
             {
-                final BlockTask waitManager = new BlockTask();
-
-                final HandlerTask[] newmanagers = new HandlerTask[managers.length + 1];
-
-                System.arraycopy(managers, 0, newmanagers, 0,
-                    managers.length);
-
-                newmanagers[managers.length] = waitManager;
-
-                m_handoverQueue.append(newmanagers);
-
-                task.handover();
-
-                waitManager.block();
+                runningExecutor.add(tasks);
             }
-        });
+            else
+            {
+                executer = new TaskExecuter( tasks, currentThread );
+                m_running_threads.put(currentThread, executer);
+            }
+        }
+        if ( executer != null )
+        {
+            m_pool.executeTask(executer);
+        }
+    }
+
+    private final class TaskExecuter implements Runnable
+    {
+        private final List m_tasks = new LinkedList();
+
+        private final Object m_key;
+
+        public TaskExecuter(final HandlerTask[] tasks, final Object key)
+        {
+            m_key = key;
+            m_tasks.add(tasks);
+        }
+
+        public void run()
+        {
+            boolean running;
+            do
+            {
+                HandlerTask[] tasks = null;
+                synchronized ( m_tasks )
+                {
+                    tasks = (HandlerTask[]) m_tasks.remove(0);
+                }
+                m_deliver_task.execute(tasks);
+                synchronized ( m_running_threads )
+                {
+                    running = m_tasks.size() > 0;
+                    if ( !running )
+                    {
+                        m_running_threads.remove(m_key);
+                    }
+                }
+            } while ( running );
+        }
+
+        public void add(final HandlerTask[] tasks)
+        {
+            synchronized ( m_tasks )
+            {
+                m_tasks.add(tasks);
+            }
+        }
     }
 }

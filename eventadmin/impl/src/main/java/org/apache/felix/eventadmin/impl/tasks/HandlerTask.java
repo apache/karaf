@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,7 +21,7 @@ package org.apache.felix.eventadmin.impl.tasks;
 /**
  * A task that will deliver its event to its <tt>EventHandler</tt> when executed
  * or blacklist the handler, respectively.
- *  
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface HandlerTask
@@ -29,10 +29,15 @@ public interface HandlerTask
     /**
      * Deliver the event to the handler.
      */
-    public void execute();
-    
+    void execute();
+
     /**
      * Blacklist the handler.
      */
-    public void blackListHandler();
+    void blackListHandler();
+
+    /**
+     * Is the delivery finished
+     */
+    boolean finished();
 }
