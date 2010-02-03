@@ -130,6 +130,10 @@ public class SyncDeliverTasks implements DeliverTask
                             // stop the timer
                             timerBarrier.waitForRendezvous();
                         }
+                        catch (IllegalStateException ise)
+                        {
+                            // this can happen on shutdown, so we ignore it
+                        }
                         finally
                         {
                             myThread.cleanup();
