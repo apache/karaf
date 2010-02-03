@@ -25,6 +25,7 @@ final class ServletHandlerRequest
     extends HttpServletRequestWrapper
 {
     private final String alias;
+    private String contextPath;
     private String pathInfo;
     private boolean pathInfoCalculated = false;
 
@@ -43,6 +44,28 @@ final class ServletHandlerRequest
         }
 
         return super.getAuthType();
+    }
+
+    @Override
+    public String getContextPath()
+    {
+        /*
+         * FELIX-2030 Calculate the context path for the Http Service
+         * registered servlets from the container context and servlet paths
+         */
+        if (contextPath == null) {
+            final String context = super.getContextPath();
+            final String servlet = super.getServletPath();
+            if (context.length() == 0) {
+                contextPath = servlet;
+            } else if (servlet.length() == 0) {
+                contextPath = context;
+            } else {
+                contextPath = context + servlet;
+            }
+        }
+
+        return contextPath;
     }
 
     @Override
