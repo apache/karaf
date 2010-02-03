@@ -16,11 +16,7 @@
  */
 package org.apache.felix.karaf.shell.itests;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Dictionary;
-import java.util.List;
-
+import org.apache.felix.karaf.testing.AbstractIntegrationTest;
 import org.apache.felix.karaf.testing.Helper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +24,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
 
@@ -36,12 +31,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
-import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 @RunWith(JUnit4TestRunner.class)
-public class CoreTest extends org.apache.felix.karaf.testing.AbstractIntegrationTest {
+public class CoreTest extends AbstractIntegrationTest {
 
     @Test
     public void testHelp() throws Exception {

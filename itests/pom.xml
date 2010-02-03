@@ -56,62 +56,12 @@
             <version>1.2.1</version>
         </dependency>
 
-        <!-- The assembly and all the dependencies -->
-        <dependency>
-            <groupId>org.apache.felix.karaf</groupId>
-            <artifactId>apache-felix-karaf</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.felix.karaf.tooling</groupId>
             <artifactId>org.apache.felix.karaf.tooling.testing</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- Pax EXAM -->
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-container-default</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-junit-extender-impl</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.5</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <repositories>
-        <repository>
-            <id>ops4j.releases</id>
-            <url>http://repository.ops4j.org/maven2</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>ops4j.releases</id>
-            <url>http://repository.ops4j.org/maven2</url>
-        </pluginRepository>
-    </pluginRepositories>
+   </dependencies>
 
     <build>
         <plugins>
@@ -153,26 +103,6 @@
                 </plugins>
             </build>
         </profile>
-        <!--
-        <profile>
-            <activation>
-                <os>
-                    <family>Windows</family>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        -->
     </profiles>
 
 </project>

@@ -16,6 +16,7 @@
  */
 package org.apache.felix.karaf.shell.itests;
 
+import org.apache.felix.karaf.testing.AbstractIntegrationTest;
 import org.apache.felix.karaf.testing.Helper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +36,7 @@ import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
 
 @RunWith(JUnit4TestRunner.class)
-public class FeaturesTest extends org.apache.felix.karaf.testing.AbstractIntegrationTest {
+public class FeaturesTest extends AbstractIntegrationTest {
 
     @Test
     public void testFeatures() throws Exception {
