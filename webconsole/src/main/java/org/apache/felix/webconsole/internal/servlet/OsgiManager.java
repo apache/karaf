@@ -896,6 +896,11 @@ public class OsgiManager extends GenericServlet
                     bindHttpService( httpService );
                 }
             }
+            else
+            {
+                // just set the configured location (FELIX-2034)
+                this.webManagerRoot = newWebManagerRoot;
+            }
         }
     }
 
