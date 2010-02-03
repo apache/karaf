@@ -67,7 +67,23 @@
                         <DynamicImport-Package>
                             org.osgi.service.log
                         </DynamicImport-Package>
-                        <Import-Package>!org.osgi.service.log,*</Import-Package>
+                        <Import-Package>
+                            !org.osgi.service.log,
+                            <!--
+                                Configuration Admin is optional and if it is
+                                present, version 1.2 (from R4.0) is enough  
+                            -->
+                            org.osgi.service.cm;version="[1.2,2)";resolution:=optional,
+                            
+                            <!--
+                                Metatype is optional and if it is
+                                present, version 1.1 (from R4.1) is enough  
+                            -->
+                            org.osgi.service.metatype;version="[1.1,2)";resolution:=optional,
+                            
+                            <!-- default -->
+                            *
+                        </Import-Package>
                         <Export-Package>org.osgi.service.event</Export-Package>
                         <Private-Package>org.apache.felix.eventadmin.impl.*</Private-Package>
                         <Import-Service>

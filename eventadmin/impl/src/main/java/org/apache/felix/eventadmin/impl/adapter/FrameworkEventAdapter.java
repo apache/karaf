@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -32,37 +32,34 @@ import org.osgi.service.event.EventConstants;
 /**
  * This class registers itself as a listener for framework events and posts them via
  * the EventAdmin as specified in 113.6.3 OSGi R4 compendium.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class FrameworkEventAdapter implements FrameworkListener
+public class FrameworkEventAdapter extends AbstractAdapter implements FrameworkListener
 {
-    private final EventAdmin m_admin;
-    
     /**
      * The constructor of the adapter. This will register the adapter with the
      * given context as a <tt>FrameworkListener</tt> and subsequently, will
      * post received events via the given EventAdmin.
-     * 
+     *
      * @param context The bundle context with which to register as a listener.
      * @param admin The <tt>EventAdmin</tt> to use for posting events.
      */
     public FrameworkEventAdapter(final BundleContext context, final EventAdmin admin)
     {
-        if(null == admin)
-        {
-            throw new NullPointerException("EventAdmin must not be null");
-        }
-        
-        m_admin = admin;
-        
+        super(admin);
+
         context.addFrameworkListener(this);
     }
-    
+
+    public void destroy(BundleContext context) {
+        context.removeFrameworkListener(this);
+    }
+
     /**
-     * Once a framework event is received this method assembles and posts an event 
-     * via the <tt>EventAdmin</tt> as specified in 113.6.3 OSGi R4 compendium. 
-     * 
+     * Once a framework event is received this method assembles and posts an event
+     * via the <tt>EventAdmin</tt> as specified in 113.6.3 OSGi R4 compendium.
+     *
      * @param event The event to adapt.
      */
     public void frameworkEvent(final FrameworkEvent event)
@@ -92,7 +89,7 @@ public class FrameworkEventAdapter implements FrameworkListener
 
         if (null != thrown)
         {
-            properties.put(EventConstants.EXCEPTION_CLASS, 
+            properties.put(EventConstants.EXCEPTION_CLASS,
                 thrown.getClass().getName());
 
             final String message = thrown.getMessage();
@@ -135,7 +132,7 @@ public class FrameworkEventAdapter implements FrameworkListener
         }
 
         try {
-            m_admin.postEvent(new Event(topic.toString(), properties));
+            getEventAdmin().postEvent(new Event(topic.toString(), properties));
         } catch(IllegalStateException e) {
             // This is o.k. - indicates that we are stopped.
         }

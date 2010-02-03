@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -33,32 +33,34 @@ import org.osgi.service.event.EventConstants;
 /**
  * This class registers itself as a listener for service events and posts them via
  * the EventAdmin as specified in 113.6.5 OSGi R4 compendium.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceEventAdapter implements ServiceListener
+public class ServiceEventAdapter extends AbstractAdapter implements ServiceListener
 {
-    private final EventAdmin m_admin;
-    
     /**
      * The constructor of the adapter. This will register the adapter with the
      * given context as a <tt>ServiceListener</tt> and subsequently, will
      * post received events via the given EventAdmin.
-     * 
+     *
      * @param context The bundle context with which to register as a listener.
      * @param admin The <tt>EventAdmin</tt> to use for posting events.
      */
     public ServiceEventAdapter(final BundleContext context, final EventAdmin admin)
     {
-        m_admin = admin;
-        
+        super(admin);
+
         context.addServiceListener(this);
     }
 
+    public void destroy(BundleContext context) {
+        context.removeServiceListener(this);
+    }
+
     /**
-     * Once a Service event is received this method assembles and posts an event 
-     * via the <tt>EventAdmin</tt> as specified in 113.6.5 OSGi R4 compendium. 
-     * 
+     * Once a Service event is received this method assembles and posts an event
+     * via the <tt>EventAdmin</tt> as specified in 113.6.5 OSGi R4 compendium.
+     *
      * @param event The event to adapt.
      */
     public void serviceChanged(final ServiceEvent event)
@@ -83,7 +85,7 @@ public class ServiceEventAdapter implements ServiceListener
             {
                 // LOG and IGNORE
                 LogWrapper.getLogger().log(event.getServiceReference(),
-                    LogWrapper.LOG_WARNING, "Exception parsing " + 
+                    LogWrapper.LOG_WARNING, "Exception parsing " +
                     EventConstants.SERVICE_ID + "=" + id, ne);
             }
         }
@@ -132,7 +134,7 @@ public class ServiceEventAdapter implements ServiceListener
         }
 
         try {
-            m_admin.postEvent(new Event(topic.toString(), properties));
+            getEventAdmin().postEvent(new Event(topic.toString(), properties));
         } catch(IllegalStateException e) {
             // This is o.k. - indicates that we are stopped.
         }

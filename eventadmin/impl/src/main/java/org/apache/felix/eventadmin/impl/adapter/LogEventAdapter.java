@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -36,47 +36,39 @@ import org.osgi.service.event.EventConstants;
 /**
  * This class registers itself as a listener for <tt>LogReaderService</tt> services
  * with the framework and subsequently, a <tt>LogListener</tt> callback with any
- * currently available <tt>LogReaderService</tt>. Any received log event is then 
+ * currently available <tt>LogReaderService</tt>. Any received log event is then
  * posted via the EventAdmin as specified in 113.6.6 OSGi R4 compendium.
  * Note that this class does not create a hard dependency on the org.osgi.service.log
- * packages. The adaption only takes place if it is present or once it becomes 
- * available hence, combined with a DynamicImport-Package no hard dependency is 
- * needed. 
- * 
+ * packages. The adaption only takes place if it is present or once it becomes
+ * available hence, combined with a DynamicImport-Package no hard dependency is
+ * needed.
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class LogEventAdapter implements ServiceListener
+public class LogEventAdapter extends AbstractAdapter implements ServiceListener
 {
     // The internal lock for this object used instead synchronized(this)
     private final Object m_lock = new Object();
-    
+
     private BundleContext m_context;
-    
+
     // A singleton instance of the used log listener that is the adapter
     private Object m_logListener;
-    
-    final EventAdmin m_admin;
-    
+
     /**
      * The constructor of the adapter. This will register the adapter with the
-     * given context as a listener for <tt>LogReaderService</tt> services and 
+     * given context as a listener for <tt>LogReaderService</tt> services and
      * subsequently, a <tt>LogListener</tt> callback with any currently available
-     * <tt>LogReaderService</tt>. Any received log event is then posted via the given 
+     * <tt>LogReaderService</tt>. Any received log event is then posted via the given
      * EventAdmin.
-     * 
+     *
      * @param context The bundle context with which to register as a listener.
      * @param admin The <tt>EventAdmin</tt> to use for posting events.
      */
     public LogEventAdapter(final BundleContext context, final EventAdmin admin)
     {
-        if(null == admin)
-        {
-            throw new NullPointerException("EventAdmin must not be null");
-        }
-        
+        super(admin);
         m_context = context;
-        
-        m_admin = admin;
 
         try
         {
@@ -92,13 +84,13 @@ public class LogEventAdapter implements ServiceListener
             {
                 for (int i = 0; i < refs.length; i++)
                 {
-                    final org.osgi.service.log.LogReaderService logReader = 
+                    final org.osgi.service.log.LogReaderService logReader =
                         (org.osgi.service.log.LogReaderService) m_context
                         .getService(refs[i]);
 
                     if (null != logReader)
                     {
-                        logReader.addLogListener((org.osgi.service.log.LogListener) 
+                        logReader.addLogListener((org.osgi.service.log.LogListener)
                             getLogListener());
                     }
                 }
@@ -109,32 +101,36 @@ public class LogEventAdapter implements ServiceListener
         }
     }
 
+    public void destroy(BundleContext context) {
+        context.removeServiceListener(this);
+    }
+
     /**
      * Once a <tt>LogReaderService</tt> register event is received this method
-     * registers a <tt>LogListener</tt> with the received service that assembles 
-     * and posts any log event via the <tt>EventAdmin</tt> as specified in 
-     * 113.6.6 OSGi R4 compendium. 
-     * 
+     * registers a <tt>LogListener</tt> with the received service that assembles
+     * and posts any log event via the <tt>EventAdmin</tt> as specified in
+     * 113.6.6 OSGi R4 compendium.
+     *
      * @param event The event to adapt.
      */
     public void serviceChanged(final ServiceEvent event)
     {
         if (ServiceEvent.REGISTERED == event.getType())
         {
-            final org.osgi.service.log.LogReaderService logReader = 
+            final org.osgi.service.log.LogReaderService logReader =
                 (org.osgi.service.log.LogReaderService) m_context
                 .getService(event.getServiceReference());
 
             if (null != logReader)
             {
-                logReader.addLogListener((org.osgi.service.log.LogListener) 
+                logReader.addLogListener((org.osgi.service.log.LogListener)
                     getLogListener());
             }
         }
     }
 
     /*
-     * Constructs a LogListener that assembles and posts any log event via the 
+     * Constructs a LogListener that assembles and posts any log event via the
      * EventAdmin as specified in 113.6.6 OSGi R4 compendium. Note that great
      * care is taken to not create a hard dependency on the org.osgi.service.log
      * package.
@@ -153,9 +149,9 @@ public class LogEventAdapter implements ServiceListener
                 public void logged(final org.osgi.service.log.LogEntry entry)
                 {
                     // This is where the assembly as specified in 133.6.6 OSGi R4
-                    // compendium is taking place (i.e., the log entry is adapted to 
+                    // compendium is taking place (i.e., the log entry is adapted to
                     // an event and posted via the EventAdmin)
-                    
+
                     final Dictionary properties = new Hashtable();
 
                     final Bundle bundle = entry.getBundle();
@@ -224,7 +220,7 @@ public class LogEventAdapter implements ServiceListener
                                 // LOG and IGNORE
                                 LogWrapper.getLogger().log(
                                     entry.getServiceReference(),
-                                    LogWrapper.LOG_WARNING, "Exception parsing " + 
+                                    LogWrapper.LOG_WARNING, "Exception parsing " +
                                     EventConstants.SERVICE_ID + "=" + id, ne);
                             }
                         }
@@ -234,7 +230,7 @@ public class LogEventAdapter implements ServiceListener
 
                         if (null != pid)
                         {
-                            properties.put(EventConstants.SERVICE_PID, 
+                            properties.put(EventConstants.SERVICE_PID,
                                 pid.toString());
                         }
 
@@ -282,13 +278,13 @@ public class LogEventAdapter implements ServiceListener
                     }
 
                     try {
-                        m_admin.postEvent(new Event(topic.toString(), properties));
+                        getEventAdmin().postEvent(new Event(topic.toString(), properties));
                     } catch(IllegalStateException e) {
                         // This is o.k. - indicates that we are stopped.
                     }
                 }
             };
-            
+
             return m_logListener;
         }
     }
