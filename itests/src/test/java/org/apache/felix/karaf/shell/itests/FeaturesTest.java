@@ -16,28 +16,26 @@
  */
 package org.apache.felix.karaf.shell.itests;
 
-import static org.junit.Assert.assertNotNull;
+import org.apache.felix.karaf.testing.Helper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
-import static org.ops4j.pax.exam.CoreOptions.equinox;
-import static org.ops4j.pax.exam.CoreOptions.felix;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import org.ops4j.pax.exam.Option;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
 
+import static org.junit.Assert.assertNotNull;
+import static org.ops4j.pax.exam.CoreOptions.equinox;
+import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
+
 @RunWith(JUnit4TestRunner.class)
-public class FeaturesTest extends AbstractIntegrationTest {
+public class FeaturesTest extends org.apache.felix.karaf.testing.AbstractIntegrationTest {
 
     @Test
     public void testFeatures() throws Exception {
@@ -53,57 +51,20 @@ public class FeaturesTest extends AbstractIntegrationTest {
     }
 
     @Configuration
-    public static Option[] configuration() {
-        Option[] options = options(
+    public static Option[] configuration() throws Exception{
+        return combine(
+            // Default karaf environment
+            Helper.getDefaultOptions(),
             // this is how you set the default log level when using pax logging (logProfile)
             systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("DEBUG"),
-            systemProperty("karaf.name").value("root"),
-            systemProperty("karaf.home").value("target/karaf.home"),
-            systemProperty("karaf.base").value("target/karaf.home"),
-            systemProperty("karaf.startLocalConsole").value("false"),
-            systemProperty("karaf.startRemoteShell").value("false"),
-
-            // hack system packages
-            systemPackages("org.apache.felix.karaf.jaas.boot;version=1.99"),
-            bootClasspathLibrary(mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.boot")).afterFramework(),
-            bootClasspathLibrary(mavenBundle("org.apache.felix.karaf", "org.apache.felix.karaf.main")).afterFramework(),
-
-            // Log
-            mavenBundle("org.ops4j.pax.logging", "pax-logging-api"),
-            mavenBundle("org.ops4j.pax.logging", "pax-logging-service"),
-            // Felix Config Admin
-            mavenBundle("org.apache.felix", "org.apache.felix.configadmin"),
-            // Felix Preferences Service
-            mavenBundle("org.apache.felix", "org.apache.felix.prefs"),
-            // Blueprint
-            mavenBundle("org.apache.geronimo.blueprint", "geronimo-blueprint"),
-
-            // Bundles
-            mavenBundle("org.apache.mina", "mina-core"),
-            mavenBundle("org.apache.sshd", "sshd-core"),
-            mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.config"),
-            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.console"),
-            mavenBundle("org.apache.felix.gogo", "org.apache.felix.gogo.runtime"),
-            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.osgi"),
-            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.log").noStart(),
-
+            // add two features
             scanFeatures(
                     maven().groupId("org.apache.felix.karaf").artifactId("apache-felix-karaf").type("xml").classifier("features").versionAsInProject(),
                     "obr", "wrapper"
             ),
-
+            // Test on both equinox and felix
             equinox(), felix()
         );
-        // We need to add pax-exam-junit here when running with the ibm
-        // jdk to avoid the following exception during the test run:
-        // ClassNotFoundException: org.ops4j.pax.exam.junit.Configuration
-        if ("IBM Corporation".equals(System.getProperty("java.vendor"))) {
-            Option[] ibmOptions = options(
-                wrappedBundle(maven("org.ops4j.pax.exam", "pax-exam-junit"))
-            );
-            options = combine(ibmOptions, options);
-        }
-        return options;
     }
 
 }

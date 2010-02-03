@@ -65,6 +65,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.felix.karaf.tooling</groupId>
+            <artifactId>org.apache.felix.karaf.tooling.testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Pax EXAM -->
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>

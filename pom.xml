@@ -309,6 +309,11 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.felix.karaf.tooling</groupId>
+                <artifactId>org.apache.felix.karaf.tooling.testing</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
                 <version>${felix.framework.version}</version>
