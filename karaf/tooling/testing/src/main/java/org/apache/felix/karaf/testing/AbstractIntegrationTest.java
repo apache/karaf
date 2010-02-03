@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.karaf.shell.itests;
+package org.apache.felix.karaf.testing;
 
 import java.util.Collection;
 import java.util.Dictionary;
@@ -22,7 +22,6 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
 import org.osgi.framework.Bundle;
@@ -33,6 +32,8 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
+import static org.apache.felix.karaf.testing.Helper.mavenBundle;
 
 public abstract class AbstractIntegrationTest {
 
@@ -102,10 +103,6 @@ public abstract class AbstractIntegrationTest {
             }
         }
         return null;
-    }
-
-    public static MavenArtifactProvisionOption mavenBundle(String groupId, String artifactId) {
-        return CoreOptions.mavenBundle().groupId(groupId).artifactId(artifactId).versionAsInProject();
     }
 
     /*
