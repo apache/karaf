@@ -61,7 +61,7 @@
                             org.apache.felix.webconsole.plugins.event.internal.Activator
                         </Bundle-Activator>
                         <Private-Package>
-                            org.apache.felix.webconsole.plugins.event.*,
+                            org.apache.felix.webconsole.plugins.event.*
                         </Private-Package>
                         <Import-Package>
                             !org.osgi.service.event,
@@ -73,8 +73,7 @@
                             json
                         </Embed-Dependency>
                         <DynamicImport-Package>
-                            org.osgi.service.event, 
-                            org.osgi.service.cm
+                            org.osgi.service.event,org.osgi.service.cm
                         </DynamicImport-Package>
                     </instructions>
                 </configuration>

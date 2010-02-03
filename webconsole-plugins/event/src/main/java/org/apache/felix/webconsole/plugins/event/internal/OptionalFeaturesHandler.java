@@ -37,14 +37,14 @@ public class OptionalFeaturesHandler
     private static final String FILTER = "(|(" + Constants.OBJECTCLASS + "=" + EVENT_ADMIN_CLASS_NAME + ")"
                                         +"(" + Constants.OBJECTCLASS + "=" + CONFIGURATION_ADMIN_CLASS_NAME + "))";
 
-    /** Event admin service reference */
-    private ServiceReference eventAdminReference;
+    /** Event admin service id */
+    private Long eventAdminServiceId;
 
     /** Registration for the event handler. */
     private ServiceRegistration eventHandlerRegistration;
 
-    /** Configuration admin service reference */
-    private ServiceReference configAdminReference;
+    /** Configuration admin service id */
+    private Long configAdminServiceId;
 
     /** Registration for the configuration listener. */
     private ServiceRegistration configListenerRegistration;
@@ -60,19 +60,21 @@ public class OptionalFeaturesHandler
         this.plugin = plugin;
         this.bundleContext = context;
         // check if event admin is already available
-        this.eventAdminReference = null;
+        this.eventAdminServiceId = null;
         final ServiceReference ref = this.bundleContext.getServiceReference(EVENT_ADMIN_CLASS_NAME);
         if ( ref != null )
         {
-            bindEventAdmin(ref);
+            final Long id = (Long)ref.getProperty(Constants.SERVICE_ID);
+            bindEventAdmin(id);
         }
 
         // check if config admin is already available
-        this.configAdminReference = null;
+        this.configAdminServiceId = null;
         final ServiceReference cfaRef = this.bundleContext.getServiceReference(CONFIGURATION_ADMIN_CLASS_NAME);
         if ( cfaRef != null )
         {
-            bindConfigAdmin(cfaRef);
+            final Long id = (Long)ref.getProperty(Constants.SERVICE_ID);
+            bindConfigAdmin(id);
         }
 
         // listen for event and config admin from now on
@@ -89,8 +91,8 @@ public class OptionalFeaturesHandler
     public void destroy()
     {
         this.bundleContext.removeServiceListener(this);
-        this.unbindEventAdmin(this.eventAdminReference);
-        this.unbindConfigAdmin(this.configAdminReference);
+        this.unbindEventAdmin(this.eventAdminServiceId);
+        this.unbindConfigAdmin(this.configAdminServiceId);
     }
 
     /**
@@ -105,6 +107,7 @@ public class OptionalFeaturesHandler
             {
                 if ( objectClasses[i].equals(EVENT_ADMIN_CLASS_NAME) )
                 {
+                    final Long id = (Long)event.getServiceReference().getProperty(Constants.SERVICE_ID);
                     if ( event.getType() == ServiceEvent.REGISTERED )
                     {
                         new Thread()
@@ -112,9 +115,9 @@ public class OptionalFeaturesHandler
                             public void run()
                             {
                                 try {
-                                    Thread.sleep(500);
+                                    Thread.sleep(50);
                                 } catch (InterruptedException ignore) {}
-                                bindEventAdmin(event.getServiceReference());
+                                bindEventAdmin(id);
                             }
                         }.start();
                     }
@@ -125,15 +128,16 @@ public class OptionalFeaturesHandler
                             public void run()
                             {
                                 try {
-                                    Thread.sleep(500);
+                                    Thread.sleep(50);
                                 } catch (InterruptedException ignore) {}
-                                unbindEventAdmin(event.getServiceReference());
+                                unbindEventAdmin(id);
                             }
                         }.start();
                     }
                 }
                 else if ( objectClasses[i].equals(CONFIGURATION_ADMIN_CLASS_NAME) )
                 {
+                    final Long id = (Long)event.getServiceReference().getProperty(Constants.SERVICE_ID);
                     if ( event.getType() == ServiceEvent.REGISTERED )
                     {
                         new Thread()
@@ -141,9 +145,9 @@ public class OptionalFeaturesHandler
                             public void run()
                             {
                                 try {
-                                    Thread.sleep(500);
+                                    Thread.sleep(50);
                                 } catch (InterruptedException ignore) {}
-                                bindConfigAdmin(event.getServiceReference());
+                                bindConfigAdmin(id);
                             }
                         }.start();
                     }
@@ -154,9 +158,9 @@ public class OptionalFeaturesHandler
                             public void run()
                             {
                                 try {
-                                    Thread.sleep(500);
+                                    Thread.sleep(50);
                                 } catch (InterruptedException ignore) {}
-                                unbindConfigAdmin(event.getServiceReference());
+                                unbindConfigAdmin(id);
                             }
                         }.start();
                     }
@@ -165,13 +169,13 @@ public class OptionalFeaturesHandler
         }
     }
 
-    private void bindEventAdmin(final ServiceReference ref)
+    private synchronized void bindEventAdmin(final Long id)
     {
-        if ( this.eventAdminReference != null)
+        if ( this.eventAdminServiceId != null)
         {
-            this.unbindEventAdmin(this.eventAdminReference);
+            this.unbindEventAdmin(this.eventAdminServiceId);
         }
-        this.eventAdminReference = ref;
+        this.eventAdminServiceId = id;
         final Dictionary props = new Hashtable();
         props.put( Constants.SERVICE_DESCRIPTION, "Event handler for the Apache Felix Web Console" );
         props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
@@ -182,11 +186,11 @@ public class OptionalFeaturesHandler
                 new EventHandler(this.plugin.getCollector()), props);
     }
 
-    private void unbindEventAdmin(final ServiceReference ref)
+    private synchronized void unbindEventAdmin(final Long id)
     {
-        if ( this.eventAdminReference != null && this.eventAdminReference.equals(ref) )
+        if ( this.eventAdminServiceId != null && this.eventAdminServiceId.equals(id) )
         {
-            this.eventAdminReference = null;
+            this.eventAdminServiceId = null;
             this.plugin.setEventAdminAvailable(false);
             if ( this.eventHandlerRegistration != null )
             {
@@ -196,22 +200,22 @@ public class OptionalFeaturesHandler
         }
     }
 
-    private void bindConfigAdmin(final ServiceReference ref)
+    private synchronized void bindConfigAdmin(final Long id)
     {
-        if ( this.configAdminReference != null )
+        if ( this.configAdminServiceId != null )
         {
-            this.unbindConfigAdmin(this.configAdminReference);
+            this.unbindConfigAdmin(this.configAdminServiceId);
         }
         this.plugin.setConfigAdminAvailable(true);
-        this.configAdminReference = ref;
+        this.configAdminServiceId = id;
         this.configListenerRegistration = ConfigurationListener.create(this.bundleContext, this.plugin);
     }
 
-    private void unbindConfigAdmin(final ServiceReference ref)
+    private synchronized void unbindConfigAdmin(final Long id)
     {
-        if ( this.configAdminReference == ref )
+        if ( this.configAdminServiceId != null && this.configAdminServiceId.equals(id) )
         {
-            this.configAdminReference = null;
+            this.configAdminServiceId = null;
             this.plugin.setConfigAdminAvailable(false);
             if ( this.configListenerRegistration != null )
             {

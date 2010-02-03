@@ -56,7 +56,7 @@ public class Activator implements BundleActivator
 
         // finally we register the plugin
         final Dictionary props = new Hashtable();
-        props.put( Constants.SERVICE_DESCRIPTION, "Event plugin for the Apache Felix Web Console" );
+        props.put( Constants.SERVICE_DESCRIPTION, "Event Plugin for the Apache Felix Web Console" );
         props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
         props.put( "felix.webconsole.label", "events");
         props.put( "felix.webconsole.title", "Events");
