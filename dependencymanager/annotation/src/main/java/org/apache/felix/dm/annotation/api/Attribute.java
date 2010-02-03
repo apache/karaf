@@ -24,8 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This Annotation has to be specified within the MetaType annotation, and declares an Attribute Definition
- * which complies to the MetaType specification.
+ * Annotates a MetaType annotation for declaring the data type of a property/attribute. 
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.ANNOTATION_TYPE)
