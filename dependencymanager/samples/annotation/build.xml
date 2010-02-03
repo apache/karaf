@@ -1,5 +1,5 @@
 <project name="TestDM" default="bnd">
-  <property name="bndjar" value="${user.home}/.m2/repository/biz/aQute/bnd/0.0.392/bnd-0.0.392.jar"/>
+  <property name="bndjar" value="${user.home}/.m2/repository/biz/aQute/bnd/0.0.394/bnd-0.0.394.jar"/>
   <property name="annotjar" value="${user.home}/.m2/repository/org/apache/felix/org.apache.felix.dependencymanager.annotation/3.0.0-SNAPSHOT/org.apache.felix.dependencymanager.annotation-3.0.0-SNAPSHOT.jar"/>
   <property name="corejar" value="${user.home}/.m2/repository/org/osgi/org.osgi.core/4.1.0/org.osgi.core-4.1.0.jar"/>
   <property name="compjar" value="${user.home}/.m2/repository/org/osgi/org.osgi.compendium/4.1.0/org.osgi.compendium-4.1.0.jar"/>
