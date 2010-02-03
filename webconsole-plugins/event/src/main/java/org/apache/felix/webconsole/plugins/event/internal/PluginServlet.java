@@ -39,10 +39,10 @@ public class PluginServlet extends HttpServlet
     private final EventCollector collector;
 
     /** Is the event admin available? */
-    private boolean eventAdminAvailable = false;
+    private volatile boolean eventAdminAvailable = false;
 
     /** Is the config admin available? */
-    private boolean configAdminAvailable = false;
+    private volatile boolean configAdminAvailable = false;
 
     public PluginServlet()
     {

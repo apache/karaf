@@ -107,22 +107,58 @@ public class OptionalFeaturesHandler
                 {
                     if ( event.getType() == ServiceEvent.REGISTERED )
                     {
-                        this.bindEventAdmin(event.getServiceReference());
+                        new Thread()
+                        {
+                            public void run()
+                            {
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException ignore) {}
+                                bindEventAdmin(event.getServiceReference());
+                            }
+                        }.start();
                     }
                     else if ( event.getType() == ServiceEvent.UNREGISTERING )
                     {
-                        this.unbindEventAdmin(event.getServiceReference());
+                        new Thread()
+                        {
+                            public void run()
+                            {
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException ignore) {}
+                                unbindEventAdmin(event.getServiceReference());
+                            }
+                        }.start();
                     }
                 }
                 else if ( objectClasses[i].equals(CONFIGURATION_ADMIN_CLASS_NAME) )
                 {
                     if ( event.getType() == ServiceEvent.REGISTERED )
                     {
-                        this.bindConfigAdmin(event.getServiceReference());
+                        new Thread()
+                        {
+                            public void run()
+                            {
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException ignore) {}
+                                bindConfigAdmin(event.getServiceReference());
+                            }
+                        }.start();
                     }
                     else if ( event.getType() == ServiceEvent.UNREGISTERING )
                     {
-                        this.unbindConfigAdmin(event.getServiceReference());
+                        new Thread()
+                        {
+                            public void run()
+                            {
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException ignore) {}
+                                unbindConfigAdmin(event.getServiceReference());
+                            }
+                        }.start();
                     }
                 }
             }
@@ -148,7 +184,7 @@ public class OptionalFeaturesHandler
 
     private void unbindEventAdmin(final ServiceReference ref)
     {
-        if ( this.eventAdminReference == ref )
+        if ( this.eventAdminReference != null && this.eventAdminReference.equals(ref) )
         {
             this.eventAdminReference = null;
             this.plugin.setEventAdminAvailable(false);
