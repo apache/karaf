@@ -22,31 +22,15 @@ package org.apache.felix.eventadmin.impl;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.felix.eventadmin.impl.adapter.AbstractAdapter;
-import org.apache.felix.eventadmin.impl.adapter.BundleEventAdapter;
-import org.apache.felix.eventadmin.impl.adapter.FrameworkEventAdapter;
-import org.apache.felix.eventadmin.impl.adapter.LogEventAdapter;
-import org.apache.felix.eventadmin.impl.adapter.ServiceEventAdapter;
+import org.apache.felix.eventadmin.impl.adapter.*;
 import org.apache.felix.eventadmin.impl.dispatch.DefaultThreadPool;
 import org.apache.felix.eventadmin.impl.dispatch.ThreadPool;
-import org.apache.felix.eventadmin.impl.handler.BlacklistingHandlerTasks;
-import org.apache.felix.eventadmin.impl.handler.CacheFilters;
-import org.apache.felix.eventadmin.impl.handler.CacheTopicHandlerFilters;
-import org.apache.felix.eventadmin.impl.handler.CleanBlackList;
-import org.apache.felix.eventadmin.impl.handler.Filters;
-import org.apache.felix.eventadmin.impl.handler.HandlerTasks;
-import org.apache.felix.eventadmin.impl.handler.TopicHandlerFilters;
-import org.apache.felix.eventadmin.impl.security.CacheTopicPermissions;
-import org.apache.felix.eventadmin.impl.security.SecureEventAdminFactory;
-import org.apache.felix.eventadmin.impl.security.TopicPermissions;
-import org.apache.felix.eventadmin.impl.tasks.AsyncDeliverTasks;
-import org.apache.felix.eventadmin.impl.tasks.DeliverTask;
-import org.apache.felix.eventadmin.impl.tasks.SyncDeliverTasks;
+import org.apache.felix.eventadmin.impl.handler.*;
+import org.apache.felix.eventadmin.impl.security.*;
+import org.apache.felix.eventadmin.impl.tasks.*;
 import org.apache.felix.eventadmin.impl.util.LeastRecentlyUsedCacheMap;
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventAdmin;
@@ -140,6 +124,8 @@ public class Configuration
     // all adapters
     private AbstractAdapter[] adapters;
 
+    private ServiceRegistration managedServiceReg;
+
     public Configuration( BundleContext bundleContext )
     {
         this.bundleContext = bundleContext;
@@ -173,7 +159,7 @@ public class Configuration
             }
             Dictionary props = new Hashtable();
             props.put( Constants.SERVICE_PID, PID );
-            bundleContext.registerService( interfaceNames, service, props );
+            managedServiceReg = bundleContext.registerService( interfaceNames, service, props );
         }
         catch ( Throwable t )
         {
@@ -329,6 +315,11 @@ public class Configuration
                 adapters[i].destroy(bundleContext);
             }
             adapters = null;
+        }
+        if ( managedServiceReg != null )
+        {
+            managedServiceReg.unregister();
+            managedServiceReg = null;
         }
     }
 
