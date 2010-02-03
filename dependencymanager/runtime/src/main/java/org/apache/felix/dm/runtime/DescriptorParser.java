@@ -46,15 +46,16 @@ import org.osgi.service.log.LogService;
  *
  *    line := <type> ':' <params>
  *    
- *    type := service|serviceDependency|configurationDependency
+ *    type := service|serviceDependency|configurationDependency|temporalServiceDependency
  *    service := 'Service'
  *    serviceDependency := 'ServiceDependency'
  *    configurationDependency := 'ConfigurationDependency'
+ *    temporalServiceDependency := 'TemporalServiceDependency'
  *    
  *    params := paramName '=' paramValue ( ';' paramName '=' paramValue )*
  *    
  *    paramName := init | start | stop | destroy | impl | provide | properties | factory | factoryMethod | composition | service | filter | 
- *                 defaultImpl | required | added | changed | removed | autoConfig | pid | propagate | updated
+ *                 defaultImpl | required | added | changed | removed | autoConfig | pid | propagate | updated | timeout
  *    init := 'init'
  *    start := 'start'
  *    stop := 'stop'
@@ -76,6 +77,7 @@ import org.osgi.service.log.LogService;
  *    pid := 'pid'
  *    propagate := 'propagate'
  *    updated := 'updated'
+ *    timeout := 'timeout'
  *    
  *    paramValue := strings | attributes
  *    strings := string ( ',' string )*
