@@ -57,15 +57,95 @@ public class SyncDeliverTasks implements DeliverTask
     /** The timeout for event handlers, 0 = disabled. */
     final long m_timeout;
 
+    private static interface Matcher
+    {
+        boolean match(String className);
+    }
+    private static final class PackageMatcher implements Matcher
+    {
+        private final String m_packageName;
+
+        public PackageMatcher(final String name)
+        {
+            m_packageName = name;
+        }
+        public boolean match(String className)
+        {
+            final int pos = className.lastIndexOf('.');
+            return pos > -1 && className.substring(0, pos).equals(m_packageName);
+        }
+    }
+    private static final class SubPackageMatcher implements Matcher
+    {
+        private final String m_packageName;
+
+        public SubPackageMatcher(final String name)
+        {
+            m_packageName = name + '.';
+        }
+        public boolean match(String className)
+        {
+            final int pos = className.lastIndexOf('.');
+            return pos > -1 && className.substring(0, pos + 1).startsWith(m_packageName);
+        }
+    }
+    private static final class ClassMatcher implements Matcher
+    {
+        private final String m_className;
+
+        public ClassMatcher(final String name)
+        {
+            m_className = name;
+        }
+        public boolean match(String className)
+        {
+            return m_className.equals(className);
+        }
+    }
+
+    /** The matchers for ignore timeout handling. */
+    private final Matcher[] m_ignoreTimeoutMatcher;
+
     /**
      * Construct a new sync deliver tasks.
      * @param pool The thread pool used to spin-off new threads.
      * @param timeout The timeout for an event handler, 0 = disabled
      */
-    public SyncDeliverTasks(final ThreadPool pool, final long timeout)
+    public SyncDeliverTasks(final ThreadPool pool, final long timeout, final String[] ignoreTimeout)
     {
         m_pool = pool;
         m_timeout = timeout;
+        if ( ignoreTimeout == null || ignoreTimeout.length == 0 )
+        {
+            m_ignoreTimeoutMatcher = null;
+        }
+        else
+        {
+            m_ignoreTimeoutMatcher = new Matcher[ignoreTimeout.length];
+            for(int i=0;i<ignoreTimeout.length;i++)
+            {
+                String value = ignoreTimeout[i];
+                if ( value != null )
+                {
+                    value = value.trim();
+                }
+                if ( value != null && value.length() > 0 )
+                {
+                    if ( value.endsWith(".") )
+                    {
+                        m_ignoreTimeoutMatcher[i] = new PackageMatcher(value.substring(0, value.length() - 1));
+                    }
+                    else if ( value.endsWith("*") )
+                    {
+                        m_ignoreTimeoutMatcher[i] = new SubPackageMatcher(value.substring(0, value.length() - 1));
+                    }
+                    else
+                    {
+                        m_ignoreTimeoutMatcher[i] = new ClassMatcher(value);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -75,7 +155,26 @@ public class SyncDeliverTasks implements DeliverTask
      */
     private boolean useTimeout(final HandlerTask task)
     {
-        return m_timeout > 0;
+        // we only check the classname if a timeout is configured
+        if ( m_timeout > 0)
+        {
+            if ( m_ignoreTimeoutMatcher != null )
+            {
+                final String className = task.getHandlerClassName();
+                for(int i=0;i<m_ignoreTimeoutMatcher.length;i++)
+                {
+                    if ( m_ignoreTimeoutMatcher[i] != null)
+                    {
+                        if ( m_ignoreTimeoutMatcher[i].match(className) )
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -27,6 +27,11 @@ package org.apache.felix.eventadmin.impl.tasks;
 public interface HandlerTask
 {
     /**
+     * Return the class name of the handler
+     */
+    String getHandlerClassName();
+
+    /**
      * Deliver the event to the handler.
      */
     void execute();

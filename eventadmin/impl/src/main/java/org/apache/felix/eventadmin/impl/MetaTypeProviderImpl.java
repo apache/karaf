@@ -36,18 +36,21 @@ public class MetaTypeProviderImpl
     private final int m_threadPoolSize;
     private final int m_timeout;
     private final boolean m_requireTopic;
+    private final String[] m_ignoreTimeout;
 
     private final ManagedService m_delegatee;
 
     public MetaTypeProviderImpl(final ManagedService delegatee,
             final int cacheSize, final int threadPoolSize,
-            final int timeout, final boolean requireTopic)
+            final int timeout, final boolean requireTopic,
+            final String[] ignoreTimeout)
     {
         m_cacheSize = cacheSize;
         m_threadPoolSize = threadPoolSize;
         m_timeout = timeout;
         m_requireTopic = requireTopic;
         m_delegatee = delegatee;
+        m_ignoreTimeout = ignoreTimeout;
     }
 
     private ObjectClassDefinition ocd;
@@ -107,7 +110,17 @@ public class MetaTypeProviderImpl
                     "will enable that handlers without a topic are receiving all events " +
                     "(i.e., they are treated the same as with a topic=*).",
                     m_requireTopic ) );
-
+            adList.add( new AttributeDefinitionImpl( Configuration.PROP_IGNORE_TIMEOUT, "Ignore Timeouts",
+                    "Configure event handlers to be called without a timeout. If a timeout is configured by default " +
+                    "all event handlers are called using the timeout. For performance optimization it is possible to " +
+                    "configure event handlers where the timeout handling is not used - this reduces the thread usage " +
+                    "from the thread pools as the timout handling requires an additional thread to call the event " +
+                    "handler. However, the application should work without this configuration property. It is a " +
+                    "pure optimization! The value is a list of strings. If a string ends with a dot, " +
+                    "all handlers in exactly this package are ignored. If the string ends with a star, " +
+                    "all handlers in this package and all subpackages are ignored. If the string neither " +
+                    "ends with a dot nor with a start, this is assumed to define an exact class name.",
+                    AttributeDefinition.STRING, m_ignoreTimeout, Integer.MAX_VALUE, null, null));
             ocd = new ObjectClassDefinition()
             {
 

@@ -62,6 +62,18 @@ public class HandlerTaskImpl implements HandlerTask
     }
 
     /**
+     * @see org.apache.felix.eventadmin.impl.tasks.HandlerTask#getHandlerClassName()
+     */
+    public String getHandlerClassName() {
+        final EventHandler handler = m_handlerTasks.getEventHandler(m_eventHandlerRef);
+        try {
+            return handler.getClass().getName();
+        } finally {
+            m_handlerTasks.ungetEventHandler(handler, m_eventHandlerRef);
+        }
+    }
+
+    /**
      * @see org.apache.felix.eventadmin.impl.tasks.HandlerTask#execute()
      */
     public void execute()

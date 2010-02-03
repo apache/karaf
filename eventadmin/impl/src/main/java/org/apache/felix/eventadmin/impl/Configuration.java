@@ -19,8 +19,7 @@
 package org.apache.felix.eventadmin.impl;
 
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
 
 import org.apache.felix.eventadmin.impl.adapter.*;
 import org.apache.felix.eventadmin.impl.dispatch.DefaultThreadPool;
@@ -81,6 +80,21 @@ import org.osgi.service.metatype.MetaTypeProvider;
  * <tt>false</tt> will enable that handlers without a topic are receiving all events
  * (i.e., they are treated the same as with a topic=*).
  * </p>
+ * <p>
+ * <p>
+ *      <tt>org.apache.felix.eventadmin.IgnoreTimeout</tt> - Configure
+ *         <tt>EventHandler</tt>s to be called without a timeout.
+ * </p>
+ * If a timeout is configured by default all event handlers are called using the timeout.
+ * For performance optimization it is possible to configure event handlers where the
+ * timeout handling is not used - this reduces the thread usage from the thread pools
+ * as the timout handling requires an additional thread to call the event handler.
+ * However, the application should work without this configuration property. It is a
+ * pure optimization!
+ * The value is a list of string (separated by comma). If the string ends with a dot,
+ * all handlers in exactly this package are ignored. If the string ends with a star,
+ * all handlers in this package and all subpackages are ignored. If the string neither
+ * ends with a dot nor with a start, this is assumed to define an exact class name.
  *
  * These properties are read at startup and serve as a default configuration.
  * If a configuration admin is configured, the event admin can be configured
@@ -95,6 +109,7 @@ public class Configuration
     static final String PROP_THREAD_POOL_SIZE = "org.apache.felix.eventadmin.ThreadPoolSize";
     static final String PROP_TIMEOUT = "org.apache.felix.eventadmin.Timeout";
     static final String PROP_REQUIRE_TOPIC = "org.apache.felix.eventadmin.RequireTopic";
+    static final String PROP_IGNORE_TIMEOUT = "org.apache.felix.eventadmin.IgnoreTimeout";
 
     /** The bundle context. */
     private final BundleContext m_bundleContext;
@@ -106,6 +121,8 @@ public class Configuration
     private int m_timeout;
 
     private boolean m_requireTopic;
+
+    private String[] m_ignoreTimeout;
 
     // The thread pool used - this is a member because we need to close it on stop
     private volatile ThreadPool m_sync_pool;
@@ -206,6 +223,19 @@ public class Configuration
             // (i.e., they are treated the same as with a topic=*).
             m_requireTopic = getBooleanProperty(
                 m_bundleContext.getProperty(PROP_REQUIRE_TOPIC), true);
+            final String value = m_bundleContext.getProperty(PROP_IGNORE_TIMEOUT);
+            if ( value == null )
+            {
+                m_ignoreTimeout = null;
+            }
+            else
+            {
+                final StringTokenizer st = new StringTokenizer(value, ",");
+                m_ignoreTimeout = new String[st.countTokens()];
+                for(int i=0; i<m_ignoreTimeout.length; i++) {
+                    m_ignoreTimeout[i] = st.nextToken();
+                }
+            }
         }
         else
         {
@@ -213,6 +243,21 @@ public class Configuration
             m_threadPoolSize = getIntProperty(PROP_THREAD_POOL_SIZE, config.get(PROP_THREAD_POOL_SIZE), 20, 2);
             m_timeout = getIntProperty(PROP_TIMEOUT, config.get(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
             m_requireTopic = getBooleanProperty(config.get(PROP_REQUIRE_TOPIC), true);
+            m_ignoreTimeout = null;
+            final Object value = config.get(PROP_IGNORE_TIMEOUT);
+            if ( value instanceof String )
+            {
+                m_ignoreTimeout = new String[] {(String)value};
+            }
+            else if ( value instanceof String[] )
+            {
+                m_ignoreTimeout = (String[])value;
+            }
+            else
+            {
+                LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
+                        "Value for property: " + PROP_IGNORE_TIMEOUT + " is neither a string nor a string array - Using default");
+            }
         }
     }
 
@@ -255,7 +300,9 @@ public class Configuration
         m_sync_pool = new DefaultThreadPool(m_threadPoolSize, true);
         m_async_pool = new DefaultThreadPool(m_threadPoolSize > 5 ? m_threadPoolSize / 2 : 2, false);
 
-        final DeliverTask syncExecuter = new SyncDeliverTasks(m_sync_pool, (m_timeout > 100 ? m_timeout : 0));
+        final DeliverTask syncExecuter = new SyncDeliverTasks(m_sync_pool,
+                (m_timeout > 100 ? m_timeout : 0),
+                m_ignoreTimeout);
         m_admin = createEventAdmin(m_bundleContext,
                 handlerTasks,
                 new AsyncDeliverTasks(m_async_pool, syncExecuter),
@@ -366,7 +413,8 @@ public class Configuration
         try
         {
             return new MetaTypeProviderImpl((ManagedService)managedService,
-                    m_cacheSize, m_threadPoolSize, m_timeout, m_requireTopic);
+                    m_cacheSize, m_threadPoolSize, m_timeout, m_requireTopic,
+                    m_ignoreTimeout);
         } catch (Throwable t)
         {
             // we simply ignore this
