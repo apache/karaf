@@ -21,12 +21,13 @@ package org.apache.felix.dm.samples.annotation;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.felix.dm.annotation.api.Property;
 import org.apache.felix.dm.annotation.api.Service;
 
 /**
  * A French Dictionary Service.
  */
-@Service(properties={"language=fr"})
+@Service(properties={@Property(name="language", value="fr")})
 public class FrenchDictionary implements DictionaryService
 {
     private List<String> m_words = Arrays.asList("bonjour", "salut");

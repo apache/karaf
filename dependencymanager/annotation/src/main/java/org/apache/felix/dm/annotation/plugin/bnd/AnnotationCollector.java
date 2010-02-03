@@ -33,6 +33,7 @@ import org.apache.felix.dm.annotation.api.Composition;
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Init;
+import org.apache.felix.dm.annotation.api.Property;
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
@@ -383,9 +384,10 @@ public class AnnotationCollector extends ClassDataCollector
         Object[] properties = annotation.get(Params.properties.toString());
         if (properties != null)
         {
-            for (Object property : properties)
+            for (Object p : properties)
             {
-                String prop = property.toString().replace("=", ":");
+                Annotation a = (Annotation) p; 
+                String prop = a.get("name") + ":" + a.get("value");
                 info.addParam(Params.properties, prop);
             }
         }

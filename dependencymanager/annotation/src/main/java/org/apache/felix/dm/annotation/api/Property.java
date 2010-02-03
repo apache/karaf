@@ -24,35 +24,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates an OSGi Service class.
+ * Annotation used to describe a key-value pair.
  */
 @Retention(RetentionPolicy.CLASS)
-@Target(ElementType.TYPE)
-public @interface Service
+@Target( { ElementType.ANNOTATION_TYPE })
+public @interface Property
 {
     /**
-     * Returns the list of provided interface. By default, the directly implemented interfaces are provided.
-     * @return The list of provided interface.
+     * Returns the property name.
+     * @return this property name
      */
-    Class<?>[] provide() default Object.class;
+    String name();
 
     /**
-     * Returns the list of provided service properties.
-     * @return The list of provided service properties.
+     * Returns the property value
+     * @return this property value
      */
-    Property[] properties() default {};
-    
-    /**
-     * Returns the Class of the class which acts as a factory for this Service. The default method
-     * factory name is "create". If you need to invoke another method, then you can use the 
-     * <code>factoryMethod</code> attribute.
-     * @return the factory Class name.
-     */
-    Class<?> factory() default Object.class;
-
-    /**
-     * Returns the method name of the factory class which will create our Service instance.
-     * @return the factory method name.
-     */
-    String factoryMethod() default "";
+    String value();
 }
