@@ -32,28 +32,32 @@ import org.osgi.service.metatype.*;
 public class MetaTypeProviderImpl
     implements MetaTypeProvider, ManagedService
 {
-    private final int cacheSize;
-    private final int threadPoolSize;
-    private final int timeout;
-    private final boolean requireTopic;
+    private final int m_cacheSize;
+    private final int m_threadPoolSize;
+    private final int m_timeout;
+    private final boolean m_requireTopic;
 
-    private final ManagedService delegatee;
+    private final ManagedService m_delegatee;
 
-    public MetaTypeProviderImpl(final Configuration config,
-                                final ManagedService delegatee)
+    public MetaTypeProviderImpl(final ManagedService delegatee,
+            final int cacheSize, final int threadPoolSize,
+            final int timeout, final boolean requireTopic)
     {
-        this.cacheSize = config.getCacheSize();
-        this.threadPoolSize = config.getThreadPoolSize();
-        this.timeout = config.getTimeout();
-        this.requireTopic = config.getRequireTopic();
-        this.delegatee = delegatee;
+        m_cacheSize = cacheSize;
+        m_threadPoolSize = threadPoolSize;
+        m_timeout = timeout;
+        m_requireTopic = requireTopic;
+        m_delegatee = delegatee;
     }
 
     private ObjectClassDefinition ocd;
 
+    /**
+     * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+     */
     public void updated(Dictionary properties) throws ConfigurationException
     {
-        this.delegatee.updated(properties);
+        m_delegatee.updated(properties);
     }
 
     /**
@@ -81,20 +85,20 @@ public class MetaTypeProviderImpl
             adList.add( new AttributeDefinitionImpl( Configuration.PROP_CACHE_SIZE, "Cache Size",
                     "The size of various internal caches. The default value is 30. Increase in case " +
                     "of a large number (more then 100) of services. A value less then 10 triggers the " +
-                    "default value.", this.cacheSize) );
+                    "default value.", m_cacheSize) );
 
             adList.add( new AttributeDefinitionImpl( Configuration.PROP_THREAD_POOL_SIZE, "Thread Pool Size",
                 "The size of the thread pool. The default value is 10. Increase in case of a large amount " +
                 "of synchronous events where the event handler services in turn send new synchronous events in " +
                 "the event dispatching thread or a lot of timeouts are to be expected. A value of " +
                 "less then 2 triggers the default value. A value of 2 effectively disables thread pooling.",
-                this.threadPoolSize ) );
+                m_threadPoolSize ) );
 
             adList.add( new AttributeDefinitionImpl( Configuration.PROP_TIMEOUT, "Timeout",
                     "The black-listing timeout in milliseconds. The default value is 5000. Increase or decrease " +
                     "at own discretion. A value of less then 100 turns timeouts off. Any other value is the time " +
                     "in milliseconds granted to each event handler before it gets blacklisted",
-                    this.timeout ) );
+                    m_timeout ) );
 
             adList.add( new AttributeDefinitionImpl( Configuration.PROP_REQUIRE_TOPIC, "Require Topic",
                     "Are event handlers required to be registered with a topic? " +
@@ -102,7 +106,7 @@ public class MetaTypeProviderImpl
                     "must register with a list of topics they are interested in. Disabling this setting " +
                     "will enable that handlers without a topic are receiving all events " +
                     "(i.e., they are treated the same as with a topic=*).",
-                    this.requireTopic ) );
+                    m_requireTopic ) );
 
             ocd = new ObjectClassDefinition()
             {

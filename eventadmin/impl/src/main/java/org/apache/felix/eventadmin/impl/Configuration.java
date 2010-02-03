@@ -97,15 +97,15 @@ public class Configuration
     static final String PROP_REQUIRE_TOPIC = "org.apache.felix.eventadmin.RequireTopic";
 
     /** The bundle context. */
-    private final BundleContext bundleContext;
+    private final BundleContext m_bundleContext;
 
-    private int cacheSize;
+    private int m_cacheSize;
 
-    private int threadPoolSize;
+    private int m_threadPoolSize;
 
-    private int timeout;
+    private int m_timeout;
 
-    private boolean requireTopic;
+    private boolean m_requireTopic;
 
     // The thread pool used - this is a member because we need to close it on stop
     private volatile ThreadPool m_sync_pool;
@@ -122,13 +122,13 @@ public class Configuration
     private volatile ServiceRegistration m_registration;
 
     // all adapters
-    private AbstractAdapter[] adapters;
+    private AbstractAdapter[] m_adapters;
 
-    private ServiceRegistration managedServiceReg;
+    private ServiceRegistration m_managedServiceReg;
 
     public Configuration( BundleContext bundleContext )
     {
-        this.bundleContext = bundleContext;
+        m_bundleContext = bundleContext;
 
         // default configuration
         configure( null );
@@ -138,7 +138,7 @@ public class Configuration
         {
             Object service = new ManagedService()
             {
-                public void updated( Dictionary properties ) throws ConfigurationException
+                public synchronized void updated( Dictionary properties ) throws ConfigurationException
                 {
                     configure( properties );
                     stop();
@@ -159,7 +159,7 @@ public class Configuration
             }
             Dictionary props = new Hashtable();
             props.put( Constants.SERVICE_PID, PID );
-            managedServiceReg = bundleContext.registerService( interfaceNames, service, props );
+            m_managedServiceReg = bundleContext.registerService( interfaceNames, service, props );
         }
         catch ( Throwable t )
         {
@@ -179,8 +179,8 @@ public class Configuration
             // small but frequently used objects (i.e., in case of the default value
             // we end-up with a total of 120 small objects being cached). A value of less
             // then 10 triggers the default value.
-            cacheSize = getIntProperty(PROP_CACHE_SIZE,
-                this.bundleContext, 30, 10);
+            m_cacheSize = getIntProperty(PROP_CACHE_SIZE,
+                m_bundleContext.getProperty(PROP_CACHE_SIZE), 30, 10);
 
             // The size of the internal thread pool. Note that we must execute
             // each synchronous event dispatch that happens in the synchronous event
@@ -190,61 +190,61 @@ public class Configuration
             // a lazy thread pool (i.e., new threads are created when needed). Ones the
             // the size is reached and no cached thread is available new threads will
             // be created.
-            threadPoolSize = getIntProperty(
-                PROP_THREAD_POOL_SIZE, this.bundleContext, 20, 2);
+            m_threadPoolSize = getIntProperty(
+                PROP_THREAD_POOL_SIZE, m_bundleContext.getProperty(PROP_THREAD_POOL_SIZE), 20, 2);
 
             // The timeout in milliseconds - A value of less then 100 turns timeouts off.
             // Any other value is the time in milliseconds granted to each EventHandler
             // before it gets blacklisted.
-            timeout = getIntProperty(PROP_TIMEOUT,
-                    this.bundleContext, 5000, Integer.MIN_VALUE);
+            m_timeout = getIntProperty(PROP_TIMEOUT,
+                    m_bundleContext.getProperty(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
 
             // Are EventHandler required to be registered with a topic? - The default is
             // true. The specification says that EventHandler must register with a list
             // of topics they are interested in. Setting this value to false will enable
             // that handlers without a topic are receiving all events
             // (i.e., they are treated the same as with a topic=*).
-            requireTopic = getBooleanProperty(
-                PROP_REQUIRE_TOPIC, this.bundleContext, true);
+            m_requireTopic = getBooleanProperty(
+                m_bundleContext.getProperty(PROP_REQUIRE_TOPIC), true);
         }
         else
         {
-            cacheSize = getIntProperty(PROP_CACHE_SIZE, config, 30, 10);
-            threadPoolSize = getIntProperty(PROP_THREAD_POOL_SIZE, config, 20, 2);
-            timeout = getIntProperty(PROP_TIMEOUT, config, 5000, Integer.MIN_VALUE);
-            requireTopic = getBooleanProperty(PROP_REQUIRE_TOPIC, config, true);
+            m_cacheSize = getIntProperty(PROP_CACHE_SIZE, config.get(PROP_CACHE_SIZE), 30, 10);
+            m_threadPoolSize = getIntProperty(PROP_THREAD_POOL_SIZE, config.get(PROP_THREAD_POOL_SIZE), 20, 2);
+            m_timeout = getIntProperty(PROP_TIMEOUT, config.get(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
+            m_requireTopic = getBooleanProperty(config.get(PROP_REQUIRE_TOPIC), true);
         }
     }
 
     public synchronized void start()
     {
         LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-                PROP_CACHE_SIZE + "=" + cacheSize);
+                PROP_CACHE_SIZE + "=" + m_cacheSize);
         LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-            PROP_THREAD_POOL_SIZE + "=" + threadPoolSize);
+            PROP_THREAD_POOL_SIZE + "=" + m_threadPoolSize);
         LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-            PROP_TIMEOUT + "=" + timeout);
+            PROP_TIMEOUT + "=" + m_timeout);
         LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
-            PROP_REQUIRE_TOPIC + "=" + requireTopic);
+            PROP_REQUIRE_TOPIC + "=" + m_requireTopic);
 
         final TopicPermissions publishPermissions = new CacheTopicPermissions(
-            new LeastRecentlyUsedCacheMap(cacheSize), TopicPermission.PUBLISH);
+            new LeastRecentlyUsedCacheMap(m_cacheSize), TopicPermission.PUBLISH);
 
         final TopicPermissions subscribePermissions = new CacheTopicPermissions(
-            new LeastRecentlyUsedCacheMap(cacheSize), TopicPermission.SUBSCRIBE);
+            new LeastRecentlyUsedCacheMap(m_cacheSize), TopicPermission.SUBSCRIBE);
 
         final TopicHandlerFilters topicHandlerFilters =
-            new CacheTopicHandlerFilters(new LeastRecentlyUsedCacheMap(cacheSize),
-            requireTopic);
+            new CacheTopicHandlerFilters(new LeastRecentlyUsedCacheMap(m_cacheSize),
+            m_requireTopic);
 
         final Filters filters = new CacheFilters(
-            new LeastRecentlyUsedCacheMap(cacheSize), this.bundleContext);
+            new LeastRecentlyUsedCacheMap(m_cacheSize), m_bundleContext);
 
         // The handlerTasks object is responsible to determine concerned EventHandler
         // for a given event. Additionally, it keeps a list of blacklisted handlers.
         // Note that blacklisting is deactivated by selecting a different scheduler
         // below (and not in this HandlerTasks object!)
-        final HandlerTasks handlerTasks = new BlacklistingHandlerTasks(this.bundleContext,
+        final HandlerTasks handlerTasks = new BlacklistingHandlerTasks(m_bundleContext,
             new CleanBlackList(), topicHandlerFilters, filters,
             subscribePermissions);
 
@@ -252,23 +252,23 @@ public class Configuration
         // demand - in case none of its cached threads is free - until threadPoolSize
         // is reached. Subsequently, a threadPoolSize of 2 effectively disables
         // caching of threads.
-        m_sync_pool = new DefaultThreadPool(threadPoolSize, true);
-        m_async_pool = new DefaultThreadPool(threadPoolSize > 5 ? threadPoolSize / 2 : 2, false);
+        m_sync_pool = new DefaultThreadPool(m_threadPoolSize, true);
+        m_async_pool = new DefaultThreadPool(m_threadPoolSize > 5 ? m_threadPoolSize / 2 : 2, false);
 
-        final DeliverTask syncExecuter = createSyncExecuters( m_sync_pool, timeout);
-        m_admin = createEventAdmin(this.bundleContext,
+        final DeliverTask syncExecuter = new SyncDeliverTasks(m_sync_pool, (m_timeout > 100 ? m_timeout : 0));
+        m_admin = createEventAdmin(m_bundleContext,
                 handlerTasks,
-                createAsyncExecuters(m_async_pool, syncExecuter),
+                new AsyncDeliverTasks(m_async_pool, syncExecuter),
                 syncExecuter);
 
         // register the admin wrapped in a service factory (SecureEventAdminFactory)
         // that hands-out the m_admin object wrapped in a decorator that checks
         // appropriated permissions of each calling bundle
-        m_registration = this.bundleContext.registerService(EventAdmin.class.getName(),
+        m_registration = m_bundleContext.registerService(EventAdmin.class.getName(),
             new SecureEventAdminFactory(m_admin, publishPermissions), null);
 
         // Finally, adapt the outside events to our kind of events as per spec
-        adaptEvents(this.bundleContext, m_admin);
+        adaptEvents(m_bundleContext, m_admin);
     }
 
     /**
@@ -308,18 +308,18 @@ public class Configuration
      */
     public synchronized void destroy()
     {
-        if ( this.adapters != null )
+        if ( m_adapters != null )
         {
-            for(int i=0;i<adapters.length;i++)
+            for(int i=0;i<m_adapters.length;i++)
             {
-                adapters[i].destroy(bundleContext);
+                m_adapters[i].destroy(m_bundleContext);
             }
-            adapters = null;
+            m_adapters = null;
         }
-        if ( managedServiceReg != null )
+        if ( m_managedServiceReg != null )
         {
-            managedServiceReg.unregister();
-            managedServiceReg = null;
+            m_managedServiceReg.unregister();
+            m_managedServiceReg = null;
         }
     }
 
@@ -339,79 +339,34 @@ public class Configuration
         return new EventAdminImpl(handlerTasks, asyncExecuters, syncExecuters);
     }
 
-    /*
-     * Create an AsyncDeliverTasks object that is used to dispatch asynchronous
-     * events. Additionally, the asynchronous dispatch queue is initialized and
-     * activated (i.e., a thread is started via the given ThreadPool).
-     */
-    private DeliverTask createAsyncExecuters(final ThreadPool pool, final DeliverTask deliverTask)
-    {
-        // init the queue
-        final AsyncDeliverTasks result = new AsyncDeliverTasks(pool, deliverTask);
-
-        return result;
-    }
-
-    /*
-     * Create a SyncDeliverTasks object that is used to dispatch synchronous events.
-     * Additionally, the synchronous dispatch queue is initialized and activated
-     * (i.e., a thread is started via the given ThreadPool).
-     */
-    private DeliverTask createSyncExecuters(final ThreadPool pool, final long timeout)
-    {
-        // init the queue
-        final SyncDeliverTasks result = new SyncDeliverTasks(pool, (timeout > 100 ? timeout : 0));
-
-        return result;
-    }
-
-    /*
+    /**
      * Init the adapters in org.apache.felix.eventadmin.impl.adapter
      */
     private void adaptEvents(final BundleContext context, final EventAdmin admin)
     {
-        if ( adapters == null )
+        if ( m_adapters == null )
         {
-            adapters = new AbstractAdapter[4];
-            adapters[0] = new FrameworkEventAdapter(context, admin);
-            adapters[1] = new BundleEventAdapter(context, admin);
-            adapters[2] = new ServiceEventAdapter(context, admin);
-            adapters[3] = new LogEventAdapter(context, admin);
+            m_adapters = new AbstractAdapter[4];
+            m_adapters[0] = new FrameworkEventAdapter(context, admin);
+            m_adapters[1] = new BundleEventAdapter(context, admin);
+            m_adapters[2] = new ServiceEventAdapter(context, admin);
+            m_adapters[3] = new LogEventAdapter(context, admin);
         }
         else
         {
-            for(int i=0; i<adapters.length; i++)
+            for(int i=0; i<m_adapters.length; i++)
             {
-                adapters[i].update(admin);
+                m_adapters[i].update(admin);
             }
         }
-    }
-
-    public int getCacheSize()
-    {
-        return cacheSize;
-    }
-
-    public int getThreadPoolSize()
-    {
-        return threadPoolSize;
-    }
-
-    public int getTimeout()
-    {
-        return timeout;
-    }
-
-    public boolean getRequireTopic()
-    {
-        return requireTopic;
     }
 
     private Object tryToCreateMetaTypeProvider(final Object managedService)
     {
         try
         {
-            return new MetaTypeProviderImpl(this, (ManagedService)managedService);
+            return new MetaTypeProviderImpl((ManagedService)managedService,
+                    m_cacheSize, m_threadPoolSize, m_timeout, m_requireTopic);
         } catch (Throwable t)
         {
             // we simply ignore this
@@ -457,11 +412,9 @@ public class Configuration
      * generated in case the value is erroneous (i.e., can not be parsed as an int or
      * is less then the min value).
      */
-    private int getIntProperty(final String key, final Dictionary dict,
+    private int getIntProperty(final String key, final Object value,
         final int defaultValue, final int min)
     {
-        final Object value = dict.get(key);
-
         if(null != value)
         {
             final int result;
@@ -499,41 +452,9 @@ public class Configuration
      * Returns false if the value of the property is set and is either 0, false, or no
      * Returns the defaultValue otherwise
      */
-    private boolean getBooleanProperty(final String key, final BundleContext context,
+    private boolean getBooleanProperty(final Object obj,
         final boolean defaultValue)
     {
-        String value = context.getProperty(key);
-
-        if(null != value)
-        {
-            value = value.trim().toLowerCase();
-
-            if(0 < value.length() && ("0".equals(value) || "false".equals(value)
-                || "no".equals(value)))
-            {
-                return false;
-            }
-
-            if(0 < value.length() && ("1".equals(value) || "true".equals(value)
-                || "yes".equals(value)))
-            {
-                return true;
-            }
-        }
-
-        return defaultValue;
-    }
-
-    /**
-     * Returns true if the value of the property is set and is either 1, true, or yes
-     * Returns false if the value of the property is set and is either 0, false, or no
-     * Returns the defaultValue otherwise
-     */
-    private boolean getBooleanProperty(final String key, final Dictionary dict,
-        final boolean defaultValue)
-    {
-        Object obj = dict.get(key);
-
         if(null != obj)
         {
             if ( obj instanceof Boolean )
