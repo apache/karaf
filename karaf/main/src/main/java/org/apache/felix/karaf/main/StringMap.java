@@ -18,7 +18,9 @@
  */
 package org.apache.felix.karaf.main;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Simple utility class that creates a map for string-based keys by
