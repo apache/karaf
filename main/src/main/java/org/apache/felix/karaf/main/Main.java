@@ -30,14 +30,7 @@ import java.net.URLClassLoader;
 import java.security.AccessControlException;
 import java.security.Provider;
 import java.security.Security;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.lang.reflect.Method;
@@ -445,46 +438,7 @@ public class Main {
         // the start level to which the bundles are assigned is specified by
         // appending a ".n" to the auto-install property name, where "n" is
         // the desired start level for the list of bundles.
-        for (Iterator i = configProps.keySet().iterator(); i.hasNext();) {
-            String key = (String) i.next();
-
-            // Ignore all keys that are not the auto-install property.
-            if (!key.startsWith(PROPERTY_AUTO_INSTALL)) {
-                continue;
-            }
-
-            // If the auto-install property does not have a start level,
-            // then assume it is the default bundle start level, otherwise
-            // parse the specified start level.
-            int startLevel = sl.getInitialBundleStartLevel();
-            if (!key.equals(PROPERTY_AUTO_INSTALL)) {
-                try {
-                    startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
-                }
-                catch (NumberFormatException ex) {
-                    System.err.println("Invalid property: " + key);
-                }
-            }
-
-            StringTokenizer st = new StringTokenizer(configProps.getProperty(key), "\" ", true);
-            if (st.countTokens() > 0) {
-                String location = null;
-                do {
-                    location = nextLocation(st);
-                    if (location != null) {
-                        try {
-                            String[] parts = convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
-                            Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
-                            sl.setBundleStartLevel(b, startLevel);
-                        }
-                        catch (Exception ex) {
-                            System.err.println("Auto-properties install: " + ex);
-                        }
-                    }
-                }
-                while (location != null);
-            }
-        }
+        autoInstall(PROPERTY_AUTO_INSTALL, context, sl, convertToMavenUrls);
 
         // The auto-start property specifies a space-delimited list of
         // bundle URLs to be automatically installed and started into each
@@ -493,19 +447,32 @@ public class Main {
         // where "n" is the desired start level for the list of bundles.
         // The following code starts bundles in two passes, first it installs
         // them, then it starts them.
+            List<Bundle> bundlesToStart = autoInstall(PROPERTY_AUTO_START, context, sl, convertToMavenUrls);
+        // Now loop through and start the installed bundles.
+        for (Bundle b : bundlesToStart) {
+            try {
+                b.start();
+            }
+            catch (Exception ex) {
+                System.err.println("Auto-properties start: " + ex);
+            }
+        }
+    }
+
+    private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, StartLevel sl, boolean convertToMavenUrls) {
+        Map<Integer, String> autoStart = new TreeMap<Integer, String>();
+        List<Bundle> bundles = new ArrayList<Bundle>();
         for (Iterator i = configProps.keySet().iterator(); i.hasNext();) {
             String key = (String) i.next();
-
             // Ignore all keys that are not the auto-start property.
-            if (!key.startsWith(PROPERTY_AUTO_START)) {
+            if (!key.startsWith(propertyPrefix)) {
                 continue;
             }
-
             // If the auto-start property does not have a start level,
             // then assume it is the default bundle start level, otherwise
             // parse the specified start level.
             int startLevel = sl.getInitialBundleStartLevel();
-            if (!key.equals(PROPERTY_AUTO_START)) {
+            if (!key.equals(propertyPrefix)) {
                 try {
                     startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
                 }
@@ -513,8 +480,10 @@ public class Main {
                     System.err.println("Invalid property: " + key);
                 }
             }
-
-            StringTokenizer st = new StringTokenizer(configProps.getProperty(key), "\" ", true);
+            autoStart.put(startLevel, configProps.getProperty(key));
+        }
+        for (Integer startLevel : autoStart.keySet()) {
+            StringTokenizer st = new StringTokenizer(autoStart.get(startLevel), "\" ", true);
             if (st.countTokens() > 0) {
                 String location = null;
                 do {
@@ -524,6 +493,7 @@ public class Main {
                             String[] parts = convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
                             Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
                             sl.setBundleStartLevel(b, startLevel);
+                            bundles.add(b);
                         }
                         catch (Exception ex) {
                             System.err.println("Auto-properties install:" + ex);
@@ -533,34 +503,7 @@ public class Main {
                 while (location != null);
             }
         }
-
-        // Now loop through and start the installed bundles.
-        for (Iterator i = configProps.keySet().iterator(); i.hasNext();) {
-            String key = (String) i.next();
-            if (key.startsWith(PROPERTY_AUTO_START)) {
-                StringTokenizer st = new StringTokenizer(configProps.getProperty(key), "\" ", true);
-                if (st.countTokens() > 0) {
-                    String location = null;
-                    do {
-                        location = nextLocation(st);
-                        if (location != null) {
-                            // Installing twice just returns the same bundle.
-                            try {
-                                String[] parts = convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
-                                Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
-                                if (b != null) {
-                                    b.start();
-                                }
-                            }
-                            catch (Exception ex) {
-                                System.err.println("Auto-properties start: " + ex);
-                            }
-                        }
-                    }
-                    while (location != null);
-                }
-            }
-        }
+        return bundles;
     }
 
     private static String[] convertToMavenUrlsIfNeeded(String location, boolean convertToMavenUrls) {
