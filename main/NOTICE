@@ -13,6 +13,9 @@ The OSGi Alliance (http://www.osgi.org/).
 Copyright (c) OSGi Alliance (2000, 2009).
 Licensed under the Apache License 2.0.
 
+This product includes software from http://kxml.sourceforge.net.
+Copyright (c) 2002,2003, Stefan Haustein, Oberhausen, Rhld., Germany.
+Licensed under BSD License.
 
 II. Used Software
 
@@ -27,3 +30,4 @@ Licensed under the Apache License 2.0.
 
 III. License Summary
 - Apache License 2.0
+- BSD License
