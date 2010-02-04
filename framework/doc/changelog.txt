@@ -1,3 +1,27 @@
+Changes from 2.0.2 to 2.0.3
+---------------------------
+
+** Bug
+    * [FELIX-1838] - PackageAdmin.getExportedPackages() duplicates output for packages with different version
+    * [FELIX-1867] - ModuleImpl diagnoseClassLoadError throw NullPointerException for empty package name in debug mode
+    * [FELIX-1917] - A few minor bugs in the framework found while embedding Felix
+    * [FELIX-1919] - Fragment bundle cannot be linked to its host
+    * [FELIX-1920] - RequiredBundle.getRequiringBundles() incorrectly calculates result
+    * [FELIX-1929] - getStartLevel() always reports requested start level, not active start level
+    * [FELIX-1982] - Documented but uninterpreted felix.cache.* properties
+    * [FELIX-1998] - Use UTF-8 when decoding reference location URLs
+    * [FELIX-2002] - Uninstalled fragments are not properly detached
+
+** Improvement
+    * [FELIX-37] - Implement security for bundle resource URLs
+    * [FELIX-325] - Factor out security checks from the framework/system bundle code
+    * [FELIX-1973] - Implement all required security checks
+
+** New Feature
+    * [FELIX-30] - Implement extension bundles
+    * [FELIX-1991] - Allow boot delegation class loader to be configurable per bundle
+
+
 Changes from 2.0.1 to 2.0.2
 ---------------------------
 
