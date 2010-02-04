@@ -112,7 +112,6 @@
     <shell.version>1.4.1</shell.version>
     <shell.tui.version>1.4.1</shell.tui.version>
     <obr.version>1.4.2</obr.version>
-    <security.version>0.9.0-SNAPSHOT</security.version>
   </properties>
   <profiles>
     <profile>
