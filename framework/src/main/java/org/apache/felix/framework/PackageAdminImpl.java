@@ -273,12 +273,6 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             }
             notifyAll();
         }
-        try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
     }
 
     public boolean resolveBundles(Bundle[] bundles)
