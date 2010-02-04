@@ -91,7 +91,6 @@
     <module organisation="org.eclipse2" resolver="eclipse2"/>
     <module organisation="org.apache" name="felix\.sigil.*" matcher="regexp" resolver="default"/>
     <module organisation="org.apache" resolver="apache"/>
-    <module organisation="org.apache.ant" resolver="apache"/>
     <module organisation="biz.aQute" resolver="aQute"/>
     <module organisation="org.codehaus.groovy" resolver="apache" />
   </modules>

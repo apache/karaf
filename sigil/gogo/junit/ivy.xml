@@ -24,11 +24,5 @@
        status="integration"/>
   <publications>
     <artifact name="org.apache.felix.sigil.gogo.junit" />
-  </publications>
-  
-  <dependencies>
-    <dependency org="org.apache" name="ant" rev="1.7.1">
-      <artifact name="ant-junit" type="jar" />
-    </dependency>
-  </dependencies> 
+  </publications>  
 </ivy-module>

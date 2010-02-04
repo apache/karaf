@@ -20,7 +20,4 @@
 <project name="gogo.junit" default="build"
   xmlns:ivy="antlib:org.apache.ivy.ant">
   <import file="../build.xml"/>
-  <target name="init">
-  	<ivy:retrieve inline="true" organisation="org.apache.ant" module="ant-junit" revision="1.7.1" transitive="false" />
-  </target>
 </project>
