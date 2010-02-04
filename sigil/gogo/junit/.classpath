@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.apache.felix.sigil.classpathContainer"/>
+	<classpathentry kind="lib" path="lib/ant-junit-1.7.1.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>
