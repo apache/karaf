@@ -46,9 +46,13 @@ public class SigilJunit
         OPTIONS.addOption("q", "quiet", false, "Run tests quietly, i.e. don't print steps to console" );
     }
     
-    private JUnitService service;
+    private final JUnitService service;
+    
+    public SigilJunit(JUnitService service) {
+        this.service = service;
+    }
 
-    public void junit(String[] args) throws IOException, ParseException {
+    public boolean junit(String[] args) throws IOException, ParseException {
         Parser p = new GnuParser();
         CommandLine cmd = p.parse(OPTIONS, args);
         String[] cargs = cmd.getArgs();
@@ -57,6 +61,7 @@ public class SigilJunit
                 System.out.println( "\t" + t );
                 System.out.flush();
             }
+            return true;
         }
         else {
             boolean quiet = cmd.hasOption( 'q' );
@@ -68,11 +73,11 @@ public class SigilJunit
                 System.out.println( "Writing results to " + dir.getAbsolutePath() );
                 System.out.flush();
             }
-            runTests( cargs, quiet, dir );
+            return runTests( cargs, quiet, dir );
         }
     }
     
-    private void runTests(String[] args, boolean quiet, File dir) throws IOException {
+    private boolean runTests(String[] args, boolean quiet, File dir) throws IOException {
         int count = 0;
         int failures = 0;
         int errors = 0;
@@ -123,6 +128,8 @@ public class SigilJunit
         
         System.out.println( "Ran " + count + " tests. " + failures + " failures " + errors + " errors." );
         System.out.flush();
+        
+        return failures + errors == 0;
     }
 
     private TestSuite[] findTests(String t) {

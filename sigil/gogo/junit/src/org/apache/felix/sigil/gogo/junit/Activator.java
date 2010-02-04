@@ -19,21 +19,48 @@
 package org.apache.felix.sigil.gogo.junit;
 
 import java.util.Hashtable;
+import java.util.Map;
 
+import org.apache.felix.sigil.junit.server.JUnitService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 import org.osgi.service.command.CommandProcessor;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator
 {
 
-    public void start( BundleContext ctx ) throws Exception
+    public void start( final BundleContext ctx ) throws Exception
     {
-        Hashtable props = new Hashtable();
+        final Hashtable props = new Hashtable();
         props.put(CommandProcessor.COMMAND_SCOPE, "sigil");
-        props.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "junit" });        
-        ctx.registerService( SigilJunit.class.getName(), new SigilJunit(), props );
+        props.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "junit" });
+        
+        ServiceTracker tracker = new ServiceTracker(ctx, JUnitService.class.getName(), null) {
+            private Map<ServiceReference, ServiceRegistration> regs;
+
+            @Override
+            public Object addingService( ServiceReference reference )
+            {
+                JUnitService svc = ( JUnitService ) super.addingService( reference );
+                ServiceRegistration reg = ctx.registerService( SigilJunit.class.getName(), new SigilJunit(svc), props );
+                regs.put(reference, reg);
+                return svc;
+            }
+
+            @Override
+            public void removedService( ServiceReference reference, Object service )
+            {
+                ServiceRegistration reg = regs.remove( reference );
+                reg.unregister();
+                super.removedService( reference, service );
+            }
+            
+        };
+        tracker.open();
     }
 
     public void stop( BundleContext ctx ) throws Exception
