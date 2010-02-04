@@ -18,14 +18,22 @@
  */
 package org.apache.felix.sigil.gogo.junit;
 
+import java.util.Hashtable;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+
+import org.osgi.service.command.CommandProcessor;
 
 public class Activator implements BundleActivator
 {
 
     public void start( BundleContext ctx ) throws Exception
     {
+        Hashtable props = new Hashtable();
+        props.put(CommandProcessor.COMMAND_SCOPE, "sigil");
+        props.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "junit" });        
+        ctx.registerService( SigilJunit.class.getName(), new SigilJunit(), props );
     }
 
     public void stop( BundleContext ctx ) throws Exception
