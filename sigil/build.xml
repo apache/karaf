@@ -65,6 +65,9 @@
     <!-- ivy -->
     <ivy:retrieve organisation="org.apache" module="felix.sigil.ivy.resolver" revision="latest.integration" inline="true" pattern="${site.dir}/ivy/[artifact].[ext]" transitive="false"/>
 
+    <!-- gogo -->
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.gogo.junit" revision="latest.integration" inline="true" pattern="${site.dir}/gogo/[artifact].[ext]" transitive="false"/>
+
     <groovy:groovy src="bldcommon/updatesite.groovy">
       <arg value="${site.dir}/features"/>
       <arg value="${site.dir}/site.xml" />
