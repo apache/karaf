@@ -1,0 +1,524 @@
+Changes from 2.0.2 to 2.0.3
+---------------------------
+
+** Bug
+    * [FELIX-1838] - PackageAdmin.getExportedPackages() duplicates output for packages with different version
+    * [FELIX-1867] - ModuleImpl diagnoseClassLoadError throw NullPointerException for empty package name in debug mode
+    * [FELIX-1917] - A few minor bugs in the framework found while embedding Felix
+    * [FELIX-1919] - Fragment bundle cannot be linked to its host
+    * [FELIX-1920] - RequiredBundle.getRequiringBundles() incorrectly calculates result
+    * [FELIX-1929] - getStartLevel() always reports requested start level, not active start level
+    * [FELIX-1982] - Documented but uninterpreted felix.cache.* properties
+    * [FELIX-1998] - Use UTF-8 when decoding reference location URLs
+    * [FELIX-2002] - Uninstalled fragments are not properly detached
+
+** Improvement
+    * [FELIX-37] - Implement security for bundle resource URLs
+    * [FELIX-325] - Factor out security checks from the framework/system bundle code
+    * [FELIX-1973] - Implement all required security checks
+
+** New Feature
+    * [FELIX-30] - Implement extension bundles
+    * [FELIX-1991] - Allow boot delegation class loader to be configurable per bundle
+
+
+Changes from 2.0.1 to 2.0.2
+---------------------------
+
+** Bug
+    * [FELIX-1754] - Usage of BundleContext.getServiceReferences results in failure to activate components
+    * [FELIX-1782] - Errors during start-up on gnu/classpath based VMs (jamvm, kaffe, cacao) and mika
+    * [FELIX-1795] - Bundle version ignored in Fragment-Host header
+    * [FELIX-1834] - java.io.IOException: No framework context found when embedding felix frameworks as bundles
+
+** Improvement
+    * [FELIX-1534] - Improve fragment merging
+    * [FELIX-1781] - Try to reduce object allocations/usage in resolver algorithm
+    * [FELIX-1783] - Eliminate contention on ServiceRegistry.getServiceReferences(String, Filter)
+
+Changes from 2.0.0 to 2.0.1
+---------------------------
+
+** Bug
+    * [FELIX-1565] - Deadlock UrlHandlers
+    * [FELIX-1573] - Occasional NPE in URLHandlersBundleStreamHandler
+    * [FELIX-1580] - Regression with native library handling
+    * [FELIX-1586] - Framework reports org.osgi.framework.version as 1.3
+    * [FELIX-1600] - ServiceReference.isAssignableTo() always returns true if requesting bundle has no wire
+    * [FELIX-1631] - Implicit bootdelegation causes hang on android
+    * [FELIX-1710] - Resolver still does not discard all partial results when a cyclical dependency fails
+    * [FELIX-1721] - Framework boot delegation has a bug due to extraneous code
+    * [FELIX-1731] - Native library extraction could be improved to help cases where there are dependencies among libraries
+
+** Improvement
+    * [FELIX-1619] - Change the default auto-deploy actions to be install and start only
+    * [FELIX-1625] - Refactor bundle cache to simplify management
+    * [FELIX-1679] - VersionRange class should use finals to be thread safe.
+    * [FELIX-1724] - Various module metadata should be cached
+
+** Task
+    * [FELIX-1617] - Modify framework, main, shell, shell.tui, and obr to depend on official OSGi JAR files
+
+Changes from 1.8.1 to 2.0.0
+---------------------------
+
+** Bug
+    * [FELIX-893] - Felix fails to start using J9 JVM
+    * [FELIX-905] - Felix needs an RFC 126 FindHook
+    * [FELIX-906] - Felix needs an RFC 126 EventHook
+    * [FELIX-1122] - Extension bundles are not being removed from the bundle list when uninstalled
+    * [FELIX-1123] - System bundle does still not correctly handle (export) package attributes
+    * [FELIX-1124] - ResourceNotFoundException too verbose
+    * [FELIX-1130] - Bundle.getHeaders() returns a Dictionary<java.util.jar.Attribute.Name,String>
+    * [FELIX-1138] - URL Handlers performance regression due to service lookups
+    * [FELIX-1170] - MemoryLeak when stopping and restarting Felix
+    * [FELIX-1187] - BundleContext.ungetService() should return false only if the usage count is zero when the method is invoked
+    * [FELIX-1197] - Bundle Fragments not resolved correctly
+    * [FELIX-1198] - config.properties still refers to old org.osgi.framework.startlevel property
+    * [FELIX-1247] - BundleEvent.UNRESOLVED should be fired during update/uninstall not refresh
+    * [FELIX-1249] - Bundle.findEntries() should search fragments as well as the bundle itself
+    * [FELIX-1254] - Bundle#findEntries does not return resources from fragments
+    * [FELIX-1271] - Improve manifest localization to handle special cases
+    * [FELIX-1272] - Need to special case getResource()/getResources()/loadClass() for fragment bundles
+    * [FELIX-1273] - Bundle.getResources() should return null for a non-existent resource
+    * [FELIX-1277] - Fix Service Hooks Tests failures in RFC 126 TCK
+    * [FELIX-1279] - Framework.waitForStop() does not obey timeout
+    * [FELIX-1280] - Package Admin - getExportedPackages must return null instead of an empty array
+    * [FELIX-1285] - SecureAction captures the calling context incorrectly
+    * [FELIX-1286] - Module class loader should use secure action instead of a privileged block
+    * [FELIX-1287] - System bundle operations from RFC-132 (e.g., init(), start(), stop(), waitForStop()) are using wrong lock object
+    * [FELIX-1288] - System bundle context should be null after stopping the framework
+    * [FELIX-1292] - PackageAdmin.getBundle(Class) should return null if the bundle associated with the passed in class is from another framework
+    * [FELIX-1293] - StringMap used for case insensitive properties does not respect ordering if case sensitivity is changed
+    * [FELIX-1295] - ServiceRegistry increments/decrements service use count after/before getService/ungetService() is called on ServiceFactory
+    * [FELIX-1371] - Automatic parent class loader delegation does not correctly filter calls to Bundle.loadClass()
+    * [FELIX-1397] - Required execution environment verification should happen at resolve time, not install time
+    * [FELIX-1400] - bootdelegation and dynamic-import-packages are accepting invalid patterns
+    * [FELIX-1401] - Manifest localization with fragments not handled correctly
+    * [FELIX-1422] - Resolver does not always discard partial results when a cyclically dependency fails
+    * [FELIX-1435] - Resolver does not always resolve a dynamic import to a fragment export
+    * [FELIX-1527] - R4.2 spec errata now specifies uninstalling a bundle must transition through INSTALLED on its way to UNINSTALLED
+    * [FELIX-1551] - Start level service must synchronously persist bundle start level changes
+    * [FELIX-1556] - Bundle.getResource/s is not able to find resources if the package is not alraedy wired when I use DynamicImport-Package: *
+
+** Improvement
+    * [FELIX-712] - Ability to disable automatic parent classloader delegation
+    * [FELIX-883] - JarContent logs and then swallows exceptions when reading from JAR file, should probably throw an exception
+    * [FELIX-1120] - Enable BundleCache customization
+    * [FELIX-1134] - Add support for native libraries in fragments
+    * [FELIX-1189] - Improve error message in main when there is an error processing auto-install/start bundles
+    * [FELIX-1246] - PackageAdmin.getBundle() is not implemented efficiently
+    * [FELIX-1260] - Make Bundle.findEntries() and Bundle.getEntryPaths() more thread safe
+    * [FELIX-1291] - Implement support for proper return type from Framework.waitForStop()
+    * [FELIX-1300] - Remove legacy bundle cache support when extracting embedded JAR files
+    * [FELIX-1360] - Improve native library matching algorithm (part 2)
+    * [FELIX-1404] - Use provided classes from OSGi R4.2 companion code
+    * [FELIX-1432] - Manifest parser doesn't return import package declarations in order of manifest
+    * [FELIX-1462] - Felix framework launcher should only use standard launching API
+
+** New Feature
+    * [FELIX-33] - Implement system bundle update
+    * [FELIX-749] - Add support for lazy activation of bundles
+    * [FELIX-1193] - Implement org.osgi.framework.bundle.parent from RFC 132
+    * [FELIX-1205] - Update to the latest OSGi R4.2 API
+    * [FELIX-1244] - Add support for ServiceEvent.MODIFIED_ENDMATCH
+    * [FELIX-1250] - Support service exceptions for service factories
+    * [FELIX-1289] - Support for FrameworkUtil.getBundle()
+    * [FELIX-1297] - Implement support for new org.osgi.framework.command.execpermission configuration property
+    * [FELIX-1298] - Implement support for new org.osgi.framework.library.extensions configuration property
+    * [FELIX-1446] - Framework launcher should automatically deploy bundles in bundle directory
+    * [FELIX-1478] - Add shutdown hook to launcher to cleanly shutdown the framework if the process is killed
+
+
+
+
+** Task
+    * [FELIX-1144] - The NOTICE file for Main subproject is not correctly copied into the source JAR
+
+
+** Test
+    * [FELIX-1208] - Need migrate the EventDispatcherTest to newer version of EasyMock
+ 
+Changes form 1.6.1 to 1.8.0
+---------------------------
+** Bug
+    * [FELIX-1034] - bootdelegation property seems to be matching more packages than desired
+    * [FELIX-1059] - DynamicImport-Package matches more packages than desired
+
+** Improvement
+    * [FELIX-1060] - URLHandlers doesn't support URLStreamHandler.openConnection(proxy,url) method
+
+** New Feature
+    * [FELIX-29] - Implement bundle fragments
+
+Changes from 1.6.0 to 1.6.1
+---------------------------
+** Bug
+    * [FELIX-1027] - deadlock with felix 1.6.0 ?
+    * [FELIX-1028] - NPE in configuration view when running webconsole with Equinox
+    * [FELIX-1033] - Exceptions when Felix is started with security manager
+    * [FELIX-1035] - deadlock observed while using fileinstall to monitor multiple directories
+    * [FELIX-1045] - Felix 1.6.0 fails with ClassCircularityError
+
+Changes from 1.4.1 to 1.6.0
+---------------------------
+
+** Bug
+    * [FELIX-737] - Resolver does not correctly discard export when module imports the same package (part 2)
+    * [FELIX-852] - Fragment support is currently limited to directly resolved hosts
+    * [FELIX-869] - SCR throws exception on invalidating a component with a reference to a service that was already unregistered
+    * [FELIX-891] - Bundle lock acquisition should not record lock until it verifies the bundle is lockable
+    * [FELIX-892] - ServiceReferenceImpl improper implementation of equals and hashcode
+    * [FELIX-893] - Felix fails to start using J9 JVM
+    * [FELIX-897] - Empty system package is exported when a semicolon is present in "extra" configuration
+    * [FELIX-902] - Empty bundle.state file produces NPE
+    * [FELIX-910] - Framework may ignore framework startlevel on startup
+    * [FELIX-911] - Potential deadlock between Bundle.stop() and BundleContext.registerService()
+    * [FELIX-915] - PackageAdmin returns null on getBundle(...) with system classes
+    * [FELIX-934] - Bootdelegation bug
+    * [FELIX-947] - Behaviour of startlevel comman doesn't adhere to spec
+    * [FELIX-948] - ServiceReferenceImpl.compareTo should handle other types than integer for service ranking
+    * [FELIX-951] - Deadlock in iPojo when stopping Felix
+    * [FELIX-952] - Exception thrown when unregistering services because the bundle is stopped
+    * [FELIX-953] - Bundle#loadClass sometimes return null instead of throwing a CNFE
+    * [FELIX-961] - 100% CPU looping inside uses calculation
+    * [FELIX-962] - Erroneous class loading delegation to the application launcher classloader in some cases
+    * [FELIX-969] - system bundle does not correctly handle (export) package attributes
+    * [FELIX-971] - Exception thrown in ServiceTracker at shutdown 
+    * [FELIX-978] - Resolver does not clean up properly on a failed recursive attempt to resolve
+    * [FELIX-1004] - Extensionmanager openConnection(URL) method should be public
+    * [FELIX-1005] - Strange list of imported packages returned by the package admin
+
+** Improvement
+    * [FELIX-681] - Modify daemon threads to catch all exceptions and log them to avoid premature thread death
+    * [FELIX-851] - Refactor the module abstraction layer to align more closely to OSGi concepts
+    * [FELIX-872] - JarContent swallows exception when opening manifest, it should log it
+    * [FELIX-883] - JarContent logs and then swallows exceptions when reading from JAR file, should probably throw an exception
+    * [FELIX-894] - Loosen locking when starting/stopping/uninstalling a bundle by firing event without holding a lock
+    * [FELIX-908] - Unsynchronize access to bundle state inside BundleInfo by making the variable volatile
+
+Changes from 1.4.0 to 1.4.1
+---------------------------
+
+* [2008-12-19] Refactor the URLHandlers implementation to fix a possible 
+  Linkage-Error when running embedded inside tomcat. Furthermore, make it possible
+  to dynamically set a SecurityManager, change the url we add to the framework
+  classloader to fix issues with rmi and make sure we restore the previous URLStreamHandlerFactory
+  after stopping. (FELIX-842, FELIX-837, FELIX-844, FELIX-827)
+* [2008-12-19] Add missing javax.security.cert in JRE 1.4 and 1.5. (FELIX-854)
+* [2008-12-19] Improve framework internal locking protocol.
+* [2008-12-18] Fixed an issue where bundles with a non-existing native library
+  would not be removed correctly. (FELIX-835)
+* [2008-11-21] Throw an exception when there is an attempt to start or stop a 
+  fragment, as per the spec. (FELIX-820)
+* [2008-11-20] Fixed a bug during shutdown where uninstalled fragments are not
+  properly closed. (FELIX-819)
+* [2008-11-14] Added partial support for new service registry hooks as proposed 
+  for OSGi R4.2; currently, only listener hooks are supported. (FELIX-804)
+* [2008-11-08] Fixed Felix' delegation hack so that it correctly delegates to 
+  the parent class loader for resources as appropriate; previously it was always 
+  delegating for class loading, which was incorrect. (FELIX-808)
+
+Changes from 1.2.2 to 1.4.0
+---------------------------
+
+* [2008-11-05] URLStreamHandlerService and ContentHandlerService override
+  built-in handlers and make it possible to use URLHandlers when extending the 
+  Felix class. (FELIX-756, FELIX-800)
+* [2008-11-04] Implement ServiceReference.compareTo() method. (FELIX-799)
+* [2008-10-31] Fix some visibility issues in the LDAP operators which could
+  result in incorrect toString values. (FELIX-765)
+* [2008-10-31] Fixed spec compliance issues around getting a service reference 
+  from an invalid registration and throwing an exception when there are
+  duplicate property keys. (FELIX-798)
+* [2008-10-21] Fixed an issue with extension bundles which would be installed
+  as fragments and fail to install extension bundles if they have incomplete 
+  metadata. (FELIX-770)
+* [2008-10-21] Fix a possible deadlock in URLHandlers. (FELIX-748)
+* [2008-10-16] Modified framework to have default values for the system
+  packages property, which also required modifying main to no longer expect to
+  set it. Now it is possible to start Felix with no configuration properties.
+  (FELIX-753)
+* [2008-10-16] Update felix to work with the 1.0.0-rc1 version of the android
+  sdk.
+* [2008-10-15] Implemented remaining PackageAdmin methods from R4. (FELIX-35)
+* [2008-10-15] Modified resolver to correctly mark fragment modules as resolved.
+  (FELIX-777)
+* [2008-10-15] Modified the resolver to longer consider uninstalled fragments
+  and hosts when resolving dependencies; this required a new "stale" flag on 
+  modules that gets set when their associated bundle is uninstalled. (FELIX-776)
+* [2008-10-15] Modified the resolver to sort candidates when resolving 
+  Require-Bundle dependencies. (FELIX-775)
+* [2008-10-14] Modified ExportedPackage.getImportingBundles() to include
+  bundles requiring the exporting bundle, in addition to those bundles
+  importing the package. Also tried to simplify dependency management code
+  by separating it out. (FELIX-764) 
+* [2008-10-14] Fix a NullPointerException in SecureAction when a
+  SecurityManager is used by keeping pointers on the local stack. (FELIX-766)
+* [2008-10-13] Use System.gc to allow to update and uninstall bundles with 
+  native libs on Windows. (FELIX-733)
+* [2008-10-10] Set the activator to null on Bundle.stop() to allow for earlier 
+  garbage collection. (FELIX-762)
+* [2008-10-10] Implements support for flushing the cache on framework 
+  initialization. (FELIX-755)
+* [2008-10-10] Improve exception messages. (FELIX-750)
+* [2008-10-09] Modified the bundle cache to no longer have profiles. (FELIX-754)
+* [2008-10-08] Modified the Felix API to aligned with the proposed standard 
+  OSGi framework API. The framework instance can now be stopped and restarted. 
+  (FELIX-753)
+* [2008-09-29] Support transiently starting/stopping bundles. (FELIX-713) 
+* [2008-09-25] Correctly discard exported packages when a bundle is chosen to
+  import a package it exports. (FELIX-736)
+* [2008-09-24] Clearly distinguish between "resolved" and "unresolved" 
+  capabilities, which is necessary since "resolved" capabilities have higher 
+  priority than "unresolved" ones. (FELIX-730)
+* [2008-09-24] Do not bootdelegate in the case where Bundle.loadClass() has
+  been used. (FELIX-712)
+* [2008-09-23] Improve decoding of reference URLs. (FELIX-731)
+* [2008-09-23] For completeness, added symbolic names to framework and main.
+* [2008-09-17] Improve gc by fixing an issue with StartLevel and PackageAdmin.
+  (FELIX-728)
+* [2008-09-15] Fix an issue with Require-Bundle not aggregating packages 
+  correctly. (FELIX-722)
+* [2008-09-15] Fixed a bug where class loader delegation for dynamic imports 
+  was happening when it shouldn't. (FELIX-724)
+* [2008-09-12] Added a configuration property to determine whether installing a 
+  fragment that uses unimplemented features throws an exception or logs a 
+  warning. (FELIX-725)
+* [2008-09-12] Removed some experimental code for "implicit requirements",
+  since it was no longer needed.
+* [2008-09-12] Fix some visibility issues within the LDAP filter. (FELIX-721)
+
+Changes from 1.2.1 to 1.2.2
+---------------------------
+
+* [2008-10-14] Fixed a NullPointer exception that could happen when 
+  running with a SecurityManager as a backport of FELIX-766.
+
+Changes from 1.2.0 to 1.2.1
+---------------------------
+
+* [2008-09-05] Fixed a performance regression that was caused by uncached 
+  access to the bundle manifest headers. (FELIX-711)
+* [2008-09-03] Fixed a bug in calculating the system bundle's exported 
+  packages which added a null export package.
+
+Changes from 1.0.4 to 1.2.0
+---------------------------
+
+* [2008-08-29] Support JAR-wide manifest package metadata. (FELIX-682)
+* [2008-08-29] Throw an exception when installing a fragment that uses 
+  features that we do not support.
+* [2008-08-20] Improve error reporting when loading bundle classes using 
+  Bundle.loadClass. 
+* [2008-08-16] Fix attribute checking when resolving dynamic imports. 
+  (FELIX-676)
+* [2008-08-08] Implement singleton bundle support. (FELIX-102)
+* [2008-08-06] Default to current security policy if no security extension is 
+  installed in order to make Subject.doAs work. (FELIX-654)
+* [2008-08-04] Return Bundle.getLastModified() for bundle URLs 
+  lastModified(). (FELIX-582)
+* [2008-08-04] Improve handling of improper resource URLs. (FELIX-577)
+* [2008-08-01] Add necessary stub methods to implement new R4.1 methods. 
+  (FELIX-595)
+* [2008-08-01] Applied patch to properly return symbolic name when it has
+  parameters. (FELIX-650)
+* [2008-07-25] Fix some rollback issues after a bundle update throws an 
+  exception. (FELIX-647)
+* [2008-07-23] Modified manifest parser to be more lenient. (FELIX-641)
+* [2008-07-07] Add support for the standard symbolic name for the system 
+  bundle. (FELIX-602)
+* [2008-06-01] Add initial fragment support for extending the host bundle 
+  class path. (FELIX-29, FELIX-656)
+
+Changes from 1.0.3 to 1.0.4
+___________________________
+
+* [2008-04-18] Check that the returned object from a service factory is an 
+  instance of all classes named when the service was registered. (FELIX-540)
+* [2008-04-13] Fix an issue when logging messages while holding framework 
+  internal locks that could lead to a deadlock. For now we just disable 
+  logging to log services inside the framework. (FELIX-536)
+* [2008-04-13] Implemented various small performance improvments e.g.,
+  we now cache filters and create an index for objectclass to improve 
+  service lookup performance and don't use the BundleInfo to get the 
+  bundle id but the BundleImpl directly. Furthermore, we added an index to 
+  get bundles by id. 
+* [2008-04-04] Fix an NoClassDefFoundError when trying to query the 
+  framework classloader for whether a class is available or not. 
+* [2008-03-19] Don't try to resolve extension bundles and fix a 
+  classcastexception that could happen if more then one framework is around 
+  and both have extensions installed. Furthermore, make extension bundles 
+  use the system bundle context.
+* [2008-03-07] Bundle.getResource does now check for AdminPermission. 
+  (FELIX-150)
+* [2008-03-06] Make urlhandlers work when a handler factory is already set. 
+  Furthermore, it is now possible to have more then one framework running 
+  in more then one classloader. (FELIX-38).
+* [2008-03-05] Make LDAP filter reentrant.
+* [2008-02-29] Refactored the IContent abstraction from the module loader 
+  layer to provide more generic access to the content of the module. This 
+  makes it possible that a bundle's class path could span multiple module's, 
+  which will be necessary for fragments. (FELIX-29)
+* [2008-02-27] Applied a patch to disable the class loading diagnostic message
+  when the logger is not at the DEBUG level. (FELIX-500)
+* [2008-02-15] Modified the service registry to use more fine-grained locking 
+  to avoid callbacks to service factories while holding locks. (FELIX-489)
+
+Changes from 1.0.1 to 1.0.3
+---------------------------
+
+* [2008-01-27] Moved framework docs to main, since the launcher examples now
+  depend on main for the auto-property handling.
+* [2008-01-25] Applied patches  to improve how Felix finds resources when
+  getResources() is called. (FELIX-466, FELIX-467)
+* [2008-01-25] Make FilterImpl.toString() add escape characters where needed.
+  (FELIX-471)
+* [2008-01-16] Fix a NPE on framework restart when extension bundles are
+  installed.
+* [2008-01-15] Try to fix a potential visibility issue on loading a class
+  form a bundle where it seems to be possible that we create two classloaders
+  instead of one.
+* [2008-01-15] Modified boot delegation to not terminate when delegating to
+  parent class loader for non-java.* packages. (FELIX-463)
+* [2008-01-04] Fix some issues related to directories on the bundle class
+  path. Specifically, leading slashes created an issue and are now stripped
+  and entries were not being properly filtered when enumerating the contents
+  of a class path directory. (FELIX-426)
+* [2007-12-20] Modified logger to have all of its public methods be final to
+  avoid it from being extended in undesired ways via the constructor supplied
+  logger. (FELIX-428)
+* [2007-12-20] The TCK has changed to verify that bundles do not depend on
+  themselves, so we filter that case now.
+* [2007-12-20] Applied patch from Guillaume Nodet to properly fire a framework
+  error event only when a bundle cannot be resolved. (FELIX-441)
+* [2007-12-19] Modified framework to accept a Logger instance so that host
+  applications can do custom logging until the log service arrives. (FELIX-428)
+* [2007-12-19] Add support for loading bundles on Google Android (FELIX-440).
+* [2007-12-18] Improve native code loading - bundle installation will now
+  fail in case a native library is not in the jar and we only use the first
+  library of a given name. Furthermore, we now support .dylib extensions on
+  the mac as well as others; should make it possible to use .netmodules as
+  well. (FELIX-439)
+* [2007-12-17] Make the win32 alias match any version of windows for native
+  clauses. (FELIX-438)
+* [2007-12-14] Removed auto-property processing out of the framework and
+  into the default launcher, i.e, main. (FELIX-393)
+* [2007-12-13] Fix a StackOverflowError in URLHandlers.createStreamHandler() 
+  when creating URL on jamvm and Mika. This patch resolves an unfortunate 
+  interaction between our ExtensionManager and the URLHandlers by making the 
+  URLHandlers aware of the extension protocol. Pretty much like we do already 
+  for the bundle protocol. (FELIX-435)
+* [2007-11-26] Fix a small oversight in the extension manager that could lead
+  to a null pointer exception and save some memory by creating less objects.
+* [2007-11-26] Degrate to version 0.0.0 if we can not find the Felix.properties 
+  for some reason and avoid a null pointer in this case.
+* [2007-11-08] Reorganized usage count methods to better handle null
+  reference checking in response to Karl Pauls seeing an NPE when trying to
+  get a service that was already unregistered while shutting down the
+  framework.
+* [2007-11-06] Added a simple check to detect and work around a bug in J9.
+  (FELIX-416)
+* [2007-10-30] Change how the extension manager url stream handler handles 
+  request to the root path in order to make some tomcat issue go away.
+  (FELIX-414)
+* [2007-10-26] Added support for "/" bundle resources as requested. (FELIX-383)
+* [2007-10-24] Use system bundle when firing a framework error event when an 
+  install error occurs.
+* [2007-10-22] Fix a NPE when getEntryPaths is called on the system bundle. 
+  (FELIX-394)
+* [2007-10-16] Modifies bundle resource URL handling such that if a resource 
+  URL points to a resource that does not exist, a bundle class path search 
+  for the resource will be instigated and if any matching resource is found, 
+  that one will be used instead. (FELIX-383)
+* [2007-10-10] Auto-property handling now installs bundles into the default 
+  bundle start level if a start level is not specified. (FELIX-359)
+* [2007-10-08] Overwrite the URLStreamHandler.getHostAddress(URL) in the 
+  ExtensionManager to immediately return null to prevent DNS lookup. 
+  (FELIX-388)
+* [2007-09-30] Resolved a concurrency issue that could result in the same 
+  bundle being resolved more than once; also tried to simplify locking in 
+  the core search policy implementation. (FELIX-381)
+
+Changes from 1.0.0 to 1.0.1
+---------------------------
+
+* [2007-07-23] Fixed a bug in the framework shutdown process which was 
+  causing threads calling Felix.stopAndWait() to not get notified that 
+  the framework had shutdown. (FELIX-329)
+* [2007-08-15] Fixed a bug in the LDAP filter which was not thread safe 
+  on execution. (FELIX-338)
+* [2007-08-17] Added support for persistent last used bundle ID to avoid
+  re-use of bundle identifiers. (FELIX-339)
+* [2007-08-23] Modified BundleImpl.getHeaders(Locale) to accept a null 
+  locale. (FELIX-346)
+* [2007-09-11] Added support to handle external termination of Felix 
+  which was not handled or detected and prevented a restart of future 
+  Felix instances in the same VM. (FELIX-363)
+* [2007-09-12] Add support for Collection values in the LDAP filter to 
+  match the 4.1 spec. 
+* [2007-09-12] Fixed a bug in the LDAP filter where attributes where 
+  limited to [a-zA-Z ] so didn't allow for e.g., numbers. (FELIX-361)
+* [2007-09-13] Enable support for exporting the same package more than 
+  once (FELIX-101).
+* [2007-09-13] Returns the system bundle from a call to 
+  PackageAdmin.getBundle(Class) in case the class comes from the 
+  classloader (or one of its parents) that loaded Felix and the system 
+  bundle exports the package.
+* [2007-09-16] Fixed a bug in class space filtering in the service registry 
+  that could result in class cast exceptions for service clients.
+* [2007-09-16] Fixed a bug that prevented extension bundle exports to be 
+  usable.
+
+Changes from 0.8.0-incubator to 1.0.0
+-------------------------------------
+
+* [2007-01-18] Added support for bundle header localization. (FELIX-27)
+* [2007-01-22] Modified framework resolver to support a generic
+  capability/requirement model.
+* [2007-01-22] Reorganized and centralized manifest parsing code and added
+  support for resolver's generic capability/requirement model. (FELIX-98)
+* [2007-01-22] Improved native library naming normalization. (FELIX-26)
+* [2007-01-23] No longer eagerly resolving classes loaded from modules
+  since this was causing verification errors with IBM J9.
+* [2007-01-25] Added some support for execution environment checking.
+  (FELIX-23)
+* [2007-01-29] Added support for getAllServiceReferences(). (FELIX-32)
+* [2007-01-31] Added Require-Bundle support to resolve using the generic
+  capability/requirement model of the resolver. (FELIX-28)
+* [2007-02-05] Fixed a bug in processor type normalization for x86-64
+  processors.
+* [2007-02-09] The resolver previously ignored packages that were pending
+  removal when resolving new bundles, now it does not.
+* [2007-02-09] Bundles are automatically refreshed when updated/uninstalled
+  if none of their exported packages are in use.
+* [2007-02-13] Added support for extension bundles. (FELIX-30)
+* [2007-03-02] Added a Bundle.getBundleContext() method until actual
+  support for OSGi R4.1.
+* [2007-04-26] Modified Bundle.findEntries() to return URLs to directory
+  entries as well as file entries.
+* [2007-05-06] Modified LDAP evaluator to special case the fact that
+  BigDecimal is not available in Foundation profile.
+* [2007-05-21] Made some performance improvements in LDAP evaluation.
+* [2007-05-22] Modified JAR file to include Service Tracker package.
+* [2007-05-22] Improved concurrency handling around checking for already
+  loaded classes and defining classes.
+* [2007-06-05] Modified resource URLs to use port number rather than
+  prepend information to the resource path.
+* [2007-06-13] Improved dynamic imports to cycle through all available
+  candidates when checking for class space consistency.
+* [2007-06-18] Improved service registry filtering based on class versions
+  to allow a bundle to register a service for a different version of class
+  that it can access.
+* [2007-06-21] Modified our "last ditch effort" to guess when to delegate
+  to the system bundle to make it a little more robust.
+* [2007-06-29] Fixed a bug in EventDispatcher that was causing asynchronous
+  events to not be fired after stopping the framework instance and creating
+  a new instance. (FELIX-314)
+* [2007-07-03] Fixed a bug in EventDispatcher that would not correctly
+  update a listener when it implemented multiple listener interfaces.
+* [2007-07-04] Modified Felix framework class to implement the Bundle
+  interface to improve the startup/shutdown sequence and to provide a
+  simplified API for creating framework instances.
+* [2007-07-11] Removed the PropertyResolver-related classes and now only
+  use Maps for configuration properties. (FELIX-324)

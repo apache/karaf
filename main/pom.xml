@@ -32,7 +32,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
-      <version>${pom.version}</version>
+      <version>${framework.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.osgi</groupId>
@@ -109,6 +109,7 @@
   <properties>
     <log.level>4</log.level>
     <dollar>$</dollar>
+    <framework.version>2.0.3</framework.version>
     <shell.version>1.4.1</shell.version>
     <shell.tui.version>1.4.1</shell.tui.version>
     <obr.version>1.4.3</obr.version>
@@ -176,7 +177,7 @@
                 <artifactItem>
                   <groupId>${pom.groupId}</groupId>
                   <artifactId>org.apache.felix.framework</artifactId>
-                  <version>${pom.version}</version>
+                  <version>${framework.version}</version>
                 </artifactItem>
               </artifactItems>
             </configuration>
@@ -253,7 +254,7 @@
             <descriptor>assembly.xml</descriptor>
           </descriptors>
           <appendAssemblyId>false</appendAssemblyId>
-          <finalName>felix-framework-${pom.version}</finalName>
+          <finalName>felix-framework-${framework.version}</finalName>
         </configuration>
         </execution>
         </executions>
