@@ -68,6 +68,10 @@
             <artifactId>org.apache.felix.karaf.deployer.features</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix.karaf.deployer</groupId>
+            <artifactId>org.apache.felix.karaf.deployer.war</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix.karaf.features</groupId>
             <artifactId>org.apache.felix.karaf.features.core</artifactId>
         </dependency>
@@ -224,10 +228,6 @@
             <artifactId>pax-url-wrap</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-servlet_2.5_spec</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
         </dependency>
@@ -246,6 +246,56 @@
         <dependency>
             <groupId>org.apache.geronimo.blueprint</groupId>
             <artifactId>geronimo-blueprint</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-servlet_2.5_spec</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-wrap</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jetty-bundle</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-spi</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-runtime</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-jetty</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-jsp</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-extender-war</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-extender-whiteboard</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
     <build>

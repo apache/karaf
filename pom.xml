@@ -186,6 +186,11 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.felix.karaf.deployer</groupId>
+                <artifactId>org.apache.felix.karaf.deployer.war</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.felix.karaf</groupId>
                 <artifactId>org.apache.felix.karaf.management</artifactId>
                 <version>${pom.version}</version>
@@ -497,6 +502,11 @@
                 <version>${junit.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.jetty-bundle</artifactId>
+                <version>${jetty.bundle.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
@@ -583,6 +593,11 @@
                 <version>${pax.url.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-war</artifactId>
+                <version>${pax.url.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-servlet_2.5_spec</artifactId>
                 <version>${geronimo.servlet.version}</version>
@@ -657,6 +672,41 @@
                 <groupId>org.ops4j.pax.runner</groupId>
                 <artifactId>pax-runner-no-jcl</artifactId>
                 <version>${pax.runner.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-api</artifactId>
+                <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-spi</artifactId>
+                <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-runtime</artifactId>
+                <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-jetty</artifactId>
+                <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-jsp</artifactId>
+                <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-extender-war</artifactId>
+                <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-extender-whiteboard</artifactId>
+                <version>${pax.web.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

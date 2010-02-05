@@ -52,6 +52,14 @@
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${pax.web.version}</bundle>
     </feature>
+    <feature name="war" version="${version}">
+        <feature version="${version}">http</feature>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-extender-war/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.deployer/org.apache.felix.karaf.deployer.war/${version}</bundle>
+    </feature>
     <feature name="webconsole" version="${version}">
         <feature version="${version}">http</feature>
         <config name="org.apache.felix.webconsole.internal.servlet.OsgiManager">
@@ -59,9 +67,7 @@
           password=karaf
         </config>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
-        <!-- TODO: add this bundle when upgrading to webconsole 1.2.12
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.branding/${version}</bundle>
-        -->
         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.admin/${version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.features/${version}</bundle>
