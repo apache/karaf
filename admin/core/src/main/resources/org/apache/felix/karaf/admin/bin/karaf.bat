@@ -19,7 +19,7 @@ REM
 REM =========================================================================
 
 SETLOCAL
-SET KARAF_BASE=${karaf.base}
-SET KARAF_HOME=${karaf.home}
+SET KARAF_HOME=${SUBST-KARAF-HOME}
+SET KARAF_BASE=${SUBST-KARAF-BASE}
 
 %KARAF_HOME%\bin\karaf.bat %*

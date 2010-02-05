@@ -18,7 +18,8 @@
 #
 ################################################################################
 
-KARAF_HOME=${karaf.home}
+KARAF_HOME=${SUBST-KARAF-HOME}
+KARAF_NAME=${SUBST-KARAF-NAME}
 
-exec ${KARAF_HOME}/bin/admin start ${karaf.name} "$@"
+exec ${KARAF_HOME}/bin/admin start ${KARAF_NAME} "$@"
 

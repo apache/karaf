@@ -18,6 +18,7 @@ REM limitations under the License.
 REM 
 REM =========================================================================
 
-SET KARAF_HOME=${karaf.home}
+SET KARAF_HOME=${SUBST-KARAF-HOME}
+SET KARAF_NAME=${SUBST-KARAF-NAME}
 
-%KARAF_HOME%\bin\admin.bat stop ${karaf.name}
+%KARAF_HOME%\bin\admin.bat stop %KARAF_NAME%

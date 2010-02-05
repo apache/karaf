@@ -1,4 +1,5 @@
 #!/bin/sh
+################################################################################
 #
 #    Licensed to the Apache Software Foundation (ASF) under one or more
 #    contributor license agreements.  See the NOTICE file distributed with
@@ -15,11 +16,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-# $Id: karaf 979 2005-11-30 22:50:55Z bsnyder $
-#
+################################################################################
 
-KARAF_HOME=${karaf.home}
-KARAF_BASE=${karaf.base}
+KARAF_HOME=${SUBST-KARAF-HOME}
+KARAF_BASE=${SUBST-KARAF-BASE}
 
 export KARAF_BASE
 exec ${KARAF_HOME}/bin/karaf "$*"
