@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,10 +151,10 @@ public class AdminServiceImpl implements AdminService {
         copyResourceToDir(karafBase, "etc/users.properties", true);
 
         HashMap<String, String> props = new HashMap<String, String>();
-        props.put("${karaf.name}", name);
-        props.put("${karaf.home}", System.getProperty("karaf.home"));
-        props.put("${karaf.base}", karafBase.getPath());
-        props.put("${karaf.sshPort}", Integer.toString(sshPort));
+        props.put("${SUBST-KARAF-NAME}", name);
+        props.put("${SUBST-KARAF-HOME}", System.getProperty("karaf.home"));
+        props.put("${SUBST-KARAF-BASE}", karafBase.getPath());
+        props.put("${SUBST-SSH-PORT}", Integer.toString(sshPort));
         copyFilteredResourceToDir(karafBase, "etc/system.properties", props);
         copyFilteredResourceToDir(karafBase, "etc/org.apache.felix.karaf.shell.cfg", props);
         if( System.getProperty("os.name").startsWith("Win") ) {
@@ -226,33 +225,11 @@ public class AdminServiceImpl implements AdminService {
         saveStorage(storage, new File(storageLocation, STORAGE_FILE), "Admin Service storage");
     }
     
-    private InputStream openKarafHomeFiles(String resource) {
-    	 String home = System.getProperty("karaf.home");
-    	 if (home == null) {
-    		 return null;
-    	 }
-    	 File karafHome = new File(System.getProperty("karaf.home"));
-         File sourceFile = new File(karafHome, resource);
-         InputStream is = null;
-         if (sourceFile.exists()) {
-         	try {
-				is = sourceFile.toURI().toURL().openStream();
-			} catch (Exception e) {
-				// Do nothing here
-			}	
-         }
-         return is;
-    }
-
     private void copyResourceToDir(File target, String resource, boolean text) throws Exception {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
             println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
-            InputStream is = openKarafHomeFiles(resource);
-            if (is == null) {
-            	// copy it from the karaf bundle
-            	is = getClass().getClassLoader().getResourceAsStream("org/apache/felix/karaf/admin/" + resource);
-            }
+            InputStream is = getClass().getClassLoader().getResourceAsStream("org/apache/felix/karaf/admin/" + resource);
             try {
                 if( text ) {
                     // Read it line at a time so that we can use the platform line ending when we write it out.
@@ -292,10 +269,7 @@ public class AdminServiceImpl implements AdminService {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
             println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
-            InputStream is = openKarafHomeFiles(resource);
-            if (is == null) {
-            	is = getClass().getClassLoader().getResourceAsStream("org/apache/felix/karaf/admin/" + resource);
-            }
+            InputStream is = getClass().getClassLoader().getResourceAsStream("org/apache/felix/karaf/admin/" + resource);
             try {
                 // Read it line at a time so that we can use the platform line ending when we write it out.
                 PrintStream out = new PrintStream(new FileOutputStream(outFile));

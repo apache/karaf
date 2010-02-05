@@ -69,11 +69,8 @@ public class AdminServiceImplTest extends TestCase {
      * //TODO: fix this test so it can run in an IDE
      */
     public void testConfigurationFiles() throws Exception {
-    	try {
         AdminServiceImpl service = new AdminServiceImpl();
         service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
-        File karafHome = new File("target/test-classes");
-        System.setProperty("karaf.home", karafHome.getAbsolutePath());
 
         InstanceSettings settings = new InstanceSettings(8122, getName(), null, null);
         Instance instance = service.createInstance(getName(), settings);
@@ -89,9 +86,6 @@ public class AdminServiceImplTest extends TestCase {
         assertFileExists(instance.getLocation(), "etc/org.apache.felix.karaf.management.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
-    	} finally {
-    		System.clearProperty("karaf.home");
-    	}
     }
 
     private void assertFileExists(String path, String name) throws IOException {
