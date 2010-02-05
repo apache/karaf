@@ -93,7 +93,7 @@
             	            org.osgi.service.event.EventAdmin
                         </Export-Service>
                         <Embed-Dependency>
-                            concurrent
+                            concurrent;inline="EDU/oswego/cs/dl/util/concurrent/*"
                         </Embed-Dependency>
                     </instructions>
                 </configuration>
