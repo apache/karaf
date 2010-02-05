@@ -19,6 +19,8 @@
 package org.apache.felix.shell.impl;
 
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -77,16 +79,20 @@ public class LogCommandImpl implements Command
         StringBuffer buffer = new StringBuffer();
         buffer.append(sdf.format(new Date(entry.getTime()))).append(" ");
         buffer.append(levelAsAString(entry.getLevel())).append(" - ");
-        buffer.append("Bundle:").append(entry.getBundle().getSymbolicName()).append(" ");
+        buffer.append("Bundle: ").append(entry.getBundle().getSymbolicName());
         if (entry.getServiceReference() != null)
         {
-            buffer.append(entry.getServiceReference().toString()).append(" ");
+            buffer.append(" - ");
+            buffer.append(entry.getServiceReference().toString());
         }
-        buffer.append("- ").append(entry.getMessage()).append(" - ");
+        buffer.append(" - ").append(entry.getMessage());
         if (entry.getException() != null)
         {
-            buffer.append(entry.getException().getClass().getName()).append(": ").append(
-                entry.getException().getMessage());
+            buffer.append(" - ");
+            StringWriter writer = new StringWriter();
+            PrintWriter  pw = new PrintWriter(writer);
+            entry.getException().printStackTrace(pw);
+            buffer.append(writer.toString());
         }
 
         out.println(buffer.toString());
