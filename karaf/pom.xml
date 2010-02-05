@@ -81,12 +81,12 @@
         <felix.osgi.version>1.4.0</felix.osgi.version>
         <felix.plugin.version>2.0.1</felix.plugin.version>
         <felix.prefs.version>1.0.4</felix.prefs.version>
-        <felix.webconsole.version>2.0.0</felix.webconsole.version>
+        <felix.webconsole.version>2.0.6</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
         <geronimo.blueprint.version>1.0.0</geronimo.blueprint.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <jansi.version>1.1</jansi.version>
-        <jetty.bundle.version>6.1.14_1</jetty.bundle.version>
+        <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
         <junit.version>4.7_1</junit.version>
         <jline.version>0.9.95-20091026.080844</jline.version>
         <log4j.version>1.2.14</log4j.version>
@@ -96,7 +96,7 @@
         <pax.logging.version>1.4</pax.logging.version>
         <pax.runner.version>1.2.1</pax.runner.version>
         <pax.url.version>1.1.2</pax.url.version>
-        <pax.web.version>0.7.1</pax.web.version>
+        <pax.web.version>0.7.2</pax.web.version>
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring.version>2.5.6.SEC01</spring.version>
