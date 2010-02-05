@@ -41,6 +41,7 @@ import org.apache.felix.karaf.main.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
@@ -225,7 +226,12 @@ public class Main {
         }
         try {
             if (await) {
-                framework.waitForStop(0);
+                while (true) {
+                    FrameworkEvent event = framework.waitForStop(0);
+                    if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
+                        break;
+                    }
+                }
             }
             exiting = true;
             if (framework.getState() == Bundle.ACTIVE) {
