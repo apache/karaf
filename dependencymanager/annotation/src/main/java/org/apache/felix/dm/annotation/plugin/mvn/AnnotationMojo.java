@@ -98,6 +98,11 @@ public class AnnotationMojo extends AbstractMojo
                 {
                     jar.putResource(entry.getKey(), entry.getValue());
                 }
+                
+                Resource metaType = generator.getMetaTypeResource();
+                if (metaType != null) {
+                    jar.putResource("OSGI-INF/metatype/metatype.xml", metaType);
+                }
                 copy(jar, target);
             }
 
@@ -128,7 +133,7 @@ public class AnnotationMojo extends AbstractMojo
 
         catch (Throwable t)
         {
-            getLog().warn("Exception while scanning annotation", t);
+            getLog().error("Exception while scanning annotation", t);
             throw new MojoExecutionException(t.getMessage(), t.getCause());
         }
 
