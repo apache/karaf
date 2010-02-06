@@ -7,3 +7,9 @@
 
   * add test for compatibility library
 
+- annotation:
+
+  * implement missing services
+  * implement missing dependencies
+  * implement property meta data
+
