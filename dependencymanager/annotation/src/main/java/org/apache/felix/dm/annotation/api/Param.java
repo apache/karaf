@@ -24,11 +24,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation used to describe a key-value pair.
+ * Annotation used to describe a property key-value pair. It is used when
+ * declaring Service properties, as well as PropertyInfo options metadata.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target( { ElementType.ANNOTATION_TYPE })
-public @interface Property
+public @interface Param
 {
     /**
      * Returns the property name.
