@@ -33,7 +33,7 @@ import org.apache.felix.dm.annotation.api.Composition;
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Init;
-import org.apache.felix.dm.annotation.api.Param;
+import org.apache.felix.dm.annotation.api.Properties;
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
@@ -65,6 +65,8 @@ public class AnnotationCollector extends ClassDataCollector
         + ConfigurationDependency.class.getName().replace('.', '/') + ";";
     private final static String A_TEMPORAL_SERVICE_DEPENDENCY = "L"
         + TemporalServiceDependency.class.getName().replace('.', '/') + ";";
+    private final static String A_PROPERTIES = "L"
+        + Properties.class.getName().replace('.', '/') + ";";
 
     private Reporter m_reporter;
     private String m_className;
@@ -75,6 +77,7 @@ public class AnnotationCollector extends ClassDataCollector
     private String m_descriptor;
     private Set<String> m_methods = new HashSet<String>();
     private List<Info> m_infos = new ArrayList<Info>();
+    private MetaType m_metaType;
 
     // Pattern used to parse the class parameter from the bind methods ("bind(Type)" or "bind(Map, Type)")
     private final static Pattern m_bindClassPattern = Pattern.compile("\\((Ljava/util/Map;)?L([^;]+);\\)V");
@@ -254,10 +257,11 @@ public class AnnotationCollector extends ClassDataCollector
      * Makes a new Collector for parsing a given class.
      * @param reporter the object used to report logs.
      */
-    public AnnotationCollector(Reporter reporter)
+    public AnnotationCollector(Reporter reporter, MetaType metaType)
     {
         m_reporter = reporter;
         m_infos.add(new Info(EntryTypes.Service));
+        m_metaType = metaType;
     }
 
     /**
@@ -367,6 +371,10 @@ public class AnnotationCollector extends ClassDataCollector
         else if (annotation.getName().equals(A_TEMPORAL_SERVICE_DEPENDENCY))
         {
             parseServiceDependencyAnnotation(annotation, true);
+        } 
+        else if (annotation.getName().equals(A_PROPERTIES)) 
+        {
+            parsePropertiesMetaData(annotation);
         }
     }
 
@@ -486,6 +494,46 @@ public class AnnotationCollector extends ClassDataCollector
     }
 
     /**
+     * Parses a Properties annotation which declares Config Admin Properties meta data.
+     * @param properties the Properties annotation to be parsed.
+     */
+    private void parsePropertiesMetaData(Annotation properties)
+    {
+        String propertiesPid = get(properties, "pid", m_className);
+        String propertiesHeading = properties.get("heading");
+        String propertiesDesc = properties.get("description");
+
+        MetaType.OCD ocd = new MetaType.OCD(propertiesPid, propertiesHeading, propertiesDesc);
+        for (Object p : (Object[]) properties.get("properties"))
+        {
+            Annotation property = (Annotation) p;
+            String heading = property.get("heading");
+            String id = property.get("id");
+            String type = (String) property.get("type");
+            type = (type != null) ? parseClass(type, m_classPattern, 1) : null;
+            Object[] defaults = (Object[]) property.get("defaults");
+            String description = property.get("description");
+            Integer cardinality = property.get("cardinality");
+            Boolean required = property.get("required");
+
+            MetaType.AD ad = new MetaType.AD(id, type, defaults, heading, description, cardinality, required);
+            Object[] options = property.get("options");
+            if (options != null) {
+                for (Object o : (Object[]) property.get("options"))
+                {
+                    Annotation option = (Annotation) o;
+                    ad.add(new MetaType.Option((String) option.get("name"), (String) option.get("value")));
+                }
+            }
+            ocd.add(ad);
+        }
+
+        m_metaType.add(ocd);
+        MetaType.Designate designate = new MetaType.Designate(propertiesPid);
+        m_metaType.add(designate);
+    }
+
+    /**
      * Parses a class.
      * @param clazz the class to be parsed (the package is "/" separated).
      * @param pattern the pattern used to match the class.
@@ -520,6 +568,20 @@ public class AnnotationCollector extends ClassDataCollector
             throw new IllegalArgumentException("Invalid method " + m_method + ", wrong signature: "
                 + m_descriptor);
         }
+    }
+
+    /**
+     * Get an annotation attribute, and return a default value if its not present.
+     * @param <T> the type of the variable which is assigned to the return value of this method.
+     * @param properties The annotation we are parsing
+     * @param name the attribute name to get from the annotation
+     * @param defaultValue the default value to return if the attribute is not found in the annotation
+     * @return the annotation attribute value, or the defaultValue if not found
+     */
+    private <T> T get(Annotation properties, String name, T defaultValue)
+    {
+        T value = (T) properties.get(name);
+        return value != null ? value : defaultValue;
     }
 
     /**

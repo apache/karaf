@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,11 @@ public class DescriptorGenerator extends Processor
     Map<String, Resource> m_resources = new HashMap<String, Resource>();
 
     /**
+     * This is the generated MetaType XML descriptor, if any Properties/Property annotations have been found.
+     */
+    private Resource m_metaTypeResource;
+
+    /**
      * Creates a new descriptor generator.
      * @param analyzer The bnd analyzer used to lookup classes containing DM annotations.
      */
@@ -76,16 +82,19 @@ public class DescriptorGenerator extends Processor
             // Try to locate any classes in the wildcarded universe
             // that are annotated with the DependencyManager "Service" annotations.
             Collection<Clazz> expanded = m_analyzer.getClasses("",
-            // Then limit the ones with component annotations.
+                // Then limit the ones with component annotations.
                 QUERY.ANNOTATION.toString(), Service.class.getName(),
                 // Parse everything
                 QUERY.NAMED.toString(), "*");
 
+            // Create the object which will collect Config Admin MetaTypes.
+            MetaType metaType = new MetaType();
+            
             for (Clazz c : expanded)
             {
                 clazz = c;
                 // Let's parse all annotations from that class !
-                AnnotationCollector reader = new AnnotationCollector(this);
+                AnnotationCollector reader = new AnnotationCollector(this, metaType);
                 c.parseClassFileWithCollector(reader);
                 reader.finish();
                 // And store the generated component descriptors in our resource list.
@@ -95,6 +104,10 @@ public class DescriptorGenerator extends Processor
                 annotationsFound = true;
             }
 
+            // If some Meta Types have been parsed, then creates the corresponding resource file.
+            if (metaType.getSize() > 0) {
+                m_metaTypeResource = createMetaTypeResource(metaType);
+            }
             return annotationsFound;
         }
         catch (Throwable err)
@@ -106,7 +119,7 @@ public class DescriptorGenerator extends Processor
                 sb.append(" from class " + clazz);
             }
             sb.append(": ");
-            sb.append(err.toString());
+            sb.append(parse(err));
             error(sb.toString(), err.getCause());
             return false;
         }
@@ -147,6 +160,13 @@ public class DescriptorGenerator extends Processor
     }
 
     /**
+     * Returns the MetaType resource.
+     */
+    public Resource getMetaTypeResource() {
+        return m_metaTypeResource;
+    }
+    
+    /**
      * Creates a bnd resource that contains the generated dm descriptor.
      * @param collector 
      * @return
@@ -162,4 +182,33 @@ public class DescriptorGenerator extends Processor
         out.close();
         return new EmbeddedResource(data, 0);
     }
+    
+    /**
+     * Creates a bnd resource that contains the generated metatype descriptor.
+     * @param metaType the Object that has collected all meta type informations.
+     * @return the meta type resource
+     * @throws IOException on any errors
+     */
+    private Resource createMetaTypeResource(MetaType metaType) throws IOException
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintWriter pw = new PrintWriter(new OutputStreamWriter(out, "UTF-8"));
+        metaType.writeTo(pw);
+        pw.close();
+        byte[] data = out.toByteArray();
+        out.close();
+        return new EmbeddedResource(data, 0);    
+    }
+    
+    /**
+     * Parse an exception into a string.
+     * @param e The exception to parse
+     * @return the parsed exception
+     */
+    private static String parse(Throwable e) {
+      StringWriter buffer = new StringWriter();
+      PrintWriter  pw = new PrintWriter(buffer);
+      e.printStackTrace(pw);
+      return (buffer.toString());
+    } 
 }

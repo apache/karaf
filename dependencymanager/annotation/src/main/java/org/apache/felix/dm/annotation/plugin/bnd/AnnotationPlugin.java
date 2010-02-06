@@ -56,6 +56,13 @@ public class AnnotationPlugin implements AnalyzerPlugin
             {
                 analyzer.getJar().putResource(entry.getKey(), entry.getValue());
             }
+
+            // Inser the metatype resource, if any.
+            Resource metaType = generator.getMetaTypeResource();
+            if (metaType != null)
+            {
+                analyzer.getJar().putResource("OSGI-INF/metatype/metatype.xml", metaType);
+            }
         }
         return false;
     }
