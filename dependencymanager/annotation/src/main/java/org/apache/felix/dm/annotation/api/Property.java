@@ -48,7 +48,7 @@ public @interface Property
      *    <li>String.class</li>
      *    <li>Long.class</li>
      *    <li>Integer.class</li>
-     *    <li>Char.class</li>
+     *    <li>Character.class</li>
      *    <li>Byte.class</li>
      *    <li>Double.class</li>
      *    <li>Float.class</li>
