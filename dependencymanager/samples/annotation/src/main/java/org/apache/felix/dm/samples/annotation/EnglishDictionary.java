@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
-import org.apache.felix.dm.annotation.api.Property;
+import org.apache.felix.dm.annotation.api.Param;
 import org.apache.felix.dm.annotation.api.Service;
 
 /**
  * An English Dictionary Service. We'll be configured using OSGi Config Admin.
  */
-@Service(properties={@Property(name="language", value="en")})
+@Service(properties={@Param(name="language", value="en")})
 public class EnglishDictionary implements DictionaryService
 {
     private CopyOnWriteArrayList<String> m_words = new CopyOnWriteArrayList<String>();

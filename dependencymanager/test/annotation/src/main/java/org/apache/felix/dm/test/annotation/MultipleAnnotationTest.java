@@ -19,7 +19,7 @@
 package org.apache.felix.dm.test.annotation;
 
 import org.apache.felix.dm.annotation.api.Composition;
-import org.apache.felix.dm.annotation.api.Property;
+import org.apache.felix.dm.annotation.api.Param;
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
@@ -68,7 +68,7 @@ public class MultipleAnnotationTest
         }
     }
 
-    @Service(properties = {@Property(name="foo", value="bar") }, factory=Factory.class, factoryMethod="createServiceProvider")
+    @Service(properties = {@Param(name="foo", value="bar") }, factory=Factory.class, factoryMethod="createServiceProvider")
     static class ServiceProvider implements ServiceInterface
     {
         @ServiceDependency(filter="(test=multiple)")

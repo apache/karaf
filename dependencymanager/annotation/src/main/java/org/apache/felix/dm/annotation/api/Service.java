@@ -40,7 +40,7 @@ public @interface Service
      * Returns the list of provided service properties.
      * @return The list of provided service properties.
      */
-    Property[] properties() default {};
+    Param[] properties() default {};
     
     /**
      * Returns the Class of the class which acts as a factory for this Service. The default method
