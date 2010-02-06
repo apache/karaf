@@ -27,28 +27,33 @@ import org.apache.felix.dm.annotation.api.Stop;
 
 public class MultipleAnnotationTest
 {
-    public static class Factory {
-        public ServiceConsumer createServiceConsumer() {
+    public static class Factory
+    {
+        public ServiceConsumer createServiceConsumer()
+        {
             return new ServiceConsumer();
         }
-        
-        public ServiceProvider createServiceProvider() {
+
+        public ServiceProvider createServiceProvider()
+        {
             return new ServiceProvider();
         }
-        
-        public ServiceProvider2 createServiceProvider2() {
+
+        public ServiceProvider2 createServiceProvider2()
+        {
             return new ServiceProvider2();
         }
     }
-    
-    public interface ServiceInterface {
+
+    public interface ServiceInterface
+    {
         public void doService();
     }
 
-    @Service(factory=Factory.class, factoryMethod="createServiceConsumer")
+    @Service(factory = Factory.class, factoryMethod = "createServiceConsumer")
     static class ServiceConsumer
     {
-        @ServiceDependency(filter="(test=multiple)")
+        @ServiceDependency(filter = "(test=multiple)")
         volatile Sequencer m_sequencer;
 
         @ServiceDependency(filter = "(foo=bar)")
@@ -68,13 +73,13 @@ public class MultipleAnnotationTest
         }
     }
 
-    @Service(properties = {@Param(name="foo", value="bar") }, factory=Factory.class, factoryMethod="createServiceProvider")
+    @Service(properties = { @Param(name = "foo", value = "bar") }, factory = Factory.class, factoryMethod = "createServiceProvider")
     static class ServiceProvider implements ServiceInterface
     {
-        @ServiceDependency(filter="(test=multiple)")
+        @ServiceDependency(filter = "(test=multiple)")
         Sequencer m_sequencer;
 
-        @ServiceDependency(removed="unbind")
+        @ServiceDependency(removed = "unbind")
         void bind(ServiceProvider2 provider2)
         {
             m_sequencer.step(4);
@@ -103,16 +108,16 @@ public class MultipleAnnotationTest
         }
     }
 
-    @Service(provide = { ServiceProvider2.class }, factory=Factory.class, factoryMethod="createServiceProvider2")
+    @Service(provide = { ServiceProvider2.class }, factory = Factory.class, factoryMethod = "createServiceProvider2")
     static class ServiceProvider2
     {
         Composite m_composite = new Composite();
         Sequencer m_sequencer;
 
-        @ServiceDependency(required=false, filter="(foo=bar)")
+        @ServiceDependency(required = false, filter = "(foo=bar)")
         Runnable m_runnable;
 
-        @ServiceDependency(service=Sequencer.class, filter="(test=multiple)")
+        @ServiceDependency(service = Sequencer.class, filter = "(test=multiple)")
         void bind(Sequencer seq)
         {
             m_sequencer = seq;
