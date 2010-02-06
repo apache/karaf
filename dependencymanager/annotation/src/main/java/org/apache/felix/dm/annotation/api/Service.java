@@ -31,8 +31,8 @@ import java.lang.annotation.Target;
 public @interface Service
 {
     /**
-     * Returns the list of provided interface. By default, the directly implemented interfaces are provided.
-     * @return The list of provided interface.
+     * Returns the list of provided interfaces. By default, the directly implemented interfaces are provided.
+     * @return The list of provided interfaces.
      */
     Class<?>[] provide() default Object.class;
 
