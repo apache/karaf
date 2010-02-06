@@ -19,19 +19,42 @@
 package org.apache.felix.dm.samples.annotation;
 
 import java.util.Dictionary;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Param;
+import org.apache.felix.dm.annotation.api.Properties;
+import org.apache.felix.dm.annotation.api.Property;
 import org.apache.felix.dm.annotation.api.Service;
 
 /**
- * An English Dictionary Service. We'll be configured using OSGi Config Admin.
+ * An English Dictionary Service. We provide here our Properties MetaData in order to let webconsole configure us.
+ * You must configure the PID that corresponds to this class through web console in order to activate this service.
  */
 @Service(properties={@Param(name="language", value="en")})
+@Properties(
+    heading="English Dictionary", 
+    description = "Configuration for the EnglishDictionary Service",
+    properties={
+        @Property(heading="English Words",
+            description="Declares here some valid english words",
+            defaults={"hello", "world"},
+            id=EnglishDictionary.WORDS,
+            cardinality=Integer.MAX_VALUE
+        )
+    }
+)
 public class EnglishDictionary implements DictionaryService
 {
+    /**
+     * The id of our Configuration Admin property key.
+     */
+    public final static String WORDS = "words";
+    
+    /**
+     * We store all configured words in a thread-safe data structure, because ConfigAdmin
+     * may invoke our updated method at any time.
+     */
     private CopyOnWriteArrayList<String> m_words = new CopyOnWriteArrayList<String>();
     
     /**
@@ -42,14 +65,14 @@ public class EnglishDictionary implements DictionaryService
     @ConfigurationDependency
     protected void updated(Dictionary<String, ?> config) {
         m_words.clear();
-        List<String> words = (List<String>) config.get("words");
+        String[] words = (String[]) config.get(WORDS);
         for (String word : words) {
             m_words.add(word);
         }
     }
            
     /**
-     * Check if a word exists if the list of words we have been configured from ConfigAdmin.
+     * Check if a word exists if the list of words we have been configured from ConfigAdmin/WebConsole.
      */
     public boolean checkWord(String word)
     {
