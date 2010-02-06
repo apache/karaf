@@ -25,12 +25,12 @@ import java.lang.annotation.Target;
 
 /**
  * Describes configuration properties MetaData informations. This annotation is used to generate
- * a MetaType xml file under OSGI-INF/metatype/metatype.xml and is used to expose
+ * a MetaType xml file under OSGI-INF/metatype/metatype.xml and is used to configure
  * Service Component properties through web console.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
-public @interface PropertiesInfo
+public @interface Properties
 {
     /**
      * Sets the PID that is associtated whith this annotation. By default, the PID is the full java class name.
@@ -54,7 +54,7 @@ public @interface PropertiesInfo
      * The list of properties types used to expose properties in web console. 
      * @return The list of properties types used to expose properties in web console. 
      */
-    PropertyInfo[] properties();
+    Property[] properties();
 
     /**
      * The path for the localization MetaType property files.

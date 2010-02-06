@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.ANNOTATION_TYPE)
-public @interface PropertyInfo
+public @interface Property
 {
     /**
      * The label used to display the property. Example: "Log Level".
