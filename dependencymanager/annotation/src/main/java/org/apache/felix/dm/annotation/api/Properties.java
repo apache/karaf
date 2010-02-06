@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
 public @interface Properties
 {
     /**
-     * Sets the PID that is associtated whith this annotation. By default, the PID is the full java class name.
+     * Sets the PID that is associated with this annotation. By default, the PID is the full java class name.
      * @return The PID that is associated with this annotation.
      */
     String pid() default "";
@@ -55,10 +55,4 @@ public @interface Properties
      * @return The list of properties types used to expose properties in web console. 
      */
     Property[] properties();
-
-    /**
-     * The path for the localization MetaType property files.
-     * @return The path for the localization MetaType property files
-     */
-    String localization() default "OSGI-INF/metatype/metatype";
 }
