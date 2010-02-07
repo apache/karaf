@@ -39,12 +39,12 @@ import java.lang.annotation.Target;
  * <blockquote>
  * 
  * <pre>
- * @Service
+ * &#64;Service
  * class MyServer implements Runnable {
- *   @TemporalServiceDependency(timeout=15000)
+ *   &#64;TemporalServiceDependency(timeout=15000)
  *   MyDependency _dependency;.
  *   
- *   @Start
+ *   &#64;Start
  *   void start() {
  *     (new Thread(this)).start();
  *   }

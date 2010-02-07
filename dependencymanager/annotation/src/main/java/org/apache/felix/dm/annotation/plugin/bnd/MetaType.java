@@ -24,14 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-
 /**
- * Helper class used to represent a data structure which is complying to the MetaType XML.
- * We use XStream in order to generating the XML from this class.
+ * Helper class used to generate an XML representation of a MetaType data structure.
  */
 public class MetaType
 {
@@ -84,53 +78,69 @@ public class MetaType
      */
     public void writeTo(PrintWriter pw)
     {
-        XStream xStream = new XStream();
-        xStream.processAnnotations(new Class[] { OCD.class, AD.class, Option.class,
-                Designate.class, OBject.class });
-        StringBuilder xml = new StringBuilder("");
-        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        xml.append("<metatype:MetaData xmlns:metatype=\"http://www.osgi.org/xmlns/metatype/v1.0.0\" localization=\""
-            + LOCALIZATION + "\">\n");
+        pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        pw.println("<metatype:MetaData xmlns:metatype=\"http://www.osgi.org/xmlns/metatype/v1.0.0\" localization=\""
+            + LOCALIZATION + "\">");
         for (OCD ocd : m_ocdList)
         {
-            xml.append(xStream.toXML(ocd) + "\n");
+            ocd.writeTo(pw);
         }
         for (Designate designate : m_designateList)
         {
-            xml.append(xStream.toXML(designate) + "\n");
+            designate.writeTo(pw);
         }
-        xml.append("</metatype:MetaData>");
-        pw.println(xml);
+        pw.println("</metatype:MetaData>");
+    }
+
+    private static void writeAttribute(String name, Object value, PrintWriter pw)
+    {
+        if (value != null)
+        {
+            pw.print(" " + name + "=" + "\"" + value.toString() + "\"");
+        }
     }
 
     /**
      * An Object Class Definition, which contains a set of Attributes properies.
      */
-    @XStreamAlias("OCD")
     public static class OCD
     {
-        @XStreamAsAttribute
-        String id;
-
-        @XStreamAsAttribute
-        String name;
-
-        @XStreamAsAttribute
-        String description;
-
-        @XStreamImplicit(itemFieldName = "AD")
-        List<AD> attributes = new ArrayList<AD>();
+        String m_id;
+        String m_name;
+        String m_description;
+        List<AD> m_attributes = new ArrayList<AD>();
 
         OCD(String pid, String name, String desc)
         {
-            this.id = pid;
-            this.name = name;
-            this.description = desc;
+            this.m_id = pid;
+            this.m_name = name;
+            this.m_description = desc;
         }
 
         public void add(AD ad)
         {
-            attributes.add(ad);
+            m_attributes.add(ad);
+        }
+
+        public void writeTo(PrintWriter pw)
+        {
+            pw.print("   <OCD");
+            writeAttribute("id", m_id, pw);
+            writeAttribute("name", m_name, pw);
+            writeAttribute("description", m_description, pw);
+            if (m_attributes.size() == 0)
+            {
+                pw.println("/>");
+            }
+            else
+            {
+                pw.println(">");
+                for (AD ad : m_attributes)
+                {
+                    ad.writeTo(pw);
+                }
+                pw.println("   </OCD>");
+            }
         }
     }
 
@@ -138,33 +148,16 @@ public class MetaType
      * An Attribute Definition, which describes a given Properties
      */
     @SuppressWarnings("serial")
-    @XStreamAlias("AD")
     public static class AD
     {
-        @XStreamAsAttribute
-        String id;
-
-        @XStreamAsAttribute
-        String type;
-
-        @XStreamAsAttribute
-        @XStreamAlias("default")
-        String defaults;
-
-        @XStreamAsAttribute
-        String name;
-
-        @XStreamAsAttribute
-        String description;
-
-        @XStreamImplicit(itemFieldName = "")
-        List<Option> options = new ArrayList<Option>();
-
-        @XStreamAsAttribute
-        Integer cardinality;
-
-        @XStreamAsAttribute
-        Boolean required;
+        String m_id;
+        String m_type;
+        String m_defaults;
+        String m_name;
+        String m_description;
+        Integer m_cardinality;
+        Boolean m_required;
+        List<Option> m_options = new ArrayList<Option>();
 
         private final static Map<String, String> _allowedTypes = new HashMap<String, String>()
         {
@@ -182,12 +175,12 @@ public class MetaType
 
         public AD(String id, String type, Object[] defaults, String name, String desc, Integer cardinality, Boolean required)
         {
-            this.id = id;
-            this.type = (type == null) ? "String" : getType(type);
-            this.name = name;
-            this.description = desc;
-            this.cardinality = cardinality;
-            this.required = required;
+            this.m_id = id;
+            this.m_type = (type == null) ? "String" : getType(type);
+            this.m_name = name;
+            this.m_description = desc;
+            this.m_cardinality = cardinality;
+            this.m_required = required;
 
             if (defaults != null)
             {
@@ -200,7 +193,7 @@ public class MetaType
                         sb.append(",");
                     }
                 }
-                this.defaults = sb.toString();
+                this.m_defaults = sb.toString();
 
                 // Check if the number of default values is consistent with the cardinality.
                 if (cardinality != null)
@@ -216,72 +209,110 @@ public class MetaType
             }
         }
 
+        public void writeTo(PrintWriter pw)
+        {
+            pw.print("      <AD");
+            writeAttribute("id", m_id, pw);
+            writeAttribute("type", m_type, pw);
+            writeAttribute("default", m_defaults, pw);
+            writeAttribute("name", m_name, pw);
+            writeAttribute("description", m_description, pw);
+            writeAttribute("cardinality", m_cardinality, pw);
+            if (m_options.size() == 0)
+            {
+                pw.println("/>");
+            }
+            else
+            {
+                pw.println(">");
+                for (Option option : m_options)
+                {
+                    option.writeTo(pw);
+                }
+                pw.println("      </AD>");
+            }
+        }
+
         private String getType(String t)
         {
             String result = _allowedTypes.get(t);
             if (result == null)
             {
-                throw new IllegalArgumentException("Invalid Property type: " + type);
+                throw new IllegalArgumentException("Invalid Property type: " + m_type);
             }
             return result;
         }
 
         public void add(Option option)
         {
-            options.add(option);
+            m_options.add(option);
         }
     }
 
     /**
      * An Option datastructure, which can be associated with an Attribute.
      */
-    @XStreamAlias("Option")
     public static class Option
     {
-        @XStreamAsAttribute
-        String value;
-
-        @XStreamAsAttribute
-        String label;
+        String m_value;
+        String m_label;
 
         Option(String value, String label)
         {
-            this.value = value;
-            this.label = label;
+            this.m_value = value;
+            this.m_label = label;
+        }
+
+        public void writeTo(PrintWriter pw)
+        {
+            pw.print("         <Option");
+            writeAttribute("value", m_value, pw);
+            writeAttribute("label", m_label, pw);
+            pw.println("/>");
         }
     }
 
     /**
      * A Designate element, which maps a PID to a given Object Class Definition.
      */
-    @XStreamAlias("Designate")
     public static class Designate
     {
-        @XStreamAsAttribute
-        String pid;
-
-        @XStreamAlias(value = "Object")
-        OBject object;
+        String m_pid;
+        OBject m_object;
 
         public Designate(String pid)
         {
-            this.pid = pid;
-            this.object = new OBject(pid);
+            this.m_pid = pid;
+            this.m_object = new OBject(pid);
+        }
+
+        public void writeTo(PrintWriter pw)
+        {
+            pw.print("   <Designate");
+            writeAttribute("pid", m_pid, pw);
+            pw.println(">");
+            m_object.writeTo(pw);
+            pw.println("   </Designate>");
         }
     }
 
     /**
      * A definition of an instance.
      */
-    @XStreamAlias("Object")
     public static class OBject
     {
-        @XStreamAsAttribute
-        String ocdref;
+        String m_ocdref;
 
         OBject(String ocdref)
         {
-            this.ocdref = ocdref;
+            this.m_ocdref = ocdref;
+        }
+
+        public void writeTo(PrintWriter pw)
+        {
+            pw.print("      <Object");
+            writeAttribute("ocdref", m_ocdref, pw);
+            pw.println("/>");
         }
     }
 }

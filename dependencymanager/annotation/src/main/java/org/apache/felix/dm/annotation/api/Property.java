@@ -94,8 +94,8 @@ public @interface Property
 
     /**
      * Return a list of valid options for this property.
-     * The Options are defined using the <code>Property</code> annotation, where the name is used to
-     * reference the option label, and the value attribute is used to reference the option value.
+     * The Options are defined using the {@link Param} annotation, where the {@link Param#name()} attribute is used to
+     * reference the option label, and the {@link Param#value()} attribute is used to reference the option value.
      * @return the list of valid options for this property.
      */
     Param[] options() default {};

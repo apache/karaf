@@ -36,8 +36,9 @@ import org.apache.felix.dm.annotation.api.Service;
     heading="English Dictionary", 
     description = "Configuration for the EnglishDictionary Service",
     properties={
-        @Property(heading="English Words",
-            description="Declares here some valid english words",
+        @Property(
+            heading="English Words",
+            description="Declare here some valid english words",
             defaults={"hello", "world"},
             id=EnglishDictionary.WORDS,
             cardinality=Integer.MAX_VALUE
