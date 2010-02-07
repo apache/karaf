@@ -1,3 +1,9 @@
+Changes from 1.4.1 to 1.4.2
+---------------------------
+
+** Improvement
+    * [FELIX-1987] - Stacktraces are not displayed by the "log" Felix shell command
+ 
 Changes from 1.4.0 to 1.4.1
 ---------------------------
 
@@ -12,7 +18,7 @@ Changes from 1.4.0 to 1.4.1
 ** Task
     * [FELIX-1617] - Modify framework, main, shell, shell.tui, and obr to depend on official OSGi JAR files
 
-Changes form 1.2.0 to 1.4.0
+Changes from 1.2.0 to 1.4.0
 ---------------------------
 
 ** Bug
