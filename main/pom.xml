@@ -109,10 +109,10 @@
   <properties>
     <log.level>4</log.level>
     <dollar>$</dollar>
-    <framework.version>2.0.3</framework.version>
-    <shell.version>1.4.2</shell.version>
+    <framework.version>2.1.0-SNAPSHOT</framework.version>
+    <shell.version>1.5.0-SNAPSHOT</shell.version>
     <shell.tui.version>1.4.1</shell.tui.version>
-    <obr.version>1.4.3</obr.version>
+    <obr.version>1.5.0-SNAPSHOT</obr.version>
   </properties>
   <profiles>
     <profile>
