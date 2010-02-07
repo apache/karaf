@@ -28,7 +28,7 @@
   <name>Apache Felix Bundle Repository</name>
   <description>Bundle repository service.</description>
   <artifactId>org.apache.felix.bundlerepository</artifactId>
-  <version>1.4.3</version>
+  <version>1.5.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -97,10 +97,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.bundlerepository-1.4.3</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.bundlerepository-1.4.3</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.bundlerepository-1.4.3</url>
-  </scm>
 </project>
