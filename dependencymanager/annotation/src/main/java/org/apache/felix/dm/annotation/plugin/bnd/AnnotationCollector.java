@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.dm.annotation.api.AspectService;
 import org.apache.felix.dm.annotation.api.Composition;
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Destroy;
@@ -67,6 +68,8 @@ public class AnnotationCollector extends ClassDataCollector
         + TemporalServiceDependency.class.getName().replace('.', '/') + ";";
     private final static String A_PROPERTIES = "L"
         + Properties.class.getName().replace('.', '/') + ";";
+    private final static String A_ASPECT_SERVICE = "L"
+        + AspectService.class.getName().replace('.', '/') + ";";
 
     private Reporter m_reporter;
     private String m_className;
@@ -95,6 +98,7 @@ public class AnnotationCollector extends ClassDataCollector
     enum EntryTypes
     {
         Service, 
+        AspectService,
         ServiceDependency, 
         TemporalServiceDependency, 
         ConfigurationDependency,
@@ -331,6 +335,7 @@ public class AnnotationCollector extends ClassDataCollector
     public void annotation(Annotation annotation)
     {
         m_reporter.trace("Parsed annotation: %s", annotation);
+
         if (annotation.getName().equals(A_INIT))
         {
             checkMethod(m_voidMethodPattern);
@@ -376,6 +381,10 @@ public class AnnotationCollector extends ClassDataCollector
         {
             parsePropertiesMetaData(annotation);
         }
+        else if (annotation.getName().equals(A_ASPECT_SERVICE))
+        {
+            parseAspectService(annotation);
+        }
     }
 
     /**
@@ -389,16 +398,7 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(Params.impl, m_className);
 
         // properties attribute
-        Object[] properties = annotation.get(Params.properties.toString());
-        if (properties != null)
-        {
-            for (Object p : properties)
-            {
-                Annotation a = (Annotation) p; 
-                String prop = a.get("name") + ":" + a.get("value");
-                info.addParam(Params.properties, prop);
-            }
-        }
+        parseParameters(annotation, Params.properties, info);
 
         // provide attribute
         info.addClassParam(annotation, Params.provide, m_interfaces);
@@ -531,8 +531,65 @@ public class AnnotationCollector extends ClassDataCollector
         m_metaType.add(ocd);
         MetaType.Designate designate = new MetaType.Designate(propertiesPid);
         m_metaType.add(designate);
+        m_reporter.warning("Parsed MetaType Properties from class " + m_className);
     }
 
+    /**
+     * Parses an AspectService annotation.
+     * @param annotation
+     */
+    private void parseAspectService(Annotation annotation)
+    {
+        Info info = new Info(EntryTypes.AspectService);
+        m_infos.set(0, info);
+
+        // Parse Service interface.
+        Object service = annotation.get(Params.service.toString());
+        if (service == null) {
+            if (m_interfaces == null)
+            {
+                throw new IllegalStateException("Invalid AspectService annotation: " +
+                    "the service attribute has not been set and the class " + m_className + " does not implement any interfaces");
+            }
+            if (m_interfaces.length != 1) 
+            {
+                throw new IllegalStateException("Invalid AspectService annotation: " +
+                    "the service attribute has not been set and the class " + m_className + " implements more than one interface");
+            }
+            
+            service = m_interfaces[0];
+        }
+        info.addClassParam(annotation, Params.service, service.toString());
+        
+        // Parse service filter
+        info.addParam(annotation, Params.filter, null);
+        
+        // Generate Aspect Implementation
+        info.addParam(Params.impl, m_className);
+        
+        // Parse Aspect properties.
+        parseParameters(annotation, Params.properties, info);
+    }
+
+    /**
+     * Parses a Param annotation (which represents a list of key-value pari).
+     * @param annotation the annotation where the Param annotation is defined
+     * @param attribute the attribute name which is of Param type
+     * @param info the Info object where the parsed attributes are written
+     */
+    private void parseParameters(Annotation annotation, Params attribute, Info info) {
+        Object[] parameters = annotation.get(attribute.toString());
+        if (parameters != null)
+        {
+            for (Object p : parameters)
+            {
+                Annotation a = (Annotation) p; 
+                String prop = a.get("name") + ":" + a.get("value");
+                info.addParam(attribute, prop);
+            }
+        }
+    }
+    
     /**
      * Parses a class.
      * @param clazz the class to be parsed (the package is "/" separated).
