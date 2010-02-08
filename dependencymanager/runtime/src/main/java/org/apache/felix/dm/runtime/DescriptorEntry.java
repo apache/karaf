@@ -25,6 +25,7 @@ package org.apache.felix.dm.runtime;
 public enum DescriptorEntry
 {
     Service,
+    AspectService,
     ServiceDependency,
     TemporalServiceDependency,
     ConfigurationDependency
