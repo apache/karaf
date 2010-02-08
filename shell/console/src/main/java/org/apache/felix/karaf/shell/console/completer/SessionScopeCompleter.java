@@ -60,8 +60,8 @@ public class SessionScopeCompleter implements Completer
                 int max = -1;
                 for( String segment : segments )
                 {
-                    Completion completion = new Completion( candidates );
-                    completion.complete( completer, segment + ":" + buffer, ( segment + ":" ).length() + cursor );
+                    Completion completion = new Completion( segment, candidates );
+                    completion.complete( completer, buffer, cursor );
 
                     // Compute the max cursor position
                     max = Math.max( max, completion.cursor );
@@ -91,24 +91,39 @@ public class SessionScopeCompleter implements Completer
     private class Completion
     {
 
+        public final String scope;
+
         public final List<String> candidates;
 
         public int cursor;
 
-        public Completion( final List candidates )
+        public Completion( final String scope, final List candidates )
         {
+            assert scope != null;
             assert candidates != null;
 
+            this.scope = scope;
             // noinspection unchecked
             this.candidates = new LinkedList<String>( candidates );
         }
 
-        public void complete( final Completer completer, final String buffer, final int cursor )
+        public void complete( Completer completer, String buffer, int cursor )
         {
             assert completer != null;
 
+            buffer = scope + ":" + buffer;
+            cursor += (scope + ":").length();
+
             this.cursor = completer.complete( buffer, cursor, candidates );
+
+            cursor -= (scope + ":").length();
+            for (int i = 0; i < candidates.size(); i++) {
+                String s = candidates.get(i);
+                s = s.substring((scope + ":").length());
+                candidates.set(i, s);
+            }
         }
+
     }
 
 }
