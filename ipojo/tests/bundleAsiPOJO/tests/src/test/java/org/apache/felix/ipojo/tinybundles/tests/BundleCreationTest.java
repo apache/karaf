@@ -9,7 +9,6 @@ import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
 
@@ -26,6 +25,7 @@ import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -66,37 +66,26 @@ public class BundleCreationTest {
                     .artifactId("org.apache.felix.ipojo")
                     .version ( asInProject() )
             ),
-            provision(
-                            newBundle()
-                                .addClass( Hello.class )
-                                .prepare()
-                               .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
-                               .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tinybundles.tests.service")
-                                .build( asURL() ).toExternalForm()
-                        ),
+             provision(newBundle()
+                     .add(Hello.class)
+                     .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
+                     .set(Constants.EXPORT_PACKAGE,"org.apache.felix.ipojo.tinybundles.tests.service")
+                     .build(TinyBundles.withBnd())),
             provision(
                     newBundle()
-                    .addClass(MyProvider.class)
-                    .prepare(
-                        with()
-                            .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
-                            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tinybundles.tests.service")
-                        )
-                        .build( asiPOJOBundle(new File("provider.jar"), new File("provider.xml"))  ).toExternalForm()
-                        ),
-                provision(newBundle()
-                        .addClass(Consumer.class)
-                        .prepare(
-                                with()
-                                        .set(Constants.BUNDLE_SYMBOLICNAME, "Consumer")
-                                        .set(Constants.IMPORT_PACKAGE,
-                                                "org.apache.felix.ipojo.tinybundles.tests.service"))
-                        .build(
-                                asiPOJOBundle(new File("cons.jar"),
-                                        new File("consumer.xml")))
-                        .toExternalForm())
-
-        );
+                    .add(MyProvider.class)
+                    .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
+                    .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tinybundles.tests.service")
+                    .build( asiPOJOBundle(new File("provider.jar"), new File("provider.xml")))),
+            provision(
+                    newBundle()
+                    .add(Consumer.class)
+                    .set(Constants.BUNDLE_SYMBOLICNAME, "Consumer")
+                    .set(Constants.IMPORT_PACKAGE,
+                             "org.apache.felix.ipojo.tinybundles.tests.service")
+                    .build(
+                           asiPOJOBundle(new File("consumer.xml"))
+                    )));
     }
 
     @Test

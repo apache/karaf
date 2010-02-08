@@ -231,6 +231,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @param pojo : pojo instance on which calling the bind method.
      */
     protected void onObjectCreation(Object pojo) {
+                
         ServiceReference[] refs;
         synchronized (this) {
             if (!m_isStarted) { return; }

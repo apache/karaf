@@ -28,24 +28,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!--  <plugin>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>maven-paxexam-plugin</artifactId>
-        <executions>
-          <execution>
-          <id>generate-paxexam-config</id>
-          <goals>
-            <goal>generate-paxexam-config</goal>
-          </goals>
-          </execution>
-        </executions>
-        <configuration>
-        <settings>
-          <platform>felix</platform>
-        </settings>
-        </configuration>
-      </plugin> -->
     </plugins>
   </build>
 
@@ -56,53 +38,85 @@
       <version>${pom.version}</version>
     </dependency>
 
-  <!--
-    Pax Exam API:
-  -->
+  <!-- Pax Exam API: -->
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam</artifactId>
+      <version>1.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!--
+      During runtime Pax Exam will discover the OSGi container to use by
+      searching metadata available into classpath. Pax Exam comes with a
+      default container that uses [Pax Runner] for implementing the
+      container requirements:
+    -->
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-container-default
+          </artifactId>
+      <version>1.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!--
+      If your test code is based on JUnit you will have to have the Junit
+      support artifact:
+    -->
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-junit</artifactId>
+      <version>1.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.5</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <!--  TinyBundle -->
+    <dependency>
+      <groupId>org.ops4j.pax.swissbox</groupId>
+      <artifactId>pax-swissbox-tinybundles</artifactId>
+      <version>1.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.base</groupId>
+      <artifactId>ops4j-base</artifactId>
+      <version>1.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.swissbox</groupId>
+      <artifactId>pax-swissbox-bnd</artifactId>
+      <version>1.2.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- mockito -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.7</version>
+      <scope>test</scope>
+    </dependency>
+  
   <dependency>
-    <groupId>org.ops4j.pax.exam</groupId>
-    <artifactId>pax-exam</artifactId>
-    <version>1.1.0</version>
-  </dependency>
-  <!--
-    During runtime Pax Exam will discover the OSGi container to use by
-    searching metadata available into classpath. Pax Exam comes with a
-    default container that uses [Pax Runner] for implementing the
-    container requirements:
-  -->
-  <dependency>
-    <groupId>org.ops4j.pax.exam</groupId>
-    <artifactId>pax-exam-container-default
-    </artifactId>
-    <version>1.1.0</version>
-  </dependency>
-  <!--
-    If your test code is based on JUnit you will have to have the Junit
-    support artifact:
-  -->
-  <dependency>
-    <groupId>org.ops4j.pax.exam</groupId>
-    <artifactId>pax-exam-junit</artifactId>
-    <version>1.1.0</version>
-  </dependency>
-  <dependency>
-    <groupId>junit</groupId>
-    <artifactId>junit</artifactId>
-    <version>4.5</version>
-    <type>jar</type>
-    <scope>test</scope>
-  </dependency>
-  <!--  Tinybundles -->
-  <dependency>
-    <groupId>org.ops4j.pax.swissbox</groupId>
-    <artifactId>pax-swissbox-tinybundles</artifactId>
-    <version>1.0.0</version>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.felix</groupId>
-    <artifactId>org.apache.felix.ipojo.tinybundles.bundleAsiPOJO</artifactId>
-    <version>${pom.version}</version>
-  </dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.ipojo.tinybundles.bundleAsiPOJO
+      </artifactId>
+      <version>1.5.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.ipojo.test.helpers</artifactId>
+      <version>1.5.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <repositories>

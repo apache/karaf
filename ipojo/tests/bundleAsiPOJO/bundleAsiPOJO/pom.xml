@@ -7,6 +7,13 @@
   <version>1.5.0-SNAPSHOT</version>
   <name>BundleAsiPOJO</name>
 
+
+  <parent>
+    <artifactId>felix-parent</artifactId>
+    <groupId>org.apache.felix</groupId>
+    <version>1.2.0</version>
+  </parent>
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -17,7 +24,7 @@
     <dependency>
         <groupId>org.ops4j.pax.swissbox</groupId>
         <artifactId>pax-swissbox-tinybundles</artifactId>
-        <version>1.0.0</version>
+        <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

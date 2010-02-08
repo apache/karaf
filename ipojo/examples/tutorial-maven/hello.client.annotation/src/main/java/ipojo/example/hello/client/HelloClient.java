@@ -20,8 +20,6 @@ package ipojo.example.hello.client;
 
 import ipojo.example.hello.Hello;
 
-import java.util.Set;
-
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Requires;

@@ -8,9 +8,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
 
 import java.io.File;
 
@@ -19,6 +17,8 @@ import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
+import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.apache.felix.ipojo.tests.core.component.MyComponent;
 import org.apache.felix.ipojo.tests.core.handler.EmptyHandler;
 import org.apache.felix.ipojo.tests.core.service.MyService;
@@ -31,6 +31,7 @@ import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -72,6 +73,7 @@ public class IgnoreCaseHandlerSelectionTest {
         File tmp = new File("target/tmp");
         tmp.mkdirs();
 
+        
         Option[] opt =  options(
                 felix(),
                 equinox(),
@@ -79,27 +81,26 @@ public class IgnoreCaseHandlerSelectionTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").versionAsInProject()
                         ),
                 provision(
                         newBundle()
-                            .addClass( MyService.class )
-                            .prepare()
-                           .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
-                           .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                            .build( asURL() ).toExternalForm()
+                            .add( MyService.class )
+                            .set( Constants.BUNDLE_SYMBOLICNAME, "ServiceInterface" )
+                            .set( Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service" )
+                            .build( TinyBundles.withBnd() ) 
                     ),
                provision(
                        // Components and the handler
                         newBundle()
-                            .addClass(MyComponent.class) // Component Implementation
-                            .addClass(EmptyHandler.class) // Handler.
-                            .prepare(
-                                    with()
-                                        .set(Constants.BUNDLE_SYMBOLICNAME,"IgnoreCase")
-                                        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service, org.apache.felix.ipojo, org.apache.felix.ipojo.metadata")
-                                    )
-                            .build( asiPOJOBundle(new File(tmp, "ignorecase.jar"), new File("ignorecase.xml"))).toExternalForm()));
+                            .add(MyComponent.class) // Component Implementation
+                            .add(EmptyHandler.class) // Handler.
+                            .set(Constants.BUNDLE_SYMBOLICNAME,"IgnoreCase")
+                            .set(Constants.IMPORT_PACKAGE, 
+                                    "org.apache.felix.ipojo.tests.core.service, " +
+                                    "org.apache.felix.ipojo, " +
+                                    "org.apache.felix.ipojo.metadata")
+                            .build(asiPOJOBundle(new File(tmp, "ignorecase.jar"), new File("src/test/resources/ignorecase.xml")))));
         return opt;
     }
 

@@ -82,6 +82,32 @@ public class HandlerManager extends InstanceManager {
         if (m_handler != null) { return; }
         m_handler = (Handler) createPojoObject();
     }
+    
+    /**
+     * Creates an instance of the content.
+     * This method needs to be called once only for singleton provided service.
+     * This methods call the {@link InstanceManager#createObject()} method, and adds
+     * the created object to the {@link InstanceManager#m_pojoObjects} list. Then,
+     * it calls the {@link PrimitiveHandler#onCreation(Object)} methods on attached
+     * handlers.
+     * @return a new instance or <code>null</code> if an error occurs during the
+     * creation.
+     */
+    public Object createPojoObject() {
+        Object instance = createObject();
+
+        // Add the new instance in the instance list.
+        synchronized (this) {
+            if (m_pojoObjects == null) {
+                m_pojoObjects = new ArrayList(1);
+            }
+            m_pojoObjects.add(instance);
+        }
+        
+        //Do not call onCreation, this will be done in the start method.
+        
+        return instance;
+    }
 
     /**
      * Starts the instance manager.
@@ -95,13 +121,21 @@ public class HandlerManager extends InstanceManager {
             }
         }
 
+        // Start attached handler.
         for (int i = 0; i < m_handlers.length; i++) {
             m_handlers[i].addInstanceStateListener(this);
             m_handlers[i].start();
         }
         
-        m_handler.start(); // Call the handler start method.
+        // Call the onCreation method.
+        for (int i = 0; i < m_handlers.length; i++) {
+            ((PrimitiveHandler) m_handlers[i].getHandler()).onCreation(m_handler);
+        }
 
+        
+        m_handler.start(); // Call the handler start method, the instance might be invalid.
+        
+        
         for (int i = 0; i < m_handlers.length; i++) {
             if (!m_handlers[i].getHandler().isValid()) {
                 setState(INVALID);

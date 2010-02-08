@@ -22,6 +22,7 @@ import ipojo.example.hello.Hello;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.ServiceProperty;
 
 /**
  * Component implementing the Hello service.
@@ -31,6 +32,14 @@ import org.apache.felix.ipojo.annotations.Provides;
 @Component
 @Provides
 public class HelloImpl implements Hello {
+    
+    
+    @ServiceProperty
+    public String boo = "boo";
+    
+    @ServiceProperty
+    public String bla = "bla";
+
     
     /**
      * Returns an 'Hello' message.

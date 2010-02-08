@@ -109,7 +109,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * The content of the current instance.
      */
-    private List m_pojoObjects;
+    protected List m_pojoObjects;
 
     /**
      * The factory method used to create content objects.
@@ -559,7 +559,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
     /**
      * Creates a POJO objects.
-     * This method is not synchronized and does require any locks.
+     * This method is not synchronized and does not require any locks.
      * If a {@link InstanceManager#m_factoryMethod} is specified,
      * this method called this static method to creates the object.
      * Otherwise, the methods uses the regular constructor.
@@ -568,7 +568,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @return the created object or <code>null</code> if an error
      * occurs during the creation.
      */
-    private Object createObject() {
+    protected Object createObject() {
         if (m_clazz == null) {
             load();
         }
