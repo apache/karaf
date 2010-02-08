@@ -562,8 +562,10 @@ public class AnnotationCollector extends ClassDataCollector
         info.addClassParam(annotation, Params.service, service.toString());
         
         // Parse service filter
-        info.addParam(annotation, Params.filter, null);
-        
+        String filter = annotation.get(Params.filter.toString());
+        Verifier.verifyFilter(filter, 0);
+        info.addParam(Params.filter, filter);
+                
         // Generate Aspect Implementation
         info.addParam(Params.impl, m_className);
         
