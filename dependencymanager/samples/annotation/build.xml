@@ -15,6 +15,6 @@
     <mkdir dir="target"/>
     <mkdir dir="target/classes"/>
     <taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${annotjar}:${bndjar}"/>
-    <bnd classpath="target/classes" files="directives.bnd" output="target/org.apache.felix.dependencymanager.samples.annotation-3.0.0-SNAPSHOT.jar"/>
+    <bnd classpath="target/classes" eclipse="false" files="directives.bnd" output="target/org.apache.felix.dependencymanager.samples.annotation-3.0.0-SNAPSHOT.jar"/>
   </target>
 </project>
