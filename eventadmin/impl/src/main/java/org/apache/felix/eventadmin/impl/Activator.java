@@ -61,9 +61,8 @@ public class Activator implements BundleActivator
         // independent of the org.osgi.service.log package)
         LogWrapper.setContext(context);
 
+        // this creates the event admin and starts it
         m_config = new Configuration(context);
-
-        m_config.start();
     }
 
     /**

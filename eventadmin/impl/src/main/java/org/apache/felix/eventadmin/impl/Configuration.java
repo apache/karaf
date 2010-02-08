@@ -149,8 +149,9 @@ public class Configuration
 
         // default configuration
         configure( null );
+        start();
 
-        // listen for Configuration Admin configuration
+        // check for Configuration Admin configuration
         try
         {
             Object service = new ManagedService()
@@ -176,7 +177,7 @@ public class Configuration
             }
             Dictionary props = new Hashtable();
             props.put( Constants.SERVICE_PID, PID );
-            m_managedServiceReg = bundleContext.registerService( interfaceNames, service, props );
+            m_managedServiceReg = m_bundleContext.registerService( interfaceNames, service, props );
         }
         catch ( Throwable t )
         {
