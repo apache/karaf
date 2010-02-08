@@ -73,7 +73,7 @@ public class OptionalFeaturesHandler
         final ServiceReference cfaRef = this.bundleContext.getServiceReference(CONFIGURATION_ADMIN_CLASS_NAME);
         if ( cfaRef != null )
         {
-            final Long id = (Long)ref.getProperty(Constants.SERVICE_ID);
+            final Long id = (Long)cfaRef.getProperty(Constants.SERVICE_ID);
             bindConfigAdmin(id);
         }
 
@@ -115,7 +115,7 @@ public class OptionalFeaturesHandler
                             public void run()
                             {
                                 try {
-                                    Thread.sleep(50);
+                                    Thread.sleep(500);
                                 } catch (InterruptedException ignore) {}
                                 bindEventAdmin(id);
                             }
@@ -128,7 +128,7 @@ public class OptionalFeaturesHandler
                             public void run()
                             {
                                 try {
-                                    Thread.sleep(50);
+                                    Thread.sleep(500);
                                 } catch (InterruptedException ignore) {}
                                 unbindEventAdmin(id);
                             }
@@ -145,7 +145,7 @@ public class OptionalFeaturesHandler
                             public void run()
                             {
                                 try {
-                                    Thread.sleep(50);
+                                    Thread.sleep(500);
                                 } catch (InterruptedException ignore) {}
                                 bindConfigAdmin(id);
                             }
@@ -158,7 +158,7 @@ public class OptionalFeaturesHandler
                             public void run()
                             {
                                 try {
-                                    Thread.sleep(50);
+                                    Thread.sleep(500);
                                 } catch (InterruptedException ignore) {}
                                 unbindConfigAdmin(id);
                             }
