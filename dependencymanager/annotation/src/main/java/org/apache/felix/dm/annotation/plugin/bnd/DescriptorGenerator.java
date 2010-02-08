@@ -82,8 +82,6 @@ public class DescriptorGenerator extends Processor
             // Try to locate any classes in the wildcarded universe
             // that are annotated with the DependencyManager "Service" annotations.
             Collection<Clazz> expanded = m_analyzer.getClasses("",
-                // Then limit the ones with component annotations.
-                QUERY.ANNOTATION.toString(), Service.class.getName(),
                 // Parse everything
                 QUERY.NAMED.toString(), "*");
 
@@ -100,7 +98,7 @@ public class DescriptorGenerator extends Processor
                 // And store the generated component descriptors in our resource list.
                 String name = c.getFQN();
                 Resource resource = createComponentResource(reader);
-                m_resources.put("OSGI-INF/" + name + ".dm", resource);
+                m_resources.put("OSGI-INF/dependencymanager/" + name, resource);
                 annotationsFound = true;
             }
 
