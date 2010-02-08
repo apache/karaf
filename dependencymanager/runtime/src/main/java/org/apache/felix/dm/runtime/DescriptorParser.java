@@ -46,8 +46,9 @@ import org.osgi.service.log.LogService;
  *
  *    line := <type> ':' <params>
  *    
- *    type := service|serviceDependency|configurationDependency|temporalServiceDependency
+ *    type := service|aspectservice|serviceDependency|configurationDependency|temporalServiceDependency
  *    service := 'Service'
+ *    aspectservice := 'AspectService'
  *    serviceDependency := 'ServiceDependency'
  *    configurationDependency := 'ConfigurationDependency'
  *    temporalServiceDependency := 'TemporalServiceDependency'
