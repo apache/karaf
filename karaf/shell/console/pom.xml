@@ -122,6 +122,14 @@
                         <Private-Package>
                             org.fusesource.jansi.internal
                         </Private-Package>
+                        <Bundle-NativeCode>jline/jline32.dll;
+                                           osname=Win32;
+                                           processor=x86,
+                                           jline/jline64.dll;
+                                           osname=Win32;
+                                           processor=x86-64,
+                                           *
+                        </Bundle-NativeCode>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
