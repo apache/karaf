@@ -17,7 +17,19 @@
 package org.apache.felix.karaf.shell.commands;
 
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.karaf.shell.console.CloseShellException;
+import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Command(scope = "shell", name = "more", description = "")
-public class MoreAction {
+@Command(scope = "shell", name = "logout", description = "Disconnect shell from current session")
+public class LogoutAction extends OsgiCommandSupport {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    protected Object doExecute() throws Exception {
+        log.info("Disconnecting from current session...");
+        throw new CloseShellException();
+    }
+
 }
