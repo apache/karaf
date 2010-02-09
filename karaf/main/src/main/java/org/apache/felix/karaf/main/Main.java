@@ -1203,6 +1203,7 @@ public class Main {
                                 // Match against our command string
                                 boolean match = command.toString().equals(shutdown);
                                 if (match) {
+                                    LOG.log(Level.INFO, "Karaf shutdown socket: received shutdown command. Stopping framework...");
                                     framework.stop();
                                     break;
                                 } else {
