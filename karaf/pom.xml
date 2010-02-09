@@ -88,7 +88,7 @@
         <jansi.version>1.1</jansi.version>
         <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
         <junit.version>4.7_1</junit.version>
-        <jline.version>0.9.95-20091026.080844</jline.version>
+        <jline.version>0.9.95.20100209</jline.version>
         <log4j.version>1.2.14</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.0-RC1</mina.version>
