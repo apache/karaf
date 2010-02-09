@@ -40,6 +40,7 @@ import jline.AnsiWindowsTerminal;
 import jline.ConsoleReader;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
+import org.apache.felix.karaf.shell.console.CloseShellException;
 import org.apache.felix.karaf.shell.console.Completer;
 import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.felix.karaf.shell.console.completer.SessionScopeCompleter;
@@ -181,6 +182,10 @@ public class Console implements Runnable
             {
                 //System.err.println("^C");
                 // TODO: interrupt current thread
+            }
+            catch (CloseShellException e)
+            {
+                break;
             }
             catch (Throwable t)
             {

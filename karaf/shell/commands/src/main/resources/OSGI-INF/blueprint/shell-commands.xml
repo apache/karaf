@@ -57,6 +57,9 @@
             <action class="org.apache.felix.karaf.shell.commands.MoreAction"/>
         </command>
         -->
+        <command name="shell/logout">
+            <action class="org.apache.felix.karaf.shell.commands.LogoutAction"/>
+        </command>
         <command name="shell/printf">
             <action class="org.apache.felix.karaf.shell.commands.PrintfAction"/>
         </command>
