@@ -34,6 +34,8 @@ import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
+import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
+
 @RunWith(JUnit4TestRunner.class)
 public class CoreTest extends AbstractIntegrationTest {
 
@@ -109,9 +111,12 @@ public class CoreTest extends AbstractIntegrationTest {
     public static Option[] configuration() throws Exception {
         Option[] options = combine(
             // Default karaf environment
-            Helper.getDefaultOptions(),
-            // this is how you set the default log level when using pax logging (logProfile)
-            systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("DEBUG"),
+            Helper.getDefaultOptions(
+                // this is how you set the default log level when using pax logging (logProfile)
+                systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("DEBUG")),
+
+            workingDirectory("target/paxrunner/core/"),
+
             // Test on both equinox and felix
             equinox(), felix()
         );
