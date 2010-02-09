@@ -85,7 +85,7 @@
         <felix.metatype.version>1.0.2</felix.metatype.version>
         <geronimo.blueprint.version>1.0.0</geronimo.blueprint.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-        <jansi.version>1.1</jansi.version>
+        <jansi.version>1.2</jansi.version>
         <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
         <junit.version>4.7_1</junit.version>
         <jline.version>0.9.95.20100209</jline.version>
