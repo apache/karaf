@@ -32,6 +32,7 @@ import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
 
@@ -68,6 +69,8 @@ public class FeaturesTest extends AbstractIntegrationTest {
             ),
 
             workingDirectory("target/paxrunner/features/"),
+
+            waitForFrameworkStartup(),
             
             // Test on both equinox and felix
             equinox(), felix()

@@ -32,6 +32,7 @@ import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
@@ -116,6 +117,8 @@ public class CoreTest extends AbstractIntegrationTest {
                 systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("DEBUG")),
 
             workingDirectory("target/paxrunner/core/"),
+
+            waitForFrameworkStartup(),
 
             // Test on both equinox and felix
             equinox(), felix()
