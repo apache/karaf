@@ -48,12 +48,22 @@ public class AdminServiceImpl implements AdminService {
 
     private File storageLocation;
 
+    private long stopTimeout = 30000;
+
     public File getStorageLocation() {
         return storageLocation;
     }
 
     public void setStorageLocation(File storage) {
         this.storageLocation = storage;
+    }
+
+    public long getStopTimeout() {
+        return stopTimeout;
+    }
+
+    public void setStopTimeout(long stopTimeout) {
+        this.stopTimeout = stopTimeout;
     }
 
     private Properties loadStorage(File location) throws IOException {
