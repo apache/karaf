@@ -158,6 +158,7 @@ public class ShellFactoryImpl implements Factory<Command>
         }
     }
 
+    // TODO: remove this class when sshd use lf->crlf conversion by default
     public class LfToCrLfFilterOutputStream extends FilterOutputStream {
 
         private boolean lastWasCr;
