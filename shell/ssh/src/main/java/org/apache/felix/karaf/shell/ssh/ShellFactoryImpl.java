@@ -20,6 +20,7 @@
 package org.apache.felix.karaf.shell.ssh;
 
 import java.io.Closeable;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -99,8 +100,8 @@ public class ShellFactoryImpl implements Factory<Command>
                 };
                 Console console = new Console(commandProcessor,
                                               in,
-                                              new PrintStream(out, true),
-                                              new PrintStream(err, true),
+                                              new PrintStream(new LfToCrLfFilterOutputStream(out), true),
+                                              new PrintStream(new LfToCrLfFilterOutputStream(err), true),
                                               new SshTerminal(env),
                                               new AggregateCompleter(completers),
                                               new Runnable() {
@@ -156,5 +157,27 @@ public class ShellFactoryImpl implements Factory<Command>
             return sourceObject;
         }
     }
+
+    public class LfToCrLfFilterOutputStream extends FilterOutputStream {
+
+        private boolean lastWasCr;
+
+        public LfToCrLfFilterOutputStream(OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            if (!lastWasCr && b == '\n') {
+                out.write('\r');
+                out.write('\n');
+            } else {
+                out.write(b);
+            }
+            lastWasCr = b == '\r';
+        }
+
+    }
+
 
 }
