@@ -52,7 +52,7 @@ public class BootstrapLogManager {
             // Make a best effort to log to the default file appender configured for log4j
             FileInputStream fis = null;
             try {
-                fis = new FileInputStream("../etc/org.ops4j.pax.logging.cfg");
+                fis = new FileInputStream(System.getProperty("karaf.base") + "/etc/org.ops4j.pax.logging.cfg");
                 props.load(fis);
             } catch (IOException e) {
                 props.setProperty("log4j.appender.out.file", "${karaf.base}/data/log/karaf.log");
