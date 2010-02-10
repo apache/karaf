@@ -37,7 +37,7 @@ import static org.ops4j.pax.exam.CoreOptions.frameworkStartLevel;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.rawPaxRunnerOption;
+import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
 
 /**
  * Helper class for setting up a pax-exam test environment for karaf.
@@ -142,7 +142,7 @@ public final class Helper {
         }
         // Transform system properties to VM options
         List<Option> options = new ArrayList<Option>();
-        String vmOptions = "-Dorg.ops4j.pax.exam.rbc.rmi.port=1099";
+        String vmOptions = "";
         for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             String value = configProps.getProperty(name);
@@ -168,7 +168,7 @@ public final class Helper {
             options.add(frameworkStartLevel(Integer.parseInt(configProps.getProperty("org.osgi.framework.startlevel.beginning"))));
         }
 
-        options.add(rawPaxRunnerOption("--vmOptions", vmOptions));
+        options.add(vmOption(vmOptions));
  
         return options.toArray(new Option[options.size()]);
     }
