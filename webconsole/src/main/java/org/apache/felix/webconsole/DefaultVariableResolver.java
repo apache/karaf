@@ -37,24 +37,46 @@ public class DefaultVariableResolver extends HashMap implements VariableResolver
     private static final long serialVersionUID = 4148807223433047780L;
 
 
+    /**
+     * Creates a new variable resolver with default capacity.
+     */
     public DefaultVariableResolver()
     {
         super();
     }
 
 
+    /**
+     * Creates a new variable resolver and initializes both - capacity & load factor
+     * 
+     * @param initialCapacity  the initial capacity of the variable container
+     * @param loadFactor the load factor of the variable container
+     * @see HashMap#HashMap(int, float)
+     */
     public DefaultVariableResolver( final int initialCapacity, final float loadFactor )
     {
         super( initialCapacity, loadFactor );
     }
 
 
+    /**
+     * Creates a new variable resolver with specified initial capacity
+     * 
+     * @param initialCapacity  the initial capacity of the variable container
+     * @see HashMap#HashMap(int)
+     */
     public DefaultVariableResolver( final int initialCapacity )
     {
         super( initialCapacity );
     }
 
 
+    /**
+     * Creates a new variable resolver copying the variables from the given map.
+     * 
+     * @param source  the map whose variables are to be placed in this resolver.
+     * @see HashMap#HashMap(Map)
+     */
     public DefaultVariableResolver( final Map source )
     {
         super( source );

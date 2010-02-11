@@ -30,10 +30,9 @@ import javax.servlet.http.HttpServletResponse;
  * <p>
  * <strong>NOTE: This interface is just an intermediate solution for making the
  * web console extensible. Future releases of the web console will remove this
- * and the {@link Render} interfaces and use the
- * <code>javax.servlet.Servlet</code> interface with predefined service
- * registration properties instead.</strong>
- * 
+ * interface and use the <code>javax.servlet.Servlet</code> interface with
+ * predefined service registration properties instead.</strong>
+ *
  * @deprecated This interface will be removed when <a
  *             href="https://issues.apache.org/jira/browse/FELIX-574">FELIX-574</a>
  *             will be implemented.
@@ -41,6 +40,9 @@ import javax.servlet.http.HttpServletResponse;
 public interface Action
 {
 
+    /**
+     * The name of the service used when registered in the OSGi framework.
+     */
     static final String SERVICE = Action.class.getName();
 
     /**
@@ -50,9 +52,19 @@ public interface Action
     static final String ATTR_REDIRECT_PARAMETERS = "redirectParameters";
 
 
+    /**
+     * Retrieves the name of the action (alias)
+     *
+     * @return the name
+     */
     String getName();
 
 
+    /**
+     * This method is actually unused
+     *
+     * @return label?
+     */
     String getLabel();
 
 
@@ -65,11 +77,11 @@ public interface Action
      *
      * @return <code>true</code> the client should be redirected after the
      *      action has been taken. <code>false</code> if this method also
-     *      provided response to the client and nore more processing is
+     *      provided response to the client and no more processing is
      *      required.
      *
-     * @throws IOException May be thrown if an I/O error occurrs
-     * @throws ServletException May be thrown if another error occurrs while
+     * @throws IOException May be thrown if an I/O error occurs
+     * @throws ServletException May be thrown if another error occurs while
      *      processing the action. The <code>rootCause</code> of the exception
      *      should contain the cause of the error.
      */

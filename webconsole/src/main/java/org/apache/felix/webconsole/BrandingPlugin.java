@@ -31,6 +31,8 @@ public interface BrandingPlugin
      * Returns an indicative name of the branding plugin. This value is used
      * as the Window/Page title together with the title of the respective
      * plugin.
+     * 
+     * @return the name of the branding plugin
      */
     String getBrandName();
 
@@ -38,6 +40,8 @@ public interface BrandingPlugin
     /**
      * Returns the name of the product in which the web console is contained
      * and to which the web console is branded.
+     *
+     * @return the product name
      */
     String getProductName();
 
@@ -45,6 +49,8 @@ public interface BrandingPlugin
     /**
      * Returns an (absolute) URL to a web site representing the product to
      * which the web console is branded.
+     *
+     * @return the product URL
      */
     String getProductURL();
 
@@ -52,12 +58,16 @@ public interface BrandingPlugin
     /**
      * Returns an absolute path to an image to be rendered as the logo of the
      * branding product.
+     *
+     * @return a path to an image - usually the product logo
      */
     String getProductImage();
 
 
     /**
      * Returns the name of the branding product vendor.
+     *
+     * @return the product vendor
      */
     String getVendorName();
 
@@ -65,6 +75,8 @@ public interface BrandingPlugin
     /**
      * Returns an (absolute) URL to the web site of the branding product
      * vendor.
+     *
+     * @return the URL of the product vendor
      */
     String getVendorURL();
 
@@ -72,6 +84,8 @@ public interface BrandingPlugin
     /**
      * Returns an absolute path to an image to be rendered as the logo of the
      * branding product vendor.
+     *
+     * @return the company logo
      */
     String getVendorImage();
 
@@ -79,6 +93,8 @@ public interface BrandingPlugin
     /**
      * Returns the absolute path to an icon to be used as the web console
      * "favicon".
+     *
+     * @return path to an image, that is shown as favorite icon in the web browser
      */
     String getFavIcon();
 
@@ -86,6 +102,8 @@ public interface BrandingPlugin
     /**
      * Returns the absolute path to a CSS file to be used as the main CSS for
      * the basic admin site.
+     *
+     * @return a path to a custom CSS. Used to override the default web console styling
      */
     String getMainStyleSheet();
 }

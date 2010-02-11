@@ -25,7 +25,7 @@ import java.net.URL;
 /**
  * This is an optional extension of the {@link ConfigurationPrinter}.
  * If a configuration printer implements this interface, the printer
- * can add additional attamchemtns to the output of the configuration rendering.
+ * can add additional attachments to the output of the configuration rendering.
  *
  * Currently this is only supported for the ZIP mode.
  *
@@ -42,7 +42,7 @@ public interface AttachmentProvider
      * The returned list should contain URLs pointing to the
      * attachments for this mode.
      * @param mode The render mode.
-     * @return An array of urls or null.
+     * @return An array of URLs or null.
      */
     URL[] getAttachments(String mode);
 }
