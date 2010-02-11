@@ -27,24 +27,41 @@ import java.util.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.apache.commons.io.IOUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 
+/**
+ * The Web Console can be extended by registering an OSGi service for the interface
+ * {@link javax.servlet.Servlet} with the service property
+ * <code>felix.webconsole.label</code> set to the label (last segment in the URL)
+ * of the page. The respective service is called a Web Console Plugin or a plugin
+ * for short.
+ *
+ * To help rendering the response the Apache Felix Web Console bundle provides two
+ * options. One of the options is to extend the AbstractWebConsolePlugin overwriting
+ * the {@link #renderContent(HttpServletRequest, HttpServletResponse)} method.
+ */
 public abstract class AbstractWebConsolePlugin extends HttpServlet
 {
 
     /** Pseudo class version ID to keep the IDE quite. */
     private static final long serialVersionUID = 1L;
 
-    /** The name of the request attribute containig the map of FileItems from the POST request */
+    /** The name of the request attribute containing the map of FileItems from the POST request */
     public static final String ATTR_FILEUPLOAD = "org.apache.felix.webconsole.fileupload";
 
+    /**
+     * Web Console Plugin typically consists of servlet and resources such as images,
+     * scripts or style sheets.
+     *
+     * To load resources, a Resource Provider is used. The resource provider is an object,
+     * that provides a method which name is specified by this constants and it is
+     * 'getResource'.
+     *
+     *  @see #getResourceProvider()
+     */
     public static final String GET_RESOURCE_METHOD_NAME = "getResource";
 
     /**
@@ -72,6 +89,8 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
     /**
      * Returns the title for this plugin as returned by {@link #getTitle()}
+     *
+     * @see javax.servlet.GenericServlet#getServletName()
      */
     public String getServletName()
     {
@@ -93,6 +112,9 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      * <b>Note</b>: If a resource is sent back for the request only the first
      * step is executed. Otherwise the first step is a null-operation actually
      * and the latter four steps are executed in order.
+     * @see javax.servlet.http.HttpServlet#doGet(
+     *  javax.servlet.http.HttpServletRequest,
+     *  javax.servlet.http.HttpServletResponse)
      */
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
@@ -129,6 +151,9 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      * footers of this plugin be rendered or not. This method always returns
      * <code>true</true> but has been overwritten in the
      * {@link WebConsolePluginAdapter} for the plugins.
+     *
+     * @param request the original request passed from the HTTP server
+     * @return <code>true</code> if the page should have headers and footers rendered
      */
     protected boolean isHtmlRequest( final HttpServletRequest request )
     {
@@ -138,27 +163,65 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
     //---------- AbstractWebConsolePlugin API ----------------------------------
 
+    /**
+     * This method is called from the Felix Web Console to ensure the
+     * AbstractWebConsolePlugin is correctly setup.
+     *
+     * It is called right after the Web Console receives notification for
+     * plugin registration.
+     *
+     * @param bundleContext the context of the plugin bundle
+     */
     public void activate( BundleContext bundleContext )
     {
         this.bundleContext = bundleContext;
     }
 
 
+    /**
+     * This method is called, by the Web Console to de-activate the plugin and release
+     * all used resources.
+     */
     public void deactivate()
     {
         this.bundleContext = null;
     }
 
 
-    public abstract String getTitle();
-
-
-    public abstract String getLabel();
-
-
+    /**
+     * This method is used to render the content of the plug-in. It is called internally
+     * from the Web Console.
+     *
+     * @param req the HTTP request send from the user
+     * @param res the HTTP response object, where to render the plugin data.
+     * @throws IOException if an input or output error is
+     *  detected when the servlet handles the request
+     * @throws ServletException  if the request for the GET
+     *  could not be handled
+     */
     protected abstract void renderContent( HttpServletRequest req, HttpServletResponse res ) throws ServletException,
         IOException;
 
+    /**
+     * Retrieves the label. This is the last component in the servlet path.
+     *
+     * This method MUST be overridden, if the {@link #AbstractWebConsolePlugin()}
+     * constructor is used.
+     *
+     * @return the label.
+     */
+    public abstract String getLabel();
+
+    /**
+     * Retrieves the title of the plug-in. It is displayed in the page header
+     * and is also included in the title of the HTML document.
+     *
+     * This method MUST be overridden, if the {@link #AbstractWebConsolePlugin()}
+     * constructor is used.
+     *
+     * @return the plugin title.
+     */
+    public abstract String getTitle();
 
     /**
      * Returns a list of CSS reference paths or <code>null</code> if no
@@ -178,12 +241,13 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         return null;
     }
 
-
     /**
      * Returns the <code>BundleContext</code> with which this plugin has been
      * activated. If the plugin has not be activated by calling the
      * {@link #activate(BundleContext)} method, this method returns
      * <code>null</code>.
+     *
+     * @return the bundle context or <code>null</code> if the bundle is not activated.
      */
     protected BundleContext getBundleContext()
     {
@@ -197,13 +261,14 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      * been activated. If the plugin has not be activated by calling the
      * {@link #activate(BundleContext)} method, this method returns
      * <code>null</code>.
+     *
+     * @return the bundle or <code>null</code> if the plugin is not activated.
      */
     public final Bundle getBundle()
     {
         final BundleContext bundleContext = getBundleContext();
         return ( bundleContext != null ) ? bundleContext.getBundle() : null;
     }
-
 
     /**
      * Returns the object which might provide resources. The class of this
@@ -223,7 +288,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
     /**
      * Returns a method which is called on the
-     * {@link #getResourceProvider() resource provder} class to return an URL
+     * {@link #getResourceProvider() resource provider} class to return an URL
      * to a resource which may be spooled when requested. The method has the
      * following signature:
      * <pre>
@@ -240,7 +305,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      *      if the {@link #getResourceProvider() resource provider} is
      *      <code>null</code> or does not provide such a method.
      */
-    private Method getGetResourceMethod()
+    private final Method getGetResourceMethod()
     {
         // return what we know of the getResourceMethod, if we already checked
         if (getResourceMethodChecked) {
@@ -309,9 +374,9 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      * @param response The response object
      * @return <code>true</code> if the request causes a resource to be sent back.
      *
-     * @throws IOException If an error occurrs accessing or spooling the resource.
+     * @throws IOException If an error occurs accessing or spooling the resource.
      */
-    private boolean spoolResource( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    private final boolean spoolResource( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         // no resource if no resource accessor
         Method getResourceMethod = getGetResourceMethod();
@@ -392,22 +457,22 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         }
       finally
         {
-            if ( ins != null )
-            {
-                try
-                {
-                    ins.close();
-                }
-                catch ( IOException ignore )
-                {
-                }
-            }
+            IOUtils.closeQuietly(ins);
         }
 
         return false;
     }
 
 
+    /**
+     * This method is responsible for generating the top heading of the page.
+     *
+     * @param request the HTTP request coming from the user
+     * @param response the HTTP response, where data is rendered
+     * @return the writer that was used for generating the response.
+     * @throws IOException on I/O error
+     * @see #endResponse(PrintWriter)
+     */
     protected PrintWriter startResponse( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         response.setCharacterEncoding( "utf-8" );
@@ -428,6 +493,12 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     }
 
 
+    /**
+     * This method is called to generate the top level links with the available plug-ins.
+     *
+     * @param request the HTTP request coming from the user
+     * @param pw the writer, where the HTML data is rendered
+     */
     protected void renderTopNavigation( HttpServletRequest request, PrintWriter pw )
     {
         // assume pathInfo to not be null, else this would not be called
@@ -489,105 +560,57 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     }
 
 
+    /**
+     * This method is responsible for generating the footer of the page.
+     *
+     * @param pw the writer, where the HTML data is rendered
+     * @see #startResponse(HttpServletRequest, HttpServletResponse)
+     */
     protected void endResponse( PrintWriter pw )
     {
         pw.println(getFooter());
     }
 
 
-    public static String getParameter( HttpServletRequest request, String name )
+    /**
+     * An utility method, that is used to filter out simple parameter from file
+     * parameter when multipart transfer encoding is used.
+     *
+     * This method processes the request and sets a request attribute
+     * {@link #ATTR_FILEUPLOAD}. The attribute value is a {@link Map}
+     * where the key is a String specifying the field name and the value
+     * is a {@link org.apache.commons.fileupload.FileItem}.
+     *
+     * @param request the HTTP request coming from the user
+     * @param name the name of the parameter
+     * @return if not multipart transfer encoding is used - the value is the
+     *  parameter value or <code>null</code> if not set. If multipart is used,
+     *  and the specified parameter is field - then the value of the parameter
+     *  is returned.
+     * @deprecated use {@link WebConsoleUtil#getParameter(HttpServletRequest, String)}
+     */
+    public static final String getParameter( HttpServletRequest request, String name )
     {
-        // just get the parameter if not a multipart/form-data POST
-        if ( !ServletFileUpload.isMultipartContent( new ServletRequestContext( request ) ) )
-        {
-            return request.getParameter( name );
-        }
-
-        // check, whether we alread have the parameters
-        Map params = ( Map ) request.getAttribute( ATTR_FILEUPLOAD );
-        if ( params == null )
-        {
-            // parameters not read yet, read now
-            // Create a factory for disk-based file items
-            DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold( 256000 );
-
-            // Create a new file upload handler
-            ServletFileUpload upload = new ServletFileUpload( factory );
-            upload.setSizeMax( -1 );
-
-            // Parse the request
-            params = new HashMap();
-            try
-            {
-                List items = upload.parseRequest( request );
-                for ( Iterator fiter = items.iterator(); fiter.hasNext(); )
-                {
-                    FileItem fi = ( FileItem ) fiter.next();
-                    FileItem[] current = ( FileItem[] ) params.get( fi.getFieldName() );
-                    if ( current == null )
-                    {
-                        current = new FileItem[]
-                            { fi };
-                    }
-                    else
-                    {
-                        FileItem[] newCurrent = new FileItem[current.length + 1];
-                        System.arraycopy( current, 0, newCurrent, 0, current.length );
-                        newCurrent[current.length] = fi;
-                        current = newCurrent;
-                    }
-                    params.put( fi.getFieldName(), current );
-                }
-            }
-            catch ( FileUploadException fue )
-            {
-                // TODO: log
-            }
-            request.setAttribute( ATTR_FILEUPLOAD, params );
-        }
-
-        FileItem[] param = ( FileItem[] ) params.get( name );
-        if ( param != null )
-        {
-            for ( int i = 0; i < param.length; i++ )
-            {
-                if ( param[i].isFormField() )
-                {
-                    return param[i].getString();
-                }
-            }
-        }
-
-        // no valid string parameter, fail
-        return null;
+        return WebConsoleUtil.getParameter(request, name);
     }
 
     /**
      * Utility method to handle relative redirects.
-     * Some app servers like web sphere handle relative redirects differently
-     * therefore we should make an absolute url before invoking send redirect.
+     * Some application servers like Web Sphere handle relative redirects differently
+     * therefore we should make an absolute URL before invoking send redirect.
+     *
+     * @param request the HTTP request coming from the user
+     * @param response the HTTP response, where data is rendered
+     * @param redirectUrl the redirect URI.
+     * @throws IOException If an input or output exception occurs
+     * @throws IllegalStateException   If the response was committed or if a partial
+     *  URL is given and cannot be converted into a valid URL
+     * @deprecated use {@link WebConsoleUtil#sendRedirect(HttpServletRequest, HttpServletResponse, String)}
      */
     protected void sendRedirect(final HttpServletRequest request,
                                 final HttpServletResponse response,
                                 String redirectUrl) throws IOException {
-        // check for relative url
-        if ( !redirectUrl.startsWith("/") ) {
-            String base = request.getContextPath() + request.getServletPath() + request.getPathInfo();
-            int i = base.lastIndexOf('/');
-            if (i > -1) {
-                base = base.substring(0, i);
-            } else {
-                i = base.indexOf(':');
-                base = (i > -1) ? base.substring(i + 1, base.length()) : "";
-            }
-            if (!base.startsWith("/")) {
-                base = '/' + base;
-            }
-            redirectUrl = base + '/' + redirectUrl;
-
-        }
-        response.sendRedirect(redirectUrl);
+        WebConsoleUtil.sendRedirect(request, response, redirectUrl);
     }
 
     /**
@@ -600,7 +623,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     /**
      * @param brandingPlugin the brandingPlugin to set
      */
-    public static void setBrandingPlugin(BrandingPlugin brandingPlugin) {
+    public static final void setBrandingPlugin(BrandingPlugin brandingPlugin) {
         if(brandingPlugin == null){
             AbstractWebConsolePlugin.brandingPlugin = DefaultBrandingPlugin.getInstance();
         } else {
@@ -609,7 +632,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     }
 
 
-    private String getHeader()
+    private final String getHeader()
     {
         // MessageFormat pattern place holder
         //  0 main title (brand name)
@@ -663,7 +686,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     }
 
 
-    private String getFooter()
+    private final String getFooter()
     {
         // close <div id="main">, body and html
         final String footer = "    </div>"
@@ -673,7 +696,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     }
 
 
-    private String getCssLinks( final String appRoot )
+    private final String getCssLinks( final String appRoot )
     {
         // get the CSS references and return nothing if there are none
         final String[] cssRefs = getCssReferences();
@@ -707,7 +730,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      *          the url.
      * @throws NullPointerException if <code>url</code> is <code>null</code>.
      */
-    private String toUrl( final String url, final String appRoot )
+    private static final String toUrl( final String url, final String appRoot )
     {
         if ( url.startsWith( "/" ) )
         {
@@ -715,4 +738,5 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         }
         return url;
     }
+
 }

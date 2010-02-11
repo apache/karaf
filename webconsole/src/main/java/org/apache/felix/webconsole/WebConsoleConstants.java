@@ -18,7 +18,10 @@
  */
 package org.apache.felix.webconsole;
 
-
+/**
+ * WebConsoleConstants provides some common constants that are used by plugin
+ * developers.
+ */
 public interface WebConsoleConstants
 {
 
