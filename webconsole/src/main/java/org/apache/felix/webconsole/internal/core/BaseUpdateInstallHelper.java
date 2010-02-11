@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.internal.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -80,16 +81,7 @@ abstract class BaseUpdateInstallHelper extends Thread
         }
         finally
         {
-            if ( bundleStream != null )
-            {
-                try
-                {
-                    bundleStream.close();
-                }
-                catch ( IOException ignore )
-                {
-                }
-            }
+            IOUtils.closeQuietly( bundleStream );
         }
 
     }

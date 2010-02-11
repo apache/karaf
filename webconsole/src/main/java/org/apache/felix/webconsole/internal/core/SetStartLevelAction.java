@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.Action;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.BaseManagementPlugin;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -54,13 +55,13 @@ public class SetStartLevelAction extends BaseManagementPlugin implements Action
         StartLevel sl = getStartLevel();
         if ( sl != null )
         {
-            int bundleSL = this.getParameterInt( request, "bundleStartLevel" );
+            int bundleSL = WebConsoleUtil.getParameterInt( request, "bundleStartLevel", -1 );
             if ( bundleSL > 0 && bundleSL != sl.getInitialBundleStartLevel() )
             {
                 sl.setInitialBundleStartLevel( bundleSL );
             }
 
-            int systemSL = this.getParameterInt( request, "systemStartLevel" );
+            int systemSL = WebConsoleUtil.getParameterInt( request, "systemStartLevel", -1 );
             if ( systemSL > 0 && systemSL != sl.getStartLevel() )
             {
                 sl.setStartLevel( systemSL );
@@ -70,19 +71,5 @@ public class SetStartLevelAction extends BaseManagementPlugin implements Action
         return true;
     }
 
-
-    private int getParameterInt( HttpServletRequest request, String name )
-    {
-        try
-        {
-            return Integer.parseInt( request.getParameter( name ) );
-        }
-        catch ( NumberFormatException nfe )
-        {
-            // don't care
-        }
-
-        return -1;
-    }
 
 }

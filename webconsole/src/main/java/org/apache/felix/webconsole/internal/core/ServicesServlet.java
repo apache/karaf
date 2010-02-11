@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONArray;
@@ -280,20 +281,6 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
     }
 
 
-    private void keyVal( JSONWriter jw, String key, Object value ) throws JSONException
-    {
-        if ( key != null && value != null )
-        {
-            jw.object();
-            jw.key( "key" );
-            jw.value( key );
-            jw.key( "value" );
-            jw.value( value );
-            jw.endObject();
-        }
-    }
-
-
     private String propertyAsString( ServiceReference ref, String name )
     {
         Object value = ref.getProperty( name );
@@ -343,19 +330,19 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
             String key = keys[i];
             if ( Constants.SERVICE_PID.equals( key ) )
             {
-                keyVal( jw, "Service PID", service.getProperty( key ) );
+                WebConsoleUtil.keyVal( jw, "Service PID", service.getProperty( key ) );
             }
             else if ( Constants.SERVICE_DESCRIPTION.equals( key ) )
             {
-                keyVal( jw, "Service Description", service.getProperty( key ) );
+                WebConsoleUtil.keyVal( jw, "Service Description", service.getProperty( key ) );
             }
             else if ( Constants.SERVICE_VENDOR.equals( key ) )
             {
-                keyVal( jw, "Service Vendor", service.getProperty( key ) );
+                WebConsoleUtil.keyVal( jw, "Service Vendor", service.getProperty( key ) );
             }
             else if ( !Constants.OBJECTCLASS.equals( key ) && !Constants.SERVICE_ID.equals( key ) )
             {
-                keyVal( jw, key, service.getProperty( key ) );
+                WebConsoleUtil.keyVal( jw, key, service.getProperty( key ) );
             }
 
         }

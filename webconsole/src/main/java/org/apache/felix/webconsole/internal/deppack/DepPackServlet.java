@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONException;
@@ -79,7 +80,7 @@ public class DepPackServlet extends BaseWebConsolePlugin
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
         // get the uploaded data
-        final String action = getParameter( req, Util.PARAM_ACTION );
+        final String action = WebConsoleUtil.getParameter( req, Util.PARAM_ACTION );
         if ( ACTION_DEPLOY.equals( action ) )
         {
             Map params = ( Map ) req.getAttribute( AbstractWebConsolePlugin.ATTR_FILEUPLOAD );
@@ -232,8 +233,8 @@ public class DepPackServlet extends BaseWebConsolePlugin
 
         jw.key( "props" );
         jw.array();
-        keyVal( jw, "Package Name", pack.getName() );
-        keyVal( jw, "Version", pack.getVersion() );
+        WebConsoleUtil.keyVal( jw, "Package Name", pack.getName() );
+        WebConsoleUtil.keyVal( jw, "Version", pack.getVersion() );
 
         final StringBuffer buffer = new StringBuffer();
         for ( int i = 0; i < pack.getBundleInfos().length; i++ )
@@ -243,24 +244,11 @@ public class DepPackServlet extends BaseWebConsolePlugin
             buffer.append( pack.getBundleInfos()[i].getVersion() );
             buffer.append( "<br/>" );
         }
-        keyVal( jw, "Bundles", buffer.toString() );
+        WebConsoleUtil.keyVal( jw, "Bundles", buffer.toString() );
 
         jw.endArray();
 
         jw.endObject();
     }
 
-
-    private void keyVal( JSONWriter jw, String key, Object value ) throws JSONException
-    {
-        if ( key != null && value != null )
-        {
-            jw.object();
-            jw.key( "key" );
-            jw.value( key );
-            jw.key( "value" );
-            jw.value( value );
-            jw.endObject();
-        }
-    }
 }

@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.bundlerepository.*;
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.*;
 import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.Util;
@@ -661,24 +662,24 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
         jw.key( "props" );
         jw.array();
-        keyVal( jw, "Symbolic Name", bundle.getSymbolicName() );
-        keyVal( jw, "Version", headers.get( Constants.BUNDLE_VERSION ) );
-        keyVal( jw, "Bundle Location", bundle.getLocation() );
-        keyVal( jw, "Last Modification", new Date( bundle.getLastModified() ) );
+        WebConsoleUtil.keyVal( jw, "Symbolic Name", bundle.getSymbolicName() );
+        WebConsoleUtil.keyVal( jw, "Version", headers.get( Constants.BUNDLE_VERSION ) );
+        WebConsoleUtil.keyVal( jw, "Bundle Location", bundle.getLocation() );
+        WebConsoleUtil.keyVal( jw, "Last Modification", new Date( bundle.getLastModified() ) );
 
         String docUrl = ( String ) headers.get( Constants.BUNDLE_DOCURL );
         if ( docUrl != null )
         {
-            keyVal( jw, "Bundle Documentation", docUrl );
+            WebConsoleUtil.keyVal( jw, "Bundle Documentation", docUrl );
         }
 
-        keyVal( jw, "Vendor", headers.get( Constants.BUNDLE_VENDOR ) );
-        keyVal( jw, "Copyright", headers.get( Constants.BUNDLE_COPYRIGHT ) );
-        keyVal( jw, "Description", headers.get( Constants.BUNDLE_DESCRIPTION ) );
+        WebConsoleUtil.keyVal( jw, "Vendor", headers.get( Constants.BUNDLE_VENDOR ) );
+        WebConsoleUtil.keyVal( jw, "Copyright", headers.get( Constants.BUNDLE_COPYRIGHT ) );
+        WebConsoleUtil.keyVal( jw, "Description", headers.get( Constants.BUNDLE_DESCRIPTION ) );
 
-        keyVal( jw, "Start Level", getStartLevel( bundle ) );
+        WebConsoleUtil.keyVal( jw, "Start Level", getStartLevel( bundle ) );
 
-        keyVal( jw, "Bundle Classpath", headers.get( Constants.BUNDLE_CLASSPATH ) );
+        WebConsoleUtil.keyVal( jw, "Bundle Classpath", headers.get( Constants.BUNDLE_CLASSPATH ) );
 
         listFragmentInfo( jw, bundle, pluginRoot );
 
@@ -749,11 +750,11 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                     }
                 }
             }
-            keyVal( jw, "Exported Packages", val );
+            WebConsoleUtil.keyVal( jw, "Exported Packages", val );
         }
         else
         {
-            keyVal( jw, "Exported Packages", "None" );
+            WebConsoleUtil.keyVal( jw, "Exported Packages", "None" );
         }
 
         exports = packageAdmin.getExportedPackages( ( Bundle ) null );
@@ -807,7 +808,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 val.put( "None" );
             }
 
-            keyVal( jw, "Imported Packages", val );
+            WebConsoleUtil.keyVal( jw, "Imported Packages", val );
         }
 
         if ( !usingBundles.isEmpty() )
@@ -818,7 +819,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 Bundle usingBundle = ( Bundle ) ui.next();
                 val.put( getBundleDescriptor( usingBundle, pluginRoot ) );
             }
-            keyVal( jw, "Importing Bundles", val );
+            WebConsoleUtil.keyVal( jw, "Importing Bundles", val );
         }
     }
 
@@ -854,11 +855,11 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                     R4Export export = new R4Export( pkgs[i] );
                     collectExport( val, export.getName(), export.getVersion() );
                 }
-                keyVal( jw, "Exported Packages", val );
+                WebConsoleUtil.keyVal( jw, "Exported Packages", val );
             }
             else
             {
-                keyVal( jw, "Exported Packages", "None" );
+                WebConsoleUtil.keyVal( jw, "Exported Packages", "None" );
             }
         }
 
@@ -926,7 +927,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                     val.put( "None" );
                 }
 
-                keyVal( jw, "Imported Packages", val );
+                WebConsoleUtil.keyVal( jw, "Imported Packages", val );
             }
         }
     }
@@ -972,7 +973,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             appendProperty( val, refs[i], Constants.SERVICE_DESCRIPTION, "Description" );
             appendProperty( val, refs[i], Constants.SERVICE_VENDOR, "Vendor" );
 
-            keyVal( jw, key, val);
+            WebConsoleUtil.keyVal( jw, key, val);
         }
     }
 
@@ -993,7 +994,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             val.put( header + ": " + value );
         }
 
-        keyVal( jw, "Manifest Headers", val );
+        WebConsoleUtil.keyVal( jw, "Manifest Headers", val );
     }
 
     private static final String enableLineWrapping(final String value)
@@ -1028,7 +1029,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 {
                     val.put( getBundleDescriptor( hostBundles[i], pluginRoot ) );
                 }
-                keyVal( jw, "Host Bundles", val );
+                WebConsoleUtil.keyVal( jw, "Host Bundles", val );
             }
         }
         else
@@ -1041,7 +1042,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 {
                     val.put( getBundleDescriptor( fragmentBundles[i], pluginRoot ) );
                 }
-                keyVal( jw, "Fragments Attached", val );
+                WebConsoleUtil.keyVal( jw, "Fragments Attached", val );
             }
         }
 
@@ -1068,20 +1069,6 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         {
             dest.append( label ).append( ": " ).append( value );
             array.put(dest.toString());
-        }
-    }
-
-
-    private void keyVal( JSONWriter jw, String key, Object value ) throws JSONException
-    {
-        if ( key != null && value != null )
-        {
-            jw.object();
-            jw.key( "key" );
-            jw.value( key );
-            jw.key( "value" );
-            jw.value( value );
-            jw.endObject();
         }
     }
 

@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONException;
@@ -63,11 +64,12 @@ public class LogServlet extends BaseWebConsolePlugin
 
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
-        final String minLevel = getParameter( req, "minLevel" );
+        final int minLevel = WebConsoleUtil.getParameterInt( req, "minLevel", LogService.LOG_DEBUG );
+
         resp.setContentType( "application/json" );
         resp.setCharacterEncoding( "utf-8" );
 
-        renderJSON( resp.getWriter(), extractLogLevel( minLevel ) );
+        renderJSON( resp.getWriter(), minLevel );
     }
 
 
@@ -125,28 +127,10 @@ public class LogServlet extends BaseWebConsolePlugin
     }
 
 
-    private int extractLogLevel( String minLevel )
-    {
-        if ( minLevel == null )
-            return LogService.LOG_DEBUG;
-
-        int minLogLevel = LogService.LOG_DEBUG;;
-        try
-        {
-            minLogLevel = Integer.parseInt( minLevel );
-        }
-        catch ( Throwable t )
-        {
-            minLogLevel = LogService.LOG_DEBUG;
-        }
-        return minLogLevel;
-    }
-
-
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
-        final String minLevel = getParameter( request, "minLevel" );
+        final int minLevel = WebConsoleUtil.getParameterInt( request, "minLevel", LogService.LOG_DEBUG );
         final String info = request.getPathInfo();
         if ( info.endsWith( ".json" ) )
         {
@@ -154,7 +138,7 @@ public class LogServlet extends BaseWebConsolePlugin
             response.setCharacterEncoding( "UTF-8" );
 
             PrintWriter pw = response.getWriter();
-            this.renderJSON( pw, extractLogLevel( minLevel ) );
+            this.renderJSON( pw, minLevel );
             return;
         }
         super.doGet( request, response );

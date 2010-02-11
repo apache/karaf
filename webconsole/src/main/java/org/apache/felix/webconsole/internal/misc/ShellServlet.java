@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.shell.ShellService;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.osgi.framework.BundleContext;
@@ -71,7 +72,7 @@ public class ShellServlet extends AbstractWebConsolePlugin implements OsgiManage
             String command = request.getParameter( "command" );
 
             pw.print( "<span class=\"consolecommand\">-&gt; " );
-            pw.print( command == null ? "" : escapeHtml( command ) );
+            pw.print( command == null ? "" : WebConsoleUtil.escapeHtml( command ) );
             pw.println( "</span><br />" );
 
             if ( command != null && !"".equals( command ) )
@@ -86,12 +87,12 @@ public class ShellServlet extends AbstractWebConsolePlugin implements OsgiManage
                         true ) );
                     if ( baosOut.size() > 0 )
                     {
-                        pw.print( escapeHtml( new String( baosOut.toByteArray() ) ) );
+                        pw.print( WebConsoleUtil.escapeHtml( new String( baosOut.toByteArray() ) ) );
                     }
                     if ( baosErr.size() > 0 )
                     {
                         pw.print( "<span class=\"error\">" );
-                        pw.print( escapeHtml( new String( baosErr.toByteArray() ) ) );
+                        pw.print( WebConsoleUtil.escapeHtml( new String( baosErr.toByteArray() ) ) );
                         pw.println( "</span>" );
                     }
                 }
@@ -108,7 +109,7 @@ public class ShellServlet extends AbstractWebConsolePlugin implements OsgiManage
             pw.print( "<span class=\"error\">" );
             StringWriter out = new StringWriter();
             t.printStackTrace( new PrintWriter( out, true ) );
-            pw.print( escapeHtml( out.toString() ) );
+            pw.print( WebConsoleUtil.escapeHtml( out.toString() ) );
             pw.println( "</span>" );
         }
     }
@@ -182,42 +183,4 @@ public class ShellServlet extends AbstractWebConsolePlugin implements OsgiManage
         super.deactivate();
     }
 
-
-    protected String escapeHtml( String text )
-    {
-        StringBuffer sb = new StringBuffer();
-        for ( int i = 0; i < text.length(); i++ )
-        {
-            char ch = text.charAt( i );
-            if ( ch == '<' )
-            {
-                sb.append( "&lt;" );
-            }
-            else if ( ch == '>' )
-            {
-                sb.append( "&gt;" );
-            }
-            else if ( ch == '&' )
-            {
-                sb.append( "&amp;" );
-            }
-            else if ( ch == ' ' )
-            {
-                sb.append( "&nbsp;" );
-            }
-            else if ( ch == '\r' )
-            {
-            }
-            else if ( ch == '\n' )
-            {
-                sb.append( "<br />\r\n" );
-            }
-            else
-            {
-                sb.append( ch );
-            }
-        }
-
-        return ( sb.toString() );
-    }
 }

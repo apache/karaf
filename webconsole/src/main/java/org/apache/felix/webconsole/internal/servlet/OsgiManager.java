@@ -42,6 +42,7 @@ import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.Action;
 import org.apache.felix.webconsole.BrandingPlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
@@ -428,7 +429,7 @@ public class OsgiManager extends GenericServlet
     protected boolean handleAction( HttpServletRequest req, HttpServletResponse resp ) throws IOException, ServletException
     {
         // check action
-        String actionName = AbstractWebConsolePlugin.getParameter( req, Util.PARAM_ACTION );
+        String actionName = WebConsoleUtil.getParameter( req, Util.PARAM_ACTION );
         if ( actionName != null )
         {
             Action action = ( Action ) this.operations.get( actionName );
@@ -449,7 +450,7 @@ public class OsgiManager extends GenericServlet
                 }
 
                 // maybe overwrite redirect
-                if ( PARAM_NO_REDIRECT_AFTER_ACTION.equals( AbstractWebConsolePlugin.getParameter( req,
+                if ( PARAM_NO_REDIRECT_AFTER_ACTION.equals( WebConsoleUtil.getParameter( req,
                     PARAM_NO_REDIRECT_AFTER_ACTION ) ) )
                 {
                     resp.setStatus( HttpServletResponse.SC_OK );

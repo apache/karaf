@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
+
 
 /**
  * The <code>DefaultBrandingPlugin</code> class is the default implementation
@@ -129,17 +131,11 @@ public class DefaultBrandingPlugin implements BrandingPlugin
                 props.load( ins );
             }
             catch ( IOException ignore )
-            {
+            { /* ignore - will use defaults */
             }
             finally
             {
-                try
-                {
-                    ins.close();
-                }
-                catch ( IOException ignore )
-                {
-                }
+                IOUtils.closeQuietly( ins );
             }
         }
 
@@ -156,6 +152,11 @@ public class DefaultBrandingPlugin implements BrandingPlugin
     }
 
 
+    /**
+     * Retrieves the shared instance
+     * 
+     * @return the singleton instance of the object
+     */
     public static DefaultBrandingPlugin getInstance()
     {
         if ( instance == null )
@@ -166,54 +167,81 @@ public class DefaultBrandingPlugin implements BrandingPlugin
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getBrandName()
+     */
     public String getBrandName()
     {
         return brandName;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getProductName()
+     */
     public String getProductName()
     {
         return productName;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getProductURL()
+     */
     public String getProductURL()
     {
         return productURL;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getProductImage()
+     */
     public String getProductImage()
     {
         return productImage;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getVendorName()
+     */
     public String getVendorName()
     {
         return vendorName;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getVendorURL()
+     */
     public String getVendorURL()
     {
         return vendorURL;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getVendorImage()
+     */
     public String getVendorImage()
     {
         return vendorImage;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getFavIcon()
+     */
     public String getFavIcon()
     {
         return favIcon;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.BrandingPlugin#getMainStyleSheet()
+     */
     public String getMainStyleSheet()
     {
         return mainStyleSheet;

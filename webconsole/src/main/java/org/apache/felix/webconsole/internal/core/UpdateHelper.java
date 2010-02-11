@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.internal.obr.DeployerThread;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -116,16 +118,7 @@ abstract class UpdateHelper extends BaseUpdateInstallHelper
         }
         finally
         {
-            if ( input != null )
-            {
-                try
-                {
-                    input.close();
-                }
-                catch ( IOException ignore )
-                {
-                }
-            }
+            IOUtils.closeQuietly( input );
         }
 
         // not installed from the bundle location

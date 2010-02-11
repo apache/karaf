@@ -33,6 +33,7 @@ import java.util.zip.ZipInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
@@ -221,16 +222,7 @@ public class LicenseServlet extends AbstractWebConsolePlugin implements OsgiMana
                 }
                 finally
                 {
-                    if ( ins != null )
-                    {
-                        try
-                        {
-                            ins.close();
-                        }
-                        catch ( IOException ignore )
-                        {
-                        }
-                    }
+                    IOUtils.closeQuietly( ins );
                 }
 
                 jw.endArray();
@@ -262,32 +254,16 @@ public class LicenseServlet extends AbstractWebConsolePlugin implements OsgiMana
 
     private String readResource( InputStream resource ) throws IOException
     {
-        Reader r = null;
-        StringBuffer buffer = new StringBuffer();
         try
         {
-            char[] buf = new char[1024];
-            r = new InputStreamReader( resource, "ISO-8859-1" );
-            int num;
-            while ( ( num = r.read( buf ) ) >= 0 )
-            {
-                buffer.append( buf, 0, num );
-            }
+            // return new String(IOUtils.toCharArray(resource, "ISO-8859-1"));
+            // the method below is faster that the one above
+            return new String(IOUtils.toByteArray(resource), "ISO-8859-1");
         }
         finally
         {
-            if ( r != null )
-            {
-                try
-                {
-                    r.close();
-                }
-                catch ( IOException ignore )
-                {
-                }
-            }
+            IOUtils.closeQuietly(resource);
         }
-        return buffer.toString();
     }
 
 

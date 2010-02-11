@@ -522,31 +522,10 @@ public class ConfigurationRender extends BaseWebConsolePlugin
 
 
         // helper method filter the string for "<" before writing
-        private void writeFiltered( final String string )
+        private void writeFiltered( String string )
         {
-            if ( string.indexOf( '<' ) >= 0 )
-            {
-                // TODO: replace with WebConsoleUtil.escapeHtml()
-                // this "convoluted" code replaces "<" by "&lt;"
-                final StringTokenizer tokener = new StringTokenizer( string, "<", true );
-                while ( tokener.hasMoreElements() )
-                {
-                    final String token = tokener.nextToken();
-                    if ( "<".equals( token ) )
-                    {
-                        super.write( "&lt;" );
-                    }
-                    else
-                    {
-                        super.write( token );
-                    }
-                }
-            }
-            else
-            {
-                // no filtering needed write as is
-                super.write( string, 0, string.length() );
-            }
+            string = WebConsoleUtil.escapeHtml(string); // filtering
+            super.write( string, 0, string.length() );
         }
     }
 

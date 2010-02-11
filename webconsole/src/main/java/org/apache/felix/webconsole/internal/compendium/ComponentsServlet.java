@@ -34,6 +34,7 @@ import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONArray;
@@ -416,21 +417,13 @@ public class ComponentsServlet extends BaseWebConsolePlugin
 
     private void keyVal( JSONWriter jw, String key, Object value )
     {
-        if ( key != null && value != null )
+        try
         {
-            try
-            {
-                jw.object();
-                jw.key( "key" );
-                jw.value( key );
-                jw.key( "value" );
-                jw.value( value );
-                jw.endObject();
-            }
-            catch ( JSONException je )
-            {
-                // don't care
-            }
+            WebConsoleUtil.keyVal( jw, key, value );
+        }
+        catch ( JSONException je )
+        {
+            // don't care
         }
     }
 
