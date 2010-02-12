@@ -46,7 +46,7 @@ public class SpringStateListenerFactory implements BundleStateListener.Factory {
     }
 
     public void init() {
-        createListener();
+        getListener();
     }
 
     public void destroy() throws Exception {
@@ -55,7 +55,7 @@ public class SpringStateListenerFactory implements BundleStateListener.Factory {
         }
     }
 
-    public BundleStateListener getListener() {
+    public synchronized BundleStateListener getListener() {
         if (listener == null) {
             listener = createListener();
         }
