@@ -120,45 +120,53 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     public void bundleChanged(BundleEvent bundleEvent) {
             Bundle bundle = bundleEvent.getBundle();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
-                Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
-                while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
-                    URL url = (URL) featuresUrlEnumeration.nextElement();
-                    try {
-                        featuresService.addRepository(url.toURI());
-                        for (Repository repo : featuresService.listRepositories()) {
-                            if (repo.getURI().equals(url.toURI())) {
-                                Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
-                                    featuresService.installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
-                            }
-                        }
-                    } catch (Exception e) {
-                        LOGGER.error("Unable to install features", e);
-                    }
-                }
-            } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
-                Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
-                while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
-                    URL url = (URL) featuresUrlEnumeration.nextElement();
-                    for (Repository repo : featuresService.listRepositories()) {
+                try {
+                    Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
+                    while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
+                        URL url = (URL) featuresUrlEnumeration.nextElement();
                         try {
-                            if (repo.getURI().equals(url.toURI())) {
-                                for (Feature f : repo.getFeatures()) {
-                                    try {
-                                        featuresService.uninstallFeature(f.getName(), f.getVersion());
-                                    } catch (Exception e) {
-                                        LOGGER.error("Unable to uninstall feature: " + f.getName(), e);
-                                    }
+                            featuresService.addRepository(url.toURI());
+                            for (Repository repo : featuresService.listRepositories()) {
+                                if (repo.getURI().equals(url.toURI())) {
+                                    Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
+                                        featuresService.installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
                                 }
                             }
                         } catch (Exception e) {
-                            LOGGER.error("Unable to uninstall features: " + url, e);
+                            LOGGER.error("Unable to install features", e);
                         }
                     }
-                    try {
-                        featuresService.removeRepository(url.toURI());
-                    } catch (URISyntaxException e) {
-                        LOGGER.error("Unable to remove repository: " + url, e);
+                } catch (Exception e) {
+                    // Ignore exceptions thrown when searching or iterating over the bundle entries
+                }
+            } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
+                try {
+                    Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
+                    while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
+                        URL url = (URL) featuresUrlEnumeration.nextElement();
+                        for (Repository repo : featuresService.listRepositories()) {
+                            try {
+                                if (repo.getURI().equals(url.toURI())) {
+                                    for (Feature f : repo.getFeatures()) {
+                                        try {
+                                            featuresService.uninstallFeature(f.getName(), f.getVersion());
+                                        } catch (Exception e) {
+                                            LOGGER.error("Unable to uninstall feature: " + f.getName(), e);
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) {
+                                LOGGER.error("Unable to uninstall features: " + url, e);
+                            }
+                        }
+                        try {
+                            featuresService.removeRepository(url.toURI());
+                        } catch (URISyntaxException e) {
+                            LOGGER.error("Unable to remove repository: " + url, e);
+                        }
                     }
+                } catch (Exception e) {
+                    // Ignore exceptions thrown when searching or iterating over the bundle entries
                 }
             }
     }
