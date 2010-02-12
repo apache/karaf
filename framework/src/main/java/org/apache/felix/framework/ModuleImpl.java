@@ -305,13 +305,30 @@ public class ModuleImpl implements IModule
     {
         if (m_cachedRequirements == null)
         {
-            Map reqMap = new HashMap();
+            List allReqs = new ArrayList();
+            Map pkgMap = new HashMap();
+            Map rbMap = new HashMap();
             for (int i = 0; (m_requirements != null) && i < m_requirements.length; i++)
             {
-                reqMap.put(((Requirement) m_requirements[i]).getTargetName(), m_requirements[i]);
+                if (m_requirements[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                {
+                    pkgMap.put(
+                        ((Requirement) m_requirements[i]).getTargetName(),
+                        m_requirements[i]);
+                }
+                else if (m_requirements[i].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+                {
+                    rbMap.put(
+                        ((Requirement) m_requirements[i]).getTargetName(),
+                        m_requirements[i]);
+                }
+                else
+                {
+                    allReqs.add(m_requirements[i]);
+                }
             }
 
-            // Aggregate host and fragment requirements.
+            // Aggregate host and fragment bundle and package requirements.
             for (int fragIdx = 0;
                 (m_fragments != null) && (fragIdx < m_fragments.length);
                 fragIdx++)
@@ -321,12 +338,11 @@ public class ModuleImpl implements IModule
                     (reqs != null) && (reqIdx < reqs.length);
                     reqIdx++)
                 {
-                    if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
-                        || reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+                    if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
                         // If the current fragment requirement overlaps a previously
                         // added requirement, then calculate a new intersecting requirement.
-                        Requirement req = (Requirement) reqMap.get(
+                        Requirement req = (Requirement) pkgMap.get(
                             ((Requirement) reqs[reqIdx]).getTargetName());
                         if (req != null)
                         {
@@ -337,12 +353,31 @@ public class ModuleImpl implements IModule
                         {
                             req = (Requirement) reqs[reqIdx];
                         }
-                        reqMap.put(req.getTargetName(), req);
+                        pkgMap.put(req.getTargetName(), req);
+                    }
+                    else if (reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+                    {
+                        // If the current fragment requirement overlaps a previously
+                        // added requirement, then calculate a new intersecting requirement.
+                        Requirement req = (Requirement) pkgMap.get(
+                            ((Requirement) reqs[reqIdx]).getTargetName());
+                        if (req != null)
+                        {
+                            req = FelixResolverState.calculateVersionIntersection(
+                                req, (Requirement) reqs[reqIdx]);
+                        }
+                        else
+                        {
+                            req = (Requirement) reqs[reqIdx];
+                        }
+                        rbMap.put(req.getTargetName(), req);
                     }
                 }
             }
+            allReqs.addAll(pkgMap.values());
+            allReqs.addAll(rbMap.values());
             m_cachedRequirements = (IRequirement[])
-                reqMap.values().toArray(new IRequirement[reqMap.size()]);
+                allReqs.toArray(new IRequirement[allReqs.size()]);
         }
         return m_cachedRequirements;
     }
