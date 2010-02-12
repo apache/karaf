@@ -129,6 +129,8 @@ public class OracleJDBCLock implements Lock {
             result = statement.execute();
         } catch (Exception e) {
             LOG.warning("Could not obtain connection: " + e.getMessage());
+            lockConnection.close();
+            lockConnection = null;
         } finally {
             if (null != statement) {
                 try {
@@ -157,14 +159,10 @@ public class OracleJDBCLock implements Lock {
                 LOG.severe("Could not set DB update cursor");
                 return result;
             }
-            LOG.fine("OracleJDBCLock#lock:: have set Update Cursor, now do update");
-            long time = System.currentTimeMillis();
-            statement = lockConnection.prepareStatement(statements.getLockUpdateStatement(time));
-            int rows = statement.executeUpdate();
-            LOG.fine("OracleJDBCLock#lock:: Number of update rows: " + rows);
-            if (rows >= 1) {
-                result=true;
-            }
+            LOG.fine("OracleJDBCLock#lock:: have set Update Cursor, now perform query");
+            String up = "SELECT * FROM " + table;
+            statement = lockConnection.prepareStatement(up);
+            return statement.execute();
         } catch (Exception e) {
             LOG.warning("Failed to acquire database lock: " + e.getMessage());
         }finally {
@@ -198,28 +196,7 @@ public class OracleJDBCLock implements Lock {
             LOG.severe("Lost lock!");
             return false; 
         }
-        PreparedStatement statement = null;
-        boolean result = true;
-        try { 
-            long time = System.currentTimeMillis();
-            statement = lockConnection.prepareStatement(statements.getLockUpdateStatement(time));
-            int rows = statement.executeUpdate();
-            if (rows < 1) {
-                result = false;
-            }
-        } catch (Exception ex) {
-            LOG.severe("Error occured while testing lock: " + ex + " " + ex.getMessage());
-            return false;
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (Exception ex1) {
-                    LOG.severe("Error occured after testing lock: " + ex1.getMessage());
-                }
-            }
-        }
-        return result;
+        return true;
     }
 
     /**
