@@ -667,7 +667,7 @@ public class ModuleImpl implements IModule
         // We do not call getClassLoader().loadClass() for arrays because
         // it does not correctly handle array types, which is necessary in
         // cases like deserialization using a wrapper class loader.
-        if (name.charAt(0) == '[')
+        if ((name != null) && (name.length() > 0) && (name.charAt(0) == '['))
         {
             return Class.forName(name, false, getClassLoader());
         }
