@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>Apache Felix - Apache Felix Shell TUI</title>
+
+
+  
+    
+    <link rel="stylesheet" href="apache-felix-shell-tui_files/site.css" type="text/css" media="all">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></head><body>
+    <div class="title"><div class="logo"><a href="http://felix.apache.org/site/index.html"><img alt="Apache Felix" src="apache-felix-shell-tui_files/logo.png" border="0"></a></div><div class="header"><a href="http://www.apache.org/"><img alt="Apache" src="apache-felix-shell-tui_files/apache.png" border="0"></a></div></div>
+    <div class="menu">
+<ul>
+	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
+	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
+	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="apache-felix-shell-tui_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
+	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
+	<li><a href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</a></li>
+	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<sup><img class="rendericon" src="apache-felix-shell-tui_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="apache-felix-shell-tui_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="apache-felix-shell-tui_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>
+<!-- ApacheCon Ad -->
+<iframe src="apache-felix-shell-tui_files/button.html" style="border-width: 0pt; float: left;" frameborder="0" height="135" scrolling="no" width="135"></iframe>
+<p style="height: 100px;">
+<!-- ApacheCon Ad -->
+</p></li></ul> </div>
+    <div class="main">
+<h1><a name="ApacheFelixShellTUI-ApacheFelixShellTUI"></a>Apache Felix Shell TUI</h1>
+<p>The Apache Felix Shell TUI (Textual User Interface) sub-project provides a simple, text-based user interface for the <a href="/confluence/display/FELIX/Apache+Felix+Shell+Service" title="Apache Felix Shell Service">Apache Felix Shell Service</a>. This bundle is not of much use by itself and should always be used in conjunction with the shell service bundle. The shell service and shell TUI bundles are used by the standard Felix launcher to provide a means for interacting with the launched Felix framework instance. The shell TUI bundle is not required to use the shell service; it is possible to use it programmatically, via a GUI interface, or a remote access interface.</p>
+
+<p>Shell TUI supports one configuration property:</p>
+
+<ul>
+	<li><tt>shell.tui.checkinput</tt> &#45; This is a simple workaround for a JRE bug which can appear when running Shell TUI inside Eclipse; the default value is <tt>false</tt>. Note that if this workaround is enabled, when running from the command line under Windows, character input is not echoed back to the screen.</li>
+</ul>
+
+
+<p>To set this property, add it to the <tt>conf/config.properties</tt> file of your Felix installation.</p>
+
+    </div>
+  </body></html>

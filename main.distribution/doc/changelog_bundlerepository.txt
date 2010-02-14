@@ -1,0 +1,95 @@
+Changes from 1.4.2 to 1.4.3
+---------------------------
+
+** Bug
+    * [FELIX-1792] - Felix OBR seems to just randomly choose one of the satisifed bundles if more than one bundle meets the requirement
+
+
+Changes from 1.4.1 to 1.4.2
+---------------------------
+
+** Task
+    * [FELIX-1617] - Modify framework, main, shell, shell.tui, and obr to depend on official OSGi JAR files
+
+Changes from 1.4.0 to 1.4.1
+---------------------------
+
+** Bug
+    * [FELIX-1000] - Updating an bundle which was installed via OBR fails
+    * [FELIX-1157] - NPE results in OBR if a resource does not have a presentation name
+    * [FELIX-1433] - java.lang.NumberFormatException in Bundle-Version (org.osgi.framework.Version) due to trailing whitespace
+
+Changes from 1.2.1 to 1.4.0
+---------------------------
+** Bug
+    * [FELIX-973] - FilterImpl from Felix Framework does not support none LDAP operators
+    * [FELIX-977] - Bundle resolving runs extreme long
+    * [FELIX-999] - The OBR ResolverImpl shouldn't try to start fragment bundles
+
+** Improvement
+    * [FELIX-884] - OBR should expose registered services as capabilities of local repository
+    * [FELIX-887] - Ensure BundleListeners are not forgotten about
+    * [FELIX-940] - Add support for execution environment
+    * [FELIX-986] - Include the symbolicname in the output of obr list -v
+
+** New Feature
+    * [FELIX-976] - OBR update-url shell command
+
+Changes from 1.2.0 to 1.2.1
+---------------------------
+* [2008-10-24] Fixed potential NPE when comparing resources. (FELIX-789)
+* [2008-10-24] Removed the default repository URL from OBR, so now it must 
+  be configured to have a repository. (FELIX-481)
+* [2008-10-24] Print message if there are no matching bundles. (FELIX-785)
+* [2008-10-23] Modified the OBR shell command to hide multiple versions of 
+  available artifacts to cut down on noise. It is still possible to list 
+  all versions by using a new "-v" switch.
+* [2008-09-29] Adapt Bundle-DocURL header to modified URL
+
+
+Changes from 1.0.3 to 1.2.0
+---------------------------
+
+* [2008-08-30] Prevent issues when updating running bundles. (FELIX-701)
+* [2008-08-28] Prevent NullPointerException if a locally installed bundle
+  does not have a Bundle-SymbolicName or version. (FELIX-108)
+* [2008-08-12] Added OBR descriptor and updated to the newest bundle plugin. (FELIX-672)
+* [2008-07-31] Use LogService instead of System.err. (FELIX-482)
+* [2008-07-21] Modified OBR to correctly consider the namespace attribute 
+  when matching capabilities to requirements. (FELIX-638)
+* [2008-06-26] Implement referral with hop count support. (FELIX-399)
+* [2008-05-09] Return an empty resource array when querying with a filter
+  with invalid syntax. (FELIX-480)
+* [2008-05-09] Fixed improper synchronization with respect to visibility rules.
+* [2008-05-09] Ignore resources with invalid filters. (FELIX-484)
+* [2008-05-09] Move repository URL list initialization to a later time to 
+  avoid the default repository URL if it is not desired. (FELIX-485)
+
+Changes from 1.0.2 to 1.0.3
+---------------------------
+
+* [2008-04-21] Re-release to make bytecode executable on jre 1.3.
+
+Changes from 1.0.0 to 1.0.2
+---------------------------
+
+* [2008-01-27] Change the default url from sf.net to sourceforge.net.
+* [2007-10-25] Add support for zipped repository files. (FELIX-410)
+* [2007-10-03] Updated OBR's VersionRange to match the Framework's VersionRange
+  and now accept whitespace in its version range. (FELIX-389)
+* [2007-09-24] Extract OSGi OBR service API to a non-bundle jar to avoid 
+  circular build problems.
+
+Changes from 0.8.0-incubator to 1.0.0
+-------------------------------------
+
+* [2007-03-16] Correctly initialized member fields to avoid incorrectly
+  assigning the source and license URLs. (FELIX-242)
+* [2007-03-19] Parent POM extends Apache POM for Apache-wide policies.
+  (FELIX-260)
+* [2007-05-18] Improved OBR dependency resolution by searching resolving
+  bundles before local bundles and to search through all available
+  candidates to find one that can resolve instead of picking one and failing
+  if it cannot be resolved. (FELIX-285)
+* [2007-07-13] Fixed LDAP filter syntax bug when using inclusive version
+  ranges. (FELIX-327)

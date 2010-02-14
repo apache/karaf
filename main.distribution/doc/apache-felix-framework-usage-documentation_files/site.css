@@ -1,0 +1,25 @@
+/* @override http://felix.apache.org/site/media.data/site.css */
+
+body { background-color: #ffffff; color: #3b3b3b; font-family: Tahoma, Arial, sans-serif; font-size: 10pt; line-height: 140% }
+h1, h2, h3, h4, h5, h6 { font-weight: normal; color: #000000; line-height: 100%; margin-top: 0px}
+h1 { font-size: 200% }
+h2 { font-size: 175% }
+h3 { font-size: 150% }
+h4 { font-size: 140% }
+h5 { font-size: 130% }
+h6 { font-size: 120% }
+a { color: #1980af }
+a:visited { color: #1980af }
+a:hover { color: #1faae9 }
+.title { position: absolute; left: 1px; right: 1px; top:25px; height: 81px; background: url(http://felix.apache.org/site/media.data/gradient.png) repeat-x; background-position: bottom; }
+.logo { position: absolute; width: 15em; height: 81px; text-align: center; }
+.header { text-align: right; margin-right: 20pt; margin-top: 30pt;}
+.menu { border-top: 10px solid #f9bb00; position: absolute; top: 107px; left: 1px; width: 15em; bottom: 0px; padding: 0px; background-color: #fcfcfc }
+.menu ul { background-color: #fdf5d9; list-style: none; padding-left: 4em; margin-top: 0px; padding-top: 2em; padding-bottom: 2em; margin-left: 0px; color: #4a4a43}
+.menu a { text-decoration: none; color: #4a4a43 }
+.main { position: absolute; border-top: 10px solid #cde0ea; top: 107px; left: 15em; right: 1px; margin-left: 2px; padding-right: 4em; padding-left: 1em; padding-top: 1em;}
+.code { background-color: #eeeeee; border: solid 1px black; padding: 0.5em }
+.code-keyword { color: #880000 }
+.code-quote { color: #008800 }
+.code-object { color: #0000dd }
+.code-java { margin: 0em }
