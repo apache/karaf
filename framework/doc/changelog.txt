@@ -1,3 +1,14 @@
+Changes from 2.0.3 to 2.0.4
+---------------------------
+
+** Bug
+    * [FELIX-2056] - URLHandlersStreamHandler not getting handlers from frameworks that are inside a different classloader
+    * [FELIX-2067] - Fragment bundle ignored silently when the host Bundle-SymbolicName equals import package name
+    * [FELIX-2073] - The System Bundle is not providing WS Addressing
+
+** Improvement
+    * [FELIX-2071] - Missing checks inside ModuleImpl (in Framework) which causes exceptions
+
 Changes from 2.0.2 to 2.0.3
 ---------------------------
 
