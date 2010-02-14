@@ -140,6 +140,27 @@ public class AnnotationTest implements Sequencer
         m_ensure.waitForStep(2, 10000);
     }
 
+    @Test
+    public void testAspectWithLifecycleAnnotation(BundleContext context)
+    {
+        m_ensure = new Ensure();
+        DependencyManager m = new DependencyManager(context);
+        // We provide ourself as a "Sequencer" service: this will active the org.apache.felix.dependencymanager.test.annotation.AspectTest service
+        Dictionary props = new Hashtable() {{ put("test", "aspectLifecycle.ServiceProvider"); }};
+        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
+        // Check if the ServiceProvider has been injected in the AspectTest service.
+        m_ensure.waitForStep(1, 10000);
+        // Provide the Sequencer for activating the ServiceProviderAspect service
+        props = new Hashtable() {{ put("test", "aspectLifecycle.ServiceProviderAspect"); }};
+        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
+        // Check if the AspectTest has been injected with the aspect
+        m_ensure.waitForStep(3, 10000);
+        // Stop the test.annotation bundle.
+        stopAnnotationBundle(context);
+        // And check if the aspect has been called in its stop/destroy methods.
+        m_ensure.waitForStep(6, 10000);
+    }
+
     private void sleep(int i)
     {
         try {
