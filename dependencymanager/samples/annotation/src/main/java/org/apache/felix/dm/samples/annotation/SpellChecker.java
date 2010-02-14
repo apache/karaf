@@ -23,6 +23,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
+import org.apache.felix.dm.annotation.api.Start;
+import org.apache.felix.dm.annotation.api.Stop;
 import org.apache.felix.shell.Command;
 import org.osgi.service.log.LogService;
 
@@ -53,7 +55,23 @@ public class SpellChecker implements Command
     {
         m_dictionaries.add(dictionary);
     }
-
+    
+    /**
+     * Lifecycle method callback, used to check if our service has been activated.
+     */
+    @Start
+    protected void start() {
+        m_log.log(LogService.LOG_WARNING, "Spell Checker started");
+    }
+    
+    /**
+     * Lifecycle method callback, used to check if our service has been activated.
+     */
+    @Stop
+    protected void stop() {
+        m_log.log(LogService.LOG_WARNING, "Spell Checker stopped");
+    }
+        
     /**
      * Remove a dictionary from our service.
      * @param dictionary
