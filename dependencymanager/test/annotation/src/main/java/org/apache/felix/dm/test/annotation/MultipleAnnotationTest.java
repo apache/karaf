@@ -78,11 +78,13 @@ public class MultipleAnnotationTest
     {
         @ServiceDependency(filter = "(test=multiple)")
         Sequencer m_sequencer;
+        
+        ServiceProvider2 m_serviceProvider2;
 
         @ServiceDependency(removed = "unbind")
         void bind(ServiceProvider2 provider2)
         {
-            m_sequencer.step(4);
+            m_serviceProvider2 = provider2;
         }
 
         void unbind(ServiceProvider2 provider2)
@@ -93,6 +95,9 @@ public class MultipleAnnotationTest
         @Start
         void start()
         {
+            if (m_serviceProvider2 != null) {
+                m_sequencer.step(4);
+            }
             m_sequencer.step(5);
         }
 
