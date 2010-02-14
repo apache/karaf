@@ -263,12 +263,11 @@ public class ComponentManager implements SynchronousBundleListener
         }
 
         // Set service callbacks
-        String init = parser.getString(DescriptorParam.init, null);
-        String start = parser.getString(DescriptorParam.start, null);
-        String stop = parser.getString(DescriptorParam.stop, null);
-        String destroy = parser.getString(DescriptorParam.destroy, null);
-        service.setCallbacks(init, start, stop, destroy);
-
+        setServiceCallbacks(service, parser);
+        
+        // Set composition
+        setServiceComposition(service, parser);
+        
         // Set service interface with associated service properties
         Dictionary<String, String> serviceProperties = parser.getDictionary(
             DescriptorParam.properties, null);
@@ -278,13 +277,54 @@ public class ComponentManager implements SynchronousBundleListener
             service.setInterface(provides, serviceProperties);
         }
 
-        // Set Composition
+        return service;
+    }
+
+    /**
+     * Set Service callbacks, if provided from our Component descriptor
+     * @param service
+     * @param parser
+     */
+    private void setServiceCallbacks(Service service, DescriptorParser parser)
+    {
+        String init = parser.getString(DescriptorParam.init, null);
+        String start = parser.getString(DescriptorParam.start, null);
+        String stop = parser.getString(DescriptorParam.stop, null);
+        String destroy = parser.getString(DescriptorParam.destroy, null);
+        service.setCallbacks(init, start, stop, destroy);
+    }
+
+    /**
+     * Sets Service Composition, if provided from our Component descriptor.
+     * @param service
+     * @param parser
+     */
+    private void setServiceComposition(Service service, DescriptorParser parser)
+    {
         String composition = parser.getString(DescriptorParam.composition, null);
         if (composition != null)
         {
             service.setComposition(composition);
         }
+    }
 
+    /**
+     * Creates an Aspect Service.
+     * @param b
+     * @param dm
+     * @param parser
+     * @return
+     */
+    private Service createAspectService(Bundle b, DependencyManager dm, DescriptorParser parser)
+        throws ClassNotFoundException
+    {
+        Class<?> serviceInterface = b.loadClass(parser.getString(DescriptorParam.service));
+        String serviceFilter = parser.getString(DescriptorParam.filter, null);
+        Class<?> aspectImplementation = b.loadClass(parser.getString(DescriptorParam.impl));
+        Dictionary<String, String> aspectProperties = parser.getDictionary(DescriptorParam.properties, null);
+        Service service = dm.createAspectService(serviceInterface, serviceFilter, aspectImplementation, aspectProperties);
+        setServiceCallbacks(service, parser);
+        setServiceComposition(service, parser);
         return service;
     }
 
@@ -375,23 +415,5 @@ public class ComponentManager implements SynchronousBundleListener
         String callback = parser.getString(DescriptorParam.updated, "updated");
         cd.setCallback(callback);
         return cd;
-    }
-
-    /**
-     * Creates an Aspect Service.
-     * @param b
-     * @param dm
-     * @param parser
-     * @return
-     */
-    private Service createAspectService(Bundle b, DependencyManager dm, DescriptorParser parser)
-        throws ClassNotFoundException
-    {
-        Class<?> serviceInterface = b.loadClass(parser.getString(DescriptorParam.service));
-        String serviceFilter = parser.getString(DescriptorParam.filter, null);
-        Class<?> aspectImplementation = b.loadClass(parser.getString(DescriptorParam.impl));
-        Dictionary<String, String> aspectProperties = parser.getDictionary(DescriptorParam.properties, null);
-        Service service = dm.createAspectService(serviceInterface, serviceFilter, aspectImplementation, aspectProperties);
-        return service;
     }
 }
