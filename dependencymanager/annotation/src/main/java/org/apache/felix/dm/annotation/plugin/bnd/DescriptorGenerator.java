@@ -94,12 +94,14 @@ public class DescriptorGenerator extends Processor
                 // Let's parse all annotations from that class !
                 AnnotationCollector reader = new AnnotationCollector(this, metaType);
                 c.parseClassFileWithCollector(reader);
-                reader.finish();
-                // And store the generated component descriptors in our resource list.
-                String name = c.getFQN();
-                Resource resource = createComponentResource(reader);
-                m_resources.put("OSGI-INF/dependencymanager/" + name, resource);
-                annotationsFound = true;
+                if (reader.finish()) 
+                {
+                    // And store the generated component descriptors in our resource list.
+                    String name = c.getFQN();
+                    Resource resource = createComponentResource(reader);
+                    m_resources.put("OSGI-INF/dependencymanager/" + name, resource);
+                    annotationsFound = true;
+                }
             }
 
             // If some Meta Types have been parsed, then creates the corresponding resource file.

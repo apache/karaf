@@ -79,8 +79,13 @@ public class AnnotationCollector extends ClassDataCollector
     private String m_method;
     private String m_descriptor;
     private Set<String> m_methods = new HashSet<String>();
-    private List<Info> m_infos = new ArrayList<Info>();
+    private List<Info> m_infos = new ArrayList<Info>(); // Last elem is either Service or AspectService
     private MetaType m_metaType;
+    private String m_startMethod;
+    private String m_stopMethod;
+    private String m_initMethod;
+    private String m_destroyMethod;
+    private String m_compositionMethod;
 
     // Pattern used to parse the class parameter from the bind methods ("bind(Type)" or "bind(Map, Type)")
     private final static Pattern m_bindClassPattern = Pattern.compile("\\((Ljava/util/Map;)?L([^;]+);\\)V");
@@ -264,7 +269,6 @@ public class AnnotationCollector extends ClassDataCollector
     public AnnotationCollector(Reporter reporter, MetaType metaType)
     {
         m_reporter = reporter;
-        m_infos.add(new Info(EntryTypes.Service));
         m_metaType = metaType;
     }
 
@@ -335,35 +339,39 @@ public class AnnotationCollector extends ClassDataCollector
     public void annotation(Annotation annotation)
     {
         m_reporter.trace("Parsed annotation: %s", annotation);
-
-        if (annotation.getName().equals(A_INIT))
+        
+        if (annotation.getName().equals(A_SERVICE))
+        {
+            parseServiceAnnotation(annotation);
+        } 
+        else if (annotation.getName().equals(A_ASPECT_SERVICE))
+        {
+            parseAspectService(annotation);
+        }
+        else if (annotation.getName().equals(A_INIT))
         {
             checkMethod(m_voidMethodPattern);
-            m_infos.get(0).m_params.put(Params.init, m_method);
+            m_initMethod = m_method;
         }
         else if (annotation.getName().equals(A_START))
         {
             checkMethod(m_voidMethodPattern);
-            m_infos.get(0).m_params.put(Params.start, m_method);
+            m_startMethod = m_method;
         }
         else if (annotation.getName().equals(A_STOP))
         {
             checkMethod(m_voidMethodPattern);
-            m_infos.get(0).m_params.put(Params.stop, m_method);
+            m_stopMethod = m_method;
         }
         else if (annotation.getName().equals(A_DESTROY))
         {
             checkMethod(m_voidMethodPattern);
-            m_infos.get(0).m_params.put(Params.destroy, m_method);
+            m_destroyMethod = m_method;
         }
         else if (annotation.getName().equals(A_COMPOSITION))
         {
             checkMethod(m_methodCompoPattern);
-            m_infos.get(0).m_params.put(Params.composition, m_method);
-        }
-        else if (annotation.getName().equals(A_SERVICE))
-        {
-            parseServiceAnnotation(annotation);
+            m_compositionMethod = m_method;
         }
         else if (annotation.getName().equals(A_SERVICE_DEP))
         {
@@ -381,10 +389,6 @@ public class AnnotationCollector extends ClassDataCollector
         {
             parsePropertiesMetaData(annotation);
         }
-        else if (annotation.getName().equals(A_ASPECT_SERVICE))
-        {
-            parseAspectService(annotation);
-        }
     }
 
     /**
@@ -393,7 +397,12 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseServiceAnnotation(Annotation annotation)
     {
-        Info info = m_infos.get(0);
+        Info info = new Info(EntryTypes.Service);
+        m_infos.add(info);
+
+        // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
+        addInitStartStopDestroyCompositionParams(info);
+        
         // impl attribute
         info.addParam(Params.impl, m_className);
 
@@ -408,6 +417,30 @@ public class AnnotationCollector extends ClassDataCollector
 
         // factoryMethod attribute
         info.addParam(annotation, Params.factoryMethod, null);
+    }
+
+    private void addInitStartStopDestroyCompositionParams(Info info)
+    {
+        if (m_initMethod != null) {
+            info.addParam(Params.init, m_initMethod);
+        }
+        
+        if (m_startMethod != null) {
+            info.addParam(Params.start, m_startMethod);
+        }
+        
+        if (m_stopMethod != null) {
+            info.addParam(Params.stop, m_stopMethod);
+        }
+        
+        if (m_destroyMethod != null) {
+            info.addParam(Params.destroy, m_destroyMethod);
+        }
+        
+        // Register Composition method
+        if (m_compositionMethod != null) {
+            info.addParam(Params.composition, m_compositionMethod);
+        }        
     }
 
     /**
@@ -541,8 +574,11 @@ public class AnnotationCollector extends ClassDataCollector
     private void parseAspectService(Annotation annotation)
     {
         Info info = new Info(EntryTypes.AspectService);
-        m_infos.set(0, info);
+        m_infos.add(info);
 
+        // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
+        addInitStartStopDestroyCompositionParams(info);
+        
         // Parse Service interface.
         Object service = annotation.get(Params.service.toString());
         if (service == null) {
@@ -628,6 +664,34 @@ public class AnnotationCollector extends ClassDataCollector
                 + m_descriptor);
         }
     }
+    
+    /**
+     * Checks if the class is annotated with some given annotations. Notice that the Service
+     * is always parsed at end of parsing, so, we have to check the last element of our m_infos
+     * List.
+     * @return true if one of the provided annotations has been found from the parsed class.
+     */
+    private void checkServiceDeclared(EntryTypes ... types) {
+        boolean ok = false;
+        if (m_infos.size() > 0)
+        {
+            for (EntryTypes type : types)
+            {
+                if (m_infos.get(m_infos.size() - 1).m_entry == type)
+                {
+                    ok = true;
+                    break;
+                }
+            }
+        }
+
+        if (!ok)
+        {
+            throw new IllegalStateException(
+                ": the class must be annotated with either one of the following types: "
+                    + Arrays.toString(types));
+        }
+    }
 
     /**
      * Get an annotation attribute, and return a default value if its not present.
@@ -645,28 +709,40 @@ public class AnnotationCollector extends ClassDataCollector
 
     /**
      * Finishes up the class parsing. This method must be called once the parseClassFileWithCollector method has returned.
+     * @return true if some annotations have been parsed, false if not.
      */
-    public void finish()
+    public boolean finish()
     {
+        if (m_infos.size() == 0)
+        {
+            return false;
+        }
+
+        // We must have at least a Service or an AspectService annotation.
+        checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService);
+
         StringBuilder sb = new StringBuilder();
         sb.append("Parsed annotation for class ");
         sb.append(m_className);
-        for (Info info : m_infos)
+        for (int i = m_infos.size() - 1; i >= 0; i--)
         {
-            sb.append("\n\t").append(info.toString());
+            sb.append("\n\t").append(m_infos.get(i).toString());
         }
         m_reporter.warning(sb.toString());
+        return true;
     }
 
     /**
-     * Writes the generated component descriptor in the given print writer
+     * Writes the generated component descriptor in the given print writer.
+     * The first line must be the service (@Service or AspectService).
      * @param pw the writer where the component descriptor will be written.
      */
     public void writeTo(PrintWriter pw)
     {
-        for (Info info : m_infos)
+        // The last element our our m_infos list contains either the Service, or the AspectService descriptor.
+        for (int i = m_infos.size() - 1; i >= 0; i--)
         {
-            pw.println(info.toString());
+            pw.println(m_infos.get(i).toString());
         }
     }
 }
