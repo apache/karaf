@@ -583,7 +583,7 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
             }
             else
             {
-                m_action.invoke(
+                service = m_action.invoke(
                     m_action.getMethod(framework.getClass(), "getStreamHandlerService", STRING_TYPES), 
                     framework, new Object[]{m_protocol});
             }
