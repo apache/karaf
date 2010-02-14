@@ -109,10 +109,10 @@
   <properties>
     <log.level>4</log.level>
     <dollar>$</dollar>
-    <framework.version>2.1.0-SNAPSHOT</framework.version>
-    <shell.version>1.5.0-SNAPSHOT</shell.version>
+    <framework.version>2.0.3</framework.version>
+    <shell.version>1.4.2</shell.version>
     <shell.tui.version>1.4.1</shell.tui.version>
-    <obr.version>1.5.0-SNAPSHOT</obr.version>
+    <obr.version>1.4.3</obr.version>
   </properties>
   <profiles>
     <profile>
@@ -240,25 +240,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-        <execution>
-            <id>assemble</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly.xml</descriptor>
-          </descriptors>
-          <appendAssemblyId>false</appendAssemblyId>
-          <finalName>felix-framework-${framework.version}</finalName>
-        </configuration>
-        </execution>
-        </executions>
-      </plugin>
     </plugins>
     <resources>
       <resource>
@@ -268,9 +249,4 @@
     </resources> 
   </build>
 
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main-2.0.3</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main-2.0.3</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main-2.0.3</url>
-  </scm>
 </project>
