@@ -16,8 +16,35 @@
  */
 package org.apache.felix.karaf.shell.commands;
 
+import java.util.List;
+
+import jline.History;
+import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
+import org.fusesource.jansi.Ansi;
+
 /**
- * TODO
+ * History command
  */
-public class HistoryAction {
+@Command(scope = "shell", name="history", description="Prints command history")
+public class HistoryAction extends OsgiCommandSupport {
+
+    @Override
+    protected Object doExecute() throws Exception {
+        History history = (History) session.get(".jline.history");
+        List<String> elements = history.getHistoryList();
+
+        int i = 0;
+        for (String element : elements) {
+            System.out.println(
+                    Ansi.ansi()
+                        .a("  ")
+                        .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", i).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                        .a("  ")
+                        .a(element)
+                        .toString());
+            i++;
+        }
+        return null;
+    }
 }

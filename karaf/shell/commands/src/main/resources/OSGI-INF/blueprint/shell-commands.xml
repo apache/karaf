@@ -35,11 +35,9 @@
         <command name="shell/grep">
             <action class="org.apache.felix.karaf.shell.commands.GrepAction"/>
         </command>
-        <!--
         <command name="shell/history">
             <action class="org.apache.felix.karaf.shell.commands.HistoryAction"/>
         </command>
-        -->
         <command name="shell/if">
             <action class="org.apache.felix.karaf.shell.commands.IfAction"/>
         </command>
