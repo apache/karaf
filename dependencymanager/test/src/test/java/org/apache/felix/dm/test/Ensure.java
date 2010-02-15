@@ -57,6 +57,17 @@ public class Ensure {
         }
         notifyAll();
     }
+    
+    /**
+     * Mark this point as the next step.
+     */
+    public synchronized void step() {
+        step++;
+        if (DEBUG) {
+            STREAM.println("[Ensure " + INSTANCE + "] next step " + step);
+        }
+        notifyAll();
+    }
 
     /**
      * Wait until we arrive at least at step <code>nr</code> in the process, or fail if that
