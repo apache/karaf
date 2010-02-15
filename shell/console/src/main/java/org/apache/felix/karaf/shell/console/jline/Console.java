@@ -102,6 +102,7 @@ public class Console implements Runnable
         File file = new File(System.getProperty("user.home"), ".karaf/karaf.history");
         file.getParentFile().mkdirs();
         reader.getHistory().setHistoryFile(file);
+        session.put(".jline.history", reader.getHistory());
         if (completer != null) {
             reader.addCompletor(
                 new CompleterAsCompletor(
