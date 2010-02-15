@@ -27,7 +27,7 @@
   <packaging>pom</packaging>
   <name>Apache Felix Main Distribution</name>
   <artifactId>org.apache.felix.main.distribution</artifactId>
-  <version>2.0.4</version>
+  <version>2.1.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -135,10 +135,4 @@
       </resource>
     </resources> 
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main.distribution-2.0.4</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main.distribution-2.0.4</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main.distribution-2.0.4</url>
-  </scm>
 </project>
