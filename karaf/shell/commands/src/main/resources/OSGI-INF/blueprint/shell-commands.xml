@@ -57,6 +57,11 @@
             <action class="org.apache.felix.karaf.shell.commands.MoreAction"/>
         </command>
         -->
+        <command name="shell/new">
+            <action class="org.apache.felix.karaf.shell.commands.NewAction">
+                <property name="blueprintConverter" ref="blueprintConverter"/>
+            </action>
+        </command>
         <command name="shell/logout">
             <action class="org.apache.felix.karaf.shell.commands.LogoutAction"/>
         </command>
