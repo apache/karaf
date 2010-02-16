@@ -409,6 +409,26 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
                     cap.setName("package");
                     cap.addP(new PropertyImpl("package", null, pkgs[pkgIdx].getName()));
                     cap.addP(new PropertyImpl("version", "version", pkgs[pkgIdx].getVersion().toString()));
+                    for (int i = 0; i < pkgs[pkgIdx].getAttributes().length; i++)
+                    {
+                        R4Attribute attribute = pkgs[pkgIdx].getAttributes()[i];
+                        String key = attribute.getName();
+                        if (key.equalsIgnoreCase("specification-version")
+                                || key.equalsIgnoreCase("version"))
+                            continue;
+                        else
+                        {
+                            Object value = attribute.getValue();
+                            cap.addP(key, value);
+                        }
+                    }
+                    for (int i = 0; i < pkgs[pkgIdx].getDirectives().length; i++)
+                    {
+                        R4Directive directive = pkgs[pkgIdx].getDirectives()[i];
+                        String key = directive.getName();
+                        Object value = directive.getValue();
+                        cap.addP(key, value);
+                    }
                     addCapability(cap);
                 }
             }
