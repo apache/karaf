@@ -350,7 +350,7 @@ public class FilterImpl implements Filter
                         }
                     }
                 }
-                else if (numClass.isArray())
+                else if (numClass != null && numClass.isArray())
                 {
                     int len = Array.getLength(obj);
                     for (int i = 0; i < len; i++)
@@ -425,6 +425,7 @@ public class FilterImpl implements Filter
             }
             catch (Exception e)
             {
+                e.printStackTrace();
             }
             return false;
         }

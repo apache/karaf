@@ -70,7 +70,7 @@ public class FilterImplTest extends TestCase {
         dict.put("package", "org.eclipse.core.runtime");
         dict.put("version", "0.0.0");
         dict.put("common", "split");
-        assertFalse(filterImpl.match(dict));
+        assertTrue(filterImpl.match(dict));
 
         filterImpl = new FilterImpl("(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:*>common))");
         dict = new Hashtable();
@@ -116,5 +116,4 @@ public class FilterImplTest extends TestCase {
         assertFalse(filterImpl.matchCase(dict));
         
     }
-    
 }

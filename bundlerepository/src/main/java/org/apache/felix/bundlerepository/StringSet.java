@@ -26,10 +26,13 @@ public class StringSet extends HashSet
 
     public StringSet(String set)
     {
-        StringTokenizer st = new StringTokenizer(set, ",");
-        while (st.hasMoreTokens())
+        if (set != null)
         {
-            add(st.nextToken().trim());
+            StringTokenizer st = new StringTokenizer(set, ",");
+            while (st.hasMoreTokens())
+            {
+                add(st.nextToken().trim());
+            }
         }
     }
 }
