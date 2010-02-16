@@ -393,7 +393,12 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
             Bundle[] bundles = m_context.getBundles();
             for (int i = 0; i < bundles.length; i++) {
                 if ((bundles[i].getState() & m_stateMask) > 0) {
-                    if (m_filter.match(bundles[i].getHeaders())) {
+                    Filter filter = m_filter;
+                    if (filter == null) {
+                        service = bundles[i];
+                        break;
+                    }
+                    else if (filter.match(bundles[i].getHeaders())) {
                         service = bundles[i];
                         break;
                     }
