@@ -27,6 +27,8 @@ import org.osgi.service.obr.*;
 
 public class ResolverImpl implements Resolver
 {
+    public static final String PREFER_LOCAL = "obr.resolver.preferLocal";
+
     private final BundleContext m_context;
     private final RepositoryAdmin m_admin;
     private final Logger m_logger;
@@ -40,6 +42,7 @@ public class ResolverImpl implements Resolver
     private final Map m_unsatisfiedMap = new HashMap();
     private boolean m_resolved = false;
     private long m_resolveTimeStamp;
+    private boolean m_preferLocal = true;
 
     public ResolverImpl(BundleContext context, RepositoryAdminImpl admin, Logger logger)
     {
@@ -47,6 +50,11 @@ public class ResolverImpl implements Resolver
         m_admin = admin;
         m_logger = logger;
         m_local = admin.getLocalRepository();
+        String s = context.getProperty(PREFER_LOCAL);
+        if (s != null)
+        {
+            m_preferLocal = Boolean.parseBoolean(s);
+        }
     }
 
     public synchronized void add(Resource resource)
@@ -181,11 +189,7 @@ public class ResolverImpl implements Resolver
                 {
                     candidate = searchResolvingResources(reqs[reqIdx]);
                     if (candidate == null)
-                    {   
-                        // TODO: OBR - We need a nicer way to make sure that
-                        // the local resources are preferred over the remote
-                        // resources. Currently, we are just putting them at
-                        // the beginning of the candidate list.
+                    {
                         List candidateCapabilities = searchLocalResources(reqs[reqIdx]);
                         candidateCapabilities.addAll(searchRemoteResources(reqs[reqIdx]));
 
@@ -377,28 +381,31 @@ public class ResolverImpl implements Resolver
      * This method selects the resource providing the highest version of the capability.
      * If two resources provide the same version of the capability, the resource with
      * the largest number of cabailities be preferred
-     * @param resources
+     * @param caps
      * @return
      */
     private Capability getBestCandidate(List caps)
     {
         Version bestVersion = null;
         Capability best = null;
+        boolean bestLocal = false;
 
         for(int capIdx = 0; capIdx < caps.size(); capIdx++)
         {
             Capability current = (Capability) caps.get(capIdx);
+            boolean isCurrentLocal = ((CapabilityImpl) current).getResource().getRepository() == null;
 
             if (best == null)
             {
                 best = current;
+                bestLocal = isCurrentLocal;
                 Object v = current.getProperties().get(Resource.VERSION);
                 if ((v != null) && (v instanceof Version))
                 {
                     bestVersion = (Version) v;
                 }
             }
-            else
+            else if (!m_preferLocal || !bestLocal || isCurrentLocal)
             {
                 Object v = current.getProperties().get(Resource.VERSION);
 
@@ -409,6 +416,7 @@ public class ResolverImpl implements Resolver
                         < ((CapabilityImpl) current).getResource().getCapabilities().length))
                 {
                     best = current;
+                    bestLocal = isCurrentLocal;
                     bestVersion = null;
                 }
                 else if ((v != null) && (v instanceof Version))
@@ -418,6 +426,7 @@ public class ResolverImpl implements Resolver
                     if ((bestVersion == null) || (bestVersion.compareTo(v) < 0))
                     {
                         best = current;
+                        bestLocal = isCurrentLocal;
                         bestVersion = (Version) v;
                     }
                     // If the current resource version is equal to the
@@ -428,6 +437,7 @@ public class ResolverImpl implements Resolver
                                 < ((CapabilityImpl) current).getResource().getCapabilities().length))
                     {
                         best = current;
+                        bestLocal = isCurrentLocal;
                         bestVersion = (Version) v;
                     }
                 }   
