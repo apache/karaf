@@ -84,7 +84,7 @@
                             <!-- default -->
                             *
                         </Import-Package>
-                        <Export-Package>org.osgi.service.event</Export-Package>
+                        <Export-Package>org.osgi.service.event;version=1.2</Export-Package>
                         <Private-Package>org.apache.felix.eventadmin.impl.*</Private-Package>
                         <Import-Service>
             	            org.osgi.service.event.EventHandler, org.osgi.service.log.LogService, org.osgi.service.log.LogReaderService
