@@ -75,4 +75,6 @@ public interface BundleDependency extends Dependency, ServiceComponentDependency
   BundleDependency setFilter(String filter) throws IllegalArgumentException;
 
   BundleDependency setStateMask(int mask);
+  
+  BundleDependency setPropagate(boolean propagate);
 }

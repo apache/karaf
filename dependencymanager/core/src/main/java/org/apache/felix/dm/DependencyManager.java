@@ -186,7 +186,7 @@ public class DependencyManager {
      * It will also inherit all dependencies, and if you declare the original
      * service as a member it will be injected.
      * 
-     * @param serviceInterface the service interface to apply the aspect to
+     * @param serviceInterface the service interface to apply the adapter to
      * @param serviceFilter the filter condition to use with the service interface
      * @param adapterInterface the interface to use when registering adapters
      * @param adapterImplementation the implementation of the adapter
@@ -244,11 +244,13 @@ public class DependencyManager {
      * @param bundleFilter the filter to apply to the bundle manifest
      * @param adapterImplementation the implementation of the adapter
      * @param adapterInterface the interface to use when registering adapters
+     * @param adapterProperties additional properties to use with the service registration
+     * @param propagate <code>true</code> if properties from the bundle should be propagated to the service
      * @return a service that acts as a factory for generating bundle adapters
      */
-    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, Class adapterInterface) {
+    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
         return createService()
-            .setImplementation(new BundleAdapterImpl(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface))
+            .setImplementation(new BundleAdapterImpl(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
             .add(createBundleDependency()
                 .setFilter(bundleFilter)
                 .setStateMask(bundleStateMask)

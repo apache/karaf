@@ -18,11 +18,13 @@
  */
 package org.apache.felix.dm.impl.dependencies;
 
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 
 import org.apache.felix.dm.dependencies.BundleDependency;
+import org.apache.felix.dm.impl.DefaultNullObject;
 import org.apache.felix.dm.impl.Logger;
 import org.apache.felix.dm.impl.tracker.BundleTracker;
 import org.apache.felix.dm.impl.tracker.BundleTrackerCustomizer;
@@ -49,6 +51,11 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
 	private Bundle m_bundleInstance;
 	private Filter m_filter;
 	private long m_bundleId = -1;
+	private boolean m_propagate;
+	private String m_autoConfigInstance;
+    private Object m_nullObject;
+    private boolean m_autoConfigInvoked;
+
     
     public BundleDependencyImpl(BundleContext context, Logger logger) {
         super(logger);
@@ -297,7 +304,7 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
     public synchronized BundleDependency setCallbacks(Object instance, String added, String changed, String removed) {
         ensureNotActive();
         // if at least one valid callback is specified, we turn off auto configuration
-        if (added != null || removed != null || changed != null) {
+        if ((added != null || removed != null || changed != null) && ! m_autoConfigInvoked) {
             setAutoConfig(false);
         }
         m_callbackInstance = instance;
@@ -315,6 +322,15 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
     public synchronized BundleDependency setAutoConfig(boolean autoConfig) {
         ensureNotActive();
         m_autoConfig = autoConfig;
+        m_autoConfigInvoked = true;
+        return this;
+    }
+
+    public synchronized BundleDependency setAutoConfig(String instanceName) {
+        ensureNotActive();
+        m_autoConfig = (instanceName != null);
+        m_autoConfigInstance = instanceName;
+        m_autoConfigInvoked = true;
         return this;
     }
     
@@ -323,7 +339,13 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
         setIsRequired(required);
         return this;
     }
-
+    
+    public BundleDependency setPropagate(boolean propagate) {
+        ensureNotActive();
+        m_propagate = propagate;
+        return this;
+    }
+    
 	public BundleDependency setBundle(Bundle bundle) {
 		m_bundleId = bundle.getBundleId();
 		return this;
@@ -359,18 +381,53 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
     }
 
     public Object getAutoConfigInstance() {
-        // TODO Auto-generated method stub
-        return null;
+        return lookupBundle();
     }
 
+    public Object lookupBundle() {
+        Object service = null;
+        if (m_isStarted) {
+            service = getBundle();
+        }
+        else {
+            Bundle[] bundles = m_context.getBundles();
+            for (int i = 0; i < bundles.length; i++) {
+                if ((bundles[i].getState() & m_stateMask) > 0) {
+                    if (m_filter.match(bundles[i].getHeaders())) {
+                        service = bundles[i];
+                        break;
+                    }
+                }
+            }
+        }
+        if (service == null && isAutoConfig()) {
+            // TODO does it make sense to add support for custom bundle impls?
+//            service = getDefaultImplementation();
+            if (service == null) {
+                service = getNullObject();
+            }
+        }
+        return service;
+    }
+
+    private Object getNullObject() {
+        if (m_nullObject == null) {
+            try {
+                m_nullObject = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { Bundle.class }, new DefaultNullObject()); 
+            }
+            catch (Exception e) {
+                m_logger.log(Logger.LOG_ERROR, "Could not create null object for Bundle.", e);
+            }
+        }
+        return m_nullObject;
+    }
+    
     public String getAutoConfigName() {
-        // TODO Auto-generated method stub
-        return null;
+        return m_autoConfigInstance;
     }
 
     public Class getAutoConfigType() {
-        // TODO Auto-generated method stub
-        return null;
+        return Bundle.class;
     }
 
     public void invokeAdded(DependencyService service) {
@@ -396,7 +453,6 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
     }
 
     public boolean isPropagated() {
-        // TODO Auto-generated method stub
-        return false;
+        return m_propagate;
     }
 }

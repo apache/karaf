@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 public abstract class AbstractDecorator {
@@ -60,6 +61,24 @@ public abstract class AbstractDecorator {
     
     public void removed(ServiceReference ref, Object service) {
         Service newService = (Service) m_services.remove(ref);
+        if (newService == null) {
+            System.out.println("Service should not be null here, dumping stack.");
+            Thread.dumpStack();
+        }
+        else {
+            m_manager.remove(newService);
+        }
+    }
+    
+    // callbacks for bundles
+    public void added(Bundle bundle) {
+        Service newService = createService(new Object[] { bundle });
+        m_services.put(bundle, newService);
+        m_manager.add(newService);
+    }
+    
+    public void removed(Bundle bundle) {
+        Service newService = (Service) m_services.remove(bundle);
         if (newService == null) {
             System.out.println("Service should not be null here, dumping stack.");
             Thread.dumpStack();

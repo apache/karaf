@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.felix.dm.dependencies.BundleDependency;
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
+import org.apache.felix.dm.dependencies.ResourceDependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.dependencies.TemporalServiceDependency;
 import org.apache.felix.dm.impl.Logger;
@@ -142,9 +143,25 @@ public abstract class DependencyActivatorBase implements BundleActivator {
     public BundleDependency createBundleDependency() {
         return m_manager.createBundleDependency();
     }
+    
+    public ResourceDependency createResourceDependency() {
+        return m_manager.createResourceDependency();
+    }
 
     public Service createAspectService(Class serviceInterface, String serviceFilter, Object aspectImplementation, Dictionary properties) {
         return m_manager.createAspectService(serviceInterface, serviceFilter, aspectImplementation, properties);
+    }
+    
+    public Service createAdapterService(Class serviceInterface, String serviceFilter, Class adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
+        return m_manager.createAdapterService(serviceInterface, serviceFilter, adapterInterface, adapterImplementation, adapterProperties);
+    }
+    
+    public Service createResourceAdapter(String resourceFilter, Class adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+        return m_manager.createResourceAdapterService(resourceFilter, adapterInterface, adapterProperties, adapterImplementation, propagate);
+    }
+    
+    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
+        return m_manager.createBundleAdapterService(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface, adapterProperties, propagate);
     }
 
     /**

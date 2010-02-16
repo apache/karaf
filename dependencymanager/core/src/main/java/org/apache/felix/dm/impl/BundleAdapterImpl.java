@@ -18,36 +18,80 @@
  */
 package org.apache.felix.dm.impl;
 
-import org.apache.felix.dm.DependencyManager;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
 
-public class BundleAdapterImpl {
-	private final int m_stateMask;
-	private final String m_filter;
-	private final Object m_impl;
-	private volatile DependencyManager m_manager;
-	private final Class m_iface;
+public class BundleAdapterImpl extends AbstractDecorator {
+    private volatile Service m_service;
+    private final String m_resourceFilter;
+    private final Object m_adapterImplementation;
+    private final Object m_adapterInterface;
+    private final Dictionary m_adapterProperties;
+    private final boolean m_propagate;
+    private final int m_bundleStateMask;
 
-	public BundleAdapterImpl(int stateMask, String filter, Object impl, Class iface) {
-		m_stateMask = stateMask;
-		m_filter = filter;
-		m_impl = impl;
-		m_iface = iface;
-	}
+    public BundleAdapterImpl(int bundleStateMask, String bundleFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
+        m_bundleStateMask = bundleStateMask;
+        m_resourceFilter = bundleFilter;
+        m_adapterImplementation = adapterImplementation;
+        m_adapterInterface = adapterInterface;
+        m_adapterProperties = adapterProperties;
+        m_propagate = propagate;
+    }
+
+    public BundleAdapterImpl(int bundleStateMask, String bundleFilter, Object adapterImplementation, String[] adapterInterfaces, Dictionary adapterProperties, boolean propagate) {
+        m_bundleStateMask = bundleStateMask;
+        m_resourceFilter = bundleFilter;
+        m_adapterImplementation = adapterImplementation;
+        m_adapterInterface = adapterInterfaces;
+        m_adapterProperties = adapterProperties;
+        m_propagate = propagate;
+    }       
 	
-	public void added(Bundle bundle) {
-		// TODO decorator be smarter:
-		m_manager.add(m_manager.createService()
-			.setInterface(m_iface.getName(), null)
-			.setImplementation(m_impl)
-			.add(m_manager.createBundleDependency()
-				.setBundle(bundle)
-				.setStateMask(m_stateMask)
-				.setRequired(true)
-				)
-			);
-	}
-
-	public void removed(Bundle bundle) {
+	public Service createService(Object[] properties) {
+	    Bundle bundle = (Bundle) properties[0];
+	    Properties props = new Properties();
+        if (m_adapterProperties != null) {
+            Enumeration e = m_adapterProperties.keys();
+            while (e.hasMoreElements()) {
+                Object key = e.nextElement();
+                props.put(key, m_adapterProperties.get(key));
+            }
+        }
+        List dependencies = m_service.getDependencies();
+        // the first dependency is always the dependency on the bundle, which
+        // will be replaced with a more specific dependency below
+        dependencies.remove(0);
+        if (m_adapterInterface instanceof String) {
+            return m_manager.createService()
+                .setInterface((String) m_adapterInterface, props)
+                .setImplementation(m_adapterImplementation)
+                .add(dependencies)
+                .add(m_manager.createBundleDependency()
+                    .setBundle(bundle)
+                    .setPropagate(m_propagate)
+                    .setCallbacks(null, "changed", null)
+                    .setAutoConfig(true)
+                    .setRequired(true)
+                );
+        }
+        else {
+            return m_manager.createService()
+                .setInterface((String[]) m_adapterInterface, props)
+                .setImplementation(m_adapterImplementation)
+                .add(dependencies)
+                .add(m_manager.createBundleDependency()
+                    .setBundle(bundle)
+                    .setPropagate(m_propagate)
+                    .setCallbacks(null, "changed", null)
+                    .setAutoConfig(true)
+                    .setRequired(true)
+                );
+        }
 	}
 }
