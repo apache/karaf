@@ -45,9 +45,11 @@ public class BundleInfoTask extends Task
         if ( header == null )
             throw new BuildException( "missing attribute: header" );
 
+        JarFile jar = null;
+        
         try
         {
-            JarFile jar = new JarFile( bundle );
+            jar = new JarFile( bundle, false );
             Manifest mf = jar.getManifest();
             String value = mf.getMainAttributes().getValue( header );
             if ( property == null )
@@ -76,6 +78,19 @@ public class BundleInfoTask extends Task
         catch ( IOException e )
         {
             throw new BuildException( "Failed to access bundle", e );
+        }
+        finally {
+            if ( jar != null ) {
+                try
+                {
+                    jar.close();
+                }
+                catch (IOException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

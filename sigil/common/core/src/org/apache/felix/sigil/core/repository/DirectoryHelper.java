@@ -59,7 +59,7 @@ public class DirectoryHelper
                     JarFile jar = null;
                     try
                     {
-                        jar = new JarFile( f );
+                        jar = new JarFile( f, false );
                         ISigilBundle bundle = buildBundle( repository, jar.getManifest(), f );
                         if ( bundle != null )
                         {
