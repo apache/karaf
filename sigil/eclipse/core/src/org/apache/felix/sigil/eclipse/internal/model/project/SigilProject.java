@@ -522,6 +522,11 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
         {
             bldProject = BldFactory.getProject( uri, true );
             ISigilBundle bundle = bldProject.getDefaultBundle();
+            
+            if ( bundle == null ) {
+                throw SigilCore.newCoreException("No default bundle", null);
+            }
+            
             bundle.setParent( this );
             return bundle;
         }
