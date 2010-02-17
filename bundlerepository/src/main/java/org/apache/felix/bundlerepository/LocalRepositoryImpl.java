@@ -413,10 +413,8 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
                     {
                         R4Attribute attribute = pkgs[pkgIdx].getAttributes()[i];
                         String key = attribute.getName();
-                        if (key.equalsIgnoreCase("specification-version")
-                                || key.equalsIgnoreCase("version"))
-                            continue;
-                        else
+                        if (!key.equalsIgnoreCase("specification-version")
+                            && !key.equalsIgnoreCase("version"))
                         {
                             Object value = attribute.getValue();
                             cap.addP(key, value);
@@ -425,7 +423,7 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
                     for (int i = 0; i < pkgs[pkgIdx].getDirectives().length; i++)
                     {
                         R4Directive directive = pkgs[pkgIdx].getDirectives()[i];
-                        String key = directive.getName();
+                        String key = directive.getName() + ":";
                         Object value = directive.getValue();
                         cap.addP(key, value);
                     }
