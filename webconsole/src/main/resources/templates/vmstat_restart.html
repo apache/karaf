@@ -1,0 +1,13 @@
+﻿<script type="text/javascript" src="res/ui/vmstat.js"></script>
+
+<!-- status line -->
+<p class="statline">${vmstat.restarting}</p>
+
+<form id="reloadform" method="get" action="">
+	<div style="width:100%; text-align: center">
+		<input class="ui-state-error" type="submit" value="${reload}" />
+		${vmstat.reloading.in} <span id="reloadcountdowncell">&nbsp;</span>
+		<script type="text/javascript">shutdown(10, "reloadform", "reloadcountdowncell");</script>
+	</div>
+</form>
+

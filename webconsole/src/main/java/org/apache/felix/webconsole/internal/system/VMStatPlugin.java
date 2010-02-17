@@ -20,51 +20,75 @@ package org.apache.felix.webconsole.internal.system;
 
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
-import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.core.SetStartLevelAction;
+import org.apache.commons.io.IOUtils;
+import org.apache.felix.webconsole.DefaultVariableResolver;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleUtil;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.service.log.LogService;
+import org.osgi.service.startlevel.StartLevel;
 
 
-public class VMStatPlugin extends BaseWebConsolePlugin
+/**
+ * VMStatPlugin provides the System Information tab. This particular plugin uses
+ * more than one templates.
+ */
+public class VMStatPlugin extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
 
-    public static final String LABEL = "vmstat";
-
-    public static final String TITLE = "System Information";
+    private static final String LABEL = "vmstat";
+    private static final String TITLE = "System Information";
+    private static final String CSS[] = null;
 
     private static final String ATTR_TERMINATED = "terminated";
 
     private static final String PARAM_SHUTDOWN_TIMER = "shutdown_timer";
     private static final String PARAM_SHUTDOWN_TYPE = "shutdown_type";
-
     private static final String PARAM_SHUTDOWN_TYPE_RESTART = "Restart";
-    private static final String PARAM_SHUTDOWN_TYPE_STOP = "Stop";
+    //private static final String PARAM_SHUTDOWN_TYPE_STOP = "Stop";
 
     private static final long startDate = ( new Date() ).getTime();
 
+    // from BaseWebConsolePlugin
+    private static String START_LEVEL_NAME = StartLevel.class.getName();
 
-    public String getLabel()
+    // templates
+    private final String TPL_VM_MAIN;
+    private final String TPL_VM_STOP;
+    private final String TPL_VM_RESTART;
+
+
+    /** Default constructor */
+    public VMStatPlugin()
     {
-        return LABEL;
+        super( LABEL, TITLE, CSS );
+        // load templates
+        try
+        {
+            TPL_VM_MAIN = IOUtils.toString( getClass().getResourceAsStream( "/templates/vmstat.html" ), "UTF-8" );
+            TPL_VM_STOP = IOUtils.toString( getClass().getResourceAsStream( "/templates/vmstat_stop.html" ), "UTF-8" );
+            TPL_VM_RESTART = IOUtils.toString( getClass().getResourceAsStream( "/templates/vmstat_restart.html" ),
+                "UTF-8" );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e.toString() );
+        }
     }
 
 
-    public String getTitle()
-    {
-        return TITLE;
-    }
-
-
+    /**
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
@@ -75,6 +99,7 @@ public class VMStatPlugin extends BaseWebConsolePlugin
             final boolean restart = PARAM_SHUTDOWN_TYPE_RESTART.equals( request.getParameter( PARAM_SHUTDOWN_TYPE ) );
 
             // simply terminate VM in case of shutdown :-)
+            final Bundle systemBundle = getBundleContext().getBundle( 0 );
             Thread t = new Thread( "Stopper" )
             {
                 public void run()
@@ -88,12 +113,11 @@ public class VMStatPlugin extends BaseWebConsolePlugin
                         // ignore
                     }
 
-                    getLog().log( LogService.LOG_INFO, "Shutting down server now!" );
+                    log( "Shutting down server now!" );
 
                     // stopping bundle 0 (system bundle) stops the framework
                     try
                     {
-                        Bundle systemBundle = getBundleContext().getBundle( 0 );
                         if ( restart )
                         {
                             systemBundle.update();
@@ -105,7 +129,7 @@ public class VMStatPlugin extends BaseWebConsolePlugin
                     }
                     catch ( BundleException be )
                     {
-                        getLog().log( LogService.LOG_ERROR, "Problem stopping or restarting the Framework", be );
+                        log( "Problem stopping or restarting the Framework", be );
                     }
                 }
             };
@@ -120,178 +144,70 @@ public class VMStatPlugin extends BaseWebConsolePlugin
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
-        PrintWriter pw = response.getWriter();
-
-        pw.println( "" );
+        String body;
 
         if ( request.getAttribute( ATTR_TERMINATED ) != null )
         {
-            pw.println( "<tr>" );
-            pw.println( "<td colspan='2' class='techcontentcell'>" );
-            pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
-            pw.println( "<tr class='content'>" );
-
             Object restart = request.getAttribute( PARAM_SHUTDOWN_TYPE );
             if ( ( restart instanceof Boolean ) && ( ( Boolean ) restart ).booleanValue() )
             {
-                pw.println( "<th class='content important'>Framework is restarting. stand by ...</th>" );
-
-                pw.println( "<td class='content'>" );
-                pw.println( "<form name='reloadform' method='get'>" );
-                pw.println( "<input class='submit important' type='submit' value='Reload')\">&nbsp;" );
-                pw.println( "Reloading in <span id='reloadcountdowncell'>&nbsp;</span>" );
-                pw.println( "<script language='JavaScript'>" );
-                pw.println( "shutdown(10, 'reloadform', 'reloadcountdowncell');" );
-                pw.println( "</script>" );
-
-                pw.println( "</form>" );
-                pw.println( "</td" );
+                body = TPL_VM_RESTART;
             }
             else
             {
-                pw.println( "<th class='content important'>Framework has been stopped.</th>" );
+                body = TPL_VM_STOP;
             }
-
-            pw.println( "</tr>" );
-            pw.println( "</table>" );
-            pw.println( "</td>" );
-            pw.println( "</tr>" );
+            response.getWriter().print( body );
             return;
         }
 
-        boolean shutdownTimer = false;
-        String target = request.getRequestURI();
-        if ( request.getParameter( PARAM_SHUTDOWN_TIMER ) != null )
-        {
-            target = getLabel(); // ShutdownRender.NAME;
-            shutdownTimer = true;
-        }
-
-        pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th colspan='2' class='content container'>Start Level Information:</th>" );
-        pw.println( "</tr>" );
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td class='content'>System Start Level</td>" );
-        pw.println( "<td class='content'>" );
-        pw.println( "<form method='post'>" );
-        pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + SetStartLevelAction.NAME + "'>" );
-        pw.println( "<input class='input' type='text' size='3' name='systemStartLevel' value='"
-            + getStartLevel().getStartLevel() + "'/>" );
-        pw.println( "&nbsp;&nbsp;<input class='submit' type='submit' name='" + SetStartLevelAction.LABEL
-            + "' value='Change'>" );
-        pw.println( "</form>" );
-        pw.println( "</td>" );
-        pw.println( "</tr>" );
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td class='content'>Default Bundle Start Level</td>" );
-        pw.println( "<td class='content'>" );
-        pw.println( "<form method='post'>" );
-        pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + SetStartLevelAction.NAME + "'>" );
-        pw.println( "<input class='input' type='text' size='3' name='bundleStartLevel' value='"
-            + getStartLevel().getInitialBundleStartLevel() + "'/>" );
-        pw.println( "&nbsp;&nbsp;<input class='submit' type='submit' name='" + SetStartLevelAction.LABEL
-            + "' value='Change'>" );
-        pw.println( "</form>" );
-        pw.println( "</td>" );
-        pw.println( "</tr>" );
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td colspan='2' class='content'>&nbsp;</th>" );
-        pw.println( "</tr>" );
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th colspan='2' class='content container'>Server Information:</th>" );
-        pw.println( "</tr>" );
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td class='content'>Last Started</td>" );
-        pw.println( "<td class='content'>" );
-        pw.println( "<script language='JavaScript'>" );
-        pw.println( "localDate(" + startDate /* <%= Server.getStartTime() %> */
-            + ")" );
-        pw.println( "</script>" );
-        pw.println( "</td>" );
-        pw.println( "</tr>" );
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<form name='shutdownform' method='post' action='" + target + "'>" );
-        pw.println( "<td class='content'>Framework</td>" );
-        pw.println( "<td class='content'>" );
-
-        if ( !shutdownTimer )
-        {
-            pw.println( "<input type='hidden' name='" + PARAM_SHUTDOWN_TIMER + "' value='" + PARAM_SHUTDOWN_TIMER
-                + "'>" );
-            pw
-                .println( "<input class='submit important' type='submit' name='"
-                    + PARAM_SHUTDOWN_TYPE
-                    + "' value='Restart' onclick=\"return confirm('This will stop and restart the framework and all bundles. Please confirm to continue.')\">" );
-            pw
-                .println( "<input class='submit important' type='submit' name='"
-                    + PARAM_SHUTDOWN_TYPE
-                    + "' value='Stop' onclick=\"return confirm('This will stop the framework and all bundles. Please confirm to continue.')\">" );
-        }
-        else
-        {
-            pw.println( "<input type='hidden' name='" + PARAM_SHUTDOWN_TYPE + "' value='"
-                + request.getParameter( PARAM_SHUTDOWN_TYPE ) + "'>" );
-            pw.println( "<input class='submit important' type='button' value='Abort' onclick=\"abort('"
-                + request.getRequestURI() + "')\">&nbsp;" );
-            pw.println( "Shutdown in <span id='countdowncell'>&nbsp;</span>" );
-            pw.println( "<script language='JavaScript'>" );
-            pw.println( "shutdown(3, 'shutdownform', 'countdowncell');" );
-            pw.println( "</script>" );
-        }
-
-        pw.println( "</td>" );
-        pw.println( "</form>" );
-        pw.println( "</tr>" );
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td colspan='2' class='content'>&nbsp;</th>" );
-        pw.println( "</tr>" );
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th colspan='2' class='content container'>Java Information:</th>" );
-        pw.println( "</tr>" );
+        body = TPL_VM_MAIN;
 
         long freeMem = Runtime.getRuntime().freeMemory() / 1024;
         long totalMem = Runtime.getRuntime().totalMemory() / 1024;
         long usedMem = totalMem - freeMem;
 
-        this.infoLine( pw, "Java Runtime", System.getProperty( "java.runtime.name" ) + "(build "
-            + System.getProperty( "java.runtime.version" ) + ")" );
-        this.infoLine( pw, "Java Virtual Machine", System.getProperty( "java.vm.name" ) + "(build "
-            + System.getProperty( "java.vm.version" ) + ", " + System.getProperty( "java.vm.info" ) + ")" );
-        this.infoLine( pw, "Total Memory", totalMem + " KB" );
-        this.infoLine( pw, "Used Memory", usedMem + " KB" );
-        this.infoLine( pw, "Free Memory", freeMem + " KB" );
+        boolean shutdownTimer = request.getParameter( PARAM_SHUTDOWN_TIMER ) != null;
+        String shutdownType = request.getParameter( PARAM_SHUTDOWN_TYPE );
+        if ( shutdownType == null )
+            shutdownType = "";
 
-        pw.println( "<tr class='content'>" );
-        pw.println( "<form method='post'>" );
-        pw.println( "<td class='content'>Garbage Collection</td>" );
-        pw.println( "<td class='content'>" );
-        pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + GCAction.NAME + "'>" );
-        pw.println( "<input class='submit' type='submit' name='" + GCAction.LABEL + "' value='Run'>" );
-        pw.println( "</form></td></tr>" );
+        JSONObject json = new JSONObject();
+        try
+        {
+            json.put( "systemStartLevel", getStartLevel().getStartLevel() );
+            json.put( "bundleStartLevel", getStartLevel().getInitialBundleStartLevel() );
+            json.put( "lastStarted", startDate );
+            json.put( "runtime", System.getProperty( "java.runtime.name" ) + "(build "
+                + System.getProperty( "java.runtime.version" ) + ")" );
+            json.put( "jvm", System.getProperty( "java.vm.name" ) + "(build " + System.getProperty( "java.vm.version" )
+                + ", " + System.getProperty( "java.vm.info" ) + ")" );
+            json.put( "shutdownTimer", shutdownTimer );
+            json.put( "mem_total", totalMem );
+            json.put( "mem_free", freeMem );
+            json.put( "mem_used", usedMem );
+            json.put( "shutdownType", shutdownType );
+        }
+        catch ( JSONException e )
+        {
+            throw new IOException( e.toString() );
+        }
 
-        pw.println( "</table>" );
+        DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
+        vars.put( "startData", json.toString() );
+
+        response.getWriter().print( body );
     }
 
 
-    private void infoLine( PrintWriter pw, String label, String value )
+    private final StartLevel getStartLevel()
     {
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td class='content'>" + label + "</td>" );
-        pw.println( "<td class='content'>" );
-        pw.println( value );
-        pw.println( "</td></tr>" );
+        return ( StartLevel ) getService( START_LEVEL_NAME );
     }
-
 }

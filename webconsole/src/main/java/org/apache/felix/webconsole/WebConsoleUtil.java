@@ -54,10 +54,13 @@ public final class WebConsoleUtil
     /**
      * Returns the {@link VariableResolver} for the given request.
      * <p>
-     *  If not resolver
-     * has yet be created for the requests, an instance of the
-     * {@link DefaultVariableResolver} is created, placed into the request and
-     * returned.
+     * If no resolver has yet be created for the requests, an instance of the
+     * {@link DefaultVariableResolver} is created with preset properties,
+     * placed into the request and returned. The preset properties are
+     * <code>appRoot</code> set to the value of the
+     * {@link WebConsoleConstants#ATTR_APP_ROOT} request attribute and
+     * <code>pluginRoot</code> set to the value of the
+     * {@link WebConsoleConstants#ATTR_PLUGIN_ROOT} request attribute.
      * <p>
      * <b>Note</b>: An object not implementing the {@link VariableResolver}
      * interface already stored as the
@@ -77,7 +80,9 @@ public final class WebConsoleUtil
             return ( VariableResolver ) resolverObj;
         }
 
-        final VariableResolver resolver = new DefaultVariableResolver();
+        final DefaultVariableResolver resolver = new DefaultVariableResolver();
+        resolver.put( "appRoot", request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT ) );
+        resolver.put( "pluginRoot", request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT ) );
         setVariableResolver( request, resolver );
         return resolver;
     }
@@ -101,8 +106,8 @@ public final class WebConsoleUtil
     /**
      * An utility method, that is used to filter out simple parameter from file
      * parameter when multipart transfer encoding is used.
-     * 
-     * This method processes the request and sets a request attribute 
+     *
+     * This method processes the request and sets a request attribute
      * {@link AbstractWebConsolePlugin#ATTR_FILEUPLOAD}. The attribute value is a {@link Map}
      * where the key is a String specifying the field name and the value
      * is a {@link org.apache.commons.fileupload.FileItem}.
@@ -186,12 +191,12 @@ public final class WebConsoleUtil
      * Utility method to handle relative redirects.
      * Some application servers like Web Sphere handle relative redirects differently
      * therefore we should make an absolute URL before invoking send redirect.
-     * 
+     *
      * @param request the HTTP request coming from the user
      * @param response the HTTP response, where data is rendered
      * @param redirectUrl the redirect URI.
      * @throws IOException If an input or output exception occurs
-     * @throws IllegalStateException   If the response was committed or if a partial 
+     * @throws IllegalStateException   If the response was committed or if a partial
      *  URL is given and cannot be converted into a valid URL
      */
     public static final void sendRedirect(final HttpServletRequest request,
@@ -218,8 +223,8 @@ public final class WebConsoleUtil
 
     /**
      * Escapes HTML special chars like: <>&\r\n and space
-     * 
-     * 
+     *
+     *
      * @param text the text to escape
      * @return the escaped text
      */
@@ -262,7 +267,7 @@ public final class WebConsoleUtil
 
     /**
      * Retrieves a request parameter and converts it to int.
-     * 
+     *
      * @param request the HTTP request
      * @param name the name of the request parameter
      * @param _default the default value returned if the parameter is not set or is not a valid integer.
@@ -287,9 +292,9 @@ public final class WebConsoleUtil
     }
 
     /**
-     * Writes a key-value pair in a JSON writer. Write is performed only if both key and 
+     * Writes a key-value pair in a JSON writer. Write is performed only if both key and
      * value are not null.
-     * 
+     *
      * @param jw the writer, where to write the data
      * @param key the key value, stored under 'key'
      * @param value the value stored under 'value'
