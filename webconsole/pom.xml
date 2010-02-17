@@ -139,6 +139,9 @@
                                 <configuration>
                                     <classifier>bare</classifier>
                                     <instructions>
+                                        <Bundle-SymbolicName>
+                                            ${artifactId}.bare
+                                        </Bundle-SymbolicName>
                                         <Include-Resource>
                                             {maven-resources},META-INF/NOTICE=src/main/bare-resources/NOTICE
                                         </Include-Resource>
