@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.config.BldFactory;
 import org.apache.felix.sigil.config.IBldProject;
 import org.apache.felix.sigil.config.IBldProject.IBldBundle;
@@ -270,7 +271,7 @@ public class ProjectRepository extends AbstractBundleRepository
 
             info.setSymbolicName(bb.getSymbolicName());
 
-            Version version = new Version(bb.getVersion());
+            Version version = VersionTable.getVersion(bb.getVersion());
             info.setVersion(version);
 
             ISigilBundle pb = ModelElementFactory.getInstance().newModelElement(ISigilBundle.class);

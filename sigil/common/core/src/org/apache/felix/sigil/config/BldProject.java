@@ -42,6 +42,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.core.internal.model.osgi.BundleModelElement;
 import org.apache.felix.sigil.core.internal.model.osgi.PackageExport;
 import org.apache.felix.sigil.core.internal.model.osgi.PackageImport;
@@ -53,7 +54,6 @@ import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IPackageImport.OSGiImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
-import org.osgi.framework.Version;
 
 public class BldProject implements IBldProject, IRepositoryConfig
 {
@@ -888,7 +888,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
                     }
 
                     if (version != null)
-                        pkgExport.setVersion(new Version(version));
+                        pkgExport.setVersion(VersionTable.getVersion(version));
 
                     list.add(pkgExport);
                 }

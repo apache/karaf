@@ -97,7 +97,7 @@ public class VersionRange implements Serializable
         }
         else
         {
-            Version atLeast = Version.parseVersion( val );
+            Version atLeast = VersionTable.getVersion( val );
             return new VersionRange( atLeast );
         }
 
@@ -122,7 +122,7 @@ public class VersionRange implements Serializable
         {
             throw new IllegalArgumentException( "illegal version range syntax " + "too many commas" );
         }
-        Version floor = Version.parseVersion( floorCeiling[0] );
+        Version floor = VersionTable.getVersion( floorCeiling[0] );
         Version ceiling = "*".equals( floorCeiling[1] ) ? INFINITE_VERSION : Version.parseVersion( floorCeiling[1] );
         return new VersionRange( openFloor, floor, ceiling, openCeiling );
     }
@@ -260,16 +260,16 @@ public class VersionRange implements Serializable
         switch ( lowerBoundRule )
         {
             case Any:
-                floor = new Version( 0, 0, 0 );
+                floor = VersionTable.getVersion( 0, 0, 0 );
                 break;
             case Major:
-                floor = new Version( pointVersion.getMajor(), 0, 0 );
+                floor = VersionTable.getVersion( pointVersion.getMajor(), 0, 0 );
                 break;
             case Minor:
-                floor = new Version( pointVersion.getMajor(), pointVersion.getMinor(), 0 );
+                floor = VersionTable.getVersion( pointVersion.getMajor(), pointVersion.getMinor(), 0 );
                 break;
             case Micro:
-                floor = new Version( pointVersion.getMajor(), pointVersion.getMinor(), pointVersion.getMicro() );
+                floor = VersionTable.getVersion( pointVersion.getMajor(), pointVersion.getMinor(), pointVersion.getMicro() );
                 break;
             case Exact:
                 floor = pointVersion;
@@ -284,13 +284,13 @@ public class VersionRange implements Serializable
                 ceiling = INFINITE_VERSION;
                 break;
             case Major:
-                ceiling = new Version( pointVersion.getMajor() + 1, 0, 0 );
+                ceiling = VersionTable.getVersion( pointVersion.getMajor() + 1, 0, 0 );
                 break;
             case Minor:
-                ceiling = new Version( pointVersion.getMajor(), pointVersion.getMinor() + 1, 0 );
+                ceiling = VersionTable.getVersion( pointVersion.getMajor(), pointVersion.getMinor() + 1, 0 );
                 break;
             case Micro:
-                ceiling = new Version( pointVersion.getMajor(), pointVersion.getMinor(), pointVersion.getMicro() + 1 );
+                ceiling = VersionTable.getVersion( pointVersion.getMajor(), pointVersion.getMinor(), pointVersion.getMicro() + 1 );
                 break;
             case Exact:
                 ceiling = pointVersion;

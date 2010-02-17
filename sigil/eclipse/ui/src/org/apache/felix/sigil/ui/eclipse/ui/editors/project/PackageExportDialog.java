@@ -20,6 +20,7 @@
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
@@ -59,7 +60,7 @@ public class PackageExportDialog extends ResourceSelectDialog
             {
                 try
                 {
-                    version = Version.parseVersion( versionText.getText() );
+                    version = VersionTable.getVersion( versionText.getText() );
                     setErrorMessage( null );
                 }
                 catch ( IllegalArgumentException ex )

@@ -30,6 +30,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.core.licence.ILicenseManager;
 import org.apache.felix.sigil.core.licence.ILicensePolicy;
@@ -298,7 +299,7 @@ public abstract class AbstractBundleRepository implements IBundleRepository
                 {
                     info = ModelElementFactory.getInstance().newModelElement( IBundleModelElement.class );
                     info.setSymbolicName( name.split( ";" )[0] );
-                    info.setVersion( Version.parseVersion( attrs.getValue( "Bundle-Version" ) ) );
+                    info.setVersion( VersionTable.getVersion( attrs.getValue( "Bundle-Version" ) ) );
                     info.setName( attrs.getValue( "Bundle-Name" ) );
                     info.setDescription( attrs.getValue( "Bundle-Description" ) );
                     info.setVendor( attrs.getValue( "Bundle-Vendor" ) );
@@ -433,7 +434,7 @@ public abstract class AbstractBundleRepository implements IBundleRepository
     private Version parseVersion( String val )
     {
         val = val.replaceAll( "\"", "" );
-        return new Version( val );
+        return VersionTable.getVersion( val );
     }
 
 

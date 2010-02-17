@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.ui.eclipse.ui.util.IValidationListener;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
@@ -254,15 +255,14 @@ public class VersionRangeComponent extends Composite
                 }
                 else
                 {
-                    Version v = Version.parseVersion( specificText.getText().trim() );
+                    Version v = VersionTable.getVersion( specificText.getText().trim() );
                     versions = new VersionRange( false, v, v, false );
                 }
             }
             else
             {
-                Version min = Version.parseVersion( minimumText.getText() );
-                Version max = "*".equals( maximumText.getText() ) ? VersionRange.INFINITE_VERSION : Version
-                    .parseVersion( maximumText.getText() );
+                Version min = VersionTable.getVersion( minimumText.getText() );
+                Version max = "*".equals( maximumText.getText() ) ? VersionRange.INFINITE_VERSION : VersionTable.getVersion( maximumText.getText() );
                 versions = new VersionRange( !minInclusiveButton.getSelection(), min, max, !maxInclusiveButton
                     .getSelection() );
             }

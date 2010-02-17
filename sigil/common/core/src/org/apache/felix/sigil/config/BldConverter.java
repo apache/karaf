@@ -32,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.config.IBldProject.IBldBundle;
 import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.core.internal.model.eclipse.SigilBundle;
@@ -43,7 +44,6 @@ import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.osgi.framework.Version;
 
 import aQute.lib.osgi.Constants;
 
@@ -155,7 +155,7 @@ public class BldConverter
 
         info.setSymbolicName( bundle.getSymbolicName() );
 
-        info.setVersion( Version.parseVersion( bundle.getVersion() ) );
+        info.setVersion( VersionTable.getVersion( bundle.getVersion() ) );
 
         String activator = bundle.getActivator();
         if ( activator != null )

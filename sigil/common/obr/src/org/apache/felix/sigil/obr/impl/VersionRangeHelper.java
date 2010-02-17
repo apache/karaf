@@ -30,6 +30,7 @@ import org.apache.felix.sigil.common.osgi.Not;
 import org.apache.felix.sigil.common.osgi.Ops;
 import org.apache.felix.sigil.common.osgi.SimpleTerm;
 import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.osgi.framework.Version;
 
 
@@ -178,7 +179,7 @@ class VersionRangeHelper
 
     private static Version toVersion( SimpleTerm t )
     {
-        return new Version( t.getRval() );
+        return VersionTable.getVersion( t.getRval() );
     }
 
 

@@ -34,6 +34,7 @@ import org.apache.felix.sigil.common.osgi.LDAPParseException;
 import org.apache.felix.sigil.common.osgi.LDAPParser;
 import org.apache.felix.sigil.common.osgi.SimpleTerm;
 import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
@@ -42,7 +43,6 @@ import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.osgi.framework.Version;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -143,7 +143,7 @@ final class OBRHandler extends DefaultHandler
                 IBundleModelElement info = ModelElementFactory.getInstance()
                     .newModelElement( IBundleModelElement.class );
                 info.setSymbolicName( attributes.getValue( "", SYMBOLIC_NAME ) );
-                info.setVersion( new Version( attributes.getValue( "", VERSION ) ) );
+                info.setVersion( VersionTable.getVersion(attributes.getValue( "", VERSION ) ) );
                 info.setName( attributes.getValue( "", PRESENTATION_NAME ) );
                 URI l = makeAbsolute( uri );
                 info.setUpdateLocation( l );
@@ -284,7 +284,7 @@ final class OBRHandler extends DefaultHandler
             }
             else if ( "version".equals( name ) )
             {
-                export.setVersion( new Version( value ) );
+                export.setVersion( VersionTable.getVersion( value ) );
             }
         }
     }

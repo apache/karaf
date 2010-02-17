@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.eclipse.ILibrary;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
@@ -224,7 +225,7 @@ public class LibraryConfigurationDialog extends TitleAreaDialog
 
         try
         {
-            version = new Version( txtVersion.getText() );
+            version = VersionTable.getVersion( txtVersion.getText() );
             if ( version.getQualifier().indexOf( '_' ) > -1 )
             {
                 warning = "The use of underscores in a version qualifier is discouraged.";

@@ -22,8 +22,8 @@ package org.apache.felix.sigil.ui.eclipse.ui.preferences;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.common.osgi.VersionRangeBoundingRule;
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.eclipse.SigilCore;
-import org.apache.felix.sigil.ui.eclipse.ui.SigilUI;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -31,7 +31,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -48,7 +47,7 @@ import org.osgi.framework.Version;
 public class VersionsPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
 
-    private static final Version SAMPLE_VERSION = new Version( 1, 2, 3, "qualifier" );
+    private static final Version SAMPLE_VERSION = VersionTable.getVersion( 1, 2, 3, "qualifier" );
 
     private IWorkbench workbench;
 
@@ -169,7 +168,7 @@ public class VersionsPreferencePage extends PreferencePage implements IWorkbench
             {
                 try
                 {
-                    sampleVersion = new Version( txtSampleVersion.getText() );
+                    sampleVersion = VersionTable.getVersion( txtSampleVersion.getText() );
                 }
                 catch ( IllegalArgumentException x )
                 {
@@ -184,7 +183,7 @@ public class VersionsPreferencePage extends PreferencePage implements IWorkbench
             {
                 try
                 {
-                    matchVersion = new Version( txtMatchVersion.getText() );
+                    matchVersion = VersionTable.getVersion( txtMatchVersion.getText() );
                 }
                 catch ( IllegalArgumentException x )
                 {

@@ -20,6 +20,7 @@
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
@@ -134,7 +135,7 @@ public class GeneralInfoSection extends SigilSection
 
             public Object getValue( String label )
             {
-                return Version.parseVersion( label );
+                return VersionTable.getVersion( label );
             }
         };
 
