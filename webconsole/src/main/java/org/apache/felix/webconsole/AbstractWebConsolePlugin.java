@@ -65,6 +65,16 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     public static final String GET_RESOURCE_METHOD_NAME = "getResource";
 
     /**
+     * The header fragment read from the templates/main_header.html file
+     */
+    private static String HEADER;
+
+    /**
+     * The footer fragment read from the templates/main_footer.html file
+     */
+    private static String FOOTER;
+
+    /**
      * The reference to the getResource method provided by the
      * {@link #getResourceProvider()}. This is <code>null</code> if there is
      * none or before the first check if there is one.
@@ -646,53 +656,49 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         //  8 branding product image (BrandingPlugin.getProductImage())
         //  9 additional HTML code to be inserted into the <head> section
         //    (for example plugin provided CSS links)
-
-        final String header = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
-
-        + "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
-        + "  <head>"
-        + "    <meta http-equiv=\"Content-Type\" content=\"text/html; utf-8\">"
-        + "    <link rel=\"icon\" href=\"{4}\">"
-        + "    <title>{0} - {1}</title>"
-
-        + "    <link href=\"{2}/res/ui/admin.css\" rel=\"stylesheet\" type=\"text/css\">"
-        + "    <link href=\"{5}\" rel=\"stylesheet\" type=\"text/css\">"
-        + "    {9}"
-
-        + "    <script language=\"JavaScript\">"
-        + "      appRoot = \"{2}\";"
-        + "      pluginRoot = \"{2}/{3}\";"
-        + "    </script>"
-
-        + "    <script src=\"{2}/res/ui/jquery-1.3.2.min.js\" language=\"JavaScript\"></script>"
-        + "    <script src=\"{2}/res/ui/jquery.cookies-2.1.0.min.js\" language=\"JavaScript\"></script>"
-        + "    <script src=\"{2}/res/ui/jquery.tablesorter-2.0.3.min.js\" language=\"JavaScript\"></script>"
-
-        + "    <script src=\"{2}/res/ui/admin.js\" language=\"JavaScript\"></script>"
-        + "    <script src=\"{2}/res/ui/ui.js\" language=\"JavaScript\"></script>"
-
-        + "  </head>"
-        + "  <body>"
-        + "    <div id=\"main\">"
-        + "      <div id=\"lead\">"
-        + "        <h1>"
-        + "          {0}<br>{1}"
-        + "        </h1>"
-        + "        <p>"
-        + "          <a target=\"_blank\" href=\"{6}\" title=\"{7}\"><img src=\"{8}\" border=\"0\"></a>"
-        + "        </p>"
-        + "      </div>";
-        return header;
+        if ( HEADER == null )
+        {
+            HEADER = readTemplateFile( "/templates/main_header.html" );
+        }
+        return HEADER;
     }
 
 
     private final String getFooter()
     {
-        // close <div id="main">, body and html
-        final String footer = "    </div>"
-            + "  </body>"
-            + "</html>";
-        return footer;
+        if ( FOOTER == null )
+        {
+            FOOTER = readTemplateFile( "/templates/main_footer.html" );
+        }
+        return FOOTER;
+    }
+
+
+    /**
+     * Reads the <code>templateFile</code> as a resource through the class
+     * loader of this class converting the binary data into a string using
+     * UTF-8 encoding.
+     * <p>
+     * If the template file cannot read into a string and an exception is
+     * caused, the exception is logged and an empty string returned.
+     *
+     * @param templateFile The absolute path to the template file to read.
+     * @return The contents of the template file as a string or and empty
+     * string if the template file fails to be read.
+     */
+    private final String readTemplateFile( final String templateFile )
+    {
+        try
+        {
+            return IOUtils.toString( getClass().getResourceAsStream( templateFile ), "UTF-8" );
+        }
+        catch ( IOException e )
+        {
+            log( "readTemplateFile: Error loading " + templateFile, e );
+        }
+
+        // fall back to empty contents to prevent NPE
+        return "";
     }
 
 
