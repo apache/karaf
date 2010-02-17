@@ -29,6 +29,9 @@
         <command name="dev/dynamic-import">
             <action class="org.apache.felix.karaf.shell.dev.DynamicImport" />
         </command>
+        <command name="dev/print-stack-traces">
+            <action class="org.apache.felix.karaf.shell.dev.PrintStackTraces" />
+        </command>
     </command-bundle>
 
 </blueprint>
