@@ -64,7 +64,7 @@ public class VersionTable
         synchronized( versions ) {
             Version v = versions.get(key);
             if ( v == null ) {
-                v = new Version(major, minor, micro);
+                v = new Version(major, minor, micro, qualifier);
                 versions.put(key, v);
             }
             
