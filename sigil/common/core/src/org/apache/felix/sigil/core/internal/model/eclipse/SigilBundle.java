@@ -30,8 +30,9 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.model.AbstractCompoundModelElement;
@@ -55,9 +56,9 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     private static final long serialVersionUID = 1L;
 
     private IBundleModelElement bundle;
-    private Set<IPath> sourcePaths;
-    private Set<String> classpath;
-    private Set<String> packages;
+    private IPath[] sourcePaths;
+    private String[] classpath;
+    private String[] packages;
     private IPath location;
 
     private IPath sourcePathLocation;
@@ -67,9 +68,9 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     public SigilBundle()
     {
         super( "Sigil Bundle" );
-        sourcePaths = new HashSet<IPath>();
-        classpath = new HashSet<String>();
-        packages = new HashSet<String>();
+        sourcePaths = new IPath[0];
+        classpath = new String[0];
+        packages = new String[0];
     }
 
 
@@ -104,6 +105,15 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
                     .getCause() );
             }
         }
+        
+        updateManifest(location);
+    }
+
+
+    private void updateManifest(IPath location2)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 
@@ -212,43 +222,53 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
 
     public void addSourcePath( IPath path )
     {
-        sourcePaths.add( path );
+        ArrayList<IPath> tmp = new ArrayList<IPath>(getSourcePaths());
+        tmp.add(path);
+        sourcePaths = tmp.toArray( new IPath[tmp.size()] );
     }
 
 
     public void removeSourcePath( IPath path )
     {
-        sourcePaths.remove( path );
+        ArrayList<IPath> tmp = new ArrayList<IPath>(getSourcePaths());
+        if ( tmp.remove(path) ) {
+            sourcePaths = tmp.toArray( new IPath[tmp.size()] );
+        }
     }
 
 
-    public Set<IPath> getSourcePaths()
+    public Collection<IPath> getSourcePaths()
     {
-        return sourcePaths;
+        return Arrays.asList(sourcePaths);
     }
 
 
     public void clearSourcePaths()
     {
-        sourcePaths.clear();
+        sourcePaths = new IPath[0];
     }
 
 
     public void addClasspathEntry( String encodedClasspath )
     {
-        classpath.add( encodedClasspath.trim() );
+        ArrayList<String> tmp = new ArrayList<String>(getClasspathEntrys());
+        tmp.add(encodedClasspath.trim());
+        classpath = tmp.toArray( new String[tmp.size()] );
     }
 
 
-    public Set<String> getClasspathEntrys()
+    public Collection<String> getClasspathEntrys()
     {
-        return classpath;
+        return Arrays.asList(classpath);
     }
 
 
     public void removeClasspathEntry( String encodedClasspath )
     {
-        classpath.remove( encodedClasspath.trim() );
+        ArrayList<String> tmp = new ArrayList<String>(getClasspathEntrys());
+        if ( tmp.remove( encodedClasspath.trim() ) ) {
+            classpath = tmp.toArray( new String[tmp.size()] );
+        }
     }
 
 
@@ -356,21 +376,30 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     }
 
 
-    public Set<String> getPackages()
+    public Collection<String> getPackages()
     {
-        return packages;
+        return Arrays.asList(packages);
     }
 
 
     public void addPackage( String pkg )
     {
-        packages.add( pkg );
+        ArrayList<String> tmp = new ArrayList<String>(getClasspathEntrys());
+        tmp.add(pkg);
+        packages = tmp.toArray( new String[tmp.size()] );
     }
 
 
     public boolean removePackage( String pkg )
     {
-        return packages.remove( pkg );
+        ArrayList<String> tmp = new ArrayList<String>(getClasspathEntrys());
+        if ( tmp.remove(pkg) ) {
+            packages = tmp.toArray( new String[tmp.size()] );
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
 

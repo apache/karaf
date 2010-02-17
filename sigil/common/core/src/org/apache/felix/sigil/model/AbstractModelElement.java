@@ -46,8 +46,6 @@ public abstract class AbstractModelElement implements IModelElement
     {
         support = new ModelElementSupport( this );
         this.description = description.intern();
-        this.meta = new HashMap<Object, Object>();
-        this.serializedMeta = new HashMap<Serializable, Serializable>();
     }
 
 
@@ -59,7 +57,7 @@ public abstract class AbstractModelElement implements IModelElement
 
     public Map<Object, Object> getMeta()
     {
-        return meta;
+        return meta == null ? Collections.emptyMap() : Collections.unmodifiableMap(meta);
     }
 
 
@@ -76,7 +74,9 @@ public abstract class AbstractModelElement implements IModelElement
         {
             AbstractModelElement clone = ( AbstractModelElement ) super.clone();
 
-            clone.meta = new HashMap<Object, Object>( meta );
+            if ( meta != null ) {
+                clone.meta = new HashMap<Object, Object>( meta );
+            }
 
             return clone;
         }
@@ -186,35 +186,36 @@ public abstract class AbstractModelElement implements IModelElement
         return Collections.emptySet();
     }
 
-
-    protected Object writeReplace()
-    {
-        AbstractModelElement clone = clone();
-
-        for ( Map.Entry<Object, Object> e : clone.meta.entrySet() )
-        {
-            if ( e.getKey() instanceof Serializable && e.getValue() instanceof Serializable )
-            {
-                serializedMeta.put( ( Serializable ) e.getKey(), ( Serializable ) e.getValue() );
-            }
-        }
-
-        clone.meta.clear();
-
-        return clone;
-    }
-
-
     public Class<?> getPropertyType( String name ) throws NoSuchMethodException
     {
         return support.getPropertyType( name );
     }
 
+    protected Object writeReplace()
+    {
+        AbstractModelElement clone = clone();
+
+        if ( clone.meta != null ) {
+            clone.serializedMeta = new HashMap<Serializable, Serializable>(clone.meta.size());
+            
+            for ( Map.Entry<Object, Object> e : clone.meta.entrySet() )
+            {
+                if ( e.getKey() instanceof Serializable && e.getValue() instanceof Serializable )
+                {
+                    clone.serializedMeta.put( ( Serializable ) e.getKey(), ( Serializable ) e.getValue() );
+                }
+            }
+    
+            clone.meta = null;
+        }
+
+        return clone;
+    }
 
     protected Object readResolve()
     {
-        this.meta = new HashMap<Object, Object>( serializedMeta );
-        serializedMeta.clear();
+        meta = serializedMeta == null ? null : new HashMap<Object, Object>( serializedMeta );
+        serializedMeta = null;
         return this;
     }
 

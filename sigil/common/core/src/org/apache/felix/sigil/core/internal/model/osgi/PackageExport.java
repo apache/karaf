@@ -20,8 +20,9 @@
 package org.apache.felix.sigil.core.internal.model.osgi;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 
 import org.apache.felix.sigil.model.AbstractModelElement;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
@@ -36,8 +37,7 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
 
     private String name;
     private Version version;
-    private HashSet<String> uses = new HashSet<String>();
-
+    private String[] uses = new String[0];
 
     public PackageExport()
     {
@@ -94,19 +94,23 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
 
     public void addUse( String use )
     {
-        uses.add( use );
+        ArrayList<String> tmp = new ArrayList<String>(getUses());
+        tmp.add(use);
+        uses = tmp.toArray( new String[tmp.size()] );
     }
 
 
     public Collection<String> getUses()
     {
-        return uses;
+        return Arrays.asList(uses);
     }
 
 
     public void removeUse( String use )
     {
-        uses.remove( use );
+        ArrayList<String> tmp = new ArrayList<String>(getUses());
+        tmp.remove(use);
+        uses = tmp.toArray( new String[tmp.size()] );
     }
 
 
@@ -119,8 +123,8 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
 
     public void setUses( Collection<String> uses )
     {
-        this.uses.clear();
-        this.uses.addAll( uses );
+        ArrayList<String> tmp = new ArrayList<String>(uses);
+        this.uses = tmp.toArray( new String[tmp.size()] );
     }
 
 

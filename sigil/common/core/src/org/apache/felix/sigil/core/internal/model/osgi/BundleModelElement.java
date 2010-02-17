@@ -21,6 +21,8 @@ package org.apache.felix.sigil.core.internal.model.osgi;
 
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,9 +48,9 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
     private URI updateLocation;
     private String symbolicName;
     private Version version = Version.emptyVersion;
-    private Set<IPackageImport> imports;
-    private Set<IPackageExport> exports;
-    private Set<IRequiredBundle> requires;
+    private IPackageImport[] imports;
+    private IPackageExport[] exports;
+    private IRequiredBundle[] requires;
     private URI sourceLocation;
     private Set<String> classpathElements;
     private IRequiredBundle fragmentHost;
@@ -71,9 +73,9 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
     public BundleModelElement()
     {
         super( "OSGi Bundle" );
-        this.imports = new HashSet<IPackageImport>();
-        this.exports = new HashSet<IPackageExport>();
-        this.requires = new HashSet<IRequiredBundle>();
+        this.imports = new IPackageImport[0];
+        this.exports = new IPackageExport[0];
+        this.requires = new IRequiredBundle[0];
         this.classpathElements = new HashSet<String>();
         this.libraries = new HashSet<ILibraryImport>();
     }
@@ -157,67 +159,78 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
     }
 
 
-    public Set<IPackageExport> getExports()
+    public Collection<IPackageExport> getExports()
     {
-        return exports;
+        return Arrays.asList(exports);
     }
 
 
     public void addExport( IPackageExport packageExport )
     {
-        exports.add( packageExport );
-        packageExport.setParent( this );
+        HashSet<IPackageExport> tmp = new HashSet<IPackageExport>(getExports());
+        if ( tmp.add(packageExport) ) {
+            exports = tmp.toArray( new IPackageExport[tmp.size()] );
+            packageExport.setParent( this );
+        }
     }
-
 
     public void removeExport( IPackageExport packageExport )
     {
-        if ( exports.remove( packageExport ) )
-        {
+        HashSet<IPackageExport> tmp = new HashSet<IPackageExport>(getExports());
+        if ( tmp.remove(packageExport) ) {
+            exports = tmp.toArray( new IPackageExport[tmp.size()] );
             packageExport.setParent( null );
         }
     }
 
 
-    public Set<IPackageImport> getImports()
+    public Collection<IPackageImport> getImports()
     {
-        return imports;
+        return Arrays.asList(imports);
     }
 
 
     public void addImport( IPackageImport packageImport )
     {
-        imports.add( packageImport );
-        packageImport.setParent( this );
+        HashSet<IPackageImport> tmp = new HashSet<IPackageImport>(getImports());
+        if ( tmp.add(packageImport) ) {
+            imports = tmp.toArray( new IPackageImport[tmp.size()] );
+            packageImport.setParent( this );
+        }
     }
 
 
     public void removeImport( IPackageImport packageImport )
     {
-        if ( imports.remove( packageImport ) )
-        {
+        HashSet<IPackageImport> tmp = new HashSet<IPackageImport>(getImports());
+        if ( tmp.remove(packageImport) ) {
+            imports = tmp.toArray( new IPackageImport[tmp.size()] );
             packageImport.setParent( null );
         }
     }
 
 
-    public Set<IRequiredBundle> getRequiredBundles()
+    public Collection<IRequiredBundle> getRequiredBundles()
     {
-        return requires;
+        return Arrays.asList(requires);
     }
 
 
     public void addRequiredBundle( IRequiredBundle bundle )
     {
-        requires.add( bundle );
-        bundle.setParent( this );
+        HashSet<IRequiredBundle> tmp = new HashSet<IRequiredBundle>(getRequiredBundles());
+        if ( tmp.add(bundle) ) {
+            requires = tmp.toArray( new IRequiredBundle[tmp.size()] );
+            bundle.setParent( this );
+        }
     }
 
 
     public void removeRequiredBundle( IRequiredBundle bundle )
     {
-        if ( requires.remove( bundle ) )
-        {
+        HashSet<IRequiredBundle> tmp = new HashSet<IRequiredBundle>(getRequiredBundles());
+        if ( tmp.remove(bundle) ) {
+            requires = tmp.toArray( new IRequiredBundle[tmp.size()] );
             bundle.setParent( null );
         }
     }
@@ -306,23 +319,23 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
     {
         BundleModelElement bd = ( BundleModelElement ) super.clone();
 
-        bd.imports = new HashSet<IPackageImport>();
-        bd.exports = new HashSet<IPackageExport>();
-        bd.requires = new HashSet<IRequiredBundle>();
+        bd.imports = new IPackageImport[imports.length];
+        bd.exports = new IPackageExport[exports.length];
+        bd.requires = new IRequiredBundle[requires.length];
 
-        for ( IPackageImport pi : imports )
+        for ( int i = 0; i < imports.length; i++ ) 
         {
-            bd.imports.add( ( IPackageImport ) pi.clone() );
+            bd.imports[i] = (IPackageImport) imports[i].clone();
         }
 
-        for ( IPackageExport pe : exports )
+        for ( int i = 0; i < exports.length; i++ )
         {
-            bd.exports.add( ( IPackageExport ) pe.clone() );
+            bd.exports[i] = ( IPackageExport ) exports[i].clone();
         }
 
-        for ( IRequiredBundle rb : requires )
+        for ( int i = 0; i < requires.length; i++ )
         {
-            bd.requires.add( ( IRequiredBundle ) rb.clone() );
+            bd.requires[i] = ( IRequiredBundle ) requires[i].clone();
         }
 
         return bd;

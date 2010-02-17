@@ -116,7 +116,7 @@ public class ResolveProjectsJob extends Job
                     IResolution resolution = resolver.resolve( sigilProject, config, resolutionMonitor );
 
                     // Find missing imports
-                    Set<IPackageImport> imports = sigilProject.getBundle().getBundleInfo().getImports();
+                    Collection<IPackageImport> imports = sigilProject.getBundle().getBundleInfo().getImports();
                     for ( IPackageImport pkgImport : imports )
                     {
                         if ( resolution.getProvider( pkgImport ) == null )
@@ -126,7 +126,7 @@ public class ResolveProjectsJob extends Job
                     }
 
                     // Find missing required bundles
-                    Set<IRequiredBundle> requiredBundles = sigilProject.getBundle().getBundleInfo()
+                    Collection<IRequiredBundle> requiredBundles = sigilProject.getBundle().getBundleInfo()
                         .getRequiredBundles();
                     for ( IRequiredBundle requiredBundle : requiredBundles )
                     {

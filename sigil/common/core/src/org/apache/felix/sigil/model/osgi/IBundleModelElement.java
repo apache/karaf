@@ -63,7 +63,7 @@ public interface IBundleModelElement extends INamedModelElement, ICompoundModelE
     void setDocURI( URI docURI );
 
 
-    Set<IPackageExport> getExports();
+    Collection<IPackageExport> getExports();
 
 
     void addExport( IPackageExport packageExport );
@@ -72,7 +72,7 @@ public interface IBundleModelElement extends INamedModelElement, ICompoundModelE
     void removeExport( IPackageExport packageExport );
 
 
-    Set<IPackageImport> getImports();
+    Collection<IPackageImport> getImports();
 
 
     void addImport( IPackageImport packageImport );
@@ -81,7 +81,7 @@ public interface IBundleModelElement extends INamedModelElement, ICompoundModelE
     void removeImport( IPackageImport packageImport );
 
 
-    Set<IRequiredBundle> getRequiredBundles();
+    Collection<IRequiredBundle> getRequiredBundles();
 
 
     void addRequiredBundle( IRequiredBundle bundle );

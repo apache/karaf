@@ -176,7 +176,7 @@ public class DependencyManagementSection extends SigilSection
 
         // Get the existing imports for the bundle
         IBundleModelElement bundleInfo = getProjectModel().getBundle().getBundleInfo();
-        Set<IPackageImport> existingImports = bundleInfo.getImports();
+        Collection<IPackageImport> existingImports = bundleInfo.getImports();
         Map<String, IPackageImport> existingImportsMap = new HashMap<String, IPackageImport>();
         for ( IPackageImport existingImport : existingImports )
         {
@@ -204,7 +204,7 @@ public class DependencyManagementSection extends SigilSection
         }
 
         // Remove required bundles
-        Set<IRequiredBundle> requiredBundles = bundleInfo.getRequiredBundles();
+        Collection<IRequiredBundle> requiredBundles = bundleInfo.getRequiredBundles();
         int requiredBundlesSize = requiredBundles.size();
         for ( IRequiredBundle requiredBundle : requiredBundles )
         {

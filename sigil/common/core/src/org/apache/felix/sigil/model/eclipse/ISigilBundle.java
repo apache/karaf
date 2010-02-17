@@ -21,7 +21,7 @@ package org.apache.felix.sigil.model.eclipse;
 
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,13 +59,13 @@ public interface ISigilBundle extends ICompoundModelElement, IVersionedModelElem
     void removeSourcePath( IPath path );
 
 
-    Set<IPath> getSourcePaths();
+    Collection<IPath> getSourcePaths();
 
 
     void clearSourcePaths();
 
 
-    Set<String> getClasspathEntrys();
+    Collection<String> getClasspathEntrys();
 
 
     void addClasspathEntry( String encodedClasspath );
@@ -102,7 +102,7 @@ public interface ISigilBundle extends ICompoundModelElement, IVersionedModelElem
      * get package names included in bundle.
      * Can contain wildcards e.g. org.foo.*
      */
-    Set<String> getPackages();
+    Collection<String> getPackages();
 
 
     /**
