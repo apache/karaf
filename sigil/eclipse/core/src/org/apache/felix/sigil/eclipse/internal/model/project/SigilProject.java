@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.regex.Matcher;
 
 import org.apache.felix.sigil.config.BldFactory;
 import org.apache.felix.sigil.config.IBldProject;
@@ -48,6 +49,7 @@ import org.apache.felix.sigil.repository.IResolution;
 import org.apache.felix.sigil.repository.ResolutionConfig;
 import org.apache.felix.sigil.repository.ResolutionException;
 import org.apache.felix.sigil.repository.ResolutionMonitorAdapter;
+import org.apache.felix.sigil.utils.GlobCompiler;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -65,6 +67,7 @@ import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaCore;
@@ -327,8 +330,12 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
     @Override
     public int hashCode()
     {
-        // TODO Auto-generated method stub
-        return super.hashCode();
+        int hc = getSymbolicName().hashCode();
+        if ( getVersion() != null ) {
+            hc *= getVersion().hashCode();
+        }
+        hc *= 7;
+        return hc;
     }
 
 
@@ -570,9 +577,22 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
     }
 
 
-    public boolean isInBundleClasspath( IPackageFragmentRoot root ) throws JavaModelException
+    public boolean isInBundleClasspath( IPackageFragment root ) throws JavaModelException
     {
-        String enc = getJavaModel().encodeClasspathEntry( root.getRawClasspathEntry() );
-        return getBundle().getClasspathEntrys().contains( enc.trim() );
+        if ( getBundle().getClasspathEntrys().isEmpty() ) {
+            for ( String p : getBundle().getPackages() ) {
+                SigilCore.log("Checking " + p + "->" + root.getElementName() );
+                Matcher m = GlobCompiler.compile(p).matcher(root.getElementName());
+                if ( m.matches() ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else {
+            IPackageFragmentRoot parent = (IPackageFragmentRoot) root.getParent();
+            String enc = getJavaModel().encodeClasspathEntry( parent.getRawClasspathEntry() );
+            return getBundle().getClasspathEntrys().contains( enc.trim() );
+        }
     }
 }
