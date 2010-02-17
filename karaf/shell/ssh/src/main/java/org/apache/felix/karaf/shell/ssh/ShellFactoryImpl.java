@@ -93,11 +93,6 @@ public class ShellFactoryImpl implements Factory<Command>
 
         public void start(final Environment env) throws IOException {
             try {
-                final Callable<Boolean> printStackTraces = new Callable<Boolean>() {
-                    public Boolean call() {
-                        return Boolean.valueOf(System.getProperty(Console.PRINT_STACK_TRACES));
-                    }
-                };
                 Console console = new Console(commandProcessor,
                                               in,
                                               new PrintStream(new LfToCrLfFilterOutputStream(out), true),
@@ -108,8 +103,7 @@ public class ShellFactoryImpl implements Factory<Command>
                                                   public void run() {
                                                       destroy();
                                                   }
-                                              },
-                                              printStackTraces);
+                                              });
                 CommandSession session = console.getSession();
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 for (Map.Entry<String,String> e : env.getEnv().entrySet()) {

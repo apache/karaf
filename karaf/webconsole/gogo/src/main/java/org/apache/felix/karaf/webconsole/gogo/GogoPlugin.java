@@ -208,20 +208,13 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 out = new PipedInputStream();
                 PrintStream pipedOut = new PrintStream(new PipedOutputStream(out), true);
 
-                final Callable<Boolean> printStackTraces = new Callable<Boolean>() {
-                    public Boolean call() {
-                        return Boolean.valueOf(bundleContext.getProperty(Console.PRINT_STACK_TRACES));
-                    }
-                };
-
                 console = new Console(commandProcessor,
                                       new PipedInputStream(in),
                                       pipedOut,
                                       pipedOut,
                                       new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
                                       new AggregateCompleter(completers),
-                                      null,
-                                      printStackTraces);
+                                      null);
                 CommandSession session = console.getSession();
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 session.put("USER", "karaf");

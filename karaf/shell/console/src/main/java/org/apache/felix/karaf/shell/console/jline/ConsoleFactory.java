@@ -82,19 +82,13 @@ public class ConsoleFactory {
                     }
                 }
             };
-            final Callable<Boolean> printStackTraces = new Callable<Boolean>() {
-                public Boolean call() {
-                    return Boolean.valueOf(bundleContext.getProperty(Console.PRINT_STACK_TRACES));
-                }
-            };
             this.console = new Console(commandProcessor,
                                        in,
                                        wrap(out),
                                        wrap(err),
                                        terminal,
                                        new AggregateCompleter(completers),
-                                       callback,
-                                       printStackTraces);
+                                       callback);
             CommandSession session = console.getSession();
             session.put("USER", "karaf");
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
