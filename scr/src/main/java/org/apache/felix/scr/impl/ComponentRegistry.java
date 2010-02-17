@@ -367,23 +367,30 @@ public class ComponentRegistry implements ScrService
      * been sent.  Hence DS must consider a bundle active when it is really
      * active and when it is a lazily activated bundle in the STARTING state.
      *
-     * @throws NullPointerException if bundle is <code>null</code>.
+     * @param bundle The bundle check
+     * @return <code>true</code> if <code>bundle</code> is not <code>null</code>
+     *          and the bundle is either active or has lazy activation policy
+     *          and is in the starting state.
+     *
      * @see <a href="https://issues.apache.org/jira/browse/FELIX-1666">FELIX-1666</a>
      */
     static boolean isBundleActive( final Bundle bundle )
     {
-        if ( bundle.getState() == Bundle.ACTIVE )
+        if ( bundle != null )
         {
-            return true;
-        }
+            if ( bundle.getState() == Bundle.ACTIVE )
+            {
+                return true;
+            }
 
-        if ( bundle.getState() == Bundle.STARTING )
-        {
-            // according to the spec the activationPolicy header is only
-            // set to request a bundle to be lazily activated. So in this
-            // simple check we just verify the header is set to assume
-            // the bundle is considered a lazily activated bundle
-            return bundle.getHeaders().get( Constants.BUNDLE_ACTIVATIONPOLICY ) != null;
+            if ( bundle.getState() == Bundle.STARTING )
+            {
+                // according to the spec the activationPolicy header is only
+                // set to request a bundle to be lazily activated. So in this
+                // simple check we just verify the header is set to assume
+                // the bundle is considered a lazily activated bundle
+                return bundle.getHeaders().get( Constants.BUNDLE_ACTIVATIONPOLICY ) != null;
+            }
         }
 
         // fall back: bundle is not considered active

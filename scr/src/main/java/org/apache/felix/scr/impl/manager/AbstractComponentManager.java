@@ -35,6 +35,7 @@ import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.apache.felix.scr.impl.metadata.ServiceMetadata;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
@@ -196,10 +197,34 @@ public abstract class AbstractComponentManager implements Component
         return m_componentMetadata.getName();
     }
 
+    /**
+     * Returns the <code>Bundle</code> providing this component. If the
+     * component as already been disposed off, this method returns
+     * <code>null</code>.
+     */
     public Bundle getBundle()
     {
-        return getActivator().getBundleContext().getBundle();
+        final BundleComponentActivator activator = getActivator();
+        if ( activator != null )
+        {
+            final BundleContext context = activator.getBundleContext();
+            if ( context != null )
+            {
+                try
+                {
+                    return context.getBundle();
+                }
+                catch ( IllegalStateException ise )
+                {
+                    // if the bundle context is not valid any more
+                }
+            }
+        }
+
+        // already disposed off component or bundle context is invalid
+        return null;
     }
+
 
     public String getClassName()
     {
