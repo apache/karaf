@@ -21,6 +21,7 @@ package org.apache.felix.sigil.ui.eclipse.ui.util;
 
 
 import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -44,7 +45,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -71,9 +71,9 @@ public class ResourcesDialogHelper
                 try
                 {
                     for ( IJavaElement e : JavaHelper.findTypes( project.getJavaModel(),
-                        IJavaElement.PACKAGE_FRAGMENT_ROOT ) )
+                        IJavaElement.PACKAGE_FRAGMENT ) )
                     {
-                        IPackageFragmentRoot root = ( IPackageFragmentRoot ) e;
+                        IPackageFragment root = ( IPackageFragment ) e;
                         if ( project.isInBundleClasspath( root ) )
                         {
                             for ( IJavaElement e1 : JavaHelper.findTypes( root, IJavaElement.COMPILATION_UNIT,
@@ -235,19 +235,16 @@ public class ResourcesDialogHelper
                 {
                     ArrayList<IPackageFragment> list = new ArrayList<IPackageFragment>( UPDATE_BATCH_SIZE );
                     for ( IJavaElement e : JavaHelper.findTypes( project.getJavaModel(),
-                        IJavaElement.PACKAGE_FRAGMENT_ROOT ) )
+                        IJavaElement.PACKAGE_FRAGMENT ) )
                     {
-                        IPackageFragmentRoot root = ( IPackageFragmentRoot ) e;
+                        IPackageFragment root = ( IPackageFragment ) e;
                         if ( project.isInBundleClasspath( root ) )
                         {
-                            for ( IJavaElement e1 : JavaHelper.findTypes( root, IJavaElement.PACKAGE_FRAGMENT ) )
+                            list.add( root );
+                            if ( list.size() >= UPDATE_BATCH_SIZE )
                             {
-                                list.add( ( IPackageFragment ) e1 );
-                                if ( list.size() >= UPDATE_BATCH_SIZE )
-                                {
-                                    dialog.addElements( list );
-                                    list.clear();
-                                }
+                                dialog.addElements( list );
+                                list.clear();
                             }
                         }
                     }
