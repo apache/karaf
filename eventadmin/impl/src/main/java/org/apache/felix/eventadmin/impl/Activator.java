@@ -83,5 +83,8 @@ public class Activator implements BundleActivator
             m_config.destroy();
         }
         m_config = null;
+
+        // FELIX-2089: "unset" the bundle context on stop
+        LogWrapper.setContext(null);
     }
 }
