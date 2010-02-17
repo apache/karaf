@@ -690,10 +690,10 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
     					}
 		        	}
 	        	}
-	        	if (m_implementation == null) {
-                    m_logger.log(Logger.LOG_ERROR, "Implementation cannot be null.");
-	        	}
 	        	if (m_serviceInstance == null) {
+	        	    if (m_implementation == null) {
+	        	        m_logger.log(Logger.LOG_ERROR, "Implementation cannot be null.");
+	        	    }
 	        	    m_serviceInstance = m_implementation;
 	        	}
 	        }
