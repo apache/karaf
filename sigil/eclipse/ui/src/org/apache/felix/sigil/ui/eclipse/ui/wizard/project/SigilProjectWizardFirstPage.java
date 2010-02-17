@@ -20,6 +20,7 @@
 package org.apache.felix.sigil.ui.eclipse.ui.wizard.project;
 
 
+import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.ui.eclipse.ui.views.RepositoryViewPart;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -49,7 +50,7 @@ public class SigilProjectWizardFirstPage extends WizardNewProjectCreationPage
 {
 
     private volatile String description = "";
-    private volatile Version version = new Version( 1, 0, 0 );
+    private volatile Version version = VersionTable.getVersion( 1, 0, 0 );
     private volatile String vendor = "";
     private volatile String name = "";
 
@@ -161,7 +162,7 @@ public class SigilProjectWizardFirstPage extends WizardNewProjectCreationPage
     {
         try
         {
-            version = new Version( txtVersion.getText() );
+            version = VersionTable.getVersion( txtVersion.getText() );
         }
         catch ( IllegalArgumentException e )
         {
