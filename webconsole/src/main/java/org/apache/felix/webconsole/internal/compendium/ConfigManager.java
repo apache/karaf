@@ -31,21 +31,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.Vector;
-import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.WebConsoleConstants;
-import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.DefaultVariableResolver;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -57,7 +55,6 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
@@ -67,32 +64,31 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  */
 public class ConfigManager extends ConfigManagerBase
 {
+    private static final String LABEL = "configMgr"; // was name
+    private static final String TITLE = "Configuration";
+    private static final String CSS[] = { "/res/ui/config.css" };
 
     private static final String PID_FILTER = "pidFilter";
-
-    public static final String NAME = "configMgr";
-
-    public static final String LABEL = "Configuration";
-
-    public static final String PID = "pid";
-
-    public static final String factoryPID = "factoryPid";
+    private static final String PID = "pid";
+    private static final String factoryPID = "factoryPid";
 
     private static final String PLACEHOLDER_PID = "[Temporary PID replaced by real PID upon save]";
 
+    // templates
+    private final String TEMPLATE;
 
-    public String getTitle()
+    /** Default constructor */
+    public ConfigManager()
     {
-        return LABEL;
+        super(LABEL, TITLE, CSS);
+
+        // load templates
+        TEMPLATE = readTemplateFile( "/templates/config.html" );
     }
 
-
-    public String getLabel()
-    {
-        return NAME;
-    }
-
-
+    /**
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         // needed multiple times below
@@ -133,7 +129,7 @@ public class ConfigManager extends ConfigManagerBase
                     redirect += "?" + PID_FILTER + "=" + pidFilter;
                 }
 
-                this.sendRedirect(request, response, redirect);
+                WebConsoleUtil.sendRedirect(request, response, redirect);
             }
 
             return;
@@ -148,7 +144,7 @@ public class ConfigManager extends ConfigManagerBase
         if ( request.getParameter( "unbind" ) != null )
         {
             config.setBundleLocation( null );
-            sendRedirect( request, response, config.getPid() );
+            WebConsoleUtil.sendRedirect( request, response, config.getPid() );
             return;
         }
 
@@ -227,7 +223,7 @@ public class ConfigManager extends ConfigManagerBase
                 }
                 pw.write("]");
             } catch (InvalidSyntaxException e) {
-                // this should not happend as we checked the filter before
+                // this should not happened as we checked the filter before
             }
             // nothing more to do
             return;
@@ -239,7 +235,7 @@ public class ConfigManager extends ConfigManagerBase
     /**
      * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
 
         // extract the configuration pid from the request path
@@ -281,42 +277,20 @@ public class ConfigManager extends ConfigManagerBase
 
         final Locale loc = getLocale( request );
         final String locale = ( loc != null ) ? loc.toString() : null;
+        
 
-        final PrintWriter pw = response.getWriter();
-
-        final String appRoot = (String) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
-        pw.println( "<script src='" + appRoot + "/res/ui/configmanager.js' language='JavaScript'></script>" );
-
-        pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
-
-        if ( ca == null )
+        JSONObject json = new JSONObject();
+        try
         {
-            pw.println( "<tr class='content' id='configField'>" );
-            pw.println( "<td class='content'>&nbsp;</th>" );
-            pw.println( "<td class='content'>" );
-            pw.print( "Configuration Admin Service not available" );
-            pw.println( "</td>" );
-            pw.println( "</tr>" );
+            json.put("status", ca != null ? Boolean.TRUE : Boolean.FALSE);
+            listConfigurations(json, ca, pidFilter, locale);
+            listFactoryConfigurations(json, pidFilter, locale);
         }
-        else
+        catch (JSONException e)
         {
-            pw.println( "<tr class='content' id='configField'>" );
-            pw.println( "<td class='content'>Configurations</th>" );
-            pw.println( "<td class='content'>" );
-            this.listConfigurations( pw, ca, pidFilter, locale );
-            pw.println( "</td>" );
-            pw.println( "</tr>" );
-
-            pw.println( "<tr class='content' id='factoryField'>" );
-            pw.println( "<td class='content'>Factory Configurations</th>" );
-            pw.println( "<td class='content'>" );
-            this.listFactoryConfigurations( pw, ca, pidFilter, locale );
-            pw.println( "</td>" );
-            pw.println( "</tr>" );
+            throw new IOException(e.toString());
         }
-
-        pw.println( "</table>" );
-
+        
         // if a configuration is addressed, display it immediately
         final Configuration config;
         if ( request.getParameter( "create" ) != null && pid != null )
@@ -329,18 +303,13 @@ public class ConfigManager extends ConfigManagerBase
             config = getConfiguration( ca, pid );
         }
 
-        if ( pid != null )
-        {
-            Util.startScript( pw );
 
-            pw.println( "var configuration=" );
-            printConfigurationJson( pw, pid, config, pidFilter, locale );
-            pw.println( ";" );
+        // prepare variables
+        DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
+        vars.put( "__data__", json.toString() );
+        vars.put( "selectedPid", pid != null ? pid : "");
 
-            pw.println( "displayConfigForm(configuration);" );
-
-            Util.endScript( pw );
-        }
+        response.getWriter().print(TEMPLATE);
     }
 
 
@@ -375,33 +344,57 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private void listConfigurations( PrintWriter pw, ConfigurationAdmin ca, String pidFilter, String locale )
+    private final void listFactoryConfigurations(JSONObject json, String pidFilter,
+        String locale)
+    {
+        try
+        {
+            Map optionsFactory = getServices(ManagedServiceFactory.class.getName(),
+                pidFilter, locale, true);
+            addMetaTypeNames(optionsFactory, getFactoryPidObjectClasses(locale),
+                pidFilter, ConfigurationAdmin.SERVICE_FACTORYPID);
+            for (Iterator i = optionsFactory.keySet().iterator(); i.hasNext();)
+            {
+                String id = (String) i.next();
+                Object name = optionsFactory.get(id);
+                json.append("fpids", new JSONObject().put("id", id).put("name", name));
+            }
+        }
+        catch (Exception e)
+        {
+            log("listFactoryConfigurations: Unexpected problem encountered", e);
+        }
+    }
+
+    private final void listConfigurations(JSONObject json, ConfigurationAdmin ca,
+        String pidFilter, String locale)
     {
         try
         {
             // start with ManagedService instances
-            SortedMap optionsPlain = getServices( ManagedService.class.getName(), pidFilter, locale, true );
+            Map optionsPlain = getServices(ManagedService.class.getName(), pidFilter,
+                locale, true);
 
             // next are the MetaType informations without ManagedService
-            addMetaTypeNames( optionsPlain, getPidObjectClasses( locale ), pidFilter, Constants.SERVICE_PID );
+            addMetaTypeNames(optionsPlain, getPidObjectClasses(locale), pidFilter,
+                Constants.SERVICE_PID);
 
             // add in existing configuration (not duplicating ManagedServices)
-            Configuration[] cfgs = ca.listConfigurations( pidFilter );
-            for ( int i = 0; cfgs != null && i < cfgs.length; i++ )
+            Configuration[] cfgs = ca.listConfigurations(pidFilter);
+            for (int i = 0; cfgs != null && i < cfgs.length; i++)
             {
 
-                // ignore configuration object if an entry already exists in the
-                // map
+                // ignore configuration object if an entry already exists in the map
                 String pid = cfgs[i].getPid();
-                if ( optionsPlain.containsKey( pid ) )
+                if (optionsPlain.containsKey(pid))
                 {
                     continue;
                 }
 
-                // insert and entry for the pid
-                ObjectClassDefinition ocd = this.getObjectClassDefinition( cfgs[i], locale );
+                // insert and entry for the PID
+                ObjectClassDefinition ocd = this.getObjectClassDefinition(cfgs[i], locale);
                 String name;
-                if ( ocd != null )
+                if (ocd != null)
                 {
                     name = ocd.getName() + " (";
                     name += pid + ")";
@@ -411,34 +404,21 @@ public class ConfigManager extends ConfigManagerBase
                     name = pid;
                 }
 
-                optionsPlain.put( pid, name );
+                optionsPlain.put(pid, name);
             }
 
-            printOptionsForm( pw, optionsPlain, "configSelection_pid", "configure", "Configure" );
+            for (Iterator i = optionsPlain.keySet().iterator(); i.hasNext();)
+            {
+                String id = (String) i.next();
+                Object name = optionsPlain.get(id);
+                json.append("pids", new JSONObject().put("id", id).put("name", name));
+            }
         }
-        catch ( Exception e )
+        catch (Exception e)
         {
-            getLog().log( LogService.LOG_ERROR, "listConfigurations: Unexpected problem encountered", e );
+            log("listConfigurations: Unexpected problem encountered", e);
         }
     }
-
-
-    private void listFactoryConfigurations( PrintWriter pw, ConfigurationAdmin ca, String pidFilter,
-        String locale )
-    {
-        try
-        {
-            SortedMap optionsFactory = getServices( ManagedServiceFactory.class.getName(), pidFilter, locale, true );
-            addMetaTypeNames( optionsFactory, getFactoryPidObjectClasses( locale ), pidFilter,
-                ConfigurationAdmin.SERVICE_FACTORYPID );
-            printOptionsForm( pw, optionsFactory, "configSelection_factory", "create", "Create" );
-        }
-        catch ( Exception e )
-        {
-            getLog().log( LogService.LOG_ERROR, "listFactoryConfigurations: Unexpected problem encountered", e );
-        }
-    }
-
 
     private SortedMap getServices( String serviceClass, String serviceFilter, String locale, boolean ocdRequired )
         throws InvalidSyntaxException
@@ -487,6 +467,7 @@ public class ConfigManager extends ConfigManagerBase
             }
             catch ( InvalidSyntaxException not_expected )
             {
+                /* filter is correct */
             }
         }
 
@@ -502,35 +483,6 @@ public class ConfigManager extends ConfigManagerBase
                 pidMap.put( pid, name );
             }
         }
-
-    }
-
-
-    private void printOptionsForm( PrintWriter pw, SortedMap options, String formId, String submitMethod,
-        String submitLabel )
-    {
-        SortedSet set = new TreeSet();
-        for ( Iterator ei = options.entrySet().iterator(); ei.hasNext(); )
-        {
-            Entry entry = ( Entry ) ei.next();
-            set.add(entry.getValue().toString() + Character.MAX_VALUE + entry.getKey().toString());
-        }
-
-        pw.println( "<select class='select' name='pid' id='" + formId + "' onChange='" + submitMethod + "();'>" );
-        for ( Iterator ei = set.iterator(); ei.hasNext(); )
-        {
-            String entry = ( String ) ei.next();
-            int sep = entry.indexOf( Character.MAX_VALUE );
-            String value = entry.substring( 0, sep );
-            String key = entry.substring( sep + 1 );
-            pw.print( "<option value='" + key + "'>" );
-            pw.print( value );
-            pw.println( "</option>" );
-        }
-        pw.println( "</select>" );
-        pw.println( "&nbsp;&nbsp;" );
-        pw.println( "<input class='submit' type='button' value='" + submitLabel + "' onClick='" + submitMethod
-            + "();' />" );
 
     }
 
@@ -801,7 +753,7 @@ public class ConfigManager extends ConfigManagerBase
             // only delete if the PID is not our place holder
             if ( !PLACEHOLDER_PID.equals( pid ) )
             {
-                getLog().log( LogService.LOG_INFO, "applyConfiguration: Deleting configuration " + pid );
+                log( "applyConfiguration: Deleting configuration " + pid );
                 Configuration config = ca.getConfiguration( pid, null );
                 config.delete();
             }
@@ -861,7 +813,7 @@ public class ConfigManager extends ConfigManagerBase
                         {
                             try
                             {
-                                props.put( propName, this.toType( ad.getType(), prop ) );
+                                props.put( propName, toType( ad.getType(), prop ) );
                             }
                             catch ( NumberFormatException nfe )
                             {
@@ -881,7 +833,7 @@ public class ConfigManager extends ConfigManagerBase
                             {
                                 try
                                 {
-                                    vec.add( this.toType( ad.getType(), properties[i] ) );
+                                    vec.add( toType( ad.getType(), properties[i] ) );
                                 }
                                 catch ( NumberFormatException nfe )
                                 {
@@ -906,7 +858,7 @@ public class ConfigManager extends ConfigManagerBase
                         else
                         {
                             // convert to an array
-                            props.put( propName, this.toArray( ad.getType(), vec ) );
+                            props.put( propName, toArray( ad.getType(), vec ) );
                         }
                     }
                 }
@@ -920,7 +872,7 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private Configuration getConfiguration( ConfigurationAdmin ca, String pid, String factoryPid ) throws IOException
+    private static final Configuration getConfiguration( ConfigurationAdmin ca, String pid, String factoryPid ) throws IOException
     {
         if ( factoryPid != null && ( pid == null || pid.equals( PLACEHOLDER_PID ) ) )
         {
@@ -935,7 +887,7 @@ public class ConfigManager extends ConfigManagerBase
      * @throws NumberFormatException If the value cannot be converted to
      *      a number and type indicates a numeric type
      */
-    private Object toType( int type, String value )
+    private static final Object toType( int type, String value )
     {
         switch ( type )
         {
@@ -964,7 +916,7 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private Object toArray( int type, Vector values )
+    private static final Object toArray( int type, Vector values )
     {
         int size = values.size();
 
@@ -979,20 +931,28 @@ public class ConfigManager extends ConfigManagerBase
         {
             case AttributeDefinition.BOOLEAN:
                 array = new boolean[size];
+                break;
             case AttributeDefinition.BYTE:
                 array = new byte[size];
+                break;
             case AttributeDefinition.CHARACTER:
                 array = new char[size];
+                break;
             case AttributeDefinition.DOUBLE:
                 array = new double[size];
+                break;
             case AttributeDefinition.FLOAT:
                 array = new float[size];
+                break;
             case AttributeDefinition.LONG:
                 array = new long[size];
+                break;
             case AttributeDefinition.INTEGER:
                 array = new int[size];
+                break;
             case AttributeDefinition.SHORT:
                 array = new short[size];
+                break;
             default:
                 // unexpected, but assume string
                 array = new String[size];

@@ -25,7 +25,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -39,10 +40,15 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * The <code>ConfigManagerBase</code> is the base class for the
  * ConfigurationAdmin support in the web console. It provides various helper
  * methods mostly with respect to using the MetaTypeService to access
- * configuration descriptiorns.
+ * configuration descriptions.
  */
-abstract class ConfigManagerBase extends BaseWebConsolePlugin
+abstract class ConfigManagerBase extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
+
+    ConfigManagerBase(String label, String title, String[] css)
+    {
+        super(label, title, css);
+    }
 
     private static final long serialVersionUID = -6691093960031418130L;
 
@@ -67,6 +73,9 @@ abstract class ConfigManagerBase extends BaseWebConsolePlugin
      * Returns a map of PIDs and providing bundles of MetaType information. The
      * map is indexed by PID and the value of each entry is the bundle providing
      * the MetaType information for that PID.
+     *
+     * @param locale The name of the locale to get the meta data for.
+     * @return see the method description 
      */
     protected Collection getPidObjectClasses( final String locale )
     {
@@ -79,6 +88,9 @@ abstract class ConfigManagerBase extends BaseWebConsolePlugin
      * information. The map is indexed by factory PID and the value of each
      * entry is the bundle providing the MetaType information for that factory
      * PID.
+     *
+     * @param locale The name of the locale to get the meta data for.
+     * @return see the method description 
      */
     protected Collection getFactoryPidObjectClasses( final String locale )
     {
@@ -87,13 +99,13 @@ abstract class ConfigManagerBase extends BaseWebConsolePlugin
 
 
     /**
-     * Returns the <code>ObjectClassDefinition</code> objects for the ids
+     * Returns the <code>ObjectClassDefinition</code> objects for the IDs
      * returned by the <code>idGetter</code>. Depending on the
      * <code>idGetter</code> implementation this will be for factory PIDs or
      * plain PIDs.
      *
      * @param idGetter The {@link IdGetter} used to get the list of factory PIDs
-     *          or PIDs from <code>MetaTypeInformation</code> objetcs.
+     *          or PIDs from <code>MetaTypeInformation</code> objects.
      * @param locale The name of the locale to get the object class definitions
      *          for.
      */

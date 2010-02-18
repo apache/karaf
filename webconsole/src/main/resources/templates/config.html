@@ -1,0 +1,59 @@
+﻿<script type="text/javascript" src="res/ui/config.js"></script>
+<script type="text/javascript">
+// <![CDATA[
+// data
+var configData = ${__data__};
+var selectedPid = '${selectedPid}';
+var i18n = { // i18n
+	stat_ok      : '${config.status.ok}', // "Configuration Admin Service is running.";
+	stat_missing : '${config.status.missing}', //"Configuration Admin Service is not installed/running."
+	save         : '${save}',
+	reset        : '${reset}',
+	del          : '${delete}',
+	props_title  : '${config.properties}',
+	props_enter  : '${config.properties.enter}', // "Enter Name-Value pairs of configuration properties"
+	cfg_title    : '${config.info.title}', // "Configuration Information"
+	pid          : '${config.info.pid}', // "Persistent Identity (PID)";
+	fpid         : '${config.info.fpid}', // "Factory Peristent Identifier (Factory PID)";
+	binding      : '${config.info.binding}', // "Configuration Binding";
+	unbound      : '${config.info.unbound}', // "Unbound or new configuration"; 
+	unbind_btn   : '${config.unbind.btn}', // "Unbind;
+	unbind_tip   : '${config.unbind.tip}', // "Unbind Configuration from Bundle"
+	del_ask      : '${config.del.ask}', // "Are you sure to delete this configuration ?";
+	del_config   : '${config.del.config}', // "Configuration: ";
+	del_bundle   : '${config.del.bundle}', // "Bundle: ";
+	unbind_ask   : '${config.unbind.ask}', // "Are you sure to unbind this configuration ?"
+	'xx' : '${config.form.properties}',
+	'xx' : '${config.form.properties}',
+
+}
+// ]]>
+</script>
+
+<!-- status line -->
+<p class="statline">&nbsp;</p>
+
+<div id="config_content" >
+	<table class="nicetable">
+	<tr id="configField">
+		<td>Configurations</td>
+		<td>
+			<select name="pid" id="configSelection_pid" onchange="configure();">
+				<option>&nbsp;</option>
+			</select>
+			&nbsp;
+			<button onclick="configure();">Configure</button>
+		</td>
+	</tr>
+	<tr id="factoryField">
+		<td>Factory Configurations</td>
+		<td>
+			<select name="pid" id="configSelection_factory" onchange="create();">
+				<option>&nbsp;</option>
+			</select>
+			&nbsp;
+			<button onclick="create();">Create</button>
+		</td>
+	</tr>
+	</table>
+</div>
