@@ -791,7 +791,9 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
                     for ( int i = 0; i < ubList.length; i++ )
                     {
                         Bundle ub = ubList[i];
-                        usingBundles.put( ub.getSymbolicName(), ub );
+                        String name = ub.getSymbolicName();
+                        if (name == null) name = ub.getLocation();
+                        usingBundles.put( name, ub );
                     }
                 }
             }
