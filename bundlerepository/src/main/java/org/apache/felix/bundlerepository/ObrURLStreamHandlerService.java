@@ -19,6 +19,7 @@
 package org.apache.felix.bundlerepository;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -30,6 +31,8 @@ import java.util.TreeMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Resource;
@@ -52,6 +55,14 @@ import org.osgi.service.url.AbstractURLStreamHandlerService;
 public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
 {
     /**
+     * Syntax for the url; to be shown on exception messages.
+     */
+    private static final String SYNTAX = "obr:<bundle-symbolic-name>['/'<bundle-version>]";
+    /**
+     * Property defining the obr update strategy
+     */
+    public static final String OBR_UPDATE_STRATEGY = "obr.update.strategy";
+    /**
      * The BundleContext to search for the bundles.
      */
     private final BundleContext m_bundleContext;
@@ -69,10 +80,6 @@ public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
      * Default: newest
      */
     private String m_updateStrategy = "newest";
-    /**
-     * Property defining the obr update strategy
-     */
-    public static final String OBR_UPDATE_STRATEGY = "obr.update.strategy";
 
     /**
      * Constructor
@@ -119,11 +126,72 @@ public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
 
         if (remoteURL == null)
         {
-            throw new IOException("could not resolve obr url to remote url! " + u);
+            String path = u.getPath();
+            remoteURL = getRemoteObrInstallUrl(path);
         }
 
         return remoteURL.openConnection();
 
+    }
+
+    /**
+     * Assume the URL is a query URL and try to find a matching resource.
+     *
+     * Note: the code from the below method comes from OPS4j Pax URL handler
+     *
+     * @param path the OBR url path
+     * @return the remote URL of the resolved bundle
+     * @throws IOException if an error occurs
+     */
+    private URL getRemoteObrInstallUrl(String path) throws IOException
+    {
+        if( path == null || path.trim().length() == 0 )
+        {
+            throw new MalformedURLException( "Path cannot be null or empty. Syntax " + SYNTAX );
+        }
+        final String[] segments = path.split( "/" );
+        if( segments.length > 2 )
+        {
+            throw new MalformedURLException( "Path cannot contain more then one '/'. Syntax  " + SYNTAX );
+        }
+        final StringBuffer buffer = new StringBuffer();
+        // add bundle symbolic name filter
+        buffer.append( "(symbolicname=" ).append( segments[ 0 ] ).append( ")" );
+        if( !validateFilter( buffer.toString() ) )
+        {
+            throw new MalformedURLException( "Invalid symbolic name value." );
+        }
+        // add bundle version filter
+        if( segments.length > 1 )
+        {
+            buffer.insert( 0, "(&" ).append( "(version=" ).append( segments[ 1 ] ).append( "))" );
+            if( !validateFilter( buffer.toString() ) )
+            {
+                throw new MalformedURLException( "Invalid version value." );
+            }
+        }
+        Resource[] discoverResources =
+           m_reRepositoryAdmin.discoverResources(buffer.toString());
+        if (discoverResources == null || discoverResources.length == 0)
+        {
+            throw new IOException( "No resource found for filter [" + buffer.toString() + "]" );
+        }
+        ResourceSelectionStrategy strategy = new NewestSelectionStrategy(m_logger);
+        Resource selected = strategy.selectOne(Version.emptyVersion, discoverResources);
+
+        return selected.getURL();
+    }
+
+    private boolean validateFilter(String filter) {
+        try
+        {
+            FrameworkUtil.createFilter(filter);
+            return true;
+        }
+        catch (InvalidSyntaxException e)
+        {
+            return false;
+        }
     }
 
     /**
@@ -136,19 +204,24 @@ public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
      */
     private URL getRemoteUrlForBundle(Bundle bundle) throws IOException
     {
-        String bundleVersion =
-            (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+        String symbolicName = bundle.getSymbolicName();
+        String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("(symbolicname=");
-        buffer.append(bundle.getSymbolicName());
+        buffer.append(symbolicName);
         buffer.append(")");
 
         Resource[] discoverResources =
             m_reRepositoryAdmin.discoverResources(buffer.toString());
+        if (discoverResources == null || discoverResources.length == 0)
+        {
+            throw new IOException( "No resource found for filter [" + buffer.toString() + "]" );
+        }
 
         ResourceSelectionStrategy strategy = getStrategy(m_updateStrategy);
         Resource selected = strategy.selectOne(
-            Version.parseVersion(bundleVersion), discoverResources);
+            Version.parseVersion(version), discoverResources);
 
         return selected.getURL();
     }

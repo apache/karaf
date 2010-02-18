@@ -560,7 +560,7 @@ public class ResolverImpl implements Resolver
                         Bundle bundle = m_context.installBundle(
                             "obr://"
                             + deployResources[i].getSymbolicName()
-                            + "/" + System.currentTimeMillis(),
+                            + "/-" + System.currentTimeMillis(),
                             url.openStream());
 
                         // If necessary, save the installed bundle to be
