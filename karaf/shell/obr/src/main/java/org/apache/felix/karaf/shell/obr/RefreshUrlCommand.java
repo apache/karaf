@@ -31,7 +31,7 @@ public class RefreshUrlCommand extends ObrCommandSupport {
     List<String> urls;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-		if (urls != null || urls.isEmpty()) {
+		if (urls != null && !urls.isEmpty()) {
 			for (String url : urls) {
 				admin.removeRepository(new URL(url));
 				admin.addRepository(new URL(url));
