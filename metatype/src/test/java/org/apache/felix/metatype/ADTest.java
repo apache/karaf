@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -27,7 +27,7 @@ import org.osgi.service.metatype.AttributeDefinition;
 /**
  * The <code>ADTest</code> class tests the static helper methods of the
  * {@link AD} class.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ADTest extends TestCase
@@ -48,7 +48,9 @@ public class ADTest extends TestCase
     {
         String listString = "";
         String[] list = AD.splitList( listString );
-        assertNull( list );
+        assertNotNull( list );
+        assertEquals( 1, list.length );
+        assertEquals( listString, list[0] );
     }
 
 

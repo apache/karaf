@@ -372,10 +372,15 @@ public class AD
 
     public static String[] splitList( String listString )
     {
-        // return nothing ...
+        // check for non-existing or empty lists
         if ( listString == null )
         {
             return null;
+        }
+        else if ( listString.length() == 0 )
+        {
+            return new String[]
+                { "" };
         }
 
         List values = new ArrayList();
