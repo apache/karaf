@@ -36,7 +36,13 @@ import org.osgi.framework.Constants;
 class ResourceBundleCache
 {
 
-    private static final Locale DEFAULT_LOCALE = new Locale( "" );
+    /**
+     * The default locale corresponding to the default language in the
+     * bundle.properties file, which is english.
+     * (FELIX-1957 The Locale(String) constructor used before is not available
+     * in the OSGi/Minimum-1.1 profile and should be prevented)
+     */
+    private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
     private final Bundle bundle;
 

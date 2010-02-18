@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -34,15 +33,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
-import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
-import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.WebConsoleUtil;
-import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.core.BundlesServlet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -87,7 +82,7 @@ public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiMan
     public ComponentsServlet()
     {
         super(LABEL, TITLE, CSS);
-        
+
         // load templates
         TEMPLATE = readTemplateFile( "/templates/components.html" );
     }
@@ -159,14 +154,14 @@ public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiMan
         StringWriter w = new StringWriter();
         PrintWriter w2 = new PrintWriter(w);
         renderResult( w2, reqInfo.component );
-        
+
         // prepare variables
         DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
         vars.put( "__drawDetails__", reqInfo.componentRequested ? Boolean.TRUE : Boolean.FALSE );
         vars.put( "__data__", w.toString() );
 
         response.getWriter().print( TEMPLATE );
-        
+
     }
 
 
@@ -403,7 +398,7 @@ public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiMan
         if ( props != null )
         {
             JSONArray buf = new JSONArray();
-            TreeSet keys = new TreeSet( Collections.list( props.keys() ) );
+            TreeSet keys = new TreeSet( Util.list( props.keys() ) );
             for ( Iterator ki = keys.iterator(); ki.hasNext(); )
             {
                 final String key = ( String ) ki.next();

@@ -21,7 +21,6 @@ package org.apache.felix.webconsole.internal.compendium;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -31,6 +30,7 @@ import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
 import org.apache.felix.webconsole.internal.AbstractConfigurationPrinter;
+import org.apache.felix.webconsole.internal.Util;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
@@ -204,7 +204,7 @@ public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
         {
 
             pw.println( "  Properties=" );
-            TreeSet keys = new TreeSet( Collections.list( props.keys() ) );
+            TreeSet keys = new TreeSet( Util.list( props.keys() ) );
             for ( Iterator ki = keys.iterator(); ki.hasNext(); )
             {
                 String key = ( String ) ki.next();

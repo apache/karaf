@@ -18,8 +18,10 @@ package org.apache.felix.webconsole.internal;
 
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -147,6 +149,25 @@ public class Util
     public static void sort( Bundle[] bundles )
     {
         Arrays.sort( bundles, BUNDLE_NAME_COMPARATOR );
+    }
+
+
+    /**
+     * This method is the same as Collections#list(Enumeration). The reason to
+     * duplicate it here, is that it is missing in OSGi/Minimum execution
+     * environment.
+     *
+     * @param e the enumeration which to convert
+     * @return the list containing all enumeration entries.
+     */
+    public static final ArrayList list( Enumeration e )
+    {
+        ArrayList l = new ArrayList();
+        while ( e.hasMoreElements() )
+        {
+            l.add( e.nextElement() );
+        }
+        return l;
     }
 
     // ---------- inner classes ------------------------------------------------
