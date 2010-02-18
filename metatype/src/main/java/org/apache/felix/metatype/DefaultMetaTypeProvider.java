@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.felix.metatype.internal.LocalizedObjectClassDefinition;
 import org.apache.felix.metatype.internal.l10n.BundleResources;
@@ -54,7 +54,7 @@ public class DefaultMetaTypeProvider implements MetaTypeProvider
 
     private Map objectClassDefinitions;
     private Map designates;
-    private Map locales;
+    private String[] locales;
 
 
     public DefaultMetaTypeProvider( Bundle bundle, MetaData metadata )
@@ -125,7 +125,7 @@ public class DefaultMetaTypeProvider implements MetaTypeProvider
             }
 
             Enumeration entries = getBundle().findEntries( path, pattern + "*.properties", false );
-            locales = new TreeMap();
+            TreeSet localeSet = new TreeSet();
             while ( entries.hasMoreElements() )
             {
                 URL url = ( URL ) entries.nextElement();
@@ -136,19 +136,16 @@ public class DefaultMetaTypeProvider implements MetaTypeProvider
                 {
                     name = name.substring( 1 );
                 }
-                if (name.length() > 0) {
-                    locales.put( name, url );
+                if ( name.length() > 0 )
+                {
+                    localeSet.add( name );
                 }
             }
+
+            locales = ( String[] ) localeSet.toArray( new String[localeSet.size()] );
         }
 
-        // no locales found
-        if ( locales.isEmpty() )
-        {
-            return null;
-        }
-
-        return ( String[] ) locales.keySet().toArray( new String[locales.size()] );
+        return ( locales.length == 0 ) ? null : locales;
     }
 
 
