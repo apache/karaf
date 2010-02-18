@@ -25,10 +25,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleUtil;
-import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
-import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.framework.ServiceReference;
@@ -37,31 +36,33 @@ import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
 
 
-public class LogServlet extends BaseWebConsolePlugin
+/**
+ * LogServlet provides support for reading the log messages.
+ */
+public class LogServlet extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
-    public static final String LABEL = "logs";
-    public static final String TITLE = "Log Service";
+    private static final String LABEL = "logs";
+    private static final String TITLE = "Log Service";
+    private static final String CSS[] = { "/res/ui/logs.css" };
 
     private final static int MAX_LOGS = 200; //maximum number of log entries
 
+    // templates
+    private final String TEMPLATE;
 
+    /** Default constructor */
     public LogServlet()
     {
+        super(LABEL, TITLE, CSS);
+
+        // load templates
+        TEMPLATE = readTemplateFile( "/templates/logs.html" );
     }
 
 
-    public String getLabel()
-    {
-        return LABEL;
-    }
-
-
-    public String getTitle()
-    {
-        return TITLE;
-    }
-
-
+    /**
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
         final int minLevel = WebConsoleUtil.getParameterInt( req, "minLevel", LogService.LOG_DEBUG );
@@ -73,21 +74,11 @@ public class LogServlet extends BaseWebConsolePlugin
     }
 
 
-    private void renderJSON( final PrintWriter pw, int minLogLevel ) throws IOException
+    private final void renderJSON( final PrintWriter pw, int minLogLevel ) throws IOException
     {
         // create status line
         final LogReaderService logReaderService = ( LogReaderService ) this.getService( LogReaderService.class
             .getName() );
-
-        StringBuffer statusLine = new StringBuffer();
-        if ( logReaderService == null )
-        {
-            statusLine.append( "Log Service is not installed/running." );
-        }
-        else
-        {
-            statusLine.append( "Log Service is running." );
-        }
 
         JSONWriter jw = new JSONWriter( pw );
         try
@@ -95,7 +86,7 @@ public class LogServlet extends BaseWebConsolePlugin
             jw.object();
 
             jw.key( "status" );
-            jw.value( statusLine );
+            jw.value( logReaderService == null ? Boolean.FALSE : Boolean.TRUE );
 
             jw.key( "data" );
             jw.array();
@@ -127,6 +118,9 @@ public class LogServlet extends BaseWebConsolePlugin
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
@@ -145,23 +139,17 @@ public class LogServlet extends BaseWebConsolePlugin
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
-        final PrintWriter pw = response.getWriter();
-
-        final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
-        Util.script( pw, appRoot, "logs.js" );
-
-        pw.println( "<div id='plugin_content'/>" );
-
-        Util.startScript( pw );
-        pw.println( "renderLogs( );" );
-        Util.endScript( pw );
+        response.getWriter().print(TEMPLATE);
     }
 
 
-    private void logJson( JSONWriter jw, LogEntry info, int index ) throws JSONException
+    private static final void logJson( JSONWriter jw, LogEntry info, int index ) throws JSONException
     {
         jw.object();
         jw.key( "id" );
@@ -170,6 +158,8 @@ public class LogServlet extends BaseWebConsolePlugin
         jw.value( info.getTime() );
         jw.key( "level" );
         jw.value( logLevel( info.getLevel() ) );
+        jw.key( "raw_level" );
+        jw.value( info.getLevel() );
         jw.key( "message" );
         jw.value( info.getMessage() );
         jw.key( "service" );
@@ -180,7 +170,7 @@ public class LogServlet extends BaseWebConsolePlugin
     }
 
 
-    private String serviceDescription( ServiceReference serviceReference )
+    private static final String serviceDescription( ServiceReference serviceReference )
     {
         if ( serviceReference == null )
             return "";
@@ -189,7 +179,7 @@ public class LogServlet extends BaseWebConsolePlugin
     }
 
 
-    private String logLevel( int level )
+    private static final String logLevel( int level )
     {
         switch ( level )
         {
@@ -206,7 +196,7 @@ public class LogServlet extends BaseWebConsolePlugin
     }
 
 
-    private String exceptionMessage( Throwable e )
+    private static final String exceptionMessage( Throwable e )
     {
         if ( e == null )
             return "";

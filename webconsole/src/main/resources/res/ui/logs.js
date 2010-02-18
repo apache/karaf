@@ -14,35 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function renderStatusLine() {
-	$("#plugin_content").append( "<div class='fullwidth'><div class='statusline'/></div>" );
-}
-
-function renderView( /* Array of String */ columns, /* String */ buttons ) {
-    renderStatusLine();
-    renderButtons(buttons);
-    var txt = "<div class='table'><table id='plugin_table' class='tablelayout'><thead><tr>";
-    for ( var name in columns ) {
-    	txt = txt + "<th class='col_" + columns[name] + "'>" + columns[name] + "</th>";
-    }
-    txt = txt + "</tr></thead><tbody></tbody></table></div>";
-    $("#plugin_content").append( txt );
-    renderButtons(buttons);
-    renderStatusLine();	
-}
-
-function renderButtons( buttons ) {
-	$("#plugin_content").append( "<form method='post' enctype='multipart/form-data'><div class='fullwidth'><div class='buttons'>" +
-	                             buttons + "</div></div></form>" );
-}
-
+ 
+var logsElem  = false;
+var logs2Elem = false;
+var tableElem = false;
+var statElem  = false;
+ 
 function renderData( eventData )  {
-	$(".statusline").empty().append(eventData.status);
-	$("#plugin_table > tbody > tr").remove();	
-    for ( var idx in eventData.data ) {
-        entry( eventData.data[idx] );
-    }
-    $("#plugin_table").trigger("update");
+	statElem.empty().append(eventData.status ? i18n.status_ok : i18n.status_missing);
+	logsElem.css("display", eventData.status ? "block" : "none"  );
+	if (eventData.status) {
+		$("#plugin_table > tbody > tr").remove();	
+		var hasEntries = false;
+		for ( var idx in eventData.data ) {
+			entry( eventData.data[idx] );
+			hasEntries = true;
+		}
+		logs2Elem.css("display", hasEntries ? "block" : "none"  );
+	
+		if (hasEntries) tableElem.trigger("update").trigger("applyWidgets");
+	}
 }
 
 function entry( /* Object */ dataEntry ) {
@@ -57,11 +48,16 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     var level = dataEntry.level;
     var exception = dataEntry.exception;
     var service = dataEntry.service;
-
+	switch (dataEntry.raw_level) { // i18n
+		case 1: level = i18n.error; break;
+		case 2: level = i18n.warn; break;
+		case 3: level = i18n.info; break;
+		case 4: level = i18n.debug; break;
+	}
     parent.appendChild( td( null, null, [ text( printDate(dataEntry.received) ) ] ) );
     parent.appendChild( td( null, null, [ text( level ) ] ) );    
-    parent.appendChild( td( null, null, [ text( message ) ] ) );
-    parent.appendChild( td( null, null, [ text( service ) ] ) );
+    parent.appendChild( td( null, null, [ text( wordWrap(message) ) ] ) );
+    parent.appendChild( td( null, null, [ text( wordWrap(service) ) ] ) );
     parent.appendChild( td( null, null, [ text( exception ) ] ) );
 }
 
@@ -72,25 +68,24 @@ function printDate(time) {
 }
 
 function loadData() {
-	$.get(pluginRoot + "/data.json", { "minLevel":$("#minLevel").val()}, function(data) {
-	    renderData(data);
-	}, "json");	
+	$.get(pluginRoot + "/data.json", { "minLevel":$(".minLevel").val()}, renderData, "json");
+	return false; // for button
 }
 
-function renderLogs() {
-	$(document).ready(function(){
-	    renderView( ["Received", "Level", "Message", "Service", "Exception"],
-	    		 "<span>Severity at least: <select id='minLevel'><option value='1'>ERROR</option>" + 
-	    		 "<option value='2'>WARN</option><option value='3'>INFO</option><option value='4' selected='selected'>DEBUG</option></select></span> "+
-	    		 "<button class='reloadButton' type='button' name='reload'>Reload</button>");
-	    loadData();
-	    
-	    $("#plugin_table").tablesorter();
-	    $(".reloadButton").click(loadData);
-	    $("#minLevel").change(function() {
-	    	$.post(pluginRoot, { "minLevel":$("#minLevel").val()}, function(data) {
-	    	    renderData(data);
-	    	}, "json");
-	    });
-	});
-}
+$(document).ready(function() {
+	// install user interaction handlers
+    $(".reloadButton").click(loadData);
+    $(".minLevel").change(function() {
+		var value = $(this).val();
+		$(".minLevel").val(value); // same values for both select boxes
+    	$.post(pluginRoot, {"minLevel":value}, function(data) {
+    	    renderData(data);
+    	}, "json");
+    });
+	logsElem  = $("#logs");
+    logs2Elem = $("#logs2");
+	tableElem = $("#plugin_table");
+	statElem  = $(".statline");
+	// load logs
+	loadData();
+});
