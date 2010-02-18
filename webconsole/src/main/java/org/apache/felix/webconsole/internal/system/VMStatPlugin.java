@@ -26,7 +26,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleUtil;
@@ -71,18 +70,11 @@ public class VMStatPlugin extends SimpleWebConsolePlugin implements OsgiManagerP
     public VMStatPlugin()
     {
         super( LABEL, TITLE, CSS );
+
         // load templates
-        try
-        {
-            TPL_VM_MAIN = IOUtils.toString( getClass().getResourceAsStream( "/templates/vmstat.html" ), "UTF-8" );
-            TPL_VM_STOP = IOUtils.toString( getClass().getResourceAsStream( "/templates/vmstat_stop.html" ), "UTF-8" );
-            TPL_VM_RESTART = IOUtils.toString( getClass().getResourceAsStream( "/templates/vmstat_restart.html" ),
-                "UTF-8" );
-        }
-        catch ( IOException e )
-        {
-            throw new RuntimeException( e.toString() );
-        }
+        TPL_VM_MAIN = readTemplateFile(  "/templates/vmstat.html"  );
+        TPL_VM_STOP = readTemplateFile( "/templates/vmstat_stop.html" );
+        TPL_VM_RESTART = readTemplateFile( "/templates/vmstat_restart.html" );
     }
 
 
