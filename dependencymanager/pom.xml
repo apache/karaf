@@ -39,7 +39,7 @@
     <module>annotation</module>
     <module>runtime</module>
     <module>samples</module>
-    <module>samples/annotation</module>
+    <module>samples.annotation</module>
     <module>test</module>
   </modules>
 </project>
