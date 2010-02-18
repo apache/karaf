@@ -14,30 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function renderStatusLine() {
-	$("#plugin_content").append(
-			"<div class='fullwidth'><div class='statusline'/></div>");
-}
-
-function renderView( /* Array of String */columns) {
-	renderStatusLine();
-	var txt = "<div class='table'><table id='plugin_table' class='tablelayout'><thead><tr>";
-	for ( var name in columns) {
-		txt = txt + "<th class='col_" + columns[name] + "'>" + columns[name]
-				+ "</th>";
-	}
-	txt = txt + "</tr></thead><tbody></tbody></table></div>";
-	$("#plugin_content").append(txt);
-	renderStatusLine();
-}
 
 function renderData(eventData) {
-	$(".statusline").empty().append(eventData.status);
-	$("#plugin_table > tbody > tr").remove();
+	$('.statline').empty().append(i18n.statline.msgFormat(eventData.serviceCount));
+	$('#plugin_table > tbody > tr').remove();
 	for ( var idx in eventData.data) {
 		entry(eventData.data[idx]);
 	}
-	$("#plugin_table").trigger("update");
+	$('#plugin_table').trigger('update');
 	if (drawDetails) {
 		renderDetails(eventData);
 	}
@@ -45,27 +29,23 @@ function renderData(eventData) {
 
 function entry( /* Object */dataEntry) {
 	var trElement = tr(null, {
-		id : "entry" + dataEntry.id
+		id : 'entry' + dataEntry.id
 	});
 	entryInternal(trElement, dataEntry);
-	$("#plugin_table > tbody").append(trElement);
+	$('#plugin_table > tbody').append(trElement);
 }
 
 function entryInternal( /* Element */parent, /* Object */dataEntry) {
 	var id = dataEntry.id;
 	var name = dataEntry.id;
 
-	var inputElement = createElement("img", "rightButton", {
-		src : appRoot + "/res/imgs/arrow_right.png",
-		style : {
-			border : "none"
-		},
-		id : 'img' + id,
-		title : "Details",
-		alt : "Details",
-		width : 14,
-		height : 14
+	// right arrow
+	var inputElement = createElement('span', 'ui-icon ui-icon-triangle-1-e', {
+		title: i18n.detailsTip,
+		id: 'img' + id,
+		style: {display: 'inline-block'}
 	});
+
 	$(inputElement).click(function() {
 		showDetails(id)
 	});
@@ -73,127 +53,112 @@ function entryInternal( /* Element */parent, /* Object */dataEntry) {
 	if (drawDetails) {
 		titleElement = text(name);
 	} else {
-		titleElement = createElement("a", null, {
-			href : window.location.pathname + "/" + id
+		titleElement = createElement('a', null, {
+			href : window.location.pathname + '/' + id
 		});
 		titleElement.appendChild(text(name));
 	}
-	var bundleElement = createElement("a", null, {
+	var bundleElement = createElement('a', null, {
 		href : bundlePath + dataEntry.bundleId
 	});
-	bundleElement.appendChild(text(dataEntry.bundleSymbolicName + " ("
-			+ dataEntry.bundleId + ")"));
+	bundleElement.appendChild(text(dataEntry.bundleSymbolicName + ' ('
+			+ dataEntry.bundleId + ')'));
 
-	parent
-			.appendChild(td(null, null,
-					[ inputElement, text(" "), titleElement ]));
+	parent.appendChild(td(null, null, [ inputElement, text(' '), titleElement ]));
 	parent.appendChild(td(null, null, [ text(dataEntry.types) ]));
 	parent.appendChild(td(null, null, [ bundleElement ]));
 }
 
 function showDetails(id) {
-	$.get(pluginRoot + "/" + id + ".json", null, function(data) {
+	$.get(pluginRoot + '/' + id + '.json', null, function(data) {
 		renderDetails(data);
-	}, "json");
+	}, 'json');
 }
 
 function hideDetails(id) {
-	$("#img" + id).each(function() {
-		$("#pluginInlineDetails").remove();
-		$(this).attr("src", appRoot + "/res/imgs/arrow_right.png");
-		$(this).attr("title", "Details");
-		$(this).attr("alt", "Details");
-		$(this).unbind('click').click(function() {
-			showDetails(id)
-		});
+	$('#img' + id).each(function() {
+		$('#pluginInlineDetails' + id).remove();
+		$(this).
+			removeClass('ui-icon-triangle-1-w').//left
+			removeClass('ui-icon-triangle-1-s').//down
+			addClass('ui-icon-triangle-1-e').//right
+			unbind('click').click(function() {showDetails(id)});
 	});
 }
 
 function renderDetails(data) {
 	data = data.data[0];
-	$("#pluginInlineDetails").remove();
-	$("#entry" + data.id + " > td").eq(1).append(
-			"<div id='pluginInlineDetails'/>");
-	$("#img" + data.id).each(function() {
+	$('#entry' + data.id + ' > td').eq(1).append('<div id="pluginInlineDetails' + data.id + '"/>');
+	$('#img' + data.id).each(function() {
 		if (drawDetails) {
-			$(this).attr("src", appRoot + "/res/imgs/arrow_left.png");
-			$(this).attr("title", "Back");
-			$(this).attr("alt", "Back");
 			var ref = window.location.pathname;
 			ref = ref.substring(0, ref.lastIndexOf('/'));
-			$(this).unbind('click').click(function() {
-				window.location = ref;
-			});
+			$(this).
+				removeClass('ui-icon-triangle-1-e').//right
+				removeClass('ui-icon-triangle-1-s').//down
+				addClass('ui-icon-triangle-1-w').//left
+				attr('title', i18n.back).
+				unbind('click').click(function() {window.location = ref;});
 		} else {
-			$(this).attr("src", appRoot + "/res/imgs/arrow_down.png");
-			$(this).attr("title", "Hide Details");
-			$(this).attr("alt", "Hide Details");
-			$(this).unbind('click').click(function() {
-				hideDetails(data.id)
-			});
+			$(this).
+				removeClass('ui-icon-triangle-1-w').//left
+				removeClass('ui-icon-triangle-1-e').//right
+				addClass('ui-icon-triangle-1-s').//down
+				attr('title', i18n.detailsHide).
+				unbind('click').click(function() {hideDetails(data.id)});
 		}
 	});
-	$("#pluginInlineDetails").append(
-			"<table border='0'><tbody></tbody></table>");
-	var details = data.props;
-	for ( var idx in details) {
+	if (data.props) 
+		$('#pluginInlineDetails' + data.id).append( renderObjectAsTable(data.props) );
+}
+
+function renderObjectAsTable(/* Object*/ details) {
+	var txt = '';
+
+	for (var idx in details) {
 		var prop = details[idx];
 
-		var txt = "<tr><td class='aligntop' noWrap='true' style='border:0px none'>"
+		txt += '<tr><td class="aligntop" noWrap="true" style="border:0px none">'
 				+ prop.key
-				+ "</td><td class='aligntop' style='border:0px none'>";
+				+ '</td><td class="aligntop" style="border:0px none">';
 		if (prop.value) {
 			if ($.isArray(prop.value)) {
 				var i = 0;
 				for ( var pi in prop.value) {
 					var value = prop.value[pi];
 					if (i > 0) {
-						txt = txt + "<br/>";
+						txt = txt + '<br/>';
 					}
-					var span;
-					if (value.substring(0, 6) == "INFO: ") {
-						txt = txt + "<span style='color: grey;'>!!"
-								+ value.substring(5) + "</span>";
-					} else if (value.substring(0, 7) == "ERROR: ") {
-						txt = txt + "<span style='color: red;'>!!"
-								+ value.substring(6) + "</span>";
-					} else {
-						txt = txt + value;
-					}
+					txt = txt + value;
 					i++;
 				}
 			} else {
 				txt = txt + prop.value;
 			}
 		} else {
-			txt = txt + "\u00a0";
+			txt = txt + '\u00a0';
 		}
-		txt = txt + "</td></tr>";
-		$("#pluginInlineDetails > table > tbody").append(txt);
-
+		txt = txt + '</td></tr>';
 	}
+
+	if ( txt ) {
+		txt = '<table border="0"><tbody>' + txt + '</tbody></table>';
+	}
+
+	return txt;
 }
 
 function renderServices(data) {
 	$(document).ready(function() {
-		renderView( [ "Id", "Type(s)", "Bundle" ]);
 		renderData(data);
 
-		var extractMethod = function(node) {
-			var link = node.getElementsByTagName("a");
-			if (link && link.length == 1) {
-				return link[0].innerHTML;
-			}
-			return node.innerHTML;
-		};
-		$("#plugin_table").tablesorter( {
+		$('#plugin_table').tablesorter( {
 			headers : {
-				0 : {
-					sorter : "digit"
-				}
+				0 : { sorter : 'digit' }
 			},
 			sortList : [ [ 1, 0 ] ],
-			textExtraction : extractMethod
+			textExtraction : mixedLinksExtraction,
+			widgets: ['zebra']
 		});
 	});
 }

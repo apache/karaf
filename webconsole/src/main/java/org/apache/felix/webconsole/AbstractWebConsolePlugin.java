@@ -684,20 +684,42 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      *
      * @param templateFile The absolute path to the template file to read.
      * @return The contents of the template file as a string or and empty
-     * string if the template file fails to be read.
+     *      string if the template file fails to be read.
+     *
+     * @throws NullPointerException if <code>templateFile</code> is
+     *      <code>null</code>
+     * @throws RuntimeException if an <code>IOException</code> is thrown reading
+     *      the template file into a string. The exception provides the
+     *      exception thrown as its cause.
      */
-    private final String readTemplateFile( final String templateFile )
+    protected final String readTemplateFile( final String templateFile )
     {
-        try
+        InputStream templateStream = getClass().getResourceAsStream( templateFile );
+        if ( templateStream != null )
         {
-            return IOUtils.toString( getClass().getResourceAsStream( templateFile ), "UTF-8" );
-        }
-        catch ( IOException e )
-        {
-            log( "readTemplateFile: Error loading " + templateFile, e );
+            try
+            {
+                return IOUtils.toString( templateStream, "UTF-8" );
+            }
+            catch ( IOException e )
+            {
+                throw new RuntimeException( "readTemplateFile: Error loading " + templateFile, e );
+            }
+            finally
+            {
+                try
+                {
+                    templateStream.close();
+                }
+                catch ( IOException ignore )
+                {
+                    // ignored
+                }
+            }
         }
 
-        // fall back to empty contents to prevent NPE
+        // template file does not exist, return an empty string
+        log( "readTemplateFile: File '" + templateFile + "' not found through class " + getClass() );
         return "";
     }
 

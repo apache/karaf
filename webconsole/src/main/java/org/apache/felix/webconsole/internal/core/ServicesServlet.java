@@ -30,9 +30,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.ConfigurationPrinter;
+import org.apache.felix.webconsole.DefaultVariableResolver;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.WebConsoleUtil;
-import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,18 +46,21 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.log.LogService;
 
 
-public class ServicesServlet extends BaseWebConsolePlugin implements ConfigurationPrinter
+/**
+ * ServicesServlet provides a plugin for inspecting the registered services.
+ */
+public class ServicesServlet extends SimpleWebConsolePlugin implements ConfigurationPrinter, OsgiManagerPlugin
 {
+    // don't create empty reference array all the time, create it only once - it is immutable
+    private static final ServiceReference[] NO_REFS = new ServiceReference[0];
 
     private final class RequestInfo
     {
         public final String extension;
         public final ServiceReference service;
         public final boolean serviceRequested;
-        public final String pathInfo;
 
 
         protected RequestInfo( final HttpServletRequest request )
@@ -86,13 +91,11 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
             {
                 service = null;
                 serviceRequested = false;
-                pathInfo = null;
             }
             else
             {
                 service = getServiceById( serviceInfo );
                 serviceRequested = true;
-                pathInfo = serviceInfo;
             }
             request.setAttribute( ServicesServlet.class.getName(), this );
         }
@@ -100,18 +103,32 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
     }
 
 
-    public static RequestInfo getRequestInfo( final HttpServletRequest request )
+    static RequestInfo getRequestInfo( final HttpServletRequest request )
     {
         return ( RequestInfo ) request.getAttribute( ServicesServlet.class.getName() );
     }
 
     private ServiceRegistration configurationPrinter;
 
+    /** the label for the services plugin */
     public static final String LABEL = "services";
+    private static final String TITLE = "Services";
+    private static final String CSS[] = null;
 
-    public static final String TITLE = "Services";
+    private final String TEMPLATE;
+
+    /** Default constructor */
+    public ServicesServlet() {
+        super(LABEL, TITLE, CSS);
+
+        // load templates
+        TEMPLATE = readTemplateFile( "/templates/services.html" );
+    }
 
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#activate(org.osgi.framework.BundleContext)
+     */
     public void activate( BundleContext bundleContext )
     {
         super.activate( bundleContext );
@@ -119,6 +136,9 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.SimpleWebConsolePlugin#deactivate()
+     */
     public void deactivate()
     {
         if ( configurationPrinter != null )
@@ -131,18 +151,9 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
     }
 
 
-    public String getLabel()
-    {
-        return LABEL;
-    }
-
-
-    public String getTitle()
-    {
-        return TITLE;
-    }
-
-
+    /**
+     * @see org.apache.felix.webconsole.ConfigurationPrinter#printConfiguration(java.io.PrintWriter)
+     */
     public void printConfiguration( PrintWriter pw )
     {
         try
@@ -215,12 +226,12 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
         }
         catch ( Exception e )
         {
-            getLog().log( LogService.LOG_ERROR, "Problem rendering Bundle details for configuration status", e );
+            log( "Problem rendering Bundle details for configuration status", e );
         }
     }
 
 
-    private void appendServiceInfoCount( final StringBuffer buf, String msg, int count )
+    private static final void appendServiceInfoCount( final StringBuffer buf, String msg, int count )
     {
         buf.append( count );
         buf.append( " service" );
@@ -231,7 +242,7 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
     }
 
 
-    private ServiceReference getServiceById( String pathInfo )
+    final ServiceReference getServiceById( String pathInfo )
     {
         // only use last part of the pathInfo
         pathInfo = pathInfo.substring( pathInfo.lastIndexOf( '/' ) + 1 );
@@ -251,14 +262,14 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
         }
         catch ( InvalidSyntaxException e )
         {
-            getLog().log( LogService.LOG_WARNING, "Unable to search for services using filter " + filterStr, e );
+            log( "Unable to search for services using filter " + filterStr, e );
             // this shouldn't happen
             return null;
         }
     }
 
 
-    private ServiceReference[] getServices()
+    private final ServiceReference[] getServices()
     {
         try
         {
@@ -266,13 +277,13 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
         }
         catch ( InvalidSyntaxException e )
         {
-            getLog().log( LogService.LOG_WARNING, "Unable to access service reference list.", e );
-            return new ServiceReference[0];
+            log( "Unable to access service reference list.", e );
+            return NO_REFS;
         }
     }
 
 
-    private String getStatusLine( final ServiceReference[] services )
+    private static final String getStatusLine( final ServiceReference[] services )
     {
         final StringBuffer buffer = new StringBuffer();
         buffer.append( "Services information: " );
@@ -418,7 +429,8 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
         throws IOException
     {
         final ServiceReference[] allServices = this.getServices();
-        final String statusLine = this.getStatusLine( allServices );
+        final String statusLine = getStatusLine( allServices );
+
         final ServiceReference[] services = ( service != null ) ? new ServiceReference[]
             { service } : allServices;
 
@@ -430,6 +442,9 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
 
             jw.key( "status" );
             jw.value( statusLine );
+
+            jw.key( "serviceCount" );
+            jw.value( allServices.length );
 
             jw.key( "data" );
 
@@ -453,50 +468,53 @@ public class ServicesServlet extends BaseWebConsolePlugin implements Configurati
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
-        final RequestInfo reqInfo = new RequestInfo( request );
-        if ( reqInfo.service == null && reqInfo.serviceRequested )
-        {
-            response.sendError( 404 );
-            return;
-        }
-        if ( reqInfo.extension.equals( "json" ) )
-        {
-            this.renderJSON( response, reqInfo.service );
+        if (request.getPathInfo().indexOf("/res/") == -1)
+        { // not resource
+            final RequestInfo reqInfo = new RequestInfo( request );
+            if ( reqInfo.service == null && reqInfo.serviceRequested )
+            {
+                response.sendError( 404 );
+                return;
+            }
+            if ( reqInfo.extension.equals( "json" ) )
+            {
+                this.renderJSON( response, reqInfo.service );
 
-            // nothing more to do
-            return;
+                // nothing more to do
+                return;
+            }
         }
 
         super.doGet( request, response );
     }
 
 
-    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
-        IOException
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         // get request info from request attribute
         final RequestInfo reqInfo = getRequestInfo( request );
-        final PrintWriter pw = response.getWriter();
 
         final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
+        StringWriter w = new StringWriter();
+        PrintWriter w2 = new PrintWriter(w);
+        writeJSON(w2, reqInfo.service);
 
-        Util.startScript( pw );
-        pw.println( "var imgRoot = '" + appRoot + "/res/imgs';" );
-        pw.println( "var bundlePath = '" + appRoot + "/" + BundlesServlet.NAME + "/" + "';" );
-        pw.println( "var drawDetails = " + reqInfo.serviceRequested + ";" );
-        Util.endScript( pw );
+        // prepare variables
+        DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
+        vars.put( "bundlePath", appRoot +  "/" + BundlesServlet.NAME + "/" );
+        vars.put( "drawDetails", reqInfo.serviceRequested ? Boolean.TRUE : Boolean.FALSE );
+        vars.put( "__data__", w.toString() );
 
-        Util.script( pw, appRoot, "services.js" );
-
-        pw.println( "<div id='plugin_content'/>" );
-        Util.startScript( pw );
-        pw.print( "renderServices(" );
-        writeJSON( pw, reqInfo.service );
-        pw.println( ");" );
-        Util.endScript( pw );
-
+        response.getWriter().print( TEMPLATE );
     }
+
 }

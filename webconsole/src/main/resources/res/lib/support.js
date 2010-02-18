@@ -60,7 +60,7 @@ function initStaticWidgets(elem) {
 /* automatically executed on load */
 $(document).ready(function() {
 	// init table-sorter tables - only once!
-	var tables = $('table.tablesorter');
+	var tables = $('table.tablesorter:not(.noauto)');
 	if (tables.size() > 0) tables.tablesorter();
 	
 	// init navigation
@@ -80,9 +80,33 @@ $(document).ready(function() {
 	initStaticWidgets();
 });
 
+/* A helper function, used together with tablesorter, when the cells contains mixed text and links. As example:
+
+	elem.tablesorter({
+		headers: {
+			0: {textExtraction: mixedLinksExtraction},
+			2: {sorter: false}
+		}
+	});
+*/
+function mixedLinksExtraction(node) {
+	var l = node.getElementsByTagName('a');
+	return l && l.length > 0 ? l[0].innerHTML : node.innerHTML;
+};
+
+/* Java-like MessageFormat method. Usage:
+	'hello {0}'.msgFormat('world')
+*/
+String.prototype.msgFormat = function(/* variable arguments*/) {
+	var i=0; var s=this;
+	while(i<arguments.length) s=s.replace('{'+i+'}',arguments[i++]);
+	return s;
+}
+
+
 /* replacement for confirm() method, needs 'action' parameter to work.
  * if action is not set - then default confirm() method is used. */
-function Xconfirm(text, action, title) {
+function Xconfirm(/* String */text, /* Callback function */action, /* String */title) {
 	if (!$.isFunction(action)) return confirm(text);
 	if (title === undefined) title = "";
 
@@ -101,7 +125,7 @@ function Xconfirm(text, action, title) {
 	});
 	return false;
 }
-function Xalert(text, title) {
+function Xalert(/* String */text, /* String */title) {
 	if (!$.isFunction(action)) return alert(text);
 	if (title === undefined) title = "";
 

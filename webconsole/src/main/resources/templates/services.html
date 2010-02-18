@@ -1,0 +1,38 @@
+﻿<script type="text/javascript" src="res/ui/services.js"></script>
+<script type="text/javascript">
+// <![CDATA[
+// i18n stuff
+var i18n = {
+	back : "${back}",
+	detailsHide : "${services.details.hide}",
+	detailsTip : "${services.details.tip}",
+	statline : "${services.statusline}"
+}
+
+// data
+var bundlePath = "${bundlePath}";
+var drawDetails = ${drawDetails};
+renderServices(${__data__});
+// ]]>
+</script>
+
+<p class="statline">&nbsp;</p>
+
+<div class="ui-widget-header ui-corner-top buttonGroup">${services.caption}</div>
+
+<table id="plugin_table" class="tablesorter nicetable noauto">
+	<thead>
+		<tr>
+			<th class="col_Id">${id}</th>
+			<th class="col_Types">${type_s}</th>
+			<th class="col_Bundle">${bundle}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td colspan="3">dummy</td></tr>
+	</tbody>
+</table>
+
+<div class="ui-widget-header ui-corner-bottom buttonGroup">&nbsp;</div>
+	
+<p class="statline">&nbsp;</p>
