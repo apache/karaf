@@ -154,7 +154,7 @@ function showDetails( id ) {
 function hideDetails( id ) {
 	currentBundle = null;
 	$("#img" + id).each(function() {
-		$("#pluginInlineDetails").remove();
+		$("#pluginInlineDetails" + id).remove();
 		$(this).attr("src", appRoot + "/res/imgs/arrow_right.png");
 		$(this).attr("title", "Details");
 		$(this).attr("alt", "Details");
@@ -163,8 +163,7 @@ function hideDetails( id ) {
 }
 
 function renderDetails( data ) {
-	$("#pluginInlineDetails").remove();
-	$("#entry" + data.id + " > td").eq(1).append("<div id='pluginInlineDetails'/>");
+	$("#entry" + data.id + " > td").eq(1).append("<div id='pluginInlineDetails"  + data.id + "'/>");
 	$("#img" + data.id).each(function() {
 		if ( drawDetails ) {
 			$(this).attr("src", appRoot + "/res/imgs/arrow_left.png");
@@ -180,7 +179,7 @@ function renderDetails( data ) {
 			$(this).unbind('click').click(function() {hideDetails(data.id)});
 		}
 	});
-	$("#pluginInlineDetails").append("<table border='0'><tbody></tbody></table>");
+	$("#pluginInlineDetails" + data.id).append("<table border='0'><tbody></tbody></table>");
     var details = data.props;
     for (var idx in details) {
         var prop = details[idx];
@@ -213,7 +212,7 @@ function renderDetails( data ) {
         	txt = txt + "\u00a0";
         }
         txt = txt + "</td></tr>";
-        $("#pluginInlineDetails > table > tbody").append(txt);
+        $("#pluginInlineDetails" + data.id + " > table > tbody").append(txt);
 	}
 }
 
