@@ -81,12 +81,8 @@ $(document).ready(function() {
 });
 
 /* A helper function, used together with tablesorter, when the cells contains mixed text and links. As example:
-
 	elem.tablesorter({
-		headers: {
-			0: {textExtraction: mixedLinksExtraction},
-			2: {sorter: false}
-		}
+		textExtraction: mixedLinksExtraction
 	});
 */
 function mixedLinksExtraction(node) {

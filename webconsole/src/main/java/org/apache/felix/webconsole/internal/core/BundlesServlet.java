@@ -17,42 +17,70 @@
 package org.apache.felix.webconsole.internal.core;
 
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.bundlerepository.*;
+import org.apache.felix.bundlerepository.R4Attribute;
+import org.apache.felix.bundlerepository.R4Export;
+import org.apache.felix.bundlerepository.R4Import;
+import org.apache.felix.bundlerepository.R4Package;
 import org.apache.felix.webconsole.ConfigurationPrinter;
+import org.apache.felix.webconsole.DefaultVariableResolver;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.WebConsoleUtil;
-import org.apache.felix.webconsole.internal.*;
 import org.apache.felix.webconsole.internal.Logger;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.json.*;
-import org.osgi.framework.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Version;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
-import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
 
 /**
- * The <code>BundlesServlet</code> TODO
+ * The <code>BundlesServlet</code> provides the bundles plugins, used to display
+ * the list of bundles, installed on the framework. It also adds ability to control
+ * the lifecycle of the bundles, like start, stop, uninstall, install.
  */
-public class BundlesServlet extends BaseWebConsolePlugin implements ConfigurationPrinter
+public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManagerPlugin, ConfigurationPrinter
 {
 
+    /** the label of the bundles plugin - used by other plugins to reference to plugin details */
     public static final String NAME = "bundles";
-
-    public static final String LABEL = "Bundles";
-
-    public static final String BUNDLE_ID = "bundleId";
+    private static final String TITLE = "Bundles";
+    private static final String CSS[] = { "/res/ui/bundles.css" };
 
     // bootdelegation property entries. wildcards are converted to package
     // name prefixes. whether an entry is a wildcard or not is set as a flag
@@ -66,7 +94,24 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     private boolean[] bootPkgWildcards;
 
     private ServiceRegistration configurationPrinter;
+    
+    // templates
+    private final String TEMPLATE_MAIN;
+    private final String TEMPLATE_UPLOAD;
 
+    /** Default constructor */
+    public BundlesServlet()
+    {
+        super(NAME, TITLE, CSS);
+
+        // load templates
+        TEMPLATE_MAIN = readTemplateFile( "/templates/bundles.html" ); 
+        TEMPLATE_UPLOAD = readTemplateFile( "/templates/bundles_upload.html" ); 
+    }
+
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#activate(org.osgi.framework.BundleContext)
+     */
     public void activate( BundleContext bundleContext )
     {
         super.activate( bundleContext );
@@ -92,6 +137,9 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.SimpleWebConsolePlugin#deactivate()
+     */
     public void deactivate()
     {
         if ( configurationPrinter != null )
@@ -104,20 +152,11 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     }
 
 
-    public String getLabel()
-    {
-        return NAME;
-    }
-
-
-    public String getTitle()
-    {
-        return LABEL;
-    }
-
-
     //---------- ConfigurationPrinter
 
+    /**
+     * @see org.apache.felix.webconsole.ConfigurationPrinter#printConfiguration(java.io.PrintWriter)
+     */
     public void printConfiguration( PrintWriter pw )
     {
         try
@@ -175,13 +214,16 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         }
         catch ( Exception e )
         {
-            getLog().log( LogService.LOG_ERROR, "Problem rendering Bundle details for configuration status", e );
+            log( "Problem rendering Bundle details for configuration status", e );
         }
     }
 
 
     //---------- BaseWebConsolePlugin
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
@@ -209,6 +251,9 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         super.doGet( request, response );
     }
 
+    /**
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
         final RequestInfo reqInfo = new RequestInfo(req);
@@ -239,7 +284,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 }
                 catch ( BundleException be )
                 {
-                    getLog().log( LogService.LOG_ERROR, "Cannot start", be );
+                    log( "Cannot start", be );
                 }
             }
             else if ( "stop".equals( action ) )
@@ -252,7 +297,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 }
                 catch ( BundleException be )
                 {
-                    getLog().log( LogService.LOG_ERROR, "Cannot stop", be );
+                    log( "Cannot stop", be );
                 }
             }
             else if ( "refresh".equals( action ) )
@@ -278,7 +323,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 }
                 catch ( BundleException be )
                 {
-                    getLog().log( LogService.LOG_ERROR, "Cannot uninstall", be );
+                    log( "Cannot uninstall", be );
                 }
             }
         }
@@ -314,7 +359,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             "/" + ServicesServlet.LABEL + "/";
     }
 
-    private Bundle getBundle( String pathInfo )
+    Bundle getBundle( String pathInfo )
     {
         // only use last part of the pathInfo
         pathInfo = pathInfo.substring( pathInfo.lastIndexOf( '/' ) + 1 );
@@ -373,51 +418,37 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         buf.append(msg);
     }
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         // get request info from request attribute
         final RequestInfo reqInfo = getRequestInfo(request);
-        final PrintWriter pw = response.getWriter();
 
-        final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
+        final int startLevel = getStartLevel().getInitialBundleStartLevel();
 
-        Util.startScript( pw );
-        pw.println( "var imgRoot = '" + appRoot + "/res/imgs';");
-        pw.println( "var startLevel = " + getStartLevel().getInitialBundleStartLevel() + ";");
-        pw.println( "var drawDetails = " + reqInfo.bundleRequested + ";");
-        pw.println( "var currentBundle = " + (reqInfo.bundleRequested && reqInfo.bundle != null ? String.valueOf(reqInfo.bundle.getBundleId()) : "null") + ";");
-        Util.endScript( pw );
-
-        Util.script(pw, appRoot, "bundles.js");
+        // prepare variables
+        DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
+        vars.put( "startLevel", String.valueOf(startLevel));
+        vars.put( "drawDetails", reqInfo.bundleRequested ? Boolean.TRUE : Boolean.FALSE );
+        vars.put( "currentBundle", (reqInfo.bundleRequested && reqInfo.bundle != null ? String.valueOf(reqInfo.bundle.getBundleId()) : "null"));
 
         if ( "upload".equals(reqInfo.pathInfo) )
         {
-            renderUploadForm(pw, appRoot);
+            response.getWriter().print(TEMPLATE_UPLOAD);
         }
         else
         {
-            pw.println( "<div id='plugin_content'/>");
-            Util.startScript( pw );
-            pw.print( "renderBundles(");
             final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
             final String servicesRoot = getServicesRoot ( request );
-            writeJSON(pw, reqInfo.bundle, pluginRoot, servicesRoot );
-            pw.println(");" );
-            Util.endScript( pw );
+            StringWriter w = new StringWriter();
+            PrintWriter w2 = new PrintWriter(w);
+            writeJSON(w2, reqInfo.bundle, pluginRoot, servicesRoot );
+            vars.put( "__bundles__", w.toString());
+            
+            response.getWriter().print(TEMPLATE_MAIN);
         }
-    }
-
-    private void renderUploadForm( final PrintWriter pw, final String appRoot ) throws IOException
-    {
-        Util.script(pw, appRoot, "jquery.multifile-1.4.6.min.js");
-        pw.println(" <div id='plugin_content'><div class='contentheader'>Upload / Install Bundles</div>");
-        pw.println( "<form method='post' enctype='multipart/form-data' action='../'>");
-        pw.println( "<input type='hidden' name='action' value='install'/>");
-        pw.println( "<div class='contentline'><div class='contentleft'>Start Bundle</div><div class='contentright'><input class='checkradio' type='checkbox' name='bundlestart' value='start'/></div></div>");
-        pw.println( "<div class='contentline'><div class='contentleft'>Start Level</div><div class='contentright'><input class='input' type='input' name='bundlestartlevel' value='" + getStartLevel().getInitialBundleStartLevel() + "' size='4'/></div></div>");
-        pw.println( "<div class='contentline'><input class='fileinput multi' accept='jar' type='file' name='bundlefile'/></div>");
-        pw.println( "<div class='contentline'><input type='submit' value='Install or Update'/></div>");
-        pw.println( "</form></div");
     }
 
     private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot )
@@ -442,7 +473,8 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         final String servicesRoot, final boolean fullDetails ) throws IOException
     {
         final Bundle[] allBundles = this.getBundles();
-        final String statusLine = this.getStatusLine(allBundles);
+        final Object[] status = getStatusLine(allBundles);
+        final String statusLine = (String) status[5];
         final Bundle[] bundles = ( bundle != null ) ? new Bundle[]
             { bundle } : allBundles;
         Util.sort( bundles );
@@ -455,6 +487,12 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
             jw.key( "status" );
             jw.value( statusLine );
+            
+            // add raw status
+            jw.key( "s" );
+            jw.array();
+            for ( int i = 0; i < 5; i++ ) jw.value(status[i]); 
+            jw.endArray();
 
             jw.key( "data" );
 
@@ -477,8 +515,9 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
     }
 
-    private String getStatusLine(final Bundle[] bundles)
+    private Object[] getStatusLine(final Bundle[] bundles)
     {
+        Object[] ret = new Object[6];
         int active = 0, installed = 0, resolved = 0, fragments = 0;
         for ( int i = 0; i < bundles.length; i++ )
         {
@@ -534,7 +573,13 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             }
             buffer.append('.');
         }
-        return buffer.toString();
+        ret[0] = new Integer(bundles.length);
+        ret[1] = new Integer(active);
+        ret[2] = new Integer(fragments);
+        ret[3] = new Integer(resolved);
+        ret[4] = new Integer(installed);
+        ret[5] = buffer.toString();
+        return ret;
     }
 
     private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details, final String pluginRoot, final String servicesRoot )
@@ -580,7 +625,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     }
 
 
-    protected Bundle[] getBundles()
+    private final Bundle[] getBundles()
     {
         return getBundleContext().getBundles();
     }
@@ -622,12 +667,12 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         jw.endObject();
     }
 
-    private boolean isFragmentBundle( Bundle bundle)
+    private final boolean isFragmentBundle( Bundle bundle)
     {
         return getPackageAdmin().getBundleType( bundle ) == PackageAdmin.BUNDLE_TYPE_FRAGMENT;
     }
 
-    private boolean hasStart( Bundle bundle )
+    private final boolean hasStart( Bundle bundle )
     {
         if ( isFragmentBundle(bundle) )
         {
@@ -637,7 +682,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     }
 
 
-    private boolean hasStop( Bundle bundle )
+    private final boolean hasStop( Bundle bundle )
     {
         if ( isFragmentBundle(bundle) )
         {
@@ -647,7 +692,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     }
 
 
-    private boolean hasUninstall( Bundle bundle )
+    private static final boolean hasUninstall( Bundle bundle )
     {
         return bundle.getState() == Bundle.INSTALLED || bundle.getState() == Bundle.RESOLVED
             || bundle.getState() == Bundle.ACTIVE;
@@ -655,7 +700,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     }
 
 
-    private void bundleDetails( JSONWriter jw, Bundle bundle, final String pluginRoot, final String servicesRoot)
+    private final void bundleDetails( JSONWriter jw, Bundle bundle, final String pluginRoot, final String servicesRoot)
         throws JSONException
     {
         Dictionary headers = bundle.getHeaders();
@@ -700,7 +745,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
     }
 
 
-    private Integer getStartLevel( Bundle bundle )
+    private final Integer getStartLevel( Bundle bundle )
     {
         StartLevel sl = getStartLevel();
         return ( sl != null ) ? new Integer( sl.getBundleStartLevel( bundle ) ) : null;
@@ -754,7 +799,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
         }
         else
         {
-            WebConsoleUtil.keyVal( jw, "Exported Packages", "None" );
+            WebConsoleUtil.keyVal( jw, "Exported Packages", "---" );
         }
 
         exports = packageAdmin.getExportedPackages( ( Bundle ) null );
@@ -859,7 +904,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
             }
             else
             {
-                WebConsoleUtil.keyVal( jw, "Exported Packages", "None" );
+                WebConsoleUtil.keyVal( jw, "Exported Packages", "---" );
             }
         }
 
@@ -924,7 +969,7 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
                 else
                 {
                     // add description if there are no imports
-                    val.put( "None" );
+                    val.put( "---" );
                 }
 
                 WebConsoleUtil.keyVal( jw, "Imported Packages", val );
@@ -1296,8 +1341,30 @@ public class BundlesServlet extends BaseWebConsolePlugin implements Configuratio
 
     }
 
-    public static RequestInfo getRequestInfo(final HttpServletRequest request)
+    static final RequestInfo getRequestInfo(final HttpServletRequest request)
     {
-        return (RequestInfo)request.getAttribute(BundlesServlet.class.getName());
+        return (RequestInfo)request.getAttribute( BundlesServlet.class.getName() );
+    }
+    
+    private final PackageAdmin getPackageAdmin()
+    {
+        return ( PackageAdmin ) getService( PackageAdmin.class.getName() );
+    }
+    
+    private final StartLevel getStartLevel()
+    {
+        return ( StartLevel ) getService( StartLevel.class.getName() );
+    }
+    
+    // TODO: may remove later, when BaseWebConsolePlugin is made to extend SimpleWebConsolePlugin
+    private Logger log;
+    Logger getLog()
+    {
+        if ( log == null )
+        {
+            log = new Logger( getBundleContext() );
+        }
+
+        return log;
     }
 }

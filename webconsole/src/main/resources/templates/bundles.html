@@ -1,0 +1,86 @@
+﻿<script type="text/javascript" src="${appRoot}/res/ui/bundles.js"></script>
+<script type="text/javascript">
+// <![CDATA[
+var startLevel = ${startLevel};
+var drawDetails = ${drawDetails};
+var currentBundle = ${currentBundle};
+var __bundles__ = ${__bundles__};
+var i18n = {
+	'Symbolic Name'       : '${bundles.name.symb}',
+	'Version'             : '${version}',
+	'Bundle Location'     : '${bundles.location}',
+	'Last Modification'   : '${bundles.lastMod}',
+	'Bundle Documentation': '${bundles.doc}',
+	'Vendor'              : '${bundles.vendor}',
+	'Copyright'           : '${bundles.copyright}',
+	'Description'         : '${bundles.description}',
+	'Start Level'         : '${bundles.startlevel}',
+	'Bundle Classpath'    : '${bundles.classpath}',
+	'Exported Packages'   : '${bundles.pkg.exported}',
+	'Imported Packages'   : '${bundles.pkg.imported}',
+	'Importing Bundles'   : '${bundles.pkg.importingBundles}',
+	'Manifest Headers'    : '${bundles.manifest.headers}',
+	'Host Bundles'        : '${bundles.hosts}',
+	'Fragments Attached'  : '${bundles.framents}',
+	'Vendor'              : '${bundles.vendor}',
+	// actions
+	'Start'               : '${start}',
+	'Stop'                : '${stop}',
+	'Update'              : '${bundles.update}',
+	'Uninstall'           : '${bundles.uninstall}',
+	'Refresh Package Imports' : '${bundles.refreshImports}',
+	//
+	statline              : '${bundles.statline}'
+}
+// ]]>
+</script>
+
+<!-- status line -->
+<p class="statline">&nbsp;</p>
+
+<!-- top header -->
+<form method="post" enctype="multipart/form-data" action="">
+	<div class="ui-widget-header ui-corner-top buttonGroup">
+		<input name="action" value="install" type="hidden" />
+		<input name="bundlestart" value="start" type="hidden" />
+		<input name="bundlestartlevel" value="5" type="hidden" />
+		<input name="bundlefile" style="margin-left: 10px;" type="file" />
+		<input value="${bundles.install_or_update}" style="margin-left: 10px;" type="submit" />
+		<button class="reloadButton" type="button" name="reload" style="margin-left: 60px;">${reload}</button>
+		<button class="installButton" type="button" name="install">${bundles.install_update}</button>
+		<button class="refreshPackages" type="button" name="refresh">${bundles.refreshPkg}</button>
+	</div>
+</form>
+
+<table id="plugin_table" class="tablesorter nicetable noauto">
+	<thead>
+		<tr>
+			<th class="col_Id">${id}</th>
+			<th class="col_Name">${bundles.name}</th>
+			<th class="col_Version">${version}</th>
+			<th class="col_Symbolic_Name">${bundles.name.symb}</th>
+			<th class="col_Status">${bundles.status}</th>
+			<th class="col_Actions">${bundles.actions}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td colspan="6">&nbsp;</td></tr>
+	</tbody>
+</table>
+
+<!-- bottom header -->
+<form method="post" enctype="multipart/form-data" action="">
+	<div class="ui-widget-header ui-corner-bottom buttonGroup">
+		<input name="action" value="install" type="hidden" />
+		<input name="bundlestart" value="start" type="hidden" />
+		<input name="bundlestartlevel" value="5" type="hidden" />
+		<input name="bundlefile" style="margin-left: 10px;" type="file" />
+		<input value="${bundles.install_or_update}" style="margin-left: 10px;" type="submit" />
+		<button class="reloadButton" type="button" name="reload" style="margin-left: 60px;">${reload}</button>
+		<button class="installButton" type="button" name="install">${bundles.install_update}</button>
+		<button class="refreshPackages" type="button" name="refresh">${bundles.refreshPkg}</button>
+	</div>
+</form>
+
+<!-- status line -->
+<p class="statline">&nbsp;</p>
