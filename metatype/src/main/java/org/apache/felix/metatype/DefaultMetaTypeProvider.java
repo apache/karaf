@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -32,7 +32,6 @@ import org.apache.felix.metatype.internal.l10n.Resources;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.metatype.MetaTypeProvider;
-import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
 
@@ -43,7 +42,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * <p>
  * This class may be used by clients, e.g. <code>ManagedService</code> or
  * <code>ManagedServiceFactory</code> implementations to easily also implement
- * the <code>MetaTypeProvider</code> interface. 
+ * the <code>MetaTypeProvider</code> interface.
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -52,7 +51,7 @@ public class DefaultMetaTypeProvider implements MetaTypeProvider
 
     private final Bundle bundle;
     private final String localePrefix;
-    
+
     private Map objectClassDefinitions;
     private Map designates;
     private Map locales;
@@ -137,7 +136,9 @@ public class DefaultMetaTypeProvider implements MetaTypeProvider
                 {
                     name = name.substring( 1 );
                 }
-                locales.put( name, url );
+                if (name.length() > 0) {
+                    locales.put( name, url );
+                }
             }
         }
 
@@ -178,7 +179,7 @@ public class DefaultMetaTypeProvider implements MetaTypeProvider
     {
         return ( Designate ) designates.get( pid );
     }
-    
+
     protected Map getObjectClassDefinitions()
     {
         return objectClassDefinitions;
