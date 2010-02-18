@@ -201,7 +201,10 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
 
             // Convert bundle manifest header attributes to resource properties.
             convertAttributesToProperties(dict);
-            
+
+            // Convert properties to bundle capability
+            convertAttributesToBundleCapability();
+
             // Convert import package declarations into requirements.
             convertImportPackageToRequirement(dict);
 
@@ -328,6 +331,18 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
                     put(Resource.LICENSE_URL, (String) dict.get(key));
                 }
             }
+        }
+
+        private void convertAttributesToBundleCapability()
+        {
+            CapabilityImpl cap = new CapabilityImpl();
+            cap.setName("bundle");
+            if (getPresentationName() != null) {
+                cap.addP(Resource.PRESENTATION_NAME, getPresentationName());
+            }
+            cap.addP(Resource.SYMBOLIC_NAME, getSymbolicName());
+            cap.addP(Resource.VERSION, getVersion());
+            addCapability(cap);
         }
 
         private void convertImportPackageToRequirement(Dictionary dict)
