@@ -658,7 +658,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         //    (for example plugin provided CSS links)
         if ( HEADER == null )
         {
-            HEADER = readTemplateFile( "/templates/main_header.html" );
+            HEADER = readTemplateFile( AbstractWebConsolePlugin.class, "/templates/main_header.html" );
         }
         return HEADER;
     }
@@ -668,7 +668,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     {
         if ( FOOTER == null )
         {
-            FOOTER = readTemplateFile( "/templates/main_footer.html" );
+            FOOTER = readTemplateFile( AbstractWebConsolePlugin.class, "/templates/main_footer.html" );
         }
         return FOOTER;
     }
@@ -692,9 +692,13 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      *      the template file into a string. The exception provides the
      *      exception thrown as its cause.
      */
-    protected final String readTemplateFile( final String templateFile )
+    protected final String readTemplateFile( final String templateFile ) {
+        return readTemplateFile( getClass(), templateFile );
+    }
+
+    private final String readTemplateFile( final Class clazz, final String templateFile)
     {
-        InputStream templateStream = getClass().getResourceAsStream( templateFile );
+        InputStream templateStream = clazz.getResourceAsStream( templateFile );
         if ( templateStream != null )
         {
             try
@@ -703,23 +707,17 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
             }
             catch ( IOException e )
             {
-                throw new RuntimeException( "readTemplateFile: Error loading " + templateFile, e );
+                // don't use new Exception(message, cause) because cause is 1.4+
+                throw new RuntimeException( "readTemplateFile: Error loading " + templateFile + ": " + e );
             }
             finally
             {
-                try
-                {
-                    templateStream.close();
-                }
-                catch ( IOException ignore )
-                {
-                    // ignored
-                }
+                IOUtils.closeQuietly( templateStream );
             }
         }
 
         // template file does not exist, return an empty string
-        log( "readTemplateFile: File '" + templateFile + "' not found through class " + getClass() );
+        log( "readTemplateFile: File '" + templateFile + "' not found through class " + clazz );
         return "";
     }
 
@@ -739,7 +737,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         {
             buf.append( "<link href='" );
             buf.append( toUrl( cssRefs[i], appRoot ) );
-            buf.append( "' rel='stylesheet' type='text/css'>" );
+            buf.append( "' rel='stylesheet' type='text/css' />" );
         }
 
         return buf.toString();
