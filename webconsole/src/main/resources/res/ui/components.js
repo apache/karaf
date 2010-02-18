@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,43 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function renderStatusLine() {
-	$("#plugin_content").append( "<div class='fullwidth'><div class='statusline'/></div>" );
-}
-
-function renderView( /* Array of String */ columns, /* Array of String */ buttons ) {
-    renderStatusLine();
-    renderButtons(buttons);
-    var txt = "<div class='table'><table id='plugin_table' class='tablelayout'><thead><tr>";
-    for ( var name in columns ) {
-    	txt = txt + "<th class='col_" + columns[name] + "'>" + columns[name] + "</th>";
-    }
-    txt = txt + "</tr></thead><tbody></tbody></table></div>";
-    $("#plugin_content").append( txt );
-    renderButtons(buttons);
-    renderStatusLine();	
-}
-
-function renderButtons( buttons ) {
-	$("#plugin_content").append( "<form method='post' enctype='multipart/form-data'><div class='fullwidth'><div class='buttons'>" +
-	                             buttons + "</div></div></form>" );
-}
-
 function renderData( eventData )  {
-	$(".statusline").empty().append(eventData.status);
-	$("#plugin_table > tbody > tr").remove();
-    for ( var idx in eventData.data ) {
-        entry( eventData.data[idx] );
-    }
-    $("#plugin_table").trigger("update");
-    if ( drawDetails ) {
-	    renderDetails(eventData);
-    }
+	switch(eventData.status) {
+		case -1: // no event admin
+			$(".statline").html(i18n.stat_no_service);
+			$("#scr").addClass('ui-helper-hidden');
+			break;
+		case  0: // no components
+			$(".statline").html(i18n.stat_no_components);
+			$('#scr').addClass('ui-helper-hidden');
+			break;
+		default:
+			$(".statline").html(i18n.stat_ok.msgFormat(eventData.status));
+			$('#scr').removeClass('ui-helper-hidden');
+			
+			$("#plugin_table > tbody > tr").remove();
+			for ( var idx in eventData.data ) {
+				entry( eventData.data[idx] );
+			}
+			$("#plugin_table").trigger("update");
+			if ( drawDetails ) renderDetails(eventData);
+			initStaticWidgets();
+	}
 }
 
 function entry( /* Object */ dataEntry ) {
-    var trElement = tr( null, { id: "entry" + dataEntry.id } );
-    entryInternal( trElement,  dataEntry );
+	var trElement = tr( null, { id: "entry" + dataEntry.id } );
+	entryInternal( trElement,  dataEntry );
 	$("#plugin_table > tbody").append(trElement);	
 }
 
@@ -59,64 +49,65 @@ function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action, 
 	var op = action.link;
 	var opLabel = action.name;
 	var img = action.image;
+	// fixup JQuery UI icons
+	if (img == 'configure')	  { img = 'wrench'
+	} else if (img == 'disable') { img = 'stop' //locked
+	} else if (img == 'enable')  { img = 'play' //unlocked
+	}
+	
+	// apply i18n
+	opLabel = i18n[opLabel] ? i18n[opLabel] : opLabel;
 	
 	var arg = id;
 	if ( op == "configure" ) {
 		arg = pid
 	}
-	var input = createElement( "input", null, {
-            type: 'image',
-            title: opLabel,
-            alt: opLabel,
-            src: imgRoot + '/component_' + img + '.png',
-            style: {"margin-left": "10px"}
-        });
-	$(input).click(function() {changeDataEntryState(arg, op)});
+	var input = createElement('li', 'dynhover', {
+		title: opLabel
+	});
+	$(input)
+		.html('<span class="ui-icon ui-icon-'+img+'"></span>')
+		.click(function() {changeDataEntryState(arg, op)});
+
+	if (!enabled) {
+		$(input).attr('disabled', true).addClass('ui-state-disabled');
 		
-    if (!enabled) {
-    	$(input).attr("disabled", true);
-    }
-    parent.appendChild( input );
+	}
+	parent.appendChild( input );
 }
 
 function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
-    var id = dataEntry.id;
-    var name = dataEntry.name;
-    var state = dataEntry.state;
-    
-    var inputElement = createElement("img", "rightButton", {
-    	src: appRoot + "/res/imgs/arrow_right.png",
-        style: {"border": "none"},
-    	id: 'img' + id,
-    	title: "Details",
-    	alt: "Details",
-    	width: 14,
-    	height: 14
-    });
+	var id = dataEntry.id;
+	var name = dataEntry.name;
+	var state = dataEntry.state;
+
+	var inputElement = createElement('span', 'ui-icon ui-icon-triangle-1-e', {
+		title: "Details",
+		id: 'img' + id,
+		style: {display: "inline-block"}
+	});
 	$(inputElement).click(function() {showDetails(id)});
-    var titleElement;
-    if ( drawDetails ) {
-    	titleElement = text(name);
-    } else {
-        titleElement = createElement ("a", null, {
-    	    href: window.location.pathname + "/" + id
-        });
-        titleElement.appendChild(text(name));
-    }
-    
-    parent.appendChild( td( null, null, [ text( id ) ] ) );
-    parent.appendChild( td( null, null, [ inputElement, text(" "), titleElement ] ) );
-    parent.appendChild( td( null, null, [ text( state ) ] ) );
-    var actionsTd = td( null, null );
-    var div = createElement("div", null, {
-    	style: { "text-align" : "left"}
-    });
-    actionsTd.appendChild(div);
-    
-    for ( var a in dataEntry.actions ) {
-    	actionButton( div, id, dataEntry.actions[a], dataEntry.pid );
-    }
-    parent.appendChild( actionsTd );
+	var titleElement;
+	if ( drawDetails ) {
+		titleElement = text(name);
+	} else {
+		titleElement = createElement ("a", null, {
+			href: window.location.pathname + "/" + id
+		});
+		titleElement.appendChild(text(name));
+	}
+
+	parent.appendChild( td( null, null, [ text( id ) ] ) );
+	parent.appendChild( td( null, null, [ inputElement, text(" "), titleElement ] ) );
+	parent.appendChild( td( null, null, [ text( state ) ] ) );
+	var actionsTd = td( null, null );
+	var div = createElement('ul', 'icons ui-widget');
+	actionsTd.appendChild(div);
+
+	for ( var a in dataEntry.actions ) {
+		actionButton( div, id, dataEntry.actions[a], dataEntry.pid );
+	}
+	parent.appendChild( actionsTd );
 }
 
 function changeDataEntryState(/* long */ id, /* String */ action) {
@@ -125,29 +116,31 @@ function changeDataEntryState(/* long */ id, /* String */ action) {
 		return;
 	}
 	$.post(pluginRoot + "/" + id, {"action":action}, function(data) {
-	    renderData(data);
+		renderData(data);
 	}, "json");	
 }
 
 function showDetails( id ) {
-    $.get(pluginRoot + "/" + id + ".json", null, function(data) {
-    	renderDetails(data);
-    }, "json");
+	$.get(pluginRoot + "/" + id + ".json", null, function(data) {
+		renderDetails(data);
+	}, "json");
 }
 
 function loadData() {
 	$.get(pluginRoot + "/.json", null, function(data) {
-	    renderData(data);
+		renderData(data);
 	}, "json");	
 }
 
 function hideDetails( id ) {
 	$("#img" + id).each(function() {
 		$("#pluginInlineDetails").remove();
-		$(this).attr("src", appRoot + "/res/imgs/arrow_right.png");
-        $(this).attr("title", "Details");
-        $(this).attr("alt", "Details");
-        $(this).unbind('click').click(function() {showDetails(id)});
+		$(this).
+			removeClass('ui-icon-triangle-1-w').//left
+			removeClass('ui-icon-triangle-1-s').//down
+			addClass('ui-icon-triangle-1-e').//right
+		    attr("title", "Details").
+			unbind('click').click(function() {showDetails(id)});
 	});
 }
 
@@ -157,73 +150,75 @@ function renderDetails( data ) {
 	$("#entry" + data.id + " > td").eq(1).append("<div id='pluginInlineDetails'/>");
 	$("#img" + data.id).each(function() {
 		if ( drawDetails ) {
-			$(this).attr("src", appRoot + "/res/imgs/arrow_left.png");
-	        $(this).attr("title", "Back");
-	        $(this).attr("alt", "Back");
-    	    var ref = window.location.pathname;
-    	    ref = ref.substring(0, ref.lastIndexOf('/'));
-            $(this).unbind('click').click(function() {window.location = ref;});
+			var ref = window.location.pathname;
+			ref = ref.substring(0, ref.lastIndexOf('/'));
+			$(this).
+				removeClass('ui-icon-triangle-1-e').//right
+				removeClass('ui-icon-triangle-1-s').//down
+				addClass('ui-icon-triangle-1-w').//left
+				attr("title", "Back").
+				unbind('click').click(function() {window.location = ref});
 		} else {
-			$(this).attr("src", appRoot + "/res/imgs/arrow_down.png");
-	        $(this).attr("title", "Hide Details");
-	        $(this).attr("alt", "Hide Details");
-            $(this).unbind('click').click(function() {hideDetails(data.id)});
+			$(this).
+				removeClass('ui-icon-triangle-1-w').//left
+				removeClass('ui-icon-triangle-1-e').//right
+				addClass('ui-icon-triangle-1-s').//down
+				attr("title", "Hide Details").
+				unbind('click').click(function() {hideDetails(data.id)});
 		}
 	});
 	$("#pluginInlineDetails").append("<table border='0'><tbody></tbody></table>");
-    var details = data.props;
-    for (var idx in details) {
-        var prop = details[idx];
-        
-        var txt = "<tr><td class='aligntop' noWrap='true' style='border:0px none'>" + prop.key + "</td><td class='aligntop' style='border:0px none'>";	        
-        if (prop.value) {
-    		if ( $.isArray(prop.value) ) {
-        		var i = 0;
-        		for(var pi in prop.value) {
-        			var value = prop.value[pi];
-	                if (i > 0) { txt = txt + "<br/>"; }
-	                var span;
-	                if (value.substring(0, 2) == "!!") {
-	                	txt = txt + "<span style='color: red;'>" + value + "</span>";
-	                } else {
-	                	txt = txt + value;
-	                }
-	                i++;
-        		}
-    		} else {
-    			txt = txt + prop.value;
-    		}
-        } else {
-        	txt = txt + "\u00a0";
-        }
-        txt = txt + "</td></tr>";
-        $("#pluginInlineDetails > table > tbody").append(txt);
+	var details = data.props;
+	for (var idx in details) {
+		var prop = details[idx];
+		var key = i18n[prop.key] ? i18n[prop.key] : prop.key; // i18n
+
+		var txt = "<tr><td class='aligntop' noWrap='true' style='border:0px none'>" + key + "</td><td class='aligntop' style='border:0px none'>";	
+		if (prop.value) {
+			if ( $.isArray(prop.value) ) {
+				var i = 0;
+				for(var pi in prop.value) {
+					var value = prop.value[pi];
+					if (i > 0) { txt = txt + "<br/>"; }
+					var span;
+					if (value.substring(0, 2) == "!!") {
+						txt = txt + "<span style='color: red;'>" + value + "</span>";
+					} else {
+						txt = txt + value;
+					}
+					i++;
+				}
+			} else {
+				txt = txt + prop.value;
+			}
+		} else {
+			txt = txt + "\u00a0";
+		}
+		txt = txt + "</td></tr>";
+		$("#pluginInlineDetails > table > tbody").append(txt);
 	}
 }
 
-function renderComponents(data) {
-	$(document).ready(function(){
-    	renderView( ["Id", "Name", "Status", "Actions"],
-        		"<div class='button'><button class='reloadButton' type='button' name='reload'>Reload</button></div>");
-        renderData(data);
-        
-        $(".reloadButton").click(loadData);
 
-        var extractMethod = function(node) {
-        	var link = node.getElementsByTagName("a");
-            if ( link && link.length == 1 ) {
-            	return link[0].innerHTML;
-            }
-            return node.innerHTML;
-        };
-        $("#plugin_table").tablesorter({
-            headers: {
-        	    0: { sorter:"digit"},
-                3: { sorter: false }
-            },
-            sortList: [[1,0]],
-            textExtraction:extractMethod 
-        });
-    });
-}
- 
+$(document).ready(function(){
+	renderData (scrData);
+
+	$(".reloadButton").click(loadData);
+
+	var extractMethod = function(node) {
+		var link = node.getElementsByTagName("a");
+		if ( link && link.length == 1 ) {
+			return link[0].innerHTML;
+		}
+		return node.innerHTML;
+	};
+	$("#plugin_table").tablesorter({
+		headers: {
+			0: { sorter:"digit"},
+			3: { sorter: false }
+		},
+		sortList: [[1,0]],
+		textExtraction:extractMethod
+	});
+});
+

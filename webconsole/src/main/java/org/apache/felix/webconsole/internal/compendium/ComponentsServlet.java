@@ -19,6 +19,7 @@ package org.apache.felix.webconsole.internal.compendium;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -33,10 +34,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
+import org.apache.felix.webconsole.ConfigurationPrinter;
+import org.apache.felix.webconsole.DefaultVariableResolver;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.internal.core.BundlesServlet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -51,43 +57,46 @@ import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 
 
-public class ComponentsServlet extends BaseWebConsolePlugin
+/**
+ * ComponentsServlet provides a plugin for managing Service Components Runtime.
+ */
+public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String NAME = "components";
+    private static final String LABEL = "components";
+    private static final String TITLE = "Components";
+    private static final String CSS[] = { "/res/ui/bundles.css" }; // yes, it's correct!
 
-    public static final String LABEL = "Components";
+    // actions
+    private static final String OPERATION = "action";
+    private static final String OPERATION_ENABLE = "enable";
+    private static final String OPERATION_DISABLE = "disable";
+    private static final String OPERATION_CONFIGURE = "configure";
 
-    public static final String COMPONENT_ID = "componentId";
-
-    public static final String OPERATION = "action";
-
-    public static final String OPERATION_ENABLE = "enable";
-
-    public static final String OPERATION_DISABLE = "disable";
-
-    public static final String OPERATION_CONFIGURE = "configure";
-
+    // needed services
     private static final String SCR_SERVICE = ScrService.class.getName();
-
     private static final String META_TYPE_NAME = MetaTypeService.class.getName();
-
     private static final String CONFIGURATION_ADMIN_NAME = ConfigurationAdmin.class.getName();
 
-    public String getTitle()
+    // templates
+    private final String TEMPLATE;
+
+    /** Default constructor */
+    public ComponentsServlet()
     {
-        return LABEL;
+        super(LABEL, TITLE, CSS);
+        
+        // load templates
+        TEMPLATE = readTemplateFile( "/templates/components.html" );
     }
 
 
-    public String getLabel()
-    {
-        return NAME;
-    }
 
-
+    /**
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         final RequestInfo reqInfo = new RequestInfo(request);
@@ -116,6 +125,9 @@ public class ComponentsServlet extends BaseWebConsolePlugin
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
     IOException {
         final RequestInfo reqInfo = new RequestInfo(request);
@@ -136,27 +148,25 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         super.doGet( request, response );
     }
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         // get request info from request attribute
         final RequestInfo reqInfo = getRequestInfo(request);
-        final PrintWriter pw = response.getWriter();
 
-        final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
+        StringWriter w = new StringWriter();
+        PrintWriter w2 = new PrintWriter(w);
+        renderResult( w2, reqInfo.component );
+        
+        // prepare variables
+        DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
+        vars.put( "__drawDetails__", reqInfo.componentRequested ? Boolean.TRUE : Boolean.FALSE );
+        vars.put( "__data__", w.toString() );
 
-        Util.startScript( pw );
-        pw.println( "var imgRoot = '" + appRoot + "/res/imgs';");
-        pw.println( "var drawDetails = " + reqInfo.componentRequested + ";");
-        Util.endScript( pw );
-
-        Util.script(pw, appRoot, "components.js");
-
-        pw.println( "<div id='plugin_content'/>");
-        Util.startScript( pw );
-        pw.print( "renderComponents(");
-        renderResult( pw, reqInfo.component );
-        pw.println(");" );
-        Util.endScript( pw );
+        response.getWriter().print( TEMPLATE );
+        
     }
 
 
@@ -172,7 +182,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
             if ( scrService == null )
             {
                 jw.key( "status" );
-                jw.value( "Apache Felix Declarative Service required for this function" );
+                jw.value( -1 );
             }
             else
             {
@@ -181,7 +191,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
                 if ( components == null || components.length == 0 )
                 {
                     jw.key( "status" );
-                    jw.value( "No components installed currently" );
+                    jw.value( 0 );
                 }
                 else
                 {
@@ -201,7 +211,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
                     }
                     buffer.append(" installed.");
                     jw.key("status");
-                    jw.value(buffer.toString());
+                    jw.value(componentMap.size());
 
                     // render components
                     jw.key( "data" );
@@ -479,17 +489,17 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         return false;
     }
 
-    protected ConfigurationAdmin getConfigurationAdmin()
+    private final ConfigurationAdmin getConfigurationAdmin()
     {
         return ( ConfigurationAdmin ) getService( CONFIGURATION_ADMIN_NAME );
     }
 
-    private ScrService getScrService()
+    final ScrService getScrService()
     {
         return ( ScrService ) getService( SCR_SERVICE );
     }
 
-    protected MetaTypeService getMetaTypeService()
+    private final MetaTypeService getMetaTypeService()
     {
         return ( MetaTypeService ) getService( META_TYPE_NAME );
     }
@@ -556,7 +566,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
 
     }
 
-    public static RequestInfo getRequestInfo(final HttpServletRequest request)
+    static RequestInfo getRequestInfo(final HttpServletRequest request)
     {
         return (RequestInfo)request.getAttribute(ComponentsServlet.class.getName());
     }

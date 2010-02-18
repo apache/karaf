@@ -1,0 +1,54 @@
+﻿<script type="text/javascript" src="res/ui/components.js"></script>
+<script type="text/javascript">
+// <![CDATA[
+var drawDetails = ${__drawDetails__};
+var scrData = ${__data__};
+// i18n
+var i18n = {
+	'Enable'           : '${scr.action.enable}',
+	'Disable'          : '${scr.action.disable}',
+	'Configure'        : '${scr.action.configure}',
+	'Bundle'           : '${scr.prop.bundle}',
+	'Default State'    : '${scr.prop.defstate}',
+	'Activation'       : '${scr.prop.activation}',
+	'Service Type'     : '${scr.serv.type}',
+	'Services'         : '${scr.serv}',
+	'Properties'       : '${scr.prop.properties}',
+	stat_no_service    : "${scr.status.no_service}",
+	stat_no_components : "${scr.status.no_components}",
+	stat_ok            : "${scr.status.ok}"
+}
+// ]]>
+</script>
+<p class="statline">&nbsp;</p>
+
+
+<div id="scr"> <!-- data available -->
+	<!-- top header -->
+	<form method='post' enctype='multipart/form-data' action="">
+		<div class="ui-widget-header ui-corner-top buttonGroup">
+			<button class='reloadButton' type='button' name='reload'>${reload}</button>
+		</div>
+	</form>
+	
+	<table id="plugin_table" class="tablesorter nicetable noauto">
+	<thead>
+		<tr>
+			<th class="col_Id">${id}</th>
+			<th class="col_Name">${scr.title.name}</th>
+			<th class="col_Status">${scr.title.status}</th>
+			<th class="col_Actions">${scr.title.actions}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td colspan="4">&nbsp;</td></tr>
+	</tbody>
+	</table>
+</div> <!-- end data available -->
+
+<!-- bottom header -->
+<form method='post' enctype='multipart/form-data' action="">
+	<div class="ui-widget-header ui-corner-bottom buttonGroup">
+		<button class='reloadButton' type='button' name='reload'>${reload}</button>
+	</div>
+</form>
