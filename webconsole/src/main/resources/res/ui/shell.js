@@ -15,72 +15,41 @@
  * limitations under the License.
  */
 
-function executeCommand(command) {
-    var xmlhttp = getXmlHttp();
-    if (!xmlhttp) {
-        return;
-    }
-    
-    if (xmlhttp.readyState < 4) {
-        xmlhttp.abort();
-    }
-    
-    var url = document.location;
-    
-    xmlhttp.open("POST", url);
-    
-    // set If-Modified-Since way back in the past to prevent
-    // using any content from the cache
-    xmlhttp.setRequestHeader("If-Modified-Since", new Date(0));
-    xmlhttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-    
-    xmlhttp.onreadystatechange = updateConsole;
-    
-    xmlhttp.send("command=" + encodeURIComponent(command));
+// elements cache
+var consoleframe = false;
+var console = false;
+var command = false;
+
+function executeCommand(cmd) {
+	$.post(document.location.href, { 'command' : encodeURIComponent(cmd) },
+		function(result) {
+			console.removeClass('ui-helper-hidden').append(result);
+			consoleframe.attr('scrollTop', console.attr('scrollHeight'));
+			command.val('');
+			shellCommandFocus();
+		}, 'html');
 }
 
-function updateConsole() {
-    var xmlhttp = getXmlHttp();
-    if (!xmlhttp || xmlhttp.readyState != 4) {
-        return;
-    }
-    
-    var result = xmlhttp.responseText;
-    if (!result) {
-        return;
-    }
+function shellCommandFocus() { command.focus() }
 
-    var console = document.getElementById("console");
-    
-    console.style.display = "";
-    console.innerHTML = console.innerHTML + result;
-    
-    var consoleframe = document.getElementById("consoleframe");
-    consoleframe.scrollTop = console.scrollHeight;
+// automatically executed on load
+$(document).ready(function(){
+	// init cache
+	consoleframe = $('#consoleframe').click(shellCommandFocus);
+	console      = $('#console');
+	command      = $('#command').focus();
 
-    document.forms["shellCommandForm"].elements["command"].value = "";
-    
-    shellCommandFocus();
-}
-
-function clearConsole() {
-    var console = document.getElementById("console");
-
-    console.style.display = "none";
-    console.innerHTML = "";
-    
-    var consoleframe = document.getElementById("consoleframe");
-    consoleframe.scrollTop = 0;
-    
-    shellCommandFocus();
-}
-
-function shellCommandFocus() {
-    document.forms["shellCommandForm"].elements["command"].focus();
-}
-
-function runShellCommand() {
-    var command = document.forms["shellCommandForm"].elements["command"].value;
-    
-    executeCommand(command);
-}
+	// attach action handlers
+	$('#clear').click(function() {
+		console.addClass('ui-helper-hidden').html('');
+		consoleframe.attr('scrollTop', 0);
+		shellCommandFocus();
+	});
+	$('#help').click(function() {
+		executeCommand('help');
+	});
+	$('form').submit(function() {
+		executeCommand(command.val());
+		return false;
+	});
+});

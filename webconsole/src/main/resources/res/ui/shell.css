@@ -15,50 +15,23 @@
  * limitations under the License.
  */
 
-div.consolebuttons {
-    text-align: right;
-    border: none;
-    width: 955px;
-    padding-bottom: 2px;
-}
-
-div.consoleframe {
-    font-family: "Courier New", Courier, monospace;
-    font-size: 12px;
-    font-weight: normal;
+#consoleframe {
+    font-family: monospace;
     background-color: #f0f0f0;
-    color: #000000;
-    border: 1px solid #999999;
-    width: 955px;
     height: 500px;
     overflow: auto;
 }
 
-div.console {
-}
-
 span.consolecommand {
     white-space: pre;
+	font-weight: bold;
 }
 
 span.error {
     color: #ff0000;
 }
 
-span.prompt {
-    padding-left: 0px;
-    padding-top: 2px;
-    padding-bottom: 3px;
-}
-
 input.command {
-    font-family: "Courier New", Courier, monospace;
-    font-size: 12px;
-    font-weight: normal;
-    background-color: #f0f0f0;
-    color: #000000;
-    border: none;
-    width: 900px;
-    margin-left: -1px; 
-    margin-top: -1px; 
+    font-family: monospace;
+    width: 80%;
 }

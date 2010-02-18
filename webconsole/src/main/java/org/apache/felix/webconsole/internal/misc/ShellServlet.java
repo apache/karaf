@@ -30,35 +30,38 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.shell.ShellService;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
-import org.apache.felix.webconsole.internal.Util;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
 
-public class ShellServlet extends AbstractWebConsolePlugin implements OsgiManagerPlugin
+/**
+ * ShellServlet provides a Web bases interface to the Apache shell service, allowing
+ * the user to execute shell commands from the browser.
+ */
+public class ShellServlet extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
-    private static final String[] CSS_REFS =
-        { "res/ui/shell.css" };
 
-    private ServiceTracker shellTracker;
+    private static final String LABEL = "shell";
+    private static final String TITLE = "Shell";
+    private static final String[] CSS = { "/res/ui/shell.css" };
+    
+    // templates
+    private final String TEMPLATE;
 
-
-    public String getLabel()
+    /** Default constructor */
+    public ShellServlet()
     {
-        return "shell";
+        super(LABEL, TITLE, CSS);
+
+        // load templates
+        TEMPLATE = readTemplateFile( "/templates/shell.html" ); 
     }
 
 
-    public String getTitle()
-    {
-        return "Shell";
-    }
-
-
+    /**
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
@@ -114,73 +117,18 @@ public class ShellServlet extends AbstractWebConsolePlugin implements OsgiManage
         }
     }
 
-
-    protected String[] getCssReferences()
-    {
-        return CSS_REFS;
-    }
-
-
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        PrintWriter pw = response.getWriter();
-
-        final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
-        Util.script( pw, appRoot, "shell.js" );
-
-        pw.println( "<br />" );
-
-        pw.println( "<form name=\"shellCommandForm\" method=\"post\" action=\"" + appRoot
-            + "/shell\" title=\"Shell Command\" onsubmit=\"runShellCommand();return false;\">" );
-
-        pw.println( "<div class=\"consolebuttons\">" );
-        pw.println( "<input class=\"submit\" type=\"button\" value=\"Help\" onclick=\"executeCommand('help');\"/>" );
-        pw
-            .println( "&nbsp;&nbsp;<input class=\"submit\" type=\"button\" value=\"Clear\" onclick=\"clearConsole();\"/>" );
-        pw.println( "</div>" );
-
-        pw.println( "<div id=\"consoleframe\" class=\"consoleframe\" onclick=\"shellCommandFocus();\">" );
-        pw.println( "<div id=\"console\" class=\"console\" onclick=\"shellCommandFocus();\">" );
-        pw.println( "</div>" );
-
-        pw.println( "<span class=\"prompt\">" );
-        pw.println( "-&gt; <input type=\"text\" name=\"command\" value=\"\" class=\"command\" autocomplete=\"off\"/>" );
-        pw.println( "</span>" );
-
-        pw.println( "</div>" );
-
-        pw.println( "</form>" );
-
-        pw.println( "<script type=\"text/javascript\">" );
-        pw.println( "shellCommandFocus();" );
-        pw.println( "</script>" );
+        response.getWriter().print(TEMPLATE);
     }
 
 
-    protected ShellService getShellService()
+    private final ShellService getShellService()
     {
-        return ( ( ShellService ) shellTracker.getService() );
-    }
-
-
-    public void activate( BundleContext bundleContext )
-    {
-        super.activate( bundleContext );
-
-        shellTracker = new ServiceTracker( bundleContext, ShellService.class.getName(), null );
-        shellTracker.open();
-    }
-
-
-    public void deactivate()
-    {
-        if ( shellTracker != null )
-        {
-            shellTracker.close();
-            shellTracker = null;
-        }
-
-        super.deactivate();
+        return ((ShellService) getService(ShellService.class.getName()));
     }
 
 }
