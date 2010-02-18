@@ -45,7 +45,7 @@ public class ShellServlet extends SimpleWebConsolePlugin implements OsgiManagerP
     private static final String LABEL = "shell";
     private static final String TITLE = "Shell";
     private static final String[] CSS = { "/res/ui/shell.css" };
-    
+
     // templates
     private final String TEMPLATE;
 
@@ -55,7 +55,7 @@ public class ShellServlet extends SimpleWebConsolePlugin implements OsgiManagerP
         super(LABEL, TITLE, CSS);
 
         // load templates
-        TEMPLATE = readTemplateFile( "/templates/shell.html" ); 
+        TEMPLATE = readTemplateFile( "/templates/shell.html" );
     }
 
 
@@ -128,7 +128,12 @@ public class ShellServlet extends SimpleWebConsolePlugin implements OsgiManagerP
 
     private final ShellService getShellService()
     {
-        return ((ShellService) getService(ShellService.class.getName()));
+        try {
+            return ((ShellService) getService(ShellService.class.getName()));
+        } catch (NoClassDefFoundError ncdfe) {
+            // shell service class not available
+        }
+        return null;
     }
 
 }
