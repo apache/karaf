@@ -75,7 +75,7 @@ public class BundleGenerator
         {
             // Deduce the classpath from Export-Package, or Private-Package headers.
 
-            String pkg = _directives.getProperty("Private-Package");
+            String pkg = _directives.getProperty("Export-Package");
             if (pkg == null)
             {
                 pkg = _directives.getProperty("Private-Package");
