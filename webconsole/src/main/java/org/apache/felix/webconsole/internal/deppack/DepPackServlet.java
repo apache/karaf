@@ -19,6 +19,7 @@ package org.apache.felix.webconsole.internal.deppack;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -27,56 +28,49 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.DefaultVariableResolver;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleUtil;
-import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONException;
 import org.json.JSONWriter;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 
 
-public class DepPackServlet extends BaseWebConsolePlugin
+/**
+ * DepPackServlet provides a plugin for managing deployment admin packages.
+ */
+public class DepPackServlet extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
 
-    public static final String LABEL = "deppack";
+    private static final String LABEL = "deppack";
+    private static final String TITLE = "Deployment Packages";
+    private static final String CSS[] = { "/res/ui/deployment.css" };
 
-    public static final String TITLE = "Deployment Packages";
-
+    //
     private static final String ACTION_DEPLOY = "deploydp";
-
     private static final String ACTION_UNINSTALL = "uninstalldp";
-
     private static final String PARAMETER_PCK_FILE = "pckfile";
 
+    // templates
+    private final String TEMPLATE;
 
-    public String getLabel()
+    /** Default constructor */
+    public DepPackServlet()
     {
-        return LABEL;
+        super(LABEL, TITLE, CSS);
+
+        // load templates
+        TEMPLATE = readTemplateFile( "/templates/deployment.html" );
     }
 
 
-    public String getTitle()
-    {
-        return TITLE;
-    }
-
-
-    protected void activate( ComponentContext context )
-    {
-        this.activate( context.getBundleContext() );
-    }
-
-
-    protected void deactivate( ComponentContext context )
-    {
-        this.deactivate();
-    }
-
-
+    /**
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
         // get the uploaded data
@@ -138,7 +132,7 @@ public class DepPackServlet extends BaseWebConsolePlugin
     }
 
 
-    private FileItem getFileItem( Map params, String name, boolean isFormField )
+    private static final FileItem getFileItem( Map params, String name, boolean isFormField )
     {
         FileItem[] items = ( FileItem[] ) params.get( name );
         if ( items != null )
@@ -157,42 +151,39 @@ public class DepPackServlet extends BaseWebConsolePlugin
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
 
-        PrintWriter pw = response.getWriter();
-
-        String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
-        pw.println( "<script src='" + appRoot + "/res/ui/packages.js' language='JavaScript'></script>" );
-
-        pw.println( "<h1>Deployment Admin</h1>" );
         final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DeploymentAdmin.class.getName() );
-        if ( admin == null )
-        {
-            pw.println( "<p><em>Deployment Admin is not installed.</em></p>" );
-            return;
-        }
-        final DeploymentPackage[] packages = admin.listDeploymentPackages();
 
-        Util.startScript( pw );
-        pw.println( "var packageListData = " );
-        JSONWriter jw = new JSONWriter( pw );
+        StringWriter w = new StringWriter();
+        PrintWriter w2 = new PrintWriter(w);
+        JSONWriter jw = new JSONWriter( w2 );
         try
         {
             jw.object();
-
-            jw.key( "data" );
-
-            jw.array();
-
-            for ( int i = 0; i < packages.length; i++ )
+            if ( null == admin )
             {
-                packageInfoJson( jw, packages[i] );
+                jw.key( "error" );
+                jw.value( true );
             }
+            else
+            {
+                final DeploymentPackage[] packages = admin.listDeploymentPackages();
+                jw.key( "data" );
 
-            jw.endArray();
+                jw.array();
+                for ( int i = 0; i < packages.length; i++ )
+                {
+                    packageInfoJson( jw, packages[i] );
+                }
+                jw.endArray();
 
+            }
             jw.endObject();
 
         }
@@ -201,13 +192,15 @@ public class DepPackServlet extends BaseWebConsolePlugin
             throw new IOException( je.toString() );
         }
 
-        pw.println( ";" );
-        pw.println( "renderPackage( packageListData );" );
-        Util.endScript( pw );
+        // prepare variables
+        DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
+        vars.put( "__data__", w.toString() );
+
+        response.getWriter().print(TEMPLATE);
     }
 
 
-    private void packageInfoJson( JSONWriter jw, DeploymentPackage pack ) throws JSONException
+    private static final void packageInfoJson( JSONWriter jw, DeploymentPackage pack ) throws JSONException
     {
         jw.object();
         jw.key( "id" );

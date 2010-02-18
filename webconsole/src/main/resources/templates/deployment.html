@@ -1,0 +1,52 @@
+﻿<script type="text/javascript" src="res/ui/deployment.js"></script>
+<script type="text/javascript">
+// <![CDATA[
+var i18n = {
+	status_no_data : "${deployment.status.no_data}",
+	status_no_serv : "${deployment.status.no_service}",
+	status_ok      : "${deployment.status.ok}",
+	package_name   : "${deployment.package.name}",
+	version        : "${version}",
+	bundles        : "${deployment.bundles}",
+	uninstall      : "${deployment.uninstall}"
+}
+var packageListData = ${__data__};
+// ]]>
+</script>
+
+<p class="statline">&nbsp;</p>
+
+<div id="dps1"> <!-- will be hidden if no DP service available -->
+<!-- top header -->
+<form method="post" enctype="multipart/form-data" >
+	<div class="ui-widget-header ui-corner-top buttonGroup" style="text-align: right">
+		<input name="action"  type="hidden" value="deploydp" />
+		<input name="pckfile" type="file" size="50" />
+		<input type="submit" value="${deployment.install_update}" />
+	</div>
+</form>
+
+<div id="dps2"> <!-- will be hidden if no data available -->
+	<table id="plugin_table" class="nicetable">
+	<thead>
+		<tr>
+			<th>${id}</th>
+			<th width="100%">${deployment.details}</th>
+			<th>${version}</th>
+			<th colspan="1">${deployment.actions}</th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+	</table>
+
+	<!-- bottom header -->
+	<form method="post" enctype="multipart/form-data" >
+		<div class="ui-widget-header ui-corner-bottom buttonGroup" style="text-align: right">
+			<input name="action"  type="hidden" value="deploydp" />
+			<input name="pckfile" type="file" size="50" />
+			<input type="submit" value="${deployment.install_update}" />
+		</div>
+	</form>
+</div><!--dps2-->
+</div><!--dps1-->
