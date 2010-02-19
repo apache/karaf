@@ -21,13 +21,13 @@
     <parent>
       <groupId>org.apache.felix.karaf.tooling</groupId>
       <artifactId>tooling</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
+      <version>1.4.0</version>
     </parent>
 
     <groupId>org.apache.felix.karaf.tooling</groupId>
     <artifactId>features-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.4.0</version>
     <name>Apache Felix Karaf :: Maven2 Features plugin</name>
 
     <description>

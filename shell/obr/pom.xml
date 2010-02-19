@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.felix.karaf.shell</groupId>
         <artifactId>shell</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>1.4.0</version>
     </parent>
 
     <groupId>org.apache.felix.karaf.shell</groupId>
     <artifactId>org.apache.felix.karaf.shell.obr</artifactId>
     <packaging>bundle</packaging>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.4.0</version>
     <name>Apache Felix Karaf :: Shell OBR Commands</name>
 
     <description>
