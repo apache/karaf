@@ -541,29 +541,27 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
                 {
                     if ( linkToCurrent )
                     {
-                        map.put( labelMapEntry.getValue(), "<a class='technavat' href='" + appRoot + "/"
-                            + labelMapEntry.getKey() + "'>" + labelMapEntry.getValue() + "</a>" );
+                        map.put( labelMapEntry.getValue(), "<div class='ui-state-active'><a href='" + appRoot + "/"
+                                + labelMapEntry.getKey() + "'>" + labelMapEntry.getValue() + "</a></div>");
                     }
                     else
                     {
-                        map.put( labelMapEntry.getValue(), "<span class='technavat'>" + labelMapEntry.getValue()
-                            + "</span>" );
+                        map.put( labelMapEntry.getValue(), "<div class='ui-state-active'><span>" + labelMapEntry.getValue() 
+                            + "</span></div>");
                     }
                 }
                 else
                 {
-                    map.put( labelMapEntry.getValue(), "<a href='" + appRoot + "/" + labelMapEntry.getKey() + "'>"
-                        + labelMapEntry.getValue() + "</a>" );
+                    map.put( labelMapEntry.getValue(), "<div class='ui-state-default'><a href='" + appRoot + "/" + labelMapEntry.getKey() + "'>" 
+                        + labelMapEntry.getValue() + "</a></div>");
                 }
             }
 
             // render the navigation
-            pw.println( "<div id='technav'>" );
+            pw.println("<div id='technav' class='ui-widget ui-widget-header'>");
             for ( Iterator li = map.values().iterator(); li.hasNext(); )
             {
-                pw.print( "<div class='technavitem'>" );
-                pw.print( li.next() );
-                pw.println( "</div>" );
+                pw.println( li.next() );
             }
             pw.println( "</div>" );
         }

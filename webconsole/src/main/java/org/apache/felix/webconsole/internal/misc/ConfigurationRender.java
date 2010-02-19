@@ -46,7 +46,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
     private static final String LABEL = "config";
     private static final String TITLE = "Configuration Status";
-    private static final String[] CSS_REFS = { "res/ui/configurationrender.css" };
+    private static final String[] CSS_REFS = null;
 
     /**
      * Formatter pattern to generate a relative path for the generation
