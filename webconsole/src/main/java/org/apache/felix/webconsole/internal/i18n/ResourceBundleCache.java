@@ -141,9 +141,9 @@ class ResourceBundleCache
                     entryPath = entryPath.substring( start, end );
 
                     // the default language is "name.properties" thus the entry
-                    // path is empty and must default to "_"
+                    // path is empty and must default to "_"+DEFAULT_LOCALE
                     if (entryPath.length() == 0) {
-                        entryPath = "_";
+                        entryPath = "_" + DEFAULT_LOCALE;
                     }
 
                     // only add this entry, if the "language" is not provided
