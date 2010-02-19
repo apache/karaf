@@ -136,3 +136,12 @@ tr .headerSortDown {
 	padding: .2em;
 }
 
+/* zebra tables */
+.even {
+	/* default background unmodified from JQuery UI Theme */
+}
+
+.odd {
+	/* overwrite background from JQuery UI Theme */
+	background: none !important;
+}

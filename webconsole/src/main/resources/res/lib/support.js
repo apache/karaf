@@ -22,7 +22,7 @@ if ( $.tablesorter ) {
 	$.tablesorter.defaults.header  = 'header ui-widget-header';
 	$.tablesorter.defaults.widgets = ['zebra'];
 	$.tablesorter.defaults.widgetZebra = {
-		css : ["odd", "even ui-state-default"]
+		css : ["odd ui-state-default", "even ui-state-default"]
 	};
 }
 
