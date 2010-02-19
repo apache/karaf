@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.felix.karaf.admin</groupId>
         <artifactId>admin</artifactId>
-        <version>1.4.0</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.felix.karaf.admin</groupId>
     <artifactId>org.apache.felix.karaf.admin.command</artifactId>
     <packaging>bundle</packaging>
-    <version>1.4.0</version>
+    <version>1.5.0-SNAPSHOT</version>
     <name>Apache Felix Karaf :: Admin Command</name>
 
     <properties>

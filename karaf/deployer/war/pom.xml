@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.felix.karaf.deployer</groupId>
         <artifactId>deployer</artifactId>
-        <version>1.4.0</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.felix.karaf.deployer</groupId>
     <artifactId>org.apache.felix.karaf.deployer.war</artifactId>
     <packaging>bundle</packaging>
-    <version>1.4.0</version>
+    <version>1.5.0-SNAPSHOT</version>
     <name>Apache Felix Karaf :: WAR Deployer</name>
 
     <description>This deployer transforms a plain war file to a deployable bundle</description>
