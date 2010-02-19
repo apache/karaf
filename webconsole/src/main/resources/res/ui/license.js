@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+var licenseButtons = false;
+var licenseDetails = false;
+
 function displayBundle(/* String */ bundleId)
 {
     var theBundleData = bundleData[bundleId];
@@ -25,7 +28,6 @@ function displayBundle(/* String */ bundleId)
 
     var title = theBundleData.title;
     
-    var licenseButtons = document.getElementById('licenseButtons');
     if (licenseButtons) {
         
         var innerHTML = "";
@@ -36,47 +38,42 @@ function displayBundle(/* String */ bundleId)
             for (var idx in entry)
             {
                 var descr = entry[idx];
-                buttons += "<a href='javascript:displayFile(\"" + bundleId + "\", \"" + name + "\", " + idx + ");'"
-                   + " >" + descr.url + "</a> ";
+				var jar = descr.jar ? '&jar=' + descr.jar : ''; // inner jar attribute
+				buttons += '<a href="' + pluginRoot + '?bid=' + bundleId + '&url=' + descr.path + jar + '" target="licenseDetails">' + descr.url + '</a> ';
             }
             if (buttons)
             {
+				// apply i18n
+				name =  '__res__' == name ? i18n.resources : i18n.resources_emb.msgFormat( name );
                 innerHTML += name + ": " + buttons + "<br />";
             }
         }
-        
-        if (!innerHTML)
-        {
-            innerHTML = "<em>The Bundle contains neither LICENSE nor NOTICE files</em>";
-        }
-        
-        licenseButtons.innerHTML = "<h1>" + title + "</h1>" + innerHTML;
+
+        licenseButtons.html("<h1>" + title + "</h1>" + innerHTML);
     }
     
-    var licenseDetails = document.getElementById('licenseDetails');
-    if (licenseDetails)
-    {
-        licenseDetails.innerHTML = "";
-    }
+    licenseDetails.html("");
+	$("#licenseLeft a").removeClass('ui-state-default ui-corner-all');
+	$("#licenseLeft #" +bundleId).addClass('ui-state-default ui-corner-all');
 }
 
-function displayFile ( /* String */ bundleId, /* String */ name, /* int */ idx )
-{
-    var theBundleData = bundleData[bundleId];
-    if (!theBundleData)
-    {
-        return;
-    }
-    
-    var file = theBundleData.files[name][idx];
-    if (!file)
-    {
-        return;
-    }
-    
-    var licenseDetails = document.getElementById('licenseDetails');
-    if (licenseDetails)
-    {
-        licenseDetails.innerHTML = "<h3>" + name + ": " + file.url + "</h3><pre>" + file.data + "</pre>";
-    }
-}
+
+$(document).ready(function() {
+	// init elements cache
+	licenseButtons = $("#licenseButtons");
+	licenseDetails = $("#licenseDetails")
+
+	// render list of bundles
+	var txt = "";
+	for(id in bundleData) {
+		txt += '<a id="' + id + '" href="javascript:displayBundle(\'' + id + '\')">' + bundleData[id]['title'] + '</a>';
+	}
+	if (txt) {
+		$("#licenseLeft").html(txt);
+	} else {
+		$(".statline").html(i18n.status_none);
+	}
+
+	// display first element
+	for(i in bundleData) {displayBundle(i);break;}
+});

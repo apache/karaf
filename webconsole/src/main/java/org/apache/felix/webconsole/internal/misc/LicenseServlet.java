@@ -19,263 +19,265 @@
 package org.apache.felix.webconsole.internal.misc;
 
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.Reader;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.DefaultVariableResolver;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONException;
-import org.json.JSONWriter;
+import org.json.JSONObject;
 import org.osgi.framework.Bundle;
-import org.osgi.service.component.ComponentContext;
 
 
 /**
- * The <code>LicenseServlet</code> TODO
+ * LicenseServlet provides the licenses plugin that browses through the bundles,
+ * searching for common license files.
+ * 
+ * TODO: add support for 'Bundle-License' manifest header
  */
-public class LicenseServlet extends AbstractWebConsolePlugin implements OsgiManagerPlugin
+public final class LicenseServlet extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
+    // common names (without extension) of the license files.
+    private static final String LICENSE_FILES[] =  { "README", "DISCLAIMER", "LICENSE", "NOTICE" };
+    
+    static final String LABEL = "licenses";
+    static final String TITLE = "Licenses";
+    static final String CSS[] = { "/res/ui/license.css" };
+    
+    // templates
+    private final String TEMPLATE;
 
-    private static final String[] CSS_REFS =
-        { "res/ui/license.css" };
-
-
-    public String getLabel()
+    /**
+     * Default constructor
+     */
+    public LicenseServlet()
     {
-        return "licenses";
+        super(LABEL, TITLE, CSS);
+        
+        // load templates
+        TEMPLATE = readTemplateFile( "/templates/license.html" );
     }
 
-
-    public String getTitle()
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException
     {
-        return "Licenses";
+        final String bid = request.getParameter("bid");
+
+        if (bid != null)
+        {
+            Bundle bundle = getBundleContext().getBundle(Long.parseLong(bid));
+
+            // Check bundle
+            if (bundle == null)
+            {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "No bundle with ID " + bid);
+                return;
+            }
+
+            // Check if URL is given and *validate* if it is a license file.
+            // Otherwise, using this servlet, an intruder can read ANY file in the bundle
+            final String url = request.getParameter("url"); // file location
+            if (url == null)
+            {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Missing parameter 'url'");
+                return;
+            }
+
+            String name = url.substring(url.lastIndexOf('/') + 1);
+            boolean isLicense = false;
+            for (int i = 0; !isLicense && i < LICENSE_FILES.length; i++)
+            {
+                isLicense = name.startsWith(LICENSE_FILES[i]);
+            }
+            if (!isLicense)
+            {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "Requested non-license file, go away!");
+                return;
+            }
+
+            final String jar = request.getParameter("jar"); // inner Jar file
+            response.setContentType("text/plain");
+
+            if (jar == null)
+            {
+                InputStream input = bundle.getResource(url).openStream();
+                try
+                {
+                    IOUtils.copy(input, response.getWriter());
+                }
+                finally
+                {
+                    IOUtils.closeQuietly(input);
+                }
+            }
+            else
+            { // license is in a nested JAR
+                ZipInputStream zin = null;
+                InputStream input = bundle.getResource(jar).openStream();
+                try
+                {
+                    zin = new ZipInputStream(input);
+                    for (ZipEntry zentry = zin.getNextEntry(); zentry != null; zentry = zin.getNextEntry())
+                    {
+                        if (url.equals(zentry.getName()))
+                        {
+                            IOUtils.copy(zin, response.getWriter());
+                            return;
+                        }
+                    }
+                }
+                finally
+                {
+
+                    IOUtils.closeQuietly(zin);
+                    IOUtils.closeQuietly(input);
+                }
+
+                throw new ServletException("License file:" + url + " not found!");
+            }
+
+        }
+        else
+        {
+            super.doGet(request, response);
+        }
     }
 
-
-    protected String[] getCssReferences()
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void renderContent( HttpServletRequest request, HttpServletResponse res ) throws IOException
     {
-        return CSS_REFS;
-    }
-
-
-    protected void renderContent( HttpServletRequest req, HttpServletResponse res ) throws IOException
-    {
-        PrintWriter pw = res.getWriter();
-
-        final String appRoot = ( String ) req.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
-        Util.script( pw, appRoot, "license.js" );
-
         Bundle[] bundles = getBundleContext().getBundles();
         Util.sort( bundles );
 
-        Util.startScript( pw );
-        pw.print( "bundleData = " );
-        JSONWriter jw = new JSONWriter( pw );
+        // prepare variables
+        DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
+        vars.put( "__data__", getBundleData(bundles).toString());
+
+        res.getWriter().print(TEMPLATE);
+    }
+    
+    private static final JSONObject getBundleData(Bundle[] bundles) throws IOException
+    {
+        JSONObject ret = new JSONObject();
         try
         {
-            jw.object();
-            for ( int i = 0; i < bundles.length; i++ )
+            for (int i = 0; i < bundles.length; i++)
             {
                 Bundle bundle = bundles[i];
-                jw.key( String.valueOf( bundle.getBundleId() ) );
 
-                jw.object();
-
-                jw.key( "title" );
-                jw.value( Util.getName( bundle ) );
-
-                jw.key( "files" );
-                jw.object();
-                findResource( jw, bundle, new String[]
-                    { "README", "DISCLAIMER", "LICENSE", "NOTICE" } );
-                jw.endObject();
-
-                jw.endObject();
+                JSONObject files = findResource(bundle, LICENSE_FILES);
+                if (files.length() > 0)
+                { // has resources
+                    JSONObject data = new JSONObject();
+                    data.put("bid", bundle.getBundleId());
+                    data.put("title", Util.getName(bundle));
+                    data.put("files", files);
+                    ret.put(String.valueOf(bundle.getBundleId()), data);
+                }
             }
-            jw.endObject();
-            pw.println( ";" );
         }
-        catch ( JSONException je )
+        catch (JSONException je)
         {
-            throw new IOException( je.toString() );
+            throw new IOException(je.toString());
         }
-        Util.endScript( pw );
-
-        pw.println( "<div id='licenseContent'>" );
-
-        pw.println( "<div id='licenseLeft'>" );
-        for ( int i = 0; i < bundles.length; i++ )
-        {
-            Bundle bundle = bundles[i];
-            String link = "displayBundle( \"" + bundle.getBundleId() + "\" );";
-            pw.println( "<a href='javascript:" + link + "'>" + Util.getName( bundle ) + "</a><br />" );
-
-        }
-        pw.println( "</div>" );
-
-        pw.println( "<div id='licenseRight'>" );
-        pw.println( "<div id='licenseButtons' class='licenseButtons'>&nbsp;</div>" );
-        pw.println( "<br />" );
-        pw.println( "<div id='licenseDetails' class='licenseDetails'>&nbsp;</div>" );
-        pw.println( "</div>" );
-
-        pw.println( "<div id='licenseClear'>&nbsp;</div>" );
-
-        pw.println( "</div>" ); // licenseContent
-
-        Util.startScript( pw );
-        pw.println( "displayBundle( '0' );" );
-        Util.endScript( pw );
+        return ret;
     }
 
 
-    private String getName( String path )
+    private static final String getName( String path )
     {
         return path.substring( path.lastIndexOf( '/' ) + 1 );
     }
 
-
-    private void findResource( JSONWriter jw, Bundle bundle, String[] patterns ) throws IOException, JSONException
+    private static final JSONObject findResource( Bundle bundle, String[] patterns )
+        throws IOException, JSONException
     {
-        jw.key( "Bundle Resources" ); // aka the bundle files
-        jw.array();
-        for ( int i = 0; i < patterns.length; i++ )
+
+        JSONObject ret = new JSONObject();
+
+        for ( int i = 0; i < patterns.length; i++) 
         {
-            Enumeration entries = bundle.findEntries( "/", patterns[i] + "*", true );
+            Enumeration entries = bundle.findEntries( "/", patterns[i] + "*", true);
             if ( entries != null )
             {
                 while ( entries.hasMoreElements() )
                 {
-                    URL url = ( URL ) entries.nextElement();
-                    jw.object();
-                    jw.key( "url" );
-                    jw.value( getName( url.getPath() ) );
-                    jw.key( "data" );
-                    jw.value( readResource( url ) );
-                    jw.endObject();
+                    URL url = (URL) entries.nextElement();
+                    JSONObject entry = new JSONObject();
+                    entry.put( "path", url.getPath() );
+                    entry.put( "url", getName(url.getPath()) );
+                    ret.append( "__res__", entry );
                 }
             }
         }
-        jw.endArray();
 
-        Enumeration entries = bundle.findEntries( "/", "*.jar", true );
+        Enumeration entries = bundle.findEntries("/", "*.jar", true);
         if ( entries != null )
         {
             while ( entries.hasMoreElements() )
             {
-                URL url = ( URL ) entries.nextElement();
-
-                jw.key( "Embedded " + getName( url.getPath() ) );
-                jw.array();
+                URL url = (URL) entries.nextElement();
+                final String resName = getName( url.getPath() );
 
                 InputStream ins = null;
                 try
                 {
                     ins = url.openStream();
-                    ZipInputStream zin = new ZipInputStream( ins );
+                    ZipInputStream zin = new ZipInputStream(ins);
                     for ( ZipEntry zentry = zin.getNextEntry(); zentry != null; zentry = zin.getNextEntry() )
                     {
                         String name = zentry.getName();
 
                         // ignore directory entries
-                        if ( name.endsWith( "/" ) )
+                        if ( name.endsWith("/") )
                         {
                             continue;
                         }
 
                         // cut off path and use file name for checking against patterns
-                        name = name.substring( name.lastIndexOf( '/' ) + 1 );
+                        name = name.substring(name.lastIndexOf('/') + 1);
                         for ( int i = 0; i < patterns.length; i++ )
                         {
-                            if ( name.startsWith( patterns[i] ) )
+                            if ( name.startsWith(patterns[i]) )
                             {
-                                jw.object();
-                                jw.key( "url" );
-                                jw.value( getName( name ) );
-                                jw.key( "data" );
-                                jw.value( readResource( new FilterInputStream( zin )
-                                {
-                                    public void close()
-                                    {
-                                        // nothing for now
-                                    }
-                                } ) );
-                                jw.endObject();
-                                break;
+                                JSONObject entry = new JSONObject();
+                                entry.put( "jar", url.getPath() );
+                                entry.put( "path", zentry.getName() );
+                                entry.put( "url", getName(name) );
+                                ret.append( resName, entry );
                             }
                         }
                     }
                 }
                 finally
                 {
-                    IOUtils.closeQuietly( ins );
+                    IOUtils.closeQuietly(ins);
                 }
 
-                jw.endArray();
-            }
-        }
-    }
-
-
-    private String getResource( Bundle bundle, String[] path ) throws IOException
-    {
-        for ( int i = 0; i < path.length; i++ )
-        {
-            URL resource = bundle.getResource( path[i] );
-            if ( resource != null )
-            {
-                return readResource( resource );
             }
         }
 
-        return null;
-    }
-
-
-    private String readResource( URL resource ) throws IOException
-    {
-        return readResource( resource.openStream() );
-    }
-
-
-    private String readResource( InputStream resource ) throws IOException
-    {
-        try
-        {
-            // return new String(IOUtils.toCharArray(resource, "ISO-8859-1"));
-            // the method below is faster that the one above
-            return new String(IOUtils.toByteArray(resource), "ISO-8859-1");
-        }
-        finally
-        {
-            IOUtils.closeQuietly(resource);
-        }
-    }
-
-
-    protected void activate( ComponentContext context )
-    {
-        activate( context.getBundleContext() );
-    }
-
-
-    protected void deactivate( ComponentContext context )
-    {
-        deactivate();
+        return ret;
     }
 
 }

@@ -13,37 +13,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /* CSS Document */
+ */
+
 #licenseContent {
-    position: relative;
-    margin-top: 25px; padding : 5px;
-    width: 100%;
-    padding: 5px;
+	width: 100%;
 }
-
 #licenseLeft {
-    width: 300px;
-    border-right: 1px black solid;
+	float: left;
+	width: 25%;
+	padding: 0;
+	margin-right: 1em;
 }
-
+#licenseLeft a {
+	display: block;
+	width: 100%;
+	margin: 0;
+	text-decoration: none;
+}
 #licenseRight {
-    position: absolute;
-    top: 5px;
-    left: 305px;
-    padding: 5px;
-    width: 650px;
-    border-left: 1px black solid;
+	float: left;
+	width: 70%;
 }
-
-#licenseClear {
-    clear: both;
-    height: 1px;
-}
-
-.licenseButtons {
-    padding: 5px;
-}
-
-.licenseDetails {
-    padding: 5px;
+#licenseDetails {
+	width: 100%;
+	height: 100%;
 }
