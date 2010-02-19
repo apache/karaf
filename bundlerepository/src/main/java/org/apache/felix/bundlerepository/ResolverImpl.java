@@ -621,6 +621,13 @@ public class ResolverImpl implements Resolver
         }
         else
         {
+            for (int reqIdx = 0; reqIdx < reasons.length; reqIdx++)
+            {
+                if (req.equals(reasons[reqIdx]))
+                {
+                    return;
+                }
+            }
             Requirement[] tmp = new Requirement[reasons.length + 1];
             System.arraycopy(reasons, 0, tmp, 0, reasons.length);
             tmp[reasons.length] = req;
