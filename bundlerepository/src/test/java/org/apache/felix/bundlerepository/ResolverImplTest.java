@@ -62,6 +62,8 @@ public class ResolverImplTest extends TestCase
     private RepositoryAdminImpl createRepositoryAdmin()
     {
         final MockBundleContext bundleContext = new MockBundleContext();
+        bundleContext.setProperty(RepositoryAdminImpl.REPOSITORY_URL_PROP,
+                                  getClass().getResource("/referred.xml").toExternalForm());
         RepositoryAdminImpl repoAdmin = new RepositoryAdminImpl(bundleContext, new Logger(bundleContext));
 
         // force initialization && remove all initial repositories

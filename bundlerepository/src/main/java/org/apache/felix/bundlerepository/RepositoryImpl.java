@@ -43,6 +43,9 @@ import org.osgi.service.obr.Resource;
 
 public class RepositoryImpl implements Repository
 {
+    public static final String OBR_PARSER_CLASS = "obr.parser.class";
+    public static final String OBR_PARSER_CLASS_DEFAULT = "org.apache.felix.bundlerepository.StaxParser";
+
     private String m_name = null;
     private long m_lastmodified = 0;
     private URL m_url = null;
@@ -179,7 +182,7 @@ public class RepositoryImpl implements Repository
         return null;
     }
 
-    private void parseRepositoryFile(int hopCount) throws Exception
+    protected void parseRepositoryFile(int hopCount) throws Exception
     {
         InputStream is = null;
         BufferedReader br = null;
@@ -222,38 +225,8 @@ public class RepositoryImpl implements Repository
 
             if (is != null)
             {
-                // Create the parser Kxml
-                XmlCommonHandler handler = new XmlCommonHandler(m_logger);
-                Object factory = new Object()
-                {
-                    public RepositoryImpl newInstance()
-                    {
-                        return RepositoryImpl.this;
-                    }
-                };
+                parseRepository(is);
 
-                // Get default setter method for Repository.
-                Method repoSetter = RepositoryImpl.class.getDeclaredMethod("put", new Class[]
-                    { Object.class, Object.class });
-
-                // Get default setter method for Resource.
-                Method resSetter = ResourceImpl.class.getDeclaredMethod("put", new Class[]
-                    { Object.class, Object.class });
-
-                // Map XML tags to types.
-                handler.addType("repository", factory, Repository.class, repoSetter);
-                handler.addType("referral", Referral.class, null, null);
-                handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
-                handler.addType("category", CategoryImpl.class, null, null);
-                handler.addType("require", RequirementImpl.class, Requirement.class, null);
-                handler.addType("capability", CapabilityImpl.class, Capability.class, null);
-                handler.addType("p", PropertyImpl.class, null, null);
-                handler.setDefaultType(String.class, null, null);
-
-                br = new BufferedReader(new InputStreamReader(is));
-                KXml2SAXParser parser;
-                parser = new KXml2SAXParser(br);
-                parser.parseXML(handler);
 
                 // resolve referrals
                 hopCount--;
@@ -289,4 +262,72 @@ public class RepositoryImpl implements Repository
             }
         }
     }
+
+    protected void parseRepository(InputStream is) throws Exception
+    {
+        RepositoryParser parser = null;
+        try
+        {
+            String className = (String) RepositoryAdminImpl.m_context.getProperty(OBR_PARSER_CLASS);
+            if (className == null || className.length() == 0) {
+                className = OBR_PARSER_CLASS_DEFAULT;
+            }
+            parser = (RepositoryParser) Class.forName(className).newInstance();
+        }
+        catch (Throwable t)
+        {
+        }
+        if (parser == null)
+        {
+            parser = new KXml2Parser();
+
+        }
+        parser.parse(this, is);
+    }
+
+    public interface RepositoryParser {
+
+        void parse(RepositoryImpl repository, InputStream is) throws Exception;
+
+    }
+
+    public static class KXml2Parser implements RepositoryParser
+    {
+        public void parse(final RepositoryImpl repository, final InputStream is) throws Exception
+        {
+            BufferedReader br;// Create the parser Kxml
+            XmlCommonHandler handler = new XmlCommonHandler(repository.m_logger);
+            Object factory = new Object()
+            {
+                public RepositoryImpl newInstance()
+                {
+                    return repository;
+                }
+            };
+
+            // Get default setter method for Repository.
+            Method repoSetter = RepositoryImpl.class.getDeclaredMethod("put", new Class[]
+                { Object.class, Object.class });
+
+            // Get default setter method for Resource.
+            Method resSetter = ResourceImpl.class.getDeclaredMethod("put", new Class[]
+                { Object.class, Object.class });
+
+            // Map XML tags to types.
+            handler.addType("repository", factory, Repository.class, repoSetter);
+            handler.addType("referral", Referral.class, null, null);
+            handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
+            handler.addType("category", CategoryImpl.class, null, null);
+            handler.addType("require", RequirementImpl.class, Requirement.class, null);
+            handler.addType("capability", CapabilityImpl.class, Capability.class, null);
+            handler.addType("p", PropertyImpl.class, null, null);
+            handler.setDefaultType(String.class, null, null);
+
+            br = new BufferedReader(new InputStreamReader(is));
+            KXml2SAXParser parser;
+            parser = new KXml2SAXParser(br);
+            parser.parseXML(handler);
+        }
+    }
+
 }

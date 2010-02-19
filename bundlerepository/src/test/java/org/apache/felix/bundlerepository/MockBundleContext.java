@@ -20,8 +20,8 @@ package org.apache.felix.bundlerepository;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Dictionary;
+import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -34,6 +34,13 @@ import org.osgi.framework.ServiceRegistration;
 
 public class MockBundleContext implements BundleContext
 {
+    private Properties props = new Properties();
+
+    public void setProperty(String key, String val)
+    {
+        props.setProperty(key, val);
+    }
+
     public void addBundleListener(BundleListener arg0)
     {
     }
@@ -99,16 +106,7 @@ public class MockBundleContext implements BundleContext
 
     public String getProperty(String name)
     {
-        if (RepositoryAdminImpl.REPOSITORY_URL_PROP.equals(name))
-        {
-            URL url = getClass().getResource("/referred.xml");
-            if (url != null)
-            {
-                return url.toExternalForm();
-            }
-        }
-
-        return null;
+        return props.getProperty(name);
     }
 
     public Object getService(ServiceReference arg0)
