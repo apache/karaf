@@ -267,7 +267,7 @@ public class BundlePlugin extends AbstractMojo
             }
             else
             {
-                value = value.replaceAll( "[\r\n]", "" );
+                value = value.replaceAll( "\\p{Blank}*[\r\n]\\p{Blank}*", "" );
             }
 
             transformedInstructions.put( key, value );
