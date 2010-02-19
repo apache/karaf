@@ -48,6 +48,9 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     private static final String TITLE = "Configuration Status";
     private static final String[] CSS_REFS = null;
 
+    private static final String TAB_PROPS = "System properties";
+    private static final String TAB_THREADS = "Threads";
+
     /**
      * Formatter pattern to generate a relative path for the generation
      * of the plain text or zip file representation of the status. The file
@@ -108,6 +111,53 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
             addAttachments( pw, ConfigurationPrinter.MODE_ZIP );
             zip.finish();
         }
+        else if ( request.getPathInfo().endsWith( ".nfo" ) )
+        {
+            response.setContentType( "text/html; charset=utf-8" );
+            // disable cache
+            response.addHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
+            response.addHeader("Expires", "Mon, 2 Sun 2001 05:00:00 GMT");
+            response.addHeader("Pragma", "no-cache");
+
+            String name = request.getPathInfo();
+            name = name.substring( name.lastIndexOf('/') + 1);
+            name = name.substring(0, name.length() - 4);
+
+            ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
+            pw.println ( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"" );
+            pw.println ( "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" );
+            pw.println ( "<html xmlns=\"http://www.w3.org/1999/xhtml\">" );
+            pw.println ( "<head><title>dummy</title></head><body><div>" );
+
+            if ( TAB_PROPS.equals( name ) )
+            {
+                printSystemProperties( pw );
+                pw.println( "</div></body></html>" );
+                return;
+            }
+            else if ( TAB_THREADS.equals( name))
+            {
+                printThreads( pw );
+                pw.println( "</div></body></html>" );
+                return;
+            }
+            else
+            {
+                Collection printers = getConfigurationPrinters();
+                for (Iterator i = printers.iterator(); i.hasNext();)
+                {
+                    final PrinterDesc desc = (PrinterDesc) i.next();
+                    if (desc.printer.getTitle().equals( name ) )
+                    {
+                        printConfigurationPrinter( pw, desc.printer, ConfigurationPrinter.MODE_WEB );
+                        pw.println( "</div></body></html>" );
+                        return;
+                    }
+                }
+            }
+
+            response.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid configuration printer: " + name);
+        }
         else
         {
             super.doGet( request, response );
@@ -121,7 +171,8 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     protected final void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
 
-        ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
+        //ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
+        PrintWriter pw = response.getWriter();
 
         Util.startScript(pw);
         pw.println("$(document).ready(function() {$('#tabs').tabs()} );");
@@ -154,25 +205,20 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         pw.println("<ul> <!-- tabs on top -->");
 
         // print headers only
-        pw.println("<li><a href='#tabs1'>System properties</a></li>");
-        pw.println("<li><a href='#tabs2'>Threads</a></li>");
+        final String pluginRoot = request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT ) + "/";
+        pw.println("<li><a href='" + pluginRoot + TAB_PROPS + ".nfo'>" + TAB_PROPS + "</a></li>");
+        pw.println("<li><a href='" + pluginRoot + TAB_THREADS + ".nfo'>" + TAB_THREADS + "</a></li>");
 
         // print header for printers
         Collection printers = getConfigurationPrinters();
-        int id = 3; // skip system properties & threads
         for (Iterator i = printers.iterator(); i.hasNext();)
         {
             final PrinterDesc desc = (PrinterDesc) i.next();
-            pw.print("<li><a href='#tabs");
-            pw.print(id++);
-            pw.print("'>");
-            pw.print(desc.printer.getTitle());
-            pw.print("</a></li>");
+            final String title = desc.printer.getTitle();
+            pw.print("<li><a href='" + pluginRoot + title + ".nfo'>" + title + "</a></li>" );
         }
         pw.println("</ul> <!-- end tabs on top -->");
         pw.println();
-
-        printConfigurationStatus( pw, ConfigurationPrinter.MODE_WEB );
 
         pw.println("</div> <!-- end tabs container -->");
 
@@ -459,7 +505,6 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
         // whether or not to filter "<" signs in the output
         private boolean doFilter;
-        private int index = 1; // tab index, needed to generate ID
 
 
         HtmlConfigurationWriter( Writer delegatee )
@@ -470,9 +515,6 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
         public void title( String title )
         {
-            print("<div id='tabs");
-            print(index++);
-            println("'>");
             doFilter = true;
         }
 
@@ -480,7 +522,6 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         public void end()
         {
             doFilter = false;
-            println("</div>");
         }
 
 
