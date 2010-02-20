@@ -44,7 +44,7 @@
         <reference-listener ref="keystoreManager" bind-method="register" unbind-method="unregister" />
     </reference-list>
 
-    <service interface="org.apache.geronimo.blueprint.NamespaceHandler">
+    <service interface="org.apache.aries.blueprint.NamespaceHandler">
         <service-properties>
             <entry key="osgi.service.blueprint.namespace" value="http://felix.apache.org/karaf/xmlns/jaas/v1.0.0"/>
         </service-properties>

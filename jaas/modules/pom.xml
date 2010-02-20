@@ -69,8 +69,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.geronimo.blueprint</groupId>
-            <artifactId>geronimo-blueprint</artifactId>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint</artifactId>
         </dependency>        
     </dependencies>
 
@@ -86,7 +86,7 @@
                         <Import-Package>
                             !${pom.artifactId}*,
                             org.apache.felix.karaf.jaas.config,
-                            org.apache.geronimo.blueprint.ext,
+                            org.apache.aries.blueprint.ext,
                             *
                         </Import-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>

@@ -19,19 +19,22 @@
 package org.apache.felix.karaf.shell.console.commands;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.apache.geronimo.blueprint.ParserContext;
-import org.apache.geronimo.blueprint.mutable.MutableBeanMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableIdRefMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableServiceMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableValueMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableRefMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableCollectionMetadata;
+import org.apache.aries.blueprint.ParserContext;
+import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
+import org.apache.aries.blueprint.mutable.MutableIdRefMetadata;
+import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
+import org.apache.aries.blueprint.mutable.MutableValueMetadata;
+import org.apache.aries.blueprint.mutable.MutableRefMetadata;
+import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
 import org.apache.felix.karaf.shell.console.CompletableFunction;
 import org.osgi.service.blueprint.reflect.BeanArgument;
 import org.osgi.service.blueprint.reflect.BeanProperty;
@@ -46,7 +49,7 @@ import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.osgi.service.command.Function;
 
 
-public class NamespaceHandler implements org.apache.geronimo.blueprint.NamespaceHandler {
+public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
 
     public static final String ID = "id";
     public static final String DESCRIPTION = "description";
@@ -81,6 +84,12 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
     public URL getSchemaLocation(String namespace) {
         return getClass().getResource("karaf-shell.xsd");
     }
+
+	public Set<Class> getManagedClasses() {
+		return new HashSet<Class>(Arrays.asList(
+			BlueprintCommand.class
+		));
+	}
 
     public ComponentMetadata decorate(Node node, ComponentMetadata component, ParserContext context) {
         throw new ComponentDefinitionException("Bad xml syntax: node decoration is not supported");
