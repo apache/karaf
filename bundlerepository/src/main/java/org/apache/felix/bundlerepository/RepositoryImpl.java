@@ -109,8 +109,7 @@ public class RepositoryImpl implements Repository
         // Add to resource array.
         if (m_resources == null)
         {
-            m_resources = new Resource[]
-                { resource };
+            m_resources = new Resource[] { resource };
         }
         else
         {
@@ -133,8 +132,7 @@ public class RepositoryImpl implements Repository
         // Add to resource array.
         if (m_referrals == null)
         {
-            m_referrals = new Referral[]
-                { referral };
+            m_referrals = new Referral[] { referral };
         }
         else
         {
@@ -175,7 +173,7 @@ public class RepositoryImpl implements Repository
     /**
      * Default setter method when setting parsed data from the XML file,
      * which currently ignores everything.
-    **/
+     **/
     protected Object put(Object key, Object value)
     {
         // Ignore everything for now.
@@ -254,7 +252,9 @@ public class RepositoryImpl implements Repository
             try
             {
                 if (is != null)
+                {
                     is.close();
+                }
             }
             catch (IOException ex)
             {
@@ -269,7 +269,8 @@ public class RepositoryImpl implements Repository
         try
         {
             String className = (String) RepositoryAdminImpl.m_context.getProperty(OBR_PARSER_CLASS);
-            if (className == null || className.length() == 0) {
+            if (className == null || className.length() == 0)
+            {
                 className = OBR_PARSER_CLASS_DEFAULT;
             }
             parser = (RepositoryParser) Class.forName(className).newInstance();
@@ -285,10 +286,9 @@ public class RepositoryImpl implements Repository
         parser.parse(this, is);
     }
 
-    public interface RepositoryParser {
-
+    public interface RepositoryParser
+    {
         void parse(RepositoryImpl repository, InputStream is) throws Exception;
-
     }
 
     public static class KXml2Parser implements RepositoryParser
@@ -306,12 +306,12 @@ public class RepositoryImpl implements Repository
             };
 
             // Get default setter method for Repository.
-            Method repoSetter = RepositoryImpl.class.getDeclaredMethod("put", new Class[]
-                { Object.class, Object.class });
+            Method repoSetter = RepositoryImpl.class.getDeclaredMethod(
+                "put", new Class[] { Object.class, Object.class });
 
             // Get default setter method for Resource.
-            Method resSetter = ResourceImpl.class.getDeclaredMethod("put", new Class[]
-                { Object.class, Object.class });
+            Method resSetter = ResourceImpl.class.getDeclaredMethod(
+                "put", new Class[] { Object.class, Object.class });
 
             // Map XML tags to types.
             handler.addType("repository", factory, Repository.class, repoSetter);
@@ -329,5 +329,4 @@ public class RepositoryImpl implements Repository
             parser.parseXML(handler);
         }
     }
-
 }

@@ -18,12 +18,9 @@
  */
 package org.apache.felix.bundlerepository;
 
-import java.io.File;
 import java.net.URL;
 
 import junit.framework.TestCase;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.Resolver;
 import org.osgi.service.obr.Resource;
@@ -32,7 +29,6 @@ public class StaxParserTest extends TestCase
 {
     public void testStaxParser() throws Exception
     {
-
         URL url = getClass().getResource("/repo_for_resolvertest.xml");
         RepositoryAdminImpl repoAdmin = createRepositoryAdmin(StaxParser.class);
         RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
@@ -42,7 +38,8 @@ public class StaxParserTest extends TestCase
         Resource r = null;
         //MockContext doesn't support filtering!
         Resource[] discoverResources = repoAdmin.discoverResources("");
-        for (int i = 0; i < discoverResources.length; i++) {
+        for (int i = 0; i < discoverResources.length; i++)
+        {
             Resource resource = discoverResources[i];
             if (resource.getSymbolicName().contains("org.apache.felix.test"))
             {
@@ -53,10 +50,10 @@ public class StaxParserTest extends TestCase
 
         resolver.add(r);
         assertTrue(resolver.resolve());
-
     }
 
-    public void testPerfs() throws Exception {
+    public void testPerfs() throws Exception
+    {
 //        for (int i = 0; i < 10; i++) {
 //            testPerfs(new File(System.getProperty("user.home"), ".m2/repository/repository.xml").toURI().toURL(), 0, 100);
 //        }
@@ -68,12 +65,14 @@ public class StaxParserTest extends TestCase
 
         StaxParser.factory = null;
         System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
-        for (int i = 0; i < nbWarm; i++) {
+        for (int i = 0; i < nbWarm; i++)
+        {
             RepositoryAdminImpl repoAdmin = createRepositoryAdmin(StaxParser.class);
             RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
         }
         t0 = System.currentTimeMillis();
-        for (int i = 0; i < nbTest; i++) {
+        for (int i = 0; i < nbTest; i++)
+        {
             RepositoryAdminImpl repoAdmin = createRepositoryAdmin(StaxParser.class);
             RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
         }
@@ -83,46 +82,47 @@ public class StaxParserTest extends TestCase
 
         StaxParser.factory = null;
         System.setProperty("javax.xml.stream.XMLInputFactory", "com.sun.xml.internal.stream.XMLInputFactoryImpl");
-        for (int i = 0; i < nbWarm; i++) {
+        for (int i = 0; i < nbWarm; i++)
+        {
             RepositoryAdminImpl repoAdmin = createRepositoryAdmin(StaxParser.class);
             RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
         }
         t0 = System.currentTimeMillis();
-        for (int i = 0; i < nbTest; i++) {
+        for (int i = 0; i < nbTest; i++)
+        {
             RepositoryAdminImpl repoAdmin = createRepositoryAdmin(StaxParser.class);
             RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
         }
         t1 = System.currentTimeMillis();
         System.err.println("DefStax: " + (t1 - t0) + " ms");
 
-        for (int i = 0; i < nbWarm; i++) {
+        for (int i = 0; i < nbWarm; i++)
+        {
             RepositoryAdminImpl repoAdmin = createRepositoryAdmin(RepositoryImpl.KXml2Parser.class);
             RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
         }
         t0 = System.currentTimeMillis();
-        for (int i = 0; i < nbTest; i++) {
+        for (int i = 0; i < nbTest; i++)
+        {
             RepositoryAdminImpl repoAdmin = createRepositoryAdmin(RepositoryImpl.KXml2Parser.class);
             RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
         }
         t1 = System.currentTimeMillis();
         System.err.println("KXmlParser: " + (t1 - t0) + " ms");
-
-
     }
 
-    public static void main(String[] args) throws Exception {
-
+    public static void main(String[] args) throws Exception
+    {
         new StaxParserTest().testStaxParser();
-
     }
 
     private RepositoryAdminImpl createRepositoryAdmin(Class repositoryParser)
     {
         final MockBundleContext bundleContext = new MockBundleContext();
         bundleContext.setProperty(RepositoryAdminImpl.REPOSITORY_URL_PROP,
-                                  getClass().getResource("/referral1_repository.xml").toExternalForm());
+            getClass().getResource("/referral1_repository.xml").toExternalForm());
         bundleContext.setProperty(RepositoryImpl.OBR_PARSER_CLASS,
-                                  repositoryParser.getName());
+            repositoryParser.getName());
         RepositoryAdminImpl repoAdmin = new RepositoryAdminImpl(bundleContext, new Logger(bundleContext));
 
         // force initialization && remove all initial repositories
@@ -134,5 +134,4 @@ public class StaxParserTest extends TestCase
 
         return repoAdmin;
     }
-
 }

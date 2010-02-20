@@ -29,7 +29,6 @@ import javax.xml.stream.XMLStreamReader;
  */
 public class StaxParser implements RepositoryImpl.RepositoryParser
 {
-
     private static final String REPOSITORY = "repository";
     private static final String NAME = "name";
     private static final String LASTMODIFIED = "lastmodified";
@@ -50,13 +49,14 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
     private static final String MULTIPLE = "multiple";
     private static final String OPTIONAL = "optional";
 
-
     static XMLInputFactory factory;
 
     public StaxParser()
     {
-        synchronized (StaxParser.class) {
-            if (factory == null) {
+        synchronized (StaxParser.class)
+        {
+            if (factory == null)
+            {
                 factory = XMLInputFactory.newInstance();
                 setProperty(factory, XMLInputFactory.IS_NAMESPACE_AWARE, false);
                 setProperty(factory, XMLInputFactory.IS_VALIDATING, false);
@@ -65,11 +65,15 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
         }
     }
 
-    protected static boolean setProperty(XMLInputFactory factory, String name, boolean value) {
-        try {
+    protected static boolean setProperty(XMLInputFactory factory, String name, boolean value)
+    {
+        try
+        {
             factory.setProperty(name, Boolean.valueOf(value));
             return true;
-        } catch (Throwable t) {
+        }
+        catch (Throwable t)
+        {
         }
         return false;
     }
@@ -77,29 +81,41 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
     public void parse(RepositoryImpl repository, InputStream is) throws Exception
     {
         XMLStreamReader reader = factory.createXMLStreamReader(is);
-        try {
+        try
+        {
             int event = reader.nextTag();
-            if (event != XMLStreamConstants.START_ELEMENT || !REPOSITORY.equals(reader.getLocalName())) {
+            if (event != XMLStreamConstants.START_ELEMENT || !REPOSITORY.equals(reader.getLocalName()))
+            {
                 throw new Exception("Expected element 'repository' at the root of the document");
             }
-            for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
+            for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+            {
                 String name = reader.getAttributeLocalName(i);
                 String value = reader.getAttributeValue(i);
-                if (NAME.equals(name)) {
+                if (NAME.equals(name))
+                {
                     repository.setName(value);
-                } else if (LASTMODIFIED.equals(name)) {
+                }
+                else if (LASTMODIFIED.equals(name))
+                {
                     repository.setLastmodified(value);
                 }
             }
-            while ((event = reader.nextTag()) == XMLStreamConstants.START_ELEMENT) {
+            while ((event = reader.nextTag()) == XMLStreamConstants.START_ELEMENT)
+            {
                 String element = reader.getLocalName();
-                if (REFERRAL.equals(element)) {
+                if (REFERRAL.equals(element))
+                {
                     Referral referral = parseReferral(reader);
                     repository.addReferral(referral);
-                } else if (RESOURCE.equals(element)) {
+                }
+                else if (RESOURCE.equals(element))
+                {
                     ResourceImpl resource = parseResource(reader);
                     repository.addResource(resource);
-                } else {
+                }
+                else
+                {
                     ignoreTag(reader);
                 }
             }
@@ -112,20 +128,27 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
         }
     }
 
-    private void sanityCheckEndElement(XMLStreamReader reader, int event, String element) {
-        if (event != XMLStreamConstants.END_ELEMENT || !element.equals(reader.getLocalName())) {
+    private void sanityCheckEndElement(XMLStreamReader reader, int event, String element)
+    {
+        if (event != XMLStreamConstants.END_ELEMENT || !element.equals(reader.getLocalName()))
+        {
             throw new IllegalStateException("Unexpected state while finishing element " + element);
         }
     }
 
-    private Referral parseReferral(XMLStreamReader reader) throws Exception {
+    private Referral parseReferral(XMLStreamReader reader) throws Exception
+    {
         Referral referral = new Referral();
-        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
+        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+        {
             String name = reader.getAttributeLocalName(i);
             String value = reader.getAttributeValue(i);
-            if (DEPTH.equals(name)) {
+            if (DEPTH.equals(name))
+            {
                 referral.setDepth(value);
-            } else if (URL.equals(name)) {
+            }
+            else if (URL.equals(name))
+            {
                 referral.setUrl(value);
             }
         }
@@ -133,61 +156,83 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
         return referral;
     }
 
-    private ResourceImpl parseResource(XMLStreamReader reader) throws Exception {
+    private ResourceImpl parseResource(XMLStreamReader reader) throws Exception
+    {
         ResourceImpl resource = new ResourceImpl();
-        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
+        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+        {
             resource.put(reader.getAttributeLocalName(i), reader.getAttributeValue(i));
         }
         int event;
-        while ((event = reader.nextTag()) == XMLStreamConstants.START_ELEMENT) {
+        while ((event = reader.nextTag()) == XMLStreamConstants.START_ELEMENT)
+        {
             String element = reader.getLocalName();
-            if (CATEGORY.equals(element)) {
+            if (CATEGORY.equals(element))
+            {
                 CategoryImpl category = parseCategory(reader);
                 resource.addCategory(category);
-            } else if (CAPABILITY.equals(element)) {
+            }
+            else if (CAPABILITY.equals(element))
+            {
                 CapabilityImpl capability = parseCapability(reader);
                 resource.addCapability(capability);
-            } else if (REQUIRE.equals(element)) {
+            }
+            else if (REQUIRE.equals(element))
+            {
                 RequirementImpl requirement = parseRequire(reader);
                 resource.addRequire(requirement);
-            } else {
+            }
+            else
+            {
                 ignoreTag(reader);
             }
         }
         // Sanity check
-        if (event != XMLStreamConstants.END_ELEMENT || !RESOURCE.equals(reader.getLocalName())) {
+        if (event != XMLStreamConstants.END_ELEMENT || !RESOURCE.equals(reader.getLocalName()))
+        {
             throw new Exception("Unexpected state");
         }
         return resource;
     }
 
-    private CategoryImpl parseCategory(XMLStreamReader reader) throws XMLStreamException {
+    private CategoryImpl parseCategory(XMLStreamReader reader) throws XMLStreamException
+    {
         CategoryImpl category = new CategoryImpl();
-        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
-            if (ID.equals(reader.getAttributeLocalName(i))) {
-               category.setId(reader.getAttributeValue(i));
-            };
+        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+        {
+            if (ID.equals(reader.getAttributeLocalName(i)))
+            {
+                category.setId(reader.getAttributeValue(i));
+            }
+            ;
         }
         sanityCheckEndElement(reader, reader.nextTag(), CATEGORY);
         return category;
     }
 
-    private CapabilityImpl parseCapability(XMLStreamReader reader) throws Exception {
+    private CapabilityImpl parseCapability(XMLStreamReader reader) throws Exception
+    {
         CapabilityImpl capability = new CapabilityImpl();
-        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
+        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+        {
             String name = reader.getAttributeLocalName(i);
             String value = reader.getAttributeValue(i);
-            if (NAME.equals(name)) {
+            if (NAME.equals(name))
+            {
                 capability.setName(value);
             }
         }
         int event;
-        while ((event = reader.nextTag()) == XMLStreamConstants.START_ELEMENT) {
+        while ((event = reader.nextTag()) == XMLStreamConstants.START_ELEMENT)
+        {
             String element = reader.getLocalName();
-            if (P.equals(element)) {
+            if (P.equals(element))
+            {
                 PropertyImpl prop = parseProperty(reader);
                 capability.addP(prop);
-            } else {
+            }
+            else
+            {
                 ignoreTag(reader);
             }
         }
@@ -196,16 +241,23 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
         return capability;
     }
 
-    private PropertyImpl parseProperty(XMLStreamReader reader) throws Exception {
+    private PropertyImpl parseProperty(XMLStreamReader reader) throws Exception
+    {
         String n = null, t = null, v = null;
-        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
+        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+        {
             String name = reader.getAttributeLocalName(i);
             String value = reader.getAttributeValue(i);
-            if (N.equals(name)) {
+            if (N.equals(name))
+            {
                 n = value;
-            } else if (T.equals(name)) {
+            }
+            else if (T.equals(name))
+            {
                 t = value;
-            } else if (V.equals(name)) {
+            }
+            else if (V.equals(name))
+            {
                 v = value;
             }
         }
@@ -215,38 +267,53 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
         return prop;
     }
 
-    private RequirementImpl parseRequire(XMLStreamReader reader) throws Exception {
+    private RequirementImpl parseRequire(XMLStreamReader reader) throws Exception
+    {
         RequirementImpl requirement = new RequirementImpl();
-        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++) {
+        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+        {
             String name = reader.getAttributeLocalName(i);
             String value = reader.getAttributeValue(i);
-            if (NAME.equals(name)) {
+            if (NAME.equals(name))
+            {
                 requirement.setName(value);
-            } else if (FILTER.equals(name)) {
+            }
+            else if (FILTER.equals(name))
+            {
                 requirement.setFilter(value);
-            } else if (EXTEND.equals(name)) {
+            }
+            else if (EXTEND.equals(name))
+            {
                 requirement.setExtend(value);
-            } else if (MULTIPLE.equals(name)) {
+            }
+            else if (MULTIPLE.equals(name))
+            {
                 requirement.setMultiple(value);
-            } else if (OPTIONAL.equals(name)) {
+            }
+            else if (OPTIONAL.equals(name))
+            {
                 requirement.setOptional(value);
             }
         }
         int event;
         StringBuffer sb = null;
-        while ((event = reader.next()) != XMLStreamConstants.END_ELEMENT) {
-            switch (event) {
+        while ((event = reader.next()) != XMLStreamConstants.END_ELEMENT)
+        {
+            switch (event)
+            {
                 case XMLStreamConstants.START_ELEMENT:
                     throw new Exception("Unexpected element inside <require/> element");
                 case XMLStreamConstants.CHARACTERS:
-                    if (sb == null) {
+                    if (sb == null)
+                    {
                         sb = new StringBuffer();
                     }
                     sb.append(reader.getText());
                     break;
             }
         }
-        if (sb != null) {
+        if (sb != null)
+        {
             requirement.addText(sb.toString());
         }
         // Sanity check
@@ -254,17 +321,21 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
         return requirement;
     }
 
-    private void ignoreTag(XMLStreamReader reader) throws XMLStreamException {
+    private void ignoreTag(XMLStreamReader reader) throws XMLStreamException
+    {
         int level = 1;
         int event = 0;
-        while (level > 0) {
+        while (level > 0)
+        {
             event = reader.next();
-            if (event == XMLStreamConstants.START_ELEMENT) {
+            if (event == XMLStreamConstants.START_ELEMENT)
+            {
                 level++;
-            } else if (event == XMLStreamConstants.END_ELEMENT) {
+            }
+            else if (event == XMLStreamConstants.END_ELEMENT)
+            {
                 level--;
             }
         }
     }
-
 }
