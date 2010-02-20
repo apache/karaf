@@ -73,6 +73,13 @@ public class BundleGenerator
     {
         try
         {
+            // Check if the system tmp dir exists
+            
+            File tmp = new File(System.getProperty("java.io.tmpdir"));
+            if (tmp != null && ! tmp.exists()) {
+                tmp.mkdirs();
+            }
+            
             // Deduce the classpath from Export-Package, or Private-Package headers.
 
             String pkg = _directives.getProperty("Export-Package");
