@@ -84,6 +84,7 @@
     </feature>
     <feature name="management" version="${version}">
         <bundle>mvn:org.apache.felix.karaf/org.apache.felix.karaf.management/${version}</bundle>
-        <bundle>mvn:org.osgi/org.osgi.impl.bundle.jmx/${osgi.jmx.version}</bundle>
+        <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
+        <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
     </feature>
 </features>

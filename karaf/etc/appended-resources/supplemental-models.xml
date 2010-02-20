@@ -488,9 +488,9 @@
   </supplement>
   <supplement>
     <project>
-      <groupId>org.apache.geronimo.blueprint</groupId>
-      <artifactId>geronimo-blueprint</artifactId>
-      <name>Apache Geronimo Blueprint</name>
+      <groupId>org.apache.aries.blueprint</groupId>
+      <artifactId>org.apache.aries.blueprint</artifactId>
+      <name>Apache Aries Blueprint</name>
       <organization>
         <name>The Apache Software Foundation</name>
         <url>http://www.apache.org/</url>

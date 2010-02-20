@@ -60,8 +60,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.geronimo.blueprint</groupId>
-            <artifactId>geronimo-blueprint</artifactId>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix.gogo</groupId>

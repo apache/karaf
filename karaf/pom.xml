@@ -83,7 +83,8 @@
         <felix.prefs.version>1.0.4</felix.prefs.version>
         <felix.webconsole.version>2.0.6</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
-        <geronimo.blueprint.version>1.0.0</geronimo.blueprint.version>
+        <aries.blueprint.version>1.0.0-incubating-SNAPSHOT</aries.blueprint.version>
+        <aries.jmx.version>1.0.0-incubating-SNAPSHOT</aries.jmx.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <jansi.version>1.2</jansi.version>
         <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
@@ -101,7 +102,6 @@
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring.version>2.5.6.SEC01</spring.version>
         <sshd.version>0.3.0</sshd.version>
-        <osgi.jmx.version>4.2.0.200907080519</osgi.jmx.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
@@ -613,11 +613,6 @@
                 <version>${sshd.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.impl.bundle.jmx</artifactId>
-                <version>${osgi.jmx.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.ops4j.pax.exam</groupId>
                 <artifactId>pax-exam</artifactId>
                 <version>${pax.exam.version}</version>
@@ -648,15 +643,25 @@
                 <version>${servlet.api.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.geronimo.blueprint</groupId>
-                <artifactId>geronimo-blueprint</artifactId>
-                <version>${geronimo.blueprint.version}</version>
+                <groupId>org.apache.aries.blueprint</groupId>
+                <artifactId>org.apache.aries.blueprint</artifactId>
+                <version>${aries.blueprint.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.felix</groupId>
                         <artifactId>javax.servlet</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jmx</groupId>
+                <artifactId>org.apache.aries.jmx</artifactId>
+                <version>${aries.jmx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jmx</groupId>
+                <artifactId>org.apache.aries.jmx.blueprint</artifactId>
+                <version>${aries.jmx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix.gogo</groupId>

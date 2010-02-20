@@ -17,6 +17,9 @@
 package org.apache.felix.karaf.jaas.config.impl;
 
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -33,18 +36,25 @@ import org.osgi.service.blueprint.reflect.Metadata;
 import org.apache.felix.karaf.jaas.config.JaasRealm;
 import org.apache.felix.karaf.jaas.config.KeystoreInstance;
 import org.apache.felix.karaf.jaas.boot.ProxyLoginModule;
-import org.apache.geronimo.blueprint.mutable.MutableBeanMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableValueMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableRefMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableCollectionMetadata;
-import org.apache.geronimo.blueprint.mutable.MutableServiceMetadata;
-import org.apache.geronimo.blueprint.ParserContext;
+import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
+import org.apache.aries.blueprint.mutable.MutableValueMetadata;
+import org.apache.aries.blueprint.mutable.MutableRefMetadata;
+import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
+import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
+import org.apache.aries.blueprint.ParserContext;
 
-public class NamespaceHandler implements org.apache.geronimo.blueprint.NamespaceHandler {
+public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
 
     public URL getSchemaLocation(String namespace) {
         return getClass().getResource("/org/apache/felix/karaf/jaas/config/karaf-jaas.xsd");
     }
+
+	public Set<Class> getManagedClasses() {
+		return new HashSet<Class>(Arrays.asList(
+			Config.class,
+			ResourceKeystoreInstance.class
+		));
+	}
 
     public Metadata parse(Element element, ParserContext context) {
 		String name = element.getLocalName() != null ? element.getLocalName() : element.getNodeName();

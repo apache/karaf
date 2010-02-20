@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://geronimo.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
            default-availability="optional">
 
     <type-converters>
-        <bean id="converter1" class="org.apache.geronimo.blueprint.sample.DateTypeConverter">
+        <bean id="converter1" class="org.apache.aries.blueprint.sample.DateTypeConverter">
             <property name="format" value="yyyy.MM.dd"/>
         </bean>
-        <bean id="converter2" class="org.apache.geronimo.blueprint.sample.CurrencyTypeConverter"/>
+        <bean id="converter2" class="org.apache.aries.blueprint.sample.CurrencyTypeConverter"/>
 
         <cm:property-placeholder id="property-placeholder" persistent-id="blueprint-sample">
             <cm:default-properties>
@@ -16,7 +16,7 @@
         </cm:property-placeholder>
     </type-converters>
 
-    <bean id="foo" class="org.apache.geronimo.blueprint.sample.Foo" init-method="init" destroy-method="destroy">
+    <bean id="foo" class="org.apache.aries.blueprint.sample.Foo" init-method="init" destroy-method="destroy">
         <property name="a" value="5" />
         <property name="b" value="${key.b}" />
         <property name="bar" ref="bar" />
@@ -28,7 +28,7 @@
         </property>
     </bean>
 
-    <bean id="bar" class="org.apache.geronimo.blueprint.sample.Bar">
+    <bean id="bar" class="org.apache.aries.blueprint.sample.Bar">
         <property name="value"><value>Hello FooBar</value></property>
         <property name="context" ref="bundleContext"/>
         <property name="list">
@@ -48,22 +48,22 @@
                                unregistration-method="serviceUnregistered"/>
     </service>
 
-    <bean id="fooRegistrationListener" class="org.apache.geronimo.blueprint.sample.FooRegistrationListener"/>
+    <bean id="fooRegistrationListener" class="org.apache.aries.blueprint.sample.FooRegistrationListener"/>
 
-    <reference id="ref" interface="org.apache.geronimo.blueprint.sample.Foo">
+    <reference id="ref" interface="org.apache.aries.blueprint.sample.Foo">
     </reference>
 
-    <reference id="ref2" interface="org.apache.geronimo.blueprint.sample.InterfaceA" timeout="100">
+    <reference id="ref2" interface="org.apache.aries.blueprint.sample.InterfaceA" timeout="100">
         <reference-listener bind-method="bind" unbind-method="unbind" ref="bindingListener" />
     </reference>
 
-    <bean id="bindingListener" class="org.apache.geronimo.blueprint.sample.BindingListener"/>
+    <bean id="bindingListener" class="org.apache.aries.blueprint.sample.BindingListener"/>
 
-    <reference-list id="ref-list" interface="org.apache.geronimo.blueprint.sample.InterfaceA">
+    <reference-list id="ref-list" interface="org.apache.aries.blueprint.sample.InterfaceA">
         <reference-listener bind-method="bind" unbind-method="unbind" ref="listBindingListener" />
     </reference-list>
 
-    <bean id="listBindingListener" class="org.apache.geronimo.blueprint.sample.BindingListener"/>
+    <bean id="listBindingListener" class="org.apache.aries.blueprint.sample.BindingListener"/>
 
 </blueprint>
 

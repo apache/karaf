@@ -19,7 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <service interface="org.apache.geronimo.blueprint.NamespaceHandler">
+    <service interface="org.apache.aries.blueprint.NamespaceHandler">
         <service-properties>
             <entry key="osgi.service.blueprint.namespace" value="http://felix.apache.org/karaf/xmlns/shell/v1.0.0"/>
         </service-properties>

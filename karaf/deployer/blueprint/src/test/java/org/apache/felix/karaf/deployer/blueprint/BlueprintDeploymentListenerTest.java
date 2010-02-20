@@ -39,7 +39,7 @@ public class BlueprintDeploymentListenerTest extends TestCase {
         assertNotNull(pkgs);
         assertEquals(1, pkgs.size());
         Iterator<String> it = pkgs.iterator();
-        assertEquals("org.apache.geronimo.blueprint.sample", it.next());
+        assertEquals("org.apache.aries.blueprint.sample", it.next());
     }
 
     public void testCustomManifest() throws Exception {
