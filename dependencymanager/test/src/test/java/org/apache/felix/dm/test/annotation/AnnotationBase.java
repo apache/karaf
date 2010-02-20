@@ -26,10 +26,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 /**
- * Base class for all annotation junit test classes. This class allows to parse annotations
- * from a dynamically generated "TinyBundle". The class also implements a Sequencer interface, 
- * which wraps a "Ensure" object. The Sequencer will be used directly by the tiny bundles, in order to
- * check that steps happen in the expected order. 
+ * Base class for all annotation junit test classes. The class implements a Sequencer interface, 
+ * which wraps an "Ensure" object. The Sequencer will be used directly by the tiny bundles, in order to
+ * check if steps happen in the expected order. 
  */
 public class AnnotationBase extends Base implements Sequencer
 {
