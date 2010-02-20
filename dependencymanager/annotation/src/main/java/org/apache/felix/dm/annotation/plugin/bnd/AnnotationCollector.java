@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.dm.annotation.api.AdapterService;
 import org.apache.felix.dm.annotation.api.AspectService;
 import org.apache.felix.dm.annotation.api.Composition;
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
@@ -70,6 +71,8 @@ public class AnnotationCollector extends ClassDataCollector
         + Properties.class.getName().replace('.', '/') + ";";
     private final static String A_ASPECT_SERVICE = "L"
         + AspectService.class.getName().replace('.', '/') + ";";
+    private final static String A_ADAPTER_SERVICE = "L"
+        + AdapterService.class.getName().replace('.', '/') + ";";
 
     private Reporter m_reporter;
     private String m_className;
@@ -104,6 +107,7 @@ public class AnnotationCollector extends ClassDataCollector
     {
         Service, 
         AspectService,
+        AdapterService,
         ServiceDependency, 
         TemporalServiceDependency, 
         ConfigurationDependency,
@@ -133,7 +137,11 @@ public class AnnotationCollector extends ClassDataCollector
         pid, 
         propagate, 
         updated, 
-        timeout
+        timeout,
+        adapterService,
+        adapterProperties,
+        adapteeService,
+        adapteeFilter
     };
 
     /**
@@ -347,6 +355,10 @@ public class AnnotationCollector extends ClassDataCollector
         else if (annotation.getName().equals(A_ASPECT_SERVICE))
         {
             parseAspectService(annotation);
+        }
+        else if (annotation.getName().equals(A_ADAPTER_SERVICE))
+        {
+            parseAdapterService(annotation);
         }
         else if (annotation.getName().equals(A_INIT))
         {
@@ -574,12 +586,23 @@ public class AnnotationCollector extends ClassDataCollector
     private void parseAspectService(Annotation annotation)
     {
         Info info = new Info(EntryTypes.AspectService);
-        m_infos.add(info);
+        m_infos.add(info);        
 
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
         addInitStartStopDestroyCompositionParams(info);
         
-        // Parse Service interface.
+        // Parse service filter
+        String filter = annotation.get(Params.filter.toString());
+        Verifier.verifyFilter(filter, 0);
+        info.addParam(Params.filter, filter);
+                
+        // Generate Aspect Implementation
+        info.addParam(Params.impl, m_className);
+        
+        // Parse Aspect properties.
+        parseParameters(annotation, Params.properties, info);
+        
+        // Parse service interface this aspect is applying to
         Object service = annotation.get(Params.service.toString());
         if (service == null) {
             if (m_interfaces == null)
@@ -593,22 +616,93 @@ public class AnnotationCollector extends ClassDataCollector
                     "the service attribute has not been set and the class " + m_className + " implements more than one interface");
             }
             
-            service = m_interfaces[0];
+            info.addParam(Params.service, m_interfaces[0]);
+        } else
+        {
+            checkClassImplements(annotation, Params.service);
+            info.addClassParam(annotation, Params.service, null);
         }
-        info.addClassParam(annotation, Params.service, service.toString());
-        
-        // Parse service filter
-        String filter = annotation.get(Params.filter.toString());
-        Verifier.verifyFilter(filter, 0);
-        info.addParam(Params.filter, filter);
-                
-        // Generate Aspect Implementation
-        info.addParam(Params.impl, m_className);
-        
-        // Parse Aspect properties.
-        parseParameters(annotation, Params.properties, info);
     }
 
+    /**
+     * Parses an AspectService annotation.
+     * @param annotation
+     */
+    private void parseAdapterService(Annotation annotation) 
+    {
+        Info info = new Info(EntryTypes.AdapterService);
+        m_infos.add(info);
+        
+        // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
+        addInitStartStopDestroyCompositionParams(info);
+        
+        // Generate Adapter Implementation
+        info.addParam(Params.impl, m_className);
+      
+        // Parse adaptee filter
+        String adapteeFilter = annotation.get(Params.adapteeFilter.toString());
+        if (adapteeFilter != null)
+        {
+            Verifier.verifyFilter(adapteeFilter, 0);
+            info.addParam(Params.adapteeFilter, adapteeFilter);
+        }
+        
+        // Parse the mandatory adapted service interface.
+        info.addClassParam(annotation, Params.adapteeService, null);
+        
+        // Parse Adapter properties.
+        parseParameters(annotation, Params.adapterProperties, info);
+
+        // Parse the optional adapter service (use directed implemented interface by default).
+        Object adapterService = annotation.get(Params.adapterService.toString());
+        if (adapterService == null) {
+            if (m_interfaces == null)
+            {
+                throw new IllegalStateException("Invalid AdapterService annotation: " +
+                    "the adapterService attribute has not been set and the class " + m_className + 
+                    " does not implement any interfaces");
+            }
+            if (m_interfaces.length != 1) 
+            {
+                throw new IllegalStateException("Invalid AdapterService annotation: " +
+                    "the adapterService attribute has not been set and the class " + m_className +
+                    " implements more than one interface");
+            }
+            
+            info.addParam(Params.adapterService, m_interfaces[0]);
+        } else 
+        {
+            checkClassImplements(annotation, Params.adapterService);
+            info.addClassParam(annotation, Params.adapterService, null);
+        }
+    }
+
+    /**
+     * Checks if an annotation attribute references an implemented interface. 
+     * @param annotation the parsed annotation
+     * @param attribute an annotation attribute that references an interface this class must
+     * implement.
+     */
+    private void checkClassImplements(Annotation annotation, Params attribute)
+    {
+        String iface = annotation.get(attribute.toString());
+        iface = parseClass(iface, m_classPattern, 1);
+        
+        if (m_interfaces != null)
+        {
+            for (String implemented : m_interfaces)
+            {
+                if (implemented.equals(iface))
+                {
+                    return;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Class " + m_className + " does not implement the "
+            + iface + " interface.");
+    }
+    
     /**
      * Parses a Param annotation (which represents a list of key-value pari).
      * @param annotation the annotation where the Param annotation is defined
@@ -719,7 +813,7 @@ public class AnnotationCollector extends ClassDataCollector
         }
 
         // We must have at least a Service or an AspectService annotation.
-        checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService);
+        checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService, EntryTypes.AdapterService);
 
         StringBuilder sb = new StringBuilder();
         sb.append("Parsed annotation for class ");
