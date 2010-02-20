@@ -35,11 +35,16 @@ function displayBundle(/* String */ bundleId)
         {
             var entry = theBundleData.files[name];
             var buttons = "";
+            var firstPage = null;
             for (var idx in entry)
             {
                 var descr = entry[idx];
 				var jar = descr.jar ? '&jar=' + descr.jar : ''; // inner jar attribute
-				buttons += '<a href="' + pluginRoot + '?bid=' + bundleId + '&url=' + descr.path + jar + '" target="licenseDetails">' + descr.url + '</a> ';
+				var link = pluginRoot + '?bid=' + bundleId + '&url=' + descr.path + jar;
+				buttons += '<a href="' + link + '">' + descr.url + '</a> ';
+				if (!firstPage) {
+				    firstPage = link;
+				}
             }
             if (buttons)
             {
@@ -52,9 +57,19 @@ function displayBundle(/* String */ bundleId)
         licenseButtons.html("<h1>" + title + "</h1>" + innerHTML);
     }
     
-    licenseDetails.html("");
+    if (firstPage) {
+        licenseDetails.load(firstPage);
+    } else {
+        licenseDetails.html("");
+    }
+    
 	$("#licenseLeft a").removeClass('ui-state-default ui-corner-all');
 	$("#licenseLeft #" +bundleId).addClass('ui-state-default ui-corner-all');
+
+    $('#licenseButtons a').click(function() {
+       licenseDetails.load(this.href);
+       return false;
+    });
 }
 
 

@@ -26,7 +26,6 @@
 }
 #licenseLeft a {
 	display: block;
-	width: 100%;
 	margin: 0;
 	text-decoration: none;
 }
@@ -36,5 +35,5 @@
 }
 #licenseDetails {
 	width: 100%;
-	height: 50em;
+	padding: 1em;
 }
