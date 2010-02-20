@@ -26,6 +26,7 @@ public enum DescriptorEntry
 {
     Service,
     AspectService,
+    AdapterService,
     ServiceDependency,
     TemporalServiceDependency,
     ConfigurationDependency

@@ -155,6 +155,10 @@ public class ComponentManager implements SynchronousBundleListener
                         service = createAspectService(b, dm, parser);
                         break;
                         
+                    case AdapterService:
+                        service = createAdapterService(b, dm, parser);
+                        break;
+                        
                     case ServiceDependency:
                         checkServiceParsed(service);
                         service.add(createServiceDependency(b, dm, parser, false));
@@ -323,6 +327,28 @@ public class ComponentManager implements SynchronousBundleListener
         Class<?> aspectImplementation = b.loadClass(parser.getString(DescriptorParam.impl));
         Dictionary<String, String> aspectProperties = parser.getDictionary(DescriptorParam.properties, null);
         Service service = dm.createAspectService(serviceInterface, serviceFilter, aspectImplementation, aspectProperties);
+        setServiceCallbacks(service, parser);
+        setServiceComposition(service, parser);
+        return service;
+    }
+
+    /**
+     * Creates an Adapter Service.
+     * @param b
+     * @param dm
+     * @param parser
+     * @return
+     */
+    private Service createAdapterService(Bundle b, DependencyManager dm, DescriptorParser parser)
+        throws ClassNotFoundException
+    {
+        Class<?> adapterImpl = b.loadClass(parser.getString(DescriptorParam.impl));
+        Class<?> adapterService = b.loadClass(parser.getString(DescriptorParam.adapterService));
+        Dictionary<String, String> adapterProperties = parser.getDictionary(DescriptorParam.adapterProperties, null);
+        Class<?> adapteeService = b.loadClass(parser.getString(DescriptorParam.adapteeService));
+        String adapteeFilter = parser.getString(DescriptorParam.adapteeFilter, null);
+     
+        Service service = dm.createAdapterService(adapteeService, adapteeFilter, adapterService, adapterImpl, adapterProperties);
         setServiceCallbacks(service, parser);
         setServiceComposition(service, parser);
         return service;

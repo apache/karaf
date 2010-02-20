@@ -90,7 +90,19 @@ public enum DescriptorParam
     updated,
     
     /* TemporalServiceDependency attribute for the timeout (the parsed value is a String) */
-    timeout;
+    timeout,
+    
+    /* AdapterService attribute for the adapter interface (the parsed value is a String) */
+    adapterService,
+    
+    /* AdapterService attribute for the adapter service properties (the parsed value is a Hashtable) */
+    adapterProperties,
+    
+    /* AdapterService attribute for the adaptee service (the parsed value is a String) */
+    adapteeService,
+    
+    /* AdapterService attribute for the adaptee service filter (the parsed value is a String) */
+    adapteeFilter;
     
     /**
      * Indicates if a given attribute is a Service attribute.

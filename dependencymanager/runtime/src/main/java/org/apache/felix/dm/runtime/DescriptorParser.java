@@ -56,7 +56,8 @@ import org.osgi.service.log.LogService;
  *    params := paramName '=' paramValue ( ';' paramName '=' paramValue )*
  *    
  *    paramName := init | start | stop | destroy | impl | provide | properties | factory | factoryMethod | composition | service | filter | 
- *                 defaultImpl | required | added | changed | removed | autoConfig | pid | propagate | updated | timeout
+ *                 defaultImpl | required | added | changed | removed | autoConfig | pid | propagate | updated | timeout |
+ *                 adapterService | adapterProperties | adapteeService | adapteeFilter
  *    init := 'init'
  *    start := 'start'
  *    stop := 'stop'
@@ -79,7 +80,11 @@ import org.osgi.service.log.LogService;
  *    propagate := 'propagate'
  *    updated := 'updated'
  *    timeout := 'timeout'
- *    
+ *    adapterService := 'adapterService'
+ *    adapterProperties := 'adapterProperties'
+ *    adapteeService := 'adapteeService'
+ *    adapteeFilter := 'adapteeFilter'
+ *     
  *    paramValue := strings | attributes
  *    strings := string ( ',' string )*
  *    attributes := string ':' string ( ',' string : string )*
