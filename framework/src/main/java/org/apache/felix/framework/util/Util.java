@@ -619,16 +619,26 @@ loop:   for (;;)
         // assert (pieces.length > 1)
         // minimal case is <string>*<string>
 
-        boolean result = false;
+        boolean result = true;
         int len = pieces.length;
+
+        int index = 0;
 
 loop:   for (int i = 0; i < len; i++)
         {
             String piece = pieces[i];
-            int index = 0;
-            if (i == len - 1)
+            // initial non-star; assert index == 0
+            if (i == 0)
             {
-                // this is the last piece
+                if (!s.startsWith(piece))
+                {
+                    result = false;
+                    break loop;
+                }
+            }
+            // this is the last piece
+            else if (i == len - 1)
+            {
                 if (s.endsWith(piece))
                 {
                     result = true;
@@ -638,15 +648,6 @@ loop:   for (int i = 0; i < len; i++)
                     result = false;
                 }
                 break loop;
-            }
-            // initial non-star; assert index == 0
-            else if (i == 0)
-            {
-                if (!s.startsWith(piece))
-                {
-                    result = false;
-                    break loop;
-                }
             }
             // assert i > 0 && i < len-1
             else
