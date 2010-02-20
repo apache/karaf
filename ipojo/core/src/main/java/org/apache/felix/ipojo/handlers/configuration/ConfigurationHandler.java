@@ -38,6 +38,7 @@ import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.parser.PojoMetadata;
 import org.apache.felix.ipojo.util.Callback;
 import org.apache.felix.ipojo.util.Property;
+import org.apache.felix.ipojo.util.SecurityHelper;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
@@ -294,7 +295,16 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             props.put(Constants.SERVICE_PID, m_managedServicePID);
             props.put("instance.name", getInstanceManager().getInstanceName());
             props.put("factory.name", getInstanceManager().getFactory().getFactoryName());
-            m_sr = getInstanceManager().getContext().registerService(ManagedService.class.getName(), this, props);
+            
+            // Security Check
+            if (SecurityHelper.hasPermissionToRegisterService(ManagedService.class.getName(), 
+                    getInstanceManager().getContext())) {
+                m_sr = getInstanceManager().getContext().registerService(ManagedService.class.getName(), this, props);
+            } else {
+                error("Cannot register the ManagedService - The bundle " 
+                        + getInstanceManager().getContext().getBundle().getBundleId() 
+                        + " does not have the permission to register the service");
+            }
         }
     }
 

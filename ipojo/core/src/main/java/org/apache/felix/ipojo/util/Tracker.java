@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -126,6 +127,12 @@ public class Tracker implements TrackerCustomizer {
      *            the TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.    
      */
     public Tracker(BundleContext context, String clazz, TrackerCustomizer customizer) {
+        // Security Check
+        if (! SecurityHelper.hasPermissionToGetService(clazz, context)) {
+            throw new SecurityException("The bundle " + context.getBundle().getBundleId()
+                    + " does not have the permission to get the service " + clazz);
+        }
+        
         this.m_context = context;
         this.m_trackReference = null;
         this.m_trackClass = clazz;
@@ -414,6 +421,14 @@ public class Tracker implements TrackerCustomizer {
      * @return the Service object or <code>null</code> if the service referenced by the specified ServiceReference object is not being tracked.
      */
     public Object getService(ServiceReference reference) {
+        // Security Check
+        if (! SecurityHelper.hasPermissionToGetServices((String[]) reference.getProperty(Constants.OBJECTCLASS), 
+                m_context)) {
+            throw new SecurityException("The bundle " + m_context.getBundle().getBundleId() + " does not have"
+                    + " the permission to get the services " 
+                    + Arrays.asList((String[]) reference.getProperty(Constants.OBJECTCLASS)));
+        }
+        
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
         if (tracked == null) { /* if Tracker is not open */
             return null;

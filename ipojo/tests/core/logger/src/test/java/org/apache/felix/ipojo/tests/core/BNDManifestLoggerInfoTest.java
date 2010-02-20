@@ -7,7 +7,6 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
@@ -83,23 +82,19 @@ public class BNDManifestLoggerInfoTest {
                         ),
                 provision(
                         newBundle()
-                            .addClass( MyService.class )
-                            .prepare()
-                           .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
-                           .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                            .build( asURL() ).toExternalForm()
+                            .add( MyService.class )
+                            .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
+                            .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
+                            .build( withBnd() )
                     ),
                provision(
                        // Component
                         newBundle()
-                            .addClass(MyComponent.class)
-                            .prepare(
-                                    withBnd()
-                                        .set(Constants.BUNDLE_SYMBOLICNAME,"MyComponent")
-                                        .set(Constants.IMPORT_PACKAGE, "*")
-                                        .set("IPOJO-log-level", "info")
-                                    )
-                            .build( asiPOJOBundle(new File(tmp, "provider-with-level-in-manifest.jar"), new File("component.xml"))).toExternalForm()
+                            .add(MyComponent.class)
+                            .set(Constants.BUNDLE_SYMBOLICNAME,"MyComponent")
+                            .set(Constants.IMPORT_PACKAGE, "*")
+                            .set("IPOJO-log-level", "info")
+                            .build( asiPOJOBundle(new File(tmp, "provider-with-level-in-manifest.jar"), new File("component.xml")))
                             )
                 );
         return opt;

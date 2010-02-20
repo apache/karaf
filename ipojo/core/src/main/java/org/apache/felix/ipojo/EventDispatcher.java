@@ -52,6 +52,7 @@ public final class EventDispatcher implements ServiceListener {
     private Map m_listeners;
     /**
      * The global bundle context.
+     * This is the bundle context from iPOJO.
      */
     private BundleContext m_context;
     

@@ -7,9 +7,8 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -78,27 +77,22 @@ public class SystemLoggerWarningTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject()),
                         mavenBundle().groupId( "org.apache.felix" ).artifactId( "org.apache.felix.log" ).version(asInProject())
                         ),
                 provision(
                         newBundle()
-                            .addClass( MyService.class )
-                            .prepare()
+                            .add( MyService.class )
                            .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
                            .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                            .build( asURL() ).toExternalForm()
+                            .build( withBnd() )
                     ),
                provision(
                        // Component
                         newBundle()
-                            .addClass(MyComponent.class)
-                            .prepare(
-                                    with()
-                                        .set(Constants.BUNDLE_SYMBOLICNAME,"MyComponent")
-                                        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                                    )
-                            .build( asiPOJOBundle(new File(tmp, "provider.jar"), new File("component.xml"))).toExternalForm()
+                            .add(MyComponent.class)
+                            .set(Constants.BUNDLE_SYMBOLICNAME,"MyComponent")
+                            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
+                            .build( asiPOJOBundle(new File(tmp, "provider.jar"), new File("component.xml")))
                             ),
                 systemProperty( "ipojo.log.level" ).value( "warning" )
                 );

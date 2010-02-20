@@ -82,7 +82,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     /**
      * The Bundle Context of the iPOJO Core bundle.
      */
-    private BundleContext m_context;
+    private static BundleContext m_context;
 
     /**
      * The instance creator used to create instances.
@@ -342,6 +342,15 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         m_creator = null;
         
         m_logger.log(Logger.INFO, "iPOJO Runtime stopped");
+        m_context = null;
+    }
+    
+    /**
+     * Gets iPOJO bundle context.
+     * @return the iPOJO Bundle Context
+     */
+    public static BundleContext getIPOJOBundleContext() {
+        return m_context;
     }
     
     /**

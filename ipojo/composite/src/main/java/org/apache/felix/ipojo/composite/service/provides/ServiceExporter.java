@@ -30,6 +30,7 @@ import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.composite.CompositeManager;
 import org.apache.felix.ipojo.util.DependencyModel;
 import org.apache.felix.ipojo.util.DependencyStateListener;
+import org.apache.felix.ipojo.util.SecurityHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
@@ -127,8 +128,15 @@ public class ServiceExporter extends DependencyModel {
      */
     public void onServiceArrival(ServiceReference reference) {
         Object svc = getService(reference);
-        ServiceRegistration reg = m_destination.registerService(getSpecification().getName(), svc, getProps(reference));
-        m_registrations.put(reference, reg);
+        // Security Check
+        if (SecurityHelper.hasPermissionToRegisterService(getSpecification().getName(), m_destination)) {
+            ServiceRegistration reg = m_destination
+                .registerService(getSpecification().getName(), svc, getProps(reference));
+            m_registrations.put(reference, reg);
+        } else {
+            throw new SecurityException("The bundle " + m_destination.getBundle().getBundleId() + " does not have the " +
+                    "permission to register the service " + getSpecification().getName());
+        }
     }
 
     /**

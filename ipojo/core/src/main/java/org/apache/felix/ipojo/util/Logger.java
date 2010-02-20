@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.util;
 
+import org.apache.felix.ipojo.Extender;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
@@ -132,7 +133,13 @@ public class Logger {
         LogService log = null;
         ServiceReference ref = null;
         try {
-            ref = m_context.getServiceReference(LogService.class.getName());
+            // Security Check
+            if (SecurityHelper.hasPermissionToGetService(LogService.class.getName(), m_context)) {
+                ref = m_context.getServiceReference(LogService.class.getName());
+            } else {
+                Extender.getIPOJOBundleContext().getServiceReference(LogService.class.getName());
+            }
+            
             if (ref != null) {
                 log = (LogService) m_context.getService(ref);
             }
@@ -195,7 +202,13 @@ public class Logger {
         LogService log = null;
         ServiceReference ref = null;
         try {
-            ref = m_context.getServiceReference(LogService.class.getName());
+            // Security Check
+            if (SecurityHelper.hasPermissionToGetService(LogService.class.getName(), m_context)) {
+                ref = m_context.getServiceReference(LogService.class.getName());
+            } else {
+                Extender.getIPOJOBundleContext().getServiceReference(LogService.class.getName());
+            }
+            
             if (ref != null) {
                 log = (LogService) m_context.getService(ref);
             }

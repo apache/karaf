@@ -74,7 +74,8 @@ public class ServiceImporter extends DependencyModel {
                 m_reg.unregister();
             }
             m_svcObject = getService(m_ref);
-            m_reg = m_handler.getCompositeManager().getServiceContext().registerService(getSpecification().getName(), m_svcObject, getProps(m_ref));
+            m_reg = m_handler.getCompositeManager().getServiceContext()
+                .registerService(getSpecification().getName(), m_svcObject, getProps(m_ref));
         }
 
         /**

@@ -67,7 +67,7 @@
   <dependency>
     <groupId>org.ops4j.pax.exam</groupId>
     <artifactId>pax-exam</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
   </dependency>
   <!--
     During runtime Pax Exam will discover the OSGi container to use by
@@ -79,7 +79,7 @@
     <groupId>org.ops4j.pax.exam</groupId>
     <artifactId>pax-exam-container-default
     </artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
   </dependency>
   <!--
     If your test code is based on JUnit you will have to have the Junit
@@ -88,7 +88,7 @@
   <dependency>
     <groupId>org.ops4j.pax.exam</groupId>
     <artifactId>pax-exam-junit</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
   </dependency>
   <dependency>
     <groupId>junit</groupId>
@@ -101,7 +101,7 @@
   <dependency>
     <groupId>org.ops4j.pax.swissbox</groupId>
     <artifactId>pax-swissbox-tinybundles</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.0</version>
   </dependency>
   <dependency>
     <groupId>org.apache.felix</groupId>

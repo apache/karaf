@@ -7,9 +7,9 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
+
 
 import java.io.File;
 
@@ -68,50 +68,41 @@ public class InheritanceTest {
                 equinox(),
                 provision(
                         // Runtime.
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject())
                         ),
                 // Bundle A
                 provision(
                         newBundle()
-                            .addClass( IA.class )
-                            .prepare()
+                            .add( IA.class )
                            .set(Constants.BUNDLE_SYMBOLICNAME,"A")
                            .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.a")
-                            .build( asURL() ).toExternalForm()
+                            .build( withBnd() )
                     ),
                 // Bundle B
                 provision(
                         newBundle()
-                            .addClass( IB.class )
-                            .prepare()
+                            .add( IB.class )
                            .set(Constants.BUNDLE_SYMBOLICNAME,"B")
                            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.a")
                            .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.b")
-                            .build( asURL() ).toExternalForm()
+                            .build( withBnd() )
                     ),
                // Bundle C and D : iPOJO Bundles
                provision(
                        // Component C
                         newBundle()
-                            .addClass(C.class)
-                            .prepare(
-                                    with()
-                                        .set(Constants.BUNDLE_SYMBOLICNAME,"C")
-                                        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.b," +
-                                                "org.apache.felix.ipojo.tests.inheritance.a")
-                                    )
-                            .build( asiPOJOBundle(new File(tmp, "provider.jar"), new File("src/test/resources/provider.xml"))).toExternalForm(),
+                            .add(C.class)
+                            .set(Constants.BUNDLE_SYMBOLICNAME,"C")
+                            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.b," +
+                                        "org.apache.felix.ipojo.tests.inheritance.a")
+                           .build( asiPOJOBundle(new File(tmp, "provider.jar"), new File("src/test/resources/provider.xml"))),
                      // Component D
                         newBundle()
-                            .addClass(D.class)
-                            .prepare(
-                                    with()
-                                        .set(Constants.BUNDLE_SYMBOLICNAME,"D")
-                                        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.b," +
-                                                "org.apache.felix.ipojo.tests.inheritance.a")
-                                    )
-                            .build( asiPOJOBundle(new File(tmp, "cons.jar"), new File("src/test/resources/cons.xml"))).toExternalForm())
+                            .add(D.class)
+                            .set(Constants.BUNDLE_SYMBOLICNAME,"D")
+                            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.b," +
+                                    "org.apache.felix.ipojo.tests.inheritance.a")
+                            .build( asiPOJOBundle(new File(tmp, "cons.jar"), new File("src/test/resources/cons.xml"))))
                 );
         return opt;
     }

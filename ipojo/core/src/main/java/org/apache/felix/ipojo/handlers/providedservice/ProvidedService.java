@@ -36,6 +36,7 @@ import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.IPOJOServiceFactory;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.util.Property;
+import org.apache.felix.ipojo.util.SecurityHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -84,7 +85,7 @@ public class ProvidedService implements ServiceFactory {
     /**
      * At this time, it is only the java interface full name.
      */
-    private String[] m_serviceSpecification = new String[0];
+    private String[] m_serviceSpecifications = new String[0];
 
     /**
      * The service registration. is null when the service is not registered.
@@ -124,7 +125,7 @@ public class ProvidedService implements ServiceFactory {
     public ProvidedService(ProvidedServiceHandler handler, String[] specification, int factoryPolicy, Class creationStrategyClass, Dictionary conf) {
         m_handler = handler;
 
-        m_serviceSpecification = specification;
+        m_serviceSpecifications = specification;
 
         // Add instance name, factory name and factory version is set.
         try {
@@ -191,7 +192,7 @@ public class ProvidedService implements ServiceFactory {
                 // Thread : one service object per asking thread
                 // Consumer : one service object per consumer
                 default:
-                    List specs = Arrays.asList(m_serviceSpecification);
+                    List specs = Arrays.asList(m_serviceSpecifications);
                     m_handler.error("["
                             + m_handler.getInstanceManager().getInstanceName()
                             + "] Unknown creation policy for " + specs + " : "
@@ -312,13 +313,21 @@ public class ProvidedService implements ServiceFactory {
     protected synchronized void registerService() {
         if (m_serviceRegistration == null) {
             // Build the service properties list
-            Properties serviceProperties = getServiceProperties();
-            m_strategy.onPublication(getInstanceManager(), m_serviceSpecification, serviceProperties);
-            m_serviceRegistration = m_handler.getInstanceManager().getContext().registerService(m_serviceSpecification, this, serviceProperties);
-            // An update may happen during the registration, re-check and apply.
-            if (m_wasUpdated) {
-                m_serviceRegistration.setProperties(getServiceProperties());
-                m_wasUpdated = false;
+            
+            BundleContext bc = m_handler.getInstanceManager().getContext();
+            // Security check
+            if (SecurityHelper.hasPermissionToRegisterServices(m_serviceSpecifications, bc)) {
+                Properties serviceProperties = getServiceProperties();
+                m_strategy.onPublication(getInstanceManager(), m_serviceSpecifications, serviceProperties);
+                m_serviceRegistration = bc.registerService(m_serviceSpecifications, this, serviceProperties);
+                // An update may happen during the registration, re-check and apply.
+                if (m_wasUpdated) {
+                    m_serviceRegistration.setProperties(getServiceProperties());
+                    m_wasUpdated = false;
+                }
+            } else {
+                throw new SecurityException("The bundle " + bc.getBundle().getBundleId() + " does not have the"
+                        + " permission to register the services " + Arrays.asList(m_serviceSpecifications));
             }      
         }
     }
@@ -429,7 +438,7 @@ public class ProvidedService implements ServiceFactory {
      * interface).
      */
     public String[] getServiceSpecifications() {
-        return m_serviceSpecification;
+        return m_serviceSpecifications;
     }
 
     /**
@@ -641,7 +650,7 @@ public class ProvidedService implements ServiceFactory {
          */
         public Object getService(Bundle arg0, ServiceRegistration arg1) {
             Object proxy = Proxy.newProxyInstance(getInstanceManager().getClazz().getClassLoader(),
-                    getSpecificationsWithIPOJOServiceFactory(m_serviceSpecification, m_handler.getInstanceManager().getContext()), this);
+                    getSpecificationsWithIPOJOServiceFactory(m_serviceSpecifications, m_handler.getInstanceManager().getContext()), this);
             return proxy;
         }
 

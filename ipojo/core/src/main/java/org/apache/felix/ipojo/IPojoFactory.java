@@ -31,6 +31,7 @@ import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
+import org.apache.felix.ipojo.util.SecurityHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -585,13 +586,23 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
         if (m_isPublic) {
             // Exposition of the factory service
+            BundleContext bc = SecurityHelper.selectContextToRegisterServices(m_componentDesc.getFactoryInterfacesToPublish(), 
+                    m_context, getIPOJOBundleContext());
             m_sr =
-                    m_context.registerService(m_componentDesc.getFactoryInterfacesToPublish(), this, m_componentDesc
+                    bc.registerService(m_componentDesc.getFactoryInterfacesToPublish(), this, m_componentDesc
                             .getPropertiesToPublish());
         }
         
         m_logger.log(Logger.INFO, "Factory " + m_factoryName + " started");
 
+    }
+    
+    /**
+     * Gets the iPOJO Bundle Context.
+     * @return the iPOJO Bundle Context
+     */
+    protected final BundleContext getIPOJOBundleContext() {
+        return Extender.getIPOJOBundleContext();
     }
 
     /**
