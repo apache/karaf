@@ -88,7 +88,7 @@ public class InfoCommand extends ObrCommandSupport {
             out.println("Requires:");
             for (int i = 0; i < reqs.length; i++)
             {
-                out.println("   " + reqs[i].getFilter());
+                out.println("   " + reqs[i].getName() + ":" + reqs[i].getFilter());
             }
         }
 
@@ -98,7 +98,7 @@ public class InfoCommand extends ObrCommandSupport {
             out.println("Capabilities:");
             for (int i = 0; i < caps.length; i++)
             {
-                out.println("   " + caps[i].getProperties());
+                out.println("   " + caps[i].getName() + ":" + caps[i].getProperties());
             }
         }
     }

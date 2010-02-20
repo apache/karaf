@@ -26,6 +26,9 @@
         <command name="obr/deploy">
             <action class="org.apache.felix.karaf.shell.obr.DeployCommand"/>
         </command>
+        <command name="obr/find">
+            <action class="org.apache.felix.karaf.shell.obr.FindCommand"/>
+        </command>
         <command name="obr/info">
             <action class="org.apache.felix.karaf.shell.obr.InfoCommand"/>
         </command>
@@ -35,11 +38,14 @@
         <command name="obr/listUrl">
             <action class="org.apache.felix.karaf.shell.obr.ListUrlCommand"/>
         </command>
+        <command name="obr/refreshUrl">
+            <action class="org.apache.felix.karaf.shell.obr.RefreshUrlCommand"/>
+        </command>
         <command name="obr/removeUrl">
             <action class="org.apache.felix.karaf.shell.obr.RemoveUrlCommand"/>
         </command>
-        <command name="obr/refreshUrl">
-            <action class="org.apache.felix.karaf.shell.obr.RefreshUrlCommand"/>
+        <command name="obr/resolve">
+            <action class="org.apache.felix.karaf.shell.obr.ResolveCommand"/>
         </command>
         <command name="obr/source">
             <action class="org.apache.felix.karaf.shell.obr.SourceCommand"/>

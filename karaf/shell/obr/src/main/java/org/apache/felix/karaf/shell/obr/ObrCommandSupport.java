@@ -114,7 +114,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         String[] target;
         int idx = bundle.indexOf(VERSION_DELIM);
         if (idx > 0) {
-            target = new String[] { bundle.substring(0, idx), bundle.substring(idx) };
+            target = new String[] { bundle.substring(0, idx), bundle.substring(idx+1) };
         }
         else
         {
