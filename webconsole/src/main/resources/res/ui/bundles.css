@@ -20,9 +20,5 @@
 	padding: 0;
 }
 
-ul.icons {margin: 0; padding: 0;}
-ul.icons li {margin: 1px; position: relative; padding: 1px 0; cursor: pointer; float: left;  list-style: none;}
-ul.icons span.ui-icon {float: left; margin: 0 1px;}
-
 .col_Status   { width: 50px;  }
 .col_Actions { width: 121px; }

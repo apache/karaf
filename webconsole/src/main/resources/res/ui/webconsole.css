@@ -145,3 +145,26 @@ tr .headerSortDown {
 	/* overwrite background from JQuery UI Theme */
 	background: none !important;
 }
+
+/*
+ * Common UI style to define button icons like in bundles plugin. The HTML markup is:
+ * <ul class="icons ui-widget">
+ *   <li class="dynhover" title="tooltip comes here"><span class="ui-icon ui-icon-refresh">&nbsp;</span></li>
+ * </ul>
+ */
+ul.icons {
+	margin: 0;
+	padding: 0
+}
+ul.icons span.ui-icon {
+	float: left;
+	margin: 0 1px
+}
+ul.icons li {
+	margin: 1px;
+	position: relative;
+	padding: 1px 0;
+	cursor: pointer;
+	float: left;
+	list-style: none
+}

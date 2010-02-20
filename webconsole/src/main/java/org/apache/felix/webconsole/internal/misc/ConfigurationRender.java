@@ -19,6 +19,7 @@ package org.apache.felix.webconsole.internal.misc;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.text.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -122,6 +123,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
             String name = request.getPathInfo();
             name = name.substring( name.lastIndexOf('/') + 1);
             name = name.substring(0, name.length() - 4);
+            name = URLDecoder.decode( name );
 
             ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
             pw.println ( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"" );

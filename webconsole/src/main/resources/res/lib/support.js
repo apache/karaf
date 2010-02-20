@@ -74,7 +74,7 @@ $(document).ready(function() {
 		var pre = '<br/><pre>';
 		for (i in event) pre += i + '=' + event[i] + '\n'
 		pre += '</pre>';
-		XAlert('The request failed: ' + thrownError + pre, 'AJAX Error');
+		Xalert('The request failed: ' + thrownError + pre, 'AJAX Error');
 	});
 
 	initStaticWidgets();
@@ -122,7 +122,6 @@ function Xconfirm(/* String */text, /* Callback function */action, /* String */t
 	return false;
 }
 function Xalert(/* String */text, /* String */title) {
-	if (!$.isFunction(action)) return alert(text);
 	if (title === undefined) title = "";
 
 	Xdialog(text).dialog({
