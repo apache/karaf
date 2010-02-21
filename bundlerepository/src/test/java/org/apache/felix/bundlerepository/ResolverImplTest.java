@@ -23,6 +23,7 @@ import java.net.URL;
 import junit.framework.TestCase;
 
 import org.osgi.service.obr.Repository;
+import org.osgi.service.obr.Requirement;
 import org.osgi.service.obr.Resolver;
 import org.osgi.service.obr.Resource;
 
@@ -53,7 +54,17 @@ public class ResolverImplTest extends TestCase
 
     }
 
-    public void testResolveReq() throws Exception 
+    public void testMatchingReq() throws Exception
+    {
+        RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
+        repoAdmin.addRepository(getClass().getResource("/repo_for_resolvertest.xml"));
+
+        Resource[] res = repoAdmin.discoverResources(new Requirement[] { repoAdmin.requirement("package", "(package=org.apache.felix.test.osgi)") });
+        assertNotNull(res);
+        assertEquals(1, res.length);
+    }
+
+    public void testResolveReq() throws Exception
     {
         RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
         repoAdmin.addRepository(getClass().getResource("/repo_for_resolvertest.xml"));

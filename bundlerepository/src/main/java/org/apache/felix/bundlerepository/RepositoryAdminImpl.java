@@ -31,6 +31,7 @@ import java.util.StringTokenizer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.obr.Capability;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Requirement;
@@ -152,6 +153,56 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             {
                 dict.setSourceMap(resources[resIdx].getProperties());
                 if (filter.match(dict))
+                {
+                    matchList.add(resources[resIdx]);
+                }
+            }
+        }
+
+        // Convert matching resources to an array an sort them by name.
+        resources = (Resource[]) matchList.toArray(new Resource[matchList.size()]);
+        Arrays.sort(resources, m_nameComparator);
+        return resources;
+    }
+
+    public synchronized Resource[] discoverResources(Requirement[] requirements)
+    {
+        if (!m_initialized)
+        {
+            initialize();
+        }
+
+        Resource[] resources = null;
+        MapToDictionary dict = new MapToDictionary(null);
+        Repository[] repos = listRepositories();
+        List matchList = new ArrayList();
+        for (int repoIdx = 0; (repos != null) && (repoIdx < repos.length); repoIdx++)
+        {
+            resources = repos[repoIdx].getResources();
+            for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
+            {
+                dict.setSourceMap(resources[resIdx].getProperties());
+                boolean match = true;
+                for (int reqIdx = 0; (requirements != null) && (reqIdx < requirements.length); reqIdx++)
+                {
+                    boolean reqMatch = false;
+                    Capability[] caps = resources[resIdx].getCapabilities();
+                    for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+                    {
+                        if (caps[capIdx].getName().equals(requirements[reqIdx].getName())
+                                && requirements[reqIdx].isSatisfied(caps[capIdx]))
+                        {
+                            reqMatch = true;
+                            break;
+                        }
+                    }
+                    match &= reqMatch;
+                    if (!match)
+                    {
+                        break;
+                    }
+                }
+                if (match)
                 {
                     matchList.add(resources[resIdx]);
                 }

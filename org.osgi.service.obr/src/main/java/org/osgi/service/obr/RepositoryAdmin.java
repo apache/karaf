@@ -76,6 +76,14 @@ public interface RepositoryAdmin
     Resource[] discoverResources(String filterExpr);
 
     /**
+     * Discover any resources that match the given requirements.
+     *
+     * @param requirements
+     * @return List of resources matching the filter
+     */
+    Resource[] discoverResources(Requirement[] requirements);
+
+    /**
      * Create a resolver.
      * 
      * @return

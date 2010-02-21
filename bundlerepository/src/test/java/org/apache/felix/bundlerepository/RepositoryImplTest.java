@@ -42,7 +42,7 @@ public class RepositoryImplTest extends TestCase
         assertEquals("referred.xml", refs[0].getUrl());
 
         // expect two resources
-        Resource[] res = repoAdmin.discoverResources(null);
+        Resource[] res = repoAdmin.discoverResources((String) null);
         assertNotNull("Expect Resource", res);
         assertEquals("Expect two resources", 2, res.length);
 
@@ -71,7 +71,7 @@ public class RepositoryImplTest extends TestCase
         assertEquals("referred.xml", refs[0].getUrl());
 
         // expect one resource (referral is not followed
-        Resource[] res = repoAdmin.discoverResources(null);
+        Resource[] res = repoAdmin.discoverResources((String) null);
         assertNotNull("Expect Resource", res);
         assertEquals("Expect one resource", 1, res.length);
 
