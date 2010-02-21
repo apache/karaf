@@ -33,6 +33,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.RepositoryAdmin;
+import org.osgi.service.obr.Requirement;
 import org.osgi.service.obr.Resolver;
 import org.osgi.service.obr.Resource;
 
@@ -161,6 +162,21 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         resources = (Resource[]) matchList.toArray(new Resource[matchList.size()]);
         Arrays.sort(resources, m_nameComparator);
         return resources;
+    }
+
+    public Requirement requirement(String name, String filter) {
+        RequirementImpl req = new RequirementImpl();
+        req.setName(name);
+        if (filter != null)
+        {
+            req.setFilter(filter);
+        }
+        return req;
+    }
+
+    public Filter filter(String filter) throws InvalidSyntaxException
+    {
+        return new FilterImpl(filter);
     }
 
     private void initialize()

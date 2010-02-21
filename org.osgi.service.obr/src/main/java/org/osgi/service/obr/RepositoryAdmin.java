@@ -23,6 +23,9 @@ package org.osgi.service.obr;
 
 import java.net.URL;
 
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+
 /**
  * Provides centralized access to the distributed repository.
  * 
@@ -75,7 +78,6 @@ public interface RepositoryAdmin
     /**
      * Create a resolver.
      * 
-     * @param resource
      * @return
      */
     Resolver resolver();
@@ -100,5 +102,22 @@ public interface RepositoryAdmin
      */
     Repository[] listRepositories();
 
-    Resource getResource(String respositoryId);
+    Resource getResource(String repositoryId);
+
+    /**
+     * Create a simple requirement to be used for selection
+     * @param name
+     * @param filter
+     * @return
+     */
+    Requirement requirement(String name, String filter) throws InvalidSyntaxException;
+
+    /**
+     * Create an extender filter supporting the SUBSET, SUPERSET and other extensions
+     *
+     * @param filter the string filter
+     * @return
+     */
+    Filter filter(String filter) throws InvalidSyntaxException;
+
 }

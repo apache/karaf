@@ -24,7 +24,41 @@ package org.osgi.service.obr;
 public interface Resolver
 {
 
+    /**
+     * Add the following resource to the resolution.
+     *
+     * The resource will be part of the output and all its requirements
+     * will be satisfied.
+     *
+     * It has the same effect has adding a requirement that will match
+     * this resource by symbolicname and version.
+     *
+     * The current resolution will be lost after adding a resource.
+     *
+     * @param resource the resource to add
+     */
     void add(Resource resource);
+
+    /**
+     * Returns the list of resources that have been added to the resolution
+     * @return
+     */
+    Resource[] getAddedResources();
+
+    /**
+     * Add the following requirement to the resolution
+     *
+     * The current resolution will be lost after adding a requirement.
+     *
+     * @param requirement the requirement to add
+     */
+    void add(Requirement requirement);
+
+    /**
+     * Returns the list of requirements that have been added to the resolution
+     * @return
+     */
+    Requirement[] getAddedRequirements();
 
     Requirement[] getUnsatisfiedRequirements();
 
@@ -35,8 +69,6 @@ public interface Resolver
     Resource[] getResources(Requirement requirement);
 
     Resource[] getRequiredResources();
-
-    Resource[] getAddedResources();
 
     boolean resolve();
 

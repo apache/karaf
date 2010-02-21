@@ -53,6 +53,16 @@ public class ResolverImplTest extends TestCase
 
     }
 
+    public void testResolveReq() throws Exception 
+    {
+        RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
+        repoAdmin.addRepository(getClass().getResource("/repo_for_resolvertest.xml"));
+
+        Resolver resolver = repoAdmin.resolver();
+        resolver.add(repoAdmin.requirement("package", "(package=org.apache.felix.test.osgi)"));
+        assertTrue(resolver.resolve());
+    }
+
     public static void main(String[] args) throws Exception {
 
         new ResolverImplTest().testReferral1();

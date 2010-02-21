@@ -34,6 +34,7 @@ public class ResolverImpl implements Resolver
     private final Logger m_logger;
     private final LocalRepositoryImpl m_local;
     private final Set m_addedSet = new HashSet();
+    private final Set m_addedRequirementSet = new HashSet();
     private final Set m_failedSet = new HashSet();
     private final Set m_resolveSet = new HashSet();
     private final Set m_requiredSet = new HashSet();
@@ -49,7 +50,7 @@ public class ResolverImpl implements Resolver
         m_context = context;
         m_admin = admin;
         m_logger = logger;
-        m_local = admin.getLocalRepository();
+        m_local = admin.getLocalRepository();        
         String s = context.getProperty(PREFER_LOCAL);
         if (s != null)
         {
@@ -61,6 +62,22 @@ public class ResolverImpl implements Resolver
     {
         m_resolved = false;
         m_addedSet.add(resource);
+    }
+
+    public synchronized Resource[] getAddedResources()
+    {
+        return (Resource[]) m_addedSet.toArray(new Resource[m_addedSet.size()]);
+    }
+
+    public synchronized void add(Requirement requirement)
+    {
+        m_resolved = false;
+        m_addedRequirementSet.add(requirement);
+    }
+
+    public synchronized Requirement[] getAddedRequirements()
+    {
+        return (Requirement[]) m_addedRequirementSet.toArray(new Requirement[m_addedRequirementSet.size()]);
     }
 
     public synchronized Requirement[] getUnsatisfiedRequirements()
@@ -114,11 +131,6 @@ public class ResolverImpl implements Resolver
         throw new IllegalStateException("The resources have not been resolved.");
     }
 
-    public synchronized Resource[] getAddedResources()
-    {
-        return (Resource[]) m_addedSet.toArray(new Resource[m_addedSet.size()]);
-    }
-
     public synchronized boolean resolve()
     {
         // time of the resolution process start
@@ -134,6 +146,20 @@ public class ResolverImpl implements Resolver
         m_resolved = true;
 
         boolean result = true;
+
+        // Add a fake resource if needed
+        if (!m_addedRequirementSet.isEmpty())
+        {
+            ResourceImpl fake = new ResourceImpl();
+            for (Iterator iter = m_addedRequirementSet.iterator(); iter.hasNext(); )
+            {
+                fake.addRequire((Requirement) iter.next());
+            }
+            if (!resolve(fake))
+            {
+                result = false;
+            }
+        }
 
         // Loop through each resource in added list and resolve.
         for (Iterator iter = m_addedSet.iterator(); iter.hasNext(); )
