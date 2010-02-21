@@ -613,7 +613,6 @@ loop:   for (;;)
 
     public static boolean checkSubstring(String[] pieces, String s)
     {
-System.out.println("MATCHING " + s);
         // Walk the pieces to match the string
         // There are implicit stars between each piece,
         // and the first and last pieces might be "" to anchor the match.
