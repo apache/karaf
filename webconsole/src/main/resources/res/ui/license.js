@@ -18,9 +18,9 @@
 var licenseButtons = false;
 var licenseDetails = false;
 
-function displayBundle(/* String */ bundleId)
+function displayBundle(/* String */ bundleIndex)
 {
-    var theBundleData = bundleData[bundleId];
+    var theBundleData = bundleData[bundleIndex];
     if (!theBundleData)
     {
         return;
@@ -39,10 +39,18 @@ function displayBundle(/* String */ bundleId)
             for (var idx in entry)
             {
                 var descr = entry[idx];
-				var jar = descr.jar ? '&jar=' + descr.jar : ''; // inner jar attribute
-				var link = pluginRoot + '?bid=' + bundleId + '&url=' + descr.path + jar;
+
+                var link = pluginRoot + "/" + theBundleData.bid;
+                if (descr.jar)
+                {
+                    link += descr.jar + "!/"; // inner jar attribute
+                }
+                link += descr.path;
+
 				buttons += '<a href="' + link + '">' + descr.url + '</a> ';
-				if (!firstPage) {
+
+				if (!firstPage)
+				{
 				    firstPage = link;
 				}
             }
@@ -64,7 +72,7 @@ function displayBundle(/* String */ bundleId)
     }
     
 	$("#licenseLeft a").removeClass('ui-state-default ui-corner-all');
-	$("#licenseLeft #" +bundleId).addClass('ui-state-default ui-corner-all');
+	$("#licenseLeft #" +bundleIndex).addClass('ui-state-default ui-corner-all');
 
     $('#licenseButtons a').click(function() {
        licenseDetails.load(this.href);
@@ -81,7 +89,7 @@ $(document).ready(function() {
 	// render list of bundles
 	var txt = "";
 	for(id in bundleData) {
-		txt += '<a id="' + id + '" href="javascript:displayBundle(\'' + id + '\')">' + bundleData[id]['title'] + '</a>';
+		txt += '<a id="' + id + '" href="javascript:displayBundle(\'' + id + '\')">' + bundleData[id].title + '</a>';
 	}
 	if (txt) {
 		$("#licenseLeft").html(txt);
@@ -90,5 +98,5 @@ $(document).ready(function() {
 	}
 
 	// display first element
-	for(i in bundleData) {displayBundle(i);break;}
+	displayBundle(0);
 });
