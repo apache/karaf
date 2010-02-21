@@ -70,7 +70,7 @@
 
 /* used in some plugins - showing ID (long) element in tables */
 .col_Id {
-	width: 40px;
+	width: 5em;
 }
 
 /* styling button groups like in the bundles & log plugins */
