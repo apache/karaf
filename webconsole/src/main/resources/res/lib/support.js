@@ -70,11 +70,8 @@ $(document).ready(function() {
 	);
 
 	// register global ajax error handler
-	$(document).ajaxError( function(event, XMLHttpRequest, ajaxOptions, thrownError) {
-		var pre = '<br/><pre>';
-		for (i in event) pre += i + '=' + event[i] + '\n'
-		pre += '</pre>';
-		Xalert('The request failed: ' + thrownError + pre, 'AJAX Error');
+	$(document).ajaxError( function(event, req) {
+		Xalert('The request failed: <br/><pre>' + req.statusText + '</pre>', 'AJAX Error');
 	});
 
 	initStaticWidgets();
@@ -127,6 +124,7 @@ function Xalert(/* String */text, /* String */title) {
 	Xdialog(text).dialog({
 		modal: true,
 		title: title,
+		width: '70%',
 		buttons: {
 			"Ok": function() {
 				$(this).dialog('close');

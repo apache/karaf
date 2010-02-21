@@ -1,0 +1,68 @@
+﻿<script type="text/javascript" src="res/ui/obr.js"></script>
+<script type="text/javascript">
+var i18n = {
+	status_ok : '${obr.status.ok}',
+	status_no : '${obr.status.no}',
+	selectVersion : '${obr.version.select}'
+}
+var obrData = ${__data__};
+</script>
+
+<p class="statline">${obr.status.ok}</p>
+
+<div class="ui-widget-header ui-corner-top buttonGroup">
+	<span style="float: left; margin-left: 1em">${obr.repo.title}</span>
+	<input style="width: 50%" type="text" id="addRepoUri" />
+	<button id="addRepoBtn">${obr.action.add}</button>
+</div>
+
+<table id="repoTable" class="nicetable">
+	<thead>
+		<tr>
+			<th class="col_Name">${obr.repo.name}</th>
+			<th class="col_URL">${obr.repo.url}</th>
+			<th class="col_lastMod">${obr.repo.lastModified}</th>
+			<th class="col_Actions">${obr.repo.actions}</th>
+		</tr>
+	</thead>
+	<tbody> <!-- template: will be replaced dynamically by JS -->
+		<tr>
+			<td>name</td>
+			<td>url</td>
+			<td>date</td>
+			<td>
+				<ul class="icons ui-widget">
+					<li class="dynhover" title="${refresh}"><span class="ui-icon ui-icon-refresh">&nbsp;</span></li>
+					<li class="dynhover" title="${delete}"><span class="ui-icon ui-icon-trash">&nbsp;</span></li>
+				</ul>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<br/>
+
+<form id="installForm" method="post" action="">
+	<div class="ui-widget-header ui-corner-top buttonGroup">
+		<span style="float: left; margin-left: 1em">${obr.res.title}</span>
+		<input type="text" id="searchField" />
+		<button id="searchBtn">${obr.action.search}</button>
+		<input type="submit" name="deploy" value="${obr.action.deploy}" />
+		<input type="submit" name="deploystart" value="${obr.action.deploystart}" />
+	</div>
+
+	<table id="resTable" class="nicetable">
+		<thead>
+			<tr>
+				<th class="col_Version">${version}</th>
+				<th class="col_ResName">${obr.res.name}</th>
+				<th class="col_VersionInst">${obr.res.installedVer}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td colspan="2">dummy</td></tr>
+		</tbody>
+	</table>
+</form>
+
+<br/>

@@ -1,437 +1,293 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.webconsole.internal.obr;
 
-
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
+import java.net.URL;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
-import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.DefaultVariableResolver;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleUtil;
+import org.apache.felix.webconsole.internal.Logger;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.RepositoryAdmin;
+import org.osgi.service.obr.Resolver;
 import org.osgi.service.obr.Resource;
 
-
-public class BundleRepositoryRender extends BaseWebConsolePlugin
+/**
+ * This class provides a plugin for rendering the available OSGi Bundle Repositories
+ * and the resources they provide.
+ */
+public class BundleRepositoryRender extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
+    private static final String LABEL = "obr";
+    private static final String TITLE = "OSGi Repository";
+    private static final String[] CSS = null;
 
-    public static final String LABEL = "bundlerepo";
+    // templates
+    private final String TEMPLATE;
 
-    public static final String TITLE = "OSGi Repository";
-
-    public static final String PARAM_REPO_ID = "repositoryId";
-
-    public static final String PARAM_REPO_URL = "repositoryURL";
-
-    private static final String REPOSITORY_PROPERTY = "obr.repository.url";
-
-    private static final String ALL_CATEGORIES_OPTION = "*";
-
-    private static final String NO_CATEGORIES_OPTION = "---";
-
-    private static final String PAR_CATEGORIES = "category";
-
-    private String[] repoURLs;
-
-
-    public void activate( BundleContext bundleContext )
+    /**
+     *
+     */
+    public BundleRepositoryRender()
     {
-        super.activate( bundleContext );
+        super(LABEL, TITLE, CSS);
 
-        String urlStr = bundleContext.getProperty( REPOSITORY_PROPERTY );
-        List urlList = new ArrayList();
-
-        if ( urlStr != null )
-        {
-            StringTokenizer st = new StringTokenizer( urlStr );
-            while ( st.hasMoreTokens() )
-            {
-                urlList.add( st.nextToken() );
-            }
-        }
-
-        this.repoURLs = ( String[] ) urlList.toArray( new String[urlList.size()] );
+        // load templates
+        TEMPLATE = readTemplateFile("/templates/obr.html");
     }
 
-
-    public String getLabel()
-    {
-        return LABEL;
-    }
-
-
-    public String getTitle()
-    {
-        return TITLE;
-    }
-
-
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
+        // prepare variables
+        DefaultVariableResolver vars = ((DefaultVariableResolver) WebConsoleUtil.getVariableResolver(request));
+        vars.put("__data__", getData());
 
-        PrintWriter pw = response.getWriter();
-        this.header( pw );
+        response.getWriter().print(TEMPLATE);
+    }
 
-        RepositoryAdmin repoAdmin = getRepositoryAdmin();
-        if ( repoAdmin == null )
+    /**
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException
+    {
+        final RepositoryAdmin admin = getRepositoryAdmin();
+
+        if (admin == null)
         {
-            pw.println( "<tr class='content'>" );
-            pw.println( "<td class='content' colspan='4'>RepositoryAdmin Service not available</td>" );
-            pw.println( "</tr>" );
-
-            footer( pw );
-
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                "RepositoryAdmin service is missing");
             return;
         }
 
-        Repository[] repos = repoAdmin.listRepositories();
-        Set activeURLs = new HashSet();
-        if ( repos == null || repos.length == 0 )
+        final String action = request.getParameter("action");
+        final String deploy = request.getParameter("deploy");
+        final String deploystart = request.getParameter("deploystart");
+
+        if (action != null)
         {
-            pw.println( "<tr class='content'>" );
-            pw.println( "<td class='content' colspan='4'>No Active Repositories</td>" );
-            pw.println( "</tr>" );
+            doAction(action, request.getParameter("url"), admin);
+            response.getWriter().print(getData());
+            return;
         }
-        else
+
+        if (deploy != null || deploystart != null)
         {
-            for ( int i = 0; i < repos.length; i++ )
+            doDeploy(request.getParameterValues("bundle"), deploystart != null, admin);
+            doGet(request, response);
+            return;
+        }
+
+        super.doPost(request, response);
+    }
+
+    private final RepositoryAdmin getRepositoryAdmin()
+    {
+        try
+        {
+            return (RepositoryAdmin) super.getService(RepositoryAdmin.class.getName());
+        }
+        catch (Throwable t)
+        {
+            log("Cannot create RepositoryAdmin service tracker", t);
+            return null;
+        }
+    }
+
+    private final String getData()
+    {
+        final Bundle[] bundles = getBundleContext().getBundles();
+        try
+        {
+            return toJSON(getRepositoryAdmin(), bundles).toString();
+        }
+        catch (JSONException e)
+        {
+            log("Failed to serialize repository to JSON object.", e);
+            return "";
+        }
+
+    }
+
+    private final void doAction(String action, String urlParam, RepositoryAdmin admin)
+        throws IOException, ServletException
+    {
+        Repository[] repos = admin.listRepositories();
+        Repository repo = getRepository(repos, urlParam);
+
+        URL url = repo != null ? repo.getURL() : new URL(urlParam);
+
+        if ("delete".equals(action))
+        {
+            if (!admin.removeRepository(url))
             {
-                Repository repo = repos[i];
+                throw new ServletException("Failed to remove repository with URL " + url);
+            }
+        }
+        else if ("add".equals(action) || "refresh".equals(action))
+        {
+            try
+            {
+                admin.addRepository(url);
+            }
+            catch (IOException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new ServletException("Failed to " + action + " repository " + url
+                    + ": " + e.toString());
+            }
 
-                activeURLs.add( repo.getURL().toString() );
+        }
+    }
 
-                pw.println( "<tr class='content'>" );
-                pw.println( "<td class='content'>" + repo.getName() + "</td>" );
+    private final void doDeploy(String[] bundles, boolean start, RepositoryAdmin repoAdmin)
+    {
+        // check whether we have to do something
+        if (bundles == null || bundles.length == 0)
+        {
+            log("No resources to deploy");
+            return;
+        }
 
-                pw.print( "<td class='content'>" );
-                pw.print( "<a href='" + repo.getURL() + "' target='_blank' title='Show Repository " + repo.getURL()
-                    + "'>" + repo.getURL() + "</a>" );
-                pw.println( "</td>" );
+        Resolver resolver = repoAdmin.resolver();
 
-                pw.println( "<td class='content'>" + new Date( repo.getLastModified() ) + "</td>" );
-                pw.println( "<td class='content'>" );
-                pw.println( "<form>" );
-                pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + RefreshRepoAction.NAME
-                    + "'>" );
-                pw.println( "<input type='hidden' name='" + RefreshRepoAction.PARAM_REPO + "' value='" + repo.getURL()
-                    + "'>" );
-                pw.println( "<input class='submit' type='submit' value='Refresh'>" );
-                pw.println( "<input class='submit' type='submit' name='remove' value='Remove'>" );
-                pw.println( "</form>" );
-                pw.println( "</td>" );
-                pw.println( "</tr>" );
+        // prepare the deployment
+        for (int i = 0; i < bundles.length; i++)
+        {
+            String bundle = bundles[i];
+            if (bundle == null || bundle.equals("-"))
+            {
+                continue;
+            }
+
+            String filter = "(id=" + bundle + ")";
+            Resource[] resources = repoAdmin.discoverResources(filter);
+            if (resources != null && resources.length > 0)
+            {
+                resolver.add(resources[0]);
             }
         }
 
-        // list any repositories configured but not active
-        for ( int i = 0; i < this.repoURLs.length; i++ )
+        DeployerThread dt = new DeployerThread(resolver, new Logger(getBundleContext()),
+            start);
+        dt.start();
+    }
+
+    private static final Repository getRepository(Repository[] repos, String repositoryUrl)
+    {
+        if (repositoryUrl == null || repositoryUrl.length() == 0)
         {
-            if ( !activeURLs.contains( this.repoURLs[i] ) )
+            return null;
+        }
+
+        for (int i = 0; i < repos.length; i++)
+        {
+            if (repositoryUrl.equals(repos[i].getURL().toString()))
             {
-                pw.println( "<tr class='content'>" );
-                pw.println( "<td class='content'>-</td>" );
-                pw.println( "<td class='content'>" + this.repoURLs[i] + "</td>" );
-                pw.println( "<td class='content'>[inactive, click Refresh to activate]</td>" );
-                pw.println( "<td class='content'>" );
-                pw.println( "<form>" );
-                pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + RefreshRepoAction.NAME
-                    + "'>" );
-                pw.println( "<input type='hidden' name='" + RefreshRepoAction.PARAM_REPO + "' value='"
-                    + this.repoURLs[i] + "'>" );
-                pw.println( "<input class='submit' type='submit' value='Refresh'>" );
-                pw.println( "</form>" );
-                pw.println( "</td>" );
-                pw.println( "</tr>" );
+                return repos[i];
             }
         }
 
-        // entry of a new repository
-        pw.println( "<form>" );
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td class='content'>&nbsp;</td>" );
-        pw.println( "<td class='content' colspan='2'>" );
-        pw.println( "  <input class='input' type='text' name='" + RefreshRepoAction.PARAM_REPO
-            + "' value='' size='80'>" );
-        pw.println( "</td>" );
-        pw.println( "<td class='content'>" );
-        pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + RefreshRepoAction.NAME + "'>" );
-        pw.println( "<input class='submit' type='submit' value='Add'>" );
-        pw.println( "</td>" );
-        pw.println( "</tr>" );
-        pw.println( "</form>" );
-
-        this.footer( pw );
-
-        this.listResources( pw, repos, request.getParameter( PAR_CATEGORIES ) );
+        return null;
     }
 
-
-    private void header( PrintWriter pw )
+    private static final JSONObject toJSON(RepositoryAdmin admin, Bundle[] bundles)
+        throws JSONException
     {
-        pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th class='content container' colspan='4'>Bundle Repositories</th>" );
-        pw.println( "</tr>" );
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th class='content'>Name</th>" );
-        pw.println( "<th class='content'>URL</th>" );
-        pw.println( "<th class='content'>Last Modification Time</th>" );
-        pw.println( "<th class='content'>&nbsp;</th>" );
-        pw.println( "</tr>" );
-    }
+        JSONObject json = new JSONObject();
+        json.put("status", admin != null);
 
-
-    private void footer( PrintWriter pw )
-    {
-        pw.println( "</table>" );
-    }
-
-
-    private void listResources( PrintWriter pw, Repository[] repos, String category )
-    {
-
-        // assume no category if the all option
-        if ( ALL_CATEGORIES_OPTION.equals( category ) )
+        if (admin != null)
         {
-            category = null;
-        }
-
-        Map bundles = this.getBundles();
-
-        Map resSet = new HashMap();
-        SortedSet categories = new TreeSet();
-        SortedSet labels = new TreeSet();
-
-        for ( int i = 0; i < repos.length; i++ )
-        {
-            Resource[] resources = repos[i].getResources();
-            for ( int j = 0; resources != null && j < resources.length; j++ )
+            final Repository repositories[] = admin.listRepositories();
+            for (int i = 0; repositories != null && i < repositories.length; i++)
             {
-                Resource res = resources[j];
-
-                // get categories and check whether we should actually
-                // ignore this resource
-                boolean useResource;
-                final String[] cats = res.getCategories();
-                if ( cats == null )
-                {
-                    useResource = NO_CATEGORIES_OPTION.equals( category );
-                }
-                else
-                {
-                    useResource = false;
-                    for ( int ci = 0; cats != null && ci < cats.length; ci++ )
-                    {
-                        String cat = cats[ci];
-                        categories.add( cat );
-                        useResource |= ( category == null || cat.equals( category ) );
-                    }
-                }
-
-                if ( useResource )
-                {
-                    String symbolicName = res.getSymbolicName();
-                    Version version = res.getVersion();
-                    Version installedVersion = ( Version ) bundles.get( symbolicName );
-                    if ( installedVersion == null || installedVersion.compareTo( version ) < 0 )
-                    {
-                        Collection versions = ( Collection ) resSet.get( symbolicName );
-                        if ( versions == null )
-                        {
-                            // order versions, hence use a TreeSet
-                            versions = new TreeSet();
-                            resSet.put( symbolicName, versions );
-                        }
-                        versions.add( version );
-
-                        labels.add( res.getPresentationName() + Character.MAX_VALUE + symbolicName );
-                    }
-                }
+                json.append("repositories", toJSON(repositories[i], bundles));
             }
         }
 
-        boolean doForm = !resSet.isEmpty();
-        this.resourcesHeader( pw, doForm, category, categories );
+        return json;
 
-        for ( Iterator ri = labels.iterator(); ri.hasNext(); )
-        {
-            final String label = ( String ) ri.next();
-            final int idx = label.indexOf( Character.MAX_VALUE );
-            final String presName = label.substring( 0, idx );
-            final String symName = label.substring( idx + 1 );
-            final Collection versions = ( Collection ) resSet.remove( symName );
-            if ( versions != null )
-            {
-                this.printResource( pw, symName, presName, versions );
-            }
-        }
-
-        this.resourcesFooter( pw, doForm );
     }
 
-
-    private void resourcesHeader( PrintWriter pw, boolean doForm, String currentCategory, Collection categories )
+    private static final JSONObject toJSON(Repository repo, Bundle[] bundles)
+        throws JSONException
     {
+        JSONObject json = new JSONObject() //
+        .put("lastModified", repo.getLastModified()) //
+        .put("name", repo.getName()) //
+        .put("url", repo.getURL()); //
 
-        if ( doForm )
+        Resource[] resources = repo.getResources();
+        for (int i = 0; resources != null && i < resources.length; i++)
         {
-            pw.println( "<form method='post'>" );
-            pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + InstallFromRepoAction.NAME
-                + "'>" );
+            json.append("resources", toJSON(resources[i], bundles));
         }
 
-        pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th class='content container'>Available Resources</th>" );
-
-        if ( categories != null && !categories.isEmpty() )
-        {
-            pw.println( "<th class='content container' style='text-align:right'>Limit to Bundle Category:</th>" );
-            pw.println( "<th class='content container'>" );
-            Util.startScript( pw );
-            pw.println( "function reloadWithCat(field) {" );
-            pw.println( "  var query = '?" + PAR_CATEGORIES + "=' + field.value;" );
-            pw
-                .println( "  var dest = document.location.protocol + '//' + document.location.host + document.location.pathname + query;" );
-            pw.println( "  document.location = dest;" );
-            pw.println( "}" );
-            Util.endScript( pw );
-            pw.println( "<select class='select' name='__ignoreoption__' onChange='reloadWithCat(this);'>" );
-            pw.print( "<option value='" + ALL_CATEGORIES_OPTION + "'>all</option>" );
-            pw.print( "<option value='" + NO_CATEGORIES_OPTION + "'>none</option>" );
-            for ( Iterator ci = categories.iterator(); ci.hasNext(); )
-            {
-                String category = ( String ) ci.next();
-                pw.print( "<option value='" + category + "'" );
-                if ( category.equals( currentCategory ) )
-                {
-                    pw.print( " selected" );
-                }
-                pw.print( '>' );
-                pw.print( category );
-                pw.println( "</option>" );
-            }
-            pw.println( "</select>" );
-            pw.println( "</th>" );
-        }
-        else
-        {
-            pw.println( "<th class='content container'>&nbsp;</th>" );
-        }
-
-        pw.println( "</tr>" );
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th class='content'>Deploy Version</th>" );
-        pw.println( "<th class='content' colspan='2'>Name</th>" );
-        pw.println( "</tr>" );
+        return json;
     }
 
-
-    private void printResource( PrintWriter pw, String symbolicName, String presentationName, Collection versions )
+    private static final JSONObject toJSON(Resource resource, Bundle[] bundles)
+        throws JSONException
     {
-        pw.println( "<tr class='content'>" );
-
-        pw.println( "<td class='content' valign='top' align='center'>" );
-        pw.println( "<select class='select' name='bundle'>" );
-        pw.print( "<option value='" + AbstractObrPlugin.DONT_INSTALL_OPTION + "'>Select Version...</option>" );
-        for ( Iterator vi = versions.iterator(); vi.hasNext(); )
+        final String symbolicName = resource.getSymbolicName();
+        final String version = resource.getVersion().toString();
+        boolean installed = false;
+        for (int i = 0; symbolicName != null && !installed && bundles != null
+            && i < bundles.length; i++)
         {
-            Version version = ( Version ) vi.next();
-            pw.print( "<option value='" + symbolicName + "," + version + "'>" );
-            pw.print( version );
-            pw.println( "</option>" );
+            final String ver = (String) bundles[i].getHeaders("").get(
+                Constants.BUNDLE_VERSION);
+            installed = symbolicName.equals(bundles[i].getSymbolicName())
+                && version.equals(ver);
         }
-        pw.println( "</select>" );
-        pw.println( "</td>" );
+        JSONObject json = new JSONObject(resource.getProperties()) //
+        .put("id", resource.getId()) //
+        .put("presentationname", resource.getPresentationName()) //
+        .put("symbolicname", symbolicName) //
+        .put("url", resource.getURL()) //
+        .put("version", version) //
+        .put("url", resource.getURL()) //
+        .put("categories", resource.getCategories()) //
+        .put("installed", installed);
 
-        pw.println( "<td class='content'  colspan='2'>" + presentationName + " (" + symbolicName + ")</td>" );
-
-        pw.println( "</tr>" );
-    }
-
-
-    private void resourcesButtons( PrintWriter pw )
-    {
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td class='content'>&nbsp;</td>" );
-        pw.println( "<td class='content'>" );
-        pw.println( "<input class='submit' style='width:auto' type='submit' name='deploy' value='Deploy Selected'>" );
-        pw.println( "&nbsp;&nbsp;&nbsp;" );
-        pw
-            .println( "<input class='submit' style='width:auto' type='submit' name='deploystart' value='Deploy and Start Selected'>" );
-        pw.println( "</td></tr>" );
-    }
-
-
-    private void resourcesFooter( PrintWriter pw, boolean doForm )
-    {
-        if ( doForm )
-        {
-            this.resourcesButtons( pw );
-        }
-        pw.println( "</table></form>" );
-    }
-
-
-    private Map getBundles()
-    {
-        Map bundles = new HashMap();
-
-        Bundle[] installed = getBundleContext().getBundles();
-        for ( int i = 0; i < installed.length; i++ )
-        {
-            String ver = ( String ) installed[i].getHeaders().get( Constants.BUNDLE_VERSION );
-            Version bundleVersion = Version.parseVersion( ver );
-
-            // assume one bundle instance per symbolic name !!
-            // only add if there is a symbolic name !
-            if ( installed[i].getSymbolicName() != null )
-            {
-                bundles.put( installed[i].getSymbolicName(), bundleVersion );
-            }
-        }
-
-        return bundles;
-    }
-
-
-    protected RepositoryAdmin getRepositoryAdmin()
-    {
-        return ( RepositoryAdmin ) getService( "org.osgi.service.obr.RepositoryAdmin" );
+        // TODO: do we need these ?
+        // resource.getCapabilities()
+        // resource.getRequirements()
+        return json;
     }
 
 }
