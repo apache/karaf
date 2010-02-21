@@ -9,11 +9,13 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asFile;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.apache.felix.ipojo.architecture.Architecture;
@@ -31,6 +33,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.io.StreamUtils;
+import org.ops4j.lang.NullArgumentException;
 import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
@@ -68,70 +72,75 @@ public class VersionConflictTest {
 
 
     @Configuration
-    public static Option[] configure() throws MalformedURLException {
+    public static Option[] configure() throws NullArgumentException, FileNotFoundException, IOException {
 
         File tmp = new File("target/tmp");
         tmp.mkdirs();
 
-        String url1 =  // Version 1
-            newBundle()
-            .addClass( MyService.class )
-            .prepare()
-           .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterfaceV1")
-           .set(Constants.BUNDLE_VERSION, "1.0.0")
-           .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"1.0.0\"")
-            .build( asFile(new File(tmp, "ServiceInterfaceV1.jar"))).toURL().toExternalForm();
-
-        String url2 = // Version 2
+        File f1 = new File(tmp, "service-interface-v1.jar");
+        StreamUtils.copyStream(
                 newBundle()
-                    .addClass( MyService.class )
-                    .prepare()
-                   .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterfaceV2")
-                   .set(Constants.BUNDLE_VERSION, "2.0.0")
-                   .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"2.0.0\"")
-            .build( asFile(new File(tmp, "ServiceInterfaceV2.jar"))).toURL().toExternalForm();
+                .add( MyService.class )
+               .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterfaceV1")
+               .set(Constants.BUNDLE_VERSION, "1.0.0")
+               .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"1.0.0\"")
+               .build( withBnd()),
+                new FileOutputStream(f1),
+                true);
+        
+        File f2 = new File(tmp, "service-interface-v2.jar");
+        StreamUtils.copyStream(
+                newBundle()
+                .add( MyService.class )
+                .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterfaceV2")
+                .set(Constants.BUNDLE_VERSION, "2.0.0")
+                .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"2.0.0\"")
+                .build( withBnd()),
+                new FileOutputStream(f2),
+                true);
+        
+        File c1 = new File(tmp, "component-v1.jar");
+        StreamUtils.copyStream(
+                newBundle()
+               .add(MyComponent.class)
+               .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1")
+               .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[1.0.0, 1.0.0]\"")
+               .build( asiPOJOBundle(new File("vprovider-v1.xml"))),
+               new FileOutputStream(c1),
+               true);
 
+        File c2 = new File(tmp, "component-v2.jar");
+        StreamUtils.copyStream(
+                newBundle()
+               .add(MyComponent.class)
+               .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV2")
+               .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[2.0.0, 2.0.0]\"")
+               .build( asiPOJOBundle(new File("vprovider-v2.xml"))),
+               new FileOutputStream(c2),
+               true);
 
-        String c1 = newBundle()
-            .addClass(MyComponent.class)
-            .prepare(
-              with()
-                  .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1")
-                  .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[1.0.0, 1.0.0]\"")
-              )
-              .build( asiPOJOBundle(new File(tmp, "vprovider-v1.jar"), new File("vprovider-v1.xml"))).toExternalForm();
-
-      String c2 = newBundle()
-          .addClass(MyComponent.class)
-          .prepare(
-              with()
-                  .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV2")
-                  .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[2.0.0, 2.0.0]\"")
-                  .set(Constants.BUNDLE_VERSION, "2.0")
-              )
-              .build( asiPOJOBundle(new File(tmp, "vprovider-v2.0.jar"), new File("vprovider-v2.xml"))).toExternalForm();
-
-      String cons =   newBundle()
-        .addClass(MyCons.class)
-        .prepare(
-            with()
-                .set(Constants.BUNDLE_SYMBOLICNAME,"MyCons")
-                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[2.0.0, 2.0.0]\"")
-                .set(Constants.BUNDLE_VERSION, "2.0")
-            )
-        .build( asiPOJOBundle(new File(tmp, "cons.jar"), new File("cons.xml"))).toExternalForm();
-
-
-      String consV1 =   newBundle()
-      .addClass(MyCons.class)
-      .prepare(
-          with()
-              .set(Constants.BUNDLE_SYMBOLICNAME,"MyCons")
-              .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[1.0.0, 1.0.0]\"")
-              .set(Constants.BUNDLE_VERSION, "1.0")
-          )
-      .build( asiPOJOBundle(new File(tmp, "consv1.jar"), new File("cons.xml"))).toExternalForm();
-
+        File cons = new File(tmp, "cons.jar");
+        StreamUtils.copyStream(
+                newBundle()
+               .add(MyCons.class)
+               .set(Constants.BUNDLE_SYMBOLICNAME,"MyCons")
+               .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[2.0.0, 2.0.0]\"")
+               .set(Constants.BUNDLE_VERSION, "2.0")
+               .build(asiPOJOBundle(new File("cons.xml"))),
+               new FileOutputStream(cons),
+               true);
+        
+        File consV1 = new File(tmp, "cons-v1.jar");
+        StreamUtils.copyStream(
+                newBundle()
+               .add(MyCons.class)
+               .set(Constants.BUNDLE_SYMBOLICNAME,"MyCons")
+               .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[1.0.0, 1.0.0]\"")
+               .set(Constants.BUNDLE_VERSION, "1.0")
+               .build(asiPOJOBundle(new File("cons.xml"))),
+               new FileOutputStream(consV1),
+               true);
+        
         Option[] opt =  options(
                 felix(),
                 equinox(),
@@ -140,18 +149,16 @@ public class VersionConflictTest {
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject()),
-                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
+                        mavenBundle().groupId("org.ops4j.base").artifactId("ops4j-base-lang").versionAsInProject()
+//                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
                         ),
-                        systemProperty( "url1" ).value( url1 ),
-                        systemProperty( "url2" ).value( url2 ),
+                        systemProperty( "url1" ).value( f1.toURI().toURL().toExternalForm() ),
+                        systemProperty( "url2" ).value( f2.toURI().toURL().toExternalForm() ),
 
-                        systemProperty( "c1" ).value( c1 ),
-                        systemProperty( "c2" ).value( c2 ),
-                        systemProperty( "cons" ).value( cons ),
-                        systemProperty( "consV1" ).value( consV1 )
-
-
-
+                        systemProperty( "c1" ).value( c1.toURI().toURL().toExternalForm() ),
+                        systemProperty( "c2" ).value( c2.toURI().toURL().toExternalForm() ),
+                        systemProperty( "cons" ).value( cons.toURI().toURL().toExternalForm() ),
+                        systemProperty( "consV1" ).value( consV1.toURI().toURL().toExternalForm() )
                 );
         return opt;
     }

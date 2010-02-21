@@ -256,7 +256,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             String type = meta.getFieldType();
             if (type.endsWith("[]")) {
                 if (dep.isProxy()) {
-                    warn("Arrays cannot be used for proxied dependencies - Disable the proxy mode");
+                    info("Arrays cannot be used for proxied dependencies - Disable the proxy mode");
                     dep.setProxy(false);
                 }
                 // Set the dependency to multiple

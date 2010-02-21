@@ -345,9 +345,14 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                     // To load the proxy we use the POJO class loader. Indeed, this classloader imports iPOJO (so can access to Nullable) and has
                     // access to the service specification.
                     try {
+                        ClassLoader cl = new NullableClassLoader(
+                                getHandler().getInstanceManager().getClazz().getClassLoader(), 
+                                getSpecification().getClassLoader());
+                        
                         m_nullable =
-                            Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] {
+                            Proxy.newProxyInstance(cl, new Class[] {
                                     getSpecification(), Nullable.class }, new NullableObject()); // NOPMD
+                        
                     } catch (NoClassDefFoundError e) {
                         // A NoClassDefFoundError is thrown if the specification uses a class not accessible by the actual instance.
                         // It generally comes from a missing import.
@@ -778,6 +783,50 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         setAggregate(true);
         m_type = type;
     }
+    
+    /**
+     * Classloader for nullable objects.
+     */
+    private class NullableClassLoader extends ClassLoader {
+       /**
+        * Component classloader. 
+        */
+        private ClassLoader m_component;
+       
+       /**
+        * Specification classloader. 
+        */
+        private ClassLoader m_specification;
+       
+        /**
+         * Creates a NullableClassLoader.
+         * @param cmp the component class loader.
+         * @param spec the specification class loader.
+         */
+        public NullableClassLoader(ClassLoader cmp, ClassLoader spec) {
+            m_component = cmp;
+            m_specification = spec;
+        }
+        
+        /**
+         * Loads the given class.
+         * This method uses the classloader of the component class
+         * and (if not found) the specification classloader.
+         * @param name the class name
+         * @return the class object
+         * @throws ClassNotFoundException if the class is not found by the two classloaders.
+         * @see java.lang.ClassLoader#loadClass(java.lang.String)
+         */
+        public Class loadClass(String name) throws ClassNotFoundException {
+            try {
+                return m_component.loadClass(name);
+            } catch (ClassNotFoundException e) {
+                return m_specification.loadClass(name);
+            }
+        }
+        
+       
+    }
 
     /**
      * Creates smart proxy object for proxied scalar dependencies.
@@ -830,7 +879,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
         /**
          * Loads the given class.
-         * This class use the classloader of the specification class
+         * This method uses the classloader of the specification class
          * or the handler class loader.
          * @param name the class name
          * @return the class object

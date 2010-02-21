@@ -39,11 +39,13 @@
   <module>core/service-dependency-comparator</module>
   <module>core/service-providing-strategies</module>
   <module>core/service-providing-inheritance</module>
+  <module>core/service-dependency-optional</module>
   <module>core/configuration</module>
   <module>core/handler</module>
   <module>core/external-handlers</module>
   <module>core/bad-configurations</module>
   <module>core/logger</module>
+  <module>core/factory-version</module>
   <module>composite/composite-runtime</module>
   <module>composite/import-export</module>
   <module>composite/service-instance</module>

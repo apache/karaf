@@ -8,9 +8,8 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
 import java.io.File;
 
@@ -31,6 +30,7 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 @RunWith( JUnit4TestRunner.class )
@@ -68,45 +68,34 @@ public class FactoryVersionTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject()),
-                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject())
+                        // mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
                         ),
                 provision(
                         newBundle()
-                            .addClass( MyService.class )
-                            .prepare()
+                            .add( MyService.class )
                            .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
                            .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                            .build( asURL() ).toExternalForm()
+                            .build( withBnd() )
                     ),
                provision(
                        // Component V1
                         newBundle()
-                            .addClass(MyComponent.class)
-                            .prepare(
-                                    with()
-                                        .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1")
-                                        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                                    )
-                            .build( asiPOJOBundle(new File(tmp, "provider-v1.jar"), new File("provider-v1.xml"))).toExternalForm(),
+                            .add(MyComponent.class)
+                            .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1")
+                            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
+                            .build( asiPOJOBundle(new File(tmp, "provider-v1.jar"), new File("provider-v1.xml"))),
                      // Component V1.1 (Bundle Version)
                         newBundle()
-                            .addClass(MyComponent.class)
-                            .prepare(
-                                    with()
-                                        .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1.1")
-                                        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                                        .set(Constants.BUNDLE_VERSION, "1.1")
-                                    )
-                            .build( asiPOJOBundle(new File(tmp, "provider-v1.1.jar"), new File("provider-v1.1.xml"))).toExternalForm(),
+                            .add(MyComponent.class)
+                            .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1.1")
+                            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
+                            .set(Constants.BUNDLE_VERSION, "1.1")
+                            .build( asiPOJOBundle(new File(tmp, "provider-v1.1.jar"), new File("provider-v1.1.xml"))),
                 // Instance declaration
                 newBundle()
-                    .prepare(
-                            with()
-                                .set(Constants.BUNDLE_SYMBOLICNAME,"Instances")
-                            )
-                    .build( asiPOJOBundle(new File(tmp, "instances.jar"), new File("instances.xml"))).toExternalForm()
-
+                    .set(Constants.BUNDLE_SYMBOLICNAME,"Instances")
+                    .build( asiPOJOBundle(new File(tmp, "instances.jar"), new File("instances.xml")))
                     )
                 );
         return opt;
@@ -157,30 +146,36 @@ public class FactoryVersionTest {
     }
 
     @Test
-    public void testServiceProperty() {
+    public void testServiceProperty() throws InvalidSyntaxException {
+          
           // Version 1.0
-          ServiceReference refv1 = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-v1");
+          //ServiceReference refv1 = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-v1");
+          ServiceReference[] refv1 = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=instance-v1)");
           Assert.assertNotNull(refv1);
-          String version = (String) refv1.getProperty("factory.version");
+          String version = (String) refv1[0].getProperty("factory.version");
           Assert.assertEquals("1.0", version);
 
           // Version 1.1
-          ServiceReference refv11 = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-v1.1");
+          ServiceReference[] refv11 = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=instance-v1.1)");          
+          //ServiceReference refv11 = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-v1.1");
           Assert.assertNotNull(refv11);
-          String version11 = (String) refv11.getProperty("factory.version");
+          String version11 = (String) refv11[0].getProperty("factory.version");
 
           Assert.assertEquals("1.1", version11);
 
           // No Version
-          ServiceReference refany = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-any");
+          ServiceReference[] refany = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=instance-any)");          
+
+          // ServiceReference refany = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-any");
           Assert.assertNotNull(refany);
-          String any = (String) refany.getProperty("factory.version");
+          String any = (String) refany[0].getProperty("factory.version");
           Assert.assertNotNull(any);
 
           // No version set in the factory, so no version.
-          ServiceReference refmci = ipojo.getServiceReferenceByName(MyService.class.getName(), "MyComponentInstance");
+          ServiceReference[] refmci = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=MyComponentInstance)");          
+          //ServiceReference refmci = ipojo.getServiceReferenceByName(MyService.class.getName(), "MyComponentInstance");
           Assert.assertNotNull(refmci);
-          String mci = (String) refmci.getProperty("factory.version");
+          String mci = (String) refmci[0].getProperty("factory.version");
           Assert.assertNull(mci);
     }
 
