@@ -613,6 +613,7 @@ loop:   for (;;)
 
     public static boolean checkSubstring(String[] pieces, String s)
     {
+System.out.println("MATCHING " + s);
         // Walk the pieces to match the string
         // There are implicit stars between each piece,
         // and the first and last pieces might be "" to anchor the match.
@@ -627,7 +628,9 @@ loop:   for (;;)
 loop:   for (int i = 0; i < len; i++)
         {
             String piece = pieces[i];
-            // initial non-star; assert index == 0
+
+            // If this is the first piece, then make sure the
+            // string starts with it.
             if (i == 0)
             {
                 if (!s.startsWith(piece))
@@ -636,8 +639,10 @@ loop:   for (int i = 0; i < len; i++)
                     break loop;
                 }
             }
-            // this is the last piece
-            else if (i == len - 1)
+
+            // If this is the last piece, then make sure the
+            // string ends with it.
+            if (i == len - 1)
             {
                 if (s.endsWith(piece))
                 {
@@ -649,10 +654,11 @@ loop:   for (int i = 0; i < len; i++)
                 }
                 break loop;
             }
-            // assert i > 0 && i < len-1
-            else
+
+            // If this is neither the first or last piece, then
+            // make sure the string contains it.
+            if ((i > 0) && (i < (len - 1)))
             {
-                // Sure wish stringbuffer supported e.g. indexOf
                 index = s.indexOf(piece, index);
                 if (index < 0)
                 {
@@ -660,7 +666,8 @@ loop:   for (int i = 0; i < len; i++)
                     break loop;
                 }
             }
-            // start beyond the matching piece
+
+            // Move string index beyond the matching piece.
             index += piece.length();
         }
 
