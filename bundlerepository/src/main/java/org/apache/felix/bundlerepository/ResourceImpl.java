@@ -31,7 +31,6 @@ public class ResourceImpl implements Resource
 
     private Repository m_repo = null;
     private Map m_map = null;
-    private List m_catList = new ArrayList();
     private List m_capList = new ArrayList();
     private List m_reqList = new ArrayList();
 
@@ -59,7 +58,6 @@ public class ResourceImpl implements Resource
         if (resource != null)
         {
             m_map.putAll(resource.getProperties());
-            m_catList.addAll(resource.m_catList);
             m_capList.addAll(resource.m_capList);
             m_reqList.addAll(resource.m_reqList);
         }
@@ -151,12 +149,23 @@ public class ResourceImpl implements Resource
 
     public String[] getCategories()
     {
-        return (String[]) m_catList.toArray(new String[m_catList.size()]);
+        List catList = (List) m_map.get(CATEGORY);
+        if (catList == null)
+        {
+            return new String[0];
+        }
+        return (String[]) catList.toArray(new String[catList.size()]);
     }
 
     protected void addCategory(CategoryImpl cat)
     {
-        m_catList.add(cat.getId());
+        List catList = (List) m_map.get(CATEGORY);
+        if (catList == null)
+        {
+            catList = new ArrayList();
+            m_map.put(CATEGORY, catList);
+        }
+        catList.add(cat.getId());
     }
 
     public Repository getRepository()
@@ -207,6 +216,17 @@ public class ResourceImpl implements Resource
             else if (key.equals(SIZE))
             {
                 value = Long.valueOf(value.toString());
+            }
+            else if (key.equals(CATEGORY))
+            {
+                if (value instanceof Collection)
+                {
+                    value = new ArrayList((Collection) value);
+                }
+                else
+                {
+                    value = Arrays.asList(value.toString().split(","));
+                }
             }
     
             return m_map.put(key, value);

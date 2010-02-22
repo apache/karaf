@@ -58,9 +58,11 @@ public interface Resource
 
     final String SIZE = "size";
 
+    final String CATEGORY = "category";
+
     final static String[] KEYS = { DESCRIPTION, SIZE, ID, LICENSE_URL,
             DOCUMENTATION_URL, COPYRIGHT, SOURCE_URL, PRESENTATION_NAME,
-            SYMBOLIC_NAME, VERSION, URL };
+            SYMBOLIC_NAME, VERSION, URL, CATEGORY };
 
     // get readable name
 
