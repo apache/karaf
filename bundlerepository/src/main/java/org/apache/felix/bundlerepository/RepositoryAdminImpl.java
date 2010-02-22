@@ -190,7 +190,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
                     for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
                     {
                         if (caps[capIdx].getName().equals(requirements[reqIdx].getName())
-                                && requirements[reqIdx].isSatisfied(caps[capIdx]))
+                            && requirements[reqIdx].isSatisfied(caps[capIdx]))
                         {
                             reqMatch = true;
                             break;
