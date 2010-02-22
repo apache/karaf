@@ -70,6 +70,15 @@ public interface Resolver
 
     Resource[] getRequiredResources();
 
+    /**
+     * Start the resolution process and return whether the constraints have
+     * been successfully met or not.
+     * The resolution can be interrupted by a call to Thread.interrupt() at any
+     * time.  The result will be to stop the resolver and throw an InterruptedException.
+     *
+     * @return <code>true</code> if the resolution has succeeded else <code>false</code>
+     * @throws InterrupteResolutionException if the resolution has been interrupted
+     */
     boolean resolve();
 
     void deploy(boolean start);

@@ -22,6 +22,7 @@ import java.net.URL;
 
 import junit.framework.TestCase;
 
+import org.osgi.service.obr.InterrupteResolutionException;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.Requirement;
 import org.osgi.service.obr.Resolver;
@@ -74,6 +75,26 @@ public class ResolverImplTest extends TestCase
         Resolver resolver = repoAdmin.resolver();
         resolver.add(repoAdmin.requirement("package", "(package=org.apache.felix.test.osgi)"));
         assertTrue(resolver.resolve());
+    }
+
+    public void testResolveInterrupt() throws Exception
+    {
+        RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
+        repoAdmin.addRepository(getClass().getResource("/repo_for_resolvertest.xml"));
+
+        Resolver resolver = repoAdmin.resolver();
+        resolver.add(repoAdmin.requirement("package", "(package=org.apache.felix.test.osgi)"));
+
+        Thread.currentThread().interrupt();
+        try
+        {
+            resolver.resolve();
+            fail("An excepiton should have been thrown");
+        }
+        catch (InterrupteResolutionException e)
+        {
+            // ok
+        }
     }
 
     public static void main(String[] args) throws Exception

@@ -301,6 +301,7 @@ public class ResolverImpl implements Resolver
     {
         for (Iterator iter = m_addedSet.iterator(); iter.hasNext(); )
         {
+            checkInterrupt();
             Resource resource = (Resource) iter.next();
             Capability[] caps = resource.getCapabilities();
             for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
@@ -322,6 +323,7 @@ public class ResolverImpl implements Resolver
     {
         for (Iterator iterator = m_resolveSet.iterator(); iterator.hasNext(); )
         {
+            checkInterrupt();
             Resource resource = (Resource) iterator.next();
             Capability[] caps = resource.getCapabilities();
             for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
@@ -348,6 +350,7 @@ public class ResolverImpl implements Resolver
         Resource[] resources = m_local.getResources();
         for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
         {
+            checkInterrupt();
             // We don't need to look at resources we've already looked at.
             if (!m_failedSet.contains(resources[resIdx])
                 && !m_resolveSet.contains(resources[resIdx]))
@@ -382,6 +385,7 @@ public class ResolverImpl implements Resolver
             Resource[] resources = repos[repoIdx].getResources();
             for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
             {
+                checkInterrupt();
                 // We don't need to look at resources we've already looked at.
                 if (!m_failedSet.contains(resources[resIdx])
                     && !m_resolveSet.contains(resources[resIdx]))
@@ -471,6 +475,14 @@ public class ResolverImpl implements Resolver
         }
 
         return (best == null) ? null : best;
+    }
+
+    private void checkInterrupt()
+    {
+        if (Thread.interrupted())
+        {
+            throw new InterrupteResolutionException();
+        }
     }
 
     public synchronized void deploy(boolean start)
