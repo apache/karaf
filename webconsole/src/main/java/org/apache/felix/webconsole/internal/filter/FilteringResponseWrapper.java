@@ -57,6 +57,10 @@ public class FilteringResponseWrapper extends HttpServletResponseWrapper
     /**
      * Creates a wrapper instance using the given resource bundle for
      * translations.
+     *
+     * @param response the response to wrap 
+     * @param locale a resource bundle, that will be used for translation of the strings
+     * @param request the original request - used to obtain the variable resolver
      */
     public FilteringResponseWrapper( final HttpServletResponse response, final ResourceBundle locale,
         final ServletRequest request )
@@ -72,6 +76,8 @@ public class FilteringResponseWrapper extends HttpServletResponseWrapper
      * is being generated a filtering writer is returned which translates
      * strings enclosed in <code>${}</code> according to the resource bundle
      * configured for this response.
+     *
+     * @see javax.servlet.ServletResponseWrapper#getWriter()
      */
     public PrintWriter getWriter() throws IOException
     {
@@ -94,7 +100,7 @@ public class FilteringResponseWrapper extends HttpServletResponseWrapper
     }
 
 
-    private boolean doWrap()
+    private final boolean doWrap()
     {
         boolean doWrap = getContentType() != null && getContentType().indexOf( "text/html" ) >= 0;
         return doWrap;

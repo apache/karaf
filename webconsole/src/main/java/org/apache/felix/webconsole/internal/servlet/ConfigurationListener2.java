@@ -34,7 +34,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
 class ConfigurationListener2 extends ConfigurationListener implements MetaTypeProvider
 {
 
-    private final String pid;
+    final String pid; // reduces visibility because access to this was made though synthetic accessor method
 
     private ObjectClassDefinition ocd;
 

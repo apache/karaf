@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.*;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
-import org.apache.felix.webconsole.internal.Util;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -176,9 +175,11 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         //ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
         PrintWriter pw = response.getWriter();
 
-        Util.startScript(pw);
+        pw.println( "<script type='text/javascript'>" );
+        pw.println( "// <![CDATA[" );
         pw.println("$(document).ready(function() {$('#tabs').tabs()} );");
-        Util.endScript(pw);
+        pw.println( "// ]]>" );
+        pw.println( "</script>" );
 
         pw.println("<br/><p class=\"statline\">");
 

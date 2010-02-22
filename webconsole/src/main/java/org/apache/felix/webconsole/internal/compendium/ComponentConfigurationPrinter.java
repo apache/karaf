@@ -36,15 +36,24 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 
 
+/**
+ * ComponentConfigurationPrinter prints the available SCR services. 
+ */
 public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
 {
 
+    /**
+     * @see org.apache.felix.webconsole.ConfigurationPrinter#getTitle()
+     */
     public String getTitle()
     {
         return "Declarative Services Components";
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.ConfigurationPrinter#printConfiguration(java.io.PrintWriter)
+     */
     public void printConfiguration( PrintWriter pw )
     {
         ServiceReference sr = getBundleContext().getServiceReference( "org.apache.felix.scr.ScrService" );
@@ -67,7 +76,7 @@ public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
     }
 
 
-    public void printComponents( final PrintWriter pw, final Component[] components )
+    private static final void printComponents( final PrintWriter pw, final Component[] components )
     {
         if ( components == null || components.length == 0 )
         {
@@ -93,7 +102,7 @@ public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
     }
 
 
-    private void component( PrintWriter pw, Component component )
+    private static final void component( PrintWriter pw, Component component )
     {
 
         pw.print( component.getId() );
@@ -115,7 +124,7 @@ public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
     }
 
 
-    private void listServices( PrintWriter pw, Component component )
+    private static void listServices( PrintWriter pw, Component component )
     {
         String[] services = component.getServices();
         if ( services == null )
@@ -139,7 +148,7 @@ public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
     }
 
 
-    private void listReferences( PrintWriter pw, Component component )
+    private static final void listReferences( PrintWriter pw, Component component )
     {
         Reference[] refs = component.getReferences();
         if ( refs != null )
@@ -197,7 +206,7 @@ public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
     }
 
 
-    private void listProperties( PrintWriter pw, Component component )
+    private static final void listProperties( PrintWriter pw, Component component )
     {
         Dictionary props = component.getProperties();
         if ( props != null )

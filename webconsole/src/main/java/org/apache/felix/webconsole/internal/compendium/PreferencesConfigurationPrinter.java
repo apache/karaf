@@ -27,18 +27,28 @@ import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
 
 
+/**
+ * PreferencesConfigurationPrinter uses the {@link Preferences} service
+ * to print the store bundle preferences.
+ */
 public class PreferencesConfigurationPrinter extends AbstractConfigurationPrinter
 {
 
-    public static final String TITLE = "Preferences";
+    private static final String TITLE = "Preferences";
 
 
+    /**
+     * @see org.apache.felix.webconsole.ConfigurationPrinter#getTitle()
+     */
     public String getTitle()
     {
         return TITLE;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.ConfigurationPrinter#printConfiguration(java.io.PrintWriter)
+     */
     public void printConfiguration( PrintWriter printWriter )
     {
         ServiceReference sr = getBundleContext().getServiceReference( PreferencesService.class.getName() );
@@ -51,13 +61,13 @@ public class PreferencesConfigurationPrinter extends AbstractConfigurationPrinte
             PreferencesService ps = ( PreferencesService ) getBundleContext().getService( sr );
             try
             {
-                this.printPreferences( printWriter, ps.getSystemPreferences() );
+                printPreferences( printWriter, ps.getSystemPreferences() );
 
                 String[] users = ps.getUsers();
                 for ( int i = 0; users != null && i < users.length; i++ )
                 {
                     printWriter.println( "*** User Preferences " + users[i] + ":" );
-                    this.printPreferences( printWriter, ps.getUserPreferences( users[i] ) );
+                    printPreferences( printWriter, ps.getUserPreferences( users[i] ) );
                 }
             }
             catch ( BackingStoreException bse )
@@ -72,7 +82,7 @@ public class PreferencesConfigurationPrinter extends AbstractConfigurationPrinte
     }
 
 
-    private void printPreferences( PrintWriter pw, Preferences prefs ) throws BackingStoreException
+    private static final void printPreferences( PrintWriter pw, Preferences prefs ) throws BackingStoreException
     {
 
         final String[] children = prefs.childrenNames();
@@ -86,7 +96,7 @@ public class PreferencesConfigurationPrinter extends AbstractConfigurationPrinte
         {
             for ( int i = 0; i < children.length; i++ )
             {
-                this.printPreferences( pw, prefs.node( children[i] ) );
+                printPreferences( pw, prefs.node( children[i] ) );
             }
 
             for ( int i = 0; i < keys.length; i++ )

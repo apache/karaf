@@ -22,7 +22,10 @@ import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-
+/**
+ * AbstractConfigurationPrinter is an utility class, that provides a basic implementation
+ * of {@link ConfigurationPrinter} and {@link OsgiManagerPlugin} interfaces.
+ */
 public abstract class AbstractConfigurationPrinter implements ConfigurationPrinter, OsgiManagerPlugin
 {
 
@@ -31,6 +34,9 @@ public abstract class AbstractConfigurationPrinter implements ConfigurationPrint
     private ServiceRegistration registration;
 
 
+    /**
+     * @see org.apache.felix.webconsole.internal.OsgiManagerPlugin#activate(org.osgi.framework.BundleContext)
+     */
     public void activate( BundleContext bundleContext )
     {
         this.bundleContext = bundleContext;
@@ -38,6 +44,9 @@ public abstract class AbstractConfigurationPrinter implements ConfigurationPrint
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.internal.OsgiManagerPlugin#deactivate()
+     */
     public void deactivate()
     {
         this.registration.unregister();
@@ -45,6 +54,14 @@ public abstract class AbstractConfigurationPrinter implements ConfigurationPrint
     }
 
 
+    /**
+     * Returns the <code>BundleContext</code> with which this plugin has been
+     * activated. If the plugin has not be activated by calling the
+     * {@link #activate(BundleContext)} method, this method returns
+     * <code>null</code>.
+     *
+     * @return the bundle context or <code>null</code> if the bundle is not activated.
+     */
     protected BundleContext getBundleContext()
     {
         return bundleContext;

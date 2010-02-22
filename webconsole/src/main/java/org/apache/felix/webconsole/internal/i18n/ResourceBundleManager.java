@@ -30,6 +30,11 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 
 
+/**
+ * The ResourceBundleManager manages resource bundle instance per OSGi Bundle.
+ * It contains a local cache, for bundles, but when a bundle is being unistalled,
+ * its resources stored in the cache are cleaned up.
+ */
 public class ResourceBundleManager implements BundleListener
 {
 
@@ -40,6 +45,11 @@ public class ResourceBundleManager implements BundleListener
     private final Map resourceBundleCaches;
 
 
+    /**
+     * Creates a new object and adds self as a bundle listener
+     *
+     * @param bundleContext the bundle context of the Web Console.
+     */
     public ResourceBundleManager( final BundleContext bundleContext )
     {
         this.bundleContext = bundleContext;
@@ -50,12 +60,24 @@ public class ResourceBundleManager implements BundleListener
     }
 
 
+    /**
+     * Removes the bundle lister.
+     */
     public void dispose()
     {
         bundleContext.removeBundleListener( this );
     }
 
 
+    /**
+     * This method is used to retrieve a /cached/ instance of the i18n resource associated
+     * with a given bundle.
+     *
+     * @param provider the bundle, provider of the resources
+     * @param locale the requested locale.
+     * @return the resource bundle - if not bundle with the requested locale exists, 
+     *   the default locale is used.
+     */
     public ResourceBundle getResourceBundle( final Bundle provider, final Locale locale )
     {
         // check whether we have to return the resource bundle for the
@@ -85,7 +107,10 @@ public class ResourceBundleManager implements BundleListener
 
     // ---------- BundleListener
 
-    public void bundleChanged( BundleEvent event )
+    /**
+     * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
+     */
+    public final void bundleChanged( BundleEvent event )
     {
         if ( event.getType() == BundleEvent.STOPPED )
         {

@@ -72,8 +72,7 @@ public class DeployerThread extends Thread
         }
         catch ( Exception ie )
         {
-            Throwable cause = ( ie.getCause() != null ) ? ie.getCause() : ie;
-            logger.log( LogService.LOG_ERROR, "Cannot install bundles", cause );
+            logger.log( LogService.LOG_ERROR, "Cannot install bundles", ie );
         }
     }
 

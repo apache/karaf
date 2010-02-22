@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.VariableResolver;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.osgi.framework.ServiceReference;
 
@@ -58,10 +57,14 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     // the CSS references (null if none)
     private final String[] cssReferences;
 
-    // the delegatee variable resolver
-    private VariableResolver varResolver;
-
-
+    /**
+     * Creates a new wrapper for a Web Console Plugin
+     *
+     * @param label the label
+     * @param title the title
+     * @param plugin the plugin itself
+     * @param serviceReference reference to the plugin
+     */
     public WebConsolePluginAdapter( String label, String title, Servlet plugin, ServiceReference serviceReference )
     {
         this.label = label;
@@ -78,6 +81,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
 
     /**
      * Returns the label of this plugin page as defined in the constructor.
+     *
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#getLabel()
      */
     public String getLabel()
     {
@@ -87,6 +92,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
 
     /**
      * Returns the title of this plugin page as defined in the constructor.
+     *
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#getTitle()
      */
     public String getTitle()
     {
@@ -98,6 +105,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
      * Returns the CSS references from the
      * {@link WebConsoleConstants#PLUGIN_CSS_REFERENCES felix.webconsole.css}
      * service registration property of the plugin.
+     *
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#getCssReferences()
      */
     protected String[] getCssReferences()
     {
@@ -108,6 +117,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     /**
      * Call the plugin servlet's service method to render the content of this
      * page.
+     *
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     protected void renderContent( HttpServletRequest req, HttpServletResponse res ) throws ServletException,
         IOException
@@ -120,6 +131,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
      * Returns the registered plugin class to be able to call the
      * <code>getResource()</code> method on that object for this plugin to
      * provide additional resources.
+     *
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#getResourceProvider()
      */
     protected Object getResourceProvider()
     {
@@ -131,6 +144,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
 
     /**
      * Initializes this servlet as well as the plugin servlet.
+     *
+     * @see javax.servlet.GenericServlet#init(javax.servlet.ServletConfig)
      */
     public void init( ServletConfig config ) throws ServletException
     {
@@ -166,6 +181,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
      * {@link #renderContent(HttpServletRequest, HttpServletResponse)}
      * method is called without any decorations and without setting any
      * response headers.
+     *
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#isHtmlRequest(javax.servlet.http.HttpServletRequest)
      */
     protected boolean isHtmlRequest( final HttpServletRequest request )
     {
@@ -179,6 +196,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
      * until the abstract web console plugin calls the
      * {@link #renderContent(HttpServletRequest, HttpServletResponse)}
      * method.
+     *
+     * @see javax.servlet.http.HttpServlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
      */
     public void service( ServletRequest req, ServletResponse resp ) throws ServletException, IOException
     {
@@ -197,6 +216,8 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
 
     /**
      * Destroys this servlet as well as the plugin servlet.
+     *
+     * @see javax.servlet.GenericServlet#destroy()
      */
     public void destroy()
     {
@@ -207,7 +228,6 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
         }
         finally
         {
-            varResolver = null;
             deactivate();
         }
     }

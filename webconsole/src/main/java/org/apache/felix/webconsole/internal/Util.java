@@ -17,23 +17,24 @@
 package org.apache.felix.webconsole.internal;
 
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 
 /**
- * The <code>Util</code> TODO
+ * The <code>Util</code> class contains various utility methods used internally
+ * by the web console implementation and the build-in plugins.
  */
 public class Util
 {
+
+    // FIXME: from the constants below only PARAM_ACTION is used, consider removeal of others?
 
     /** web apps subpage */
     public static final String PAGE_WEBAPPS = "/webapps";
@@ -57,47 +58,6 @@ public class Util
     public static final String VALUE_SHUTDOWN = "shutdown";
 
 
-    public static void startScript( PrintWriter pw )
-    {
-        pw.println( "<script type='text/javascript'>" );
-        pw.println( "// <![CDATA[" );
-    }
-
-
-    public static void endScript( PrintWriter pw )
-    {
-        pw.println( "// ]]>" );
-        pw.println( "</script>" );
-    }
-
-    public static void script( PrintWriter pw, String appRoot, String scriptName )
-    {
-        pw.println( "<script src='" + appRoot + "/res/ui/" + scriptName + "' language='JavaScript'></script>" );
-    }
-
-    public static void spool( String res, HttpServletResponse resp ) throws IOException
-    {
-        InputStream ins = getResource( res );
-        if ( ins != null )
-        {
-            try
-            {
-                IOUtils.copy( ins, resp.getOutputStream() );
-            }
-            finally
-            {
-                IOUtils.closeQuietly( ins );
-            }
-        }
-    }
-
-
-    private static InputStream getResource( String resource )
-    {
-        return Util.class.getResourceAsStream( resource );
-    }
-
-
     /**
      * Return a display name for the given <code>bundle</code>:
      * <ol>
@@ -105,8 +65,11 @@ public class Util
      * header that value is returned.</li>
      * <li>Otherwise the symbolic name is returned if set</li>
      * <li>Otherwise the bundle's location is returned if defined</li>
-     * <li>Finally, as a last ressort, the bundles id is returned</li>
+     * <li>Finally, as a last resort, the bundles id is returned</li>
      * </ol>
+     *
+     * @param bundle the bundle which name to retrieve
+     * @return the bundle name - see the description of the method for more details.
      */
     public static String getName( Bundle bundle )
     {
@@ -129,6 +92,10 @@ public class Util
     /**
      * Returns the value of the header or the empty string if the header
      * is not available.
+     *
+     * @param bundle the bundle which header to retrieve 
+     * @param headerName the name of the header to retrieve
+     * @return the header or empty string if it is not set
      */
     public static String getHeaderValue( Bundle bundle, String headerName )
     {
@@ -145,6 +112,8 @@ public class Util
      * always place as the first entry. If two bundles have the same name, they
      * are ordered according to their version. If they have the same version,
      * the bundle with the lower bundle id comes before the other.
+     *
+     * @param bundles the bundles to sort
      */
     public static void sort( Bundle[] bundles )
     {

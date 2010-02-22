@@ -24,18 +24,28 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 
+/**
+ * This is the main, starting class of the Bundle. It initializes and disposes 
+ * the Apache Web Console upon bundle lifecycle requests.
+ */
 public class OsgiManagerActivator implements BundleActivator
 {
 
     private OsgiManager osgiManager;
 
 
+    /**
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
     public void start( BundleContext bundleContext )
     {
         osgiManager = new OsgiManager( bundleContext );
     }
 
 
+    /**
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
     public void stop( BundleContext arg0 )
     {
         if ( osgiManager != null )

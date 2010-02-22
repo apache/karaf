@@ -33,18 +33,28 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 
+/**
+ * ConfigurationAdminConfigurationPrinter uses the {@link ConfigurationAdmin} service
+ * to print the available configurations.
+ */
 public class ConfigurationAdminConfigurationPrinter extends AbstractConfigurationPrinter
 {
 
-    public static final String TITLE = "Configurations";
+    private static final String TITLE = "Configurations";
 
 
+    /**
+     * @see org.apache.felix.webconsole.ConfigurationPrinter#getTitle()
+     */
     public String getTitle()
     {
         return TITLE;
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.ConfigurationPrinter#printConfiguration(java.io.PrintWriter)
+     */
     public void printConfiguration( PrintWriter pw )
     {
         ServiceReference sr = getBundleContext().getServiceReference( ConfigurationAdmin.class.getName() );

@@ -22,12 +22,30 @@ package org.apache.felix.webconsole.internal;
 import org.osgi.framework.BundleContext;
 
 
+/**
+ * OsgiManagerPlugin is an internal interface. When a plugin implements this
+ * interface, the Web Console will run it's {@link #activate(BundleContext)} method upon
+ * initialization and {@link #deactivate()}, when disposed.
+ */
 public interface OsgiManagerPlugin
 {
 
+    /**
+     * This method is called from the Felix Web Console to ensure the
+     * AbstractWebConsolePlugin is correctly setup.
+     *
+     * It is called right after the Web Console receives notification for
+     * plugin registration.
+     *
+     * @param bundleContext the context of the plugin bundle
+     */
     void activate( BundleContext bundleContext );
 
 
+    /**
+     * This method is called, by the Web Console to de-activate the plugin and release
+     * all used resources.
+     */
     void deactivate();
 
 }
