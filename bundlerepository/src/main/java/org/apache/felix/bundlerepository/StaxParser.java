@@ -204,7 +204,6 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
             {
                 category.setId(reader.getAttributeValue(i));
             }
-            ;
         }
         sanityCheckEndElement(reader, reader.nextTag(), CATEGORY);
         return category;
