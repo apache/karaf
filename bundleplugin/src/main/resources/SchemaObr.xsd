@@ -61,16 +61,39 @@
     <xs:sequence>
   		<xs:element ref="p" minOccurs="0" maxOccurs="unbounded"/>
 	</xs:sequence>
+	<xs:attribute name="name" type="xs:string" use="required"/>
   </xs:complexType>
 </xs:element>
 
 <xs:element name="resource">
   <xs:complexType>
     <xs:sequence>
-		  <xs:element ref="capability" minOccurs="0" maxOccurs="unbounded"/> 
-		  <xs:element ref="require" minOccurs="0" maxOccurs="unbounded"/> 
-		  <xs:element ref="category" minOccurs="0" maxOccurs="unbounded"/> 
-	</xs:sequence>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="size" type="xs:long" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="documentation" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="source" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="javadoc" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="license" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element ref="category" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="capability" minOccurs="0" maxOccurs="unbounded"/> 
+      <xs:element ref="require" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute ref="id" use="required"/>
+    <xs:attribute name="presentationname" type="xs:string" use="optional"/>
+    <xs:attribute name="symbolicname" type="xs:string" use="optional"/>
+    <xs:attribute name="uri" type="xs:string" use="optional"/>
+    <xs:attribute name="version" type="xs:string" use="optional"/>
   </xs:complexType>
 </xs:element>
+
+<xs:element name="repository">
+  <xs:complexType>
+    <xs:sequence>
+        <xs:element ref="resource" minOccurs="0" maxOccurs="unbounded"/> 
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="lastmodified" type="xs:string" use="optional"/>
+  </xs:complexType>
+</xs:element>
+
 </xs:schema>
