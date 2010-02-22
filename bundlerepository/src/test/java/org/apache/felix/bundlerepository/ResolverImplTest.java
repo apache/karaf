@@ -41,7 +41,8 @@ public class ResolverImplTest extends TestCase
         Resource r = null;
         //MockContext doesn't support filtering!
         Resource[] discoverResources = repoAdmin.discoverResources("");
-        for (int i = 0; i < discoverResources.length; i++) {
+        for (int i = 0; i < discoverResources.length; i++)
+        {
             Resource resource = discoverResources[i];
             if (resource.getSymbolicName().contains("org.apache.felix.test"))
             {
@@ -51,7 +52,6 @@ public class ResolverImplTest extends TestCase
 
         resolver.add(r);
         assertTrue(resolver.resolve());
-
     }
 
     public void testMatchingReq() throws Exception
@@ -59,7 +59,9 @@ public class ResolverImplTest extends TestCase
         RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
         repoAdmin.addRepository(getClass().getResource("/repo_for_resolvertest.xml"));
 
-        Resource[] res = repoAdmin.discoverResources(new Requirement[] { repoAdmin.requirement("package", "(package=org.apache.felix.test.osgi)") });
+        Resource[] res = repoAdmin.discoverResources(
+            new Requirement[] { repoAdmin.requirement(
+                "package", "(package=org.apache.felix.test.osgi)") });
         assertNotNull(res);
         assertEquals(1, res.length);
     }
@@ -74,10 +76,9 @@ public class ResolverImplTest extends TestCase
         assertTrue(resolver.resolve());
     }
 
-    public static void main(String[] args) throws Exception {
-
+    public static void main(String[] args) throws Exception
+    {
         new ResolverImplTest().testReferral1();
-
     }
 
     private RepositoryAdminImpl createRepositoryAdmin()
@@ -96,5 +97,4 @@ public class ResolverImplTest extends TestCase
 
         return repoAdmin;
     }
-
 }

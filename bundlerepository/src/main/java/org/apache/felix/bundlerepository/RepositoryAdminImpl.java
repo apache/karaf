@@ -215,7 +215,8 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         return resources;
     }
 
-    public Requirement requirement(String name, String filter) {
+    public Requirement requirement(String name, String filter)
+    {
         RequirementImpl req = new RequirementImpl();
         req.setName(name);
         if (filter != null)

@@ -23,11 +23,12 @@ import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
-public class FilterImplTest extends TestCase {
-
-    public void testStandardLDAP() throws Exception {
-
-        FilterImpl filterImpl = new FilterImpl("(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split))");
+public class FilterImplTest extends TestCase
+{
+    public void testStandardLDAP() throws Exception
+    {
+        FilterImpl filterImpl = new FilterImpl(
+            "(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split))");
 
         Dictionary dict = new Hashtable();
         dict.put("package", "org.eclipse.core.runtime");
@@ -44,9 +45,10 @@ public class FilterImplTest extends TestCase {
         assertFalse(filterImpl.match(dict));
     }
 
-    public void testNoneStandardLDAPOperators() throws Exception {
-
-        FilterImpl filterImpl = new FilterImpl("(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:<*common,test))");
+    public void testNoneStandardLDAPOperators() throws Exception
+    {
+        FilterImpl filterImpl = new FilterImpl(
+            "(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:<*common,test))");
 
         Dictionary dict = new Hashtable();
         dict.put("somethindifferent", "sonstwas");
@@ -72,7 +74,8 @@ public class FilterImplTest extends TestCase {
         dict.put("common", "split");
         assertTrue(filterImpl.match(dict));
 
-        filterImpl = new FilterImpl("(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:*>common))");
+        filterImpl = new FilterImpl(
+            "(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:*>common))");
         dict = new Hashtable();
         dict.put("mandatory", "common");
         dict.put("package", "org.eclipse.core.runtime");
@@ -87,7 +90,8 @@ public class FilterImplTest extends TestCase {
         dict.put("common", "split");
         assertTrue(filterImpl.match(dict));
 
-        filterImpl = new FilterImpl("(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:*>common,test))");
+        filterImpl = new FilterImpl(
+            "(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:*>common,test))");
         dict = new Hashtable();
         dict.put("mandatory", "common");
         dict.put("package", "org.eclipse.core.runtime");
@@ -103,17 +107,16 @@ public class FilterImplTest extends TestCase {
         assertTrue(filterImpl.match(dict));
     }
 
-    public void testCaseSensitive() throws Exception {
-        
-        FilterImpl filterImpl = new FilterImpl("(&(package=org.eclipse.core.runtime))");        
+    public void testCaseSensitive() throws Exception
+    {
+        FilterImpl filterImpl = new FilterImpl("(&(package=org.eclipse.core.runtime))");
 
         Dictionary dict = new Hashtable();
         dict.put("PACKAGE", "org.eclipse.core.runtime");
         assertTrue(filterImpl.match(dict));
-        
+
         dict = new Hashtable();
         dict.put("PACKAGE", "org.eclipse.core.runtime");
         assertFalse(filterImpl.matchCase(dict));
-        
     }
 }

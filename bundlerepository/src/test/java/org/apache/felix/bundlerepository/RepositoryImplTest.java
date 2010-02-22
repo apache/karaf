@@ -94,5 +94,4 @@ public class RepositoryImplTest extends TestCase
 
         return repoAdmin;
     }
-
 }
