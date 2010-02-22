@@ -21,9 +21,6 @@ import java.util.List;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.karaf.shell.obr.util.RequirementImpl;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.service.obr.Capability;
@@ -41,7 +38,7 @@ public class FindCommand extends ObrCommandSupport {
     protected void doExecute(RepositoryAdmin admin) throws Exception {
         List<Resource> matching = new ArrayList<Resource>();
         Repository[] repos = admin.listRepositories();
-        Requirement req = parseRequirement(requirement);
+        Requirement req = parseRequirement(admin, requirement);
         for (int repoIdx = 0; (repos != null) && (repoIdx < repos.length); repoIdx++) {
             Resource[] resources = repos[repoIdx].getResources();
             for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++) {
@@ -65,7 +62,7 @@ public class FindCommand extends ObrCommandSupport {
         }
     }
 
-    private Requirement parseRequirement(String req) throws InvalidSyntaxException {
+    private Requirement parseRequirement(RepositoryAdmin admin, String req) throws InvalidSyntaxException {
         int p = req.indexOf(':');
         String name;
         String filter;
@@ -83,8 +80,7 @@ public class FindCommand extends ObrCommandSupport {
         if (!filter.startsWith("(")) {
             filter = "(" + filter + ")";
         }
-        Filter flt = FrameworkUtil.createFilter(filter);
-        return new RequirementImpl(name, flt);
+        return admin.requirement(name, filter);
     }
 
 }

@@ -21,10 +21,6 @@ import java.util.List;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.karaf.shell.obr.util.RequirementImpl;
-import org.apache.felix.karaf.shell.obr.util.ResourceImpl;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Requirement;
@@ -41,9 +37,10 @@ public class ResolveCommand extends ObrCommandSupport {
     List<String> requirements;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-        Resource resource = new ResourceImpl(null, null, null, null, null, null, getRequirements(), null, null, null);
         Resolver resolver = admin.resolver();
-        resolver.add(resource);
+        for (Requirement requirement : getRequirements(admin)) {
+            resolver.add(requirement);
+        }
         if (resolver.resolve()) {
             Resource[] resources;
             resources = resolver.getRequiredResources();
@@ -95,15 +92,15 @@ public class ResolveCommand extends ObrCommandSupport {
         }
     }
 
-    private Requirement[] getRequirements() throws InvalidSyntaxException {
+    private Requirement[] getRequirements(RepositoryAdmin admin) throws InvalidSyntaxException {
         Requirement[] reqs = new Requirement[requirements.size()];
         for (int i = 0; i < reqs.length; i++) {
-            reqs[i] = parseRequirement(requirements.get(i));
+            reqs[i] = parseRequirement(admin, requirements.get(i));
         }
         return reqs;
     }
 
-    private Requirement parseRequirement(String req) throws InvalidSyntaxException {
+    private Requirement parseRequirement(RepositoryAdmin admin, String req) throws InvalidSyntaxException {
         int p = req.indexOf(':');
         String name;
         String filter;
@@ -121,8 +118,7 @@ public class ResolveCommand extends ObrCommandSupport {
         if (!filter.startsWith("(")) {
             filter = "(" + filter + ")";
         }
-        Filter flt = FrameworkUtil.createFilter(filter);
-        return new RequirementImpl(name, flt);
+        return admin.requirement(name, filter);
     }
 
 }
