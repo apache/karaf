@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<repository lastmodified="2010" name="repo_for_optional_resources">
+
+    <resource id="res1">
+        <capability name="bundle">
+            <p n="symbolicname" v="res1" />
+        </capability>
+        <require filter="(package=org.package.res2)" name="package" optional="true" />
+    </resource>
+
+    <resource id="res2">
+        <capability name="package">
+            <p n="package" v="org.package.res2" />
+        </capability>
+        <require filter="(package=org.package.res3)" name="package" optional="false" />
+    </resource>
+
+    <resource id="res3">
+        <capability name="package">
+            <p n="package" v="org.package.res3" />
+        </capability>
+    </resource>
+
+</repository>

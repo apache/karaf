@@ -98,6 +98,19 @@ public class ResolverImplTest extends TestCase
         }
     }
 
+    public void testOptionalResolution() throws Exception
+    {
+        RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
+        repoAdmin.addRepository(getClass().getResource("/repo_for_optional_resources.xml"));
+
+        Resolver resolver = repoAdmin.resolver();
+        resolver.add(repoAdmin.requirement("bundle", "(symbolicname=res1)"));
+
+        assertTrue(resolver.resolve());
+        assertEquals(1, resolver.getRequiredResources().length);
+        assertEquals(2, resolver.getOptionalResources().length);
+    }
+
     public static void main(String[] args) throws Exception
     {
         new ResolverImplTest().testReferral1();
