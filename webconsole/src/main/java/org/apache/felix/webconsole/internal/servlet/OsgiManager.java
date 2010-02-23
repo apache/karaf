@@ -294,7 +294,12 @@ public class OsgiManager extends GenericServlet
             catch ( NoClassDefFoundError ncdfe )
             {
                 String message = ncdfe.getMessage();
-                if ( message.indexOf( ' ' ) < 0 )
+                if ( message == null )
+                {
+                    // no message, construct it
+                    message = "Class definition not found (NoClassDefFoundError)";
+                }
+                else if ( message.indexOf( ' ' ) < 0 )
                 {
                     // message is just a class name, try to be more descriptive
                     message = "Class " + message + " missing";
