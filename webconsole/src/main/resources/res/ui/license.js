@@ -18,6 +18,19 @@
 var licenseButtons = false;
 var licenseDetails = false;
 
+/*
+ * Fuction called after receiving the license data from the server to insert
+ * it into the licenseDetails div
+ * Because IE does not properly support the white-space:pre CSS setting when
+ * DOM-loading data into a <pre> element, the licenseDetails element is a
+ * <div> into which we insert the data surrounded by <pre>-</pre> tags as
+ * innerHtml. This also works in IE.
+ */
+function insertLicenseData( /* String */ data )
+{
+    licenseDetails.html( "<pre>" + data + "</pre>" );
+}
+
 function displayBundle(/* String */ bundleIndex)
 {
     var theBundleData = bundleData[bundleIndex];
@@ -66,7 +79,7 @@ function displayBundle(/* String */ bundleIndex)
     }
     
     if (firstPage) {
-        licenseDetails.load(firstPage);
+        $.get(firstPage, insertLicenseData);
     } else {
         licenseDetails.html("");
     }
@@ -75,7 +88,7 @@ function displayBundle(/* String */ bundleIndex)
 	$("#licenseLeft #" +bundleIndex).addClass('ui-state-default ui-corner-all');
 
     $('#licenseButtons a').click(function() {
-       licenseDetails.load(this.href);
+        $.get(this.href, insertLicenseData);
        return false;
     });
 }

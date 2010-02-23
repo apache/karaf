@@ -113,16 +113,13 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         }
         else if ( request.getPathInfo().endsWith( ".nfo" ) )
         {
+            WebConsoleUtil.setNoCache( response );
             response.setContentType( "text/html; charset=utf-8" );
-            // disable cache
-            response.addHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
-            response.addHeader("Expires", "Mon, 2 Sun 2001 05:00:00 GMT");
-            response.addHeader("Pragma", "no-cache");
 
             String name = request.getPathInfo();
             name = name.substring( name.lastIndexOf('/') + 1);
             name = name.substring(0, name.length() - 4);
-            name = URLDecoder.decode( name );
+            name = URLDecoder.decode( name, "UTF-8" );
 
             ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
             pw.println ( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"" );

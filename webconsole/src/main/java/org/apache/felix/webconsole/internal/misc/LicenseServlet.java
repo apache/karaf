@@ -227,6 +227,10 @@ public final class LicenseServlet extends SimpleWebConsolePlugin implements Osgi
             return false;
         }
 
+        // prepare the response
+        WebConsoleUtil.setNoCache( response );
+        response.setContentType( "text/plain" );
+
         if ( pathInfo.innerJar == null )
         {
             final URL resource = bundle.getResource( pathInfo.licenseFile );
