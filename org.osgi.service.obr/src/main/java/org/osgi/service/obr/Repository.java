@@ -42,12 +42,22 @@ public interface Repository
     Resource[] getResources();
 
     /**
-     * Return the name of this reposotory.
+     * Return the name of this repository.
      * 
      * @return a non-null name
      */
     String getName();
 
     long getLastModified();
+
+    /**
+     * Returns whether this repository is a local one
+     * or not.
+     *
+     * Local repositories contains resources that are already available
+     * in the OSGi framework and thus will be preferred over other
+     * resources.
+     */
+    boolean isLocal();
 
 }

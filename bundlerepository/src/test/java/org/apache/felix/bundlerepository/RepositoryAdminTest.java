@@ -19,9 +19,17 @@
 package org.apache.felix.bundlerepository;
 
 import java.net.URL;
+import java.util.Hashtable;
 
 import junit.framework.TestCase;
-import org.osgi.framework.Filter;
+import org.easymock.Capture;
+import org.easymock.EasyMock;
+import org.easymock.IAnswer;
+import org.easymock.internal.matchers.Captures;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.ServiceListener;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.Resource;
 
@@ -43,13 +51,28 @@ public class RepositoryAdminTest extends TestCase
         assertEquals(1, resources.length);
     }
 
-    private RepositoryAdminImpl createRepositoryAdmin()
+    private RepositoryAdminImpl createRepositoryAdmin() throws Exception
     {
-        final MockBundleContext bundleContext = new MockBundleContext() {
-            public Filter createFilter(String arg0) {
-                return new FilterImpl(arg0);
+        BundleContext bundleContext = (BundleContext) EasyMock.createMock(BundleContext.class);
+        Bundle systemBundle = (Bundle) EasyMock.createMock(Bundle.class);
+
+        EasyMock.expect(bundleContext.getProperty((String) EasyMock.anyObject())).andReturn(null).anyTimes();
+        EasyMock.expect(bundleContext.getBundle(0)).andReturn(systemBundle);
+        EasyMock.expect(systemBundle.getHeaders()).andReturn(new Hashtable());
+        EasyMock.expect(systemBundle.getRegisteredServices()).andReturn(null);
+        EasyMock.expect(new Long(systemBundle.getBundleId())).andReturn(new Long(0)).anyTimes();
+        EasyMock.expect(systemBundle.getBundleContext()).andReturn(bundleContext);
+        bundleContext.addBundleListener((BundleListener) EasyMock.anyObject());
+        bundleContext.addServiceListener((ServiceListener) EasyMock.anyObject());
+        EasyMock.expect(bundleContext.getBundles()).andReturn(new Bundle[] { systemBundle });
+        final Capture c = new Capture();
+        EasyMock.expect(bundleContext.createFilter((String) capture(c))).andAnswer(new IAnswer() {
+            public Object answer() throws Throwable {
+                return new FilterImpl((String) c.getValue());
             }
-        };
+        }).anyTimes();
+        EasyMock.replay(new Object[] { bundleContext, systemBundle });
+
         RepositoryAdminImpl repoAdmin = new RepositoryAdminImpl(bundleContext, new Logger(bundleContext));
 
         // force initialization && remove all initial repositories
@@ -61,4 +84,10 @@ public class RepositoryAdminTest extends TestCase
 
         return repoAdmin;
     }
+
+    static Object capture(Capture capture) {
+        EasyMock.reportMatcher(new Captures(capture));
+        return null;
+    }
+
 }

@@ -85,4 +85,5 @@ public interface Resource
     String[] getCategories();
 
     Repository getRepository();
+
 }

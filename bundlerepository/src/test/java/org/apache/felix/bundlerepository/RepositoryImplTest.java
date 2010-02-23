@@ -19,8 +19,17 @@
 package org.apache.felix.bundlerepository;
 
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import junit.framework.TestCase;
+import org.easymock.EasyMock;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.Resource;
 
@@ -80,9 +89,33 @@ public class RepositoryImplTest extends TestCase
         assertEquals("referral1_repository", res[0].getRepository().getName());
     }
 
-    private RepositoryAdminImpl createRepositoryAdmin()
+    private RepositoryAdminImpl createRepositoryAdmin() throws Exception
     {
-        final MockBundleContext bundleContext = new MockBundleContext();
+        BundleContext bundleContext = (BundleContext) EasyMock.createMock(BundleContext.class);
+        Bundle systemBundle = (Bundle) EasyMock.createMock(Bundle.class);
+
+        EasyMock.expect(bundleContext.getProperty((String) EasyMock.anyObject())).andReturn(null).anyTimes();
+        EasyMock.expect(bundleContext.getBundle(0)).andReturn(systemBundle);
+        EasyMock.expect(systemBundle.getHeaders()).andReturn(new Hashtable());
+        EasyMock.expect(systemBundle.getRegisteredServices()).andReturn(null);
+        EasyMock.expect(new Long(systemBundle.getBundleId())).andReturn(new Long(0)).anyTimes();
+        EasyMock.expect(systemBundle.getBundleContext()).andReturn(bundleContext);
+        bundleContext.addBundleListener((BundleListener) EasyMock.anyObject());
+        bundleContext.addServiceListener((ServiceListener) EasyMock.anyObject());
+        EasyMock.expect(bundleContext.getBundles()).andReturn(new Bundle[] { systemBundle });
+        EasyMock.expect(bundleContext.createFilter(null)).andReturn(new Filter() {
+            public boolean match(ServiceReference reference) {
+                return true;
+            }
+            public boolean match(Dictionary dictionary) {
+                return true;
+            }
+            public boolean matchCase(Dictionary dictionary) {
+                return true;
+            }
+        }).anyTimes();
+        EasyMock.replay(new Object[] { bundleContext, systemBundle });
+
         RepositoryAdminImpl repoAdmin = new RepositoryAdminImpl(bundleContext, new Logger(bundleContext));
 
         // force initialization && remove all initial repositories
@@ -94,4 +127,5 @@ public class RepositoryImplTest extends TestCase
 
         return repoAdmin;
     }
+
 }

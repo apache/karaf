@@ -170,6 +170,11 @@ public class RepositoryImpl implements Repository
         }
     }
 
+    public boolean isLocal()
+    {
+        return false;
+    }
+
     /**
      * Default setter method when setting parsed data from the XML file,
      * which currently ignores everything.

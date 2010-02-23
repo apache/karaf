@@ -21,7 +21,6 @@ package org.apache.felix.bundlerepository;
 import java.net.URL;
 import java.util.*;
 
-import org.apache.felix.bundlerepository.LocalRepositoryImpl.LocalResourceImpl;
 import org.osgi.framework.*;
 import org.osgi.service.obr.*;
 
@@ -30,9 +29,8 @@ public class ResolverImpl implements Resolver
     public static final String PREFER_LOCAL = "obr.resolver.preferLocal";
 
     private final BundleContext m_context;
-    private final RepositoryAdmin m_admin;
     private final Logger m_logger;
-    private final LocalRepositoryImpl m_local;
+    private final Repository[] m_repositories;
     private final Set m_addedSet = new HashSet();
     private final Set m_addedRequirementSet = new HashSet();
     private final Set m_failedSet = new HashSet();
@@ -45,12 +43,11 @@ public class ResolverImpl implements Resolver
     private long m_resolveTimeStamp;
     private boolean m_preferLocal = true;
 
-    public ResolverImpl(BundleContext context, RepositoryAdminImpl admin, Logger logger)
+    public ResolverImpl(BundleContext context, Repository[] repositories, Logger logger)
     {
         m_context = context;
-        m_admin = admin;
         m_logger = logger;
-        m_local = admin.getLocalRepository();        
+        m_repositories = repositories;
         String s = context.getProperty(PREFER_LOCAL);
         if (s != null)
         {
@@ -131,10 +128,34 @@ public class ResolverImpl implements Resolver
         throw new IllegalStateException("The resources have not been resolved.");
     }
 
+    private Resource[] getResources(boolean local)
+    {
+        List resources = new ArrayList();
+        for (int repoIdx = 0; (m_repositories != null) && (repoIdx < m_repositories.length); repoIdx++)
+        {
+            if (m_repositories[repoIdx].isLocal() == local)
+            {
+                resources.addAll(Arrays.asList(m_repositories[repoIdx].getResources()));
+            }
+        }
+        return (Resource[]) resources.toArray(new Resource[resources.size()]);
+    }
+
     public synchronized boolean resolve()
     {
+        // Find resources
+        Resource[] locals = getResources(true);
+        Resource[] remotes = getResources(false);
+
         // time of the resolution process start
-        m_resolveTimeStamp = m_local.getLastModified();
+        m_resolveTimeStamp = 0;
+        for (int repoIdx = 0; (m_repositories != null) && (repoIdx < m_repositories.length); repoIdx++)
+        {
+            if (m_repositories[repoIdx].isLocal())
+            {
+                m_resolveTimeStamp = Math.max(m_resolveTimeStamp, m_repositories[repoIdx].getLastModified());
+            }
+        }
 
         // Reset instance values.
         m_failedSet.clear();
@@ -155,7 +176,7 @@ public class ResolverImpl implements Resolver
             {
                 fake.addRequire((Requirement) iter.next());
             }
-            if (!resolve(fake))
+            if (!resolve(fake, locals, remotes))
             {
                 result = false;
             }
@@ -164,7 +185,7 @@ public class ResolverImpl implements Resolver
         // Loop through each resource in added list and resolve.
         for (Iterator iter = m_addedSet.iterator(); iter.hasNext(); )
         {
-            if (!resolve((Resource) iter.next()))
+            if (!resolve((Resource) iter.next(), locals, remotes))
             {
                 // If any resource does not resolve, then the
                 // entire result will be false.
@@ -173,18 +194,17 @@ public class ResolverImpl implements Resolver
         }
 
         // Clean up the resulting data structures.
-        List locals = Arrays.asList(m_local.getResources());
         m_requiredSet.removeAll(m_addedSet);
-        m_requiredSet.removeAll(locals);
+        m_requiredSet.removeAll(Arrays.asList(locals));
         m_optionalSet.removeAll(m_addedSet);
         m_optionalSet.removeAll(m_requiredSet);
-        m_optionalSet.removeAll(locals);
+        m_optionalSet.removeAll(Arrays.asList(locals));
 
         // Return final result.
         return result;
     }
 
-    private boolean resolve(Resource resource)
+    private boolean resolve(Resource resource, Resource[] locals, Resource[] remotes)
     {
         boolean result = true;
 
@@ -216,8 +236,8 @@ public class ResolverImpl implements Resolver
                     candidate = searchResolvingResources(reqs[reqIdx]);
                     if (candidate == null)
                     {
-                        List candidateCapabilities = searchLocalResources(reqs[reqIdx]);
-                        candidateCapabilities.addAll(searchRemoteResources(reqs[reqIdx]));
+                        List candidateCapabilities = searchResources(reqs[reqIdx], locals);
+                        candidateCapabilities.addAll(searchResources(reqs[reqIdx], remotes));
 
                         // Determine the best candidate available that
                         // can resolve.
@@ -226,7 +246,7 @@ public class ResolverImpl implements Resolver
                             Capability bestCapability = getBestCandidate(candidateCapabilities);
 
                             // Try to resolve the best resource.
-                            if (resolve(((CapabilityImpl) bestCapability).getResource()))
+                            if (resolve(((CapabilityImpl) bestCapability).getResource(), locals, remotes))
                             {
                                 candidate = ((CapabilityImpl) bestCapability).getResource();
                             }
@@ -262,7 +282,7 @@ public class ResolverImpl implements Resolver
                 {
 
                     // Try to resolve the candidate.
-                    if (resolve(candidate))
+                    if (resolve(candidate, locals, remotes))
                     {
                         // The resolved succeeded; record the candidate
                         // as either optional or required.
@@ -340,49 +360,16 @@ public class ResolverImpl implements Resolver
     }
 
     /**
-     * Returns a local resource meeting the given requirement
-     * @param req The requirement that the local resource must meet
-     * @return Returns the found local resource if available
-     */
-    private List searchLocalResources(Requirement req)
-    {
-        List matchingCapabilities = new ArrayList();
-        Resource[] resources = m_local.getResources();
-        for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
-        {
-            checkInterrupt();
-            // We don't need to look at resources we've already looked at.
-            if (!m_failedSet.contains(resources[resIdx])
-                && !m_resolveSet.contains(resources[resIdx]))
-            {
-                Capability[] caps = resources[resIdx].getCapabilities();
-                for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
-                {
-                    if (caps[capIdx].getName().equals(req.getName())
-                        && req.isSatisfied(caps[capIdx]))
-                    {
-                        matchingCapabilities.add(caps[capIdx]);
-                    }
-                }
-            }
-        }
-
-        return matchingCapabilities;
-    }
-
-    /**
-     * Searches for remote resources that do meet the given requirement
+     * Searches for resources that do meet the given requirement
      * @param req
-     * @return all remote resources meeting the given requirement
+     * @return all resources meeting the given requirement
      */
-    private List searchRemoteResources(Requirement req)
+    private List searchResources(Requirement req, Resource[] resources)
     {
         List matchingCapabilities = new ArrayList();
 
-        Repository[] repos = m_admin.listRepositories();
-        for (int repoIdx = 0; (repos != null) && (repoIdx < repos.length); repoIdx++)
+        for (int repoIdx = 0; (m_repositories != null) && (repoIdx < m_repositories.length); repoIdx++)
         {
-            Resource[] resources = repos[repoIdx].getResources();
             for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
             {
                 checkInterrupt();
@@ -499,9 +486,13 @@ public class ResolverImpl implements Resolver
         // the state can still change during the operation, but we will
         // be optimistic. This could also be made smarter so that it checks
         // to see if the local state changes overlap with the resolver.
-        if (m_resolveTimeStamp != m_local.getLastModified())
+        for (int repoIdx = 0; (m_repositories != null) && (repoIdx < m_repositories.length); repoIdx++)
         {
-            throw new IllegalStateException("Framework state has changed, must resolve again.");
+            if (m_repositories[repoIdx].isLocal()
+                    && m_repositories[repoIdx].getLastModified() > m_resolveTimeStamp)
+            {
+                throw new IllegalStateException("Framework state has changed, must resolve again.");
+            }
         }
 
         // Eliminate duplicates from target, required, optional resources.
@@ -535,7 +526,7 @@ public class ResolverImpl implements Resolver
             // For the resource being deployed, see if there is an older
             // version of the resource already installed that can potentially
             // be updated.
-            LocalRepositoryImpl.LocalResourceImpl localResource =
+            LocalResourceImpl localResource =
                 findUpdatableLocalResource(deployResources[i]);
             // If a potentially updatable older version was found,
             // then verify that updating the local resource will not
@@ -691,7 +682,7 @@ public class ResolverImpl implements Resolver
             // without breaking constraints of existing local resources.
             for (int i = 0; i < localResources.length; i++)
             {
-                if (isResourceUpdatable(localResources[i], resource, m_local.getResources()))
+                if (isResourceUpdatable(localResources[i], resource, localResources))
                 {
                     return (LocalResourceImpl) localResources[i];
                 }
@@ -707,7 +698,7 @@ public class ResolverImpl implements Resolver
      */
     private Resource[] findLocalResources(String symName)
     {
-        Resource[] localResources = m_local.getResources();
+        Resource[] localResources = getResources(true);
 
         List matchList = new ArrayList();
         for (int i = 0; i < localResources.length; i++)

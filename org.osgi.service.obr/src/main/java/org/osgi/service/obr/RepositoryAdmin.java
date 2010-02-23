@@ -35,11 +35,11 @@ import org.osgi.framework.InvalidSyntaxException;
  * <li>Capabilities - Capabilities provide a named aspect: a bundle, a display,
  * memory, etc.</li>
  * <li>Requirements - A named filter expression. The filter must be satisfied
- * by one or more Capabilties with the given name. These capabilities can come
+ * by one or more Capabilities with the given name. These capabilities can come
  * from other resources or from the platform. If multiple resources provide the
  * requested capability, one is selected. (### what algorithm? ###)</li>
  * <li>Requests - Requests are like requirements, except that a request can be
- * fullfilled by 0..n resources. This feature can be used to link to resources
+ * fulfilled by 0..n resources. This feature can be used to link to resources
  * that are compatible with the given resource and provide extra functionality.
  * For example, a bundle could request all its known fragments. The UI
  * associated with the repository could list these as optional downloads.</li>
@@ -85,10 +85,18 @@ public interface RepositoryAdmin
 
     /**
      * Create a resolver.
-     * 
+     *
      * @return
      */
     Resolver resolver();
+
+    /**
+     * Create a resolver on the given repositories.
+     *
+     * @param repositories the list of repositories to use for the resolution
+     * @return
+     */
+    Resolver resolver(Repository[] repositories);
 
     /**
      * Add a new repository to the federation.
@@ -101,6 +109,14 @@ public interface RepositoryAdmin
      */
     Repository addRepository(URL repository) throws Exception;
 
+    /**
+     * Remove a repository from the federation
+     *
+     * The url must point to a repository XML file.
+     *
+     * @param repository
+     * @return
+     */
     boolean removeRepository(URL repository);
 
     /**
@@ -109,6 +125,20 @@ public interface RepositoryAdmin
      * @return
      */
     Repository[] listRepositories();
+
+    /**
+     * Return the repository containing the system bundle
+     *
+     * @return
+     */
+    Repository getSystemRepository();
+
+    /**
+     * Return the repository containing locally installed resources
+     *
+     * @return
+     */
+    Repository getLocalRepository();
 
     Resource getResource(String repositoryId);
 
@@ -127,5 +157,13 @@ public interface RepositoryAdmin
      * @return
      */
     Filter filter(String filter) throws InvalidSyntaxException;
+
+    /**
+     * Create a repository from the specified URL.
+     * 
+     * @param repository
+     * @return
+     */
+    Repository repository(URL repository) throws Exception;
 
 }

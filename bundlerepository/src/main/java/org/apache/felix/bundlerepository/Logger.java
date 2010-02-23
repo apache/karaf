@@ -49,7 +49,7 @@ public class Logger
     /**
      * Constructor.
      *
-     * @param bundleContext bundle context
+     * @param context bundle context
      */
     Logger(BundleContext context)
     {

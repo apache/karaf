@@ -42,6 +42,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
 {
     static BundleContext m_context = null;
     private final Logger m_logger;
+    private final SystemRepositoryImpl m_system;
     private final LocalRepositoryImpl m_local;
     private List m_urlList = new ArrayList();
     private Map m_repoMap = new HashMap();
@@ -57,12 +58,18 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     {
         m_context = context;
         m_logger = logger;
+        m_system = new SystemRepositoryImpl(context, logger);
         m_local = new LocalRepositoryImpl(context, logger);
     }
 
-    LocalRepositoryImpl getLocalRepository()
+    public Repository getLocalRepository()
     {
         return m_local;
+    }
+
+    public Repository getSystemRepository()
+    {
+        return m_system;
     }
 
     public void dispose()
@@ -118,7 +125,22 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             initialize();
         }
 
-        return new ResolverImpl(m_context, this, m_logger);
+        List repositories = new ArrayList();
+        repositories.add(m_system);
+        repositories.add(m_local);
+        repositories.addAll(m_repoMap.values());
+
+        return resolver((Repository[]) repositories.toArray(new Repository[repositories.size()]));
+    }
+
+    public synchronized Resolver resolver(Repository[] repositories)
+    {
+        if (!m_initialized)
+        {
+            initialize();
+        }
+
+        return new ResolverImpl(m_context, repositories, m_logger);
     }
 
     public synchronized Resource[] discoverResources(String filterExpr)
@@ -229,6 +251,11 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     public Filter filter(String filter) throws InvalidSyntaxException
     {
         return new FilterImpl(filter);
+    }
+
+    public Repository repository(URL url) throws Exception
+    {
+        return new RepositoryImpl(null, url, 0, m_logger);
     }
 
     private void initialize()

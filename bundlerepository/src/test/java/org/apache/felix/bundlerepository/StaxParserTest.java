@@ -19,8 +19,17 @@
 package org.apache.felix.bundlerepository;
 
 import java.net.URL;
+import java.util.Hashtable;
 
 import junit.framework.TestCase;
+import org.easymock.Capture;
+import org.easymock.EasyMock;
+import org.easymock.IAnswer;
+import org.easymock.internal.matchers.Captures;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.ServiceListener;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.Resolver;
 import org.osgi.service.obr.Resource;
@@ -35,20 +44,11 @@ public class StaxParserTest extends TestCase
 
         Resolver resolver = repoAdmin.resolver();
 
-        Resource r = null;
-        //MockContext doesn't support filtering!
-        Resource[] discoverResources = repoAdmin.discoverResources("");
-        for (int i = 0; i < discoverResources.length; i++)
-        {
-            Resource resource = discoverResources[i];
-            if (resource.getSymbolicName().contains("org.apache.felix.test"))
-            {
-                r = resource;
-            }
-        }
-        assertNotNull(r);
+        Resource[] discoverResources = repoAdmin.discoverResources("(symbolicname=org.apache.felix.test*)");
+        assertNotNull(discoverResources);
+        assertEquals(1, discoverResources.length);
 
-        resolver.add(r);
+        resolver.add(discoverResources[0]);
         assertTrue(resolver.resolve());
     }
 
@@ -116,13 +116,32 @@ public class StaxParserTest extends TestCase
         new StaxParserTest().testStaxParser();
     }
 
-    private RepositoryAdminImpl createRepositoryAdmin(Class repositoryParser)
+    private RepositoryAdminImpl createRepositoryAdmin(Class repositoryParser) throws Exception
     {
-        final MockBundleContext bundleContext = new MockBundleContext();
-        bundleContext.setProperty(RepositoryAdminImpl.REPOSITORY_URL_PROP,
-            getClass().getResource("/referral1_repository.xml").toExternalForm());
-        bundleContext.setProperty(RepositoryImpl.OBR_PARSER_CLASS,
-            repositoryParser.getName());
+        BundleContext bundleContext = (BundleContext) EasyMock.createMock(BundleContext.class);
+        Bundle systemBundle = (Bundle) EasyMock.createMock(Bundle.class);
+
+        EasyMock.expect(bundleContext.getProperty(RepositoryAdminImpl.REPOSITORY_URL_PROP))
+                    .andReturn(getClass().getResource("/referral1_repository.xml").toExternalForm());
+        EasyMock.expect(bundleContext.getProperty(RepositoryImpl.OBR_PARSER_CLASS))
+                    .andReturn(repositoryParser.getName());
+        EasyMock.expect(bundleContext.getProperty((String) EasyMock.anyObject())).andReturn(null).anyTimes();
+        EasyMock.expect(bundleContext.getBundle(0)).andReturn(systemBundle);
+        EasyMock.expect(systemBundle.getHeaders()).andReturn(new Hashtable());
+        EasyMock.expect(systemBundle.getRegisteredServices()).andReturn(null);
+        EasyMock.expect(new Long(systemBundle.getBundleId())).andReturn(new Long(0)).anyTimes();
+        EasyMock.expect(systemBundle.getBundleContext()).andReturn(bundleContext);
+        bundleContext.addBundleListener((BundleListener) EasyMock.anyObject());
+        bundleContext.addServiceListener((ServiceListener) EasyMock.anyObject());
+        EasyMock.expect(bundleContext.getBundles()).andReturn(new Bundle[] { systemBundle });
+        final Capture c = new Capture();
+        EasyMock.expect(bundleContext.createFilter((String) capture(c))).andAnswer(new IAnswer() {
+            public Object answer() throws Throwable {
+                return new FilterImpl((String) c.getValue());
+            }
+        }).anyTimes();
+        EasyMock.replay(new Object[] { bundleContext, systemBundle });
+
         RepositoryAdminImpl repoAdmin = new RepositoryAdminImpl(bundleContext, new Logger(bundleContext));
 
         // force initialization && remove all initial repositories
@@ -134,4 +153,10 @@ public class StaxParserTest extends TestCase
 
         return repoAdmin;
     }
+
+    static Object capture(Capture capture) {
+        EasyMock.reportMatcher(new Captures(capture));
+        return null;
+    }
+
 }
