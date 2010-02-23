@@ -176,7 +176,7 @@ public class ResolverImpl implements Resolver
             {
                 fake.addRequire((Requirement) iter.next());
             }
-            if (!resolve(fake, locals, remotes))
+            if (!resolve(fake, locals, remotes, false))
             {
                 result = false;
             }
@@ -185,7 +185,7 @@ public class ResolverImpl implements Resolver
         // Loop through each resource in added list and resolve.
         for (Iterator iter = m_addedSet.iterator(); iter.hasNext(); )
         {
-            if (!resolve((Resource) iter.next(), locals, remotes))
+            if (!resolve((Resource) iter.next(), locals, remotes, false))
             {
                 // If any resource does not resolve, then the
                 // entire result will be false.
@@ -204,7 +204,7 @@ public class ResolverImpl implements Resolver
         return result;
     }
 
-    private boolean resolve(Resource resource, Resource[] locals, Resource[] remotes)
+    private boolean resolve(Resource resource, Resource[] locals, Resource[] remotes, boolean optional)
     {
         boolean result = true;
 
@@ -246,7 +246,7 @@ public class ResolverImpl implements Resolver
                             Capability bestCapability = getBestCandidate(candidateCapabilities);
 
                             // Try to resolve the best resource.
-                            if (resolve(((CapabilityImpl) bestCapability).getResource(), locals, remotes))
+                            if (resolve(((CapabilityImpl) bestCapability).getResource(), locals, remotes, optional || reqs[reqIdx].isOptional()))
                             {
                                 candidate = ((CapabilityImpl) bestCapability).getResource();
                             }
@@ -282,11 +282,11 @@ public class ResolverImpl implements Resolver
                 {
 
                     // Try to resolve the candidate.
-                    if (resolve(candidate, locals, remotes))
+                    if (resolve(candidate, locals, remotes, optional || reqs[reqIdx].isOptional()))
                     {
                         // The resolved succeeded; record the candidate
                         // as either optional or required.
-                        if (reqs[reqIdx].isOptional())
+                        if (optional || reqs[reqIdx].isOptional())
                         {
                             m_optionalSet.add(candidate);
                         }
