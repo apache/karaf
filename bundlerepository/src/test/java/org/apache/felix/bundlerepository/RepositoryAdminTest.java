@@ -27,7 +27,6 @@ import org.osgi.service.obr.Resource;
 
 public class RepositoryAdminTest extends TestCase
 {
-
     public void testResourceFilterOnCapabilities() throws Exception
     {
         URL url = getClass().getResource("/repo_for_resolvertest.xml");
@@ -43,7 +42,6 @@ public class RepositoryAdminTest extends TestCase
         assertNotNull(resources);
         assertEquals(1, resources.length);
     }
-
 
     private RepositoryAdminImpl createRepositoryAdmin()
     {
@@ -63,5 +61,4 @@ public class RepositoryAdminTest extends TestCase
 
         return repoAdmin;
     }
-
 }

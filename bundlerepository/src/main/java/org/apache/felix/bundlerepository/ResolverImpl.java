@@ -481,7 +481,7 @@ public class ResolverImpl implements Resolver
     {
         if (Thread.interrupted())
         {
-            throw new InterrupteResolutionException();
+            throw new InterruptedResolutionException();
         }
     }
 

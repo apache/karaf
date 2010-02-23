@@ -22,27 +22,24 @@ package org.osgi.service.obr;
  *
  * Exception thrown by the resolver if the resolution has been interrupted.
  */
-public class InterrupteResolutionException extends RuntimeException
+public class InterruptedResolutionException extends RuntimeException
 {
-
-    public InterrupteResolutionException()
+    public InterruptedResolutionException()
     {
     }
 
-    public InterrupteResolutionException(String message)
+    public InterruptedResolutionException(String message)
     {
         super(message);
     }
 
-    public InterrupteResolutionException(String message, Throwable cause)
+    public InterruptedResolutionException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
-    public InterrupteResolutionException(Throwable cause)
+    public InterruptedResolutionException(Throwable cause)
     {
         super(cause);
     }
-
 }
-

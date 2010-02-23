@@ -22,7 +22,7 @@ import java.net.URL;
 
 import junit.framework.TestCase;
 
-import org.osgi.service.obr.InterrupteResolutionException;
+import org.osgi.service.obr.InterruptedResolutionException;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.Requirement;
 import org.osgi.service.obr.Resolver;
@@ -91,7 +91,7 @@ public class ResolverImplTest extends TestCase
             resolver.resolve();
             fail("An excepiton should have been thrown");
         }
-        catch (InterrupteResolutionException e)
+        catch (InterruptedResolutionException e)
         {
             // ok
         }

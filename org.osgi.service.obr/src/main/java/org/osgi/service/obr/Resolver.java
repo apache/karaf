@@ -77,7 +77,7 @@ public interface Resolver
      * time.  The result will be to stop the resolver and throw an InterruptedException.
      *
      * @return <code>true</code> if the resolution has succeeded else <code>false</code>
-     * @throws InterrupteResolutionException if the resolution has been interrupted
+     * @throws InterruptedResolutionException if the resolution has been interrupted
      */
     boolean resolve();
 
