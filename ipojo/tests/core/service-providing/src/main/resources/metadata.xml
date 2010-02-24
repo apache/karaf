@@ -168,4 +168,46 @@
       <property field="prop2"/>
     </provides>
   </component>
+  
+  <!--  Service Controller -->
+  <component classname="org.apache.felix.ipojo.test.scenarios.component.controller.ControllerCheckService"
+    name="PS-Controller-1-default">
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.ps.service.FooService">
+      <controller field="controller"/>
+    </provides>
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.ps.service.CheckService">
+    </provides>
+  </component>
+    <component classname="org.apache.felix.ipojo.test.scenarios.component.controller.ControllerCheckService"
+    name="PS-Controller-1-false">
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.ps.service.FooService">
+      <property name="test2" type="string" value="test2"/>
+      <controller field="controller" value="false"/>
+      <property name="test" type="string" value="test"/>
+    </provides>
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.ps.service.CheckService">
+    </provides>
+  </component>
+  <component classname="org.apache.felix.ipojo.test.scenarios.component.controller.DoubleControllerCheckService"
+    name="PS-Controller-2-truetrue">
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.ps.service.FooService">
+      <property name="test2" type="string" value="test2"/>
+      <controller field="controllerFoo" value="true"/>
+      <property name="test" type="string" value="test"/>
+    </provides>
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.ps.service.CheckService">
+        <controller field="controllerCS" value="true"/>
+    </provides>
+  </component>
+  <component classname="org.apache.felix.ipojo.test.scenarios.component.controller.DoubleControllerCheckService"
+    name="PS-Controller-2-truefalse">
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.ps.service.FooService">
+      <property name="test2" type="string" value="test2"/>
+      <controller field="controllerFoo" value="false"/>
+      <property name="test" type="string" value="test"/>
+    </provides>
+    <provides specifications="org.apache.felix.ipojo.test.scenarios.ps.service.CheckService">
+        <controller field="controllerCS" value="true"/>
+    </provides>
+  </component>
 </ipojo>

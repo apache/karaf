@@ -112,6 +112,11 @@ public class ProvidedService implements ServiceFactory {
      * Were the properties updated during the processing.
      */
     private volatile boolean m_wasUpdated;
+    
+    /**
+     * Service Controller.
+     */
+    private ServiceController m_controller;
 
     /**
      * Creates a provided service object.
@@ -311,7 +316,8 @@ public class ProvidedService implements ServiceFactory {
      * This method also notifies the creation strategy of the publication.
      */
     protected synchronized void registerService() {
-        if (m_serviceRegistration == null) {
+        if (m_handler.getInstanceManager().getState() == ComponentInstance.VALID 
+                && m_serviceRegistration == null  && (m_controller == null || m_controller.getValue())) {
             // Build the service properties list
             
             BundleContext bc = m_handler.getInstanceManager().getContext();
@@ -447,6 +453,67 @@ public class ProvidedService implements ServiceFactory {
      */
     public ServiceRegistration getServiceRegistration() {
         return m_serviceRegistration;
+    }
+
+    /**
+     * Sets the service controller on this provided service.
+     * @param field the field attached to this controller
+     * @param value the value the initial value
+     */
+    public void setController(String field, boolean value) {
+        m_controller = new ServiceController(field, value);
+    }
+    
+    public ServiceController getController() {
+        return m_controller;
+    }
+
+    /**
+     * Service Controller.
+     */
+    class ServiceController {
+        /**
+         * The controller value.
+         */
+        private volatile boolean m_value;
+        /**
+         * The field attached to this controller.
+         */
+        private final String m_field;
+        
+        /**
+         * Creates a ServiceController.
+         * @param field the field
+         * @param value the initial value
+         */
+        public ServiceController(String field, boolean value) {
+            m_field = field;
+            m_value = value;
+        }
+
+        public String getField() {
+            return m_field;
+        }
+        
+        public boolean getValue() {
+            synchronized (ProvidedService.this) {
+                return m_value;
+            }
+        }
+
+        public void setValue(Boolean value) {
+            synchronized (ProvidedService.this) {
+                if (value.booleanValue() != m_value) {
+                    m_value = value.booleanValue();
+                    if (m_value) {
+                        registerService();
+                    } else {
+                        unregisterService();
+                    }
+                }
+            }
+        }
+        
     }
 
     /**

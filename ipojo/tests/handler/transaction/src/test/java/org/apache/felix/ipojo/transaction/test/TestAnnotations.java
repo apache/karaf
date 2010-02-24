@@ -1,16 +1,16 @@
 package org.apache.felix.ipojo.transaction.test;
 
-import static org.ops4j.pax.exam.CoreOptions.bundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
 
 import java.io.File;
-import java.net.URL;
+import java.io.InputStream;
 
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
+import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.apache.felix.ipojo.tinybundles.BundleAsiPOJO;
 import org.apache.felix.ipojo.transaction.test.component.ComponentUsingAnnotations;
 import org.apache.felix.ipojo.transaction.test.component.FooImpl;
@@ -60,33 +60,24 @@ public class TestAnnotations {
     public static Option[] configure() {
         ROOT.mkdirs();
 
-        URL service = TinyBundles.newBundle()
-            .addClass(CheckService.class)
-            .addClass(Foo.class)
-           .prepare(
-                with()
-                .set(Constants.BUNDLE_SYMBOLICNAME,"Service")
-                .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
-                )
-            .build( TinyBundles.asURL());
+        InputStream service = TinyBundles.newBundle()
+            .add(CheckService.class)
+            .add(Foo.class)
+            .set(Constants.BUNDLE_SYMBOLICNAME,"Service")
+            .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
+            .build( TinyBundles.withBnd());
 
-        String fooimpl = TinyBundles.newBundle()
-            .addClass(FooImpl.class)
-            .prepare(
-                    with()
-                    .set(Constants.BUNDLE_SYMBOLICNAME,"Foo Provider")
-                    .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
-                )
-                .build( new BundleAsiPOJO(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  ).toExternalForm();
+        InputStream fooimpl = TinyBundles.newBundle()
+            .add(FooImpl.class)
+            .set(Constants.BUNDLE_SYMBOLICNAME,"Foo Provider")
+            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
+            .build( BundleAsiPOJO.asiPOJOBundle(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  );
 
-        String test = TinyBundles.newBundle()
-        .addClass(ComponentUsingAnnotations.class)
-        .prepare(
-                with()
-                .set(Constants.BUNDLE_SYMBOLICNAME,"Transaction Annotation Test")
-                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service, javax.transaction")
-            )
-            .build( new BundleAsiPOJO(new File(ROOT, "annotations.jar"), new File(TEST, "annotation.xml"))  ).toExternalForm();
+        InputStream test = TinyBundles.newBundle()
+            .add(ComponentUsingAnnotations.class)
+            .set(Constants.BUNDLE_SYMBOLICNAME,"TransactionAnnotationTest")
+            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service, javax.transaction")
+            .build( BundleAsiPOJO.asiPOJOBundle(new File(ROOT, "annotations.jar"), new File(TEST, "annotation.xml"))  );
 
 
         Option[] opt =  options(
@@ -96,17 +87,14 @@ public class TestAnnotations {
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.handler.transaction").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.transaction").version(asInProject()),
-                        mavenBundle()
-                            .groupId( "org.ops4j.pax.swissbox" )
-                            .artifactId( "pax-swissbox-tinybundles" )
-                            .version(asInProject()),
-                        bundle(service.toExternalForm()),
-                        bundle(fooimpl),
-                        bundle(test)
-                    )
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject())
+                ),
+                provision(
+                        service,
+                        fooimpl,
+                        test
                 )
-
-                ;
+                );
         return opt;
     }
 
@@ -154,7 +142,8 @@ public class TestAnnotations {
 
     private Bundle getBundle() {
         for(Bundle b : context.getBundles()) {
-           if ("Transaction Annotation Test".equals(b.getSymbolicName())) {
+            System.out.println(b.getSymbolicName());
+           if ("TransactionAnnotationTest".equals(b.getSymbolicName())) {
                return b;
            }
         }

@@ -76,6 +76,16 @@ public class Service implements HandlerConfiguration {
     private List m_properties = new ArrayList();
     
     /**
+     * Service controller.
+     */
+    private String m_controller;
+    
+    /**
+     * Service Controller value.
+     */
+    private boolean m_controllerValue;
+    
+    /**
      * Gets the provided service element.
      * @return the 'provides' element.
      */
@@ -89,6 +99,14 @@ public class Service implements HandlerConfiguration {
         for (int i = 0; i < m_properties.size(); i++) {
             element.addElement(((ServiceProperty) m_properties.get(i)).getElement());
         }
+        
+        if (m_controller != null) {
+            Element ctrl = new Element("controller", "");
+            ctrl.addAttribute(new Attribute("field", m_controller));
+            ctrl.addAttribute(new Attribute("value", String.valueOf(m_controllerValue)));
+            element.addElement(ctrl);
+        }
+        
         return element;   
     }
     
@@ -204,6 +222,19 @@ public class Service implements HandlerConfiguration {
     public Service setCreationStrategy(String strategy) {
         m_strategy = -1; // Custom
         m_customStrategy = strategy;
+        return this;
+    }
+    
+    /**
+     * Sets the service controller.
+     * @param field the controller field
+     * @param initialValue the initial value
+     * @return the current servic object
+     */
+    public Service setServiceController(String field, 
+            boolean initialValue) {
+        m_controller = field;
+        m_controllerValue = initialValue;
         return this;
     }
     

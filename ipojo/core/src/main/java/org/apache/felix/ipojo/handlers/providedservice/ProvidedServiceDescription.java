@@ -103,6 +103,14 @@ public class ProvidedServiceDescription {
     public int getState() {
         return m_ps.getState();
     }
+    
+    public String getController() {
+        if (m_ps.getController() == null) {
+            return null; 
+        } else {
+            return String.valueOf(m_ps.getController().getValue());
+        }
+    }
 
     /**
      * Gets the service reference.

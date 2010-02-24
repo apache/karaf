@@ -82,11 +82,13 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
 
             if (m_providedServices[i].getState() == ProvidedService.REGISTERED) {
                 service.addAttribute(new Attribute("state", "registered"));
-                service.addAttribute(new Attribute("service.id", m_providedServices[i].getServiceReference().getProperty(Constants.SERVICE_ID).toString()));
+                service.addAttribute(new Attribute("service.id", m_providedServices[i].getServiceReference()
+                        .getProperty(Constants.SERVICE_ID).toString()));
             } else {
                 service.addAttribute(new Attribute("state", "unregistered"));
             }
             
+            // Service Properties.
             Properties props = m_providedServices[i].getProperties();
             Iterator iterator = props.keySet().iterator();
             while (iterator.hasNext()) {
@@ -101,6 +103,14 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
                 }
                 service.addElement(prop);
             }
+            
+            // Service Controller.
+            if (m_providedServices[i].getController() != null) {
+                Element controller = new Element("controller", null);
+                controller.addAttribute(new Attribute("value", m_providedServices[i].getController()));
+                service.addElement(controller);
+            }
+            
             services.addElement(service);
         }
         return services;

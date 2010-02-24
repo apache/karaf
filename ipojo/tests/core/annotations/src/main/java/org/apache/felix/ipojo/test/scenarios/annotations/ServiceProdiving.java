@@ -82,6 +82,16 @@ public class ServiceProdiving extends OSGiTestCase {
         
     }
     
+    public void testServiceController() {
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.PSServiceController");
+        Element[] provs = meta.getElements("provides");
+        assertNotNull("Provides exists ", provs);
+        System.out.println(provs[0].toString());
+        assertNotNull(provs[0].getElements("controller"));
+        assertEquals(1, provs[0].getElements("controller").length);
+        assertEquals("false", provs[0].getElements("controller")[0].getAttribute("value"));
+    }
+
     private Element getPropertyByName(Element[] props, String name) {
         for (int i = 0; i < props.length; i++) {
             String na = props[i].getAttribute("name");

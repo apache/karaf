@@ -76,8 +76,17 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
                 // Get the provides element
                 Element parent = (Element) m_collector.getIds().get("provides");
                 return new PropertyAnnotationParser(m_field, parent);
-            }
-            
+            } 
+        }
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/ServiceController;")) {
+            if (! m_collector.getIds().containsKey("provides")) { // The provides annotation is already computed.
+                System.err.println("The component does not provide services, skip ServiceController for " + m_field);
+                return null;
+            } else {
+                // Get the provides element
+                Element parent = (Element) m_collector.getIds().get("provides");
+                return new ServiceControllerAnnotationParser(m_field, parent);
+            } 
         }
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Property;")) {
             Element parent = null;
@@ -378,6 +387,65 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
                 prop.addAttribute(new Attribute("mandatory", m_mandatory));
             }
             
+        }
+    }
+    
+    /**
+     * Parses a ServiceController annotation.
+     */
+    private static final class ServiceControllerAnnotationParser extends EmptyVisitor implements AnnotationVisitor {
+        
+        /**
+         * Parent element element.
+         */
+        private Element m_parent;
+        
+        /**
+         * Field name. 
+         */
+        private String m_field;
+        
+        /**
+         * Property value.  
+         */
+        private String m_value;        
+        
+        /**
+         * Constructor.
+         * @param parent : parent element.
+         * @param field : field name.
+         */
+        private ServiceControllerAnnotationParser(String field, Element parent) {
+            m_parent = parent;
+            m_field = field;
+        }
+
+        /**
+         * Visit one "simple" annotation.
+         * @param arg0 : annotation name
+         * @param arg1 : annotation value
+         * @see org.objectweb.asm.AnnotationVisitor#visit(java.lang.String, java.lang.Object)
+         */
+        public void visit(String arg0, Object arg1) {
+            if (arg0.equals("value")) {
+                m_value = arg1.toString();
+                return;
+            }
+        }
+
+        /**
+         * End of the annotation.
+         * Create a "controller" element
+         * @see org.objectweb.asm.AnnotationVisitor#visitEnd()
+         */
+        public void visitEnd() {
+            Element controller = new Element("controller", "");
+            m_parent.addElement(controller);
+            
+            controller.addAttribute(new Attribute("field", m_field));
+            if (m_value != null) {
+                controller.addAttribute(new Attribute("value", m_value));
+            }
         }
     }
 }

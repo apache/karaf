@@ -161,12 +161,31 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     
                     if (field != null) {
                         getInstanceManager().register(new FieldMetadata(field, type), this);
-                        // Cannot register the property as the interception is necessary to deal with registration update.
+                        // Cannot register the property as the interception is necessary 
+                        // to deal with registration update.
                     }
                 }
 
                 // Attach to properties to the provided service
                 svc.setProperties(properties);
+            }
+            
+            Element[] controllers = providedServices[i].getElements("Controller");
+            if (controllers != null) {
+                if (controllers.length > 1) {
+                    throw new ConfigurationException("Cannot have several controller per 'provides' element");
+                }
+                
+                String field = controllers[0].getAttribute("field");
+                if (field == null) {
+                    throw new ConfigurationException("The field attribute of a controller is mandatory");
+                }
+                
+                String v = controllers[0].getAttribute("value");
+                boolean value = ! (v != null  && v.equalsIgnoreCase("false"));
+                svc.setController(field, value);
+                
+                getInstanceManager().register(new FieldMetadata(field, "boolean"), this);
             }
 
             if (checkProvidedService(svc)) {
@@ -392,6 +411,13 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             if (update) {
                 svc.update();
             }
+            if (svc.getController() != null  && svc.getController().getField().equals(fieldName) ) {
+                if (value instanceof Boolean) {
+                    svc.getController().setValue((Boolean) value);
+                } else {
+                    warn ("Boolean value expected for the service controler " + fieldName);
+                }
+            }
         }
         // Else do nothing
     }
@@ -415,6 +441,9 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     // Manage the No Value case.
                     return prop.onGet(pojo, fieldName, value); 
                 }
+            }
+            if (svc.getController() != null  && svc.getController().getField().equals(fieldName) ) {
+                return new Boolean(svc.getController().getValue());
             }
         }
         // Else it is not a property
