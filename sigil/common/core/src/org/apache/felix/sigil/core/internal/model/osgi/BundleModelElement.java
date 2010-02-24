@@ -52,7 +52,7 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
     private IPackageExport[] exports;
     private IRequiredBundle[] requires;
     private URI sourceLocation;
-    private Set<String> classpathElements;
+    private String[] classpathElements;
     private IRequiredBundle fragmentHost;
 
     // human readable values
@@ -76,7 +76,7 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
         this.imports = new IPackageImport[0];
         this.exports = new IPackageExport[0];
         this.requires = new IRequiredBundle[0];
-        this.classpathElements = new HashSet<String>();
+        this.classpathElements = new String[0];
         this.libraries = new HashSet<ILibraryImport>();
     }
 
@@ -382,19 +382,25 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
 
     public void addClasspath( String path )
     {
-        classpathElements.add( path );
+        HashSet<String> tmp = new HashSet<String>(Arrays.asList(classpathElements));
+        if ( tmp.add(path) ) {
+            classpathElements = tmp.toArray( new String[tmp.size()] );
+        }
     }
 
 
     public Collection<String> getClasspaths()
     {
-        return classpathElements.isEmpty() ? Collections.singleton( "." ) : classpathElements;
+        return classpathElements.length == 0 ? Collections.singleton( "." ) : Arrays.asList(classpathElements);
     }
 
 
     public void removeClasspath( String path )
     {
-        classpathElements.remove( path );
+        HashSet<String> tmp = new HashSet<String>(Arrays.asList(classpathElements));
+        if ( tmp.remove(path) ) {
+            classpathElements = tmp.toArray( new String[tmp.size()] );
+        }
     }
 
 
