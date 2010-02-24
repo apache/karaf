@@ -32,7 +32,7 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleContext;
 
 @RunWith(JUnit4TestRunner.class)
-public class ComponentLifeCycleTest {
+public class ComponentLifeCycleTest extends Base {
     @Configuration
     public static Option[] configuration() {
         return options(

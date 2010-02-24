@@ -35,7 +35,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
 @RunWith(JUnit4TestRunner.class)
-public class AspectTest {
+public class AspectTest extends Base {
     @Configuration
     public static Option[] configuration() {
         return options(

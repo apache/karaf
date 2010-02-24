@@ -49,7 +49,7 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 
 @RunWith(JUnit4TestRunner.class)
-public class SharingDependenciesWithMultipleServicesTest {
+public class SharingDependenciesWithMultipleServicesTest extends Base {
     @Configuration
     public static Option[] configuration() {
         return options(

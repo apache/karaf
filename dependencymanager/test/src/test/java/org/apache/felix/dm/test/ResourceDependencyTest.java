@@ -47,7 +47,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 @RunWith(JUnit4TestRunner.class)
-public class ResourceDependencyTest {
+public class ResourceDependencyTest extends Base {
     @Configuration
     public static Option[] configuration() {
         return options(

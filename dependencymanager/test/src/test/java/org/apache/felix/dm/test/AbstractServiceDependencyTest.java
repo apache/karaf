@@ -34,7 +34,7 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleContext;
 
 @RunWith(JUnit4TestRunner.class)
-public class AbstractServiceDependencyTest {
+public class AbstractServiceDependencyTest extends Base {
    @Configuration
    public static Option[] configuration() {
        return options(
