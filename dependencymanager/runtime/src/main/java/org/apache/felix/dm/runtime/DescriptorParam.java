@@ -102,7 +102,10 @@ public enum DescriptorParam
     adapteeService,
     
     /* AdapterService attribute for the adaptee service filter (the parsed value is a String) */
-    adapteeFilter;
+    adapteeFilter,
+    
+    /* BundleDependency attribute for the state mask bundle (the parsed value is a string) */
+    stateMask;
     
     /**
      * Indicates if a given attribute is a Service attribute.

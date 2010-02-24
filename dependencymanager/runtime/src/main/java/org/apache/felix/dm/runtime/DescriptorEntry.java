@@ -29,5 +29,6 @@ public enum DescriptorEntry
     AdapterService,
     ServiceDependency,
     TemporalServiceDependency,
-    ConfigurationDependency
+    ConfigurationDependency,
+    BundleDependency
 }

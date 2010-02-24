@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.dependencies.BundleDependency;
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
 import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
@@ -172,6 +173,11 @@ public class ComponentManager implements SynchronousBundleListener
                     case ConfigurationDependency:
                         checkServiceParsed(service);
                         service.add(createConfigurationDependency(b, dm, parser));
+                        break;
+                        
+                    case BundleDependency:
+                        checkServiceParsed(service);
+                        service.add(createBundleDependency(b, dm, parser));
                         break;
                 }
             }
@@ -441,5 +447,45 @@ public class ComponentManager implements SynchronousBundleListener
         String callback = parser.getString(DescriptorParam.updated, "updated");
         cd.setCallback(callback);
         return cd;
+    }
+    
+    /**
+     * Creates a BundleDependency that we parsed from a component descriptor entry.
+     * @param b
+     * @param dm
+     * @param parser
+     * @return
+     */
+    private Dependency createBundleDependency(Bundle b, DependencyManager dm,
+        DescriptorParser parser)
+    {
+        BundleDependency bd = dm.createBundleDependency();
+
+        // Set add/changed/removed
+        String added = parser.getString(DescriptorParam.added, null);
+        String changed = parser.getString(DescriptorParam.changed, null);
+        String removed = parser.getString(DescriptorParam.removed, null);
+        bd.setCallbacks(added, changed, removed);
+
+        // required
+        bd.setRequired("true".equals(parser.getString(DescriptorParam.required, "true")));
+        
+        // filter
+        String filter = parser.getString(DescriptorParam.filter, null);
+        if (filter != null) 
+        {
+            bd.setFilter(filter);
+        }
+        
+        // stateMask
+        int stateMask = parser.getInt(DescriptorParam.stateMask, -1);
+        if (stateMask != -1) 
+        {
+            bd.setStateMask(stateMask);
+        }
+
+        // propagate
+        bd.setPropagate("true".equals(parser.getString(DescriptorParam.stateMask, "true")));
+        return bd;
     }
 }
