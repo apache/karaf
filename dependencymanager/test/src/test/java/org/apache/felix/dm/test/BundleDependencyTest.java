@@ -34,7 +34,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 @RunWith(JUnit4TestRunner.class)
-public class BundleDependencyTest {
+public class BundleDependencyTest extends Base {
     @Configuration
     public static Option[] configuration() {
         return options(
@@ -71,6 +71,23 @@ public class BundleDependencyTest {
         e.step(4);
     }
     
+    @Test
+    public void testRequiredBundleDependency(BundleContext context) {
+        DependencyManager m = new DependencyManager(context);
+        // create a service provider and consumer
+        Consumer c = new Consumer();
+        
+        // helper class that ensures certain steps get executed in sequence
+        Ensure e = new Ensure();
+        Service consumerWithFilter = m.createService().setImplementation(new FilteredConsumerRequired(e)).add(m.createBundleDependency().setRequired(true).setFilter("(Bundle-SymbolicName=org.apache.felix.dependencymanager)").setCallbacks("add", "remove"));
+        // add a consumer with a filter
+        m.add(consumerWithFilter);
+        e.waitForStep(1, 10000);
+        // remove the consumer again
+        m.remove(consumerWithFilter);
+        e.waitForStep(2, 10000);
+    }
+    
     static class Consumer {
         private volatile int m_count = 0;
 
@@ -105,6 +122,28 @@ public class BundleDependencyTest {
         
         public void remove(Bundle b) {
             m_ensure.step(3);
+        }
+    }
+    
+    static class FilteredConsumerRequired {
+        private final Ensure m_ensure;
+
+        public FilteredConsumerRequired(Ensure e) {
+            m_ensure = e;
+        }
+        
+        public void add(Bundle b) {
+            Assert.assertNotNull(b);
+            if (b.getSymbolicName().equals("org.apache.felix.dependencymanager")) {
+                m_ensure.step(1);
+            }
+        }
+        
+        public void remove(Bundle b) {
+            Assert.assertNotNull(b);
+            if (b.getSymbolicName().equals("org.apache.felix.dependencymanager")) {
+                m_ensure.step(2);
+            }
         }
     }
 }
