@@ -368,23 +368,20 @@ public class ResolverImpl implements Resolver
     {
         List matchingCapabilities = new ArrayList();
 
-        for (int repoIdx = 0; (m_repositories != null) && (repoIdx < m_repositories.length); repoIdx++)
+        for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
         {
-            for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
+            checkInterrupt();
+            // We don't need to look at resources we've already looked at.
+            if (!m_failedSet.contains(resources[resIdx])
+                && !m_resolveSet.contains(resources[resIdx]))
             {
-                checkInterrupt();
-                // We don't need to look at resources we've already looked at.
-                if (!m_failedSet.contains(resources[resIdx])
-                    && !m_resolveSet.contains(resources[resIdx]))
+                Capability[] caps = resources[resIdx].getCapabilities();
+                for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
                 {
-                    Capability[] caps = resources[resIdx].getCapabilities();
-                    for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+                    if (caps[capIdx].getName().equals(req.getName())
+                            && req.isSatisfied(caps[capIdx]))
                     {
-                        if (caps[capIdx].getName().equals(req.getName())
-                                && req.isSatisfied(caps[capIdx]))
-                        {
-                            matchingCapabilities.add(caps[capIdx]);
-                        }
+                        matchingCapabilities.add(caps[capIdx]);
                     }
                 }
             }
