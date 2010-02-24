@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 import org.apache.felix.dm.annotation.api.AdapterService;
 import org.apache.felix.dm.annotation.api.AspectService;
+import org.apache.felix.dm.annotation.api.BundleDependency;
 import org.apache.felix.dm.annotation.api.Composition;
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Destroy;
@@ -67,6 +68,8 @@ public class AnnotationCollector extends ClassDataCollector
         + ConfigurationDependency.class.getName().replace('.', '/') + ";";
     private final static String A_TEMPORAL_SERVICE_DEPENDENCY = "L"
         + TemporalServiceDependency.class.getName().replace('.', '/') + ";";
+    private final static String A_BUNDLE_DEPENDENCY = "L"
+        + BundleDependency.class.getName().replace('.', '/') + ";";
     private final static String A_PROPERTIES = "L"
         + Properties.class.getName().replace('.', '/') + ";";
     private final static String A_ASPECT_SERVICE = "L"
@@ -111,6 +114,7 @@ public class AnnotationCollector extends ClassDataCollector
         ServiceDependency, 
         TemporalServiceDependency, 
         ConfigurationDependency,
+        BundleDependency,
     };
 
     // List of component descriptor parameters
@@ -141,7 +145,8 @@ public class AnnotationCollector extends ClassDataCollector
         adapterService,
         adapterProperties,
         adapteeService,
-        adapteeFilter
+        adapteeFilter,
+        stateMask
     };
 
     /**
@@ -401,6 +406,10 @@ public class AnnotationCollector extends ClassDataCollector
         {
             parsePropertiesMetaData(annotation);
         }
+        else if (annotation.getName().equals(A_BUNDLE_DEPENDENCY)) 
+        {
+            parseBundleDependencyAnnotation(annotation);
+        }
     }
 
     /**
@@ -653,7 +662,7 @@ public class AnnotationCollector extends ClassDataCollector
         // Parse Adapter properties.
         parseParameters(annotation, Params.adapterProperties, info);
 
-        // Parse the optional adapter service (use directed implemented interface by default).
+        // Parse the optional adapter service (use directly implemented interface by default).
         Object adapterService = annotation.get(Params.adapterService.toString());
         if (adapterService == null) {
             if (m_interfaces == null)
@@ -677,6 +686,26 @@ public class AnnotationCollector extends ClassDataCollector
         }
     }
 
+    private void parseBundleDependencyAnnotation(Annotation annotation)
+    {
+        Info info = new Info(EntryTypes.BundleDependency);
+        m_infos.add(info);
+
+        String filter = annotation.get(Params.filter.toString());
+        if (filter != null)
+        {
+            Verifier.verifyFilter(filter, 0);
+            info.addParam(Params.filter, filter);
+        }
+
+        info.addParam(annotation, Params.added, m_method);
+        info.addParam(annotation, Params.changed, null); // TODO check if "changed" callback exists
+        info.addParam(annotation, Params.removed, null); // TODO check if "removed" callback exists
+        info.addParam(annotation, Params.required, null);
+        info.addParam(annotation, Params.stateMask, null);
+        info.addParam(annotation, Params.propagate, null);
+    }
+    
     /**
      * Checks if an annotation attribute references an implemented interface. 
      * @param annotation the parsed annotation
