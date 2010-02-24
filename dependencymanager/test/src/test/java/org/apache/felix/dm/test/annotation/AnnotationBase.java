@@ -40,7 +40,7 @@ public class AnnotationBase extends Base implements Sequencer
     /**
      * Helper method used to stop a given bundle.
      * @param symbolicName the symbolic name of the bundle to be stopped.
-     * @param context the context of the bundle to be stopped.
+     * @param context the context used to lookup all installed bundles.
      */
     protected void stopBundle(String symbolicName, BundleContext context)
     {
