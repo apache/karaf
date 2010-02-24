@@ -33,8 +33,10 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.jar.JarFile;
 
 import org.apache.felix.sigil.core.BldCore;
+import org.apache.felix.sigil.core.util.ManifestUtil;
 import org.apache.felix.sigil.model.AbstractCompoundModelElement;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
@@ -79,7 +81,7 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
         SubMonitor progress = SubMonitor.convert( monitor, 100 );
         progress.subTask( "Synchronizing " + bundle.getSymbolicName() + " binary" );
         sync( location, bundle.getUpdateLocation(), progress.newChild( 45 ) );
-
+        
         if ( bundle.getSourceLocation() != null ) {
             try
             {
@@ -110,10 +112,15 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     }
 
 
-    private void updateManifest(IPath location2)
+    private void updateManifest(IPath location) throws IOException
     {
-        // TODO Auto-generated method stub
-        
+        JarFile f = new JarFile(location.toFile());
+        try {
+            setBundleInfo(ManifestUtil.buildBundleModelElement(f.getManifest()));
+        }
+        finally {
+            f.close();
+        }
     }
 
 
