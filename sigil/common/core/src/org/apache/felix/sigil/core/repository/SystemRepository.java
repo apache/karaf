@@ -85,6 +85,9 @@ public class SystemRepository extends AbstractBundleRepository
                     info = ModelElementFactory.getInstance().newModelElement( IBundleModelElement.class );
                 }
 
+                info.setSymbolicName("system bundle");
+                info.setName("Sigil system bundle");
+                
                 applyProfile( info );
                 systemBundle.addChild( info );
             }

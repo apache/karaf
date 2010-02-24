@@ -351,13 +351,13 @@ public class JavaHelper
     }
 
 
-    public static Collection<IClasspathEntry> resolveClasspathEntrys( ISigilProjectModel newton,
+    public static Collection<IClasspathEntry> resolveClasspathEntrys( ISigilProjectModel sigil,
         IProgressMonitor monitor ) throws CoreException
     {
         if ( monitor == null )
         {
             monitor = Job.getJobManager().createProgressGroup();
-            monitor.beginTask( "Resolving classpath for " + newton.getSymbolicName(), 2 );
+            monitor.beginTask( "Resolving classpath for " + sigil.getSymbolicName(), 2 );
         }
 
         ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
@@ -368,7 +368,7 @@ public class JavaHelper
         IResolution resolution;
         try
         {
-            resolution = SigilCore.getRepositoryManager( newton ).getBundleResolver().resolve( newton, config,
+            resolution = SigilCore.getRepositoryManager( sigil ).getBundleResolver().resolve( sigil, config,
                 new ResolutionMonitorAdapter( monitor ) );
         }
         catch ( ResolutionException e )
@@ -381,10 +381,10 @@ public class JavaHelper
         Set<ISigilBundle> bundles = resolution.getBundles();
         for ( ISigilBundle bundle : bundles )
         {
-            if ( !bundle.getBundleInfo().getSymbolicName().equals( newton.getSymbolicName() ) )
+            if ( !sigil.getSymbolicName().equals(bundle.getBundleInfo().getSymbolicName()) )
             { // discard self reference...
                 List<IModelElement> matched = resolution.getMatchedRequirements( bundle );
-                for ( IClasspathEntry cpe : buildClassPathEntry( newton, bundle, bundles, matched, monitor ) )
+                for ( IClasspathEntry cpe : buildClassPathEntry( sigil, bundle, bundles, matched, monitor ) )
                 {
                     entries.add( cpe );
                 }
