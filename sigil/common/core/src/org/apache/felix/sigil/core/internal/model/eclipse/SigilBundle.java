@@ -114,12 +114,14 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
 
     private void updateManifest(IPath location) throws IOException
     {
-        JarFile f = new JarFile(location.toFile());
-        try {
-            setBundleInfo(ManifestUtil.buildBundleModelElement(f.getManifest()));
-        }
-        finally {
-            f.close();
+        if ( location != null ) {
+            JarFile f = new JarFile(location.toFile());
+            try {
+                setBundleInfo(ManifestUtil.buildBundleModelElement(f.getManifest()));
+            }
+            finally {
+                f.close();
+            }
         }
     }
 
