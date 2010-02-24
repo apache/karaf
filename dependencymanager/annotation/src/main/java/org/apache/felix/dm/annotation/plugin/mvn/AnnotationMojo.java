@@ -86,7 +86,7 @@ public class AnnotationMojo extends AbstractMojo
             // Start scanning
             if (generator.execute())
             {
-                // Some annotation has been parsed. 
+                // Some annotations have been parsed. 
                 // Add the list of generated component descriptors in our special header.
                 jar = analyzer.getJar();
                 jar.getManifest().getMainAttributes().putValue("DependencyManager-Component",
