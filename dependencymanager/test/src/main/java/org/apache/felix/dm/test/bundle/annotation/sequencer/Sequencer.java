@@ -19,7 +19,7 @@
 package org.apache.felix.dm.test.bundle.annotation.sequencer;
 
 /**
- * Service used to ensure that steps happens in the expected order.
+ * Service used to ensure that steps happen in the expected order.
  */
 public interface Sequencer
 {
