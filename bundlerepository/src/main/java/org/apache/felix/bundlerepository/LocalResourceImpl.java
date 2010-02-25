@@ -342,4 +342,9 @@ public class LocalResourceImpl extends ResourceImpl
             addCapability(cap);
         }
     }
+
+    public String toString()
+    {
+        return m_bundle.toString();
+    }
 }

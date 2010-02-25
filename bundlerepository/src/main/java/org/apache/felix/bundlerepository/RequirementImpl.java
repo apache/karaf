@@ -125,6 +125,6 @@ public class RequirementImpl implements Requirement
 
     public synchronized String toString()
     {
-        return m_name + ": " + getFilter();
+        return m_name + ":" + getFilter();
     }
 }

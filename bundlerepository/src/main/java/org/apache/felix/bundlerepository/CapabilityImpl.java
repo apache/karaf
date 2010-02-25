@@ -67,4 +67,9 @@ public class CapabilityImpl implements Capability
     {
         m_map.put(name.toLowerCase(), value);
     }
+
+    public String toString()
+    {
+        return m_name  + ":" + m_map.toString();
+    }
 }

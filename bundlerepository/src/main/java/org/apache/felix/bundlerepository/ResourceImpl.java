@@ -275,4 +275,9 @@ public class ResourceImpl implements Resource
             }
         }
     }
+
+    public String toString()
+    {
+        return getId();
+    }
 }
