@@ -209,7 +209,7 @@ public class ResolverImpl implements Resolver
         boolean result = true;
 
         // Check for cycles.
-        if (m_resolveSet.contains(resource))
+        if (m_resolveSet.contains(resource) || m_requiredSet.contains(resource) || m_optionalSet.contains(resource))
         {
             return true;
         }
@@ -230,30 +230,38 @@ public class ResolverImpl implements Resolver
             Resource candidate = null;
             for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
             {
-                candidate = searchAddedResources(reqs[reqIdx]);
+                candidate = searchResources(reqs[reqIdx], m_addedSet);
                 if (candidate == null)
                 {
-                    candidate = searchResolvingResources(reqs[reqIdx]);
-                    if (candidate == null)
+                    candidate = searchResources(reqs[reqIdx], m_requiredSet);
+                }
+                if (candidate == null)
+                {
+                    candidate = searchResources(reqs[reqIdx], m_optionalSet);
+                }
+                if (candidate == null)
+                {
+                    candidate = searchResources(reqs[reqIdx], m_resolveSet);
+                }
+                if (candidate == null)
+                {
+                    List candidateCapabilities = searchResources(reqs[reqIdx], locals);
+                    candidateCapabilities.addAll(searchResources(reqs[reqIdx], remotes));
+
+                    // Determine the best candidate available that
+                    // can resolve.
+                    while ((candidate == null) && !candidateCapabilities.isEmpty())
                     {
-                        List candidateCapabilities = searchResources(reqs[reqIdx], locals);
-                        candidateCapabilities.addAll(searchResources(reqs[reqIdx], remotes));
+                        Capability bestCapability = getBestCandidate(candidateCapabilities);
 
-                        // Determine the best candidate available that
-                        // can resolve.
-                        while ((candidate == null) && !candidateCapabilities.isEmpty())
+                        // Try to resolve the best resource.
+                        if (resolve(((CapabilityImpl) bestCapability).getResource(), locals, remotes, optional || reqs[reqIdx].isOptional()))
                         {
-                            Capability bestCapability = getBestCandidate(candidateCapabilities);
-
-                            // Try to resolve the best resource.
-                            if (resolve(((CapabilityImpl) bestCapability).getResource(), locals, remotes, optional || reqs[reqIdx].isOptional()))
-                            {
-                                candidate = ((CapabilityImpl) bestCapability).getResource();
-                            }
-                            else
-                            {
-                                candidateCapabilities.remove(bestCapability);
-                            }
+                            candidate = ((CapabilityImpl) bestCapability).getResource();
+                        }
+                        else
+                        {
+                            candidateCapabilities.remove(bestCapability);
                         }
                     }
                 }
@@ -289,10 +297,13 @@ public class ResolverImpl implements Resolver
                         if (optional || reqs[reqIdx].isOptional())
                         {
                             m_optionalSet.add(candidate);
+                            m_resolveSet.remove(candidate);
                         }
                         else
                         {
                             m_requiredSet.add(candidate);
+                            m_optionalSet.remove(candidate);
+                            m_resolveSet.remove(candidate);
                         }
 
                         // Add the reason why the candidate was selected.
@@ -317,9 +328,9 @@ public class ResolverImpl implements Resolver
         return result;
     }
 
-    private Resource searchAddedResources(Requirement req)
+    private Resource searchResources(Requirement req, Set resourceSet)
     {
-        for (Iterator iter = m_addedSet.iterator(); iter.hasNext(); )
+        for (Iterator iter = resourceSet.iterator(); iter.hasNext(); )
         {
             checkInterrupt();
             Resource resource = (Resource) iter.next();
@@ -331,26 +342,6 @@ public class ResolverImpl implements Resolver
                 {
                     // The requirement is already satisfied an existing
                     // resource, return the resource.
-                    return resource;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private Resource searchResolvingResources(Requirement req)
-    {
-        for (Iterator iterator = m_resolveSet.iterator(); iterator.hasNext(); )
-        {
-            checkInterrupt();
-            Resource resource = (Resource) iterator.next();
-            Capability[] caps = resource.getCapabilities();
-            for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
-            {
-                if (caps[capIdx].getName().equals(req.getName())
-                    && req.isSatisfied(caps[capIdx]))
-                {
                     return resource;
                 }
             }
@@ -372,8 +363,7 @@ public class ResolverImpl implements Resolver
         {
             checkInterrupt();
             // We don't need to look at resources we've already looked at.
-            if (!m_failedSet.contains(resources[resIdx])
-                && !m_resolveSet.contains(resources[resIdx]))
+            if (!m_failedSet.contains(resources[resIdx]))
             {
                 Capability[] caps = resources[resIdx].getCapabilities();
                 for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
