@@ -19,6 +19,7 @@
 package org.apache.felix.bundlerepository;
 
 import java.io.InputStream;
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -159,40 +160,54 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
     private ResourceImpl parseResource(XMLStreamReader reader) throws Exception
     {
         ResourceImpl resource = new ResourceImpl();
-        for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+        try
         {
-            resource.put(reader.getAttributeLocalName(i), reader.getAttributeValue(i));
+            for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
+            {
+                resource.put(reader.getAttributeLocalName(i), reader.getAttributeValue(i));
+            }
+            int event;
+            while ((event = reader.nextTag()) == XMLStreamConstants.START_ELEMENT)
+            {
+                String element = reader.getLocalName();
+                if (CATEGORY.equals(element))
+                {
+                    CategoryImpl category = parseCategory(reader);
+                    resource.addCategory(category);
+                }
+                else if (CAPABILITY.equals(element))
+                {
+                    CapabilityImpl capability = parseCapability(reader);
+                    resource.addCapability(capability);
+                }
+                else if (REQUIRE.equals(element))
+                {
+                    RequirementImpl requirement = parseRequire(reader);
+                    resource.addRequire(requirement);
+                }
+                else
+                {
+                    ignoreTag(reader);
+                }
+            }
+            // Sanity check
+            if (event != XMLStreamConstants.END_ELEMENT || !RESOURCE.equals(reader.getLocalName()))
+            {
+                throw new Exception("Unexpected state");
+            }
+            return resource;
         }
-        int event;
-        while ((event = reader.nextTag()) == XMLStreamConstants.START_ELEMENT)
+        catch (Exception e)
         {
-            String element = reader.getLocalName();
-            if (CATEGORY.equals(element))
-            {
-                CategoryImpl category = parseCategory(reader);
-                resource.addCategory(category);
-            }
-            else if (CAPABILITY.equals(element))
-            {
-                CapabilityImpl capability = parseCapability(reader);
-                resource.addCapability(capability);
-            }
-            else if (REQUIRE.equals(element))
-            {
-                RequirementImpl requirement = parseRequire(reader);
-                resource.addRequire(requirement);
+            Location loc = reader.getLocation();
+            if (loc != null) {
+                throw new Exception("Error while parsing resource " + resource.getId() + " at line " + loc.getLineNumber() + " and column " + loc.getColumnNumber(), e);
             }
             else
             {
-                ignoreTag(reader);
+                throw new Exception("Error while parsing resource " + resource.getId(), e);
             }
         }
-        // Sanity check
-        if (event != XMLStreamConstants.END_ELEMENT || !RESOURCE.equals(reader.getLocalName()))
-        {
-            throw new Exception("Unexpected state");
-        }
-        return resource;
     }
 
     private CategoryImpl parseCategory(XMLStreamReader reader) throws XMLStreamException
