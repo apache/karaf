@@ -29,9 +29,8 @@ public class RequirementImpl implements Requirement
     private boolean m_extend = false;
     private boolean m_multiple = false;
     private boolean m_optional = false;
-    private Filter m_filter = null;
+    private FilterImpl m_filter = null;
     private String m_comment = null;
-    private MapToDictionary m_dict = new MapToDictionary(null);
 
     public RequirementImpl()
     {
@@ -44,7 +43,9 @@ public class RequirementImpl implements Requirement
 
     public synchronized void setName(String name)
     {
-        m_name = name;
+        // Name of capabilities and requirements are interned for performances
+        // (with a very slow inter consumption as there are only a handful of values)
+        m_name = name.intern();
     }
 
     public synchronized String getFilter()
@@ -54,13 +55,12 @@ public class RequirementImpl implements Requirement
 
     public synchronized void setFilter(String filter) throws InvalidSyntaxException
     {
-        m_filter = FilterImpl.newInstance(filter);
+        m_filter = FilterImpl.newInstance(filter, true);
     }
 
     public synchronized boolean isSatisfied(Capability capability)
     {
-        m_dict.setSourceMap(capability.getProperties());
-        return m_filter.match(m_dict);
+        return m_filter.matchCase(capability.getProperties());
     }
 
     public synchronized boolean isExtend()

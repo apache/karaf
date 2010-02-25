@@ -27,16 +27,10 @@ public class CapabilityImpl implements Capability
 {
     private Resource m_resource;
     private String m_name = null;
-    private Map m_map = null;
+    private final Map m_map = new HashMap();
 
     public CapabilityImpl()
     {
-        m_map = new TreeMap(new Comparator() {
-            public int compare(Object o1, Object o2)
-            {
-                return o1.toString().compareToIgnoreCase(o2.toString());
-            }
-        });
     }
 
     public Resource getResource()
@@ -56,7 +50,7 @@ public class CapabilityImpl implements Capability
 
     public void setName(String name)
     {
-        m_name = name;
+        m_name = name.intern();
     }
 
     public Map getProperties()
@@ -66,11 +60,11 @@ public class CapabilityImpl implements Capability
 
     protected void addP(PropertyImpl prop)
     {
-        m_map.put(prop.getN(), prop.getV());
+        addP(prop.getN(), prop.getV());
     }
 
     protected void addP(String name, Object value)
     {
-        m_map.put(name, value);
+        m_map.put(name.toLowerCase(), value);
     }
 }

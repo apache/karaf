@@ -30,7 +30,10 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -53,6 +56,7 @@ public class RepositoryImpl implements Repository
     private Resource[] m_resources = null;
     private Referral[] m_referrals = null;
     private RepositoryAdminImpl m_repoAdmin = null;
+    private List m_resourceList;
 
     // Reusable comparator for sorting resources by name.
     private ResourceComparator m_nameComparator = new ResourceComparator();
@@ -69,6 +73,7 @@ public class RepositoryImpl implements Repository
         m_repoAdmin = repoAdmin;
         m_url = url;
         m_logger = logger;
+        m_resourceList = new ArrayList();
         try
         {
             AccessController.doPrivileged(new PrivilegedExceptionAction()
@@ -98,6 +103,10 @@ public class RepositoryImpl implements Repository
 
     public Resource[] getResources()
     {
+        if (m_resources == null) {
+            Collections.sort(m_resourceList, m_nameComparator);
+            m_resources = (Resource[]) m_resourceList.toArray(new Resource[m_resourceList.size()]);
+        }
         return m_resources;
     }
 
@@ -107,19 +116,8 @@ public class RepositoryImpl implements Repository
         ((ResourceImpl) resource).setRepository(this);
 
         // Add to resource array.
-        if (m_resources == null)
-        {
-            m_resources = new Resource[] { resource };
-        }
-        else
-        {
-            Resource[] newResources = new Resource[m_resources.length + 1];
-            System.arraycopy(m_resources, 0, newResources, 0, m_resources.length);
-            newResources[m_resources.length] = resource;
-            m_resources = newResources;
-        }
-
-        Arrays.sort(m_resources, m_nameComparator);
+        m_resourceList.add(resource);
+        m_resources = null;
     }
 
     public Referral[] getReferrals()

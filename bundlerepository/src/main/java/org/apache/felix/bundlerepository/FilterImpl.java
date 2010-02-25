@@ -88,7 +88,12 @@ public class FilterImpl implements Filter {
      */
     static FilterImpl newInstance(String filterString)
             throws InvalidSyntaxException {
-        return new Parser(filterString).parse();
+        return newInstance(filterString, false);
+    }
+
+    static FilterImpl newInstance(String filterString, boolean ignoreCase)
+            throws InvalidSyntaxException {
+        return new Parser(filterString, ignoreCase).parse();
     }
 
     FilterImpl(int operation, String attr, Object value) {
@@ -101,7 +106,7 @@ public class FilterImpl implements Filter {
             {
                 conv = getSet(value);
             }
-            else if ("version".equals(attr))
+            else if ("version".equalsIgnoreCase(attr))
             {
                 if (value instanceof String) {
                     conv = new Version((String) value);
@@ -178,7 +183,7 @@ public class FilterImpl implements Filter {
      * @throws IllegalArgumentException If <code>map</code> contains
      *         case variants of the same key name.
      */
-    public boolean match(Map map) {
+    public boolean matchCase(Map map) {
         return match0(map);
     }
 
@@ -1151,11 +1156,13 @@ public class FilterImpl implements Filter {
      */
     private static class Parser {
         private final String	filterstring;
+        private final boolean   ignoreCase;
         private final char[]	filterChars;
         private int				pos;
 
-        Parser(String filterstring) {
+        Parser(String filterstring, boolean ignoreCase) {
             this.filterstring = filterstring;
+            this.ignoreCase = ignoreCase;
             filterChars = filterstring.toCharArray();
             pos = 0;
         }
@@ -1384,7 +1391,12 @@ public class FilterImpl implements Filter {
                         + filterstring.substring(pos), filterstring);
             }
 
-            return new String(filterChars, begin, length);
+            String str = new String(filterChars, begin, length);
+            if (ignoreCase)
+            {
+                str = str.toLowerCase();
+            }
+            return str;
         }
 
         private String parse_value() throws InvalidSyntaxException {

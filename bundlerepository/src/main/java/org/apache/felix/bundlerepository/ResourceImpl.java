@@ -29,8 +29,8 @@ public class ResourceImpl implements Resource
 {
     private final String URI = "uri";
 
+    private final Map m_map = new HashMap();
     private Repository m_repo = null;
-    private Map m_map = null;
     private List m_capList = new ArrayList();
     private List m_reqList = new ArrayList();
 
@@ -41,6 +41,8 @@ public class ResourceImpl implements Resource
     private String m_javadocURI = null;
     private boolean m_converted = false;
 
+    private int m_hash;
+
     public ResourceImpl()
     {
         this(null);
@@ -48,13 +50,6 @@ public class ResourceImpl implements Resource
 
     public ResourceImpl(ResourceImpl resource)
     {
-        m_map = new TreeMap(new Comparator() {
-            public int compare(Object o1, Object o2)
-            {
-                return o1.toString().compareToIgnoreCase(o2.toString());
-            }
-        });
-
         if (resource != null)
         {
             m_map.putAll(resource.getProperties());
@@ -79,11 +74,18 @@ public class ResourceImpl implements Resource
 
     public int hashCode()
     {
-        if (getSymbolicName() == null || getVersion() == null)
+        if (m_hash == 0)
         {
-            return super.hashCode();
+            if (getSymbolicName() == null || getVersion() == null)
+            {
+                m_hash =  super.hashCode();
+            }
+            else
+            {
+                m_hash = getSymbolicName().hashCode() ^ getVersion().hashCode();
+            }
         }
-        return getSymbolicName().hashCode() ^ getVersion().hashCode();
+        return m_hash;
     }
 
     public Map getProperties()
@@ -183,6 +185,9 @@ public class ResourceImpl implements Resource
     **/
     protected Object put(Object key, Object value)
     {
+        key = key.toString().toLowerCase();
+        m_converted = false;
+        m_hash = 0;
         // Capture the URIs since they might be relative, so we
         // need to defer setting the actual URL value until they
         // are used so that we will know our repository and its
