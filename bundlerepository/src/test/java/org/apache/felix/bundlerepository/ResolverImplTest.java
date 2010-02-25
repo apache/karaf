@@ -135,7 +135,7 @@ public class ResolverImplTest extends TestCase
         final Capture c = new Capture();
         EasyMock.expect(bundleContext.createFilter((String) capture(c))).andAnswer(new IAnswer() {
             public Object answer() throws Throwable {
-                return new FilterImpl((String) c.getValue());
+                return FilterImpl.newInstance((String) c.getValue());
             }
         }).anyTimes();
         EasyMock.replay(new Object[] { bundleContext, systemBundle });

@@ -237,7 +237,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         return resources;
     }
 
-    public Requirement requirement(String name, String filter)
+    public Requirement requirement(String name, String filter) throws InvalidSyntaxException
     {
         RequirementImpl req = new RequirementImpl();
         req.setName(name);
@@ -250,7 +250,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
 
     public Filter filter(String filter) throws InvalidSyntaxException
     {
-        return new FilterImpl(filter);
+        return FilterImpl.newInstance(filter);
     }
 
     public Repository repository(URL url) throws Exception

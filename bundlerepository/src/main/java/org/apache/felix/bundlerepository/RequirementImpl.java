@@ -19,6 +19,7 @@
 package org.apache.felix.bundlerepository;
 
 import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.obr.Capability;
 import org.osgi.service.obr.Requirement;
 
@@ -51,9 +52,9 @@ public class RequirementImpl implements Requirement
         return m_filter.toString();
     }
 
-    public synchronized void setFilter(String filter)
+    public synchronized void setFilter(String filter) throws InvalidSyntaxException
     {
-        m_filter = new FilterImpl(filter);
+        m_filter = FilterImpl.newInstance(filter);
     }
 
     public synchronized boolean isSatisfied(Capability capability)
