@@ -340,8 +340,7 @@ public class ResolverImpl implements Resolver
             Capability[] caps = resource.getCapabilities();
             for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
             {
-                if (caps[capIdx].getName().equals(req.getName())
-                    && req.isSatisfied(caps[capIdx]))
+                if (req.isSatisfied(caps[capIdx]))
                 {
                     // The requirement is already satisfied an existing
                     // resource, return the resource.
@@ -371,8 +370,7 @@ public class ResolverImpl implements Resolver
                 Capability[] caps = resources[resIdx].getCapabilities();
                 for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
                 {
-                    if (caps[capIdx].getName().equals(req.getName())
-                            && req.isSatisfied(caps[capIdx]))
+                    if (req.isSatisfied(caps[capIdx]))
                     {
                         matchingCapabilities.add(caps[capIdx]);
                     }

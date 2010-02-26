@@ -49,6 +49,12 @@ public interface Requirement
 
     String getComment();
 
+    /**
+     * Check if the given capability satisfied this requirement.
+     *
+     * @param capability the capability to check
+     * @return <code>true</code> is the capability satisfies this requirement, <code>false</code> otherwise
+     */
     boolean isSatisfied(Capability capability);
 
     /**

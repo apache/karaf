@@ -71,7 +71,7 @@ public class RequirementImpl implements Requirement
 
     public synchronized boolean isSatisfied(Capability capability)
     {
-        return m_filter.matchCase(capability.getProperties());
+        return m_name.equals(capability.getName()) && m_filter.matchCase(capability.getProperties());
     }
 
     public synchronized boolean isExtend()
