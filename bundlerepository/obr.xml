@@ -20,7 +20,10 @@
   <capability name="service">
     <p n="service" v="org.apache.felix.shell.Command"/>
   </capability>
-  <capability name="service">
-    <p n="service" v="org.osgi.service.obr.RepositoryAdmin"/>
-  </capability>
+    <capability name="service">
+      <p n="service" v="org.osgi.service.obr.RepositoryAdmin"/>
+    </capability>
+    <capability name="service">
+      <p n="service" v="org.apache.felix.bundlerepository.RepositoryAdmin"/>
+    </capability>
 </obr>
