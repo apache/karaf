@@ -21,6 +21,7 @@ package org.apache.felix.bundlerepository.impl;
 import java.util.*;
 
 import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.Resource;
 
 public class CapabilityImpl implements Capability
 {
@@ -32,7 +33,7 @@ public class CapabilityImpl implements Capability
     {
     }
 
-    public ResourceImpl getResource()
+    public Resource getResource()
     {
         return m_resource;
     }

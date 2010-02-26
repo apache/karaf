@@ -116,6 +116,10 @@ public class RequirementImpl implements Requirement
 
     public synchronized boolean equals(Object o)
     {
+        if (this == o)
+        {
+            return true;
+        }
         if (o instanceof Requirement)
         {
             Requirement r = (Requirement) o;

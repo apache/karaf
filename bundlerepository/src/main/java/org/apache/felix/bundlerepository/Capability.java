@@ -45,4 +45,11 @@ public interface Capability
      * @return a Map<String,List>
      */
     Map getProperties();
+
+    /**
+     * Return the resource this capability belongs to
+     *
+     * @return the resource
+     */
+    Resource getResource();
 }

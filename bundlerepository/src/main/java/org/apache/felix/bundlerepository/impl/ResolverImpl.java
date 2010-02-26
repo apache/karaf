@@ -175,7 +175,9 @@ public class ResolverImpl implements Resolver
             ResourceImpl fake = new ResourceImpl();
             for (Iterator iter = m_addedRequirementSet.iterator(); iter.hasNext(); )
             {
-                fake.addRequire((Requirement) iter.next());
+                Requirement req = (Requirement) iter.next();
+                fake.addRequire(req);
+                ((RequirementImpl) req).setResource(null);
             }
             if (!resolve(fake, locals, remotes, false))
             {
@@ -638,13 +640,6 @@ public class ResolverImpl implements Resolver
         }
         else
         {
-            for (int reqIdx = 0; reqIdx < reasons.length; reqIdx++)
-            {
-                if (req.equals(reasons[reqIdx]))
-                {
-                    return;
-                }
-            }
             Requirement[] tmp = new Requirement[reasons.length + 1];
             System.arraycopy(reasons, 0, tmp, 0, reasons.length);
             tmp[reasons.length] = req;

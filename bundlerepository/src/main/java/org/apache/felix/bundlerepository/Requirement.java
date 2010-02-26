@@ -50,4 +50,12 @@ public interface Requirement
     String getComment();
 
     boolean isSatisfied(Capability capability);
+
+    /**
+     * Return the resource this requirement belongs to
+     * or <code>null</code
+     *
+     * @return the resource
+     */
+    Resource getResource();
 }
