@@ -22,9 +22,11 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.obr.Capability;
 import org.osgi.service.obr.Requirement;
+import org.osgi.service.obr.Resource;
 
 public class RequirementImpl implements Requirement
 {
+    private Resource m_resource;
     private String m_name = null;
     private boolean m_extend = false;
     private boolean m_multiple = false;
@@ -34,6 +36,16 @@ public class RequirementImpl implements Requirement
 
     public RequirementImpl()
     {
+    }
+
+    public Resource getResource()
+    {
+        return m_resource;
+    }
+
+    public void setResource(Resource resource)
+    {
+        m_resource = resource;
     }
 
     public synchronized String getName()

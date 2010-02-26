@@ -135,6 +135,7 @@ public class ResourceImpl implements Resource
 
     protected void addRequire(Requirement req)
     {
+        ((RequirementImpl) req).setResource(this);
         m_reqList.add(req);
     }
 
