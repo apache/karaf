@@ -19,7 +19,7 @@ package org.apache.felix.karaf.shell.obr;
 import java.net.URL;
 import java.util.List;
 
-import org.osgi.service.obr.RepositoryAdmin;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 

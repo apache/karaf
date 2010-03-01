@@ -18,9 +18,9 @@ package org.apache.felix.karaf.shell.obr;
 
 import java.util.List;
 
+import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.felix.bundlerepository.Resource;
 import org.osgi.framework.Version;
-import org.osgi.service.obr.RepositoryAdmin;
-import org.osgi.service.obr.Resource;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 

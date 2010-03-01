@@ -19,15 +19,15 @@ package org.apache.felix.karaf.shell.obr;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.Repository;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.felix.bundlerepository.Requirement;
+import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
-import org.osgi.service.obr.Capability;
-import org.osgi.service.obr.Repository;
-import org.osgi.service.obr.RepositoryAdmin;
-import org.osgi.service.obr.Requirement;
-import org.osgi.service.obr.Resource;
 
 @Command(scope = "obr", name = "find", description = "Find OBR bundles for a given filter")
 public class FindCommand extends ObrCommandSupport {
@@ -60,27 +60,6 @@ public class FindCommand extends ObrCommandSupport {
                 System.out.println(version != null ? name + " (" + version + ")" : name);
             }
         }
-    }
-
-    private Requirement parseRequirement(RepositoryAdmin admin, String req) throws InvalidSyntaxException {
-        int p = req.indexOf(':');
-        String name;
-        String filter;
-        if (p > 0) {
-            name = req.substring(0, p);
-            filter = req.substring(p + 1);
-        } else {
-            if (req.contains("package")) {
-                name = "package";
-            } else {
-                name = "bundle";
-            }
-            filter = req;
-        }
-        if (!filter.startsWith("(")) {
-            filter = "(" + filter + ")";
-        }
-        return admin.requirement(name, filter);
     }
 
 }
