@@ -27,8 +27,6 @@ import org.osgi.framework.*;
 
 public class ResolverImpl implements Resolver
 {
-    public static final String PREFER_LOCAL = "obr.resolver.preferLocal";
-
     private final BundleContext m_context;
     private final Logger m_logger;
     private final Repository[] m_repositories;
@@ -42,18 +40,14 @@ public class ResolverImpl implements Resolver
     private final Map m_unsatisfiedMap = new HashMap();
     private boolean m_resolved = false;
     private long m_resolveTimeStamp;
-    private boolean m_preferLocal = true;
+    private int m_resolutionFlags;
+    private int m_deployFlags;
 
     public ResolverImpl(BundleContext context, Repository[] repositories, Logger logger)
     {
         m_context = context;
         m_logger = logger;
         m_repositories = repositories;
-        String s = context.getProperty(PREFER_LOCAL);
-        if (s != null)
-        {
-            m_preferLocal = Boolean.parseBoolean(s);
-        }
     }
 
     public synchronized void add(Resource resource)
@@ -136,6 +130,14 @@ public class ResolverImpl implements Resolver
         {
             if (m_repositories[repoIdx].isLocal() == local)
             {
+                boolean isLocal = m_repositories[repoIdx] instanceof LocalRepositoryImpl;
+                boolean isSystem = m_repositories[repoIdx] instanceof SystemRepositoryImpl;
+                if (isLocal && (m_resolutionFlags & NO_LOCAL_RESOURCES) != 0) {
+                    continue;
+                }
+                if (isSystem && (m_resolutionFlags & NO_SYSTEM_BUNDLE) != 0) {
+                    continue;
+                }
                 resources.addAll(Arrays.asList(m_repositories[repoIdx].getResources()));
             }
         }
@@ -143,6 +145,11 @@ public class ResolverImpl implements Resolver
     }
 
     public synchronized boolean resolve()
+    {
+        return resolve(0);
+    }
+
+    public synchronized boolean resolve(int flags)
     {
         // Find resources
         Resource[] locals = getResources(true);
@@ -166,6 +173,7 @@ public class ResolverImpl implements Resolver
         m_reasonMap.clear();
         m_unsatisfiedMap.clear();
         m_resolved = true;
+        m_resolutionFlags = flags;
 
         boolean result = true;
 
@@ -230,9 +238,14 @@ public class ResolverImpl implements Resolver
         Requirement[] reqs = resource.getRequirements();
         if (reqs != null)
         {
-            Resource candidate = null;
+            Resource candidate;
             for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
             {
+                // Do not resolve optional requirements
+                if ((m_resolutionFlags & NO_OPTIONAL_RESOURCES) != 0 && reqs[reqIdx].isOptional())
+                {
+                    continue;
+                }
                 candidate = searchResources(reqs[reqIdx], m_addedSet);
                 if (candidate == null)
                 {
@@ -258,9 +271,9 @@ public class ResolverImpl implements Resolver
                         Capability bestCapability = getBestCandidate(candidateCapabilities);
 
                         // Try to resolve the best resource.
-                        if (resolve(((CapabilityImpl) bestCapability).getResource(), locals, remotes, optional || reqs[reqIdx].isOptional()))
+                        if (resolve(bestCapability.getResource(), locals, remotes, optional || reqs[reqIdx].isOptional()))
                         {
-                            candidate = ((CapabilityImpl) bestCapability).getResource();
+                            candidate = bestCapability.getResource();
                         }
                         else
                         {
@@ -354,7 +367,8 @@ public class ResolverImpl implements Resolver
 
     /**
      * Searches for resources that do meet the given requirement
-     * @param req
+     * @param req the the requirement that must be satisfied by resources
+     * @param resources list of resources to look at
      * @return all resources meeting the given requirement
      */
     private List searchResources(Requirement req, Resource[] resources)
@@ -398,7 +412,7 @@ public class ResolverImpl implements Resolver
         for(int capIdx = 0; capIdx < caps.size(); capIdx++)
         {
             Capability current = (Capability) caps.get(capIdx);
-            boolean isCurrentLocal = ((CapabilityImpl) current).getResource().getRepository() == null;
+            boolean isCurrentLocal = current.getResource().getRepository() == null;
 
             if (best == null)
             {
@@ -410,15 +424,15 @@ public class ResolverImpl implements Resolver
                     bestVersion = (Version) v;
                 }
             }
-            else if (!m_preferLocal || !bestLocal || isCurrentLocal)
+            else if ((m_resolutionFlags & DO_NOT_PREFER_LOCAL) != 0 || !bestLocal || isCurrentLocal)
             {
                 Object v = current.getProperties().get(Resource.VERSION);
 
                 // If there is no version, then select the resource
                 // with the greatest number of capabilities.
                 if ((v == null) && (bestVersion == null)
-                    && (((CapabilityImpl) best).getResource().getCapabilities().length
-                        < ((CapabilityImpl) current).getResource().getCapabilities().length))
+                    && (best.getResource().getCapabilities().length
+                        < current.getResource().getCapabilities().length))
                 {
                     best = current;
                     bestLocal = isCurrentLocal;
@@ -438,8 +452,8 @@ public class ResolverImpl implements Resolver
                     // best, then select the one with the greatest
                     // number of capabilities.
                     else if ((bestVersion != null) && (bestVersion.compareTo(v) == 0)
-                            && (((CapabilityImpl) best).getResource().getCapabilities().length
-                                < ((CapabilityImpl) current).getResource().getCapabilities().length))
+                            && (best.getResource().getCapabilities().length
+                                < current.getResource().getCapabilities().length))
                     {
                         best = current;
                         bestLocal = isCurrentLocal;
@@ -462,8 +476,14 @@ public class ResolverImpl implements Resolver
 
     public synchronized void deploy(boolean start)
     {
+        deploy(START);
+    }
+
+    public synchronized void deploy(int flags)
+    {
+        m_deployFlags = flags;
         // Must resolve if not already resolved.
-        if (!m_resolved && !resolve())
+        if (!m_resolved && !resolve(flags))
         {
             m_logger.log(Logger.LOG_ERROR, "Resolver: Cannot resolve target resources.");
             return;
@@ -495,10 +515,13 @@ public class ResolverImpl implements Resolver
         {
             deployMap.put(resources[i], resources[i]);
         }
-        resources = getOptionalResources();
-        for (int i = 0; (resources != null) && (i < resources.length); i++)
+        if ((flags & NO_OPTIONAL_RESOURCES) == 0)
         {
-            deployMap.put(resources[i], resources[i]);
+            resources = getOptionalResources();
+            for (int i = 0; (resources != null) && (i < resources.length); i++)
+            {
+                deployMap.put(resources[i], resources[i]);
+            }
         }
         Resource[] deployResources = (Resource[])
             deployMap.keySet().toArray(new Resource[deployMap.size()]);
@@ -532,7 +555,7 @@ public class ResolverImpl implements Resolver
                         // stop the bundle before updating to prevent
                         // the bundle update from throwing due to not yet
                         // resolved dependencies
-                        boolean doStartBundle = start;
+                        boolean doStartBundle = (flags & START) != 0;
                         if (localResource.getBundle().getState() == Bundle.ACTIVE)
                         {
                             doStartBundle = true;
@@ -582,7 +605,7 @@ public class ResolverImpl implements Resolver
 
                         // If necessary, save the installed bundle to be
                         // started later.
-                        if (start)
+                        if ((flags & START) != 0)
                         {
                             if (!isFragmentBundle(bundle)) 
                             {

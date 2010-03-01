@@ -24,6 +24,12 @@ package org.apache.felix.bundlerepository;
 public interface Resolver
 {
 
+    int NO_OPTIONAL_RESOURCES =    0x0001;
+    int NO_LOCAL_RESOURCES =       0x0002;
+    int NO_SYSTEM_BUNDLE =         0x0004;
+    int DO_NOT_PREFER_LOCAL =      0x0008;
+    int START =                    0x0010;
+
     /**
      * Add the following resource to the resolution.
      *
@@ -60,6 +66,25 @@ public interface Resolver
      */
     Requirement[] getAddedRequirements();
 
+   /**
+     * Start the resolution process and return whether the constraints have
+     * been successfully met or not.
+     * The resolution can be interrupted by a call to Thread.interrupt() at any
+     * time.  The result will be to stop the resolver and throw an InterruptedException.
+     *
+     * @return <code>true</code> if the resolution has succeeded else <code>false</code>
+     * @throws InterruptedResolutionException if the resolution has been interrupted
+     */
+    boolean resolve() throws InterruptedResolutionException;
+
+    /**
+     * Start the resolution process with the following flags.
+     * @param flags resolution flags
+     * @return <code>true</code> if the resolution has succeeded else <code>false</code>
+     * @throws InterruptedResolutionException if the resolution has been interrupted
+     */
+    boolean resolve(int flags) throws InterruptedResolutionException;
+
     Requirement[] getUnsatisfiedRequirements();
 
     Resource[] getOptionalResources();
@@ -70,16 +95,7 @@ public interface Resolver
 
     Resource[] getRequiredResources();
 
-    /**
-     * Start the resolution process and return whether the constraints have
-     * been successfully met or not.
-     * The resolution can be interrupted by a call to Thread.interrupt() at any
-     * time.  The result will be to stop the resolver and throw an InterruptedException.
-     *
-     * @return <code>true</code> if the resolution has succeeded else <code>false</code>
-     * @throws InterruptedResolutionException if the resolution has been interrupted
-     */
-    boolean resolve();
-
     void deploy(boolean start);
+
+    void deploy(int flags);
 }

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -250,6 +251,18 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     public Repository repository(URL url) throws Exception
     {
         return new RepositoryImpl(null, url, 0, m_logger);
+    }
+
+    public Capability capability(String name, Map properties)
+    {
+        CapabilityImpl cap = new CapabilityImpl();
+        cap.setName(name);
+        for (Iterator it = properties.entrySet().iterator(); it.hasNext();)
+        {
+            Map.Entry e = (Map.Entry) it.next();
+            cap.addP((String) e.getKey(), e.getValue());
+        }
+        return cap;
     }
 
     private void initialize()

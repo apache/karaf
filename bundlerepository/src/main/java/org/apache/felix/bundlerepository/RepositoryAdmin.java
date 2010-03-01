@@ -22,6 +22,7 @@
 package org.apache.felix.bundlerepository;
 
 import java.net.URL;
+import java.util.Map;
 
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -163,5 +164,14 @@ public interface RepositoryAdmin
      * @return
      */
     Repository repository(URL repository) throws Exception;
+
+    /**
+     * Create a capability
+     *
+     * @param name name of this capability
+     * @param properties the properties
+     * @return
+     */
+    Capability capability(String name, Map properties);
 
 }
