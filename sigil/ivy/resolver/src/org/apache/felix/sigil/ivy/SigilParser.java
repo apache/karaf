@@ -69,19 +69,22 @@ public class SigilParser implements ModuleDescriptorParser
 
 
     // used by ProjectRepository
-    static DelegateParser instance()
+    static synchronized DelegateParser instance()
     {
         if ( instance == null )
             throw new IllegalStateException( "SigilParser is not instantiated." );
+        
         return instance;
     }
 
 
     public SigilParser()
     {
-        if ( instance == null )
-        {
-            instance = new DelegateParser();
+        synchronized(SigilParser.class) {
+            if ( instance == null )
+            {
+                instance = new DelegateParser();
+            }
         }
     }
 
@@ -530,7 +533,7 @@ public class SigilParser implements ModuleDescriptorParser
                 IBundleModelElement info = bundle.getBundleInfo();
                 String name = info.getSymbolicName();
 
-                if ( name == null )
+                if ( "system bundle".equals(name) )
                 {
                     // e.g. SystemProvider with framework=null
                     Log.verbose( "Discarding system bundle" );
