@@ -66,7 +66,7 @@ public class ResolveCommand extends ObrCommandSupport {
         for (Requirement requirement : parseRequirements(admin, requirements)) {
             resolver.add(requirement);
         }
-        if (resolver.resolve(optional ? 0 : Resolver.NO_OPTIONAL_REQUIREMENTS)) {
+        if (resolver.resolve(optional ? 0 : Resolver.NO_OPTIONAL_RESOURCES)) {
             Resource[] resources;
             resources = resolver.getRequiredResources();
             if ((resources != null) && (resources.length > 0)) {
