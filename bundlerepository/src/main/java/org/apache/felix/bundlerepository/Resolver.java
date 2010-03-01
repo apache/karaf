@@ -66,6 +66,43 @@ public interface Resolver
      */
     Requirement[] getAddedRequirements();
 
+    /**
+     * Add a global capability.
+     *
+     * A global capability is one capability provided by the environment
+     * but not reflected in local resources.
+     *
+     * @param capability the new global capability
+     */
+    void addGlobalCapability(Capability capability);
+
+    /**
+     * Returns the list of global capabilities
+     * @return
+     */
+    Capability[] getGlobalCapabilities();
+
+    /**
+     * Add a global requirement.
+     *
+     * A global requirement is a requirement that must be satisfied by all
+     * resources.  Such requirements are usually built using an
+     *    IF x then Y
+     * which can be expressed using the following logical expression
+     *    !X OR (X AND Y)
+     * which can be translated to the following filter
+     *    (|(!(x))(&(x)(y))
+     *
+     * @param requirement
+     */
+    void addGlobalRequirement(Requirement requirement);
+
+    /**
+     * Returns a list of global requirements
+     * @return
+     */
+    Requirement[] getGlobalRequirements();
+
    /**
      * Start the resolution process and return whether the constraints have
      * been successfully met or not.

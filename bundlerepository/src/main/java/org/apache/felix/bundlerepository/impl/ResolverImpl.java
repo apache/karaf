@@ -32,6 +32,8 @@ public class ResolverImpl implements Resolver
     private final Repository[] m_repositories;
     private final Set m_addedSet = new HashSet();
     private final Set m_addedRequirementSet = new HashSet();
+    private final Set m_globalCapabilities = new HashSet();
+    private final Set m_globalRequirements = new HashSet();
     private final Set m_failedSet = new HashSet();
     private final Set m_resolveSet = new HashSet();
     private final Set m_requiredSet = new HashSet();
@@ -70,6 +72,27 @@ public class ResolverImpl implements Resolver
     public synchronized Requirement[] getAddedRequirements()
     {
         return (Requirement[]) m_addedRequirementSet.toArray(new Requirement[m_addedRequirementSet.size()]);
+    }
+
+    public void addGlobalCapability(Capability capability)
+    {
+        m_globalCapabilities.add(capability);
+    }
+
+    public Capability[] getGlobalCapabilities()
+    {
+        return (Capability[]) m_globalCapabilities.toArray(new Capability[m_globalCapabilities.size()]);
+    }
+
+    public void addGlobalRequirement(Requirement requirement)
+    {
+        m_resolved = false;
+        m_globalRequirements.add(requirement);
+    }
+
+    public Requirement[] getGlobalRequirements()
+    {
+        return (Requirement[]) m_globalRequirements.toArray(new Requirement[m_globalRequirements.size()]);
     }
 
     public synchronized Requirement[] getUnsatisfiedRequirements()
@@ -154,6 +177,7 @@ public class ResolverImpl implements Resolver
         // Find resources
         Resource[] locals = getResources(true);
         Resource[] remotes = getResources(false);
+        remotes = filter(remotes, (Requirement[]) m_globalRequirements.toArray(new Requirement[m_globalRequirements.size()]));
 
         // time of the resolution process start
         m_resolveTimeStamp = 0;
@@ -178,10 +202,16 @@ public class ResolverImpl implements Resolver
         boolean result = true;
 
         // Add a fake resource if needed
-        if (!m_addedRequirementSet.isEmpty())
+        if (!m_addedRequirementSet.isEmpty() || !m_globalCapabilities.isEmpty())
         {
             ResourceImpl fake = new ResourceImpl();
-            for (Iterator iter = m_addedRequirementSet.iterator(); iter.hasNext(); )
+            for (Iterator iter = m_globalCapabilities.iterator(); iter.hasNext();)
+            {
+                Capability cap = (Capability) iter.next();
+                fake.addCapability(cap);
+                ((CapabilityImpl) cap).setResource(null);
+            }
+            for (Iterator iter = m_addedRequirementSet.iterator(); iter.hasNext();)
             {
                 Requirement req = (Requirement) iter.next();
                 fake.addRequire(req);
@@ -213,6 +243,40 @@ public class ResolverImpl implements Resolver
 
         // Return final result.
         return result;
+    }
+
+    private Resource[] filter(Resource[] resources, Requirement[] requirements)
+    {
+        if (requirements == null || requirements.length == 0)
+        {
+            return resources;
+        }
+        List res = new ArrayList();
+        for (int resIdx = 0; (resources != null) && resIdx < resources.length; resIdx++)
+        {
+            boolean resOk = true;
+            for (int reqIdx = 0; (requirements != null) && reqIdx < requirements.length; reqIdx++)
+            {
+                boolean reqOk = false;
+                Capability[] caps = resources[resIdx].getCapabilities();
+                for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+                {
+                    if (requirements[reqIdx].isSatisfied(caps[capIdx]))
+                    {
+                        reqOk = true;
+                        break;
+                    }
+                }
+                if (!reqOk) {
+                    resOk = false;
+                    break;
+                }
+            }
+            if (resOk) {
+                res.add(resources[resIdx]);
+            }
+        }
+        return (Resource[]) res.toArray(new Resource[res.size()]);
     }
 
     private boolean resolve(Resource resource, Resource[] locals, Resource[] remotes, boolean optional)
