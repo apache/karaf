@@ -48,9 +48,6 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     private static final String TITLE = "Configuration Status";
     private static final String[] CSS_REFS = null;
 
-    private static final String TAB_PROPS = "System properties";
-    private static final String TAB_THREADS = "Threads";
-
     /**
      * Formatter pattern to generate a relative path for the generation
      * of the plain text or zip file representation of the status. The file
@@ -69,12 +66,27 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
     private int cfgPrinterTrackerCount;
 
-    private SortedMap configurationPrinters = new TreeMap();
+    private ArrayList configurationPrinters;
 
     /** Default constructor */
     public ConfigurationRender()
     {
-        super(LABEL, TITLE, CSS_REFS);
+        super( LABEL, TITLE, CSS_REFS );
+    }
+
+
+    public void deactivate()
+    {
+        // make sure the service tracker is closed and removed on deactivate
+        ServiceTracker oldTracker = cfgPrinterTracker;
+        if ( oldTracker != null )
+        {
+            oldTracker.close();
+        }
+        cfgPrinterTracker = null;
+        configurationPrinters = null;
+
+        super.deactivate();
     }
 
 
@@ -127,30 +139,15 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
             pw.println ( "<html xmlns=\"http://www.w3.org/1999/xhtml\">" );
             pw.println ( "<head><title>dummy</title></head><body><div>" );
 
-            if ( TAB_PROPS.equals( name ) )
+            Collection printers = getConfigurationPrinters();
+            for (Iterator i = printers.iterator(); i.hasNext();)
             {
-                printSystemProperties( pw );
-                pw.println( "</div></body></html>" );
-                return;
-            }
-            else if ( TAB_THREADS.equals( name))
-            {
-                printThreads( pw );
-                pw.println( "</div></body></html>" );
-                return;
-            }
-            else
-            {
-                Collection printers = getConfigurationPrinters();
-                for (Iterator i = printers.iterator(); i.hasNext();)
+                final PrinterDesc desc = (PrinterDesc) i.next();
+                if (desc.label.equals( name ) )
                 {
-                    final PrinterDesc desc = (PrinterDesc) i.next();
-                    if (desc.printer.getTitle().equals( name ) )
-                    {
-                        printConfigurationPrinter( pw, desc.printer, ConfigurationPrinter.MODE_WEB );
-                        pw.println( "</div></body></html>" );
-                        return;
-                    }
+                    printConfigurationPrinter( pw, desc.printer, ConfigurationPrinter.MODE_WEB );
+                    pw.println( "</div></body></html>" );
+                    return;
                 }
             }
 
@@ -206,16 +203,13 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
         // print headers only
         final String pluginRoot = request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT ) + "/";
-        pw.println("<li><a href='" + pluginRoot + TAB_PROPS + ".nfo'>" + TAB_PROPS + "</a></li>");
-        pw.println("<li><a href='" + pluginRoot + TAB_THREADS + ".nfo'>" + TAB_THREADS + "</a></li>");
-
-        // print header for printers
         Collection printers = getConfigurationPrinters();
         for (Iterator i = printers.iterator(); i.hasNext();)
         {
             final PrinterDesc desc = (PrinterDesc) i.next();
+            final String label = desc.label;
             final String title = desc.printer.getTitle();
-            pw.print("<li><a href='" + pluginRoot + title + ".nfo'>" + title + "</a></li>" );
+            pw.print("<li><a href='" + pluginRoot + label + ".nfo'>" + title + "</a></li>" );
         }
         pw.println("</ul> <!-- end tabs on top -->");
         pw.println();
@@ -228,9 +222,6 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
     private void printConfigurationStatus( ConfigurationWriter pw, final String mode )
     {
-        printSystemProperties( pw );
-        printThreads( pw );
-
         for ( Iterator cpi = getConfigurationPrinters().iterator(); cpi.hasNext(); )
         {
             final PrinterDesc desc = (PrinterDesc) cpi.next();
@@ -242,7 +233,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     }
 
 
-    private final Collection getConfigurationPrinters()
+    private final ArrayList getConfigurationPrinters()
     {
         if ( cfgPrinterTracker == null )
         {
@@ -254,39 +245,50 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         if ( cfgPrinterTrackerCount != cfgPrinterTracker.getTrackingCount() )
         {
             SortedMap cp = new TreeMap();
+
+            // add provided printers
+            addConfigurationPrinter( cp, new SystemPropertiesPrinter(), SystemPropertiesPrinter.LABEL, null );
+            addConfigurationPrinter( cp, new ThreadPrinter(), ThreadPrinter.LABEL, null );
+
             ServiceReference[] refs = cfgPrinterTracker.getServiceReferences();
             if ( refs != null )
             {
                 for ( int i = 0; i < refs.length; i++ )
                 {
-                    ConfigurationPrinter cfgPrinter =  ( ConfigurationPrinter ) cfgPrinterTracker.getService(refs[i]);
-                    if ( cfgPrinter != null )
-                    {
-                        cp.put( cfgPrinter.getTitle(), new PrinterDesc(cfgPrinter, refs[i].getProperty(ConfigurationPrinter.PROPERTY_MODES)) );
-                    }
+                    ConfigurationPrinter cfgPrinter = ( ConfigurationPrinter ) cfgPrinterTracker.getService( refs[i] );
+                    addConfigurationPrinter( cp, cfgPrinter, refs[i].getProperty( WebConsoleConstants.PLUGIN_LABEL ),
+                        refs[i].getProperty( ConfigurationPrinter.PROPERTY_MODES ) );
                 }
             }
-            configurationPrinters = cp;
+            configurationPrinters = new ArrayList(cp.values());
             cfgPrinterTrackerCount = cfgPrinterTracker.getTrackingCount();
         }
 
-        return configurationPrinters.values();
+        return configurationPrinters;
     }
 
 
-    private static final void printSystemProperties( ConfigurationWriter pw )
+    private static final void addConfigurationPrinter( final SortedMap printers, final ConfigurationPrinter cfgPrinter,
+        final Object labelProperty, final Object mode )
     {
-        pw.title( "System properties" );
-
-        Properties props = System.getProperties();
-        SortedSet keys = new TreeSet( props.keySet() );
-        for ( Iterator ki = keys.iterator(); ki.hasNext(); )
+        if ( cfgPrinter != null )
         {
-            Object key = ki.next();
-            infoLine( pw, null, ( String ) key, props.get( key ) );
+            String sortKey = cfgPrinter.getTitle();
+            if ( printers.containsKey( sortKey ) )
+            {
+                int idx = -1;
+                String idxTitle;
+                do
+                {
+                    idx++;
+                    idxTitle = sortKey + idx;
+                }
+                while ( printers.containsKey( idxTitle ) );
+                sortKey = idxTitle;
+            }
+            String label = ( labelProperty instanceof String ) ? ( String ) labelProperty : sortKey;
+            printers.put( sortKey, new PrinterDesc( cfgPrinter, label, mode ) );
         }
-
-        pw.end();
     }
 
 
@@ -396,85 +398,122 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         }
     }
 
-
-    private static final void printThreads( ConfigurationWriter pw )
+    private static class SystemPropertiesPrinter implements ConfigurationPrinter
     {
-        // first get the root thread group
-        ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
-        while ( rootGroup.getParent() != null )
+
+        private static final String TITLE = "System Properties";
+
+        static final String LABEL = "_systemproperties";
+
+
+        public String getTitle()
         {
-            rootGroup = rootGroup.getParent();
+            return TITLE;
         }
 
-        pw.title(  "Threads" );
 
-        printThreadGroup( pw, rootGroup );
-
-        int numGroups = rootGroup.activeGroupCount();
-        ThreadGroup[] groups = new ThreadGroup[2 * numGroups];
-        rootGroup.enumerate( groups );
-        for ( int i = 0; i < groups.length; i++ )
+        public void printConfiguration( PrintWriter printWriter )
         {
-            printThreadGroup( pw, groups[i] );
+            Properties props = System.getProperties();
+            SortedSet keys = new TreeSet( props.keySet() );
+            for ( Iterator ki = keys.iterator(); ki.hasNext(); )
+            {
+                Object key = ki.next();
+                infoLine( printWriter, null, ( String ) key, props.get( key ) );
+            }
+
         }
 
-        pw.end();
     }
 
-
-    private static final void printThreadGroup( PrintWriter pw, ThreadGroup group )
+    private static class ThreadPrinter implements ConfigurationPrinter
     {
-        if ( group != null )
+
+        private static final String TITLE = "Threads";
+
+        static final String LABEL = "_threads";
+
+
+        public String getTitle()
         {
-            StringBuffer info = new StringBuffer();
-            info.append("ThreadGroup ").append(group.getName());
-            info.append( " [" );
-            info.append( "maxprio=" ).append( group.getMaxPriority() );
-
-            info.append( ", parent=" );
-            if ( group.getParent() != null )
-            {
-                info.append( group.getParent().getName() );
-            }
-            else
-            {
-                info.append( '-' );
-            }
-
-            info.append( ", isDaemon=" ).append( group.isDaemon() );
-            info.append( ", isDestroyed=" ).append( group.isDestroyed() );
-            info.append( ']' );
-
-            infoLine( pw, null, null, info.toString() );
-
-            int numThreads = group.activeCount();
-            Thread[] threads = new Thread[numThreads * 2];
-            group.enumerate( threads, false );
-            for ( int i = 0; i < threads.length; i++ )
-            {
-                printThread( pw, threads[i] );
-            }
-
-            pw.println();
+            return TITLE;
         }
-    }
 
 
-    private static final void printThread( PrintWriter pw, Thread thread )
-    {
-        if ( thread != null )
+        public void printConfiguration( PrintWriter pw )
         {
-            StringBuffer info = new StringBuffer();
-            info.append("Thread ").append( thread.getName() );
-            info.append( " [" );
-            info.append( "priority=" ).append( thread.getPriority() );
-            info.append( ", alive=" ).append( thread.isAlive() );
-            info.append( ", daemon=" ).append( thread.isDaemon() );
-            info.append( ", interrupted=" ).append( thread.isInterrupted() );
-            info.append( ", loader=" ).append( thread.getContextClassLoader() );
-            info.append( ']' );
+            // first get the root thread group
+            ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
+            while ( rootGroup.getParent() != null )
+            {
+                rootGroup = rootGroup.getParent();
+            }
 
-            infoLine( pw, "  ", null, info.toString() );
+            printThreadGroup( pw, rootGroup );
+
+            int numGroups = rootGroup.activeGroupCount();
+            ThreadGroup[] groups = new ThreadGroup[2 * numGroups];
+            rootGroup.enumerate( groups );
+            for ( int i = 0; i < groups.length; i++ )
+            {
+                printThreadGroup( pw, groups[i] );
+            }
+        }
+
+        private static final void printThreadGroup( PrintWriter pw, ThreadGroup group )
+        {
+            if ( group != null )
+            {
+                StringBuffer info = new StringBuffer();
+                info.append( "ThreadGroup " ).append( group.getName() );
+                info.append( " [" );
+                info.append( "maxprio=" ).append( group.getMaxPriority() );
+
+                info.append( ", parent=" );
+                if ( group.getParent() != null )
+                {
+                    info.append( group.getParent().getName() );
+                }
+                else
+                {
+                    info.append( '-' );
+                }
+
+                info.append( ", isDaemon=" ).append( group.isDaemon() );
+                info.append( ", isDestroyed=" ).append( group.isDestroyed() );
+                info.append( ']' );
+
+                infoLine( pw, null, null, info.toString() );
+
+                int numThreads = group.activeCount();
+                Thread[] threads = new Thread[numThreads * 2];
+                group.enumerate( threads, false );
+                for ( int i = 0; i < threads.length; i++ )
+                {
+                    printThread( pw, threads[i] );
+                }
+
+                pw.println();
+            }
+        }
+
+
+        private static final void printThread( PrintWriter pw, Thread thread )
+        {
+            if ( thread != null )
+            {
+                StringBuffer info = new StringBuffer();
+                info.append( "Thread " ).append( thread.getName() );
+                info.append( " [" );
+                info.append( "priority=" ).append( thread.getPriority() );
+                info.append( ", alive=" ).append( thread.isAlive() );
+                info.append( ", daemon=" ).append( thread.isDaemon() );
+                info.append( ", interrupted=" ).append( thread.isInterrupted() );
+                info.append( ", loader=" ).append( thread.getContextClassLoader() );
+                info.append( ']' );
+
+                infoLine( pw, "  ", null, info.toString() );
+            }
         }
     }
 
@@ -621,6 +660,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     {
         private final String[] modes;
         public final ConfigurationPrinter printer;
+        public final String label;
 
         private static final List CUSTOM_MODES = new ArrayList();
         static
@@ -630,9 +670,10 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
             CUSTOM_MODES.add(ConfigurationPrinter.MODE_ZIP);
         }
 
-        public PrinterDesc(final ConfigurationPrinter printer, final Object modes)
+        public PrinterDesc(final ConfigurationPrinter printer, final String label, final Object modes)
         {
             this.printer = printer;
+            this.label = label;
             if ( modes == null || !(modes instanceof String || modes instanceof String[]) )
             {
                 this.modes = null;
@@ -793,6 +834,9 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
                 }
                 this.end();
             }
+
+            // increase the filename counter
+            counter++;
         }
 
 
