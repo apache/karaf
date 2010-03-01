@@ -16,8 +16,8 @@
  */
 package org.apache.felix.karaf.shell.obr;
 
-import org.osgi.service.obr.Repository;
-import org.osgi.service.obr.RepositoryAdmin;
+import org.apache.felix.bundlerepository.Repository;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "obr", name = "listUrl", description = "Displays the repository URLs currently associated with the OBR service.")

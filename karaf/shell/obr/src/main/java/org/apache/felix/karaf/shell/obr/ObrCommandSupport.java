@@ -19,14 +19,15 @@ package org.apache.felix.karaf.shell.obr;
 import java.io.PrintStream;
 import java.util.List;
 
+import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.felix.bundlerepository.Requirement;
+import org.apache.felix.bundlerepository.Resolver;
+import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
-import org.osgi.service.obr.RepositoryAdmin;
-import org.osgi.service.obr.Requirement;
-import org.osgi.service.obr.Resolver;
-import org.osgi.service.obr.Resource;
 
 public abstract class ObrCommandSupport extends OsgiCommandSupport {
 
@@ -218,4 +219,37 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         }
 
     }
+
+
+    protected Requirement parseRequirement(RepositoryAdmin admin, String req) throws InvalidSyntaxException {
+        int p = req.indexOf(':');
+        String name;
+        String filter;
+        if (p > 0) {
+            name = req.substring(0, p);
+            filter = req.substring(p + 1);
+        } else {
+            if (req.contains("package")) {
+                name = "package";
+            } else if (req.contains("service")) {
+                name = "service";
+            } else {
+                name = "bundle";
+            }
+            filter = req;
+        }
+        if (!filter.startsWith("(")) {
+            filter = "(" + filter + ")";
+        }
+        return admin.requirement(name, filter);
+    }
+
+    protected Requirement[] parseRequirements(RepositoryAdmin admin, List<String> requirements) throws InvalidSyntaxException {
+        Requirement[] reqs = new Requirement[requirements.size()];
+        for (int i = 0; i < reqs.length; i++) {
+            reqs[i] = parseRequirement(admin, requirements.get(i));
+        }
+        return reqs;
+    }
+
 }
