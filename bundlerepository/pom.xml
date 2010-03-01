@@ -33,7 +33,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.service.obr</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>
