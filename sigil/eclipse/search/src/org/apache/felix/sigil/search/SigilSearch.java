@@ -163,9 +163,14 @@ public class SigilSearch extends AbstractUIPlugin
                     if ( bundle.isSynchronized() )
                     {
                         IPath loc = bundle.getLocation();
-                        if ( loc.isAbsolute() )
-                        {
-                            indexJar( rep, bundle, loc );
+                        if ( loc == null ) {
+                            SigilCore.error("Location is null for " + bundle);
+                        }
+                        else {
+                            if ( loc.isAbsolute() )
+                            {
+                                indexJar( rep, bundle, loc );
+                            }
                         }
                     }
                 }
@@ -193,8 +198,7 @@ public class SigilSearch extends AbstractUIPlugin
         }
         catch ( JavaModelException e )
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            SigilCore.error( "Failed to index project", e);
         }
     }
 
