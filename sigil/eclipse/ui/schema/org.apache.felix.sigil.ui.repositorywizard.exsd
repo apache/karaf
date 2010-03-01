@@ -18,10 +18,10 @@
   under the License.
 -->
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.cauldron.sigil.ui" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.apache.felix.sigil.eclipse.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.cauldron.sigil.ui" id="org.cauldron.sigil.ui.repositorywizard" name="Repository Wizard"/>
+         <meta.schema plugin="org.apache.felix.sigil.eclipse.ui" id="org.apache.felix.sigil.eclipse.ui.repositorywizard" name="Repository Wizard"/>
       </appinfo>
       <documentation>
          [Enter description of this extension point.]
@@ -73,7 +73,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="org.cauldron.sigil.ui.wizard.repository.RepositoryWizard:"/>
+                  <meta.attribute kind="java" basedOn="org.apache.felix.sigil.ui.eclipse.ui.wizard.repository.RepositoryWizard:"/>
                </appinfo>
             </annotation>
          </attribute>
