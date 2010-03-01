@@ -917,6 +917,8 @@
                                 <exclude>**/.*</exclude>
                                 <exclude>**/eclipse-classes/**/*</exclude>
                                 <exclude>**/dependency-reduced-pom.xml</exclude>
+                                <!--RAT doesn't seem to recognize MIT style licenses-->
+                                <exclude>manual/src/styles/print.css</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
