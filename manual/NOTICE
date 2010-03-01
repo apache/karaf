@@ -12,6 +12,10 @@ The PDF manual has been generated using http://www.princexml.com/
 and contains an attribution which should not be removed by
 licensee.
 
+This product includes software written by
+Hakon Wium Lie and Bert Bos.
+Licensed under the MIT License.
+
 II. Used Software
 
 This product uses software developed at
@@ -21,3 +25,4 @@ Licensed under the Apache License 2.0.
 
 III. License Summary
 - Apache License 2.0
+- MIT License
