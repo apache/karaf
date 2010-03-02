@@ -504,7 +504,7 @@ public class BundleInfo {
 			for (Iterator at = directives.keySet().iterator(); at.hasNext();) {
 				String key = (String) at.next();
 				Object value = directives.get(key);
-				capability.addProperty(key, value);
+				capability.addProperty(key + ":", value);
 			}
 		return capability;
 	}
