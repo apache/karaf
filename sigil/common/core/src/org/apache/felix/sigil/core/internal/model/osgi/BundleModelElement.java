@@ -21,7 +21,6 @@ package org.apache.felix.sigil.core.internal.model.osgi;
 
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
