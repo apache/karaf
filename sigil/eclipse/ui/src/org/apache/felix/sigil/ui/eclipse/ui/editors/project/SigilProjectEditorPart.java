@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.eclipse.SigilCore;
+import org.apache.felix.sigil.eclipse.job.ResolveProjectsJob;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.ModelElementFactory;
@@ -66,7 +67,7 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
 {
 
     private final Set<IModelElement> unresolvedElements = Collections.synchronizedSet( new HashSet<IModelElement>() );
-    private ISigilProjectModel projectx;
+    private ISigilProjectModel project;
     private ISigilProjectModel tempProject;
     private volatile boolean saving = false;
     private int dependenciesPageIndex;
@@ -101,8 +102,10 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
                     try
                     {
                         if ( doInternalSave(monitor) ) {
-                            projectx.setBundle( null );
-                            projectx.rebuildDependencies(monitor);                            
+                            project.setBundle( null );
+                            tempProject.setBundle(null);
+                            project.rebuildDependencies(monitor);
+                            refreshAllPages();
                         }
 
                         monitor.done();
@@ -116,7 +119,7 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
         }
         catch ( InvocationTargetException e )
         {
-            SigilCore.error( "Failed to save " + projectx, e.getTargetException() );
+            SigilCore.error( "Failed to save " + project, e.getTargetException() );
         }
         catch ( InterruptedException e )
         {
@@ -147,11 +150,12 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
         else if ( isDirty() )
         {
             commitPages( true );
-            tempProject.save( monitor );
+            tempProject.save( monitor, false );
             SigilUI.runInUISync( new Runnable()
             {
                 public void run()
                 {
+                    textPage.setInput(getEditorInput());
                     editorDirtyStateChanged();
                 }
             } );
@@ -177,7 +181,7 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
             addPage( new ExportsForm( this, tempProject ) );
             textPage = new PropertiesForm( this, tempProject );
             addPage( textPage, getEditorInput() );
-            setPartName( projectx.getSymbolicName() );
+            setPartName( project.getSymbolicName() );
 
             refreshTabImages();
         }
@@ -231,6 +235,27 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
 
     public void resourceChanged( IResourceChangeEvent event )
     {
+        switch (event.getType()) {
+            case IResourceChangeEvent.PRE_REFRESH:
+                handleRefresh(event);
+                break;
+            case IResourceChangeEvent.POST_CHANGE:
+                handleChange(event);
+                break;
+        }
+
+    }
+
+
+    private void handleRefresh(IResourceChangeEvent event)
+    {
+        ResolveProjectsJob job = new ResolveProjectsJob(project);
+        job.schedule();        
+    }
+
+
+    private void handleChange(IResourceChangeEvent event)
+    {
         IResourceDelta delta = event.getDelta();
         final IFile editorFile = ( ( IFileEditorInput ) getEditorInput() ).getFile();
         try
@@ -243,43 +268,13 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
                     IResource resource = delta.getResource();
                     if ( resource instanceof IProject )
                     {
-                        if ( !editorFile.getProject().equals( resource ) )
-                        {
-                            return false;
-                        }
-                        if ( kind == IResourceDelta.CHANGED && ( delta.getFlags() & IResourceDelta.MARKERS ) > 0 )
-                        {
-                            loadUnresolvedDependencies();
-                            refreshAllPages();
-                        }
-                        return true;
+                        int flags = delta.getFlags();
+                        return handleProjectChange(editorFile, (IProject) resource, kind, flags);
                     }
 
                     if ( resource instanceof IFile )
                     {
-                        IFile affectedFile = ( IFile ) resource;
-                        if ( affectedFile.equals( editorFile ) )
-                        {
-                            switch ( kind )
-                            {
-                                case IResourceDelta.REMOVED:
-                                    close( false );
-                                    break;
-                                case IResourceDelta.CHANGED:
-                                    if ( !saving )
-                                    {
-                                        reload();
-                                    }
-                                    SigilUI.runInUISync( new Runnable()
-                                    {
-                                        public void run()
-                                        {
-                                            setPartName( projectx.getSymbolicName() );
-                                        }
-                                    } );
-                                    break;
-                            }
-                        }
+                        handleFileChange(editorFile, (IFile) resource, kind);
                         // Recurse no more
                         return false;
                     }
@@ -292,6 +287,48 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
         {
             ErrorDialog.openError( getSite().getShell(), "Error", null, e.getStatus() );
         }
+    }
+
+
+    protected void handleFileChange(IFile editorFile, IFile affectedFile, int kind)
+    {
+        if ( affectedFile.equals( editorFile ) )
+        {
+            switch ( kind )
+            {
+                case IResourceDelta.REMOVED:
+                    close( false );
+                    break;
+                case IResourceDelta.CHANGED:
+                    if ( !saving )
+                    {
+                        reload();
+                    }
+                    SigilUI.runInUISync( new Runnable()
+                    {
+                        public void run()
+                        {
+                            setPartName( project.getSymbolicName() );
+                        }
+                    } );
+                    break;
+            }
+        }
+    }
+
+
+    private boolean handleProjectChange(IResource editorFile, IProject project, int kind, int flags) throws CoreException
+    {
+        if ( !editorFile.getProject().equals( project ) )
+        {
+            return false;
+        }
+        if ( kind == IResourceDelta.CHANGED && ( flags & IResourceDelta.MARKERS ) > 0 )
+        {
+            loadUnresolvedDependencies();
+            refreshAllPages();
+        }
+        return true;
     }
 
 
@@ -319,7 +356,7 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
                     }
                 }
                 firePropertyChange( IEditorPart.PROP_DIRTY );
-                setPartName( projectx.getSymbolicName() );
+                setPartName( project.getSymbolicName() );
                 refreshTabImages();
             }
         };
@@ -327,9 +364,9 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
     }
 
 
-    protected void reload()
+    private void reload()
     {
-        projectx.setBundle( null );
+        project.setBundle( null );
         refreshAllPages();
     }
 
@@ -341,15 +378,15 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
 
         try
         {
-            this.projectx = SigilCore.create( getProject() );
-            this.tempProject = (ISigilProjectModel) projectx.clone();
+            this.project = SigilCore.create( getProject() );
+            this.tempProject = (ISigilProjectModel) project.clone();
         }
         catch ( CoreException e )
         {
             throw new PartInitException( "Error creating Sigil project", e );
         }
 
-        ResourcesPlugin.getWorkspace().addResourceChangeListener( this, IResourceChangeEvent.POST_CHANGE );
+        ResourcesPlugin.getWorkspace().addResourceChangeListener( this, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_REFRESH );
 
         if ( input instanceof IFileEditorInput )
         {

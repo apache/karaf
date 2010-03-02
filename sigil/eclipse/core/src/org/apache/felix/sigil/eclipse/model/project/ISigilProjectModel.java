@@ -72,7 +72,15 @@ public interface ISigilProjectModel extends ICompoundModelElement
      *            should be reported and that the operation cannot be cancelled
      * @throws CoreException
      */
-    void save( IProgressMonitor monitor ) throws CoreException;
+    void save(IProgressMonitor monitor) throws CoreException;
+    
+    /**
+     * Save the project and optionally rebuildDependencies
+     * @param monitor
+     * @param rebuildDependencies
+     * @throws CoreException
+     */
+    void save( IProgressMonitor monitor, boolean rebuildDependencies ) throws CoreException;
     
     void rebuildDependencies(IProgressMonitor monitor) throws CoreException;
 

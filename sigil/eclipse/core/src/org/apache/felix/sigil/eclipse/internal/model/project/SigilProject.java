@@ -51,6 +51,7 @@ import org.apache.felix.sigil.repository.ResolutionException;
 import org.apache.felix.sigil.repository.ResolutionMonitorAdapter;
 import org.apache.felix.sigil.utils.GlobCompiler;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
@@ -110,11 +111,18 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
 
     public void save( IProgressMonitor monitor ) throws CoreException
     {
+        save(monitor, true);
+    }
+    
+    public void save( IProgressMonitor monitor, boolean rebuildDependencies ) throws CoreException
+    {
         SubMonitor progress = SubMonitor.convert( monitor, 100 );
 
         bldProjectFile.setContents( buildContents(), IFile.KEEP_HISTORY, progress.newChild( 10 ) );
-        
-        rebuildDependencies(progress.newChild(90));
+     
+        if ( rebuildDependencies ) {
+            rebuildDependencies(progress.newChild(90));
+        }
     }
 
     public void rebuildDependencies(IProgressMonitor monitor) throws CoreException {
@@ -123,26 +131,79 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
         calculateUses();
 
         IRepositoryManager manager = SigilCore.getRepositoryManager( this );
-        ResolutionConfig config = new ResolutionConfig( ResolutionConfig.INCLUDE_OPTIONAL );
+        ResolutionConfig config = new ResolutionConfig( ResolutionConfig.INCLUDE_OPTIONAL | ResolutionConfig.IGNORE_ERRORS );
 
         try
         {
-            IResolution res = manager.getBundleResolver().resolve( this, config,
+            IResolution resolution = manager.getBundleResolver().resolve( this, config,
                 new ResolutionMonitorAdapter( progress.newChild( 10 ) ) );
-            if ( !res.isSynchronized() )
+            
+            getProject().deleteMarkers( SigilCore.MARKER_UNRESOLVED_DEPENDENCY, true,
+                IResource.DEPTH_ONE );
+
+            // Find missing imports
+            Collection<IPackageImport> imports = getBundle().getBundleInfo().getImports();
+            for ( IPackageImport pkgImport : imports )
             {
-                res.synchronize( progress.newChild( 60 ) );
+                if ( resolution.getProvider( pkgImport ) == null )
+                {
+                    markMissingImport( pkgImport, getProject() );
+                }
             }
+
+            // Find missing required bundles
+            Collection<IRequiredBundle> requiredBundles = getBundle().getBundleInfo()
+            .getRequiredBundles();
+            for ( IRequiredBundle requiredBundle : requiredBundles )
+            {
+                if ( resolution.getProvider( requiredBundle ) == null )
+                {
+                    markMissingRequiredBundle( requiredBundle, getProject() );
+                }
+            }
+            
+            if ( !resolution.isSynchronized() )
+            {
+                resolution.synchronize( progress.newChild( 60 ) );
+            }
+            
+
         }
         catch ( ResolutionException e )
         {
-            throw SigilCore.newCoreException( "Failed to synchronize dependencies", e );
+            throw SigilCore.newCoreException( "Failed to resolve dependencies", e );
         }
 
         progress.setWorkRemaining( 30 );
 
         SigilCore.rebuildBundleDependencies( this, progress.newChild( 30 ) );
     }
+    
+
+
+    private static void markMissingImport( IPackageImport pkgImport, IProject project ) throws CoreException
+    {
+        IMarker marker = project.getProject().createMarker( SigilCore.MARKER_UNRESOLVED_IMPORT_PACKAGE );
+        marker.setAttribute( "element", pkgImport.getPackageName() );
+        marker.setAttribute( "versionRange", pkgImport.getVersions().toString() );
+        marker.setAttribute( IMarker.MESSAGE, "Cannot resolve imported package \"" + pkgImport.getPackageName()
+            + "\" with version range " + pkgImport.getVersions() );
+        marker.setAttribute( IMarker.SEVERITY, pkgImport.isOptional() ? IMarker.SEVERITY_WARNING
+            : IMarker.SEVERITY_ERROR );
+        marker.setAttribute( IMarker.PRIORITY, IMarker.PRIORITY_HIGH );
+    }
+
+
+    private static void markMissingRequiredBundle( IRequiredBundle req, IProject project ) throws CoreException
+    {
+        IMarker marker = project.getProject().createMarker( SigilCore.MARKER_UNRESOLVED_REQUIRE_BUNDLE );
+        marker.setAttribute( "element", req.getSymbolicName() );
+        marker.setAttribute( "versionRange", req.getVersions().toString() );
+        marker.setAttribute( IMarker.MESSAGE, "Cannot resolve required bundle \"" + req.getSymbolicName()
+            + "\" with version range " + req.getVersions() );
+        marker.setAttribute( IMarker.SEVERITY, req.isOptional() ? IMarker.SEVERITY_WARNING : IMarker.SEVERITY_ERROR );
+        marker.setAttribute( IMarker.PRIORITY, IMarker.PRIORITY_HIGH );
+    }    
 
     /**
      * Returns the project custom preference pool.
