@@ -175,8 +175,8 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
         if ( obj == this ) return true;
         try {
             PackageExport e = (PackageExport) obj;
-            return name == null ? e.name == null : name.equals( e.name ) && 
-                version == null ? e.version == null : version.equals( e.version );
+            return (name == null ? e.name == null : name.equals( e.name )) && 
+                (version == null ? e.version == null : version.equals( e.version ));
         }
         catch (ClassCastException e) {
             return false;
