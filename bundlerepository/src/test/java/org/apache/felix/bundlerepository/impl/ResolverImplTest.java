@@ -110,6 +110,25 @@ public class ResolverImplTest extends TestCase
         assertEquals(2, resolver.getOptionalResources().length);
     }
 
+    public void testMandatoryPackages() throws Exception
+    {
+        RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
+        repoAdmin.addRepository(getClass().getResource("/repo_for_mandatory.xml"));
+
+        Resolver resolver = repoAdmin.resolver();
+        resolver.add(repoAdmin.requirement("bundle", "(symbolicname=res2)"));
+        assertFalse(resolver.resolve());
+
+        resolver = repoAdmin.resolver();
+        resolver.add(repoAdmin.requirement("bundle", "(symbolicname=res3)"));
+        assertTrue(resolver.resolve());
+
+        resolver = repoAdmin.resolver();
+        resolver.add(repoAdmin.requirement("bundle", "(symbolicname=res4)"));
+        assertFalse(resolver.resolve());
+
+    }
+
     public static void main(String[] args) throws Exception
     {
         new ResolverImplTest().testReferral1();

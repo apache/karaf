@@ -41,11 +41,11 @@ public class RepositoryAdminTest extends TestCase
         RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
         RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
 
-        Resource[] resources = repoAdmin.discoverResources("(category:<*dummy)");
+        Resource[] resources = repoAdmin.discoverResources("(category<*dummy)");
         assertNotNull(resources);
         assertEquals(1, resources.length);
 
-        resources = repoAdmin.discoverResources("(category:*>dummy)");
+        resources = repoAdmin.discoverResources("(category*>dummy)");
         assertNotNull(resources);
         assertEquals(1, resources.length);
     }

@@ -56,14 +56,14 @@ public class FilterImplTest extends TestCase
         assertFalse(filterImpl.match(dict));
 
         dict = new Hashtable();
-        dict.put("mandatory", "common");
+        dict.put("mandatory:", "common");
         dict.put("package", "org.eclipse.core.runtime");
         dict.put("version", new Version("0.0.0"));
         dict.put("common", "split");
         assertTrue(filterImpl.match(dict));
 
         dict = new Hashtable();
-        dict.put("mandatory", "common,test");
+        dict.put("mandatory:", "common,test");
         dict.put("package", "org.eclipse.core.runtime");
         dict.put("version", new Version("0.0.0"));
         dict.put("common", "split");
@@ -78,14 +78,14 @@ public class FilterImplTest extends TestCase
         filterImpl = FilterImpl.newInstance(
             "(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:*>common))");
         dict = new Hashtable();
-        dict.put("mandatory", "common");
+        dict.put("mandatory:", "common");
         dict.put("package", "org.eclipse.core.runtime");
         dict.put("version", new Version("0.0.0"));
         dict.put("common", "split");
         assertTrue(filterImpl.match(dict));
 
         dict = new Hashtable();
-        dict.put("mandatory", "common,test");
+        dict.put("mandatory:", "common,test");
         dict.put("package", "org.eclipse.core.runtime");
         dict.put("version", new Version("0.0.0"));
         dict.put("common", "split");
@@ -94,14 +94,14 @@ public class FilterImplTest extends TestCase
         filterImpl = FilterImpl.newInstance(
             "(&(package=org.eclipse.core.runtime)(version>=0.0.0)(common=split)(mandatory:*>common,test))");
         dict = new Hashtable();
-        dict.put("mandatory", "common");
+        dict.put("mandatory:", "common");
         dict.put("package", "org.eclipse.core.runtime");
         dict.put("version", new Version("0.0.0"));
         dict.put("common", "split");
         assertFalse(filterImpl.match(dict));
 
         dict = new Hashtable();
-        dict.put("mandatory", "common,test");
+        dict.put("mandatory:", "common,test");
         dict.put("package", "org.eclipse.core.runtime");
         dict.put("version", new Version("0.0.0"));
         dict.put("common", "split");

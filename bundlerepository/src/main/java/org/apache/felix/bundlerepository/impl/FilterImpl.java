@@ -301,14 +301,14 @@ public class FilterImpl implements Filter {
             }
             case SUBSET : {
                 sb.append(attr);
-                sb.append(":<*");
+                sb.append("<*");
                 sb.append(encodeValue(approxString((String) value)));
 
                 break;
             }
             case SUPERSET : {
                 sb.append(attr);
-                sb.append(":*>");
+                sb.append("*>");
                 sb.append(encodeValue(approxString((String) value)));
 
                 break;
@@ -1294,17 +1294,13 @@ public class FilterImpl implements Filter {
             skipWhiteSpace();
 
             switch (filterChars[pos]) {
-                case ':': {
-                    if (filterChars[pos + 1] == '<' && filterChars[pos + 2] == '*') {
-                        pos += 3;
-                        return new FilterImpl(FilterImpl.SUBSET, attr,
-                                parse_value());
-                    }
-                    if (filterChars[pos + 1] == '*' && filterChars[pos + 2] == '>') {
-                        pos += 3;
+                case '*': {
+                    if (filterChars[pos + 1] == '>') {
+                        pos += 2;
                         return new FilterImpl(FilterImpl.SUPERSET, attr,
                                 parse_value());
                     }
+                    break;
                 }
                 case '~' : {
                     if (filterChars[pos + 1] == '=') {
@@ -1326,6 +1322,11 @@ public class FilterImpl implements Filter {
                     if (filterChars[pos + 1] == '=') {
                         pos += 2;
                         return new FilterImpl(FilterImpl.LESS, attr,
+                                parse_value());
+                    }
+                    if (filterChars[pos + 1] == '*') {
+                        pos += 2;
+                        return new FilterImpl(FilterImpl.SUBSET, attr,
                                 parse_value());
                     }
                     break;
@@ -1369,10 +1370,10 @@ public class FilterImpl implements Filter {
             while (c != '~' && c != '<' && c != '>' && c != '=' && c != '('
                     && c != ')') {
 
-                if (c == ':' && filterChars[pos+1] == '<' && filterChars[pos+2] == '*') {
+                if (c == '<' && filterChars[pos+1] == '*') {
                     break;
                 }
-                if (c == ':' && filterChars[pos+1] == '*' && filterChars[pos+2] == '>') {
+                if (c == '*' && filterChars[pos+1] == '>') {
                     break;
                 }
                 pos++;
