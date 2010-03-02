@@ -23,29 +23,21 @@ package org.apache.felix.sigil.repository;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.apache.felix.sigil.common.osgi.VersionRange;
-import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.core.licence.ILicenseManager;
 import org.apache.felix.sigil.core.licence.ILicensePolicy;
 import org.apache.felix.sigil.core.util.ManifestUtil;
-import org.apache.felix.sigil.core.util.QuoteUtil;
 import org.apache.felix.sigil.model.IModelElement;
-import org.apache.felix.sigil.model.ModelElementFactory;
-import org.apache.felix.sigil.model.ModelElementFactoryException;
 import org.apache.felix.sigil.model.eclipse.ILibrary;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
-import org.osgi.framework.Version;
 
 
 public abstract class AbstractBundleRepository implements IBundleRepository
