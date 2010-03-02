@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
@@ -75,14 +76,14 @@ public class ResolveCommand extends ObrCommandSupport {
                 for (int resIdx = 0; resIdx < resources.length; resIdx++) {
                     System.out.println("   " + resources[resIdx].getPresentationName() + " (" + resources[resIdx].getVersion() + ")");
                     if (why) {
-                        Requirement[] req = resolver.getReason(resources[resIdx]);
+                        Reason[] req = resolver.getReason(resources[resIdx]);
                         for (int reqIdx = 0; req != null && reqIdx < req.length; reqIdx++) {
-                            if (!req[reqIdx].isOptional()) {
+                            if (!req[reqIdx].getRequirement().isOptional()) {
                                 Resource r = req[reqIdx].getResource();
                                 if (r != null) {
-                                    System.out.println("      - " + r.getPresentationName() + " / " + req[reqIdx].getName() + ":" + req[reqIdx].getFilter());
+                                    System.out.println("      - " + r.getPresentationName() + " / " + req[reqIdx].getRequirement().getName() + ":" + req[reqIdx].getRequirement().getFilter());
                                 } else {
-                                    System.out.println("      - " + req[reqIdx].getName() + ":" + req[reqIdx].getFilter());
+                                    System.out.println("      - " + req[reqIdx].getRequirement().getName() + ":" + req[reqIdx].getRequirement().getFilter());
                                 }
                             }
                         }
@@ -98,14 +99,14 @@ public class ResolveCommand extends ObrCommandSupport {
                     System.out.println("   " + resources[resIdx].getPresentationName()
                         + " (" + resources[resIdx].getVersion() + ")");
                     if (why) {
-                        Requirement[] req = resolver.getReason(resources[resIdx]);
+                        Reason[] req = resolver.getReason(resources[resIdx]);
                         for (int reqIdx = 0; req != null && reqIdx < req.length; reqIdx++) {
-                            if (!req[reqIdx].isOptional()) {
+                            if (!req[reqIdx].getRequirement().isOptional()) {
                                 Resource r = req[reqIdx].getResource();
                                 if (r != null) {
-                                    System.out.println("      - " + r.getPresentationName() + " / " + req[reqIdx].getName() + ":" + req[reqIdx].getFilter());
+                                    System.out.println("      - " + r.getPresentationName() + " / " + req[reqIdx].getRequirement().getName() + ":" + req[reqIdx].getRequirement().getFilter());
                                 } else {
-                                    System.out.println("      - " + req[reqIdx].getName() + ":" + req[reqIdx].getFilter());
+                                    System.out.println("      - " + req[reqIdx].getRequirement().getName() + ":" + req[reqIdx].getRequirement().getFilter());
                                 }
                             }
                         }
@@ -116,7 +117,7 @@ public class ResolveCommand extends ObrCommandSupport {
                 try
                 {
                     System.out.print("\nDeploying...");
-                    resolver.deploy(start);
+                    resolver.deploy(start ? Resolver.START : 0);
                     System.out.println("done.");
                 }
                 catch (IllegalStateException ex)
@@ -125,16 +126,13 @@ public class ResolveCommand extends ObrCommandSupport {
                 }
             }
         } else {
-            Requirement[] reqs = resolver.getUnsatisfiedRequirements();
+            Reason[] reqs = resolver.getUnsatisfiedRequirements();
             if ((reqs != null) && (reqs.length > 0)) {
                 System.out.println("Unsatisfied requirement(s):");
                 printUnderline(System.out, 27);
                 for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++) {
-                    System.out.println("   " + reqs[reqIdx].getName() + ":" + reqs[reqIdx].getFilter());
-                    Resource[] resources = resolver.getResources(reqs[reqIdx]);
-                    for (int resIdx = 0; resIdx < resources.length; resIdx++) {
-                        System.out.println("      " + resources[resIdx].getPresentationName());
-                    }
+                    System.out.println("   " + reqs[reqIdx].getRequirement().getName() + ":" + reqs[reqIdx].getRequirement().getFilter());
+                    System.out.println("      " +reqs[reqIdx].getResource().getPresentationName());
                 }
             } else {
                 System.out.println("Could not resolve targets.");

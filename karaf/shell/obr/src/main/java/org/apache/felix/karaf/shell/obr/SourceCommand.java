@@ -16,6 +16,7 @@
  */
 package org.apache.felix.karaf.shell.obr;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
@@ -48,10 +49,10 @@ public class SourceCommand extends ObrCommandSupport {
             }
             else
             {
-                URL srcURL = (URL) resource.getProperties().get(Resource.SOURCE_URL);
+                URI srcURL = (URI) resource.getProperties().get(Resource.SOURCE_URI);
                 if (srcURL != null)
                 {
-                    FileUtil.downloadSource(System.out, System.err, srcURL, localDir, extract);
+                    FileUtil.downloadSource(System.out, System.err, srcURL.toURL(), localDir, extract);
                 }
                 else
                 {
