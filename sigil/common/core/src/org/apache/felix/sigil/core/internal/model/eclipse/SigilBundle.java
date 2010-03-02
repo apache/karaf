@@ -317,39 +317,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     }
 
 
-    @Override
-    public String toString()
-    {
-        return "SigilBundle["
-            + ( getBundleInfo() == null ? null : ( getBundleInfo().getSymbolicName() + ":" + getBundleInfo()
-                .getVersion() ) ) + "]";
-    }
-
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( obj == null )
-            return false;
-        if ( obj == this )
-            return true;
-
-        if ( obj instanceof SigilBundle )
-        {
-            return obj.toString().equals( toString() );
-        }
-
-        return false;
-    }
-
-
-    @Override
-    public int hashCode()
-    {
-        return 31 * toString().hashCode();
-    }
-
-
     public IPath getLicencePathLocation()
     {
         return licencePathLocation;
@@ -436,4 +403,57 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
         }
         return null;
     }
+    
+    @Override
+    public String toString()
+    {
+        return "SigilBundle["
+            + ( getBundleInfo() == null ? null : ( getBundleInfo().getSymbolicName() + ":" + getBundleInfo()
+                .getVersion() ) ) + "]";
+    }
+
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( obj == null )
+            return false;
+        if ( obj == this )
+            return true;
+
+        if ( obj instanceof SigilBundle )
+        {
+            return obj.toString().equals( toString() );
+        }
+
+        return false;
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return 31 * toString().hashCode();
+    }
+
+    @Override
+    public SigilBundle clone()
+    {
+        SigilBundle b = (SigilBundle) super.clone();
+        b.bundle = (IBundleModelElement) b.bundle.clone();
+        
+        IPath[] newPaths = new IPath[b.sourcePaths.length];
+        System.arraycopy(b.sourcePaths, 0, newPaths, 0, b.sourcePaths.length);
+        b.sourcePaths = newPaths;
+        
+        String[] tmp = new String[classpath.length];
+        System.arraycopy(b.classpath, 0, tmp, 0, b.classpath.length);
+        b.classpath = tmp;
+        
+        tmp = new String[packages.length];
+        System.arraycopy(b.packages, 0, tmp, 0, b.packages.length);
+        b.packages = tmp;
+
+        return b;
+    }    
 }
