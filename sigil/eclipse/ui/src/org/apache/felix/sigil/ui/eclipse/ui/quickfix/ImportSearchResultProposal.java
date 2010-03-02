@@ -101,7 +101,7 @@ public class ImportSearchResultProposal implements IJavaCompletionProposal
                     protected void execute( IProgressMonitor monitor ) throws CoreException
                     {
                         mod.getBundle().getBundleInfo().addExport( pe );
-                        mod.save( null );
+                        mod.save( monitor );
                     }
                 };
 

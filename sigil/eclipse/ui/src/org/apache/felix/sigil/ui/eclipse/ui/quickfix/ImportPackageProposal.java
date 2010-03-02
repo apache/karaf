@@ -84,7 +84,7 @@ public class ImportPackageProposal implements IJavaCompletionProposal
                 protected void execute( IProgressMonitor monitor ) throws CoreException
                 {
                     n.getBundle().getBundleInfo().addImport( i );
-                    n.save( null );
+                    n.save( monitor );
                 }
             };
 
