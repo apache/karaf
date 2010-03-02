@@ -363,7 +363,7 @@ public class JavaHelper
         ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 
         ResolutionConfig config = new ResolutionConfig( ResolutionConfig.INCLUDE_OPTIONAL
-            | ResolutionConfig.IGNORE_ERRORS | ResolutionConfig.INDEXED_ONLY | ResolutionConfig.LOCAL_ONLY );
+            | ResolutionConfig.IGNORE_ERRORS | ResolutionConfig.INDEXED_ONLY | ResolutionConfig.LOCAL_ONLY | ResolutionConfig.COMPILE_TIME );
 
         IResolution resolution;
         try
@@ -410,6 +410,7 @@ public class JavaHelper
         Set<ISigilBundle> all, List<IModelElement> requirements, IProgressMonitor monitor ) throws CoreException
     {
         IAccessRule[] rules = buildAccessRules( project, provider, all, requirements );
+        IClasspathAttribute[] attrs = new IClasspathAttribute[0];
 
         ISigilProjectModel other = provider.getAncestor( ISigilProjectModel.class );
 
@@ -418,11 +419,11 @@ public class JavaHelper
             if ( other == null )
             {
                 provider.synchronize( monitor );
-                return newBundleEntry( provider, rules, null, false );
+                return newBundleEntry( provider, rules, attrs, false );
             }
             else
             {
-                return newProjectEntry( other, rules, null, false );
+                return newProjectEntry( other, rules, attrs, false );
             }
         }
         catch ( IOException e )
@@ -432,62 +433,9 @@ public class JavaHelper
     }
 
 
-    private static IAccessRule[] buildExportRules( ISigilBundle bundle, Set<ISigilBundle> all,
-        List<IModelElement> requirements )
-    {
-        Set<IPackageExport> ex = mergeExports( bundle, all, requirements );
-
-        IAccessRule[] rules = new IAccessRule[ex.size() + 1];
-
-        Iterator<IPackageExport> iter = ex.iterator();
-        for ( int i = 0; i < rules.length - 1; i++ )
-        {
-            IPackageExport p = iter.next();
-            rules[i] = JavaCore.newAccessRule( new Path( p.getPackageName().replace( '.', '/' ) ).append( "*" ),
-                IAccessRule.K_ACCESSIBLE );
-        }
-
-        rules[rules.length - 1] = DENY_RULE;
-
-        return rules;
-    }
-
-
-    private static Set<IPackageExport> mergeExports( ISigilBundle bundle, Set<ISigilBundle> all,
-        List<IModelElement> requirements )
-    {
-        IBundleModelElement headers = bundle.getBundleInfo();
-        // FIXME treeset as PackageExport does not implement equals/hashCode
-        TreeSet<IPackageExport> exports = new TreeSet<IPackageExport>( headers.getExports() );
-        IRequiredBundle host = headers.getFragmentHost();
-        if ( host != null )
-        {
-            for ( ISigilBundle b : all )
-            {
-                if ( host.accepts( b.getBundleInfo() ) )
-                {
-                    exports.addAll( b.getBundleInfo().getExports() );
-                    break;
-                }
-            }
-        }
-        return exports;
-    }
-
-
     private static Collection<IClasspathEntry> newProjectEntry( ISigilProjectModel n, IAccessRule[] rules,
         IClasspathAttribute[] attributes, boolean export ) throws CoreException
     {
-        //		if (rules == null) {
-        //			rules = JavaHelper.buildExportRules(n.getBundle());
-        //		}
-
-        if ( attributes == null )
-        {
-            attributes = new IClasspathAttribute[]
-                {};
-        }
-
         ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
         entries.add( JavaCore.newProjectEntry( n.getProject().getFullPath(), rules, false, attributes, export ) );
         for ( IClasspathEntry e : n.getJavaModel().getRawClasspath() )
@@ -518,16 +466,6 @@ public class JavaHelper
     {
         String name = bundle.getBundleInfo().getSymbolicName();
 
-        //		if (rules == null) {
-        //			rules = JavaHelper.buildExportRules(bundle);
-        //		}
-
-        if ( attributes == null )
-        {
-            attributes = new IClasspathAttribute[]
-                {};
-        }
-
         if ( bundle.getBundleInfo().getVersion() != null )
         {
             name += "_version_" + bundle.getBundleInfo().getVersion();
@@ -547,7 +485,7 @@ public class JavaHelper
 
                 if ( path == null )
                 {
-                    SigilCore.error( "Found null path for " + bundle.getBundleInfo().getSymbolicName() );
+                    SigilCore.error( "Found null path for " + bundle.getSymbolicName() );
                     entries = Collections.emptyList();
                 }
                 else
@@ -820,6 +758,48 @@ public class JavaHelper
 
         return rules.toArray( new IAccessRule[rules.size()] );
     }
+    
+    private static IAccessRule[] buildExportRules( ISigilBundle bundle, Set<ISigilBundle> all,
+        List<IModelElement> requirements )
+    {
+        Set<IPackageExport> ex = mergeExports( bundle, all, requirements );
+
+        IAccessRule[] rules = new IAccessRule[ex.size() + 1];
+
+        Iterator<IPackageExport> iter = ex.iterator();
+        for ( int i = 0; i < rules.length - 1; i++ )
+        {
+            IPackageExport p = iter.next();
+            rules[i] = JavaCore.newAccessRule( new Path( p.getPackageName().replace( '.', '/' ) ).append( "*" ),
+                IAccessRule.K_ACCESSIBLE );
+        }
+
+        rules[rules.length - 1] = DENY_RULE;
+
+        return rules;
+    }
+
+
+    private static Set<IPackageExport> mergeExports( ISigilBundle bundle, Set<ISigilBundle> all,
+        List<IModelElement> requirements )
+    {
+        IBundleModelElement headers = bundle.getBundleInfo();
+        // FIXME treeset as PackageExport does not implement equals/hashCode
+        TreeSet<IPackageExport> exports = new TreeSet<IPackageExport>( headers.getExports() );
+        IRequiredBundle host = headers.getFragmentHost();
+        if ( host != null )
+        {
+            for ( ISigilBundle b : all )
+            {
+                if ( host.accepts( b.getBundleInfo() ) )
+                {
+                    exports.addAll( b.getBundleInfo().getExports() );
+                    break;
+                }
+            }
+        }
+        return exports;
+    }    
 
 
     /*

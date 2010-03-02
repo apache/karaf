@@ -31,6 +31,7 @@ public class ResolutionConfig
     public static final int INDEXED_ONLY = 8;
     /** Return only bundles that are stored or cached locally */
     public static final int LOCAL_ONLY = 16;
+    public static final int COMPILE_TIME = 32;
 
 
     public ResolutionConfig()
@@ -73,5 +74,11 @@ public class ResolutionConfig
     {
         // TODO Auto-generated method stub
         return false;
+    }
+
+
+    public boolean isCompileTime()
+    {
+        return ( options & COMPILE_TIME ) != 0;
     }
 }

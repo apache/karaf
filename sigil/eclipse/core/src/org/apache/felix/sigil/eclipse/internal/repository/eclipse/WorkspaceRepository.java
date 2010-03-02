@@ -20,150 +20,212 @@
 package org.apache.felix.sigil.eclipse.internal.repository.eclipse;
 
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
+import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.repository.AbstractBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryVisitor;
+import org.apache.felix.sigil.repository.ResolutionConfig;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
-
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.core.runtime.content.IContentTypeManager;
 
 public class WorkspaceRepository extends AbstractBundleRepository implements IResourceChangeListener
 {
 
     private static final int UPDATE_MASK = IResourceDelta.CONTENT | IResourceDelta.DESCRIPTION | IResourceDelta.OPEN;
-    private ISigilBundle[] bundles;
-
 
     public WorkspaceRepository( String id )
     {
         super( id );
-    }
-
-
+    }    
+      
+    
     @Override
     public void accept( IRepositoryVisitor visitor, int options )
     {
-        synchronized ( this )
+        List<ISigilProjectModel> models = SigilCore.getRoot().getProjects();
+        for ( ISigilProjectModel project : models )
         {
-            if ( bundles == null )
+            ISigilBundle b = project.getBundle();
+            if ( b == null )
             {
-                List<ISigilProjectModel> models = SigilCore.getRoot().getProjects();
-                ArrayList<ISigilBundle> tmp = new ArrayList<ISigilBundle>( models.size() );
-                for ( ISigilProjectModel n : models )
-                {
-                    ISigilBundle b = n.getBundle();
-                    if ( b == null )
-                    {
-                        SigilCore.error( "No bundle found for project " + n.getProject().getName() );
-                    }
-                    else
-                    {
-                        tmp.add( b );
-                    }
+                SigilCore.error( "No bundle found for project " + project.getProject().getName() );
+            }
+            else
+            {
+                if ( (options & ResolutionConfig.COMPILE_TIME) != 0 ) {
+                    b = compileTimeFilter(project, b);
                 }
-                bundles = tmp.toArray( new ISigilBundle[tmp.size()] );
+                visitor.visit( b );
             }
         }
-
-        for ( ISigilBundle b : bundles )
-        {
-            visitor.visit( b );
-        }
     }
+
+
+    private ISigilBundle compileTimeFilter(ISigilProjectModel project, ISigilBundle bundle)
+    {
+        bundle = (ISigilBundle) bundle.clone();
+
+        Collection<String> packages = findPackages(project);
+        
+        for ( IPackageExport pe : bundle.getBundleInfo().getExports() ) {
+            final String packagePath = pe.getPackageName().replace('.', '/');
+            if ( !packages.contains(packagePath) ) {
+                bundle.getBundleInfo().removeExport(pe);
+            }
+        }
+        
+        return bundle;
+    }
+
+
+
+    private Collection<String> findPackages(ISigilProjectModel project)
+    {
+        final IContentTypeManager contentTypeManager = Platform.getContentTypeManager();
+        final IContentType javaContentType = contentTypeManager.getContentType("org.eclipse.jdt.core.javaSource");
+        final HashSet<String> packages = new HashSet<String>();
+        
+        try
+        {
+            project.getProject().accept(new IResourceVisitor()
+            {
+                public boolean visit(IResource resource) throws CoreException
+                {
+                    if ( resource instanceof IFile ) {
+                        IFile f = (IFile) resource;
+                        IContentType ct = contentTypeManager.findContentTypeFor(f.getName());
+                        if ( ct != null && ct.isKindOf(javaContentType) ) {
+                            IPath p = f.getProjectRelativePath();
+                            p = p.removeLastSegments(1);
+                            p = p.removeFirstSegments(1);
+                            packages.add( p.toString() );
+                        }
+                    }
+                    
+                    return true;
+                }
+            });
+        }
+        catch (CoreException e)
+        {
+            SigilCore.error( "Failed to read packages for " + project.getProject().getName() );
+        }
+        
+        return packages;
+     }
+
 
 
     public void refresh()
     {
-        synchronized ( this )
-        {
-            bundles = null;
-        }
+        // no action
+        // TODO this method is used to prompt repository to update caches - 
+        // however caches are complex to maintain in this workspace as the bundle is actively being developed...
+        // potential performance improvement in future?
     }
-
-
-    @Override
-    protected void notifyChange()
-    {
-        refresh();
-        super.notifyChange();
-    }
-
 
     public void resourceChanged( IResourceChangeEvent event )
     {
         try
         {
-            event.getDelta().accept( new IResourceDeltaVisitor()
-            {
-                public boolean visit( IResourceDelta delta ) throws CoreException
-                {
-                    boolean result;
-
-                    IResource resource = delta.getResource();
-                    if ( resource instanceof IWorkspaceRoot )
-                    {
-                        result = true;
-                    }
-                    else if ( resource instanceof IProject )
-                    {
-                        IProject project = ( IProject ) resource;
-                        if ( SigilCore.isSigilProject( project ) )
-                        {
-                            switch ( delta.getKind() )
-                            {
-                                case IResourceDelta.CHANGED:
-                                    if ( ( delta.getFlags() & UPDATE_MASK ) == 0 )
-                                    {
-                                        break;
-                                    }
-                                    // else 
-                                    // fall through on purpose
-                                case IResourceDelta.ADDED: // fall through on purpose
-                                case IResourceDelta.REMOVED: // fall through on purpose
-                                    notifyChange();
-                                    break;
-                            }
-                            result = true;
-                        }
-                        else
-                        {
-                            result = false;
-                        }
-                    }
-                    else if ( resource.getName().equals( SigilCore.SIGIL_PROJECT_FILE ) )
-                    {
-                        switch ( delta.getKind() )
-                        {
-                            case IResourceDelta.CHANGED:
-                            case IResourceDelta.ADDED:
-                            case IResourceDelta.REMOVED:
-                                notifyChange();
-                        }
-                        result = false;
-                    }
-                    else
-                    {
-                        result = false;
-                    }
-                    return result;
-                }
-            } );
+            switch (event.getType()) {
+                case IResourceChangeEvent.PRE_REFRESH:
+                    handleRefresh(event);
+                    break;
+                case IResourceChangeEvent.POST_CHANGE:
+                    handleChange(event);
+                    break;
+            }
         }
         catch ( CoreException e )
         {
             SigilCore.error( "Workspace repository update failed", e );
         }
+    }
+
+
+    private void handleRefresh(IResourceChangeEvent event)
+    {
+        SigilCore.log("Refreshing workspace repository");
+        notifyChange();
+    }
+
+
+    private void handleChange(IResourceChangeEvent event) throws CoreException
+    {
+        event.getDelta().accept( new IResourceDeltaVisitor()
+        {
+            public boolean visit( IResourceDelta delta ) throws CoreException
+            {
+                boolean result;
+
+                IResource resource = delta.getResource();
+                if ( resource instanceof IWorkspaceRoot )
+                {
+                    result = true;
+                }
+                else if ( resource instanceof IProject )
+                {
+                    IProject project = ( IProject ) resource;
+                    if ( SigilCore.isSigilProject( project ) )
+                    {
+                        switch ( delta.getKind() )
+                        {
+                            case IResourceDelta.CHANGED:
+                                if ( ( delta.getFlags() & UPDATE_MASK ) == 0 )
+                                {
+                                    break;
+                                }
+                                // else 
+                                // fall through on purpose
+                            case IResourceDelta.ADDED: // fall through on purpose
+                            case IResourceDelta.REMOVED: // fall through on purpose
+                                notifyChange();
+                                break;
+                        }
+                        result = true;
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+                }
+                else if ( resource.getName().equals( SigilCore.SIGIL_PROJECT_FILE ) )
+                {
+                    switch ( delta.getKind() )
+                    {
+                        case IResourceDelta.CHANGED:
+                        case IResourceDelta.ADDED:
+                        case IResourceDelta.REMOVED:
+                            notifyChange();
+                    }
+                    result = false;
+                }
+                else
+                {
+                    result = false;
+                }
+                return result;
+            }
+        } );
     }
 
 }

@@ -44,7 +44,7 @@ public class WorkspaceRepositoryProvider implements IRepositoryProvider
         if ( repository == null )
         {
             repository = new WorkspaceRepository( id );
-            ResourcesPlugin.getWorkspace().addResourceChangeListener( repository, IResourceChangeEvent.POST_CHANGE );
+            ResourcesPlugin.getWorkspace().addResourceChangeListener( repository, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_REFRESH );
         }
         return repository;
     }
