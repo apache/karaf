@@ -39,7 +39,7 @@ public abstract class AbstractModelElement implements IModelElement
     private Map<Serializable, Serializable> serializedMeta;
     private OverrideOptions override;
 
-    protected final ModelElementSupport support;
+    protected ModelElementSupport support;
 
 
     public AbstractModelElement( String description )
@@ -77,6 +77,8 @@ public abstract class AbstractModelElement implements IModelElement
             if ( meta != null ) {
                 clone.meta = new HashMap<Object, Object>( meta );
             }
+            
+            clone.support = new ModelElementSupport(clone);
 
             return clone;
         }
