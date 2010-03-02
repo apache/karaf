@@ -20,12 +20,10 @@ package org.apache.felix.bundlerepository.impl;
 
 import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.Requirement;
-import org.apache.felix.bundlerepository.Resource;
 import org.osgi.framework.InvalidSyntaxException;
 
 public class RequirementImpl implements Requirement
 {
-    private Resource m_resource;
     private String m_name = null;
     private boolean m_extend = false;
     private boolean m_multiple = false;
@@ -35,16 +33,6 @@ public class RequirementImpl implements Requirement
 
     public RequirementImpl()
     {
-    }
-
-    public Resource getResource()
-    {
-        return m_resource;
-    }
-
-    public void setResource(Resource resource)
-    {
-        m_resource = resource;
     }
 
     public synchronized String getName()

@@ -119,12 +119,10 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         {
             initialize();
         }
-
         List repositories = new ArrayList();
         repositories.add(m_system);
         repositories.add(m_local);
         repositories.addAll(m_repoMap.values());
-
         return resolver((Repository[]) repositories.toArray(new Repository[repositories.size()]));
     }
 
@@ -134,32 +132,22 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         {
             initialize();
         }
-
+        if (repositories == null)
+        {
+            return resolver();
+        }
         return new ResolverImpl(m_context, repositories, m_logger);
     }
 
-    public synchronized Resource[] discoverResources(String filterExpr)
+    public synchronized Resource[] discoverResources(String filterExpr) throws InvalidSyntaxException
     {
         if (!m_initialized)
         {
             initialize();
         }
 
-        Filter filter = null;
-        try
-        {
-            filter = m_context.createFilter(filterExpr);
-        }
-        catch (InvalidSyntaxException ex)
-        {
-            m_logger.log(
-                Logger.LOG_WARNING,
-                "Error while discovering resources for " + filterExpr,
-                ex);
-            return new Resource[0];
-        }
-
-        Resource[] resources = null;
+        Filter filter = filterExpr != null ? filter(filterExpr) : null;
+        Resource[] resources;
         MapToDictionary dict = new MapToDictionary(null);
         Repository[] repos = listRepositories();
         List matchList = new ArrayList();
@@ -169,7 +157,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
             {
                 dict.setSourceMap(resources[resIdx].getProperties());
-                if (filter.match(dict))
+                if (filter == null || filter.match(dict))
                 {
                     matchList.add(resources[resIdx]);
                 }
@@ -206,8 +194,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
                     Capability[] caps = resources[resIdx].getCapabilities();
                     for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
                     {
-                        if (caps[capIdx].getName().equals(requirements[reqIdx].getName())
-                            && requirements[reqIdx].isSatisfied(caps[capIdx]))
+                        if (requirements[reqIdx].isSatisfied(caps[capIdx]))
                         {
                             reqMatch = true;
                             break;
@@ -251,6 +238,11 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     public Repository repository(URL url) throws Exception
     {
         return new RepositoryImpl(null, url, 0, m_logger);
+    }
+
+    public Repository repository(Resource[] resources) 
+    {
+        return new RepositoryImpl(resources);
     }
 
     public Capability capability(String name, Map properties)

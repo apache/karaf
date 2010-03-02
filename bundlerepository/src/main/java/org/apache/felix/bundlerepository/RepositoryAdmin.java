@@ -1,4 +1,22 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/*
  * $Header: /cvshome/build/org.osgi.service.obr/src/org/osgi/service/obr/RepositoryAdmin.java,v 1.3 2006/03/16 14:56:17 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2006). All Rights Reserved.
@@ -74,7 +92,7 @@ public interface RepositoryAdmin
      *            A standard OSGi filter
      * @return List of resources matching the filters.
      */
-    Resource[] discoverResources(String filterExpr);
+    Resource[] discoverResources(String filterExpr) throws InvalidSyntaxException;
 
     /**
      * Discover any resources that match the given requirements.
@@ -146,6 +164,7 @@ public interface RepositoryAdmin
      * @param name
      * @param filter
      * @return
+     * @throws InvalidSyntaxException
      */
     Requirement requirement(String name, String filter) throws InvalidSyntaxException;
 
@@ -154,6 +173,7 @@ public interface RepositoryAdmin
      *
      * @param filter the string filter
      * @return
+     * @throws InvalidSyntaxException
      */
     Filter filter(String filter) throws InvalidSyntaxException;
 
@@ -162,15 +182,27 @@ public interface RepositoryAdmin
      * 
      * @param repository
      * @return
+     * @throws Exception
      */
     Repository repository(URL repository) throws Exception;
+
+    /**
+     * Create a repository for the given set of resources.
+     * Such repositories can be used to create a resolver
+     * that would resolve on a subset of available resources
+     * instead of all of them.
+     *
+     * @param resources an array of resources
+     * @return a repository containing the given resources
+     */
+    Repository repository(Resource[] resources);
 
     /**
      * Create a capability
      *
      * @param name name of this capability
      * @param properties the properties
-     * @return
+     * @return a new capability with the specified name and properties
      */
     Capability capability(String name, Map properties);
 

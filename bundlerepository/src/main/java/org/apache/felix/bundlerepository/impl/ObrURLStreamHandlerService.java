@@ -109,22 +109,29 @@ public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
 
         URL remoteURL = null;
 
-        Bundle[] bundles = m_bundleContext.getBundles();
-
-        int i = 0;
-        while ((remoteURL == null) && (i < bundles.length))
+        try
         {
-            if (url.equals(bundles[i].getLocation()))
+            Bundle[] bundles = m_bundleContext.getBundles();
+
+            int i = 0;
+            while ((remoteURL == null) && (i < bundles.length))
             {
-                remoteURL = getRemoteUrlForBundle(bundles[i]);
+                if (url.equals(bundles[i].getLocation()))
+                {
+                    remoteURL = getRemoteUrlForBundle(bundles[i]);
+                }
+                i++;
             }
-            i++;
-        }
 
-        if (remoteURL == null)
+            if (remoteURL == null)
+            {
+                String path = u.getPath();
+                remoteURL = getRemoteObrInstallUrl(path);
+            }
+        }
+        catch (InvalidSyntaxException e)
         {
-            String path = u.getPath();
-            remoteURL = getRemoteObrInstallUrl(path);
+            throw (IOException) new IOException().initCause(e);
         }
 
         return remoteURL.openConnection();
@@ -140,7 +147,7 @@ public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
      * @return the remote URL of the resolved bundle
      * @throws IOException if an error occurs
      */
-    private URL getRemoteObrInstallUrl(String path) throws IOException
+    private URL getRemoteObrInstallUrl(String path) throws IOException, InvalidSyntaxException
     {
         if( path == null || path.trim().length() == 0 )
         {
@@ -199,7 +206,7 @@ public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
      * @return remote url
      * @throws IOException if something went wrong
      */
-    private URL getRemoteUrlForBundle(Bundle bundle) throws IOException
+    private URL getRemoteUrlForBundle(Bundle bundle) throws IOException, InvalidSyntaxException
     {
         String symbolicName = bundle.getSymbolicName();
         String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);

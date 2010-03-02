@@ -60,6 +60,15 @@ public class RepositoryImpl implements Repository
     // Reusable comparator for sorting resources by name.
     private ResourceComparator m_nameComparator = new ResourceComparator();
 
+    public RepositoryImpl(Resource[] resources)
+    {
+        m_repoAdmin = null;
+        m_url = null;
+        m_logger = null;
+        m_resources = resources;
+        m_lastmodified = System.currentTimeMillis();
+    }
+
     public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url, Logger logger)
         throws Exception
     {
@@ -165,11 +174,6 @@ public class RepositoryImpl implements Repository
         catch (ParseException ex)
         {
         }
-    }
-
-    public boolean isLocal()
-    {
-        return false;
     }
 
     /**

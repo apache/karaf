@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,47 +18,29 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.util.*;
-
-import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.Reason;
+import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
 
-public class CapabilityImpl implements Capability
+public class ReasonImpl implements Reason
 {
-    private String m_name = null;
-    private final Map m_map = new HashMap();
 
-    public CapabilityImpl()
+    private final Resource resource;
+    private final Requirement requirement;
+
+    public ReasonImpl(Resource resource, Requirement requirement)
     {
+        this.resource = resource;
+        this.requirement = requirement;
     }
 
-    public String getName()
+    public Resource getResource()
     {
-        return m_name;
+        return resource;
     }
 
-    public void setName(String name)
+    public Requirement getRequirement()
     {
-        m_name = name.intern();
-    }
-
-    public Map getProperties()
-    {
-        return m_map;
-    }
-
-    protected void addP(PropertyImpl prop)
-    {
-        addP(prop.getN(), prop.getV());
-    }
-
-    protected void addP(String name, Object value)
-    {
-        m_map.put(name.toLowerCase(), value);
-    }
-
-    public String toString()
-    {
-        return m_name  + ":" + m_map.toString();
+        return requirement;
     }
 }

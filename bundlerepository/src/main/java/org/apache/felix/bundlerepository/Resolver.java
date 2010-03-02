@@ -1,4 +1,22 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/*
  * $Header: /cvshome/build/org.osgi.service.obr/src/org/osgi/service/obr/Resolver.java,v 1.3 2006/03/16 14:56:17 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2006). All Rights Reserved.
@@ -82,27 +100,6 @@ public interface Resolver
      */
     Capability[] getGlobalCapabilities();
 
-    /**
-     * Add a global requirement.
-     *
-     * A global requirement is a requirement that must be satisfied by all
-     * resources.  Such requirements are usually built using an
-     *    IF x then Y
-     * which can be expressed using the following logical expression
-     *    !X OR (X AND Y)
-     * which can be translated to the following filter
-     *    (|(!(x))(&(x)(y))
-     *
-     * @param requirement
-     */
-    void addGlobalRequirement(Requirement requirement);
-
-    /**
-     * Returns a list of global requirements
-     * @return
-     */
-    Requirement[] getGlobalRequirements();
-
    /**
      * Start the resolution process and return whether the constraints have
      * been successfully met or not.
@@ -122,17 +119,32 @@ public interface Resolver
      */
     boolean resolve(int flags) throws InterruptedResolutionException;
 
-    Requirement[] getUnsatisfiedRequirements();
-
-    Resource[] getOptionalResources();
-
-    Requirement[] getReason(Resource resource);
-
-    Resource[] getResources(Requirement requirement);
-
+    /**
+     * List of mandatory resources that need to be installed
+     * @return
+     */
     Resource[] getRequiredResources();
 
-    void deploy(boolean start);
+    /**
+     * List of optional resources that may be installed
+     * @return
+     */
+    Resource[] getOptionalResources();
+
+    /**
+     * List of reasons why a resource has been included either as a mandatory or
+     * optional resource during the resolution.
+     *
+     * @param resource
+     * @return an array of Reason
+     */
+    Reason[] getReason(Resource resource);
+
+    /**
+     * List of requirements that could not be satisfied during the resolution
+     * @return
+     */
+    Reason[] getUnsatisfiedRequirements();
 
     void deploy(int flags);
 }

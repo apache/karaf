@@ -143,11 +143,6 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
         return (Resource[]) m_localResourceList.values().toArray(new Resource[m_localResourceList.size()]);
     }
 
-    public boolean isLocal()
-    {
-        return true;
-    }
-
     private void initialize()
     {
         // register for bundle and service events now

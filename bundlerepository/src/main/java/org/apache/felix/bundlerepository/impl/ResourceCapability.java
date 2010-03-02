@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,47 +18,14 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.util.*;
-
 import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.Resource;
 
-public class CapabilityImpl implements Capability
+public interface ResourceCapability
 {
-    private String m_name = null;
-    private final Map m_map = new HashMap();
 
-    public CapabilityImpl()
-    {
-    }
+    Resource getResource();
 
-    public String getName()
-    {
-        return m_name;
-    }
+    Capability getCapability();
 
-    public void setName(String name)
-    {
-        m_name = name.intern();
-    }
-
-    public Map getProperties()
-    {
-        return m_map;
-    }
-
-    protected void addP(PropertyImpl prop)
-    {
-        addP(prop.getN(), prop.getV());
-    }
-
-    protected void addP(String name, Object value)
-    {
-        m_map.put(name.toLowerCase(), value);
-    }
-
-    public String toString()
-    {
-        return m_name  + ":" + m_map.toString();
-    }
 }

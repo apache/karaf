@@ -16,35 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.bundlerepository.impl.wrapper;
+package org.apache.felix.bundlerepository;
 
-import java.net.URL;
+/**
+ * A pair of requirement and resource indicating a reason
+ * why a resource has been chosen.
+ * The reason indicates which resource and which requirement
+ * has been satisfied by the selected resource.
+ */
+public interface Reason {
 
-import org.apache.felix.bundlerepository.Repository;
+    Resource getResource();
 
-public class RepositoryWrapper implements org.osgi.service.obr.Repository {
-
-    private final Repository repository;
-
-    public RepositoryWrapper(Repository repository)
-    {
-        this.repository = repository;
-    }
-
-    public URL getURL() {
-        return repository.getURL();
-    }
-
-    public org.osgi.service.obr.Resource[] getResources() {
-        return Wrapper.wrap(repository.getResources());
-    }
-
-    public String getName() {
-        return repository.getName();
-    }
-
-    public long getLastModified() {
-        return repository.getLastModified();
-    }
+    Requirement getRequirement();
 
 }

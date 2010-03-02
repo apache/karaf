@@ -69,9 +69,4 @@ public class SystemRepositoryImpl implements Repository
         return lastModified;
     }
 
-    public boolean isLocal()
-    {
-        return true;
-    }
-
 }

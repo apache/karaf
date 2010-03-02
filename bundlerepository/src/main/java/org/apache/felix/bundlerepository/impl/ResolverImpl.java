@@ -33,13 +33,12 @@ public class ResolverImpl implements Resolver
     private final Set m_addedSet = new HashSet();
     private final Set m_addedRequirementSet = new HashSet();
     private final Set m_globalCapabilities = new HashSet();
-    private final Set m_globalRequirements = new HashSet();
     private final Set m_failedSet = new HashSet();
     private final Set m_resolveSet = new HashSet();
     private final Set m_requiredSet = new HashSet();
     private final Set m_optionalSet = new HashSet();
     private final Map m_reasonMap = new HashMap();
-    private final Map m_unsatisfiedMap = new HashMap();
+    private final Set m_unsatisfiedSet = new HashSet();
     private boolean m_resolved = false;
     private long m_resolveTimeStamp;
     private int m_resolutionFlags;
@@ -84,24 +83,11 @@ public class ResolverImpl implements Resolver
         return (Capability[]) m_globalCapabilities.toArray(new Capability[m_globalCapabilities.size()]);
     }
 
-    public void addGlobalRequirement(Requirement requirement)
-    {
-        m_resolved = false;
-        m_globalRequirements.add(requirement);
-    }
-
-    public Requirement[] getGlobalRequirements()
-    {
-        return (Requirement[]) m_globalRequirements.toArray(new Requirement[m_globalRequirements.size()]);
-    }
-
-    public synchronized Requirement[] getUnsatisfiedRequirements()
+    public synchronized Resource[] getRequiredResources()
     {
         if (m_resolved)
         {
-            return (Requirement[])
-                m_unsatisfiedMap.keySet().toArray(
-                    new Requirement[m_unsatisfiedMap.size()]);
+            return (Resource[]) m_requiredSet.toArray(new Resource[m_requiredSet.size()]);
         }
         throw new IllegalStateException("The resources have not been resolved.");
     }
@@ -110,38 +96,26 @@ public class ResolverImpl implements Resolver
     {
         if (m_resolved)
         {
-            return (Resource[])
-                m_optionalSet.toArray(
-                    new Resource[m_optionalSet.size()]);
+            return (Resource[]) m_optionalSet.toArray(new Resource[m_optionalSet.size()]);
         }
         throw new IllegalStateException("The resources have not been resolved.");
     }
 
-    public synchronized Requirement[] getReason(Resource resource)
+    public synchronized Reason[] getReason(Resource resource)
     {
         if (m_resolved)
         {
-            return (Requirement[]) m_reasonMap.get(resource);
+            List l = (List) m_reasonMap.get(resource);
+            return l != null ? (Reason[]) l.toArray(new Reason[l.size()]) : null;
         }
         throw new IllegalStateException("The resources have not been resolved.");
     }
 
-    public synchronized Resource[] getResources(Requirement requirement)
+    public synchronized Reason[] getUnsatisfiedRequirements()
     {
         if (m_resolved)
         {
-            return (Resource[]) m_unsatisfiedMap.get(requirement);
-        }
-        throw new IllegalStateException("The resources have not been resolved.");
-    }
-
-    public synchronized Resource[] getRequiredResources()
-    {
-        if (m_resolved)
-        {
-            return (Resource[])
-                m_requiredSet.toArray(
-                    new Resource[m_requiredSet.size()]);
+            return (Reason[]) m_unsatisfiedSet.toArray(new Reason[m_unsatisfiedSet.size()]);
         }
         throw new IllegalStateException("The resources have not been resolved.");
     }
@@ -151,17 +125,21 @@ public class ResolverImpl implements Resolver
         List resources = new ArrayList();
         for (int repoIdx = 0; (m_repositories != null) && (repoIdx < m_repositories.length); repoIdx++)
         {
-            if (m_repositories[repoIdx].isLocal() == local)
+            boolean isLocal = m_repositories[repoIdx] instanceof LocalRepositoryImpl;
+            boolean isSystem = m_repositories[repoIdx] instanceof SystemRepositoryImpl;
+            if (isLocal && (m_resolutionFlags & NO_LOCAL_RESOURCES) != 0) {
+                continue;
+            }
+            if (isSystem && (m_resolutionFlags & NO_SYSTEM_BUNDLE) != 0) {
+                continue;
+            }
+            Resource[] res = m_repositories[repoIdx].getResources();
+            for (int resIdx = 0; (res != null) && (resIdx < res.length); resIdx++)
             {
-                boolean isLocal = m_repositories[repoIdx] instanceof LocalRepositoryImpl;
-                boolean isSystem = m_repositories[repoIdx] instanceof SystemRepositoryImpl;
-                if (isLocal && (m_resolutionFlags & NO_LOCAL_RESOURCES) != 0) {
-                    continue;
+                if (res[resIdx].isLocal() == local)
+                {
+                    resources.add(res[resIdx]);
                 }
-                if (isSystem && (m_resolutionFlags & NO_SYSTEM_BUNDLE) != 0) {
-                    continue;
-                }
-                resources.addAll(Arrays.asList(m_repositories[repoIdx].getResources()));
             }
         }
         return (Resource[]) resources.toArray(new Resource[resources.size()]);
@@ -177,16 +155,12 @@ public class ResolverImpl implements Resolver
         // Find resources
         Resource[] locals = getResources(true);
         Resource[] remotes = getResources(false);
-        remotes = filter(remotes, (Requirement[]) m_globalRequirements.toArray(new Requirement[m_globalRequirements.size()]));
 
         // time of the resolution process start
         m_resolveTimeStamp = 0;
         for (int repoIdx = 0; (m_repositories != null) && (repoIdx < m_repositories.length); repoIdx++)
         {
-            if (m_repositories[repoIdx].isLocal())
-            {
-                m_resolveTimeStamp = Math.max(m_resolveTimeStamp, m_repositories[repoIdx].getLastModified());
-            }
+            m_resolveTimeStamp = Math.max(m_resolveTimeStamp, m_repositories[repoIdx].getLastModified());
         }
 
         // Reset instance values.
@@ -195,7 +169,7 @@ public class ResolverImpl implements Resolver
         m_requiredSet.clear();
         m_optionalSet.clear();
         m_reasonMap.clear();
-        m_unsatisfiedMap.clear();
+        m_unsatisfiedSet.clear();
         m_resolved = true;
         m_resolutionFlags = flags;
 
@@ -209,13 +183,11 @@ public class ResolverImpl implements Resolver
             {
                 Capability cap = (Capability) iter.next();
                 fake.addCapability(cap);
-                ((CapabilityImpl) cap).setResource(null);
             }
             for (Iterator iter = m_addedRequirementSet.iterator(); iter.hasNext();)
             {
                 Requirement req = (Requirement) iter.next();
                 fake.addRequire(req);
-                ((RequirementImpl) req).setResource(null);
             }
             if (!resolve(fake, locals, remotes, false))
             {
@@ -332,7 +304,7 @@ public class ResolverImpl implements Resolver
                     // can resolve.
                     while ((candidate == null) && !candidateCapabilities.isEmpty())
                     {
-                        Capability bestCapability = getBestCandidate(candidateCapabilities);
+                        ResourceCapability bestCapability = getBestCandidate(candidateCapabilities);
 
                         // Try to resolve the best resource.
                         if (resolve(bestCapability.getResource(), locals, remotes, optional || reqs[reqIdx].isOptional()))
@@ -351,20 +323,8 @@ public class ResolverImpl implements Resolver
                     // The resolve failed.
                     result = false;
                     // Associated the current resource to the requirement
-                    // in the unsatisfied requirement map.
-                    Resource[] resources = (Resource[]) m_unsatisfiedMap.get(reqs[reqIdx]);
-                    if (resources == null)
-                    {
-                        resources = new Resource[] { resource };
-                    }
-                    else
-                    {
-                        Resource[] tmp = new Resource[resources.length + 1];
-                        System.arraycopy(resources, 0, tmp, 0, resources.length);
-                        tmp[resources.length] = resource;
-                        resources = tmp;
-                    }
-                    m_unsatisfiedMap.put(reqs[reqIdx], resources);
+                    // in the unsatisfied requirement set.
+                    m_unsatisfiedSet.add(new ReasonImpl(resource, reqs[reqIdx]));
                 }
                 else if (candidate != null)
                 {
@@ -387,7 +347,13 @@ public class ResolverImpl implements Resolver
                         }
 
                         // Add the reason why the candidate was selected.
-                        addReason(candidate, reqs[reqIdx]);
+                        List reasons = (List) m_reasonMap.get(candidate);
+                        if (reasons == null)
+                        {
+                            reasons = new ArrayList();
+                            m_reasonMap.put(candidate, reasons);
+                        }
+                        reasons.add(new ReasonImpl(resource, reqs[reqIdx]));
                     }
                     else
                     {
@@ -450,7 +416,7 @@ public class ResolverImpl implements Resolver
                 {
                     if (req.isSatisfied(caps[capIdx]))
                     {
-                        matchingCapabilities.add(caps[capIdx]);
+                        matchingCapabilities.add(new ResourceCapabilityImpl(resources[resIdx], caps[capIdx]));
                     }
                 }
             }
@@ -467,22 +433,22 @@ public class ResolverImpl implements Resolver
      * @param caps
      * @return
      */
-    private Capability getBestCandidate(List caps)
+    private ResourceCapability getBestCandidate(List caps)
     {
         Version bestVersion = null;
-        Capability best = null;
+        ResourceCapability best = null;
         boolean bestLocal = false;
 
         for(int capIdx = 0; capIdx < caps.size(); capIdx++)
         {
-            Capability current = (Capability) caps.get(capIdx);
-            boolean isCurrentLocal = current.getResource().getRepository() == null;
+            ResourceCapability current = (ResourceCapability) caps.get(capIdx);
+            boolean isCurrentLocal = current.getResource().isLocal();
 
             if (best == null)
             {
                 best = current;
                 bestLocal = isCurrentLocal;
-                Object v = current.getProperties().get(Resource.VERSION);
+                Object v = current.getCapability().getProperties().get(Resource.VERSION);
                 if ((v != null) && (v instanceof Version))
                 {
                     bestVersion = (Version) v;
@@ -490,7 +456,7 @@ public class ResolverImpl implements Resolver
             }
             else if ((m_resolutionFlags & DO_NOT_PREFER_LOCAL) != 0 || !bestLocal || isCurrentLocal)
             {
-                Object v = current.getProperties().get(Resource.VERSION);
+                Object v = current.getCapability().getProperties().get(Resource.VERSION);
 
                 // If there is no version, then select the resource
                 // with the greatest number of capabilities.
@@ -538,11 +504,6 @@ public class ResolverImpl implements Resolver
         }
     }
 
-    public synchronized void deploy(boolean start)
-    {
-        deploy(START);
-    }
-
     public synchronized void deploy(int flags)
     {
         m_deployFlags = flags;
@@ -560,8 +521,7 @@ public class ResolverImpl implements Resolver
         // to see if the local state changes overlap with the resolver.
         for (int repoIdx = 0; (m_repositories != null) && (repoIdx < m_repositories.length); repoIdx++)
         {
-            if (m_repositories[repoIdx].isLocal()
-                    && m_repositories[repoIdx].getLastModified() > m_resolveTimeStamp)
+            if (m_repositories[repoIdx].getLastModified() > m_resolveTimeStamp)
             {
                 throw new IllegalStateException("Framework state has changed, must resolve again.");
             }
@@ -716,23 +676,6 @@ public class ResolverImpl implements Resolver
         return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
     }
     
-    private void addReason(Resource resource, Requirement req)
-    {
-        Requirement[] reasons = (Requirement[]) m_reasonMap.get(resource);
-        if (reasons == null)
-        {
-            reasons = new Requirement[] { req };
-        }
-        else
-        {
-            Requirement[] tmp = new Requirement[reasons.length + 1];
-            System.arraycopy(reasons, 0, tmp, 0, reasons.length);
-            tmp[reasons.length] = req;
-            reasons = tmp;
-        }
-        m_reasonMap.put(resource, reasons);
-    }
-
     // TODO: OBR - Think about this again and make sure that deployment ordering
     // won't impact it...we need to update the local state too.
     private LocalResourceImpl findUpdatableLocalResource(Resource resource)

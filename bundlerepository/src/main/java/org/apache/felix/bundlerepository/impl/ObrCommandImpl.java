@@ -24,7 +24,9 @@ import java.net.URL;
 import java.util.*;
 
 import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Requirement;
+import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.shell.Command;
 import org.osgi.framework.*;
@@ -396,7 +398,7 @@ public class ObrCommandImpl implements Command
                 try
                 {
                     out.print("\nDeploying...");
-                    resolver.deploy(command.equals(START_CMD));
+                    resolver.deploy(command.equals(START_CMD) ? Resolver.START : 0);
                     out.println("done.");
                 }
                 catch (IllegalStateException ex)
@@ -406,19 +408,15 @@ public class ObrCommandImpl implements Command
             }
             else
             {
-                Requirement[] reqs = resolver.getUnsatisfiedRequirements();
+                Reason[] reqs = resolver.getUnsatisfiedRequirements();
                 if ((reqs != null) && (reqs.length > 0))
                 {
                     out.println("Unsatisfied requirement(s):");
                     printUnderline(out, 27);
                     for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
                     {
-                        out.println("   " + reqs[reqIdx].getFilter());
-                        Resource[] resources = resolver.getResources(reqs[reqIdx]);
-                        for (int resIdx = 0; resIdx < resources.length; resIdx++)
-                        {
-                            out.println("      " + resources[resIdx].getPresentationName());
-                        }
+                        out.println("   " + reqs[reqIdx].getRequirement().getFilter());
+                        out.println("      " + reqs[reqIdx].getResource().getPresentationName());
                     }
                 }
                 else
@@ -491,7 +489,7 @@ public class ObrCommandImpl implements Command
         }
     }
 
-    private Resource[] searchRepository(String targetId, String targetVersion)
+    private Resource[] searchRepository(String targetId, String targetVersion) throws InvalidSyntaxException
     {
         // Try to see if the targetId is a bundle ID.
         try

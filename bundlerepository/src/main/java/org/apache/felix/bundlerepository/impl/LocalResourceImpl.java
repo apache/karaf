@@ -49,6 +49,11 @@ public class LocalResourceImpl extends ResourceImpl
         initialize();
     }
 
+    public boolean isLocal()
+    {
+        return true;
+    }
+
     public Bundle getBundle()
     {
         return m_bundle;

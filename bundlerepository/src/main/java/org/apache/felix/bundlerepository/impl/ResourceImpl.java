@@ -32,7 +32,7 @@ public class ResourceImpl implements Resource
 {
 
     private final Map m_map = new HashMap();
-    private RepositoryImpl m_repo = null;
+    private Repository m_repo;
     private List m_capList = new ArrayList();
     private List m_reqList = new ArrayList();
 
@@ -90,6 +90,14 @@ public class ResourceImpl implements Resource
         return m_hash;
     }
 
+    public Repository getRepository() {
+        return m_repo;
+    }
+
+    public void setRepository(Repository repository) {
+        this.m_repo = repository;
+    }
+
     public Map getProperties()
     {
         if (!m_converted)
@@ -137,7 +145,6 @@ public class ResourceImpl implements Resource
 
     protected void addRequire(Requirement req)
     {
-        ((RequirementImpl) req).setResource(this);
         m_reqList.add(req);
     }
 
@@ -148,7 +155,6 @@ public class ResourceImpl implements Resource
 
     protected void addCapability(Capability cap)
     {
-        ((CapabilityImpl) cap).setResource(this);
         m_capList.add(cap);
     }
 
@@ -173,14 +179,9 @@ public class ResourceImpl implements Resource
         catList.add(cat.getId());
     }
 
-    public Repository getRepository()
+    public boolean isLocal()
     {
-        return m_repo;
-    }
-
-    protected void setRepository(RepositoryImpl repo)
-    {
-        m_repo = repo;
+        return false;
     }
 
     /**
@@ -207,7 +208,7 @@ public class ResourceImpl implements Resource
         {
             m_sourceURI = (String) value;
         }
-        else if (key.equals(JAVADOC))
+        else if (key.equals(JAVADOC_URL))
         {
             m_javadocURI = (String) value;
         }
@@ -268,7 +269,7 @@ public class ResourceImpl implements Resource
                 }
                 if (m_javadocURI != null)
                 {
-                    m_map.put(JAVADOC, new URL(base, m_javadocURI));
+                    m_map.put(JAVADOC_URL, new URL(base, m_javadocURI));
                 }
                 m_converted = true;
             }
