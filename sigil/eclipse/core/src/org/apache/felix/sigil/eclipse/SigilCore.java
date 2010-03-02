@@ -241,11 +241,21 @@ public class SigilCore extends AbstractUIPlugin
     }
 
 
+    private static HashMap<IProject, SigilProject> projects = new HashMap<IProject, SigilProject>();
+    
     public static ISigilProjectModel create( IProject project ) throws CoreException
     {
         if ( project.hasNature( NATURE_ID ) )
         {
-            return new SigilProject( project );
+            SigilProject p = null;
+            synchronized( projects ) {
+                p = projects.get(project);
+                if ( p == null ) {
+                   p = new SigilProject( project );
+                   projects.put(project, p);
+                }
+            }
+            return p; 
         }
         else
         {
@@ -692,5 +702,4 @@ public class SigilCore extends AbstractUIPlugin
             }
         }
     }
-
 }
