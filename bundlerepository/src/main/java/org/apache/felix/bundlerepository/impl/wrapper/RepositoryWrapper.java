@@ -18,6 +18,7 @@
  */
 package org.apache.felix.bundlerepository.impl.wrapper;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.felix.bundlerepository.Repository;
@@ -32,7 +33,11 @@ public class RepositoryWrapper implements org.osgi.service.obr.Repository {
     }
 
     public URL getURL() {
-        return repository.getURL();
+        try {
+            return new URL(repository.getURI());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public org.osgi.service.obr.Resource[] getResources() {

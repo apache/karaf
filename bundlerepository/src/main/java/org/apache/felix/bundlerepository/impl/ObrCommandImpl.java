@@ -157,33 +157,26 @@ public class ObrCommandImpl implements Command
         {
             while (st.hasMoreTokens())
             {
-                if (command.equals(ADDURL_CMD))
+                try
                 {
-                    try
+                    String uri = st.nextToken();
+                    if (command.equals(ADDURL_CMD))
                     {
-                        m_repoAdmin.addRepository(new URL(st.nextToken()));
+                        m_repoAdmin.addRepository(uri);
                     }
-                    catch (Exception ex)
+                    else if (command.equals(REFRESHURL_CMD))
                     {
-                        ex.printStackTrace(err);
+                        m_repoAdmin.removeRepository(uri);
+                        m_repoAdmin.addRepository(uri);
                     }
-                } 
-                else if (command.equals(REFRESHURL_CMD))
-                {
-                    try
+                    else
                     {
-                        URL url = new URL(st.nextToken());
-                        m_repoAdmin.removeRepository(url);
-                        m_repoAdmin.addRepository(url);
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.printStackTrace(err);
+                        m_repoAdmin.removeRepository(uri);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    m_repoAdmin.removeRepository(new URL(st.nextToken()));
+                    ex.printStackTrace(err);
                 }
             }
         }
@@ -194,7 +187,7 @@ public class ObrCommandImpl implements Command
             {
                 for (int i = 0; i < repos.length; i++)
                 {
-                    out.println(repos[i].getURL());
+                    out.println(repos[i].getURI());
                 }
             }
             else
@@ -444,11 +437,11 @@ public class ObrCommandImpl implements Command
             }
             else
             {
-                URL srcURL = (URL) resource.getProperties().get(Resource.SOURCE_URL);
-                if (srcURL != null)
+                String srcURI = (String) resource.getProperties().get(Resource.SOURCE_URI);
+                if (srcURI != null)
                 {
                     FileUtil.downloadSource(
-                        out, err, srcURL, pc.getDirectory(), pc.isExtract());
+                        out, err, new URL(srcURI), pc.getDirectory(), pc.isExtract());
                 }
                 else
                 {

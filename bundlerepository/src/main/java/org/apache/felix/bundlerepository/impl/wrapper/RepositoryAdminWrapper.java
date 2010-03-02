@@ -50,7 +50,7 @@ public class RepositoryAdminWrapper implements org.osgi.service.obr.RepositoryAd
     }
 
     public boolean removeRepository(URL repository) {
-        return admin.removeRepository(repository);
+        return admin.removeRepository(repository.toExternalForm());
     }
 
     public org.osgi.service.obr.Repository[] listRepositories() {

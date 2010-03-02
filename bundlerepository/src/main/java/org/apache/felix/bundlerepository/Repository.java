@@ -39,8 +39,6 @@
 // turn this draft into an official specification.  
 package org.apache.felix.bundlerepository;
 
-import java.net.URL;
-
 /**
  * Represents a repository.
  * 
@@ -48,11 +46,22 @@ import java.net.URL;
  */
 public interface Repository
 {
+
+    /**
+     * URI identifying the system repository
+     */
+    String SYSTEM = "system";
+
+    /**
+     * URI identiying the local repository
+     */
+    String LOCAL = "local";
+
     /**
      * Return the associated URL for the repository.
      * 
      */
-    URL getURL();
+    String getURI();
 
     /**
      * Return the resources for this repository.

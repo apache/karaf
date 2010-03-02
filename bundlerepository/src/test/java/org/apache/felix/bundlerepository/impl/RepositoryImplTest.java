@@ -122,7 +122,7 @@ public class RepositoryImplTest extends TestCase
         Repository[] repos = repoAdmin.listRepositories();
         for (int i = 0; repos != null && i < repos.length; i++)
         {
-            repoAdmin.removeRepository(repos[i].getURL());
+            repoAdmin.removeRepository(repos[i].getURI());
         }
 
         return repoAdmin;

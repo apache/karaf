@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
-import org.apache.felix.bundlerepository.impl.FilterImpl;
 import org.osgi.framework.Version;
 
 public class FilterImplTest extends TestCase

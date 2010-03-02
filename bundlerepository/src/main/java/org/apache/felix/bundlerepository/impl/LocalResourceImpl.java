@@ -176,7 +176,7 @@ public class LocalResourceImpl extends ResourceImpl
             }
             else if (key.equalsIgnoreCase("Bundle-Source"))
             {
-                put(SOURCE_URL, (String) dict.get(key));
+                put(SOURCE_URI, (String) dict.get(key));
             }
             else if (key.equalsIgnoreCase(Constants.BUNDLE_DESCRIPTION))
             {
@@ -184,7 +184,7 @@ public class LocalResourceImpl extends ResourceImpl
             }
             else if (key.equalsIgnoreCase(Constants.BUNDLE_DOCURL))
             {
-                put(DOCUMENTATION_URL, (String) dict.get(key));
+                put(DOCUMENTATION_URI, (String) dict.get(key));
             }
             else if (key.equalsIgnoreCase(Constants.BUNDLE_COPYRIGHT))
             {
@@ -192,7 +192,7 @@ public class LocalResourceImpl extends ResourceImpl
             }
             else if (key.equalsIgnoreCase("Bundle-License"))
             {
-                put(LICENSE_URL, (String) dict.get(key));
+                put(LICENSE_URI, (String) dict.get(key));
             }
         }
     }

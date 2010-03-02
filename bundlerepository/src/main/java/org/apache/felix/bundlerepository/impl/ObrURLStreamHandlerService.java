@@ -183,7 +183,7 @@ public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
         ResourceSelectionStrategy strategy = new NewestSelectionStrategy(m_logger);
         Resource selected = strategy.selectOne(Version.emptyVersion, discoverResources);
 
-        return selected.getURL();
+        return new URL(selected.getURI());
     }
 
     private boolean validateFilter(String filter) {
@@ -227,7 +227,7 @@ public class ObrURLStreamHandlerService extends AbstractURLStreamHandlerService
         Resource selected = strategy.selectOne(
             Version.parseVersion(version), discoverResources);
 
-        return selected.getURL();
+        return new URL(selected.getURI());
     }
 
     private ResourceSelectionStrategy getStrategy(String strategy)

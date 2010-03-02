@@ -18,8 +18,6 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.net.URL;
-
 import org.apache.felix.bundlerepository.Resource;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -49,9 +47,9 @@ public class SystemRepositoryImpl implements Repository
         }
     }
 
-    public URL getURL()
+    public String getURI()
     {
-        return null;
+        return SYSTEM;
     }
 
     public Resource[] getResources()

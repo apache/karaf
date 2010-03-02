@@ -18,7 +18,6 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +44,6 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     private final Logger m_logger;
     private final SystemRepositoryImpl m_system;
     private final LocalRepositoryImpl m_local;
-    private List m_urlList = new ArrayList();
     private Map m_repoMap = new HashMap();
     private boolean m_initialized = false;
 
@@ -78,6 +76,11 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         m_local.dispose();
     }
 
+    public Repository addRepository(String uri) throws Exception
+    {
+        return addRepository(new URL(uri));
+    }
+
     public Repository addRepository(URL url) throws Exception
     {
         return addRepository(url, Integer.MAX_VALUE);
@@ -85,40 +88,34 @@ public class RepositoryAdminImpl implements RepositoryAdmin
 
     public synchronized RepositoryImpl addRepository(URL url, int hopCount) throws Exception
     {
-        if (!m_urlList.contains(url))
-        {
-            m_urlList.add(url);
-        }
+        initialize();
 
         // If the repository URL is a duplicate, then we will just
         // replace the existing repository object with a new one,
         // which is effectively the same as refreshing the repository.
         RepositoryImpl repo = new RepositoryImpl(this, url, hopCount, m_logger);
-        m_repoMap.put(url, repo);
+        m_repoMap.put(url.toExternalForm(), repo);
         return repo;
     }
 
-    public synchronized boolean removeRepository(URL url)
+    public synchronized boolean removeRepository(String uri)
     {
-        m_repoMap.remove(url);
-        return (m_urlList.remove(url)) ? true : false;
+        initialize();
+
+        return m_repoMap.remove(uri) != null;
     }
 
     public synchronized Repository[] listRepositories()
     {
-        if (!m_initialized)
-        {
-            initialize();
-        }
+        initialize();
+
         return (Repository[]) m_repoMap.values().toArray(new Repository[m_repoMap.size()]);
     }
 
     public synchronized Resolver resolver()
     {
-        if (!m_initialized)
-        {
-            initialize();
-        }
+        initialize();
+
         List repositories = new ArrayList();
         repositories.add(m_system);
         repositories.add(m_local);
@@ -128,10 +125,8 @@ public class RepositoryAdminImpl implements RepositoryAdmin
 
     public synchronized Resolver resolver(Repository[] repositories)
     {
-        if (!m_initialized)
-        {
-            initialize();
-        }
+        initialize();
+
         if (repositories == null)
         {
             return resolver();
@@ -141,10 +136,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
 
     public synchronized Resource[] discoverResources(String filterExpr) throws InvalidSyntaxException
     {
-        if (!m_initialized)
-        {
-            initialize();
-        }
+        initialize();
 
         Filter filter = filterExpr != null ? filter(filterExpr) : null;
         Resource[] resources;
@@ -172,10 +164,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
 
     public synchronized Resource[] discoverResources(Requirement[] requirements)
     {
-        if (!m_initialized)
-        {
-            initialize();
-        }
+        initialize();
 
         Resource[] resources = null;
         MapToDictionary dict = new MapToDictionary(null);
@@ -259,58 +248,36 @@ public class RepositoryAdminImpl implements RepositoryAdmin
 
     private void initialize()
     {
+        if (m_initialized)
+        {
+            return;
+        }
         m_initialized = true;
 
-        // Initialize the repository URL list if it is currently empty.
-        if (m_urlList.size() == 0)
+        // First check the repository URL config property.
+        String urlStr = m_context.getProperty(REPOSITORY_URL_PROP);
+        if (urlStr != null)
         {
-            // First check the repository URL config property.
-            String urlStr = m_context.getProperty(REPOSITORY_URL_PROP);
-            if (urlStr != null)
+            StringTokenizer st = new StringTokenizer(urlStr);
+            if (st.countTokens() > 0)
             {
-                StringTokenizer st = new StringTokenizer(urlStr);
-                if (st.countTokens() > 0)
+                while (st.hasMoreTokens())
                 {
-                    while (st.hasMoreTokens())
+                    final String token = st.nextToken();
+                    try
                     {
-                        final String token = st.nextToken();
-                        try
-                        {
-                            m_urlList.add(new URL(token));
-                        }
-                        catch (MalformedURLException ex)
-                        {
-                            m_logger.log(
-                                Logger.LOG_WARNING,
-                                "Repository url " + token + " cannot be used. Skipped.",
-                                ex);
-                        }
+                        addRepository(token);
+                    }
+                    catch (Exception ex)
+                    {
+                        m_logger.log(
+                            Logger.LOG_WARNING,
+                            "Repository url " + token + " cannot be used. Skipped.",
+                            ex);
                     }
                 }
             }
         }
 
-        m_repoMap.clear();
-
-        for (int i = 0; i < m_urlList.size(); i++)
-        {
-            URL url = (URL) m_urlList.get(i);
-            try
-            {
-                Repository repo = new RepositoryImpl(this, url, m_logger);
-                if (repo != null)
-                {
-                    m_repoMap.put(url, repo);
-                }
-            }
-            catch (Exception ex)
-            {
-                m_logger.log(
-                    Logger.LOG_WARNING,
-                    "RepositoryAdminImpl: Exception creating repository " + url.toExternalForm()
-                        + ". Repository is skipped.",
-                    ex);
-            }
-        }
     }
 }

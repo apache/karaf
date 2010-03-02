@@ -586,7 +586,7 @@ public class ResolverImpl implements Resolver
                             localResource.getBundle().stop();
                         }
                         
-                        localResource.getBundle().update(deployResources[i].getURL().openStream());
+                        localResource.getBundle().update(new URL(deployResources[i].getURI()).openStream());
 
                         // If necessary, save the updated bundle to be
                         // started later.
@@ -618,7 +618,7 @@ public class ResolverImpl implements Resolver
                     // bundle JAR URL for the bundle location, since this will
                     // limit OBR's ability to manipulate bundle versions. Instead,
                     // use a unique timestamp as the bundle location.
-                    URL url = deployResources[i].getURL();
+                    URL url = new URL(deployResources[i].getURI());
                     if (url != null)
                     {
                         Bundle bundle = m_context.installBundle(

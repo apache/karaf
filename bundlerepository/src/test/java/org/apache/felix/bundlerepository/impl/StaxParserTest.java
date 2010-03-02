@@ -24,11 +24,6 @@ import java.util.Hashtable;
 import junit.framework.TestCase;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
-import org.apache.felix.bundlerepository.impl.FilterImpl;
-import org.apache.felix.bundlerepository.impl.Logger;
-import org.apache.felix.bundlerepository.impl.RepositoryAdminImpl;
-import org.apache.felix.bundlerepository.impl.RepositoryImpl;
-import org.apache.felix.bundlerepository.impl.StaxParser;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -153,7 +148,7 @@ public class StaxParserTest extends TestCase
         Repository[] repos = repoAdmin.listRepositories();
         for (int i = 0; repos != null && i < repos.length; i++)
         {
-            repoAdmin.removeRepository(repos[i].getURL());
+            repoAdmin.removeRepository(repos[i].getURI());
         }
 
         return repoAdmin;

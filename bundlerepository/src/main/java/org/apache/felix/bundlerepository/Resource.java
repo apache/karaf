@@ -39,7 +39,6 @@
 // turn this draft into an official specification.  
 package org.apache.felix.bundlerepository;
 
-import java.net.URL;
 import java.util.Map;
 
 import org.osgi.framework.Version;
@@ -54,17 +53,17 @@ import org.osgi.framework.Version;
  */
 public interface Resource
 {
-    final String LICENSE_URL = "license";
+    final String LICENSE_URI = "license";
 
     final String DESCRIPTION = "description";
 
-    final String DOCUMENTATION_URL = "documentation";
+    final String DOCUMENTATION_URI = "documentation";
 
     final String COPYRIGHT = "copyright";
 
-    final String SOURCE_URL = "source";
+    final String SOURCE_URI = "source";
 
-    final String JAVADOC_URL = "javadoc";
+    final String JAVADOC_URI = "javadoc";
 
     final String SYMBOLIC_NAME = "symbolicname";
 
@@ -92,7 +91,7 @@ public interface Resource
 
     String getId();
 
-    URL getURL();
+    String getURI();
 
     Requirement[] getRequirements();
 

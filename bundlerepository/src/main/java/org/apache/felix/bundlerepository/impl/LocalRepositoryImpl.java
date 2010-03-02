@@ -18,7 +18,6 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -123,9 +122,9 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
         m_context.removeServiceListener(this);
     }
 
-    public URL getURL()
+    public String getURI()
     {
-        return null;
+        return LOCAL;
     }
 
     public String getName()

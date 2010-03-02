@@ -18,8 +18,8 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import org.apache.felix.bundlerepository.Capability;
@@ -102,7 +102,7 @@ public class ResourceImpl implements Resource
     {
         if (!m_converted)
         {
-            convertURItoURL();
+            convertURIs();
         }
         return m_map;
     }
@@ -129,13 +129,13 @@ public class ResourceImpl implements Resource
         return v;
     }
 
-    public URL getURL()
+    public String getURI()
     {
         if (!m_converted)
         {
-            convertURItoURL();
+            convertURIs();
         }
-        return (URL) m_map.get(Resource.URI);
+        return (String) m_map.get(Resource.URI);
     }
 
     public Requirement[] getRequirements()
@@ -196,19 +196,19 @@ public class ResourceImpl implements Resource
         // need to defer setting the actual URL value until they
         // are used so that we will know our repository and its
         // base URL.
-        if (key.equals(LICENSE_URL))
+        if (key.equals(LICENSE_URI))
         {
             m_licenseURI = (String) value;
         }
-        else if (key.equals(DOCUMENTATION_URL))
+        else if (key.equals(DOCUMENTATION_URI))
         {
             m_docURI = (String) value;
         }
-        else if (key.equals(SOURCE_URL))
+        else if (key.equals(SOURCE_URI))
         {
             m_sourceURI = (String) value;
         }
-        else if (key.equals(JAVADOC_URL))
+        else if (key.equals(JAVADOC_URI))
         {
             m_javadocURI = (String) value;
         }
@@ -244,36 +244,36 @@ public class ResourceImpl implements Resource
         return null;
     }
 
-    private void convertURItoURL()
+    private void convertURIs()
     {
         if (m_repo != null)
         {
             try
             {
-                URL base = m_repo.getURL();
+                URI base = m_repo.getURI() != null ? new URI(m_repo.getURI()) : null;
                 if (m_resourceURI != null)
                 {
-                    m_map.put(URI, new URL(base, m_resourceURI));
+                    m_map.put(URI, base != null ? base.resolve(m_resourceURI).toString() : m_resourceURI);
                 }
                 if (m_docURI != null)
                 {
-                    m_map.put(DOCUMENTATION_URL, new URL(base, m_docURI));
+                    m_map.put(DOCUMENTATION_URI, base != null ? base.resolve(m_docURI).toString() : m_docURI);
                 }
                 if (m_licenseURI != null)
                 {
-                    m_map.put(LICENSE_URL, new URL(base, m_licenseURI));
+                    m_map.put(LICENSE_URI, base != null ? base.resolve(m_licenseURI).toString() : m_licenseURI);
                 }
                 if (m_sourceURI != null)
                 {
-                    m_map.put(SOURCE_URL, new URL(base, m_sourceURI));
+                    m_map.put(SOURCE_URI, base != null ? base.resolve(m_sourceURI).toString() : m_sourceURI);
                 }
                 if (m_javadocURI != null)
                 {
-                    m_map.put(JAVADOC_URL, new URL(base, m_javadocURI));
+                    m_map.put(JAVADOC_URI, base != null ? base.resolve(m_javadocURI).toString() : m_javadocURI);
                 }
                 m_converted = true;
             }
-            catch (MalformedURLException ex)
+            catch (URISyntaxException ex)
             {
                 ex.printStackTrace(System.err);
             }

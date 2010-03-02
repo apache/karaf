@@ -119,9 +119,20 @@ public interface RepositoryAdmin
 
     /**
      * Add a new repository to the federation.
-     * 
+     *
      * The url must point to a repository XML file.
-     * 
+     *
+     * @param repository
+     * @return
+     * @throws Exception
+     */
+    Repository addRepository(String repository) throws Exception;
+
+    /**
+     * Add a new repository to the federation.
+     *
+     * The url must point to a repository XML file.
+     *
      * @param repository
      * @return
      * @throws Exception
@@ -136,7 +147,7 @@ public interface RepositoryAdmin
      * @param repository
      * @return
      */
-    boolean removeRepository(URL repository);
+    boolean removeRepository(String repository);
 
     /**
      * List all the repositories.

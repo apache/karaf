@@ -50,7 +50,7 @@ public class RepositoryImpl implements Repository
 
     private String m_name = null;
     private long m_lastmodified = 0;
-    private URL m_url = null;
+    private String m_uri = null;
     private final Logger m_logger;
     private Resource[] m_resources = null;
     private Referral[] m_referrals = null;
@@ -63,7 +63,7 @@ public class RepositoryImpl implements Repository
     public RepositoryImpl(Resource[] resources)
     {
         m_repoAdmin = null;
-        m_url = null;
+        m_uri = null;
         m_logger = null;
         m_resources = resources;
         m_lastmodified = System.currentTimeMillis();
@@ -79,7 +79,7 @@ public class RepositoryImpl implements Repository
         throws Exception
     {
         m_repoAdmin = repoAdmin;
-        m_url = url;
+        m_uri = url.toExternalForm();
         m_logger = logger;
         m_resourceList = new ArrayList();
         try
@@ -99,14 +99,14 @@ public class RepositoryImpl implements Repository
         }
     }
 
-    public URL getURL()
+    public String getURI()
     {
-        return m_url;
+        return m_uri;
     }
 
-    protected void setURL(URL url)
+    protected void setURI(String uri)
     {
-        m_url = url;
+        m_uri = uri;
     }
 
     public Resource[] getResources()
@@ -193,22 +193,23 @@ public class RepositoryImpl implements Repository
 
         try
         {
+            URL url = new URL(m_uri);
             // Do it the manual way to have a chance to
             // set request properties as proxy auth (EW).
-            URLConnection conn = m_url.openConnection();
+            URLConnection conn = url.openConnection();
 
             // Support for http proxy authentication
             String auth = System.getProperty("http.proxyAuth");
             if ((auth != null) && (auth.length() > 0))
             {
-                if ("http".equals(m_url.getProtocol()) || "https".equals(m_url.getProtocol()))
+                if ("http".equals(url.getProtocol()) || "https".equals(url.getProtocol()))
                 {
                     String base64 = Util.base64Encode(auth);
                     conn.setRequestProperty("Proxy-Authorization", "Basic " + base64);
                 }
             }
 
-            if (m_url.getPath().endsWith(".zip"))
+            if (url.getPath().endsWith(".zip"))
             {
                 ZipInputStream zin = new ZipInputStream(conn.getInputStream());
                 ZipEntry entry = zin.getNextEntry();
@@ -240,10 +241,10 @@ public class RepositoryImpl implements Repository
                     {
                         Referral referral = m_referrals[i];
 
-                        URL url = new URL(getURL(), referral.getUrl());
+                        URL referralUrl = new URL(url, referral.getUrl());
                         hopCount = (referral.getDepth() > hopCount) ? hopCount : referral.getDepth();
 
-                        m_repoAdmin.addRepository(url, hopCount);
+                        m_repoAdmin.addRepository(referralUrl, hopCount);
                     }
                 }
             }
