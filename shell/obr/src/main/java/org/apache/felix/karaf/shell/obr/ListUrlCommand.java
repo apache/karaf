@@ -27,7 +27,7 @@ public class ListUrlCommand extends ObrCommandSupport {
         Repository[] repos = admin.listRepositories();
         if ((repos != null) && (repos.length > 0)) {
             for (int i = 0; i < repos.length; i++) {
-                System.out.println(repos[i].getURL());
+                System.out.println(repos[i].getURI());
             }
         } else {
             System.out.println("No repository URLs are set.");

@@ -16,7 +16,6 @@
  */
 package org.apache.felix.karaf.shell.obr;
 
-import java.net.URL;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.Repository;
@@ -33,15 +32,13 @@ public class RefreshUrlCommand extends ObrCommandSupport {
     protected void doExecute(RepositoryAdmin admin) throws Exception {
 		if (urls != null && !urls.isEmpty()) {
 			for (String url : urls) {
-				admin.removeRepository(new URL(url));
-				admin.addRepository(new URL(url));
+				admin.addRepository(url);
 			}
 		} else {
 			Repository[] repos = admin.listRepositories();
 			if ((repos != null) && (repos.length > 0)) {
 				for (int i = 0; i < repos.length; i++) {
-					admin.removeRepository(repos[i].getURL());
-					admin.addRepository(repos[i].getURL());
+					admin.addRepository(repos[i].getURI());
 				}
 			}
 		}

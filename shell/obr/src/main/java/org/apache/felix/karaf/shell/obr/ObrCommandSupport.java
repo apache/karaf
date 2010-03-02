@@ -19,6 +19,7 @@ package org.apache.felix.karaf.shell.obr;
 import java.io.PrintStream;
 import java.util.List;
 
+import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
@@ -57,7 +58,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
 
     protected abstract void doExecute(RepositoryAdmin admin) throws Exception;
 
-    protected Resource[] searchRepository(RepositoryAdmin admin, String targetId, String targetVersion)
+    protected Resource[] searchRepository(RepositoryAdmin admin, String targetId, String targetVersion) throws InvalidSyntaxException
     {
         // Try to see if the targetId is a bundle ID.
         try
@@ -186,7 +187,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
                 try
                 {
                     System.out.print("\nDeploying...");
-                    resolver.deploy(start);
+                    resolver.deploy(start ? Resolver.START : 0);
                     System.out.println("done.");
                 }
                 catch (IllegalStateException ex)
@@ -196,19 +197,15 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
             }
             else
             {
-                Requirement[] reqs = resolver.getUnsatisfiedRequirements();
+                Reason[] reqs = resolver.getUnsatisfiedRequirements();
                 if ((reqs != null) && (reqs.length > 0))
                 {
                     System.out.println("Unsatisfied requirement(s):");
                     printUnderline(System.out, 27);
                     for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
                     {
-                        System.out.println("   " + reqs[reqIdx].getFilter());
-                        Resource[] resources = resolver.getResources(reqs[reqIdx]);
-                        for (int resIdx = 0; resIdx < resources.length; resIdx++)
-                        {
-                            System.out.println("      " + resources[resIdx].getPresentationName());
-                        }
+                        System.out.println("   " + reqs[reqIdx].getRequirement().getFilter());
+                        System.out.println("      " + reqs[reqIdx].getResource().getPresentationName());
                     }
                 }
                 else

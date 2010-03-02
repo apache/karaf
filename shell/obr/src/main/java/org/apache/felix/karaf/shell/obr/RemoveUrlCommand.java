@@ -16,7 +16,6 @@
  */
 package org.apache.felix.karaf.shell.obr;
 
-import java.net.URL;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
@@ -31,7 +30,7 @@ public class RemoveUrlCommand extends ObrCommandSupport {
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
         for (String url : urls) {
-            admin.removeRepository(new URL(url));
+            admin.removeRepository(url);
         }
     }
 }
