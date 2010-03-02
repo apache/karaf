@@ -166,4 +166,31 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
             }
         }
     }
+
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if ( obj == null ) return false;
+        if ( obj == this ) return true;
+        try {
+            PackageExport e = (PackageExport) obj;
+            return name == null ? e.name == null : name.equals( e.name ) && 
+                version == null ? e.version == null : version.equals( e.version );
+        }
+        catch (ClassCastException e) {
+            return false;
+        }
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        int hc = name.hashCode();
+        
+        if ( version != null ) hc *= version.hashCode();
+        
+        return hc;
+    }
 }
