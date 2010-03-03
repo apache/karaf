@@ -32,7 +32,7 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 
-abstract class BaseUpdateInstallHelper
+abstract class BaseUpdateInstallHelper implements Runnable
 {
 
     private final File bundleFile;
@@ -46,13 +46,7 @@ abstract class BaseUpdateInstallHelper
     {
         this.bundleFile = bundleFile;
         this.refreshPackages = refreshPackages;
-        this.updateThread = new Thread( name )
-        {
-            public void run()
-            {
-                BaseUpdateInstallHelper.this.run();
-            };
-        };
+        this.updateThread = new Thread( this, name );
         this.updateThread.setDaemon( true );
     }
 
@@ -102,7 +96,7 @@ abstract class BaseUpdateInstallHelper
     }
 
 
-    void run()
+    public final void run()
     {
         // wait some time for the request to settle
         sleepSilently( 500L );
