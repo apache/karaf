@@ -503,7 +503,7 @@ public class ConfigManager extends ConfigManagerBase
             }
             catch ( Exception e )
             {
-                // add message
+                log( "Error reading configuration PID " + pid, e );
             }
         }
 
@@ -665,6 +665,16 @@ public class ConfigManager extends ConfigManagerBase
                         }
                         else if ( value.getClass().isArray() )
                         {
+                            if ( value.getClass().getComponentType().isPrimitive() ) 
+                            {
+                                final int len = Array.getLength(value);
+                                final Object[] tmp = new Object[len];
+                                for ( int j = 0; j < len; j++ )
+                                {
+                                    tmp[j] = Array.get(value, j);
+                                }
+                                value = tmp;
+                            }
                             value = new JSONArray( Arrays.asList( ( Object[] ) value ) );
                         }
                         else
