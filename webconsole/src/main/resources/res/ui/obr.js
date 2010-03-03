@@ -20,6 +20,7 @@ var repoTableTemplate = false;
 var addRepoUri = false;
 var resTable = false;
 var searchField = false;
+var ifStatusOK = false;
 
 /* displays a date in the user's local timezone */
 function localTm(time) {
@@ -98,11 +99,13 @@ function renderData(data) {
 	resTable.empty();
 	if ( data.status ) {
 		$('.statline').html(i18n.status_ok);
+		ifStatusOK.removeClass('ui-helper-hidden');
 		for (var i in data.repositories ) {
 			renderRepository( data.repositories[i] );
 		}
 	} else {
 		$('.statline').html(i18n.status_no);
+		ifStatusOK.addClass('ui-helper-hidden');
 	}
 }
 
@@ -112,6 +115,7 @@ $(document).ready( function() {
 	addRepoUri = $('#addRepoUri');
 	resTable = $('#resTable tbody').empty();
 	searchField = $('#searchField');
+	ifStatusOK = $('#ifStatusOK');
 
 	$('#addRepoBtn').click(function() {
 		doRepoAction('add', addRepoUri.val());

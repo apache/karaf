@@ -10,6 +10,8 @@ var obrData = ${__data__};
 
 <p class="statline">${obr.status.ok}</p>
 
+<div id="ifStatusOK" class="ui-helper-hidden">
+
 <div class="ui-widget-header ui-corner-top buttonGroup">
 	<span style="float: left; margin-left: 1em">${obr.repo.title}</span>
 	<input style="width: 50%" type="text" id="addRepoUri" />
@@ -66,3 +68,5 @@ var obrData = ${__data__};
 </form>
 
 <br/>
+
+</div> <!-- ifStatusOK -->
