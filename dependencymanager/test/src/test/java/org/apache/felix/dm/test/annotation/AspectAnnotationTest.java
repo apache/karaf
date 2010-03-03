@@ -21,6 +21,7 @@ package org.apache.felix.dm.test.annotation;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -46,6 +47,7 @@ public class AspectAnnotationTest extends AnnotationBase
     public static Option[] configuration()
     {
         return options(
+            systemProperty("dm.log").value( "true" ),
             provision(
                 mavenBundle().groupId("org.osgi").artifactId("org.osgi.compendium").version("4.1.0"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.dependencymanager").versionAsInProject(),
