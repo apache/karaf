@@ -366,6 +366,7 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
 
     private void reload()
     {
+        tempProject.setBundle(null);
         project.setBundle( null );
         refreshAllPages();
     }
