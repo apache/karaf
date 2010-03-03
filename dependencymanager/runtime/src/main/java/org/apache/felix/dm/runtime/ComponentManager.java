@@ -332,7 +332,8 @@ public class ComponentManager implements SynchronousBundleListener
         String serviceFilter = parser.getString(DescriptorParam.filter, null);
         Class<?> aspectImplementation = b.loadClass(parser.getString(DescriptorParam.impl));
         Dictionary<String, String> aspectProperties = parser.getDictionary(DescriptorParam.properties, null);
-        Service service = dm.createAspectService(serviceInterface, serviceFilter, aspectImplementation, aspectProperties);
+        int ranking = parser.getInt(DescriptorParam.ranking, 1);
+        Service service = dm.createAspectService(serviceInterface, serviceFilter, ranking, aspectImplementation, aspectProperties);
         setServiceCallbacks(service, parser);
         setServiceComposition(service, parser);
         return service;

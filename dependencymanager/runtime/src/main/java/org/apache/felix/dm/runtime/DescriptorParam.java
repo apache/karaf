@@ -65,7 +65,7 @@ public enum DescriptorParam
     /* ServiceDependency attribute for the service default impl (the parsed value is a String) */
     defaultImpl,
 
-    /* ServiceDependency attribute for the required booleean (the parsed value is a String ("false"|"true") */
+    /* ServiceDependency attribute for the required boolean (the parsed value is a String ("false"|"true") */
     required,
 
     /* ServiceDependency attribute for the added callback name (the parsed value is a String) */
@@ -105,7 +105,10 @@ public enum DescriptorParam
     adapteeFilter,
     
     /* BundleDependency attribute for the state mask bundle (the parsed value is a string) */
-    stateMask;
+    stateMask,
+    
+    /* The ranking of an aspect (the parsed value is an int) */
+    ranking;
     
     /**
      * Indicates if a given attribute is a Service attribute.
