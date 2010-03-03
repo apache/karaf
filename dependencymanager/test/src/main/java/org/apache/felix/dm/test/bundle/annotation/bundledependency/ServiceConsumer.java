@@ -18,58 +18,26 @@
 */
 package org.apache.felix.dm.test.bundle.annotation.bundledependency;
 
-import org.apache.felix.dm.annotation.api.BundleDependency;
-import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
-import org.osgi.framework.Bundle;
 
 /**
- * Simple Consumer which has a BundleDependency dependency.
+ * ServiceInterface Consumer.
  */
 @Service
-public class Consumer
+public class ServiceConsumer
 {
-    protected volatile boolean m_added;
-    protected volatile boolean m_removed;
+    @ServiceDependency(filter="(test=adapter)")
+    Sequencer m_sequencer;
 
-    @ServiceDependency(filter="(test=consumer)")
-    private volatile Sequencer m_sequencer;
-
-    @BundleDependency(required = false, removed = "removed", filter = "(Bundle-SymbolicName=org.apache.felix.dependencymanager)")
-    public void add(Bundle b)
-    {
-        if (b != null && b.getSymbolicName().equals("org.apache.felix.dependencymanager"))
-        {
-            m_added = true;
-        }
-    }
-
-    protected void removed(Bundle b)
-    {
-        m_removed = true;
-    }
+    @ServiceDependency
+    ServiceInterface m_service;
 
     @Start
-    public void start()
-    {
-        m_sequencer.step(1);
-    }
-
-    @Destroy
-    public void destroy()
-    {
-        if (!m_added)
-        {
-            throw new IllegalStateException("Did not get DependencyManager bundle");
-        }
-
-        if (!m_removed)
-        {
-            throw new IllegalStateException("Did not remove DependencyManager bundle");
-        }
+    void start() {
         m_sequencer.step(2);
+        m_service.run();
     }
 }
