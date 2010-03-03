@@ -46,11 +46,20 @@ public @interface AspectService
      * the filter condition to use with the service interface this aspect is applying to.
      * @return the filter condition to use with the service interface
      */
-    String filter();
+    String filter() default "";
     
     /**
      * Additional properties to use with the aspect service registration
      * @return additional properties to use with the aspect service registration
      */
-    Param[] properties();
+    Param[] properties() default {};
+    
+    /**
+     * Ranking of this aspect. Since aspects are chained, the ranking defines the order in which they are chained.
+     * Chain ranking is implemented as a service ranking so service lookups automatically retrieve the top of the
+     * chain.
+     * 
+     * @return the ranking of this aspect
+     */
+    int ranking();
 }

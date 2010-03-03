@@ -146,7 +146,8 @@ public class AnnotationCollector extends ClassDataCollector
         adapterProperties,
         adapteeService,
         adapteeFilter,
-        stateMask
+        stateMask,
+        ranking
     };
 
     /**
@@ -602,8 +603,14 @@ public class AnnotationCollector extends ClassDataCollector
         
         // Parse service filter
         String filter = annotation.get(Params.filter.toString());
-        Verifier.verifyFilter(filter, 0);
-        info.addParam(Params.filter, filter);
+        if (filter != null) {
+            Verifier.verifyFilter(filter, 0);
+            info.addParam(Params.filter, filter);
+        }
+        
+        // Parse service aspect ranking
+        Integer ranking = annotation.get(Params.ranking.toString());
+        info.addParam(Params.ranking, ranking.toString());
                 
         // Generate Aspect Implementation
         info.addParam(Params.impl, m_className);
