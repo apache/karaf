@@ -21,9 +21,9 @@ package org.apache.felix.dm.test.annotation;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.Properties;
 
 import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.test.BundleGenerator;
@@ -46,6 +46,7 @@ public class BundleDependencyAnnotationTest extends AnnotationBase
     public static Option[] configuration()
     {
         return options(
+            systemProperty("dm.log").value( "true" ),
             provision(
                 mavenBundle().groupId("org.osgi").artifactId("org.osgi.compendium").version("4.1.0"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.dependencymanager").versionAsInProject(),
@@ -60,14 +61,31 @@ public class BundleDependencyAnnotationTest extends AnnotationBase
                     .build()));           
     }
 
+    /**
+     * Tests a simple Consumer, which has a BundleDependency over the dependency manager bundle.
+     * @param context
+     */
     @Test
     public void testBundleDependencyAnnotation(BundleContext context)
     {
         DependencyManager m = new DependencyManager(context);
-        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), null));
+        Properties props = new Properties() {{ put("test", "consumer"); }};
+        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
         m_ensure.waitForStep(1, 10000);
         super.stopBundle("BundleDependencyTest", context);
         m_ensure.waitForStep(2, 10000);
     }
     
+    /**
+     * Tests a Bundle Adapter, which adapts the dependency manager bundle to a "ServiceInterface" service.
+     * @param context
+     */
+    @Test
+    public void testBundleAdapterServiceAnnotation(BundleContext context)
+    {
+        DependencyManager m = new DependencyManager(context);
+        Properties props = new Properties() {{ put("test", "adapter"); }};
+        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
+        m_ensure.waitForStep(3, 10000);
+    }    
 }
