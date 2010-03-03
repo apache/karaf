@@ -95,7 +95,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     private boolean[] bootPkgWildcards;
 
     private ServiceRegistration configurationPrinter;
-    
+
     // templates
     private final String TEMPLATE_MAIN;
     private final String TEMPLATE_UPLOAD;
@@ -106,8 +106,8 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         super(NAME, TITLE, CSS);
 
         // load templates
-        TEMPLATE_MAIN = readTemplateFile( "/templates/bundles.html" ); 
-        TEMPLATE_UPLOAD = readTemplateFile( "/templates/bundles_upload.html" ); 
+        TEMPLATE_MAIN = readTemplateFile( "/templates/bundles.html" );
+        TEMPLATE_UPLOAD = readTemplateFile( "/templates/bundles_upload.html" );
     }
 
     /**
@@ -446,7 +446,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             StringWriter w = new StringWriter();
             writeJSON(w, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale() );
             vars.put( "__bundles__", w.toString());
-            
+
             response.getWriter().print(TEMPLATE_MAIN);
         }
     }
@@ -487,11 +487,11 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
             jw.key( "status" );
             jw.value( statusLine );
-            
+
             // add raw status
             jw.key( "s" );
             jw.array();
-            for ( int i = 0; i < 5; i++ ) jw.value(status[i]); 
+            for ( int i = 0; i < 5; i++ ) jw.value(status[i]);
             jw.endArray();
 
             jw.key( "data" );
@@ -1279,7 +1279,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
     private void update( final Bundle bundle )
     {
-        Thread t = new UpdateHelper( bundle, false )
+        UpdateHelper t = new UpdateHelper( bundle, false )
         {
             protected Logger getLog()
             {
@@ -1347,17 +1347,17 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     {
         return (RequestInfo)request.getAttribute( BundlesServlet.class.getName() );
     }
-    
+
     private final PackageAdmin getPackageAdmin()
     {
         return ( PackageAdmin ) getService( PackageAdmin.class.getName() );
     }
-    
+
     private final StartLevel getStartLevel()
     {
         return ( StartLevel ) getService( StartLevel.class.getName() );
     }
-    
+
     // TODO: may remove later, when BaseWebConsolePlugin is made to extend SimpleWebConsolePlugin
     private Logger log;
     Logger getLog()

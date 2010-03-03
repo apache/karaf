@@ -32,21 +32,28 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 
-abstract class BaseUpdateInstallHelper extends Thread
+abstract class BaseUpdateInstallHelper
 {
 
     private final File bundleFile;
 
     private final boolean refreshPackages;
 
+    private Thread updateThread;
+
 
     BaseUpdateInstallHelper( String name, File bundleFile, boolean refreshPackages )
     {
-        super( name );
-        setDaemon( true );
-
         this.bundleFile = bundleFile;
         this.refreshPackages = refreshPackages;
+        this.updateThread = new Thread( name )
+        {
+            public void run()
+            {
+                BaseUpdateInstallHelper.this.run();
+            };
+        };
+        this.updateThread.setDaemon( true );
     }
 
 
@@ -83,11 +90,19 @@ abstract class BaseUpdateInstallHelper extends Thread
         {
             IOUtils.closeQuietly( bundleStream );
         }
-
     }
 
 
-    public void run()
+    final void start()
+    {
+        if ( updateThread != null )
+        {
+            updateThread.start();
+        }
+    }
+
+
+    void run()
     {
         // wait some time for the request to settle
         sleepSilently( 500L );
@@ -126,6 +141,9 @@ abstract class BaseUpdateInstallHelper extends Thread
             {
                 bundleFile.delete();
             }
+
+            // release update thread for GC
+            updateThread = null;
         }
     }
 
@@ -134,7 +152,7 @@ abstract class BaseUpdateInstallHelper extends Thread
     {
         try
         {
-            sleep( msecs );
+            Thread.sleep( msecs );
         }
         catch ( InterruptedException ie )
         {

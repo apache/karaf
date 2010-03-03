@@ -274,7 +274,8 @@ public class InstallAction extends BaseManagementPlugin implements Action
         final boolean doStart, final boolean refreshPackages )
     {
 
-        Thread t = new InstallHelper( getBundleContext(), bundleFile, location, startlevel, doStart, refreshPackages )
+        InstallHelper t = new InstallHelper( getBundleContext(), bundleFile, location, startlevel, doStart,
+            refreshPackages )
         {
             protected Logger getLog()
             {
@@ -303,7 +304,7 @@ public class InstallAction extends BaseManagementPlugin implements Action
 
     private void updateBackground( final Bundle bundle, final File bundleFile, final boolean refreshPackages )
     {
-        Thread t = new UpdateHelper( bundle, bundleFile, refreshPackages )
+        UpdateHelper t = new UpdateHelper( bundle, bundleFile, refreshPackages )
         {
             protected Logger getLog()
             {
