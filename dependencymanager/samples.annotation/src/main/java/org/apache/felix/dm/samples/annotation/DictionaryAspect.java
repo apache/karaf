@@ -19,18 +19,13 @@
 package org.apache.felix.dm.samples.annotation;
 
 import org.apache.felix.dm.annotation.api.AspectService;
-import org.apache.felix.dm.annotation.api.Param;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
-import org.osgi.framework.Constants;
 import org.osgi.service.log.LogService;
 
 /**
  * This aspect wraps a Dictionary and checks the "aspect" word on behalf of it.
  */
-@AspectService(
-    filter="(!(" + Constants.SERVICE_RANKING + "=*))", 
-    properties={@Param(name=Constants.SERVICE_RANKING, value="1")}
-)
+@AspectService( ranking = 10 )
 public class DictionaryAspect implements DictionaryService
 {
     /**
