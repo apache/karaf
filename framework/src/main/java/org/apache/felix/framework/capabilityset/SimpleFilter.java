@@ -101,46 +101,76 @@ public class SimpleFilter
 
     public static SimpleFilter parse(String filter)
     {
-        filter = filter.trim();
+        int idx = skipWhitespace(filter, 0);
 
-        if ((filter == null) || (filter.length() == 0))
+        if ((filter == null) || (filter.length() == 0) || (idx >= filter.length()))
         {
             throw new IllegalArgumentException("Null or empty filter.");
         }
-        else if (filter.charAt(0) != '(')
+        else if (filter.charAt(idx) != '(')
         {
             throw new IllegalArgumentException("Missing opening parenthesis: " + filter);
         }
 
         SimpleFilter sf = null;
         List stack = new ArrayList();
-        for (int i = 0; i < filter.length(); i++)
+        while (idx < filter.length())
         {
             if (sf != null)
             {
                 throw new IllegalArgumentException(
                     "Only one top-level operation allowed: " + filter);
             }
-            if (filter.charAt(i) == '(')
+            if (filter.charAt(idx) == '(')
             {
-                if (filter.charAt(i+1) == '&')
+                // Skip paren and following whitespace.
+                idx = skipWhitespace(filter, idx + 1);
+
+                if (filter.charAt(idx) == '&')
                 {
-                    stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.AND));
+                    int peek = skipWhitespace(filter, idx + 1);
+                    if (filter.charAt(peek) == '(')
+                    {
+                        idx = peek - 1;
+                        stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.AND));
+                    }
+                    else
+                    {
+                        stack.add(0, new Integer(idx));
+                    }
                 }
-                else if (filter.charAt(i+1) == '|')
+                else if (filter.charAt(idx) == '|')
                 {
-                    stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.OR));
+                    int peek = skipWhitespace(filter, idx + 1);
+                    if (filter.charAt(peek) == '(')
+                    {
+                        idx = peek - 1;
+                        stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.OR));
+                    }
+                    else
+                    {
+                        stack.add(0, new Integer(idx));
+                    }
                 }
-                else if (filter.charAt(i+1) == '!')
+                else if (filter.charAt(idx) == '!')
                 {
-                    stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.NOT));
+                    int peek = skipWhitespace(filter, idx + 1);
+                    if (filter.charAt(peek) == '(')
+                    {
+                        idx = peek - 1;
+                        stack.add(0, new SimpleFilter(null, new ArrayList(), SimpleFilter.NOT));
+                    }
+                    else
+                    {
+                        stack.add(0, new Integer(idx));
+                    }
                 }
                 else
                 {
-                    stack.add(0, new Integer(i));
+                    stack.add(0, new Integer(idx));
                 }
             }
-            else if (filter.charAt(i) == ')')
+            else if (filter.charAt(idx) == ')')
             {
                 Object top = stack.remove(0);
                 if (top instanceof SimpleFilter)
@@ -157,13 +187,15 @@ public class SimpleFilter
                 else if (!stack.isEmpty() && (stack.get(0) instanceof SimpleFilter))
                 {
                     ((List) ((SimpleFilter) stack.get(0)).m_value).add(
-                        SimpleFilter.subfilter(filter, ((Integer) top).intValue() + 1, i));
+                        SimpleFilter.subfilter(filter, ((Integer) top).intValue(), idx));
                 }
                 else
                 {
-                    sf = SimpleFilter.subfilter(filter, ((Integer) top).intValue() + 1, i);
+                    sf = SimpleFilter.subfilter(filter, ((Integer) top).intValue(), idx);
                 }
             }
+
+            idx = skipWhitespace(filter, idx + 1);
         }
 
         if (sf == null)
@@ -177,55 +209,74 @@ public class SimpleFilter
     private static SimpleFilter subfilter(String filter, int startIdx, int endIdx)
     {
         final String opChars = "=<>";
-        String attr = null;
-        Object value = null;
-        int op = -1;
+
+        // Determine the ending index of the attribute name.
+        int attrEndIdx = startIdx;
         for (int i = 0; i < (endIdx - startIdx); i++)
         {
-            if (opChars.indexOf(filter.charAt(startIdx + i)) >= 0)
+            char c = filter.charAt(startIdx + i);
+            if (opChars.indexOf(c) >= 0)
             {
-                switch (filter.charAt(startIdx + i))
-                {
-                    case '=':
-                        attr = filter.substring(startIdx, startIdx + i);
-                        List<String> values =
-                            parseSubstring(filter.substring(startIdx + i + 1, endIdx));
-                        if (values.size() > 1)
-                        {
-                            op = SUBSTRING;
-                            value = values;
-                        }
-                        else
-                        {
-                            op = EQ;
-                            value = values.get(0);
-                        }
-                        break;
-                    case '<':
-                        if (filter.charAt(startIdx + i + 1) != '=')
-                        {
-                            throw new IllegalArgumentException(
-                                "Unknown operator: " + filter.substring(startIdx, endIdx));
-                        }
-                        attr = filter.substring(startIdx, startIdx + i);
-                        op = LTE;
-                        value = filter.substring(startIdx + i + 2, endIdx);
-                        break;
-                    case '>':
-                        if (filter.charAt(startIdx + i + 1) != '=')
-                        {
-                            throw new IllegalArgumentException(
-                                "Unknown operator: " + filter.substring(startIdx, endIdx));
-                        }
-                        attr = filter.substring(startIdx, startIdx + i);
-                        op = GTE;
-                        value = filter.substring(startIdx + i + 2, endIdx);
-                        break;
-                    default:
-                        throw new IllegalArgumentException(
-                            "Unknown operator: " + filter.substring(startIdx, endIdx));
-                }
                 break;
+            }
+            else if (!Character.isWhitespace(c))
+            {
+                attrEndIdx = startIdx + i;
+            }
+        }
+        if (attrEndIdx == startIdx)
+        {
+            throw new IllegalArgumentException(
+                "Missing attribute name: " + filter.substring(startIdx, endIdx));
+        }
+        String attr = filter.substring(startIdx, attrEndIdx + 1);
+
+        // Skip the attribute name and any following whitespace.
+        startIdx = skipWhitespace(filter, attrEndIdx + 1);
+
+        // Determine the operator type.
+        int op = -1;
+        switch (filter.charAt(startIdx))
+        {
+            case '=':
+                op = EQ;
+                startIdx++;
+                break;
+            case '<':
+                if (filter.charAt(startIdx + 1) != '=')
+                {
+                    throw new IllegalArgumentException(
+                        "Unknown operator: " + filter.substring(startIdx, endIdx));
+                }
+                op = LTE;
+                startIdx += 2;
+                break;
+            case '>':
+                if (filter.charAt(startIdx + 1) != '=')
+                {
+                    throw new IllegalArgumentException(
+                        "Unknown operator: " + filter.substring(startIdx, endIdx));
+                }
+                op = GTE;
+                startIdx += 2;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Unknown operator: " + filter.substring(startIdx, endIdx));
+        }
+
+        // Parse value.
+        Object value = filter.subSequence(startIdx, endIdx);
+
+        // Check if the equality comparison is actually a substring
+        // comparison.
+        if (op == EQ)
+        {
+            List<String> values = parseSubstring((String) value);
+            if (values.size() > 1)
+            {
+                op = SUBSTRING;
+                value = values;
             }
         }
 
@@ -384,5 +435,15 @@ loop:   for (int i = 0; i < len; i++)
         }
 
         return result;
+    }
+
+    private static int skipWhitespace(String s, int startIdx)
+    {
+        int len = s.length();
+        while ((startIdx < len) && Character.isWhitespace(s.charAt(startIdx)))
+        {
+            startIdx++;
+        }
+        return startIdx;
     }
 }
