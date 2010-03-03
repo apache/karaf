@@ -59,7 +59,7 @@ public class ResolverImpl implements Resolver
 
     public ResolverImpl(Logger logger, String fwkExecEnvStr)
     {
-System.out.println("+++ PROTO3 RESOLVER");
+//System.out.println("+++ PROTO3 RESOLVER");
         m_logger = logger;
         m_fwkExecEnvStr = (fwkExecEnvStr != null) ? fwkExecEnvStr.trim() : null;
         m_fwkExecEnvSet = parseExecutionEnvironments(fwkExecEnvStr);
