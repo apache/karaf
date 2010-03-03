@@ -828,6 +828,10 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 	    	for (int i = 0; i < instances.length; i++) {
 	    		Object serviceInstance = instances[i];
 		        Class serviceClazz = serviceInstance.getClass();
+		        if (Proxy.isProxyClass(serviceClazz)) {
+		            serviceInstance = Proxy.getInvocationHandler(serviceInstance);
+		            serviceClazz = serviceInstance.getClass();
+		        }
 		        while (serviceClazz != null) {
 		            Field[] fields = serviceClazz.getDeclaredFields();
 		            for (int j = 0; j < fields.length; j++) {

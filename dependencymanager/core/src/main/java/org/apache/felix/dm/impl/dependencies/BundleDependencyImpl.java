@@ -384,8 +384,8 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
         return lookupBundle();
     }
 
-    public Object lookupBundle() {
-        Object service = null;
+    public Bundle lookupBundle() {
+        Bundle service = null;
         if (m_isStarted) {
             service = getBundle();
         }
@@ -415,7 +415,7 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
         return service;
     }
 
-    private Object getNullObject() {
+    private Bundle getNullObject() {
         if (m_nullObject == null) {
             try {
                 m_nullObject = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { Bundle.class }, new DefaultNullObject()); 
@@ -424,7 +424,7 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
                 m_logger.log(Logger.LOG_ERROR, "Could not create null object for Bundle.", e);
             }
         }
-        return m_nullObject;
+        return (Bundle) m_nullObject;
     }
     
     public String getAutoConfigName() {
@@ -437,13 +437,7 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
 
     public void invokeAdded(DependencyService service) {
         // we remember these for future reference, needed for required service callbacks
-        if (m_isStarted) {
-            // use the tracker
-        }
-        else {
-            // do a manual lookup
-        }
-        m_bundleInstance = null; // TODO save what we looked up here
+        m_bundleInstance = lookupBundle();
         invokeAdded(service, m_bundleInstance);
     }
 

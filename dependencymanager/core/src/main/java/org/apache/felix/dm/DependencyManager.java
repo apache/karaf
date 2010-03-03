@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DependencyManager {
+    public static final String ASPECT = "org.apache.felix.dependencymanager.aspect";
     private final BundleContext m_context;
     private final Logger m_logger;
     private List m_services = Collections.synchronizedList(new ArrayList());
@@ -167,14 +168,32 @@ public class DependencyManager {
      * @param aspectProperties additional properties to use with the aspect service registration
      * @return a service that acts as a factory for generating aspects
      */
-    public Service createAspectService(Class serviceInterface, String serviceFilter, Object aspectImplementation, Dictionary aspectProperties) {
+    public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object aspectImplementation, Dictionary aspectProperties) {
         return createService()
-            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, aspectImplementation, aspectProperties))
+            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, ranking, aspectImplementation, aspectProperties))
             .add(createServiceDependency()
-                .setService(serviceInterface, serviceFilter)
+                .setService(serviceInterface, createAspectFilter(serviceFilter))
                 .setAutoConfig(false)
                 .setCallbacks("added", "removed")
             );
+    }
+    public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, Dictionary aspectProperties) {
+        return createService()
+            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, ranking, factory, factoryCreateMethod, aspectProperties))
+            .add(createServiceDependency()
+                .setService(serviceInterface, createAspectFilter(serviceFilter))
+                .setAutoConfig(false)
+                .setCallbacks("added", "removed")
+            );
+    }
+    private String createAspectFilter(String filter) {
+        // we only want to match services which are not themselves aspects
+        if (filter == null || filter.length() == 0) {
+            return "(!(" + ASPECT + "=*))";
+        }
+        else {
+            return "(&(!(" + ASPECT + "=*))" + filter + ")";
+        }        
     }
     
     /**

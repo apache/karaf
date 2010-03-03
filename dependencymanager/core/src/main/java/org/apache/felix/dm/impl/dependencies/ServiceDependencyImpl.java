@@ -336,7 +336,7 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
                             m_tracker = new ServiceTracker(m_context, m_context.createFilter(m_trackedServiceFilter), this);
                         }
                         catch (InvalidSyntaxException e) {
-                            throw new IllegalStateException("Invalid filter definition for dependency.");
+                            throw new IllegalStateException("Invalid filter definition for dependency: " + m_trackedServiceFilter);
                         }
                     }
                     else if (m_trackedServiceReference != null) {
