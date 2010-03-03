@@ -20,8 +20,6 @@
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
@@ -49,8 +47,6 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
 public abstract class BundleDependencySection extends SigilSection
 {
-
-    private Set<? extends IModelElement> unresolvedElements;
 
     protected ProjectTableViewer viewer;
     private Button add;
