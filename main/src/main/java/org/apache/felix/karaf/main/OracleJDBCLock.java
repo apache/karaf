@@ -124,7 +124,7 @@ public class OracleJDBCLock implements Lock {
                 LOG.fine("OracleJDBCLock#setUpdateCursor:: connection already established.");
                 return true; 
             }
-            String sql = "SELECT * FROM " + table + " FOR UPDATE";
+            String sql = "SELECT * FROM " + table + " FOR UPDATE NOWAIT";
             statement = lockConnection.prepareStatement(sql);
             result = statement.execute();
         } catch (Exception e) {
