@@ -207,6 +207,34 @@ public class DescriptorParser
      * @param def
      * @return
      */
+    public int getInt(DescriptorParam param)
+    {
+        String value = getString(param, null);
+        if (value != null)
+        {
+            try
+            {
+                return Integer.parseInt(value);
+            }
+            catch (NumberFormatException e)
+            {
+                throw new IllegalArgumentException("parameter " + param + " is not an int value: "
+                    + value);
+            }
+        }
+        else
+        {
+            throw new IllegalArgumentException("missing " + param + " parameter from annotation");
+        }
+    }
+
+    /**
+     * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
+     *
+     * @param param
+     * @param def
+     * @return
+     */
     public int getInt(DescriptorParam param, int def)
     {
         String value = getString(param, null);

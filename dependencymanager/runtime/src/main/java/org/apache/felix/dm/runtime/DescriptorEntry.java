@@ -27,6 +27,7 @@ public enum DescriptorEntry
     Service,
     AspectService,
     AdapterService,
+    BundleAdapterService,
     ServiceDependency,
     TemporalServiceDependency,
     ConfigurationDependency,
