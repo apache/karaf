@@ -25,13 +25,50 @@ import java.lang.annotation.Target;
 
 import org.osgi.framework.Bundle;
 
+/**
+ * Annotates a Bundle Adapter Service class. The adapter will be applied to any bundle that
+ * matches the specified bundle state mask and filter condition. For each matching
+ * bundle an adapter will be created based on the adapter implementation class.
+ * The adapter will be registered with the specified interface and existing properties 
+ * from the original resource plus any extra properties you supply here.
+ * It will also inherit all dependencies, and if you declare the original
+ * service as a member it will be injected.
+ * 
+ * @param bundleStateMask the bundle state mask to apply
+ * @param bundleFilter the filter to apply to the bundle manifest
+ * @param adapterImplementation the implementation of the adapter
+ * @param adapterInterface the interface to use when registering adapters
+ * @param adapterProperties additional properties to use with the service registration
+ * @param propagate <code>true</code> if properties from the bundle should be propagated to the service
+ * @return a service that acts as a factory for generating bundle adapters
+ */
 public @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
 @interface BundleAdapterService
 {
+    /**
+     * The filter used to match a given bundle.
+     */
     String filter();
+    
+    /**
+     * the bundle state mask to apply
+     */
     int stateMask() default Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE;
+    
+    /**
+     * The interface to use when registering adapters. By default, the interface directly implemented
+     * by the annotated class is used.
+     */
     Class<?> service() default Object.class;
+    
+    /**
+     * Additional properties to use with the service registration
+     */
     Param[] properties() default {};
+    
+    /**
+     * Specifies if properties from the bundle should be propagated to the service.
+     */
     boolean propagate() default true;
 }
