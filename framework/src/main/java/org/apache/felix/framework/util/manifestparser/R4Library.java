@@ -18,6 +18,7 @@
  */
 package org.apache.felix.framework.util.manifestparser;
 
+import java.util.List;
 import java.util.Map;
 import org.osgi.framework.Constants;
 
@@ -84,7 +85,7 @@ public class R4Library
     public boolean match(Map configMap, String name)
     {
         String libname = System.mapLibraryName(name);
-        String[] exts = ManifestParser.parseDelimitedString(
+        List<String> exts = ManifestParser.parseDelimitedString(
             (String) configMap.get(Constants.FRAMEWORK_LIBRARY_EXTENSIONS), ",");
         int extIdx = 0;
 
@@ -111,15 +112,15 @@ public class R4Library
 
             // If we have other native library extensions to try, then
             // calculate the new native library name.
-            if ((exts != null) && (extIdx < exts.length))
+            if ((exts != null) && (extIdx < exts.size()))
             {
                 int idx = libname.lastIndexOf(".");
                 libname = (idx < 0)
-                    ? libname + "." + exts[extIdx++]
-                    : libname.substring(0, idx) + "." + exts[extIdx++];
+                    ? libname + "." + exts.get(extIdx++)
+                    : libname.substring(0, idx) + "." + exts.get(extIdx++);
             }
         }
-        while ((exts != null) && (extIdx < exts.length));
+        while ((exts != null) && (extIdx < exts.size()));
 
         return false;
     }
