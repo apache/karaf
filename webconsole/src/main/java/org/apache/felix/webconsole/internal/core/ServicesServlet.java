@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -159,7 +160,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
         try
         {
             StringWriter w = new StringWriter();
-            writeJSON( w, null, true );
+            writeJSON( w, null, true, Locale.ENGLISH );
             String jsonString = w.toString();
             JSONObject json = new JSONObject( jsonString );
 
@@ -318,14 +319,14 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
     }
 
 
-    private void renderJSON( final HttpServletResponse response, final ServiceReference service )
+    private void renderJSON( final HttpServletResponse response, final ServiceReference service, final Locale locale )
         throws IOException
     {
         response.setContentType( "application/json" );
         response.setCharacterEncoding( "UTF-8" );
 
         final PrintWriter pw = response.getWriter();
-        writeJSON( pw, service );
+        writeJSON( pw, service, locale );
     }
 
 
@@ -363,7 +364,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
     }
 
 
-    private void usingBundles( JSONWriter jw, ServiceReference service ) throws JSONException
+    private void usingBundles( JSONWriter jw, ServiceReference service, Locale locale ) throws JSONException
     {
         jw.key( "usingBundles" );
         jw.array();
@@ -374,7 +375,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
             for ( int i = 0; i < usingBundles.length; i++ )
             {
                 jw.object();
-                bundleInfo( jw, usingBundles[i] );
+                bundleInfo( jw, usingBundles[i], locale );
                 jw.endObject();
             }
         }
@@ -384,7 +385,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
     }
 
 
-    private void serviceInfo( JSONWriter jw, ServiceReference service, boolean details ) throws JSONException
+    private void serviceInfo( JSONWriter jw, ServiceReference service, boolean details, final Locale locale ) throws JSONException
     {
         jw.object();
         jw.key( "id" );
@@ -394,24 +395,24 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
         jw.key( "pid" );
         jw.value( propertyAsString( service, Constants.SERVICE_PID ) );
 
-        bundleInfo( jw, service.getBundle() );
+        bundleInfo( jw, service.getBundle(), locale );
 
         if ( details )
         {
             serviceDetails( jw, service );
-            usingBundles( jw, service );
+            usingBundles( jw, service, locale );
         }
 
         jw.endObject();
     }
 
 
-    private void bundleInfo( final JSONWriter jw, final Bundle bundle ) throws JSONException
+    private void bundleInfo( final JSONWriter jw, final Bundle bundle, final Locale locale ) throws JSONException
     {
         jw.key( "bundleId" );
         jw.value( bundle.getBundleId() );
         jw.key( "bundleName" );
-        jw.value( Util.getName( bundle ) );
+        jw.value( Util.getName( bundle, locale ) );
         jw.key( "bundleVersion" );
         jw.value( Util.getHeaderValue( bundle, Constants.BUNDLE_VERSION ) );
         jw.key( "bundleSymbolicName" );
@@ -419,13 +420,13 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
     }
 
 
-    private void writeJSON( final PrintWriter pw, final ServiceReference service ) throws IOException
+    private void writeJSON( final Writer pw, final ServiceReference service, final Locale locale ) throws IOException
     {
-        writeJSON( pw, service, false );
+        writeJSON( pw, service, false, locale );
     }
 
 
-    private void writeJSON( final Writer pw, final ServiceReference service, final boolean fullDetails )
+    private void writeJSON( final Writer pw, final ServiceReference service, final boolean fullDetails, final Locale locale )
         throws IOException
     {
         final ServiceReference[] allServices = this.getServices();
@@ -452,7 +453,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
 
             for ( int i = 0; i < services.length; i++ )
             {
-                serviceInfo( jw, services[i], fullDetails || service != null );
+                serviceInfo( jw, services[i], fullDetails || service != null, locale );
             }
 
             jw.endArray();
@@ -484,7 +485,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
             }
             if ( reqInfo.extension.equals( "json" ) )
             {
-                this.renderJSON( response, reqInfo.service );
+                this.renderJSON( response, reqInfo.service, request.getLocale() );
 
                 // nothing more to do
                 return;
@@ -505,8 +506,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
 
         final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
         StringWriter w = new StringWriter();
-        PrintWriter w2 = new PrintWriter(w);
-        writeJSON(w2, reqInfo.service);
+        writeJSON(w, reqInfo.service, request.getLocale());
 
         // prepare variables
         DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );

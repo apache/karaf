@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -162,7 +163,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         try
         {
             StringWriter w = new StringWriter();
-            writeJSON( w, null, null, null, true );
+            writeJSON( w, null, null, null, true, Locale.ENGLISH );
             String jsonString = w.toString();
             JSONObject json = new JSONObject( jsonString );
 
@@ -242,7 +243,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         {
             final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
             final String servicesRoot = getServicesRoot( request );
-            this.renderJSON(response, reqInfo.bundle, pluginRoot, servicesRoot);
+            this.renderJSON(response, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale());
 
             // nothing more to do
             return;
@@ -345,7 +346,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             }
             final String pluginRoot = ( String ) req.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
             final String servicesRoot = getServicesRoot( req );
-            this.renderJSON(resp, null, pluginRoot, servicesRoot);
+            this.renderJSON(resp, null, pluginRoot, servicesRoot, req.getLocale() );
         }
         else
         {
@@ -443,41 +444,40 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
             final String servicesRoot = getServicesRoot ( request );
             StringWriter w = new StringWriter();
-            PrintWriter w2 = new PrintWriter(w);
-            writeJSON(w2, reqInfo.bundle, pluginRoot, servicesRoot );
+            writeJSON(w, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale() );
             vars.put( "__bundles__", w.toString());
             
             response.getWriter().print(TEMPLATE_MAIN);
         }
     }
 
-    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot )
+    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale )
         throws IOException
     {
         response.setContentType( "application/json" );
         response.setCharacterEncoding( "UTF-8" );
 
         final PrintWriter pw = response.getWriter();
-        writeJSON(pw, bundle, pluginRoot, servicesRoot);
+        writeJSON(pw, bundle, pluginRoot, servicesRoot, locale);
     }
 
 
-    private void writeJSON( final PrintWriter pw, final Bundle bundle, final String pluginRoot, final String servicesRoot )
+    private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale )
         throws IOException
     {
-        writeJSON( pw, bundle, pluginRoot, servicesRoot, false );
+        writeJSON( pw, bundle, pluginRoot, servicesRoot, false, locale );
     }
 
 
     private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot,
-        final String servicesRoot, final boolean fullDetails ) throws IOException
+        final String servicesRoot, final boolean fullDetails, final Locale locale ) throws IOException
     {
         final Bundle[] allBundles = this.getBundles();
         final Object[] status = getStatusLine(allBundles);
         final String statusLine = (String) status[5];
         final Bundle[] bundles = ( bundle != null ) ? new Bundle[]
             { bundle } : allBundles;
-        Util.sort( bundles );
+        Util.sort( bundles, locale );
 
         final JSONWriter jw = new JSONWriter( pw );
 
@@ -500,7 +500,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
             for ( int i = 0; i < bundles.length; i++ )
             {
-                bundleInfo( jw, bundles[i], fullDetails || bundle != null, pluginRoot, servicesRoot );
+                bundleInfo( jw, bundles[i], fullDetails || bundle != null, pluginRoot, servicesRoot, locale );
             }
 
             jw.endArray();
@@ -582,14 +582,14 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         return ret;
     }
 
-    private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details, final String pluginRoot, final String servicesRoot )
+    private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details, final String pluginRoot, final String servicesRoot, final Locale locale )
         throws JSONException
     {
         jw.object();
         jw.key( "id" );
         jw.value( bundle.getBundleId() );
         jw.key( "name" );
-        jw.value( Util.getName( bundle ) );
+        jw.value( Util.getName( bundle, locale ) );
         jw.key( "state" );
         jw.value( toStateString( bundle ) );
         jw.key( "version" );
@@ -618,7 +618,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
         if ( details )
         {
-            bundleDetails( jw, bundle, pluginRoot, servicesRoot );
+            bundleDetails( jw, bundle, pluginRoot, servicesRoot, locale );
         }
 
         jw.endObject();
@@ -700,10 +700,10 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     }
 
 
-    private final void bundleDetails( JSONWriter jw, Bundle bundle, final String pluginRoot, final String servicesRoot)
+    private final void bundleDetails( JSONWriter jw, Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale)
         throws JSONException
     {
-        Dictionary headers = bundle.getHeaders();
+        Dictionary headers = bundle.getHeaders( locale == null ? null : locale.toString() );
 
         jw.key( "props" );
         jw.array();

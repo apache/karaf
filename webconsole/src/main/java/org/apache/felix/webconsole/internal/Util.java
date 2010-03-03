@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.Locale;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -57,7 +58,6 @@ public class Util
     /** Parameter value */
     public static final String VALUE_SHUTDOWN = "shutdown";
 
-
     /**
      * Return a display name for the given <code>bundle</code>:
      * <ol>
@@ -69,11 +69,13 @@ public class Util
      * </ol>
      *
      * @param bundle the bundle which name to retrieve
+     * @param locale the locale, in which the bundle name is requested
      * @return the bundle name - see the description of the method for more details.
      */
-    public static String getName( Bundle bundle )
+    public static String getName( Bundle bundle, Locale locale )
     {
-        String name = ( String ) bundle.getHeaders().get( Constants.BUNDLE_NAME );
+        final String loc = locale == null ? null : locale.toString();
+        String name = ( String ) bundle.getHeaders( loc ).get( Constants.BUNDLE_NAME );
         if ( name == null || name.length() == 0 )
         {
             name = bundle.getSymbolicName();
@@ -93,7 +95,7 @@ public class Util
      * Returns the value of the header or the empty string if the header
      * is not available.
      *
-     * @param bundle the bundle which header to retrieve 
+     * @param bundle the bundle which header to retrieve
      * @param headerName the name of the header to retrieve
      * @return the header or empty string if it is not set
      */
@@ -106,18 +108,20 @@ public class Util
        }
        return "";
     }
+
     /**
      * Orders the bundles according to their name as returned by
-     * {@link #getName(Bundle)}, with the exception that the system bundle is
+     * {@link #getName(Bundle, Locale)}, with the exception that the system bundle is
      * always place as the first entry. If two bundles have the same name, they
      * are ordered according to their version. If they have the same version,
      * the bundle with the lower bundle id comes before the other.
      *
      * @param bundles the bundles to sort
+     * @param locale the locale, used to obtain the localized bundle name
      */
-    public static void sort( Bundle[] bundles )
+    public static void sort( Bundle[] bundles, Locale locale )
     {
-        Arrays.sort( bundles, BUNDLE_NAME_COMPARATOR );
+        Arrays.sort( bundles, new BundleNameComparator( locale ) );
     }
 
 
@@ -139,10 +143,17 @@ public class Util
         return l;
     }
 
-    // ---------- inner classes ------------------------------------------------
-
-    private static final Comparator BUNDLE_NAME_COMPARATOR = new Comparator()
+    private static final class BundleNameComparator implements Comparator
     {
+        private final Locale locale;
+
+
+        BundleNameComparator( final Locale locale )
+        {
+            this.locale = locale;
+        }
+
+
         public int compare( Object o1, Object o2 )
         {
             return compare( ( Bundle ) o1, ( Bundle ) o2 );
@@ -169,7 +180,7 @@ public class Util
             }
 
             // compare the symbolic names
-            int snComp = Util.getName( b1 ).compareToIgnoreCase( Util.getName( b2 ) );
+            int snComp = Util.getName( b1, locale ).compareToIgnoreCase( Util.getName( b2, locale ) );
             if ( snComp != 0 )
             {
                 return snComp;
@@ -193,5 +204,5 @@ public class Util
             // b1 id must be > b2 id because equality is already checked
             return 1;
         }
-    };
+    }
 }

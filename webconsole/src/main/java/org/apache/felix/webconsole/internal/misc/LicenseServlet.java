@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -98,16 +99,16 @@ public final class LicenseServlet extends SimpleWebConsolePlugin implements Osgi
     protected void renderContent( HttpServletRequest request, HttpServletResponse res ) throws IOException
     {
         Bundle[] bundles = getBundleContext().getBundles();
-        Util.sort( bundles );
+        Util.sort( bundles, request.getLocale() );
 
         // prepare variables
         DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
-        vars.put( "__data__", getBundleData(bundles).toString());
+        vars.put( "__data__", getBundleData( bundles, request.getLocale() ).toString());
 
         res.getWriter().print(TEMPLATE);
     }
 
-    private static final JSONArray getBundleData(Bundle[] bundles) throws IOException
+    private static final JSONArray getBundleData(Bundle[] bundles, Locale locale) throws IOException
     {
         JSONArray ret = new JSONArray();
         try
@@ -121,7 +122,7 @@ public final class LicenseServlet extends SimpleWebConsolePlugin implements Osgi
                 { // has resources
                     JSONObject data = new JSONObject();
                     data.put( "bid", bundle.getBundleId() );
-                    data.put( "title", Util.getName( bundle ) );
+                    data.put( "title", Util.getName( bundle, locale ) );
                     data.put( "files", files );
                     ret.put( data );
                 }
