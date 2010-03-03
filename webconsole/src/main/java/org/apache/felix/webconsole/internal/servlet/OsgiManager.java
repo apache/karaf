@@ -133,13 +133,11 @@ public class OsgiManager extends GenericServlet
             "org.apache.felix.webconsole.internal.core.BundlesServlet",
             "org.apache.felix.webconsole.internal.core.ServicesServlet",
             "org.apache.felix.webconsole.internal.core.InstallAction",
-            "org.apache.felix.webconsole.internal.core.SetStartLevelAction",
             "org.apache.felix.webconsole.internal.deppack.DepPackServlet",
             "org.apache.felix.webconsole.internal.misc.LicenseServlet",
             "org.apache.felix.webconsole.internal.misc.ConfigurationRender",
             "org.apache.felix.webconsole.internal.misc.ShellServlet",
             "org.apache.felix.webconsole.internal.obr.BundleRepositoryRender",
-            "org.apache.felix.webconsole.internal.system.GCAction",
             "org.apache.felix.webconsole.internal.system.VMStatPlugin"
         };
 

@@ -84,7 +84,32 @@ public class VMStatPlugin extends SimpleWebConsolePlugin implements OsgiManagerP
     protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
-        if ( request.getParameter( PARAM_SHUTDOWN_TIMER ) == null )
+        final String action = request.getParameter( "action");
+
+        if ( "setStartLevel".equals( action ))
+        {
+            StartLevel sl = getStartLevel();
+            if ( sl != null )
+            {
+                int bundleSL = WebConsoleUtil.getParameterInt( request, "bundleStartLevel", -1 );
+                if ( bundleSL > 0 && bundleSL != sl.getInitialBundleStartLevel() )
+                {
+                    sl.setInitialBundleStartLevel( bundleSL );
+                }
+
+                int systemSL = WebConsoleUtil.getParameterInt( request, "systemStartLevel", -1 );
+                if ( systemSL > 0 && systemSL != sl.getStartLevel() )
+                {
+                    sl.setStartLevel( systemSL );
+                }
+            }
+        }
+        else if ( "gc".equals( action ) )
+        {
+            System.gc();
+            System.gc(); // twice for sure
+        }
+        else if ( request.getParameter( PARAM_SHUTDOWN_TIMER ) == null )        
         {
 
             // whether to stop or restart the framework
