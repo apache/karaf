@@ -19,12 +19,13 @@
 package org.apache.felix.framework.util;
 
 import junit.framework.TestCase;
+import java.util.List;
 
 public class UtilTest extends TestCase
 {
     public void testSubstringMatching()
     {
-        String[] pieces;
+        List<String> pieces;
 
         pieces = Util.parseSubstring("foo");
         assertTrue("Should match!", Util.checkSubstring(pieces, "foo"));

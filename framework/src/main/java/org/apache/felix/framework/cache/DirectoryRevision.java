@@ -26,7 +26,7 @@ import java.util.jar.Manifest;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.StringMap;
-import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.framework.resolver.Content;
 
 /**
  * <p>
@@ -94,7 +94,7 @@ class DirectoryRevision extends BundleRevision
         }
     }
 
-    public synchronized IContent getContent() throws Exception
+    public synchronized Content getContent() throws Exception
     {
         return new DirectoryContent(getLogger(), getConfig(), this, getRevisionRootDir(), m_refDir);
     }

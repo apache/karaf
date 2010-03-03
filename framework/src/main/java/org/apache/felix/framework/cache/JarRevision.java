@@ -30,7 +30,7 @@ import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.JarFileX;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.framework.resolver.Content;
 
 /**
  * <p>
@@ -107,7 +107,7 @@ class JarRevision extends BundleRevision
         return new StringMap(mf.getMainAttributes(), false);
     }
 
-    public synchronized IContent getContent() throws Exception
+    public synchronized Content getContent() throws Exception
     {
         return new JarContent(getLogger(), getConfig(), this, getRevisionRootDir(),
             m_bundleFile, m_jarFile);

@@ -22,7 +22,7 @@ import java.io.File;
 import java.util.Map;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.framework.resolver.Content;
 
 /**
  * <p>
@@ -128,7 +128,7 @@ public abstract class BundleRevision
     **/
     public abstract Map getManifestHeader() throws Exception;
 
-    public abstract IContent getContent() throws Exception;
+    public abstract Content getContent() throws Exception;
 
     /**
      * <p>

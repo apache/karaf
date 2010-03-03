@@ -18,7 +18,7 @@
  */
 package org.apache.felix.framework.cache;
 
-import org.apache.felix.moduleloader.*;
+import org.apache.felix.framework.resolver.Content;
 import java.io.*;
 import java.util.*;
 import org.apache.felix.framework.Logger;
@@ -26,7 +26,7 @@ import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
 
-public class DirectoryContent implements IContent
+public class DirectoryContent implements Content
 {
     private static final int BUFSIZE = 4096;
     private static final transient String EMBEDDED_DIRECTORY = "-embedded";
@@ -131,7 +131,7 @@ public class DirectoryContent implements IContent
         return new FileInputStream(new File(m_dir, name));
     }
 
-    public synchronized IContent getEntryAsContent(String entryName)
+    public synchronized Content getEntryAsContent(String entryName)
     {
         // If the entry name refers to the content itself, then
         // just return it immediately.

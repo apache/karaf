@@ -23,16 +23,56 @@ import java.io.*;
 import java.net.*;
 import java.security.*;
 import java.util.*;
-
-import org.apache.felix.framework.cache.*;
-import org.apache.felix.framework.ext.SecurityProvider;
-import org.apache.felix.framework.searchpolicy.*;
+import java.util.Map.Entry;
+import org.apache.felix.framework.ModuleImpl.FragmentRequirement;
 import org.apache.felix.framework.ServiceRegistry.ServiceRegistryCallbacks;
-import org.apache.felix.framework.util.*;
-import org.apache.felix.framework.util.manifestparser.*;
-import org.apache.felix.moduleloader.*;
-import org.osgi.framework.*;
-import org.osgi.framework.hooks.service.*;
+import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.framework.cache.BundleCache;
+import org.apache.felix.framework.capabilityset.Attribute;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.CapabilitySet;
+import org.apache.felix.framework.capabilityset.Directive;
+import org.apache.felix.framework.resolver.Module;
+import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.resolver.Wire;
+import org.apache.felix.framework.ext.SecurityProvider;
+import org.apache.felix.framework.resolver.ResolveException;
+import org.apache.felix.framework.resolver.Resolver;
+import org.apache.felix.framework.resolver.ResolverImpl;
+import org.apache.felix.framework.util.EventDispatcher;
+import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.ListenerHookInfoImpl;
+import org.apache.felix.framework.util.MapToDictionary;
+import org.apache.felix.framework.util.SecureAction;
+import org.apache.felix.framework.util.ShrinkableCollection;
+import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.util.ThreadGate;
+import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.manifestparser.R4LibraryClause;
+import org.apache.felix.framework.util.manifestparser.RequirementImpl;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.BundleReference;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceException;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServicePermission;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.hooks.service.FindHook;
+import org.osgi.framework.hooks.service.ListenerHook;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -294,7 +334,7 @@ public class Felix extends BundleImpl implements Framework
         // Create a resolver and its state.
         m_resolverState = new FelixResolverState(m_logger);
         m_felixResolver = new FelixResolver(
-            new Resolver(m_logger,
+            new ResolverImpl(m_logger,
                 (String) m_configMap.get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT)),
             m_resolverState);
 
@@ -1579,7 +1619,7 @@ ex.printStackTrace();
 
         // Record whether the bundle is using its declared activation policy.
         boolean wasDeferred = bundle.isDeclaredActivationPolicyUsed()
-            && (bundle.getCurrentModule().getDeclaredActivationPolicy() == IModule.LAZY_ACTIVATION);
+            && (bundle.getCurrentModule().getDeclaredActivationPolicy() == Module.LAZY_ACTIVATION);
         bundle.setDeclaredActivationPolicyUsed(
             (options & Bundle.START_ACTIVATION_POLICY) != 0);
 
@@ -1667,7 +1707,7 @@ ex.printStackTrace();
             // If the bundle's activation policy is eager or activation has already
             // been triggered, then activate the bundle immediately.
             if (!bundle.isDeclaredActivationPolicyUsed()
-                || (bundle.getCurrentModule().getDeclaredActivationPolicy() != IModule.LAZY_ACTIVATION)
+                || (bundle.getCurrentModule().getDeclaredActivationPolicy() != Module.LAZY_ACTIVATION)
                 || ((ModuleImpl) bundle.getCurrentModule()).isActivationTriggered())
             {
                 // Record the event type for the final event and activate.
@@ -2090,7 +2130,7 @@ ex.printStackTrace();
                     throw new IllegalStateException("Cannot stop an uninstalled bundle.");
                 case Bundle.STARTING:
                     if (bundle.isDeclaredActivationPolicyUsed()
-                        && bundle.getCurrentModule().getDeclaredActivationPolicy() != IModule.LAZY_ACTIVATION)
+                        && bundle.getCurrentModule().getDeclaredActivationPolicy() != Module.LAZY_ACTIVATION)
                     {
                         throw new BundleException(
                             "Stopping a starting or stopping bundle is currently not supported.");
@@ -2469,7 +2509,6 @@ ex.printStackTrace();
                             "Could not remove from cache.", ex1);
                     }
                 }
-
                 if (ex instanceof BundleException)
                 {
                     throw (BundleException) ex;
@@ -2990,26 +3029,29 @@ ex.printStackTrace();
     ExportedPackage[] getExportedPackages(String pkgName)
     {
         // First, get all exporters of the package.
-        List exports =
-            m_resolverState.getResolvedCandidates(
-                new Requirement(
-                    ICapability.PACKAGE_NAMESPACE,
-                    null,
-                    new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }), null);
+        List<Directive> dirs = new ArrayList<Directive>(0);
+        List<Attribute> attrs = new ArrayList<Attribute>(1);
+        attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
+        Requirement req = new RequirementImpl(Capability.PACKAGE_NAMESPACE, dirs, attrs);
+        Set<Capability> exports = m_resolverState.getCandidates(null, req, false);
+
+        // We only want resolved capabilities.
+        for (Iterator<Capability> it = exports.iterator(); it.hasNext(); )
+        {
+            if (!it.next().getModule().isResolved())
+            {
+                it.remove();
+            }
+        }
 
         if (exports != null)
         {
             List pkgs = new ArrayList();
 
-            Requirement req = new Requirement(ICapability.PACKAGE_NAMESPACE,
-                null,
-                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) });
-
-            for (int pkgIdx = 0; pkgIdx < exports.size(); pkgIdx++)
+            for (Iterator<Capability> it = exports.iterator(); it.hasNext(); )
             {
                 // Get the bundle associated with the current exporting module.
-                BundleImpl bundle = (BundleImpl)
-                    ((ICapability) exports.get(pkgIdx)).getModule().getBundle();
+                BundleImpl bundle = (BundleImpl) it.next().getModule().getBundle();
 
                 // We need to find the version of the exported package, but this
                 // is tricky since there may be multiple versions of the package
@@ -3021,16 +3063,18 @@ ex.printStackTrace();
                 // that the first module found to be exporting the package is the
                 // provider of the package, which makes sense since it must have
                 // been resolved first.
-                IModule[] modules = bundle.getModules();
-                for (int modIdx = 0; modIdx < modules.length; modIdx++)
+                List<Module> modules = bundle.getModules();
+                for (int modIdx = 0; modIdx < modules.size(); modIdx++)
                 {
-                    ICapability[] ec = modules[modIdx].getCapabilities();
-                    for (int i = 0; (ec != null) && (i < ec.length); i++)
+                    List<Capability> ec = modules.get(modIdx).getCapabilities();
+                    for (int i = 0; (ec != null) && (i < ec.size()); i++)
                     {
-                        if (ec[i].getNamespace().equals(req.getNamespace()) &&
-                            req.isSatisfied(ec[i]))
+                        if (ec.get(i).getNamespace().equals(req.getNamespace())
+                            && CapabilitySet.matches(ec.get(i), req.getFilter()))
                         {
-                            pkgs.add(new ExportedPackageImpl(this, bundle, modules[modIdx], (Capability) ec[i]));
+                            pkgs.add(
+                                new ExportedPackageImpl(
+                                    this, bundle, modules.get(modIdx), ec.get(i)));
                         }
                     }
                 }
@@ -3111,31 +3155,43 @@ ex.printStackTrace();
         // Since a bundle may have many modules associated with it,
         // one for each revision in the cache, search each module
         // for each revision to get all exports.
-        IModule[] modules = bundle.getModules();
-        for (int modIdx = 0; modIdx < modules.length; modIdx++)
+        List<Module> modules = bundle.getModules();
+        for (int modIdx = 0; modIdx < modules.size(); modIdx++)
         {
-            ICapability[] caps = modules[modIdx].getCapabilities();
-            if ((caps != null) && (caps.length > 0))
+            List<Capability> caps = modules.get(modIdx).getCapabilities();
+            if ((caps != null) && (caps.size() > 0))
             {
-                for (int capIdx = 0; capIdx < caps.length; capIdx++)
+                for (int capIdx = 0; capIdx < caps.size(); capIdx++)
                 {
                     // See if the target bundle's module is one of the
                     // resolved exporters of the package.
-                    if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    if (caps.get(capIdx).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
                     {
-                        List resolvedCaps = m_resolverState.getResolvedCandidates(
-                            new Requirement(
-                                ICapability.PACKAGE_NAMESPACE,
-                                null,
-                                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }), null);
+                        String pkgName = (String)
+                            caps.get(capIdx).getAttribute(Capability.PACKAGE_ATTR).getValue();
+                        List<Directive> dirs = new ArrayList<Directive>(0);
+                        List<Attribute> attrs = new ArrayList<Attribute>(1);
+                        attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
+                        Requirement req =
+                            new RequirementImpl(Capability.PACKAGE_NAMESPACE, dirs, attrs);
+                        Set<Capability> exports = m_resolverState.getCandidates(null, req, false);
+                        // We only want resolved capabilities.
+                        for (Iterator<Capability> it = exports.iterator(); it.hasNext(); )
+                        {
+                            if (!it.next().getModule().isResolved())
+                            {
+                                it.remove();
+                            }
+                        }
+
 
                         // Search through the current providers to find the target module.
-                        for (int i = 0; (resolvedCaps != null) && (i < resolvedCaps.size()); i++)
+                        for (Capability cap : exports)
                         {
-                            if ((ICapability) resolvedCaps.get(i) == caps[capIdx])
+                            if (cap == caps.get(capIdx))
                             {
                                 list.add(new ExportedPackageImpl(
-                                    this, bundle, modules[modIdx], (Capability) caps[capIdx]));
+                                    this, bundle, modules.get(modIdx), caps.get(capIdx)));
                             }
                         }
                     }
@@ -3144,70 +3200,64 @@ ex.printStackTrace();
         }
     }
 
-    Bundle[] getDependentBundles(BundleImpl exporter)
+    List<Bundle> getDependentBundles(BundleImpl exporter)
     {
         // Create list for storing importing bundles.
-        List list = new ArrayList();
+        List<Bundle> list = new ArrayList();
 
         // Get all dependent modules from all exporter module revisions.
-        IModule[] modules = exporter.getModules();
-        for (int modIdx = 0; modIdx < modules.length; modIdx++)
+        List<Module> modules = exporter.getModules();
+        for (int modIdx = 0; modIdx < modules.size(); modIdx++)
         {
-            IModule[] dependents = ((ModuleImpl) modules[modIdx]).getDependents();
+            List<Module> dependents = ((ModuleImpl) modules.get(modIdx)).getDependents();
             for (int depIdx = 0;
-                (dependents != null) && (depIdx < dependents.length);
+                (dependents != null) && (depIdx < dependents.size());
                 depIdx++)
             {
-                list.add(dependents[depIdx].getBundle());
+                list.add(dependents.get(depIdx).getBundle());
             }
         }
 
-        // Return the results.
-        if (list.size() > 0)
-        {
-            return (Bundle[]) list.toArray(new Bundle[list.size()]);
-        }
-
-        return null;
+        return list;
     }
 
-    Bundle[] getImportingBundles(ExportedPackage ep)
+    List<Bundle> getImportingBundles(ExportedPackage ep)
     {
         // Create list for storing importing bundles.
-        List list = new ArrayList();
+        List<Bundle> list = new ArrayList();
 
         // Get exporting bundle information.
         BundleImpl exporter = (BundleImpl) ep.getExportingBundle();
 
         // Get all importers and requirers for all revisions of the bundle.
         // The spec says that require-bundle should be returned with importers.
-        IModule[] expModules = exporter.getModules();
-        for (int expIdx = 0; (expModules != null) && (expIdx < expModules.length); expIdx++)
+        List<Module> expModules = exporter.getModules();
+        for (int expIdx = 0; (expModules != null) && (expIdx < expModules.size()); expIdx++)
         {
             // Include any importers that have wires to the specific
             // exported package.
-            IModule[] dependents = ((ModuleImpl) expModules[expIdx]).getDependentImporters();
-            for (int depIdx = 0; (dependents != null) && (depIdx < dependents.length); depIdx++)
+            List<Module> dependents = ((ModuleImpl) expModules.get(expIdx)).getDependentImporters();
+            for (int depIdx = 0; (dependents != null) && (depIdx < dependents.size()); depIdx++)
             {
-                IWire[] wires = dependents[depIdx].getWires();
-                for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
+                List<Wire> wires = dependents.get(depIdx).getWires();
+                for (int wireIdx = 0; (wires != null) && (wireIdx < wires.size()); wireIdx++)
                 {
-                    if ((wires[wireIdx].getExporter() == expModules[expIdx])
-                        && (wires[wireIdx].hasPackage(ep.getName())))
+                    if ((wires.get(wireIdx).getExporter() == expModules.get(expIdx))
+                        && (wires.get(wireIdx).hasPackage(ep.getName())))
                     {
-                        list.add(dependents[depIdx].getBundle());
+                        list.add(dependents.get(depIdx).getBundle());
                     }
                 }
             }
-            dependents = ((ModuleImpl) expModules[expIdx]).getDependentRequirers();
-            for (int depIdx = 0; (dependents != null) && (depIdx < dependents.length); depIdx++)
+            dependents = ((ModuleImpl) expModules.get(expIdx)).getDependentRequirers();
+            for (int depIdx = 0; (dependents != null) && (depIdx < dependents.size()); depIdx++)
             {
-                list.add(dependents[depIdx].getBundle());
+                list.add(dependents.get(depIdx).getBundle());
             }
         }
 
         // Return the results.
-        return (Bundle[]) list.toArray(new Bundle[list.size()]);
+        return list;
     }
 
     boolean resolveBundles(Bundle[] targets)
@@ -3473,20 +3523,20 @@ ex.printStackTrace();
     private void populateDependentGraph(BundleImpl exporter, Map map)
     {
         // Get all dependent bundles of this bundle.
-        Bundle[] dependents = getDependentBundles(exporter);
+        List<Bundle> dependents = getDependentBundles(exporter);
 
         for (int depIdx = 0;
-            (dependents != null) && (depIdx < dependents.length);
+            (dependents != null) && (depIdx < dependents.size());
             depIdx++)
         {
             // Avoid cycles if the bundle is already in map.
-            if (!map.containsKey(dependents[depIdx]))
+            if (!map.containsKey(dependents.get(depIdx)))
             {
                 // Add each importing bundle to map.
-                map.put(dependents[depIdx], dependents[depIdx]);
+                map.put(dependents.get(depIdx), dependents.get(depIdx));
                 // Now recurse into each bundle to get its importers.
                 populateDependentGraph(
-                    (BundleImpl) dependents[depIdx], map);
+                    (BundleImpl) dependents.get(depIdx), map);
             }
         }
     }
@@ -3819,7 +3869,7 @@ ex.printStackTrace();
             m_resolverState = resolverState;
         }
 
-        public void resolve(IModule rootModule) throws ResolveException
+        public void resolve(Module rootModule) throws ResolveException
         {
             // Although there is a race condition to check the bundle state
             // then lock it, we do this because we don't want to acquire the
@@ -3850,14 +3900,44 @@ ex.printStackTrace();
                     // must find a host to attach it to and resolve the host
                     // instead, since the underlying resolver doesn't know
                     // how to deal with fragments.
-                    IModule newRootModule = m_resolverState.findHost(rootModule);
+                    Module newRootModule = m_resolverState.findHost(rootModule);
                     if (!Util.isFragment(newRootModule))
                     {
-                        // Resolve the module.
-                        Map resolvedModuleWireMap = m_resolver.resolve(m_resolverState, newRootModule);
+                        // Check singleton status.
+                        m_resolverState.checkSingleton(newRootModule);
 
-                        // Mark all modules as resolved.
-                        markResolvedModules(resolvedModuleWireMap);
+                        boolean repeat;
+                        do
+                        {
+                            repeat = false;
+                            try
+                            {
+                                // Resolve the module.
+                                Map<Module, List<Wire>> wireMap =
+                                    m_resolver.resolve(m_resolverState, newRootModule);
+
+                                // Mark all modules as resolved.
+                                markResolvedModules(wireMap);
+                            }
+                            catch (ResolveException ex)
+                            {
+                                if ((ex.getRequirement() != null)
+                                    && (ex.getRequirement() instanceof FragmentRequirement)
+                                    && (rootModule !=
+                                        ((FragmentRequirement) ex.getRequirement()).getFragment()))
+                                {
+                                    m_resolverState.detachFragment(
+                                        newRootModule,
+                                        ((FragmentRequirement) ex.getRequirement()).getFragment());
+                                    repeat = true;
+                                }
+                                else
+                                {
+                                    throw ex;
+                                }
+                            }
+                        }
+                        while (repeat);
                     }
                 }
                 finally
@@ -3868,24 +3948,23 @@ ex.printStackTrace();
             }
         }
 
-        public IWire resolveDynamicImport(IModule importer, String pkgName) throws ResolveException
+        public Wire resolve(Module module, String pkgName) throws ResolveException
         {
-            IWire candidateWire = null;
-
-            // We cannot dynamically import if the module is already resolved or
-            // if it is not allowed, so check that first. Note: We check if the
+            Wire candidateWire = null;
+            // We cannot dynamically import if the module is not already resolved
+            // or if it is not allowed, so check that first. Note: We check if the
             // dynamic import is allowed without holding any locks, but this is
             // okay since the resolver will double check later after we have
             // acquired the global lock below.
-            if (importer.isResolved()
-                && (Resolver.findAllowedDynamicImport(importer, pkgName) != null))
+            if (module.isResolved()
+                && (ResolverImpl.isAllowedDynamicImport(m_resolverState, module, pkgName, new HashMap())))
             {
                 // Acquire global lock.
                 boolean locked = acquireGlobalLock();
                 if (!locked)
                 {
                     throw new ResolveException(
-                        "Unable to acquire global lock for resolve.", importer, null);
+                        "Unable to acquire global lock for resolve.", module, null);
                 }
 
                 try
@@ -3894,42 +3973,34 @@ ex.printStackTrace();
                     // dynamically importing the package, which can happen if two
                     // threads are racing to do so. If we have an existing wire,
                     // then just return it instead.
-                    IWire[] wires = importer.getWires();
-                    for (int i = 0; (wires != null) && (i < wires.length); i++)
+                    List<Wire> wires = module.getWires();
+                    for (int i = 0; (wires != null) && (i < wires.size()); i++)
                     {
-                        if (wires[i].hasPackage(pkgName))
+                        if (wires.get(i).hasPackage(pkgName))
                         {
-                            return wires[i];
+                            return wires.get(i);
                         }
                     }
 
-                    Object[] result = m_resolver.resolveDynamicImport(m_resolverState, importer, pkgName);
-                    if (result != null)
+                    Map<Module, List<Wire>> wireMap =
+                        m_resolver.resolve(m_resolverState, module, pkgName);
+
+                    if ((wireMap != null) && wireMap.containsKey(module))
                     {
-                        candidateWire = (IWire) result[0];
-                        Map resolvedModuleWireMap = (Map) result[1];
+                        List<Wire> dynamicWires = wireMap.remove(module);
+                        candidateWire = dynamicWires.get(0);
 
                         // Mark all modules as resolved.
-                        markResolvedModules(resolvedModuleWireMap);
+                        markResolvedModules(wireMap);
 
                         // Dynamically add new wire to importing module.
                         if (candidateWire != null)
                         {
-                            wires = importer.getWires();
-                            IWire[] newWires = null;
-                            if (wires == null)
-                            {
-                                newWires = new IWire[1];
-                            }
-                            else
-                            {
-                                newWires = new IWire[wires.length + 1];
-                                System.arraycopy(wires, 0, newWires, 0, wires.length);
-                            }
-
-                            newWires[newWires.length - 1] = candidateWire;
-                            ((ModuleImpl) importer).setWires(newWires);
-m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1]);
+                            wires = new ArrayList(wires.size() + 1);
+                            wires.addAll(module.getWires());
+                            wires.add(candidateWire);
+                            ((ModuleImpl) module).setWires(wires);
+m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + wires.get(wires.size() - 1));
                         }
                     }
                 }
@@ -3943,58 +4014,45 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             return candidateWire;
         }
 
-        public synchronized List getResolvedCandidates(IRequirement req, IModule reqModule)
+        public synchronized Set<Capability> getCandidates(
+            Module reqModule, Requirement req, boolean obeyMandatory)
         {
-            return m_resolverState.getResolvedCandidates(req, reqModule);
+            return m_resolverState.getCandidates(reqModule, req, obeyMandatory);
         }
 
-        public synchronized List getUnresolvedCandidates(IRequirement req, IModule reqModule)
+        private void markResolvedModules(Map<Module, List<Wire>> wireMap)
         {
-            return m_resolverState.getUnresolvedCandidates(req, reqModule);
-        }
-
-        private void markResolvedModules(Map resolvedModuleWireMap)
-        {
-            if (resolvedModuleWireMap != null)
+            if (wireMap != null)
             {
-                Iterator iter = resolvedModuleWireMap.entrySet().iterator();
+                Iterator<Entry<Module, List<Wire>>> iter = wireMap.entrySet().iterator();
                 // Iterate over the map to mark the modules as resolved and
                 // update our resolver data structures.
-                List wireList = new ArrayList();
                 while (iter.hasNext())
                 {
-                    wireList.clear();
-
-                    Map.Entry entry = (Map.Entry) iter.next();
-                    IModule module = (IModule) entry.getKey();
-                    IWire[] wires = (IWire[]) entry.getValue();
+                    Entry<Module, List<Wire>> entry = iter.next();
+                    Module module = entry.getKey();
+                    List<Wire> wires = entry.getValue();
 
                     // Only add wires attribute if some exist; export
                     // only modules may not have wires.
-// TODO: RESOLVER - Seems stupid that we package these up as wires to tear them apart.
-                    if (wires.length > 0)
+                    for (int wireIdx = 0; wireIdx < wires.size(); wireIdx++)
                     {
-                        for (int wireIdx = 0; wireIdx < wires.length; wireIdx++)
-                        {
-                            wireList.add(wires[wireIdx]);
-                            m_logger.log(
-                                Logger.LOG_DEBUG,
-                                "WIRE: " + wires[wireIdx]);
-                        }
-                        wires = (IWire[]) wireList.toArray(new IWire[wireList.size()]);
-                        ((ModuleImpl) module).setWires(wires);
-                    }
-
-                    // Resolve all attached fragments.
-                    IModule[] fragments = ((ModuleImpl) module).getFragments();
-                    for (int i = 0; (fragments != null) && (i < fragments.length); i++)
-                    {
-                        ((ModuleImpl) fragments[i]).setResolved();
-                        // Update the state of the module's bundle to resolved as well.
-                        markBundleResolved(fragments[i]);
                         m_logger.log(
                             Logger.LOG_DEBUG,
-                            "FRAGMENT WIRE: " + fragments[i] + " -> hosted by -> " + module);
+                            "WIRE: " + wires.get(wireIdx));
+                    }
+                    ((ModuleImpl) module).setWires(wires);
+
+                    // Resolve all attached fragments.
+                    List<Module> fragments = ((ModuleImpl) module).getFragments();
+                    for (int i = 0; (fragments != null) && (i < fragments.size()); i++)
+                    {
+                        ((ModuleImpl) fragments.get(i)).setResolved();
+                        // Update the state of the module's bundle to resolved as well.
+                        markBundleResolved(fragments.get(i));
+                        m_logger.log(
+                            Logger.LOG_DEBUG,
+                            "FRAGMENT WIRE: " + fragments.get(i) + " -> hosted by -> " + module);
                     }
                     // Update the resolver state to show the module as resolved.
                     ((ModuleImpl) module).setResolved();
@@ -4005,7 +4063,7 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             }
         }
 
-        private void markBundleResolved(IModule module)
+        private void markBundleResolved(Module module)
         {
             // Update the bundle's state to resolved when the
             // current module is resolved; just ignore resolve

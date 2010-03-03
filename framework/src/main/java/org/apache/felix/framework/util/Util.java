@@ -25,9 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.CapabilitySet;
+import org.apache.felix.framework.resolver.Module;
+import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.resolver.Wire;
 
-import org.apache.felix.framework.util.manifestparser.Capability;
-import org.apache.felix.moduleloader.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -229,15 +232,15 @@ public class Util
         return allow;
     }
 
-    public static ICapability getSatisfyingCapability(IModule m, IRequirement req)
+    public static Capability getSatisfyingCapability(Module m, Requirement req)
     {
-        ICapability[] caps = m.getCapabilities();
-        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        List<Capability> caps = m.getCapabilities();
+        for (int i = 0; (caps != null) && (i < caps.size()); i++)
         {
-            if (caps[i].getNamespace().equals(req.getNamespace()) &&
-                req.isSatisfied(caps[i]))
+            if (caps.get(i).getNamespace().equals(req.getNamespace())
+                && CapabilitySet.matches(caps.get(i), req.getFilter()))
             {
-                return caps[i];
+                return caps.get(i);
             }
         }
         return null;
@@ -250,29 +253,29 @@ public class Util
      * @param namespace capability namespace
      * @return array of matching capabilities or empty if none found
      */
-    public static ICapability[] getCapabilityByNamespace(IModule module, String namespace)
+    public static List<Capability> getCapabilityByNamespace(Module module, String namespace)
     {
-        final List matching = new ArrayList();
-        final ICapability[] caps = module.getCapabilities();
-        for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+        final List<Capability> matching = new ArrayList();
+        final List<Capability> caps = module.getCapabilities();
+        for (int capIdx = 0; (caps != null) && (capIdx < caps.size()); capIdx++)
         {
-            if (caps[capIdx].getNamespace().equals(namespace))
+            if (caps.get(capIdx).getNamespace().equals(namespace))
             {
-                matching.add(caps[capIdx]);
+                matching.add(caps.get(capIdx));
             }
         }
-        return (ICapability[]) matching.toArray(new ICapability[matching.size()]);
+        return matching;
     }
 
-    public static IWire getWire(IModule m, String name)
+    public static Wire getWire(Module m, String name)
     {
-        IWire[] wires = m.getWires();
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        List<Wire> wires = m.getWires();
+        for (int i = 0; (wires != null) && (i < wires.size()); i++)
         {
-            if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-                ((Capability) wires[i].getCapability()).getPackageName().equals(name))
+            if (wires.get(i).getCapability().getNamespace().equals(Capability.PACKAGE_NAMESPACE) &&
+                wires.get(i).getCapability().getAttribute(Capability.PACKAGE_ATTR).getValue().equals(name))
             {
-                return wires[i];
+                return wires.get(i);
             }
         }
         return null;
@@ -522,21 +525,20 @@ public class Util
      * @return <code>true</code> if the module declares a fragment host, <code>false</code>
      *      otherwise.
      */
-    public static boolean isFragment(IModule module)
+    public static boolean isFragment(Module module)
     {
         Map headerMap = module.getHeaders();
         return headerMap.containsKey(Constants.FRAGMENT_HOST);
     }
-
 
     //
     // The following substring-related code was lifted and modified
     // from the LDAP parser code.
     //
 
-    public static String[] parseSubstring(String target)
+    public static List<String> parseSubstring(String target)
     {
-        List pieces = new ArrayList();
+        ArrayList pieces = new ArrayList();
         StringBuffer ss = new StringBuffer();
         // int kind = SIMPLE; // assume until proven otherwise
         boolean wasStar = false; // indicates last piece was a star
@@ -608,10 +610,11 @@ loop:   for (;;)
                 pieces.add(0, "");
             }
         }
-        return (String[]) pieces.toArray(new String[pieces.size()]);
+        pieces.trimToSize();
+        return pieces;
     }
 
-    public static boolean checkSubstring(String[] pieces, String s)
+    public static boolean checkSubstring(List<String> pieces, String s)
     {
         // Walk the pieces to match the string
         // There are implicit stars between each piece,
@@ -620,13 +623,13 @@ loop:   for (;;)
         // minimal case is <string>*<string>
 
         boolean result = true;
-        int len = pieces.length;
+        int len = pieces.size();
 
         int index = 0;
 
 loop:   for (int i = 0; i < len; i++)
         {
-            String piece = pieces[i];
+            String piece = pieces.get(i);
 
             // If this is the first piece, then make sure the
             // string starts with it.

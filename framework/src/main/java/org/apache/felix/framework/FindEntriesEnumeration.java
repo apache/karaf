@@ -19,18 +19,18 @@
 package org.apache.felix.framework;
 
 import java.util.*;
+import org.apache.felix.framework.resolver.Module;
 
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.moduleloader.IModule;
 
 class FindEntriesEnumeration implements Enumeration
 {
     private final BundleImpl m_bundle;
-    private final Enumeration[] m_enumerations;
-    private final IModule[] m_modules;
+    private final List<Enumeration> m_enumerations;
+    private final List<Module> m_modules;
     private int m_moduleIndex = 0;
     private final String m_path;
-    private final String[] m_filePattern;
+    private final List<String> m_filePattern;
     private final boolean m_recurse;
     private Object m_next = null;
 
@@ -38,23 +38,20 @@ class FindEntriesEnumeration implements Enumeration
         BundleImpl bundle, String path, String filePattern, boolean recurse)
     {
         m_bundle = bundle;
-        IModule bundleModule = m_bundle.getCurrentModule();
-        IModule[] fragmentModules = ((ModuleImpl) bundleModule).getFragments();
+        Module bundleModule = m_bundle.getCurrentModule();
+        List<Module> fragmentModules = ((ModuleImpl) bundleModule).getFragments();
         if (fragmentModules == null)
         {
-            fragmentModules = new IModule[0];
+            fragmentModules = new ArrayList<Module>(0);
         }
-        m_modules = new IModule[fragmentModules.length + 1];
-        m_modules[0] = bundleModule;
-        for (int i = 0; i < fragmentModules.length; i++)
+        m_modules = new ArrayList<Module>(fragmentModules.size() + 1);
+        m_modules.add(bundleModule);
+        m_modules.addAll(fragmentModules);
+        m_enumerations = new ArrayList<Enumeration>(m_modules.size());
+        for (int i = 0; i < m_modules.size(); i++)
         {
-            m_modules[i + 1] = fragmentModules[i];
-        }
-        m_enumerations = new Enumeration[m_modules.length];
-        for (int i = 0; i < m_modules.length; i++)
-        {
-            m_enumerations[i] = m_modules[i].getContent() != null ?
-                m_modules[i].getContent().getEntries() : null;
+            m_enumerations.add(m_modules.get(i).getContent() != null ?
+                m_modules.get(i).getContent().getEntries() : null);
         }
         m_recurse = recurse;
 
@@ -109,13 +106,13 @@ class FindEntriesEnumeration implements Enumeration
         {
             return null;
         }
-        while (m_moduleIndex < m_enumerations.length)
+        while (m_moduleIndex < m_enumerations.size())
         {
-            while (m_enumerations[m_moduleIndex] != null
-                &&  m_enumerations[m_moduleIndex].hasMoreElements())
+            while (m_enumerations.get(m_moduleIndex) != null
+                &&  m_enumerations.get(m_moduleIndex).hasMoreElements())
             {
                 // Get the next entry name.
-                String entryName = (String) m_enumerations[m_moduleIndex].nextElement();
+                String entryName = (String) m_enumerations.get(m_moduleIndex).nextElement();
                 // Check to see if it is a descendent of the specified path.
                 if (!entryName.equals(m_path) && entryName.startsWith(m_path))
                 {
@@ -141,7 +138,7 @@ class FindEntriesEnumeration implements Enumeration
                         if (Util.checkSubstring(m_filePattern, lastElement))
                         {
                             // Convert entry name into an entry URL.
-                            return m_modules[m_moduleIndex].getEntry(entryName);
+                            return m_modules.get(m_moduleIndex).getEntry(entryName);
                         }
                     }
                 }

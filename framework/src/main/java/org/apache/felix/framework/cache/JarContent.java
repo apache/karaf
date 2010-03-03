@@ -32,10 +32,10 @@ import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.JarFileX;
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.framework.resolver.Content;
 import org.osgi.framework.Constants;
 
-public class JarContent implements IContent
+public class JarContent implements Content
 {
     private static final int BUFSIZE = 4096;
     private static final transient String EMBEDDED_DIRECTORY = "-embedded";
@@ -190,7 +190,7 @@ public class JarContent implements IContent
         return is;
     }
 
-    public IContent getEntryAsContent(String entryName)
+    public Content getEntryAsContent(String entryName)
     {
         // If the entry name refers to the content itself, then
         // just return it immediately.

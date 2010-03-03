@@ -20,13 +20,12 @@ package org.apache.felix.framework;
 
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.CodeSource;
 import java.security.Permission;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 
-import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.framework.resolver.Module;
 
 public class BundleProtectionDomain extends ProtectionDomain
 {
@@ -56,9 +55,9 @@ public class BundleProtectionDomain extends ProtectionDomain
         m_toString = "[" + bundle + "]";
     }
 
-    IModule getModule() 
+    Module getModule() 
     {
-        return (IModule) m_module.get();
+        return (Module) m_module.get();
     }
 
     public boolean implies(Permission permission)

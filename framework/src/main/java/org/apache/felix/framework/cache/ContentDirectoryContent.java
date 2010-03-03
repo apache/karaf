@@ -18,18 +18,18 @@
  */
 package org.apache.felix.framework.cache;
 
-import org.apache.felix.moduleloader.*;
+import org.apache.felix.framework.resolver.Content;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
-public class ContentDirectoryContent implements IContent
+public class ContentDirectoryContent implements Content
 {
-    private IContent m_content = null;
+    private Content m_content = null;
     private String m_rootPath = null;
 
-    public ContentDirectoryContent(IContent content, String path)
+    public ContentDirectoryContent(Content content, String path)
     {
         m_content = content;
         // Add a '/' to the end if not present.
@@ -82,7 +82,7 @@ public class ContentDirectoryContent implements IContent
         return m_content.getEntryAsStream(m_rootPath + name);
     }
 
-    public IContent getEntryAsContent(String name)
+    public Content getEntryAsContent(String name)
     {
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {

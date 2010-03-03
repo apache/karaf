@@ -22,130 +22,63 @@ import org.osgi.framework.Version;
 
 public class VersionRange
 {
-    private final Version m_low;
-    private final boolean m_isLowInclusive;
-    private final Version m_high;
-    private final boolean m_isHighInclusive;
-    public static final VersionRange infiniteRange = new VersionRange(Version.emptyVersion, true, null, true);
+    private final Version m_floor;
+    private final boolean m_isFloorInclusive;
+    private final Version m_ceiling;
+    private final boolean m_isCeilingInclusive;
+    public static final VersionRange infiniteRange
+        = new VersionRange(Version.emptyVersion, true, null, true);
 
     public VersionRange(
         Version low, boolean isLowInclusive,
         Version high, boolean isHighInclusive)
     {
-        m_low = low;
-        m_isLowInclusive = isLowInclusive;
-        m_high = high;
-        m_isHighInclusive = isHighInclusive;
+        m_floor = low;
+        m_isFloorInclusive = isLowInclusive;
+        m_ceiling = high;
+        m_isCeilingInclusive = isHighInclusive;
     }
 
-    public Version getLow()
+    public Version getFloor()
     {
-        return m_low;
+        return m_floor;
     }
 
-    public boolean isLowInclusive()
+    public boolean isFloorInclusive()
     {
-        return m_isLowInclusive;
+        return m_isFloorInclusive;
     }
 
-    public Version getHigh()
+    public Version getCeiling()
     {
-        return m_high;
+        return m_ceiling;
     }
 
-    public boolean isHighInclusive()
+    public boolean isCeilingInclusive()
     {
-        return m_isHighInclusive;
+        return m_isCeilingInclusive;
     }
 
     public boolean isInRange(Version version)
     {
         // We might not have an upper end to the range.
-        if (m_high == null)
+        if (m_ceiling == null)
         {
-            return (version.compareTo(m_low) >= 0);
+            return (version.compareTo(m_floor) >= 0);
         }
-        else if (isLowInclusive() && isHighInclusive())
+        else if (isFloorInclusive() && isCeilingInclusive())
         {
-            return (version.compareTo(m_low) >= 0) && (version.compareTo(m_high) <= 0);
+            return (version.compareTo(m_floor) >= 0) && (version.compareTo(m_ceiling) <= 0);
         }
-        else if (isHighInclusive())
+        else if (isCeilingInclusive())
         {
-            return (version.compareTo(m_low) > 0) && (version.compareTo(m_high) <= 0);
+            return (version.compareTo(m_floor) > 0) && (version.compareTo(m_ceiling) <= 0);
         }
-        else if (isLowInclusive())
+        else if (isFloorInclusive())
         {
-            return (version.compareTo(m_low) >= 0) && (version.compareTo(m_high) < 0);
+            return (version.compareTo(m_floor) >= 0) && (version.compareTo(m_ceiling) < 0);
         }
-        return (version.compareTo(m_low) > 0) && (version.compareTo(m_high) < 0);
-    }
-
-    public boolean intersects(VersionRange vr)
-    {
-        // Check to see if the passed in floor is less than or equal to
-        // this ceiling and the passed in ceiling is greater than or
-        // equal to this floor.
-        boolean isFloorLessThanCeiling = false;
-        if ((m_high == null)
-            || (m_high.compareTo(vr.getLow()) > 0)
-            || ((m_high.compareTo(vr.getLow()) == 0)
-                && m_isHighInclusive && vr.isLowInclusive()))
-        {
-            isFloorLessThanCeiling = true;
-        }
-        boolean isCeilingGreaterThanFloor = false;
-        if ((vr.getHigh() == null)
-            || (m_low.compareTo(vr.getHigh()) < 0)
-            || ((m_low.compareTo(vr.getHigh()) == 0)
-                && m_isLowInclusive && vr.isHighInclusive()))
-        {
-            isCeilingGreaterThanFloor = true;
-        }
-        return isFloorLessThanCeiling && isCeilingGreaterThanFloor;
-    }
-
-    public VersionRange intersection(VersionRange vr)
-    {
-        if (!intersects(vr))
-        {
-            return null;
-        }
-
-        VersionRange floor = (m_low.compareTo(vr.getLow()) > 0) ? this : vr;
-        boolean floorInclusive = (getLow().equals(vr.getLow()))
-            ? (isLowInclusive() & vr.isLowInclusive())
-            : floor.isLowInclusive();
-
-        VersionRange ceiling;
-        boolean ceilingInclusive;
-        if (vr.getHigh() == null)
-        {
-            ceiling = this;
-            ceilingInclusive = ceiling.isHighInclusive();
-        }
-        else if (m_high == null)
-        {
-            ceiling = vr;
-            ceilingInclusive = ceiling.isHighInclusive();
-        }
-        else if (m_high.compareTo(vr.getHigh()) > 0)
-        {
-            ceiling = vr;
-            ceilingInclusive = ceiling.isHighInclusive();
-        }
-        else if (m_high.compareTo(vr.getHigh()) < 0)
-        {
-            ceiling = this;
-            ceilingInclusive = ceiling.isHighInclusive();
-        }
-        else
-        {
-            ceiling = this;
-            ceilingInclusive = (isHighInclusive() & vr.isHighInclusive());
-        }
-
-        return new VersionRange(
-            floor.getLow(), floorInclusive, ceiling.getHigh(), ceilingInclusive);
+        return (version.compareTo(m_floor) > 0) && (version.compareTo(m_ceiling) < 0);
     }
 
     public static VersionRange parse(String range)
@@ -177,19 +110,19 @@ public class VersionRange
             return false;
         }
         final VersionRange other = (VersionRange) obj;
-        if (m_low != other.m_low && (m_low == null || !m_low.equals(other.m_low)))
+        if (m_floor != other.m_floor && (m_floor == null || !m_floor.equals(other.m_floor)))
         {
             return false;
         }
-        if (m_isLowInclusive != other.m_isLowInclusive)
+        if (m_isFloorInclusive != other.m_isFloorInclusive)
         {
             return false;
         }
-        if (m_high != other.m_high && (m_high == null || !m_high.equals(other.m_high)))
+        if (m_ceiling != other.m_ceiling && (m_ceiling == null || !m_ceiling.equals(other.m_ceiling)))
         {
             return false;
         }
-        if (m_isHighInclusive != other.m_isHighInclusive)
+        if (m_isCeilingInclusive != other.m_isCeilingInclusive)
         {
             return false;
         }
@@ -199,28 +132,28 @@ public class VersionRange
     public int hashCode()
     {
         int hash = 5;
-        hash = 97 * hash + (m_low != null ? m_low.hashCode() : 0);
-        hash = 97 * hash + (m_isLowInclusive ? 1 : 0);
-        hash = 97 * hash + (m_high != null ? m_high.hashCode() : 0);
-        hash = 97 * hash + (m_isHighInclusive ? 1 : 0);
+        hash = 97 * hash + (m_floor != null ? m_floor.hashCode() : 0);
+        hash = 97 * hash + (m_isFloorInclusive ? 1 : 0);
+        hash = 97 * hash + (m_ceiling != null ? m_ceiling.hashCode() : 0);
+        hash = 97 * hash + (m_isCeilingInclusive ? 1 : 0);
         return hash;
     }
 
     public String toString()
     {
-        if (m_high != null)
+        if (m_ceiling != null)
         {
             StringBuffer sb = new StringBuffer();
-            sb.append(m_isLowInclusive ? '[' : '(');
-            sb.append(m_low.toString());
+            sb.append(m_isFloorInclusive ? '[' : '(');
+            sb.append(m_floor.toString());
             sb.append(',');
-            sb.append(m_high.toString());
-            sb.append(m_isHighInclusive ? ']' : ')');
+            sb.append(m_ceiling.toString());
+            sb.append(m_isCeilingInclusive ? ']' : ')');
             return sb.toString();
         }
         else
         {
-            return m_low.toString();
+            return m_floor.toString();
         }
     }
 }

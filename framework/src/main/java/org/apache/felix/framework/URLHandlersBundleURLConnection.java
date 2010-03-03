@@ -23,14 +23,15 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
+import java.util.List;
+import org.apache.felix.framework.resolver.Module;
 
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.moduleloader.IModule;
 
 class URLHandlersBundleURLConnection extends URLConnection
 {
     private Felix m_framework;
-    private IModule m_targetModule;
+    private Module m_targetModule;
     private int m_classPathIdx = -1;
     private int m_contentLength;
     private long m_contentTime;
@@ -77,8 +78,8 @@ class URLHandlersBundleURLConnection extends URLConnection
         m_contentTime = bundle.getLastModified();
 
         int revision = Util.getModuleRevisionFromModuleId(url.getHost());
-        IModule[] modules = bundle.getModules();
-        if ((modules == null) || (revision >= modules.length))
+        List<Module> modules = bundle.getModules();
+        if ((modules == null) || (revision >= modules.size()))
         {
             throw new IOException("Resource does not exist: " + url);
         }
@@ -86,7 +87,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         // If the revision is not specified, check the latest
         if (revision < 0)
         {
-            revision = modules.length - 1;
+            revision = modules.size() - 1;
         }
 
         // If the resource cannot be found at the current class path index,
@@ -96,15 +97,15 @@ class URLHandlersBundleURLConnection extends URLConnection
         // Of course, this approach won't work in cases where there are multiple
         // resources with the same path, since it will always find the first
         // one on the class path.
-        m_targetModule = modules[revision];
+        m_targetModule = modules.get(revision);
         m_classPathIdx = url.getPort();
         if (m_classPathIdx < 0)
         {
             m_classPathIdx = 0;
         }
-        if (!modules[revision].hasInputStream(m_classPathIdx, url.getPath()))
+        if (!modules.get(revision).hasInputStream(m_classPathIdx, url.getPath()))
         {
-            URL newurl = modules[revision].getResourceByDelegation(url.getPath());
+            URL newurl = modules.get(revision).getResourceByDelegation(url.getPath());
             if (newurl == null)
             {
                 throw new IOException("Resource does not exist: " + url);

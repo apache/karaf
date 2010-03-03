@@ -19,13 +19,16 @@
 package org.apache.felix.framework;
 
 import java.util.*;
-
-import org.apache.felix.framework.ModuleImpl;
-import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.util.VersionRange;
-import org.apache.felix.moduleloader.IModule;
-import org.osgi.framework.*;
-import org.osgi.service.packageadmin.*;
+import org.osgi.framework.AdminPermission;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
+import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.packageadmin.RequiredBundle;
+
 
 class PackageAdminImpl implements PackageAdmin, Runnable
 {
@@ -191,14 +194,14 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         if ((getBundleType(bundle) & BUNDLE_TYPE_FRAGMENT) == 0)
         {
             // Get attached fragments.
-            IModule[] modules =
+            List<Module> modules =
                 ((ModuleImpl)
                     ((BundleImpl) bundle).getCurrentModule()).getFragments();
             // Convert fragment modules to bundles.
             List list = new ArrayList();
-            for (int i = 0; (modules != null) && (i < modules.length); i++)
+            for (int i = 0; (modules != null) && (i < modules.size()); i++)
             {
-                Bundle b = modules[i].getBundle();
+                Bundle b = modules.get(i).getBundle();
                 if (b != null)
                 {
                     list.add(b);
@@ -216,7 +219,11 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     {
         if (getBundleType(bundle) == BUNDLE_TYPE_FRAGMENT)
         {
-            return m_felix.getDependentBundles((BundleImpl) bundle);
+            List<Bundle> hosts = m_felix.getDependentBundles((BundleImpl) bundle);
+            if (hosts != null)
+            {
+                return hosts.toArray(new Bundle[hosts.size()]);
+            }
         }
         return null;
     }

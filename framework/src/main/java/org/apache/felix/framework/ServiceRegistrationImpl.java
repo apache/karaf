@@ -22,12 +22,12 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
+import org.apache.felix.framework.resolver.Module;
+import org.apache.felix.framework.resolver.Wire;
 
 import org.apache.felix.framework.util.MapToDictionary;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.moduleloader.IModule;
-import org.apache.felix.moduleloader.IWire;
 import org.osgi.framework.*;
 import org.osgi.framework.BundleReference;
 
@@ -434,12 +434,12 @@ class ServiceRegistrationImpl implements ServiceRegistration
             // Get the package.
             String pkgName =
                 Util.getClassPackage(className);
-            IModule requesterModule = ((BundleImpl) requester).getCurrentModule();
+            Module requesterModule = ((BundleImpl) requester).getCurrentModule();
             // Get package wiring from service requester.
-            IWire requesterWire = Util.getWire(requesterModule, pkgName);
+            Wire requesterWire = Util.getWire(requesterModule, pkgName);
             // Get package wiring from service provider.
-            IModule providerModule = ((BundleImpl) m_bundle).getCurrentModule();
-            IWire providerWire = Util.getWire(providerModule, pkgName);
+            Module providerModule = ((BundleImpl) m_bundle).getCurrentModule();
+            Wire providerWire = Util.getWire(providerModule, pkgName);
 
             // There are four situations that may occur here:
             //   1. Neither the requester, nor provider have wires for the package.

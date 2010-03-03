@@ -18,16 +18,11 @@
  */
 package org.apache.felix.framework;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.felix.framework.ModuleImpl;
-import org.apache.felix.framework.util.Util;
-import org.apache.felix.moduleloader.ICapability;
-import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.framework.resolver.Module;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.RequiredBundle;
 
@@ -67,17 +62,17 @@ class RequiredBundleImpl implements RequiredBundle
         // of the dependent modules.
         Set bundleSet = new HashSet();
         // Loop through all of this bundle's modules.
-        IModule[] modules = m_bundle.getModules();
-        for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
+        List<Module> modules = m_bundle.getModules();
+        for (int modIdx = 0; (modules != null) && (modIdx < modules.size()); modIdx++)
         {
             // For each of this bundle's modules, loop through all of the
             // modules that require it and add them to the module list.
-            IModule[] dependents = ((ModuleImpl) modules[modIdx]).getDependentRequirers();
-            for (int depIdx = 0; (dependents != null) && (depIdx < dependents.length); depIdx++)
+            List<Module> dependents = ((ModuleImpl) modules.get(modIdx)).getDependentRequirers();
+            for (int depIdx = 0; (dependents != null) && (depIdx < dependents.size()); depIdx++)
             {
-                if (dependents[depIdx].getBundle() != null)
+                if (dependents.get(depIdx).getBundle() != null)
                 {
-                    bundleSet.add(dependents[depIdx].getBundle());
+                    bundleSet.add(dependents.get(depIdx).getBundle());
                 }
             }
         }

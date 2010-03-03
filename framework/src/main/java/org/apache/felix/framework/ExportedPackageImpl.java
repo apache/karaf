@@ -18,8 +18,9 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.util.manifestparser.Capability;
-import org.apache.felix.moduleloader.IModule;
+import java.util.List;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.resolver.Module;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.ExportedPackage;
@@ -28,18 +29,22 @@ class ExportedPackageImpl implements ExportedPackage
 {
     private final Felix m_felix;
     private final BundleImpl m_exportingBundle;
-    private final IModule m_exportingModule;
+    private final Module m_exportingModule;
     private final Capability m_export;
-    private volatile String m_toString = null;
-    private volatile String m_versionString = null;
+    private final String m_pkgName;
+    private final Version m_version;
 
     public ExportedPackageImpl(
-        Felix felix, BundleImpl exporter, IModule module, Capability export)
+        Felix felix, BundleImpl exporter, Module module, Capability export)
     {
         m_felix = felix;
         m_exportingBundle = exporter;
         m_exportingModule = module;
         m_export = export;
+        m_pkgName = (String) m_export.getAttribute(Capability.PACKAGE_ATTR).getValue();
+        m_version = (m_export.getAttribute(Capability.VERSION_ATTR) == null)
+            ? Version.emptyVersion
+            : (Version) m_export.getAttribute(Capability.VERSION_ATTR).getValue();
     }
 
     public Bundle getExportingBundle()
@@ -59,30 +64,23 @@ class ExportedPackageImpl implements ExportedPackage
         {
             return null;
         }
-        return m_felix.getImportingBundles(this);
+        List<Bundle> list = m_felix.getImportingBundles(this);
+        return list.toArray(new Bundle[list.size()]);
     }
 
     public String getName()
     {
-        return m_export.getPackageName();
+        return m_pkgName;
     }
 
     public String getSpecificationVersion()
     {
-        if (m_versionString == null)
-        {
-            m_versionString = (m_export.getPackageVersion() == null)
-                ? Version.emptyVersion.toString()
-                : m_export.getPackageVersion().toString();
-        }
-        return m_versionString;
+        return m_version.toString();
     }
 
     public Version getVersion()
     {
-        return (m_export.getPackageVersion() == null)
-            ? Version.emptyVersion
-            : m_export.getPackageVersion();
+        return m_version;
     }
 
     public boolean isRemovalPending()
@@ -92,11 +90,6 @@ class ExportedPackageImpl implements ExportedPackage
 
     public String toString()
     {
-        if (m_toString == null)
-        {
-            m_toString = m_export.getPackageName()
-                + "; version=" + getSpecificationVersion();
-        }
-        return m_toString;
+        return m_pkgName + "; version=" + m_version;
     }
 }

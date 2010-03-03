@@ -25,9 +25,9 @@ import java.security.ProtectionDomain;
 import java.util.*;
 
 import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.util.StringMap;
-import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
 class BundleImpl implements Bundle
@@ -36,7 +36,7 @@ class BundleImpl implements Bundle
     private final Felix __m_felix;
 
     private final BundleArchive m_archive;
-    private IModule[] m_modules = new IModule[0];
+    private final List<Module> m_modules = new ArrayList<Module>(0);
     private volatile int m_state;
     private boolean m_useDeclaredActivationPolicy;
     private BundleActivator m_activator = null;
@@ -76,7 +76,7 @@ class BundleImpl implements Bundle
         m_activator = null;
         m_context = null;
 
-        IModule module = createModule();
+        Module module = createModule();
         addModule(module);
     }
 
@@ -127,10 +127,10 @@ class BundleImpl implements Bundle
     {
         // Remove the bundle's associated modules from the resolver state
         // and close them.
-        for (int i = 0; i < m_modules.length; i++)
+        for (int i = 0; i < m_modules.size(); i++)
         {
-            getFramework().getResolverState().removeModule(m_modules[i]);
-            ((ModuleImpl) m_modules[i]).close();
+            getFramework().getResolverState().removeModule(m_modules.get(i));
+            ((ModuleImpl) m_modules.get(i)).close();
         }
     }
 
@@ -143,9 +143,9 @@ class BundleImpl implements Bundle
      */
     synchronized void cleanAfterUninstall()
     {
-        for (int i = 0; i < m_modules.length; i++)
+        for (int i = 0; i < m_modules.size(); i++)
         {
-            getFramework().getResolverState().unmergeFragment(m_modules[i]);
+            getFramework().getResolverState().unmergeFragment(m_modules.get(i));
         }
     }
 
@@ -166,8 +166,8 @@ class BundleImpl implements Bundle
 
             // Lastly, we want to reset our bundle be reinitializing our state
             // and recreating a module for the newest revision.
-            m_modules = new IModule[0];
-            final IModule module = createModule();
+            m_modules.clear();
+            final Module module = createModule();
             addModule(module);
             m_state = Bundle.INSTALLED;
             m_stale = false;
@@ -398,7 +398,7 @@ class BundleImpl implements Bundle
                 {
                     for (Iterator it = resourceList.iterator(); it.hasNext(); )
                     {
-                        URL temp = ((IModule) moduleList.get(modIdx)).getEntry(
+                        URL temp = ((Module) moduleList.get(modIdx)).getEntry(
                             it.next() + ".properties");
                         if (temp != null)
                         {
@@ -469,15 +469,15 @@ class BundleImpl implements Bundle
         // version instead of the fragment itself. If there are
         // no hosts, but the module is a fragment, then just
         // search the module itself.
-        IModule[] hosts = module.getDependentHosts();
-        if ((hosts != null) && (hosts.length > 0))
+        List<Module> hosts = module.getDependentHosts();
+        if ((hosts != null) && (hosts.size() > 0))
         {
-            module = (ModuleImpl) hosts[0];
-            for (int hostIdx = 1; hostIdx < hosts.length; hostIdx++)
+            module = (ModuleImpl) hosts.get(0);
+            for (int hostIdx = 1; hostIdx < hosts.size(); hostIdx++)
             {
-                if (module.getVersion().compareTo(hosts[hostIdx].getVersion()) < 0)
+                if (module.getVersion().compareTo(hosts.get(hostIdx).getVersion()) < 0)
                 {
-                    module = (ModuleImpl) hosts[hostIdx];
+                    module = (ModuleImpl) hosts.get(hostIdx);
                 }
             }
         }
@@ -485,10 +485,10 @@ class BundleImpl implements Bundle
         // Create a list of the module and any attached fragments.
         List result = new ArrayList();
         result.add(module);
-        IModule[] fragments = module.getFragments();
-        for (int i = 0; (fragments != null) && (i < fragments.length); i++)
+        List<Module> fragments = module.getFragments();
+        if (fragments != null)
         {
-            result.add(fragments[i]);
+            result.addAll(fragments);
         }
         return result;
     }
@@ -831,9 +831,9 @@ class BundleImpl implements Bundle
 
     synchronized boolean isExtension()
     {
-        for (int i = (m_modules.length - 1); i > -1; i--)
+        for (int i = (m_modules.size() - 1); i > -1; i--)
         {
-            if (m_modules[i].isExtension())
+            if (m_modules.get(i).isExtension())
             {
                 return true;
             }
@@ -977,7 +977,7 @@ class BundleImpl implements Bundle
 
     synchronized boolean isRemovalPending()
     {
-        return (m_state == Bundle.UNINSTALLED) || (m_modules.length > 1)  || m_stale;
+        return (m_state == Bundle.UNINSTALLED) || (m_modules.size() > 1)  || m_stale;
     }
 
     //
@@ -996,7 +996,7 @@ class BundleImpl implements Bundle
      * no limit on the potential number of bundle JAR file revisions.
      * @return array of modules corresponding to the bundle JAR file revisions.
     **/
-    synchronized IModule[] getModules()
+    synchronized List<Module> getModules()
     {
         return m_modules;
     }
@@ -1007,11 +1007,11 @@ class BundleImpl implements Bundle
      * @return <tt>true</tt> if the specified module is in the array of modules
      *         associated with this bundle, <tt>false</tt> otherwise.
     **/
-    synchronized boolean hasModule(IModule module)
+    synchronized boolean hasModule(Module module)
     {
-        for (int i = 0; i < m_modules.length; i++)
+        for (int i = 0; i < m_modules.size(); i++)
         {
-            if (m_modules[i] == module)
+            if (m_modules.get(i) == module)
             {
                 return true;
             }
@@ -1024,20 +1024,20 @@ class BundleImpl implements Bundle
      * in the module array.
      * @return the newest module.
     **/
-    synchronized IModule getCurrentModule()
+    synchronized Module getCurrentModule()
     {
-        return m_modules[m_modules.length - 1];
+        return m_modules.get(m_modules.size() - 1);
     }
 
     synchronized boolean isUsed()
     {
         boolean used = false;
-        for (int i = 0; !used && (i < m_modules.length); i++)
+        for (int i = 0; !used && (i < m_modules.size()); i++)
         {
-            IModule[] dependents = ((ModuleImpl) m_modules[i]).getDependents();
-            for (int j = 0; (dependents != null) && (j < dependents.length) && !used; j++)
+            List<Module> dependents = ((ModuleImpl) m_modules.get(i)).getDependents();
+            for (int j = 0; (dependents != null) && (j < dependents.size()) && !used; j++)
             {
-                if (dependents[j] != m_modules[i])
+                if (dependents.get(j) != m_modules.get(i))
                 {
                     used = true;
                 }
@@ -1053,7 +1053,7 @@ class BundleImpl implements Bundle
         m_archive.revise(location, is);
         try
         {
-            IModule module = createModule();
+            Module module = createModule();
             addModule(module);
         }
         catch (Exception ex)
@@ -1072,13 +1072,9 @@ class BundleImpl implements Bundle
     // system bundle needs to add its module directly to the bundle,
     // since it doesn't have an archive from which the module will
     // be created, which is the normal case.
-    synchronized void addModule(IModule module) throws Exception
+    synchronized void addModule(Module module) throws Exception
     {
-        IModule[] backup = m_modules;
-        IModule[] dest = new IModule[m_modules.length + 1];
-        System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
-        dest[m_modules.length] = module;
-        m_modules = dest;
+        m_modules.add(module);
 
         // Set protection domain after adding the module to the bundle,
         // since this requires that the bundle has a module.
@@ -1093,7 +1089,7 @@ class BundleImpl implements Bundle
             }
             catch (Exception ex) 
             {
-                m_modules = backup;
+                m_modules.remove(m_modules.size() - 1);
                 throw ex;
             }
         }
@@ -1109,7 +1105,7 @@ class BundleImpl implements Bundle
         }
     }
 
-    private IModule createModule() throws Exception
+    private Module createModule() throws Exception
     {
         // Get and parse the manifest from the most recent revision to
         // create an associated module for it.
@@ -1161,9 +1157,9 @@ class BundleImpl implements Bundle
     {
         ProtectionDomain pd = null;
 
-        for (int i = m_modules.length - 1; (i >= 0) && (pd == null); i--)
+        for (int i = m_modules.size() - 1; (i >= 0) && (pd == null); i--)
         {
-            pd = (ProtectionDomain) m_modules[i].getSecurityContext();
+            pd = (ProtectionDomain) m_modules.get(i).getSecurityContext();
         }
 
         return pd;
