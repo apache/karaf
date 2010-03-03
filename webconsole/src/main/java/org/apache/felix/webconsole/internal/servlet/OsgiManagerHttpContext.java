@@ -140,6 +140,7 @@ final class OsgiManagerHttpContext implements HttpContext
         {
             response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
             response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
+            response.setContentLength(0);
             response.flushBuffer();
         }
         catch ( IOException ioe )
