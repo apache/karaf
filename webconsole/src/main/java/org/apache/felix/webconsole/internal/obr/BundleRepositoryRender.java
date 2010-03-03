@@ -49,6 +49,10 @@ public class BundleRepositoryRender extends SimpleWebConsolePlugin implements Os
     private static final String TITLE = "OSGi Repository";
     private static final String[] CSS = null;
 
+    // Define a constant of that name to prevent NoClassDefFoundError in
+    // updateFromOBR trying to load the class with RepositoryAdmin.class
+    private static final String REPOSITORY_ADMIN_NAME = "org.osgi.service.obr.RepositoryAdmin";
+
     // templates
     private final String TEMPLATE;
 
@@ -115,7 +119,7 @@ public class BundleRepositoryRender extends SimpleWebConsolePlugin implements Os
     {
         try
         {
-            return (RepositoryAdmin) super.getService(RepositoryAdmin.class.getName());
+            return ( RepositoryAdmin ) super.getService( REPOSITORY_ADMIN_NAME );
         }
         catch (Throwable t)
         {

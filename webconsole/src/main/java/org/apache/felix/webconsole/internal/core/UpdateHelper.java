@@ -38,6 +38,10 @@ import org.osgi.service.obr.Resource;
 abstract class UpdateHelper extends BaseUpdateInstallHelper
 {
 
+    // Define a constant of that name to prevent NoClassDefFoundError in
+    // updateFromOBR trying to load the class with RepositoryAdmin.class
+    private static final String REPOSITORY_ADMIN_NAME = "org.osgi.service.obr.RepositoryAdmin";
+
     private final Bundle bundle;
 
 
@@ -128,7 +132,7 @@ abstract class UpdateHelper extends BaseUpdateInstallHelper
 
     private boolean updateFromOBR()
     {
-        RepositoryAdmin ra = ( RepositoryAdmin ) getService( RepositoryAdmin.class.getName() );
+        RepositoryAdmin ra = ( RepositoryAdmin ) getService( REPOSITORY_ADMIN_NAME );
         if ( ra != null )
         {
             getLog().log( LogService.LOG_DEBUG, "Trying to update from OSGi Bundle Repository" );
@@ -179,7 +183,7 @@ abstract class UpdateHelper extends BaseUpdateInstallHelper
         }
         else
         {
-            getLog().log( LogService.LOG_DEBUG, "Cannot updated from OSGi Bundle Repository: Service not available" );
+            getLog().log( LogService.LOG_INFO, "Cannot update from OSGi Bundle Repository: Service not available" );
         }
 
         // fallback to false, nothing done
