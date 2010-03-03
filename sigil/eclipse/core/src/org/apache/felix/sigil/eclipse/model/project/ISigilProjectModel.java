@@ -106,9 +106,6 @@ public interface ISigilProjectModel extends ICompoundModelElement
     IJavaProject getJavaModel();
 
 
-    Collection<ISigilProjectModel> findDependentProjects( IProgressMonitor monitor );
-
-
     void resetClasspath( IProgressMonitor monitor ) throws CoreException;
 
 

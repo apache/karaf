@@ -16,29 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.apache.felix.sigil.eclipse.model.project;
-
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+package org.apache.felix.sigil.model.eclipse;
 
 import org.apache.felix.sigil.model.ICapabilityModelElement;
-import org.apache.felix.sigil.model.IModelElement;
-import org.apache.felix.sigil.model.eclipse.ISigilBundle;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.osgi.framework.Version;
 
-
-public interface ISigilModelRoot
+public interface IBundleCapability extends ICapabilityModelElement
 {
-    List<ISigilProjectModel> getProjects();
-
-
-    Set<ISigilProjectModel> resolveDependentProjects( Collection<ICapabilityModelElement> caps, IProgressMonitor monitor );
-
-
-    Collection<ISigilBundle> resolveBundles( ISigilProjectModel sigil, IModelElement element, boolean includeOptional,
-        IProgressMonitor monitor ) throws CoreException;
+    String getSymbolicName();
+    Version getVersion();
 }

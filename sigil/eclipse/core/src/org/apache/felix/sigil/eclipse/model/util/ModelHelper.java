@@ -24,13 +24,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.felix.sigil.eclipse.SigilCore;
+import org.apache.felix.sigil.model.ICapabilityModelElement;
 import org.apache.felix.sigil.model.ICompoundModelElement;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.IModelWalker;
-import org.apache.felix.sigil.model.osgi.IBundleModelElement;
-import org.apache.felix.sigil.model.osgi.IPackageExport;
-import org.apache.felix.sigil.model.osgi.IPackageImport;
-import org.apache.felix.sigil.model.osgi.IRequiredBundle;
+import org.apache.felix.sigil.model.IRequirementModelElement;
 
 
 public class ModelHelper
@@ -47,49 +45,28 @@ public class ModelHelper
 
     private static void findUsers( IModelElement e, final LinkedList<IModelElement> users )
     {
-        if ( e instanceof IPackageExport )
+        if ( e instanceof ICapabilityModelElement )
         {
-            final IPackageExport pe = ( IPackageExport ) e;
+            final ICapabilityModelElement cap = ( ICapabilityModelElement ) e;
             SigilCore.getGlobalRepositoryManager().visit( new IModelWalker()
             {
                 public boolean visit( IModelElement element )
                 {
-                    if ( element instanceof IPackageImport )
+                    if ( element instanceof IRequirementModelElement )
                     {
-                        IPackageImport pi = ( IPackageImport ) element;
-                        if ( pi.accepts( pe ) )
-                        {
-                            users.add( pi );
-                        }
-                        return false;
-                    }
-
-                    return true;
-                }
-            } );
-        }
-        else if ( e instanceof IBundleModelElement )
-        {
-            final IBundleModelElement bndl = ( IBundleModelElement ) e;
-
-            SigilCore.getGlobalRepositoryManager().visit( new IModelWalker()
-            {
-                public boolean visit( IModelElement element )
-                {
-                    if ( element instanceof IRequiredBundle )
-                    {
-                        IRequiredBundle req = ( IRequiredBundle ) element;
-                        if ( req.accepts( bndl ) )
+                        IRequirementModelElement req = ( IRequirementModelElement ) element;
+                        if ( req.accepts( cap ) )
                         {
                             users.add( req );
                         }
                         return false;
                     }
+
                     return true;
                 }
             } );
         }
-
+        
         if ( e instanceof ICompoundModelElement )
         {
             ICompoundModelElement c = ( ICompoundModelElement ) e;

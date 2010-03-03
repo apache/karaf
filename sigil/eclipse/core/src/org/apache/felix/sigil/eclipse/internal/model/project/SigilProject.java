@@ -27,6 +27,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 
 import org.apache.felix.sigil.config.BldFactory;
@@ -36,8 +39,10 @@ import org.apache.felix.sigil.eclipse.job.ThreadProgressMonitor;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.eclipse.model.util.JavaHelper;
 import org.apache.felix.sigil.model.AbstractCompoundModelElement;
+import org.apache.felix.sigil.model.ICapabilityModelElement;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.IModelWalker;
+import org.apache.felix.sigil.model.IRequirementModelElement;
 import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
@@ -116,28 +121,75 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
     
     public void save( IProgressMonitor monitor, boolean rebuildDependencies ) throws CoreException
     {
-        SubMonitor progress = SubMonitor.convert( monitor, 100 );
+        SubMonitor progress = SubMonitor.convert( monitor, 1000 );
 
         bldProjectFile.setContents( buildContents(), IFile.KEEP_HISTORY, progress.newChild( 10 ) );
      
         if ( rebuildDependencies ) {
-            rebuildDependencies(progress.newChild(90));
+            rebuildDependencies(progress.newChild(900));
         }
     }
 
     public void rebuildDependencies(IProgressMonitor monitor) throws CoreException {
+        SubMonitor progress = SubMonitor.convert( monitor, 1000 );
+
+        HashSet<ICapabilityModelElement> changes = new HashSet<ICapabilityModelElement>(lastCaps);
+        
+        LinkedList<IRequirementModelElement> reqs = new LinkedList<IRequirementModelElement>();
+        LinkedList<ICapabilityModelElement> caps = new LinkedList<ICapabilityModelElement>();
+        
+        checkChanges(progress.newChild(100), reqs, caps);
+        
+        boolean reqsChanged;
+        boolean capsChanged;
+        
+        synchronized(this) {
+            reqsChanged = isRequirementsChanged(reqs);
+            capsChanged = isCapabilitiesChanged(caps);
+        }
+        
+        if ( reqsChanged ) {
+            processRequirementsChanges(progress.newChild(600));
+        }
+        
+        progress.setWorkRemaining( 300 );
+
+        if ( capsChanged ) {
+            changes.addAll(caps);
+            SigilCore.rebuildBundleDependencies( this, changes, progress.newChild( 300 ) );
+        }        
+    }
+    
+    private void processRequirementsChanges(IProgressMonitor monitor) throws CoreException 
+    {
         SubMonitor progress = SubMonitor.convert( monitor, 100 );
         
-        calculateUses();
-
         IRepositoryManager manager = SigilCore.getRepositoryManager( this );
         ResolutionConfig config = new ResolutionConfig( ResolutionConfig.INCLUDE_OPTIONAL | ResolutionConfig.IGNORE_ERRORS );
 
         try
         {
             IResolution resolution = manager.getBundleResolver().resolve( this, config,
-                new ResolutionMonitorAdapter( progress.newChild( 10 ) ) );
+                new ResolutionMonitorAdapter( progress.newChild( 20 ) ) );
             
+            markProblems(resolution);
+            
+            // pull remote bundles from repositories to be added to classpath
+            if ( !resolution.isSynchronized() )
+            {
+                resolution.synchronize( progress.newChild( 80 ) );
+            }
+        }
+        catch ( ResolutionException e )
+        {
+            throw SigilCore.newCoreException( "Failed to resolve dependencies", e );
+        }
+    }
+
+    private void markProblems(IResolution resolution)
+    {
+        try
+        {
             getProject().deleteMarkers( SigilCore.MARKER_UNRESOLVED_DEPENDENCY, true,
                 IResource.DEPTH_ONE );
 
@@ -161,25 +213,70 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
                     markMissingRequiredBundle( requiredBundle, getProject() );
                 }
             }
-            
-            if ( !resolution.isSynchronized() )
-            {
-                resolution.synchronize( progress.newChild( 60 ) );
-            }
-            
-
         }
-        catch ( ResolutionException e )
+        catch (CoreException e)
         {
-            throw SigilCore.newCoreException( "Failed to resolve dependencies", e );
+            SigilCore.error("Failed to update problems", e);
         }
-
-        progress.setWorkRemaining( 30 );
-
-        SigilCore.rebuildBundleDependencies( this, progress.newChild( 30 ) );
     }
-    
 
+    private List<IRequirementModelElement> lastReqs = new LinkedList<IRequirementModelElement>();
+    private List<ICapabilityModelElement> lastCaps = new LinkedList<ICapabilityModelElement>();
+            
+    private void checkChanges(IProgressMonitor monitor, final List<IRequirementModelElement> reqs, final List<ICapabilityModelElement> caps)
+    {
+        visit(new IModelWalker()
+        { 
+            public boolean visit(IModelElement element)
+            {
+                if ( element instanceof IRequirementModelElement ) {
+                    reqs.add((IRequirementModelElement) element);
+                }
+                else if ( element instanceof ICapabilityModelElement ) {
+                    // also calculate uses during this pass to save multi pass on model
+                    if ( element instanceof IPackageExport )
+                    {
+                        IPackageExport pe = ( IPackageExport ) element;
+                        try
+                        {
+                            pe.setUses( Arrays.asList( JavaHelper.findUses( pe.getPackageName(), SigilProject.this ) ) );
+                        }
+                        catch ( CoreException e )
+                        {
+                            SigilCore.error( "Failed to build uses list for " + pe, e );
+                        }
+                    }
+                    
+                    caps.add((ICapabilityModelElement) element);
+                }
+                return true;
+            }
+        });
+
+    }
+
+
+    private boolean isRequirementsChanged(List<IRequirementModelElement> dependencies)
+    {
+        if ( lastReqs.equals(dependencies) ) {
+            return false;
+        }
+        else {
+            lastReqs = dependencies;
+            return true;
+        }
+    }
+
+    private boolean isCapabilitiesChanged(List<ICapabilityModelElement> capabilites)
+    {
+        if ( lastCaps.equals(capabilites) ) {
+            return false;
+        }
+        else {
+            lastCaps = capabilites;
+            return true;
+        }
+    }
 
     private static void markMissingImport( IPackageImport pkgImport, IProject project ) throws CoreException
     {
@@ -265,37 +362,6 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
     {
         return JavaHelper.resolveClasspathEntrys( this, monitor );
     }
-
-
-    private void calculateUses()
-    {
-        visit( new IModelWalker()
-        {
-            public boolean visit( IModelElement element )
-            {
-                if ( element instanceof IPackageExport )
-                {
-                    IPackageExport pe = ( IPackageExport ) element;
-                    try
-                    {
-                        pe.setUses( Arrays.asList( JavaHelper.findUses( pe.getPackageName(), SigilProject.this ) ) );
-                    }
-                    catch ( CoreException e )
-                    {
-                        SigilCore.error( "Failed to build uses list for " + pe, e );
-                    }
-                }
-                return true;
-            }
-        } );
-    }
-
-
-    public Collection<ISigilProjectModel> findDependentProjects( IProgressMonitor monitor )
-    {
-        return SigilCore.getRoot().resolveDependentProjects( this, monitor );
-    }
-
 
     public Version getVersion()
     {

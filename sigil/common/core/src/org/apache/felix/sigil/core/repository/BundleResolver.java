@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.sigil.core.BldCore;
+import org.apache.felix.sigil.model.ICapabilityModelElement;
 import org.apache.felix.sigil.model.ICompoundModelElement;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.IModelWalker;
@@ -490,9 +491,11 @@ public class BundleResolver implements IBundleResolver
             {
                 public boolean visit(IModelElement element)
                 {
-                    if ( requirement.accepts(element) ) {
-                        ctx.resolution.addProvider( requirement, b );
-                        return false;
+                    if ( element instanceof ICapabilityModelElement ) {
+                        if ( requirement.accepts((ICapabilityModelElement) element) ) {
+                            ctx.resolution.addProvider( requirement, b );
+                            return false;
+                        }
                     }
                     return !ctx.monitor.isCanceled();
                 }

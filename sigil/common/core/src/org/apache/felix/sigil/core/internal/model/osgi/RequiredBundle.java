@@ -22,8 +22,8 @@ package org.apache.felix.sigil.core.internal.model.osgi;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.model.AbstractModelElement;
-import org.apache.felix.sigil.model.IModelElement;
-import org.apache.felix.sigil.model.osgi.IBundleModelElement;
+import org.apache.felix.sigil.model.ICapabilityModelElement;
+import org.apache.felix.sigil.model.eclipse.IBundleCapability;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 
 
@@ -119,11 +119,11 @@ public class RequiredBundle extends AbstractModelElement implements IRequiredBun
     }
 
 
-    public boolean accepts( IModelElement provider )
+    public boolean accepts( ICapabilityModelElement provider )
     {
-        if ( provider instanceof IBundleModelElement )
+        if ( provider instanceof IBundleCapability )
         {
-            IBundleModelElement bndl = ( IBundleModelElement ) provider;
+            IBundleCapability bndl = ( IBundleCapability ) provider;
             return symbolicName.equals( bndl.getSymbolicName() ) && versions.contains( bndl.getVersion() );
         }
         else

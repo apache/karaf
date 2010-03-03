@@ -46,6 +46,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -369,6 +370,14 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
         tempProject.setBundle(null);
         project.setBundle( null );
         refreshAllPages();
+        try
+        {
+            project.rebuildDependencies(Job.getJobManager().createProgressGroup());
+        }
+        catch (CoreException e)
+        {
+            SigilCore.error( "Failed to update depedencies " + this, e );
+        }
     }
 
 

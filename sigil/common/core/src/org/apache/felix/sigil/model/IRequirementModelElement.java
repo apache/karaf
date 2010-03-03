@@ -22,7 +22,7 @@ package org.apache.felix.sigil.model;
 
 public interface IRequirementModelElement extends IModelElement
 {
-    boolean accepts( IModelElement provider );
+    boolean accepts( ICapabilityModelElement provider );
     
     /**
      * indicates whether the OSGi attribute "resolution=optional" is specified.

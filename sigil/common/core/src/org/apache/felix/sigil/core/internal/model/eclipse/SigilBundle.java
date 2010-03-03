@@ -38,6 +38,7 @@ import java.util.jar.JarFile;
 import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.core.util.ManifestUtil;
 import org.apache.felix.sigil.model.AbstractCompoundModelElement;
+import org.apache.felix.sigil.model.eclipse.IBundleCapability;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
@@ -455,5 +456,11 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
         b.packages = tmp;
 
         return b;
+    }
+
+
+    public IBundleCapability getBundleCapability()
+    {
+        return new BundleCapability(bundle);
     }    
 }

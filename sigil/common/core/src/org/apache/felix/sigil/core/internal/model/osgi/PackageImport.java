@@ -22,7 +22,7 @@ package org.apache.felix.sigil.core.internal.model.osgi;
 
 import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.model.AbstractModelElement;
-import org.apache.felix.sigil.model.IModelElement;
+import org.apache.felix.sigil.model.ICapabilityModelElement;
 import org.apache.felix.sigil.model.InvalidModelException;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
@@ -159,7 +159,7 @@ public class PackageImport extends AbstractModelElement implements IPackageImpor
     }
 
 
-    public boolean accepts( IModelElement provider )
+    public boolean accepts( ICapabilityModelElement provider )
     {
         if ( provider instanceof IPackageExport )
         {

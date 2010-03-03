@@ -171,14 +171,17 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
     @Override
     public boolean equals(Object obj)
     {
-        if ( obj == null ) return false;
         if ( obj == this ) return true;
-        try {
+        if ( obj == null ) return false;
+        
+        if ( obj instanceof PackageExport ) 
+        {
             PackageExport e = (PackageExport) obj;
             return (name == null ? e.name == null : name.equals( e.name )) && 
                 (version == null ? e.version == null : version.equals( e.version ));
         }
-        catch (ClassCastException e) {
+        else 
+        {
             return false;
         }
     }

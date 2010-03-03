@@ -24,17 +24,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilModelRoot;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
+import org.apache.felix.sigil.model.ICapabilityModelElement;
 import org.apache.felix.sigil.model.IModelElement;
+import org.apache.felix.sigil.model.IModelWalker;
+import org.apache.felix.sigil.model.IRequirementModelElement;
 import org.apache.felix.sigil.model.eclipse.ILibrary;
 import org.apache.felix.sigil.model.eclipse.ILibraryImport;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
-import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
-import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.apache.felix.sigil.repository.IBundleResolver;
 import org.apache.felix.sigil.repository.IResolution;
 import org.apache.felix.sigil.repository.ResolutionConfig;
@@ -72,56 +74,93 @@ public class SigilModelRoot implements ISigilModelRoot
     }
 
 
-    public Collection<ISigilProjectModel> resolveDependentProjects( ISigilProjectModel sigil, IProgressMonitor monitor )
+    public Set<ISigilProjectModel> resolveDependentProjects( Collection<ICapabilityModelElement> caps, IProgressMonitor monitor )
     {
-        HashSet<ISigilProjectModel> dependents = new HashSet<ISigilProjectModel>();
+        final HashSet<ISigilProjectModel> dependents = new HashSet<ISigilProjectModel>();
 
-        for ( ISigilProjectModel n : getProjects() )
+        for ( final ISigilProjectModel n : getProjects() )
         {
-            if ( !sigil.equals( n ) )
-            {
-                for ( IPackageExport pe : sigil.getBundle().getBundleInfo().getExports() )
+            for (final ICapabilityModelElement cap : caps ) {
+                final ISigilProjectModel sigil = cap.getAncestor(ISigilProjectModel.class);
+                
+                n.visit(new IModelWalker()
                 {
-                    for ( IPackageImport i : n.getBundle().getBundleInfo().getImports() )
+                    public boolean visit(IModelElement element)
                     {
-                        if ( pe.getPackageName().equals( i.getPackageName() )
-                            && i.getVersions().contains( pe.getVersion() ) )
-                        {
-                            dependents.add( n );
-                        }
-                    }
-
-                    for ( ILibraryImport l : n.getBundle().getBundleInfo().getLibraryImports() )
-                    {
-                        ILibrary lib = SigilCore.getRepositoryManager( sigil ).resolveLibrary( l );
-
-                        if ( lib != null )
-                        {
-                            for ( IPackageImport i : lib.getImports() )
-                            {
-                                if ( pe.getPackageName().equals( i.getPackageName() )
-                                    && i.getVersions().contains( pe.getVersion() ) )
-                                {
-                                    dependents.add( n );
-                                }
+                        if ( element instanceof IRequirementModelElement ) {
+                            IRequirementModelElement req = (IRequirementModelElement) element;
+                            if ( req.accepts(cap) ) {
+                                dependents.add(n);
+                                return false;
                             }
                         }
-                        else
-                        {
-                            SigilCore.error( "No library found for " + l );
-                        }
-                    }
-                }
+                        else if ( element instanceof ILibraryImport ) {
+                            ILibraryImport l = (ILibraryImport) element;
+                            ILibrary lib = SigilCore.getRepositoryManager( sigil ).resolveLibrary( l );
 
-                for ( IRequiredBundle r : n.getBundle().getBundleInfo().getRequiredBundles() )
-                {
-                    if ( sigil.getSymbolicName().equals( r.getSymbolicName() )
-                        && r.getVersions().contains( sigil.getVersion() ) )
-                    {
-                        dependents.add( n );
+                            if ( lib != null )
+                            {
+                                for ( IPackageImport i : lib.getImports() )
+                                {
+                                    if ( i.accepts(cap))
+                                    {
+                                        dependents.add( n );
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                SigilCore.error( "No library found for " + l );
+                            }
+                        }
+                        return true;
                     }
-                }
+                });
             }
+//            if ( !sigil.equals( n ) )
+//            {
+//                for ( IPackageExport pe : sigil.getBundle().getBundleInfo().getExports() )
+//                {
+//                    for ( IPackageImport i : n.getBundle().getBundleInfo().getImports() )
+//                    {
+//                        if ( pe.getPackageName().equals( i.getPackageName() )
+//                            && i.getVersions().contains( pe.getVersion() ) )
+//                        {
+//                            dependents.add( n );
+//                        }
+//                    }
+//
+//                    for ( ILibraryImport l : n.getBundle().getBundleInfo().getLibraryImports() )
+//                    {
+//                        ILibrary lib = SigilCore.getRepositoryManager( sigil ).resolveLibrary( l );
+//
+//                        if ( lib != null )
+//                        {
+//                            for ( IPackageImport i : lib.getImports() )
+//                            {
+//                                if ( pe.getPackageName().equals( i.getPackageName() )
+//                                    && i.getVersions().contains( pe.getVersion() ) )
+//                                {
+//                                    dependents.add( n );
+//                                }
+//                            }
+//                        }
+//                        else
+//                        {
+//                            SigilCore.error( "No library found for " + l );
+//                        }
+//                    }
+//                }
+//
+//                for ( IRequiredBundle r : n.getBundle().getBundleInfo().getRequiredBundles() )
+//                {
+//                    if ( sigil.getSymbolicName().equals( r.getSymbolicName() )
+//                        && r.getVersions().contains( sigil.getVersion() ) )
+//                    {
+//                        dependents.add( n );
+//                    }
+//                }
+//            }
         }
 
         return dependents;

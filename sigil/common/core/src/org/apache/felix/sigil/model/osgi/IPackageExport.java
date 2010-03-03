@@ -22,10 +22,11 @@ package org.apache.felix.sigil.model.osgi;
 
 import java.util.Collection;
 
+import org.apache.felix.sigil.model.ICapabilityModelElement;
 import org.osgi.framework.Version;
 
 
-public interface IPackageExport extends IPackageModelElement, IVersionedModelElement, Comparable<IPackageExport>
+public interface IPackageExport extends IPackageModelElement, IVersionedModelElement, Comparable<IPackageExport>, ICapabilityModelElement
 {
     void addUse( String uses );
 

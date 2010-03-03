@@ -132,4 +132,7 @@ public interface ISigilBundle extends ICompoundModelElement, IVersionedModelElem
      * @return
      */
     IPackageImport findImport( String packageName );
+
+
+    IBundleCapability getBundleCapability();
 }

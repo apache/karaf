@@ -28,8 +28,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.felix.sigil.config.IBldProject;
@@ -45,6 +47,7 @@ import org.apache.felix.sigil.eclipse.model.project.ISigilModelRoot;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryConfiguration;
 import org.apache.felix.sigil.eclipse.model.util.JavaHelper;
+import org.apache.felix.sigil.model.ICapabilityModelElement;
 import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.repository.IBundleRepository;
@@ -566,9 +569,10 @@ public class SigilCore extends AbstractUIPlugin
     }
 
 
-    public static void rebuildBundleDependencies( ISigilProjectModel project, IProgressMonitor monitor )
+    public static void rebuildBundleDependencies( ISigilProjectModel project, Collection<ICapabilityModelElement> caps, IProgressMonitor monitor )
     {
-        HashSet<ISigilProjectModel> affected = new HashSet<ISigilProjectModel>( project.findDependentProjects( monitor ) );
+        Set<ISigilProjectModel> affected = SigilCore.getRoot().resolveDependentProjects( caps, monitor );
+
         affected.add( project );
 
         SubMonitor progress = SubMonitor.convert( monitor, affected.size() * 20 );

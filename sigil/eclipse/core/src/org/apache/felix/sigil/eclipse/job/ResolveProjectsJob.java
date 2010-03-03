@@ -48,7 +48,7 @@ public class ResolveProjectsJob extends Job
     public ResolveProjectsJob(ISigilProjectModel project)
     {
         super( "Resolving Sigil project" );
-        setRule( project.getProject() );
+        setRule( project.getProject().getWorkspace().getRoot() );
         sigilProjects = Collections.singleton(project);
     }
 

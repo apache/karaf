@@ -791,7 +791,7 @@ public class JavaHelper
         {
             for ( ISigilBundle b : all )
             {
-                if ( host.accepts( b.getBundleInfo() ) )
+                if ( host.accepts( b.getBundleCapability() ) )
                 {
                     exports.addAll( b.getBundleInfo().getExports() );
                     break;
