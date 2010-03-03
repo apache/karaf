@@ -35,6 +35,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
+import org.apache.felix.sigil.model.annotations.Required;
+
 
 public class ModelElementSupport implements Serializable
 {
