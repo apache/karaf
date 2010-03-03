@@ -153,13 +153,6 @@
       </command>
    </extension>
    <extension
-         point="org.eclipse.ltk.core.refactoring.refactoringContributions">
-      <contribution
-            class="org.apache.felix.sigil.ui.eclipse.ui.refactor.RenameCompositeRefactoring"
-            id="org.apache.felix.sigil.ui.rename.composite">
-      </contribution>
-   </extension>
-   <extension
          point="org.eclipse.ui.propertyPages">
       <page
             class="org.apache.felix.sigil.ui.eclipse.ui.preferences.project.ProjectPropertyPage"
