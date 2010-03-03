@@ -79,7 +79,13 @@ public class BundleDependencyTest extends Base {
         
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
-        Service consumerWithFilter = m.createService().setImplementation(new FilteredConsumerRequired(e)).add(m.createBundleDependency().setRequired(true).setFilter("(Bundle-SymbolicName=org.apache.felix.dependencymanager)").setCallbacks("add", "remove"));
+        Service consumerWithFilter = m.createService()
+            .setImplementation(new FilteredConsumerRequired(e))
+            .add(m.createBundleDependency()
+                .setRequired(true)
+                .setFilter("(Bundle-SymbolicName=org.apache.felix.dependencymanager)")
+                .setCallbacks("add", "remove")
+                );
         // add a consumer with a filter
         m.add(consumerWithFilter);
         e.waitForStep(1, 10000);
@@ -133,7 +139,8 @@ public class BundleDependencyTest extends Base {
         }
         
         public void add(Bundle b) {
-            Assert.assertNotNull(b);
+            System.out.println("Bundle is " + b);
+//            Assert.assertNotNull(b);
             if (b.getSymbolicName().equals("org.apache.felix.dependencymanager")) {
                 m_ensure.step(1);
             }

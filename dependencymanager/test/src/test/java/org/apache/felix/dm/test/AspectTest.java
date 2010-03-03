@@ -22,8 +22,6 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 
-import java.util.Properties;
-
 import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.service.Service;
 import org.junit.Test;
@@ -32,7 +30,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 
 @RunWith(JUnit4TestRunner.class)
 public class AspectTest extends Base {
@@ -55,7 +52,7 @@ public class AspectTest extends Base {
         Service sp = m.createService().setImplementation(new ServiceProvider(e)).setInterface(ServiceInterface.class.getName(), null);
         Service sp2 = m.createService().setImplementation(new ServiceProvider2(e)).setInterface(ServiceInterface2.class.getName(), null);
         Service sc = m.createService().setImplementation(new ServiceConsumer(e)).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(true));
-        Service sa = m.createAspectService(ServiceInterface.class, "(|(!(" + Constants.SERVICE_RANKING + "=*))(" + Constants.SERVICE_RANKING + "<=0))", new ServiceAspect(e), new Properties() {{ put(Constants.SERVICE_RANKING, Integer.valueOf(1)); }} );
+        Service sa = m.createAspectService(ServiceInterface.class, null, 1, new ServiceAspect(e), null);
         m.add(sc);
         m.add(sp);
         e.waitForStep(3, 15000);

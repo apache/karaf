@@ -54,6 +54,7 @@ public class FELIX2078_ServiceDependencyTest extends Base {
         Service sc = m.createService().setImplementation(new ServiceConsumer(e)).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(true).setCallbacks("add", "remove"));
         m.add(sp);
         m.add(sp2);
+        System.out.println("test");
         m.add(sc);
         // wait until both services have been added to our consumer
         e.waitForStep(2, 5000);

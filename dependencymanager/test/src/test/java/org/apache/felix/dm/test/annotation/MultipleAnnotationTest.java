@@ -62,7 +62,9 @@ public class MultipleAnnotationTest extends AnnotationBase
     {
         DependencyManager m = new DependencyManager(context);
         // Provide the Sequencer service to the MultipleAnnotationTest class.
-        m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), null));
+        m.add(m.createService()
+            .setImplementation(this)
+            .setInterface(Sequencer.class.getName(), null));
         // Check if the test.annotation components have been initialized orderly
         m_ensure.waitForStep(7, 10000);
         // Stop the test.annotation bundle
