@@ -21,14 +21,12 @@ package org.apache.felix.dm.test.bundle.annotation.aspectlifecycle;
 import org.apache.felix.dm.annotation.api.AspectService;
 import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Init;
-import org.apache.felix.dm.annotation.api.Param;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
-import org.osgi.framework.Constants;
 
-@AspectService(filter = "(!(" + Constants.SERVICE_RANKING + "=*))", properties = { @Param(name = Constants.SERVICE_RANKING, value = "1") })
+@AspectService(ranking = 10)
 public class ServiceProviderAspect implements ServiceInterface
 {
     protected boolean m_initCalled;

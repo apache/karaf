@@ -19,12 +19,10 @@
 package org.apache.felix.dm.test.bundle.annotation.aspect;
 
 import org.apache.felix.dm.annotation.api.AspectService;
-import org.apache.felix.dm.annotation.api.Param;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
-import org.osgi.framework.Constants;
 
-@AspectService(filter = "(!(" + Constants.SERVICE_RANKING + "=*))", properties = { @Param(name = Constants.SERVICE_RANKING, value = "1") })
+@AspectService(ranking = 10)
 public class ServiceProviderAspect implements ServiceInterface
 {
     @ServiceDependency(filter = "(test=aspect.ServiceProviderAspect)")
