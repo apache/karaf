@@ -32,15 +32,7 @@ import org.osgi.framework.Bundle;
  * The adapter will be registered with the specified interface and existing properties 
  * from the original resource plus any extra properties you supply here.
  * It will also inherit all dependencies, and if you declare the original
- * service as a member it will be injected.
- * 
- * @param bundleStateMask the bundle state mask to apply
- * @param bundleFilter the filter to apply to the bundle manifest
- * @param adapterImplementation the implementation of the adapter
- * @param adapterInterface the interface to use when registering adapters
- * @param adapterProperties additional properties to use with the service registration
- * @param propagate <code>true</code> if properties from the bundle should be propagated to the service
- * @return a service that acts as a factory for generating bundle adapters
+ * bundle as a member it will be injected.
  */
 public @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
