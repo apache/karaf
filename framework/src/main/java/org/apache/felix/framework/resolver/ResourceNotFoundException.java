@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,26 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.searchpolicy;
+package org.apache.felix.framework.resolver;
 
-import java.util.List;
-import org.apache.felix.moduleloader.IModule;
-import org.apache.felix.moduleloader.IRequirement;
-
-class CandidateSet
+public class ResourceNotFoundException extends Exception
 {
-    public static final int NORMAL = 0;
-    public final IModule m_module;
-    public final IRequirement m_requirement;
-    public final List m_candidates;
-    public int m_idx = 0;
-    public int m_rotated = 0;
-
-    public CandidateSet(IModule module, IRequirement requirement, List candidates)
+    public ResourceNotFoundException(String msg)
     {
-        super();
-        m_module = module;
-        m_requirement = requirement;
-        m_candidates = candidates;
+        super(msg);
     }
 }

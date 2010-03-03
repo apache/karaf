@@ -18,8 +18,9 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.searchpolicy.*;
-import org.apache.felix.moduleloader.*;
+import org.apache.felix.framework.resolver.ResourceNotFoundException;
+import org.apache.felix.framework.resolver.Content;
+import org.apache.felix.framework.capabilityset.SimpleFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -31,7 +32,7 @@ import java.net.URLStreamHandler;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -42,29 +43,37 @@ import java.util.Set;
 import java.util.Vector;
 import org.apache.felix.framework.Felix.FelixResolver;
 import org.apache.felix.framework.cache.JarContent;
+import org.apache.felix.framework.capabilityset.Attribute;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.Directive;
+import org.apache.felix.framework.resolver.Module;
+import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.resolver.Wire;
+import org.apache.felix.framework.resolver.ResolveException;
+import org.apache.felix.framework.resolver.WireImpl;
+import org.apache.felix.framework.resolver.WireModuleImpl;
 import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecureAction;
 import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.framework.util.manifestparser.Capability;
+import org.apache.felix.framework.util.manifestparser.CapabilityImpl;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.framework.util.manifestparser.R4Library;
-import org.apache.felix.framework.util.manifestparser.Requirement;
+import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleReference;
 import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 
-public class ModuleImpl implements IModule
+public class ModuleImpl implements Module
 {
     private final Logger m_logger;
     private final Map m_configMap;
     private final FelixResolver m_resolver;
     private final String m_id;
-    private final IContent m_content;
+    private final Content m_content;
     private final Map m_headerMap;
     private final URLStreamHandler m_streamHandler;
 
@@ -73,28 +82,28 @@ public class ModuleImpl implements IModule
     private final String m_symbolicName;
     private final Version m_version;
 
-    private final ICapability[] m_capabilities;
-    private ICapability[] m_cachedCapabilities = null;
-    private final IRequirement[] m_requirements;
-    private IRequirement[] m_cachedRequirements = null;
-    private final IRequirement[] m_dynamicRequirements;
-    private IRequirement[] m_cachedDynamicRequirements = null;
-    private final R4Library[] m_nativeLibraries;
+    private final List<Capability> m_capabilities;
+    private List<Capability> m_cachedCapabilities = null;
+    private final List<Requirement> m_requirements;
+    private List<Requirement> m_cachedRequirements = null;
+    private final List<Requirement> m_dynamicRequirements;
+    private List<Requirement> m_cachedDynamicRequirements = null;
+    private final List<R4Library> m_nativeLibraries;
     private final int m_declaredActivationPolicy;
-    private final String[] m_activationIncludes;
-    private final String[] m_activationExcludes;
+    private final List<String> m_activationIncludes;
+    private final List<String> m_activationExcludes;
 
     private final Bundle m_bundle;
 
-    private IModule[] m_fragments = null;
-    private IWire[] m_wires = null;
-    private IModule[] m_dependentHosts = new IModule[0];
-    private IModule[] m_dependentImporters = new IModule[0];
-    private IModule[] m_dependentRequirers = new IModule[0];
+    private List<Module> m_fragments = null;
+    private List<Wire> m_wires = null;
+    private List<Module> m_dependentHosts = new ArrayList<Module>(0);
+    private List<Module> m_dependentImporters = new ArrayList<Module>(0);
+    private List<Module> m_dependentRequirers = new ArrayList<Module>(0);
     private volatile boolean m_isResolved = false;
 
-    private IContent[] m_contentPath;
-    private IContent[] m_fragmentContents = null;
+    private Content[] m_contentPath;
+    private Content[] m_fragmentContents = null;
     private ModuleClassLoader m_classLoader;
     private boolean m_isActivationTriggered = false;
     private ProtectionDomain m_protectionDomain = null;
@@ -184,7 +193,7 @@ public class ModuleImpl implements IModule
 
     public ModuleImpl(
         Logger logger, Map configMap, FelixResolver resolver,
-        Bundle bundle, String id, Map headerMap, IContent content,
+        Bundle bundle, String id, Map headerMap, Content content,
         URLStreamHandler streamHandler, String[] bootPkgs,
         boolean[] bootPkgWildcards)
         throws BundleException
@@ -269,163 +278,110 @@ public class ModuleImpl implements IModule
         return m_version;
     }
 
-    public synchronized ICapability[] getCapabilities()
+    public synchronized List<Capability> getCapabilities()
     {
         if (m_cachedCapabilities == null)
         {
             List capList = (m_capabilities == null)
-                ? new ArrayList() : new ArrayList(Arrays.asList(m_capabilities));
+                ? new ArrayList<Capability>()
+                : new ArrayList<Capability>(m_capabilities);
             for (int fragIdx = 0;
-                (m_fragments != null) && (fragIdx < m_fragments.length);
+                (m_fragments != null) && (fragIdx < m_fragments.size());
                 fragIdx++)
             {
-                ICapability[] caps = m_fragments[fragIdx].getCapabilities();
+                List<Capability> caps = m_fragments.get(fragIdx).getCapabilities();
                 for (int capIdx = 0;
-                    (caps != null) && (capIdx < caps.length);
+                    (caps != null) && (capIdx < caps.size());
                     capIdx++)
                 {
-                    if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    if (caps.get(capIdx).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
                     {
                         capList.add(
-                            new Capability(
+                            new CapabilityImpl(
                                 this,
-                                caps[capIdx].getNamespace(),
-                                ((Capability) caps[capIdx]).getDirectives(),
-                                ((Capability) caps[capIdx]).getAttributes()));
+                                caps.get(capIdx).getNamespace(),
+                                caps.get(capIdx).getDirectives(),
+                                caps.get(capIdx).getAttributes()));
                     }
                 }
             }
-            m_cachedCapabilities = (ICapability[])
-                capList.toArray(new ICapability[capList.size()]);
+            m_cachedCapabilities = Collections.unmodifiableList(capList);
         }
         return m_cachedCapabilities;
     }
 
-    public synchronized IRequirement[] getRequirements()
+    public synchronized List<Requirement> getRequirements()
     {
         if (m_cachedRequirements == null)
         {
-            List allReqs = new ArrayList();
-            Map pkgMap = new HashMap();
-            Map rbMap = new HashMap();
-            for (int i = 0; (m_requirements != null) && i < m_requirements.length; i++)
-            {
-                if (m_requirements[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                {
-                    pkgMap.put(
-                        ((Requirement) m_requirements[i]).getTargetName(),
-                        m_requirements[i]);
-                }
-                else if (m_requirements[i].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-                {
-                    rbMap.put(
-                        ((Requirement) m_requirements[i]).getTargetName(),
-                        m_requirements[i]);
-                }
-                else
-                {
-                    allReqs.add(m_requirements[i]);
-                }
-            }
-
-            // Aggregate host and fragment bundle and package requirements.
+            List<Requirement> reqList = (m_requirements == null)
+                ? new ArrayList() : new ArrayList(m_requirements);
             for (int fragIdx = 0;
-                (m_fragments != null) && (fragIdx < m_fragments.length);
+                (m_fragments != null) && (fragIdx < m_fragments.size());
                 fragIdx++)
             {
-                IRequirement[] reqs = m_fragments[fragIdx].getRequirements();
+                List<Requirement> reqs = m_fragments.get(fragIdx).getRequirements();
                 for (int reqIdx = 0;
-                    (reqs != null) && (reqIdx < reqs.length);
+                    (reqs != null) && (reqIdx < reqs.size());
                     reqIdx++)
                 {
-                    if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    if (reqs.get(reqIdx).getNamespace().equals(Capability.PACKAGE_NAMESPACE)
+                        || reqs.get(reqIdx).getNamespace().equals(Capability.MODULE_NAMESPACE))
                     {
-                        // If the current fragment requirement overlaps a previously
-                        // added requirement, then calculate a new intersecting requirement.
-                        Requirement req = (Requirement) pkgMap.get(
-                            ((Requirement) reqs[reqIdx]).getTargetName());
-                        if (req != null)
-                        {
-                            req = FelixResolverState.calculateVersionIntersection(
-                                req, (Requirement) reqs[reqIdx]);
-                        }
-                        else
-                        {
-                            req = (Requirement) reqs[reqIdx];
-                        }
-                        pkgMap.put(req.getTargetName(), req);
-                    }
-                    else if (reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-                    {
-                        // If the current fragment requirement overlaps a previously
-                        // added requirement, then calculate a new intersecting requirement.
-                        Requirement req = (Requirement) pkgMap.get(
-                            ((Requirement) reqs[reqIdx]).getTargetName());
-                        if (req != null)
-                        {
-                            req = FelixResolverState.calculateVersionIntersection(
-                                req, (Requirement) reqs[reqIdx]);
-                        }
-                        else
-                        {
-                            req = (Requirement) reqs[reqIdx];
-                        }
-                        rbMap.put(req.getTargetName(), req);
+                        reqList.add(
+                            new FragmentRequirement(
+                                reqs.get(reqIdx), m_fragments.get(fragIdx)));
                     }
                 }
             }
-            allReqs.addAll(pkgMap.values());
-            allReqs.addAll(rbMap.values());
-            m_cachedRequirements = (IRequirement[])
-                allReqs.toArray(new IRequirement[allReqs.size()]);
+            m_cachedRequirements = Collections.unmodifiableList(reqList);
         }
         return m_cachedRequirements;
     }
 
-    public synchronized IRequirement[] getDynamicRequirements()
+    public synchronized List<Requirement> getDynamicRequirements()
     {
         if (m_cachedDynamicRequirements == null)
         {
-            List reqList = (m_dynamicRequirements == null)
-                ? new ArrayList() : new ArrayList(Arrays.asList(m_dynamicRequirements));
+            List<Requirement> reqList = (m_dynamicRequirements == null)
+                ? new ArrayList() : new ArrayList(m_dynamicRequirements);
             for (int fragIdx = 0;
-                (m_fragments != null) && (fragIdx < m_fragments.length);
+                (m_fragments != null) && (fragIdx < m_fragments.size());
                 fragIdx++)
             {
-                IRequirement[] reqs = m_fragments[fragIdx].getDynamicRequirements();
+                List<Requirement> reqs = m_fragments.get(fragIdx).getDynamicRequirements();
                 for (int reqIdx = 0;
-                    (reqs != null) && (reqIdx < reqs.length);
+                    (reqs != null) && (reqIdx < reqs.size());
                     reqIdx++)
                 {
-                    if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    if (reqs.get(reqIdx).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
                     {
-                        reqList.add(reqs[reqIdx]);
+                        reqList.add(reqs.get(reqIdx));
                     }
                 }
             }
-            m_cachedDynamicRequirements = (IRequirement[])
-                reqList.toArray(new IRequirement[reqList.size()]);
+            m_cachedDynamicRequirements = Collections.unmodifiableList(reqList);
         }
         return m_cachedDynamicRequirements;
     }
 
-    public synchronized R4Library[] getNativeLibraries()
+    public synchronized List<R4Library> getNativeLibraries()
     {
-        R4Library[] result = null;
+        List<R4Library> result = null;
         if (m_isResolved)
         {
-            List nativeList = (m_nativeLibraries == null)
-                ? new ArrayList() : new ArrayList(Arrays.asList(m_nativeLibraries));
+            List<R4Library> nativeList = (m_nativeLibraries == null)
+                ? new ArrayList() : new ArrayList(m_nativeLibraries);
             for (int fragIdx = 0;
-                (m_fragments != null) && (fragIdx < m_fragments.length);
+                (m_fragments != null) && (fragIdx < m_fragments.size());
                 fragIdx++)
             {
-                R4Library[] libs = m_fragments[fragIdx].getNativeLibraries();
+                List<R4Library> libs = m_fragments.get(fragIdx).getNativeLibraries();
                 for (int reqIdx = 0;
-                    (libs != null) && (reqIdx < libs.length);
+                    (libs != null) && (reqIdx < libs.size());
                     reqIdx++)
                 {
-                    nativeList.add(libs[reqIdx]);
+                    nativeList.add(libs.get(reqIdx));
                 }
             }
 
@@ -434,7 +390,7 @@ public class ModuleImpl implements IModule
             // could not be found when resolving the bundle.
             result = (nativeList.size() == 0)
                 ? null
-                : (R4Library[]) nativeList.toArray(new R4Library[nativeList.size()]);
+                : Collections.unmodifiableList(nativeList);
         }
         else
         {
@@ -465,20 +421,20 @@ public class ModuleImpl implements IModule
         // by default, otherwise try to find one match.
         boolean included = (m_activationIncludes == null);
         for (int i = 0;
-            (!included) && (m_activationIncludes != null) && (i < m_activationIncludes.length);
+            (!included) && (m_activationIncludes != null) && (i < m_activationIncludes.size());
             i++)
         {
-            included = m_activationIncludes[i].equals(pkgName);
+            included = m_activationIncludes.get(i).equals(pkgName);
         }
 
         // If there are no exclude filters then no classes are excluded
         // by default, otherwise try to find one match.
         boolean excluded = false;
         for (int i = 0;
-            (!excluded) && (m_activationExcludes != null) && (i < m_activationExcludes.length);
+            (!excluded) && (m_activationExcludes != null) && (i < m_activationExcludes.size());
             i++)
         {
-            excluded = m_activationExcludes[i].equals(pkgName);
+            excluded = m_activationExcludes.get(i).equals(pkgName);
         }
         return included && !excluded;
     }
@@ -497,40 +453,40 @@ public class ModuleImpl implements IModule
         return m_id;
     }
 
-    public synchronized IWire[] getWires()
+    public synchronized List<Wire> getWires()
     {
         return m_wires;
     }
 
-    public synchronized void setWires(IWire[] wires)
+    public synchronized void setWires(List<Wire> wires)
     {
         // Remove module from old wire modules' dependencies,
         // since we are no longer dependent on any the moduels
         // from the old wires.
-        for (int i = 0; (m_wires != null) && (i < m_wires.length); i++)
+        for (int i = 0; (m_wires != null) && (i < m_wires.size()); i++)
         {
-            if (m_wires[i].getCapability().getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            if (m_wires.get(i).getCapability().getNamespace().equals(Capability.MODULE_NAMESPACE))
             {
-                ((ModuleImpl) m_wires[i].getExporter()).removeDependentRequirer(this);
+                ((ModuleImpl) m_wires.get(i).getExporter()).removeDependentRequirer(this);
             }
-            else if (m_wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            else if (m_wires.get(i).getCapability().getNamespace().equals(Capability.PACKAGE_NAMESPACE))
             {
-                ((ModuleImpl) m_wires[i].getExporter()).removeDependentImporter(this);
+                ((ModuleImpl) m_wires.get(i).getExporter()).removeDependentImporter(this);
             }
         }
 
         m_wires = wires;
 
         // Add ourself as a dependent to the new wires' modules.
-        for (int i = 0; (m_wires != null) && (i < m_wires.length); i++)
+        for (int i = 0; (m_wires != null) && (i < m_wires.size()); i++)
         {
-            if (m_wires[i].getCapability().getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            if (m_wires.get(i).getCapability().getNamespace().equals(Capability.MODULE_NAMESPACE))
             {
-                ((ModuleImpl) m_wires[i].getExporter()).addDependentRequirer(this);
+                ((ModuleImpl) m_wires.get(i).getExporter()).addDependentRequirer(this);
             }
-            else if (m_wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            else if (m_wires.get(i).getCapability().getNamespace().equals(Capability.PACKAGE_NAMESPACE))
             {
-                ((ModuleImpl) m_wires[i].getExporter()).addDependentImporter(this);
+                ((ModuleImpl) m_wires.get(i).getExporter()).addDependentImporter(this);
             }
         }
     }
@@ -549,12 +505,12 @@ public class ModuleImpl implements IModule
     // Content access methods.
     //
 
-    public IContent getContent()
+    public Content getContent()
     {
         return m_content;
     }
 
-    private synchronized IContent[] getContentPath()
+    private synchronized Content[] getContentPath()
     {
         if (m_contentPath == null)
         {
@@ -570,19 +526,19 @@ public class ModuleImpl implements IModule
         return m_contentPath;
     }
 
-    private IContent[] initializeContentPath() throws Exception
+    private Content[] initializeContentPath() throws Exception
     {
         List contentList = new ArrayList();
         calculateContentPath(this, m_content, contentList, true);
         for (int i = 0; (m_fragmentContents != null) && (i < m_fragmentContents.length); i++)
         {
-            calculateContentPath(m_fragments[i], m_fragmentContents[i], contentList, false);
+            calculateContentPath(m_fragments.get(i), m_fragmentContents[i], contentList, false);
         }
-        return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
+        return (Content[]) contentList.toArray(new Content[contentList.size()]);
     }
 
     private List calculateContentPath(
-        IModule module, IContent content, List contentList, boolean searchFragments)
+        Module module, Content content, List contentList, boolean searchFragments)
         throws Exception
     {
         // Creating the content path entails examining the bundle's
@@ -596,25 +552,25 @@ public class ModuleImpl implements IModule
         // Find class path meta-data.
         String classPath = (String) module.getHeaders().get(FelixConstants.BUNDLE_CLASSPATH);
         // Parse the class path into strings.
-        String[] classPathStrings = ManifestParser.parseDelimitedString(
+        List<String> classPathStrings = ManifestParser.parseDelimitedString(
             classPath, FelixConstants.CLASS_PATH_SEPARATOR);
 
         if (classPathStrings == null)
         {
-            classPathStrings = new String[0];
+            classPathStrings = new ArrayList<String>(0);
         }
 
         // Create the bundles class path.
-        for (int i = 0; i < classPathStrings.length; i++)
+        for (int i = 0; i < classPathStrings.size(); i++)
         {
             // Remove any leading slash, since all bundle class path
             // entries are relative to the root of the bundle.
-            classPathStrings[i] = (classPathStrings[i].startsWith("/"))
-                ? classPathStrings[i].substring(1)
-                : classPathStrings[i];
+            classPathStrings.set(i, (classPathStrings.get(i).startsWith("/"))
+                ? classPathStrings.get(i).substring(1)
+                : classPathStrings.get(i));
 
             // Check for the bundle itself on the class path.
-            if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
+            if (classPathStrings.get(i).equals(FelixConstants.CLASS_PATH_DOT))
             {
                 localContentList.add(content);
             }
@@ -622,7 +578,7 @@ public class ModuleImpl implements IModule
             {
                 // Try to find the embedded class path entry in the current
                 // content.
-                IContent embeddedContent = content.getEntryAsContent(classPathStrings[i]);
+                Content embeddedContent = content.getEntryAsContent(classPathStrings.get(i));
                 // If the embedded class path entry was not found, it might be
                 // in one of the fragments if the current content is the bundle,
                 // so try to search the fragments if necessary.
@@ -631,7 +587,8 @@ public class ModuleImpl implements IModule
                         && (m_fragmentContents != null) && (fragIdx < m_fragmentContents.length);
                     fragIdx++)
                 {
-                    embeddedContent = m_fragmentContents[fragIdx].getEntryAsContent(classPathStrings[i]);
+                    embeddedContent =
+                        m_fragmentContents[fragIdx].getEntryAsContent(classPathStrings.get(i));
                 }
                 // If we found the embedded content, then add it to the
                 // class path content list.
@@ -645,7 +602,7 @@ public class ModuleImpl implements IModule
 //       need to create an "Eventer" class like "Logger" perhaps.
                     m_logger.log(Logger.LOG_INFO,
                         "Class path entry not found: "
-                        + classPathStrings[i]);
+                        + classPathStrings.get(i));
                 }
             }
         }
@@ -840,7 +797,7 @@ public class ModuleImpl implements IModule
         }
 
         // Check the module class path.
-        IContent[] contentPath = getContentPath();
+        Content[] contentPath = getContentPath();
         for (int i = 0;
             (url == null) &&
             (i < contentPath.length); i++)
@@ -936,15 +893,15 @@ public class ModuleImpl implements IModule
 
         // Note that the search may be aborted if this method throws an
         // exception, otherwise it continues if a null is returned.
-        IWire[] wires = getWires();
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        List<Wire> wires = getWires();
+        for (int i = 0; (wires != null) && (i < wires.size()); i++)
         {
-            if (wires[i] instanceof R4Wire)
+            if (wires.get(i) instanceof WireImpl)
             {
                 try
                 {
                     // If we find the class or resource, then return it.
-                    urls = wires[i].getResources(name);
+                    urls = wires.get(i).getResources(name);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -962,14 +919,14 @@ public class ModuleImpl implements IModule
         // See whether we can get the resource from the required bundles and
         // regardless of whether or not this is the case continue to the next
         // step potentially passing on the result of this search (if any).
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        for (int i = 0; (wires != null) && (i < wires.size()); i++)
         {
-            if (wires[i] instanceof R4WireModule)
+            if (wires.get(i) instanceof WireModuleImpl)
             {
                 try
                 {
                     // If we find the class or resource, then add it.
-                    urls = wires[i].getResources(name);
+                    urls = wires.get(i).getResources(name);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -996,10 +953,10 @@ public class ModuleImpl implements IModule
             // At this point, the module's imports were searched and so was the
             // the module's content. Now we make an attempt to load the
             // class/resource via a dynamic import, if possible.
-            IWire wire = null;
+            Wire wire = null;
             try
             {
-                wire = m_resolver.resolveDynamicImport(this, pkgName);
+                wire = m_resolver.resolve(this, pkgName);
             }
             catch (ResolveException ex)
             {
@@ -1033,7 +990,7 @@ public class ModuleImpl implements IModule
         // Special case "/" so that it returns a root URLs for
         // each bundle class path entry...this isn't very
         // clean or meaningful, but the Spring guys want it.
-        final IContent[] contentPath = getContentPath();
+        final Content[] contentPath = getContentPath();
         if (name.equals("/"))
         {
             for (int i = 0; i < contentPath.length; i++)
@@ -1139,8 +1096,8 @@ public class ModuleImpl implements IModule
 
          try
          {
-             return m_secureAction.createURL(null, 
-                 FelixConstants.BUNDLE_URL_PROTOCOL + "://" +  
+             return m_secureAction.createURL(null,
+                 FelixConstants.BUNDLE_URL_PROTOCOL + "://" +
                  m_id + ":" + port + path, m_streamHandler);
          }
          catch (MalformedURLException ex)
@@ -1157,19 +1114,19 @@ public class ModuleImpl implements IModule
     // Fragment and dependency management methods.
     //
 
-    public synchronized IModule[] getFragments()
+    public synchronized List<Module> getFragments()
     {
         return m_fragments;
     }
 
-    public synchronized void attachFragments(IModule[] fragments) throws Exception
+    public synchronized void attachFragments(List<Module> fragments) throws Exception
     {
         // Remove module from old fragment dependencies.
         // We will generally only remove module fragment
         // dependencies when we are uninstalling the module.
-        for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
+        for (int i = 0; (m_fragments != null) && (i < m_fragments.size()); i++)
         {
-            ((ModuleImpl) m_fragments[i]).removeDependentHost(this);
+            ((ModuleImpl) m_fragments.get(i)).removeDependentHost(this);
         }
 
         // Remove cached capabilities and requirements.
@@ -1185,12 +1142,12 @@ public class ModuleImpl implements IModule
         // to attach to our content loader.
         if (m_fragments != null)
         {
-            IContent[] fragmentContents = new IContent[m_fragments.length];
-            for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
+            Content[] fragmentContents = new Content[m_fragments.size()];
+            for (int i = 0; (m_fragments != null) && (i < m_fragments.size()); i++)
             {
-                ((ModuleImpl) m_fragments[i]).addDependentHost(this);
+                ((ModuleImpl) m_fragments.get(i)).addDependentHost(this);
                 fragmentContents[i] =
-                    m_fragments[i].getContent()
+                    m_fragments.get(i).getContent()
                         .getEntryAsContent(FelixConstants.CLASS_PATH_DOT);
             }
             // Now attach the fragment contents to our content loader.
@@ -1199,7 +1156,7 @@ public class ModuleImpl implements IModule
     }
 
     // This must be called holding the object lock.
-    private void attachFragmentContents(IContent[] fragmentContents)
+    private void attachFragmentContents(Content[] fragmentContents)
         throws Exception
     {
         // Close existing fragment contents.
@@ -1222,121 +1179,68 @@ public class ModuleImpl implements IModule
         m_contentPath = initializeContentPath();
     }
 
-    public synchronized IModule[] getDependentHosts()
+    public synchronized List<Module> getDependentHosts()
     {
         return m_dependentHosts;
     }
 
-    public synchronized void addDependentHost(IModule module)
+    public synchronized void addDependentHost(Module module)
     {
-        m_dependentHosts = addDependent(m_dependentHosts, module);
+        if (!m_dependentHosts.contains(module))
+        {
+            m_dependentHosts.add(module);
+        }
     }
 
-    public synchronized void removeDependentHost(IModule module)
+    public synchronized void removeDependentHost(Module module)
     {
-        m_dependentHosts = removeDependent(m_dependentHosts, module);
+        m_dependentHosts.remove(module);
     }
 
-    public synchronized IModule[] getDependentImporters()
+    public synchronized List<Module> getDependentImporters()
     {
         return m_dependentImporters;
     }
 
-    public synchronized void addDependentImporter(IModule module)
+    public synchronized void addDependentImporter(Module module)
     {
-        m_dependentImporters = addDependent(m_dependentImporters, module);
+        if (!m_dependentImporters.contains(module))
+        {
+            m_dependentImporters.add(module);
+        }
     }
 
-    public synchronized void removeDependentImporter(IModule module)
+    public synchronized void removeDependentImporter(Module module)
     {
-        m_dependentImporters = removeDependent(m_dependentImporters, module);
+        m_dependentImporters.remove(module);
     }
 
-    public synchronized IModule[] getDependentRequirers()
+    public synchronized List<Module> getDependentRequirers()
     {
         return m_dependentRequirers;
     }
 
-    public synchronized void addDependentRequirer(IModule module)
+    public synchronized void addDependentRequirer(Module module)
     {
-        m_dependentRequirers = addDependent(m_dependentRequirers, module);
+        if (!m_dependentRequirers.contains(module))
+        {
+            m_dependentRequirers.add(module);
+        }
     }
 
-    public synchronized void removeDependentRequirer(IModule module)
+    public synchronized void removeDependentRequirer(Module module)
     {
-        m_dependentRequirers = removeDependent(m_dependentRequirers, module);
+        m_dependentRequirers.remove(module);
     }
 
-    public synchronized IModule[] getDependents()
+    public synchronized List<Module> getDependents()
     {
-        IModule[] dependents = new IModule[
-            m_dependentHosts.length + m_dependentImporters.length + m_dependentRequirers.length];
-        System.arraycopy(
-            m_dependentHosts,
-            0,
-            dependents,
-            0,
-            m_dependentHosts.length);
-        System.arraycopy(
-            m_dependentImporters,
-            0,
-            dependents,
-            m_dependentHosts.length,
-            m_dependentImporters.length);
-        System.arraycopy(
-            m_dependentRequirers,
-            0,
-            dependents,
-            m_dependentHosts.length + m_dependentImporters.length,
-            m_dependentRequirers.length);
+        List<Module> dependents = new ArrayList<Module>
+            (m_dependentHosts.size() + m_dependentImporters.size() + m_dependentRequirers.size());
+        dependents.addAll(m_dependentHosts);
+        dependents.addAll(m_dependentImporters);
+        dependents.addAll(m_dependentRequirers);
         return dependents;
-    }
-
-    private static IModule[] addDependent(IModule[] modules, IModule module)
-    {
-        // Make sure the dependent module is not already present.
-        for (int i = 0; i < modules.length; i++)
-        {
-            if (modules[i].equals(module))
-            {
-                return modules;
-            }
-        }
-        IModule[] tmp = new IModule[modules.length + 1];
-        System.arraycopy(modules, 0, tmp, 0, modules.length);
-        tmp[modules.length] = module;
-        return tmp;
-    }
-
-    private static IModule[] removeDependent(IModule[] modules, IModule module)
-    {
-        IModule[] tmp = modules;
-
-        // Make sure the dependent module is present.
-        for (int i = 0; i < modules.length; i++)
-        {
-            if (modules[i].equals(module))
-            {
-                // If this is the module, then point to empty list.
-                if ((modules.length - 1) == 0)
-                {
-                    tmp = new IModule[0];
-                }
-                // Otherwise, we need to do some array copying.
-                else
-                {
-                    tmp = new IModule[modules.length - 1];
-                    System.arraycopy(modules, 0, tmp, 0, i);
-                    if (i < tmp.length)
-                    {
-                        System.arraycopy(modules, i + 1, tmp, i, tmp.length - i);
-                    }
-                }
-                break;
-            }
-        }
-
-        return tmp;
     }
 
     public synchronized void close()
@@ -1433,13 +1337,13 @@ public class ModuleImpl implements IModule
         throws ClassNotFoundException, ResourceNotFoundException
     {
         // We delegate to the module's wires to find the class or resource.
-        IWire[] wires = getWires();
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        List<Wire> wires = getWires();
+        for (int i = 0; (wires != null) && (i < wires.size()); i++)
         {
             // If we find the class or resource, then return it.
             Object result = (isClass)
-                ? (Object) wires[i].getClass(name)
-                : (Object) wires[i].getResource(name);
+                ? (Object) wires.get(i).getClass(name)
+                : (Object) wires.get(i).getResource(name);
             if (result != null)
             {
                 return result;
@@ -1456,10 +1360,10 @@ public class ModuleImpl implements IModule
         // At this point, the module's imports were searched and so was the
         // the module's content. Now we make an attempt to load the
         // class/resource via a dynamic import, if possible.
-        IWire wire = null;
+        Wire wire = null;
         try
         {
-            wire = m_resolver.resolveDynamicImport(this, pkgName);
+            wire = m_resolver.resolve(this, pkgName);
         }
         catch (ResolveException ex)
         {
@@ -1772,8 +1676,8 @@ public class ModuleImpl implements IModule
                 byte[] bytes = null;
 
                 // Check the module class path.
-                IContent[] contentPath = getContentPath();
-                IContent content = null;
+                Content[] contentPath = getContentPath();
+                Content content = null;
                 for (int i = 0;
                     (bytes == null) &&
                     (i < contentPath.length); i++)
@@ -1799,7 +1703,7 @@ public class ModuleImpl implements IModule
                             int activationPolicy = 
                                 ((BundleImpl) getBundle()).isDeclaredActivationPolicyUsed()
                                 ? ((BundleImpl) getBundle()).getCurrentModule().getDeclaredActivationPolicy()
-                                : IModule.EAGER_ACTIVATION;
+                                : Module.EAGER_ACTIVATION;
 
                             // If the module is using deferred activation, then if
                             // we load this class from this module we need to activate
@@ -1810,7 +1714,7 @@ public class ModuleImpl implements IModule
                                 ? false : isActivationTrigger(pkgName);
                             if (!m_isActivationTriggered
                                 && isTriggerClass
-                                && (activationPolicy == IModule.LAZY_ACTIVATION)
+                                && (activationPolicy == Module.LAZY_ACTIVATION)
                                 && (getBundle().getState() == Bundle.STARTING))
                             {
                                 List deferredList = (List) m_deferredActivation.get();
@@ -2027,14 +1931,14 @@ public class ModuleImpl implements IModule
                 // native library.
                 if (result == null)
                 {
-                    R4Library[] libs = getNativeLibraries();
-                    for (int libIdx = 0; (libs != null) && (libIdx < libs.length); libIdx++)
+                    List<R4Library> libs = getNativeLibraries();
+                    for (int libIdx = 0; (libs != null) && (libIdx < libs.size()); libIdx++)
                     {
-                        if (libs[libIdx].match(m_configMap, name))
+                        if (libs.get(libIdx).match(m_configMap, name))
                         {
                             // Search bundle content first for native library.
                             result = getContent().getEntryAsNativeLibrary(
-                                libs[libIdx].getEntryName());
+                                libs.get(libIdx).getEntryName());
                             // If not found, then search fragments in order.
                             for (int i = 0;
                                 (result == null) && (m_fragmentContents != null)
@@ -2042,7 +1946,7 @@ public class ModuleImpl implements IModule
                                 i++)
                             {
                                 result = m_fragmentContents[i].getEntryAsNativeLibrary(
-                                    libs[libIdx].getEntryName());
+                                    libs.get(libIdx).getEntryName());
                             }
                         }
                     }
@@ -2084,13 +1988,13 @@ public class ModuleImpl implements IModule
         String importer = module.getBundle().toString();
 
         // Next, check to see if the module imports the package.
-        IWire[] wires = module.getWires();
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        List<Wire> wires = module.getWires();
+        for (int i = 0; (wires != null) && (i < wires.size()); i++)
         {
-            if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-                wires[i].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
+            if (wires.get(i).getCapability().getNamespace().equals(Capability.PACKAGE_NAMESPACE) &&
+                wires.get(i).getCapability().getAttribute(Capability.PACKAGE_ATTR).getValue().equals(pkgName))
             {
-                String exporter = wires[i].getExporter().getBundle().toString();
+                String exporter = wires.get(i).getExporter().getBundle().toString();
 
                 StringBuffer sb = new StringBuffer("*** Package '");
                 sb.append(pkgName);
@@ -2114,7 +2018,7 @@ public class ModuleImpl implements IModule
 
         // Next, check to see if the package was optionally imported and
         // whether or not there is an exporter available.
-        IRequirement[] reqs = module.getRequirements();
+        List<Requirement> reqs = module.getRequirements();
 /*
 * TODO: RB - Fix diagnostic message for optional imports.
         for (int i = 0; (reqs != null) && (i < reqs.length); i++)
@@ -2174,7 +2078,9 @@ public class ModuleImpl implements IModule
         }
 */
         // Next, check to see if the package is dynamically imported by the module.
-        IRequirement pkgReq = Resolver.findAllowedDynamicImport(module, pkgName);
+// TODO: FELIX3 - Add Resolver.findAllowedDynamicImport().
+/*
+        Requirement pkgReq = Resolver.findAllowedDynamicImport(module, pkgName);
         if (pkgReq != null)
         {
             // Try to see if there is an exporter available.
@@ -2228,22 +2134,14 @@ public class ModuleImpl implements IModule
 
             return sb.toString();
         }
-
+*/
         // Next, check to see if there are any exporters for the package at all.
-        pkgReq = null;
-        try
-        {
-            pkgReq = new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-        }
-        catch (InvalidSyntaxException ex)
-        {
-            // This should never happen.
-        }
-        List exports =
-            resolver.getResolvedCandidates(pkgReq, module);
-        exports = (exports.size() == 0)
-            ? resolver.getUnresolvedCandidates(pkgReq, module)
-            : exports;
+        Requirement pkgReq = null;
+        List<Attribute> attrs = new ArrayList(1);
+        attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
+        pkgReq = new RequirementImpl(
+            Capability.PACKAGE_NAMESPACE, new ArrayList<Directive>(0), attrs);
+        Set<Capability> exports = resolver.getCandidates(module, pkgReq, false);
         if (exports.size() > 0)
         {
             boolean classpath = false;
@@ -2261,7 +2159,7 @@ public class ModuleImpl implements IModule
                 // Ignore
             }
 
-            String exporter = ((ICapability) exports.get(0)).getModule().getBundle().toString();
+            String exporter = exports.iterator().next().getModule().getBundle().toString();
 
             StringBuffer sb = new StringBuffer("*** Class '");
             sb.append(name);
@@ -2344,5 +2242,47 @@ public class ModuleImpl implements IModule
         sb.append(" ***");
 
         return sb.toString();
+    }
+
+    static class FragmentRequirement implements Requirement
+    {
+        private final Requirement m_req;
+        private final Module m_fragment;
+
+        public FragmentRequirement(Requirement req, Module fragment)
+        {
+            m_req = req;
+            m_fragment = fragment;
+        }
+
+        public Module getFragment()
+        {
+            return m_fragment;
+        }
+
+        public String getNamespace()
+        {
+            return m_req.getNamespace();
+        }
+
+        public SimpleFilter getFilter()
+        {
+            return m_req.getFilter();
+        }
+
+        public boolean isOptional()
+        {
+            return m_req.isOptional();
+        }
+
+        public Directive getDirective(String name)
+        {
+            return m_req.getDirective(name);
+        }
+
+        public List<Directive> getDirectives()
+        {
+            return m_req.getDirectives();
+        }
     }
 }

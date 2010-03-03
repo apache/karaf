@@ -1,59 +1,62 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
-package org.apache.felix.moduleloader;
+package org.apache.felix.framework.resolver;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
-public interface IModule
+public interface Module
 {
     final static int EAGER_ACTIVATION = 0;
     final static int LAZY_ACTIVATION = 1;
-
-    void setSecurityContext(Object securityContext);
-    Object getSecurityContext();
 
     // Metadata access methods.
     Map getHeaders();
     boolean isExtension();
     String getSymbolicName();
     Version getVersion();
-    ICapability[] getCapabilities();
-    IRequirement[] getRequirements();
-    IRequirement[] getDynamicRequirements();
-    R4Library[] getNativeLibraries();
+    List<Capability> getCapabilities();
+    List<Requirement> getRequirements();
+    List<Requirement> getDynamicRequirements();
+    List<R4Library> getNativeLibraries();
     int getDeclaredActivationPolicy();
 
     // Run-time data access methods.
     Bundle getBundle();
     String getId();
-    IWire[] getWires();
+    List<Wire> getWires();
     boolean isResolved();
+    // TODO: FELIX3 - Shouldn't have mutable method on Module.
+    void setSecurityContext(Object securityContext);
+    Object getSecurityContext();
 
     // Content access methods.
-    IContent getContent();
+    Content getContent();
     Class getClassByDelegation(String name) throws ClassNotFoundException;
     URL getResourceByDelegation(String name);
     Enumeration getResourcesByDelegation(String name);

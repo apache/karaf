@@ -1,57 +1,53 @@
-/* 
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
-package org.apache.felix.moduleloader;
+package org.apache.felix.framework.resolver;
 
+import org.apache.felix.framework.resolver.Module;
 import java.net.URL;
 import java.util.Enumeration;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.Requirement;
 
-/**
- * This interface represents a directed class/resource loading dependency
- * between two modules, which result when the framework resolves
- * <tt>Import-Package</tt> or <tt>Require-Bundle</tt> declarations. A wire is
- * the means by which a dependent module makes a class/resource request on
- * the providing module.
-**/
-public interface IWire
+public interface Wire
 {
     /**
      * Returns the importing module.
      * @return The importing module.
     **/
-    public IModule getImporter();
+    public Module getImporter();
     /**
      * Returns the associated requirement from the importing module that
      * resulted in the creation of this wire.
      * @return
     **/
-    public IRequirement getRequirement();
+    public Requirement getRequirement();
     /**
      * Returns the exporting module.
      * @return The exporting module.
     **/
-    public IModule getExporter();
+    public Module getExporter();
     /**
      * Returns the associated capability from the exporting module that
      * satisfies the requirement of the importing module.
      * @return
     **/
-    public ICapability getCapability();
+    public Capability getCapability();
     /**
      * Returns whether or not the wire has a given package name. For some
      * wires, such as ones for Require-Bundle, there may be many packages.

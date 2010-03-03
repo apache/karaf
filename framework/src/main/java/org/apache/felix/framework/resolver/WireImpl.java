@@ -1,76 +1,68 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
-package org.apache.felix.framework.searchpolicy;
+package org.apache.felix.framework.resolver;
 
 import java.net.URL;
 import java.util.Enumeration;
-
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.framework.util.manifestparser.Capability;
-import org.apache.felix.moduleloader.*;
+import org.apache.felix.framework.util.manifestparser.CapabilityImpl;
 
-public class R4Wire implements IWire
+public class WireImpl implements Wire
 {
-    private final IModule m_importer;
-    private final IRequirement m_requirement;
-    private final IModule m_exporter;
-    private final ICapability m_capability;
+    private final Module m_importer;
+    private final Requirement m_req;
+    private final Module m_exporter;
+    private final Capability m_cap;
 
-    public R4Wire(IModule importer, IRequirement requirement,
-        IModule exporter, ICapability capability)
+    public WireImpl(Module importer, Requirement ip, Module exporter, Capability ep)
     {
         m_importer = importer;
-        m_requirement = requirement;
+        m_req = ip;
         m_exporter = exporter;
-        m_capability = capability;
+        m_cap = ep;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getImporter()
-     */
-    public IModule getImporter()
+    public Module getImporter()
     {
         return m_importer;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getRequirement()
-     */
-    public IRequirement getRequirement()
+    public Requirement getRequirement()
     {
-        return m_requirement;
+        return m_req;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getExporter()
-     */
-    public IModule getExporter()
+    public Module getExporter()
     {
         return m_exporter;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getCapability()
-     */
-    public ICapability getCapability()
+    public Capability getCapability()
     {
-        return m_capability;
+        return m_cap;
+    }
+
+    public String toString()
+    {
+        return m_req + " (" + m_importer + ") -> " + m_cap + " (" + m_exporter + ")";
     }
 
     /* (non-Javadoc)
@@ -78,8 +70,8 @@ public class R4Wire implements IWire
      */
     public boolean hasPackage(String pkgName)
     {
-        return (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-            m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName));
+        return (m_cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE) &&
+            m_cap.getAttribute(Capability.PACKAGE_ATTR).getValue().equals(pkgName));
     }
 
     /* (non-Javadoc)
@@ -94,16 +86,16 @@ public class R4Wire implements IWire
 
         // Only check when the package of the target class is
         // the same as the package for the wire.
-        if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-            m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
+        if (m_cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE) &&
+            m_cap.getAttribute(Capability.PACKAGE_ATTR).getValue().equals(pkgName))
         {
             // Check the include/exclude filters from the target package
             // to make sure that the class is actually visible. We delegate
             // to the exporting module, rather than its content, so it can
             // it can follow any internal wires it may have (e.g., if the
             // package has multiple sources).
-            if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
-                && ((Capability) m_capability).isIncluded(name))
+// TODO: FELIX3 - Should isIncluded() be part of Capability?
+            if (((CapabilityImpl) m_cap).isIncluded(name))
             {
                 clazz = m_exporter.getClassByDelegation(name);
             }
@@ -132,8 +124,8 @@ public class R4Wire implements IWire
 
         // Only check when the package of the target resource is
         // the same as the package for the wire.
-        if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-            m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
+        if (m_cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE) &&
+            m_cap.getAttribute(Capability.PACKAGE_ATTR).getValue().equals(pkgName))
         {
             // Delegate to the exporting module, rather than its
             // content, so that it can follow any internal wires it may have
@@ -164,8 +156,8 @@ public class R4Wire implements IWire
 
         // Only check when the package of the target resource is
         // the same as the package for the wire.
-        if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-            m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
+        if (m_cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE) &&
+            m_cap.getAttribute(Capability.PACKAGE_ATTR).getValue().equals(pkgName))
         {
             urls = m_exporter.getResourcesByDelegation(name);
 
@@ -179,16 +171,5 @@ public class R4Wire implements IWire
         }
 
         return urls;
-    }
-
-    public String toString()
-    {
-        if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-        {
-            return m_importer + " -> "
-                + m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY)
-                + " -> " + m_exporter;
-        }
-        return m_importer + " -> " + m_capability + " -> " + m_exporter;
     }
 }

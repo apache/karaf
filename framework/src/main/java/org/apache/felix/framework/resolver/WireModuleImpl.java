@@ -16,36 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.searchpolicy;
+package org.apache.felix.framework.resolver;
 
 import java.net.URL;
-import java.util.*;
-
+import java.util.Enumeration;
+import java.util.List;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.moduleloader.*;
 
-public class R4WireModule implements IWire
+public class WireModuleImpl implements Wire
 {
-    private final IModule m_importer;
-    private final IRequirement m_requirement;
-    private final IModule m_exporter;
-    private final ICapability m_capability;
-    private final Map m_pkgMap;
+    private final Module m_importer;
+    private final Requirement m_requirement;
+    private final Module m_exporter;
+    private final Capability m_capability;
+    private final List<String> m_packages;
 
-    public R4WireModule(IModule importer, IRequirement requirement,
-        IModule exporter, ICapability capability, Map pkgMap)
+    public WireModuleImpl(Module importer, Requirement requirement,
+        Module exporter, Capability capability, List<String> packages)
     {
         m_importer = importer;
         m_requirement = requirement;
         m_exporter = exporter;
         m_capability = capability;
-        m_pkgMap = pkgMap;
+        m_packages = packages;
     }
 
     /* (non-Javadoc)
      * @see org.apache.felix.framework.searchpolicy.IWire#getImporter()
      */
-    public IModule getImporter()
+    public Module getImporter()
     {
         return m_importer;
     }
@@ -53,7 +54,7 @@ public class R4WireModule implements IWire
     /* (non-Javadoc)
      * @see org.apache.felix.framework.searchpolicy.IWire#getRequirement()
      */
-    public IRequirement getRequirement()
+    public Requirement getRequirement()
     {
         return m_requirement;
     }
@@ -61,7 +62,7 @@ public class R4WireModule implements IWire
     /* (non-Javadoc)
      * @see org.apache.felix.framework.searchpolicy.IWire#getExporter()
      */
-    public IModule getExporter()
+    public Module getExporter()
     {
         return m_exporter;
     }
@@ -69,7 +70,7 @@ public class R4WireModule implements IWire
     /* (non-Javadoc)
      * @see org.apache.felix.framework.searchpolicy.IWire#getCapability()
      */
-    public ICapability getCapability()
+    public Capability getCapability()
     {
         return m_capability;
     }
@@ -79,7 +80,7 @@ public class R4WireModule implements IWire
      */
     public boolean hasPackage(String pkgName)
     {
-        return (m_pkgMap.get(pkgName) != null);
+        return m_packages.contains(pkgName);
     }
 
     /* (non-Javadoc)
@@ -89,9 +90,7 @@ public class R4WireModule implements IWire
     {
         // Get the package of the target class.
         String pkgName = Util.getClassPackage(name);
-
-        ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
-        if (rp != null)
+        if (m_packages.contains(pkgName))
         {
             try
             {
@@ -119,9 +118,7 @@ public class R4WireModule implements IWire
     {
         // Get the package of the target class.
         String pkgName = Util.getResourcePackage(name);
-
-        ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
-        if (rp != null)
+        if (m_packages.contains(pkgName))
         {
             URL url = m_exporter.getResourceByDelegation(name);
             if (url != null)
@@ -145,10 +142,7 @@ public class R4WireModule implements IWire
         String pkgName = Util.getResourcePackage(name);
 
         // See if we have a resolved package for the resource's package.
-        // If so, loop through all package sources and aggregate any
-        // matching resource enumerations.
-        ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
-        if (rp != null)
+        if (m_packages.contains(pkgName))
         {
             Enumeration urls = m_exporter.getResourcesByDelegation(name);
             if (urls != null)
