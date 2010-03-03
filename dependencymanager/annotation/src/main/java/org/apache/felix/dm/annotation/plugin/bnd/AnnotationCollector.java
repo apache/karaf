@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 import org.apache.felix.dm.annotation.api.AdapterService;
 import org.apache.felix.dm.annotation.api.AspectService;
+import org.apache.felix.dm.annotation.api.BundleAdapterService;
 import org.apache.felix.dm.annotation.api.BundleDependency;
 import org.apache.felix.dm.annotation.api.Composition;
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
@@ -42,6 +43,7 @@ import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
 import org.apache.felix.dm.annotation.api.TemporalServiceDependency;
+import org.osgi.framework.Bundle;
 
 import aQute.lib.osgi.Annotation;
 import aQute.lib.osgi.ClassDataCollector;
@@ -76,6 +78,8 @@ public class AnnotationCollector extends ClassDataCollector
         + AspectService.class.getName().replace('.', '/') + ";";
     private final static String A_ADAPTER_SERVICE = "L"
         + AdapterService.class.getName().replace('.', '/') + ";";
+    private final static String A_BUNDLE_ADAPTER_SERVICE = "L"
+        + BundleAdapterService.class.getName().replace('.', '/') + ";";
 
     private Reporter m_reporter;
     private String m_className;
@@ -111,6 +115,7 @@ public class AnnotationCollector extends ClassDataCollector
         Service, 
         AspectService,
         AdapterService,
+        BundleAdapterService,
         ServiceDependency, 
         TemporalServiceDependency, 
         ConfigurationDependency,
@@ -365,6 +370,10 @@ public class AnnotationCollector extends ClassDataCollector
         else if (annotation.getName().equals(A_ADAPTER_SERVICE))
         {
             parseAdapterService(annotation);
+        }
+        else if (annotation.getName().equals(A_BUNDLE_ADAPTER_SERVICE))
+        {
+            parseBundleAdapterService(annotation);
         }
         else if (annotation.getName().equals(A_INIT))
         {
@@ -693,6 +702,62 @@ public class AnnotationCollector extends ClassDataCollector
         }
     }
 
+    /**
+     * Parses a BundleAdapterService annotation.
+     * @param annotation
+     */
+    private void parseBundleAdapterService(Annotation annotation)
+    {
+        Info info = new Info(EntryTypes.BundleAdapterService);
+        m_infos.add(info);
+        
+        // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
+        addInitStartStopDestroyCompositionParams(info);
+        
+        // Generate Adapter Implementation
+        info.addParam(Params.impl, m_className);
+      
+        // Parse bundle filter
+        String filter = annotation.get(Params.filter.toString());
+        if (filter != null)
+        {
+            Verifier.verifyFilter(filter, 0);
+            info.addParam(Params.filter, filter);
+        }
+        
+        // Parse stateMask attribute
+        info.addParam(annotation, Params.stateMask, new Integer(Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE));
+        
+        // Parse Adapter properties.
+        parseParameters(annotation, Params.properties, info);
+
+        // Parse the optional adapter service (use directly implemented interface by default).
+        Object service = annotation.get(Params.service.toString());
+        if (service == null) {
+            if (m_interfaces == null)
+            {
+                throw new IllegalStateException("Invalid BundleAdapterService annotation: " +
+                    "the service attribute has not been set and the class " + m_className + 
+                    " does not implement any interfaces");
+            }
+            if (m_interfaces.length != 1) 
+            {
+                throw new IllegalStateException("Invalid AdapterService annotation: " +
+                    "the service attribute has not been set and the class " + m_className +
+                    " implements more than one interface");
+            }
+            
+            info.addParam(Params.service, m_interfaces[0]);
+        } else 
+        {
+            checkClassImplements(annotation, Params.service);
+            info.addClassParam(annotation, Params.service, null);
+        }
+        
+        // Parse propagate attribute
+        info.addParam(annotation, Params.propagate, Boolean.FALSE);
+    }
+
     private void parseBundleDependencyAnnotation(Annotation annotation)
     {
         Info info = new Info(EntryTypes.BundleDependency);
@@ -849,7 +914,7 @@ public class AnnotationCollector extends ClassDataCollector
         }
 
         // We must have at least a Service or an AspectService annotation.
-        checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService, EntryTypes.AdapterService);
+        checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService, EntryTypes.AdapterService, EntryTypes.BundleAdapterService);
 
         StringBuilder sb = new StringBuilder();
         sb.append("Parsed annotation for class ");
