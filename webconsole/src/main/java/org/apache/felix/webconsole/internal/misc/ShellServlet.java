@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URLDecoder;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,7 +72,10 @@ public class ShellServlet extends SimpleWebConsolePlugin implements OsgiManagerP
         try
         {
             String command = request.getParameter( "command" );
-            if (command != null) command = URLDecoder.decode(command);
+            if ( command != null )
+            {
+                command = WebConsoleUtil.urlDecode( command );
+            }
 
             pw.print( "<span class=\"consolecommand\">-&gt; " );
             pw.print( command == null ? "" : WebConsoleUtil.escapeHtml( command ) );

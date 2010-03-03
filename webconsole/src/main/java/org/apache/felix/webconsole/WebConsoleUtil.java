@@ -20,6 +20,7 @@ package org.apache.felix.webconsole;
 
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -333,4 +334,31 @@ public final class WebConsoleUtil
         }
     }
 
+
+    /**
+     * Decode the given value expected to be URL encoded.
+     * <p>
+     * This method first tries to use the Java 1.4 method
+     * <code>URLDecoder.decode(String, String)</code> method and falls back to
+     * the now deprecated <code>URLDecoder.decode(String, String)</code>
+     * which uses the platform character set to decode the string. This is
+     * because the platforms before 1.4 and most notably some OSGi Execution
+     * Environments (such as Minimum EE) do not provide the newer method.
+     *
+     * @param value
+     * @return
+     */
+    public static String urlDecode( final String value )
+    {
+        try
+        {
+            return URLDecoder.decode( value, "UTF-8" );
+        }
+        catch ( Throwable t )
+        {
+            // expected NoSuchMethodError: if platform does not support it
+            // expected UnsupportedEncoding (not really: UTF-8 is required)
+            return URLDecoder.decode( value );
+        }
+    }
 }
