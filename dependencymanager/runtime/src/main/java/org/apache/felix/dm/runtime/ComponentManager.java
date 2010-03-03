@@ -160,6 +160,10 @@ public class ComponentManager implements SynchronousBundleListener
                         service = createAdapterService(b, dm, parser);
                         break;
                         
+                    case BundleAdapterService:
+                        service = createBundleAdapterService(b, dm, parser);
+                        break;
+
                     case ServiceDependency:
                         checkServiceParsed(service);
                         service.add(createServiceDependency(b, dm, parser, false));
@@ -362,6 +366,28 @@ public class ComponentManager implements SynchronousBundleListener
     }
 
     /**
+     * Creates a Bundle Adapter Service.
+     * @param b
+     * @param dm
+     * @param parser
+     * @return
+     */
+    private Service createBundleAdapterService(Bundle b, DependencyManager dm, DescriptorParser parser)
+        throws ClassNotFoundException
+    {
+        int stateMask = parser.getInt(DescriptorParam.stateMask, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+        String filter = parser.getString(DescriptorParam.filter, null);
+        Class<?> adapterImpl = b.loadClass(parser.getString(DescriptorParam.impl));
+        String service = parser.getString(DescriptorParam.service);
+        Dictionary<String, String> properties = parser.getDictionary(DescriptorParam.properties, null);
+        boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
+        Service srv = dm.createBundleAdapterService(stateMask, filter, adapterImpl, service, properties, propagate);  
+        setServiceCallbacks(srv, parser);
+        setServiceComposition(srv, parser);
+        return srv;
+    }
+
+    /**
      * Creates a ServiceDependency that we parsed from a component descriptor "ServiceDependency" entry.
      * @param b
      * @param dm
@@ -486,7 +512,7 @@ public class ComponentManager implements SynchronousBundleListener
         }
 
         // propagate
-        bd.setPropagate("true".equals(parser.getString(DescriptorParam.stateMask, "true")));
+        bd.setPropagate("true".equals(parser.getString(DescriptorParam.stateMask, "false")));
         return bd;
     }
 }
