@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.sigil.model;
+package org.apache.felix.sigil.model.annotations;
 
 
 import java.lang.annotation.Documented;
