@@ -42,6 +42,7 @@ import org.apache.felix.sigil.eclipse.internal.model.repository.RepositoryConfig
 import org.apache.felix.sigil.eclipse.internal.repository.eclipse.GlobalRepositoryManager;
 import org.apache.felix.sigil.eclipse.internal.repository.eclipse.SigilRepositoryManager;
 import org.apache.felix.sigil.eclipse.internal.resources.ProjectResourceListener;
+import org.apache.felix.sigil.eclipse.internal.resources.SigilProjectManager;
 import org.apache.felix.sigil.eclipse.model.project.ISigilModelRoot;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryConfiguration;
@@ -133,6 +134,7 @@ public class SigilCore extends AbstractUIPlugin
     private ServiceTracker serializerTracker;
 
     private static IRepositoryConfiguration repositoryConfig;
+    private static SigilProjectManager projectManager;
     private static OSGiInstallManager installs;
     private static ISigilModelRoot modelRoot;
     private static HashMap<Object, SigilRepositoryManager> repositoryManagers = new HashMap<Object, SigilRepositoryManager>();
@@ -238,26 +240,9 @@ public class SigilCore extends AbstractUIPlugin
     }
 
 
-    private static HashMap<IProject, SigilProject> projects = new HashMap<IProject, SigilProject>();
-    
     public static ISigilProjectModel create( IProject project ) throws CoreException
     {
-        if ( project.hasNature( NATURE_ID ) )
-        {
-            SigilProject p = null;
-            synchronized( projects ) {
-                p = projects.get(project);
-                if ( p == null ) {
-                   p = new SigilProject( project );
-                   projects.put(project, p);
-                }
-            }
-            return p; 
-        }
-        else
-        {
-            throw newCoreException( "Project " + project.getName() + " is not a sigil project", null );
-        }
+        return projectManager.getSigilProject(project);
     }
 
 
@@ -293,6 +278,8 @@ public class SigilCore extends AbstractUIPlugin
         installs = new OSGiInstallManager();
 
         globalRepositoryManager = new GlobalRepositoryManager();
+        
+        projectManager = new SigilProjectManager();
 
         registerModelElements( context );
         registerResourceListeners();
@@ -416,7 +403,7 @@ public class SigilCore extends AbstractUIPlugin
             @Override
             protected IStatus run( IProgressMonitor monitor )
             {
-                ResourcesPlugin.getWorkspace().addResourceChangeListener( new ProjectResourceListener(),
+                ResourcesPlugin.getWorkspace().addResourceChangeListener( new ProjectResourceListener(projectManager),
                     ProjectResourceListener.EVENT_MASKS );
                 return Status.OK_STATUS;
             }
