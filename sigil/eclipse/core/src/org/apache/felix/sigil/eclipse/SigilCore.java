@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -43,6 +41,7 @@ import org.apache.felix.sigil.eclipse.internal.model.project.SigilProject;
 import org.apache.felix.sigil.eclipse.internal.model.repository.RepositoryConfiguration;
 import org.apache.felix.sigil.eclipse.internal.repository.eclipse.GlobalRepositoryManager;
 import org.apache.felix.sigil.eclipse.internal.repository.eclipse.SigilRepositoryManager;
+import org.apache.felix.sigil.eclipse.internal.resources.ProjectResourceListener;
 import org.apache.felix.sigil.eclipse.model.project.ISigilModelRoot;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryConfiguration;
@@ -57,11 +56,6 @@ import org.apache.felix.sigil.repository.ResolutionConfig;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -417,55 +411,13 @@ public class SigilCore extends AbstractUIPlugin
 
     private void registerResourceListeners()
     {
-        final IResourceChangeListener listener = new IResourceChangeListener()
-        {
-            public void resourceChanged( IResourceChangeEvent event )
-            {
-                IResourceDelta delta = event.getDelta();
-                if ( delta != null )
-                {
-                    try
-                    {
-                        delta.accept( new IResourceDeltaVisitor()
-                        {
-                            public boolean visit( IResourceDelta delta ) throws CoreException
-                            {
-                                IResource resource = delta.getResource();
-                                if ( resource instanceof IProject )
-                                {
-                                    IProject project = ( IProject ) resource;
-                                    if ( SigilCore.isSigilProject( project ) )
-                                    {
-                                        switch ( delta.getKind() )
-                                        {
-                                            case IResourceDelta.REMOVED:
-                                            case IResourceDelta.ADDED:
-                                                rebuildAllBundleDependencies( Job.getJobManager().createProgressGroup() );
-                                                break;
-                                        }
-                                    }
-                                    // Recurse no more
-                                    return false;
-                                }
-                                return true;
-                            }
-                        } );
-                    }
-                    catch ( CoreException e )
-                    {
-                        error( "Failed to update after change", e );
-                    }
-                }
-            }
-        };
-
         Job job = new Job( "Initialising sigil resource listeners" )
         {
             @Override
             protected IStatus run( IProgressMonitor monitor )
             {
-                ResourcesPlugin.getWorkspace().addResourceChangeListener( listener,
-                    IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE );
+                ResourcesPlugin.getWorkspace().addResourceChangeListener( new ProjectResourceListener(),
+                    ProjectResourceListener.EVENT_MASKS );
                 return Status.OK_STATUS;
             }
         };
@@ -573,7 +525,9 @@ public class SigilCore extends AbstractUIPlugin
     {
         Set<ISigilProjectModel> affected = SigilCore.getRoot().resolveDependentProjects( caps, monitor );
 
-        affected.add( project );
+        if ( project != null ) {
+            affected.add( project );
+        }
 
         SubMonitor progress = SubMonitor.convert( monitor, affected.size() * 20 );
         for ( ISigilProjectModel dependent : affected )
