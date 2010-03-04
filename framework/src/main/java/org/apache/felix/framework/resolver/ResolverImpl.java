@@ -1213,14 +1213,16 @@ ex.printStackTrace();
             // Permutate the candidate map.
             for (int reqIdx = 0; reqIdx < currentBlame.m_reqs.size(); reqIdx++)
             {
-                Map<Requirement, Set<Capability>> copy = copyCandidateMap(candidateMap);
-                Set<Capability> candidates = copy.get(currentBlame.m_reqs.get(reqIdx));
-                Iterator it = candidates.iterator();
-                it.next();
-                it.remove();
-                // TODO: PROTO3 RESOLVER - We could check before doing the candidate map copy.
-                if (candidates.size() > 0)
+                // Verify whether we have more than one candidate to create
+                // a permutation.
+                Set<Capability> candidates = candidateMap.get(currentBlame.m_reqs.get(reqIdx));
+                if (candidates.size() > 1)
                 {
+                    Map<Requirement, Set<Capability>> copy = copyCandidateMap(candidateMap);
+                    candidates = copy.get(currentBlame.m_reqs.get(reqIdx));
+                    Iterator it = candidates.iterator();
+                    it.next();
+                    it.remove();
                     m_candidatePermutations.add(copy);
                 }
             }
