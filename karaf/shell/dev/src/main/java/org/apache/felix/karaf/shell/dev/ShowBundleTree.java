@@ -48,16 +48,19 @@ public class ShowBundleTree extends AbstractBundleCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowBundleTree.class);
 
-    // a cache of all exported packages
-    private ExportedPackage[] allExportedPackages;
+    private Tree<Bundle> tree;
 
     @Override
     protected void doExecute(Bundle bundle) throws Exception {
+        long start = System.currentTimeMillis();
         // let's do the real work here
         printHeader(bundle);
-        Tree<Bundle> tree = createTree(bundle);
+        tree = new Tree<Bundle>(bundle);
+        createTree(bundle);
         printTree(tree);
         printDuplicatePackages(tree);
+        LOGGER.debug(format("Dependency tree calculated in %d ms",
+                            System.currentTimeMillis() - start));
     }
 
     /*
@@ -119,44 +122,69 @@ public class ShowBundleTree extends AbstractBundleCommand {
     /*
      * Creates the bundle tree
      */
-    protected Tree<Bundle> createTree(Bundle bundle) {
-        Tree<Bundle> tree = new Tree<Bundle>(bundle);
-        Set<Bundle> trail = new HashSet<Bundle>();
+    protected void createTree(Bundle bundle) {
         if (bundle.getState() >= Bundle.RESOLVED) {
-            createNode(tree, trail);
+            createNode(tree);
         } else {
-            for (Import i : Import.parse(String.valueOf(bundle.getHeaders().get("Import-Package")))) {
-                for (ExportedPackage ep : getPackageAdmin().getExportedPackages(i.getPackage())) {
-                    if (ep.getVersion().compareTo(i.getVersion()) >= 0) {
-                        if (!bundle.equals(ep.getExportingBundle())) {
-                            Node child = tree.addChild(ep.getExportingBundle());
-                            System.out.printf("- using %s to resolve import %s%n", ep.getExportingBundle(), i);
-                            createNode(child, trail);
-                        }
+            createNodesForImports(tree, bundle);
+        }
+    }
+
+    /*
+     * Creates nodes for the imports of the bundle (instead of reporting wiring information
+     */
+    private void createNodesForImports(Node node, Bundle bundle) {
+        for (Import i : Import.parse(String.valueOf(bundle.getHeaders().get("Import-Package")),
+                                     String.valueOf(bundle.getHeaders().get("Export-Package")))) {
+            createNodeForImport(node, bundle, i);
+        }
+    }
+
+    /*
+     * Create a child node for a given import (by finding a matching export in the currently installed bundles)
+     */
+    private void createNodeForImport(Node node, Bundle bundle, Import i) {
+        ExportedPackage[] exporters = getPackageAdmin().getExportedPackages(i.getPackage());
+        boolean foundMatch = false;
+        if (exporters != null) {
+            for (ExportedPackage ep : exporters) {
+                if (i.getVersion().isInRange(ep.getVersion())) {
+                    if (bundle.equals(ep.getExportingBundle())) {
+                        foundMatch = true;
+                    } else {
+                        Node child = node.addChild(ep.getExportingBundle());
+                        System.out.printf("- import %s: resolved using %s%n", i, ep.getExportingBundle());
+                        foundMatch = true;
+                        createNode(child);
                     }
                 }
             }
         }
-        return tree;
+        if (!foundMatch) {
+            System.out.printf("- import %s: WARNING - unable to find matching export%n", i);            
+        }
     }
 
     /*
      * Creates a node in the bundle tree
      */
-    private void createNode(Node<Bundle> node, Set<Bundle> trail) {
+    private void createNode(Node<Bundle> node) {
         Bundle bundle = node.getValue();
         Collection<Bundle> exporters = new HashSet<Bundle>();
         exporters.addAll(getWiredBundles(bundle).values());
 
         for (Bundle exporter : exporters) {
-            if (trail.contains(exporter)) {
-                LOGGER.debug(format("Skipping %s because it already exists in the current tree branch", exporter));
+            if (node.hasAncestor(exporter)) {                
+                LOGGER.debug(format("Skipping %s (already exists in the current branch)", exporter));
             } else {
-                trail.add(exporter);
-                Node child = node.addChild(exporter);
+                boolean existing = tree.flatten().contains(exporter);
                 LOGGER.debug(format("Adding %s as a dependency for %s", exporter, bundle));
-                createNode(child, trail);
-                trail.remove(exporter);
+                Node child = node.addChild(exporter);
+                if (existing) {
+                    LOGGER.debug(format("Skipping children of %s (already exists in another branch)", exporter));
+                } else {
+                    createNode(child);
+                }
             }
         }
     }

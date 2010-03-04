@@ -40,6 +40,7 @@ import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.karaf.commons.osgi.VersionRange;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Feature;
 import org.apache.felix.karaf.features.Repository;

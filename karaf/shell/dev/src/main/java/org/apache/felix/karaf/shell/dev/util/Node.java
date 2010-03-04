@@ -93,6 +93,20 @@ public class Node<T> {
         return result;
     }
 
+    /**
+     * Check if the node has an ancestor that represents the given value
+     *
+     * @param value the node value
+     * @return <code>true</code> it there's an ancestor that represents the value
+     */
+    public boolean hasAncestor(T value) {
+        if (parent == null) {
+            return false;
+        } else {
+            return value.equals(parent.value) || parent.hasAncestor(value);
+        }
+    }
+
     /*
      * Write this node to the PrintWriter.  It should be indented one step
      * further for every element in the indents array.  If an element in the

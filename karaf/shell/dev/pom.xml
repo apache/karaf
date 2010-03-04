@@ -37,6 +37,11 @@
     </dependency>
 
     <dependency>
+        <groupId>org.apache.felix.karaf</groupId>
+        <artifactId>org.apache.felix.karaf.commons</artifactId>
+    </dependency>
+
+    <dependency>
         <groupId>org.ops4j.pax.url</groupId>
         <artifactId>pax-url-wrap</artifactId>
     </dependency>

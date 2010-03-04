@@ -35,6 +35,7 @@
 
     <modules>
         <module>main</module>
+        <module>commons</module>
         <module>features</module>
         <module>admin</module>
         <module>deployer</module>
@@ -168,6 +169,11 @@
             <dependency>
                 <groupId>org.apache.felix.karaf</groupId>
                 <artifactId>org.apache.felix.karaf.client</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf</groupId>
+                <artifactId>org.apache.felix.karaf.commons</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
