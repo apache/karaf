@@ -1199,6 +1199,11 @@ ex.printStackTrace();
         Map<Requirement, Set<Capability>> candidateMap)
         throws ResolveException
     {
+// TODO: FELIX3 - I think permutation is not as efficient as it could be, since
+//       we will end up generating permutations that are subsets of previous
+//       permutations as we cycle through candidates. We should check if an
+//       existing candidate map already has removed the conflicting candidate.
+
         // Try to remove the previously selected candidate associated
         // with the requirement blamed for adding the constraint. This
         // blamed requirement may be null if the bundle itself is
