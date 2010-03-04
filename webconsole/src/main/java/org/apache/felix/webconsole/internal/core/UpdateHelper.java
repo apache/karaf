@@ -22,9 +22,6 @@ package org.apache.felix.webconsole.internal.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.internal.obr.DeployerThread;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -97,32 +94,20 @@ abstract class UpdateHelper extends BaseUpdateInstallHelper
     }
 
 
-    private boolean updateFromBundleLocation() throws BundleException
+    private boolean updateFromBundleLocation()
     {
-        final String location = bundle.getLocation();
-        getLog().log( LogService.LOG_DEBUG, "Trying to update from bundle location " + location );
+        getLog().log( LogService.LOG_DEBUG, "Trying to update with Bundle.update()" );
 
-        InputStream input = null;
         try
         {
-            final URL locationURL = new URL( location );
-            input = locationURL.openStream();
-            if ( input != null )
-            {
-                doRun( input );
-                getLog().log( LogService.LOG_INFO, "Bundle updated from bundle location " + location );
-                return true;
-            }
+            bundle.update();
+            getLog().log( LogService.LOG_INFO, "Bundle updated from bundle provided (update) location" );
+            return true;
         }
-        catch ( IOException ioe )
+        catch ( Throwable ioe )
         {
-            // MalformedURLException: cannot create an URL/input for the location, use OBR
-            // IOException: cannot open stream on URL ? lets use OBR then
-            getLog().log( LogService.LOG_DEBUG, "Update failure from bundle location " + location, ioe );
-        }
-        finally
-        {
-            IOUtils.closeQuietly( input );
+            // BundleException, IllegalStateException or SecurityException? lets use OBR then
+            getLog().log( LogService.LOG_DEBUG, "Update failure using Bundle.update()", ioe );
         }
 
         // not installed from the bundle location
