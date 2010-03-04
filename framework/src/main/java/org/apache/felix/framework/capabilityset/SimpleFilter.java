@@ -74,13 +74,13 @@ public class SimpleFilter
                 s = "(!" + toString((List) m_value) + ")";
                 break;
             case EQ:
-                s = "(" + m_name + "=" + m_value + ")";
+                s = "(" + m_name + "=" + toEncodedString(m_value) + ")";
                 break;
             case LTE:
-                s = "(" + m_name + "<=" + m_value + ")";
+                s = "(" + m_name + "<=" + toEncodedString(m_value) + ")";
                 break;
             case GTE:
-                s = "(" + m_name + ">=" + m_value + ")";
+                s = "(" + m_name + ">=" + toEncodedString(m_value) + ")";
                 break;
             case SUBSTRING:
                 s = "(" + m_name + "=" + unparseSubstring((List<String>) m_value) + ")";
@@ -89,7 +89,7 @@ public class SimpleFilter
         return s;
     }
 
-    private String toString(List list)
+    private static String toString(List list)
     {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < list.size(); i++)
@@ -97,6 +97,33 @@ public class SimpleFilter
             sb.append(list.get(i).toString());
         }
         return sb.toString();
+    }
+
+    private static String toEncodedString(Object o)
+    {
+        if (o instanceof String)
+        {
+            String s = (String) o;
+            if ((s.indexOf('\\') >= 0)
+                || (s.indexOf('(') >= 0)
+                || (s.indexOf(')') >= 0))
+            {
+                StringBuffer sb = new StringBuffer();
+                for (int i = 0; i < s.length(); i++)
+                {
+                    char c = s.charAt(i);
+                    if ((c == '\\') || (c == '(') || (c == ')'))
+                    {
+                        sb.append('\\');
+                    }
+                    sb.append(c);
+                }
+
+                o = sb.toString();
+            }
+        }
+
+        return o.toString();
     }
 
     public static SimpleFilter parse(String filter)
@@ -114,6 +141,7 @@ public class SimpleFilter
 
         SimpleFilter sf = null;
         List stack = new ArrayList();
+        boolean isEscaped = false;
         while (idx < filter.length())
         {
             if (sf != null)
@@ -121,7 +149,8 @@ public class SimpleFilter
                 throw new IllegalArgumentException(
                     "Only one top-level operation allowed: " + filter);
             }
-            if (filter.charAt(idx) == '(')
+
+            if (!isEscaped && (filter.charAt(idx) == '('))
             {
                 // Skip paren and following whitespace.
                 idx = skipWhitespace(filter, idx + 1);
@@ -170,7 +199,7 @@ public class SimpleFilter
                     stack.add(0, new Integer(idx));
                 }
             }
-            else if (filter.charAt(idx) == ')')
+            else if (!isEscaped && (filter.charAt(idx) == ')'))
             {
                 Object top = stack.remove(0);
                 if (top instanceof SimpleFilter)
@@ -193,6 +222,14 @@ public class SimpleFilter
                 {
                     sf = SimpleFilter.subfilter(filter, ((Integer) top).intValue(), idx);
                 }
+            }
+            else if (!isEscaped && (filter.charAt(idx) == '\\'))
+            {
+                isEscaped = true;
+            }
+            else
+            {
+                isEscaped = false;
             }
 
             idx = skipWhitespace(filter, idx + 1);
@@ -221,7 +258,7 @@ public class SimpleFilter
             }
             else if (!Character.isWhitespace(c))
             {
-                attrEndIdx = startIdx + i;
+                attrEndIdx = startIdx + i + 1;
             }
         }
         if (attrEndIdx == startIdx)
@@ -229,10 +266,10 @@ public class SimpleFilter
             throw new IllegalArgumentException(
                 "Missing attribute name: " + filter.substring(startIdx, endIdx));
         }
-        String attr = filter.substring(startIdx, attrEndIdx + 1);
+        String attr = filter.substring(startIdx, attrEndIdx);
 
         // Skip the attribute name and any following whitespace.
-        startIdx = skipWhitespace(filter, attrEndIdx + 1);
+        startIdx = skipWhitespace(filter, attrEndIdx);
 
         // Determine the operator type.
         int op = -1;
@@ -266,7 +303,30 @@ public class SimpleFilter
         }
 
         // Parse value.
-        Object value = filter.subSequence(startIdx, endIdx);
+        StringBuffer sb = new StringBuffer(endIdx - startIdx);
+        for (int offset = 0; offset < (endIdx - startIdx); )
+        {
+            char c = filter.charAt(startIdx + offset);
+            if ((c == '(') || (c == ')'))
+            {
+                throw new IllegalArgumentException(
+                    "Illegal value: " + filter.substring(startIdx, endIdx));
+            }
+            else if (c == '\\')
+            {
+                offset++;
+            }
+
+            if ((startIdx + offset) >= endIdx)
+            {
+                throw new IllegalArgumentException(
+                    "Illegal value: " + filter.substring(startIdx, endIdx));
+            }
+
+            sb.append(filter.charAt(startIdx + offset));
+            offset++;
+        }
+        Object value = sb.toString();
 
         // Check if the equality comparison is actually a substring
         // comparison.
@@ -369,7 +429,7 @@ loop:   for (;;)
             {
                 sb.append("*");
             }
-            sb.append(pieces.get(i));
+            sb.append(toEncodedString(pieces.get(i)));
         }
         return sb.toString();
     }
