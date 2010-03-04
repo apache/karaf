@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.karaf.features.internal;
+package org.apache.felix.karaf.commons.osgi;
 
 import org.osgi.framework.Version;
 

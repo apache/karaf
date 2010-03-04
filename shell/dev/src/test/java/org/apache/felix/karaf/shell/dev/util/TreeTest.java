@@ -24,6 +24,7 @@ import java.io.StringWriter;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -106,6 +107,19 @@ public class TreeTest {
         assertTrue(elements.contains("child1"));
         assertTrue(elements.contains("child2"));
         assertTrue(elements.contains("grandchild"));
+    }
+
+    @Test
+    public void hasAncestor() throws IOException {
+        Tree<String> tree = new Tree<String>("root");
+        Node<String> child1 = tree.addChild("child1");
+        child1.addChild("grandchild");
+        Node child2 = tree.addChild("child2");
+        Node node = child2.addChild("grandchild2");
+
+        assertTrue(node.hasAncestor("child2"));
+        assertTrue(node.hasAncestor("root"));
+        assertFalse(node.hasAncestor("child1"));
     }
 
     private BufferedReader read(Tree<String> tree) {

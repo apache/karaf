@@ -19,7 +19,7 @@ package org.apache.felix.karaf.shell.dev.util;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.osgi.framework.Version;
+import org.apache.felix.karaf.commons.osgi.VersionRange;
 
 /**
  * Simple class to model an OSGi Import-Package
@@ -27,7 +27,7 @@ import org.osgi.framework.Version;
 public class Import {
 
     private final String packageName;
-    private final Version version;
+    private final VersionRange version;
     private final String value;
 
     /**
@@ -38,28 +38,24 @@ public class Import {
     protected Import(String value) {
         super();
         this.value = value;
-        if (value.contains(";")) {
-            this.packageName = value.split(";")[0];
-        } else {
-            this.packageName = value;
-        }
+        this.packageName = extractPackageName(value);
         if (value.contains("version=")) {
             this.version = extractVersion(value);
         } else {
-            this.version = Version.emptyVersion;
+            this.version = VersionRange.infiniteRange;
         }
     }
 
     /*
      * Extract the version from the string
      */
-    private Version extractVersion(String value) {
+    private VersionRange extractVersion(String value) {
         int begin = value.indexOf("version=") + 8;
         int end = value.indexOf(";", begin);
         if (end < 0) {
-            return Version.parseVersion(unquote(value.substring(begin)));
+            return VersionRange.parse(unquote(value.substring(begin)));
         } else {
-            return Version.parseVersion(unquote(value.substring(begin, end)));
+            return VersionRange.parse(unquote(value.substring(begin, end)));
         }
     }
 
@@ -74,7 +70,7 @@ public class Import {
         return packageName;  
     }
 
-    public Version getVersion() {
+    public VersionRange getVersion() {
         return version;
     }
 
@@ -89,9 +85,67 @@ public class Import {
      */
     public static List<Import> parse(String value) {
         LinkedList<Import> imports = new LinkedList<Import>();
-        for (String imp : value.split(",")) {
+        for (String imp : split(value)) {
             imports.add(new Import(imp));
         }
         return imports;
+    }
+
+    /**
+     * Parse the value of an Import-Package META-INF header and return
+     * a list of Import instances, filtering out packages that are in the
+     * Export-Package META-INF header
+     *
+     * @param importValue the value of the Import-Package header
+     * @param exportValue the value of the Export-Package header
+     */
+    public static List<Import> parse(String importValue, String exportValue) {
+        LinkedList<String> exports = new LinkedList<String>();
+        for (String exp : split(exportValue)) {
+            exports.add(extractPackageName(exp));
+        }
+        LinkedList<Import> imports = new LinkedList<Import>();
+        for (Import imp : parse(importValue)) {
+            if (!exports.contains(imp.getPackage())) {
+                imports.add(imp);
+            }
+        }
+        return imports;
+    }
+
+    /*
+     * Extract the package name from the value
+     * e.g. org.apache.felix.karaf;version="1.x" -> org.apache.felix.karaf
+     */
+    private static String extractPackageName(String value) {
+        if (value.contains(";")) {
+            return value.split(";")[0];
+        } else {
+            return value;
+        }
+    }
+
+    /*
+     * Counts the number of quotes in a String value
+     */
+    private static int quotes(String value) {
+        return value.replaceAll("[^\"]", "").length();
+    }
+
+    /*
+     * Split the OSGi headers on the , symbol
+     */
+    private static List<String> split(String value) {
+        List<String> result = new LinkedList<String>();
+        String[] elements = value.split(",");
+        for (int i = 0; i < elements.length ; i++) {
+            if (quotes(elements[i]) % 2 == 1) {
+                // we probably split a version range, so joining it again with the next element
+                result.add(elements[i] + "," + elements[++i]);
+            } else {
+                result.add(elements[i]);
+            }
+        }
+        return result;
     }
 }
