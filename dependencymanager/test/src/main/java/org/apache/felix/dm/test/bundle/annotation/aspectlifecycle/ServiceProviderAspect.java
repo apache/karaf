@@ -26,7 +26,7 @@ import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
-@AspectService(ranking = 10)
+@AspectService(ranking = 10, factory=ServiceProviderAspectFactory.class, factoryMethod="createAspect")
 public class ServiceProviderAspect implements ServiceInterface
 {
     protected boolean m_initCalled;
