@@ -19,11 +19,11 @@
 package org.apache.felix.webconsole.internal.obr;
 
 
+import org.apache.felix.bundlerepository.Reason;
+import org.apache.felix.bundlerepository.Resolver;
+import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.webconsole.internal.Logger;
 import org.osgi.service.log.LogService;
-import org.osgi.service.obr.Requirement;
-import org.osgi.service.obr.Resolver;
-import org.osgi.service.obr.Resource;
 
 
 public class DeployerThread extends Thread
@@ -35,34 +35,40 @@ public class DeployerThread extends Thread
 
     private final boolean startBundles;
 
+    private final boolean optionalDependencies;
 
-    public DeployerThread( Resolver obrResolver, Logger logger, boolean startBundles )
+
+    public DeployerThread( Resolver obrResolver, Logger logger, boolean startBundles, boolean optionalDependencies )
     {
-        this( obrResolver, logger, startBundles, "OBR Bundle Deployer" );
+        this( obrResolver, logger, startBundles, optionalDependencies, "OBR Bundle Deployer" );
     }
 
 
-    public DeployerThread( Resolver obrResolver, Logger logger, boolean startBundles, String name )
+    public DeployerThread( Resolver obrResolver, Logger logger, boolean startBundles, boolean optionalDependencies, String name )
     {
         super( name );
         this.obrResolver = obrResolver;
         this.logger = logger;
         this.startBundles = startBundles;
+        this.optionalDependencies = optionalDependencies;
     }
 
 
     public void run()
     {
+        int flags = 0;
+        flags += (startBundles ? Resolver.START : 0);
+        flags += (optionalDependencies ? 0 : Resolver.NO_OPTIONAL_RESOURCES);
         try
         {
-            if ( obrResolver.resolve() )
+            if ( obrResolver.resolve( flags ) )
             {
 
                 logResource( logger, "Installing Requested Resources", obrResolver.getAddedResources() );
                 logResource( logger, "Installing Required Resources", obrResolver.getRequiredResources() );
                 logResource( logger, "Installing Optional Resources", obrResolver.getOptionalResources() );
 
-                obrResolver.deploy( startBundles );
+                obrResolver.deploy( flags );
             }
             else
             {
@@ -91,17 +97,17 @@ public class DeployerThread extends Thread
     }
 
 
-    public static void logRequirements( Logger logger, String message, Requirement[] req )
+    public static void logRequirements( Logger logger, String message, Reason[] reasons )
     {
         logger.log( LogService.LOG_ERROR, message );
-        for ( int i = 0; req != null && i < req.length; i++ )
+        for ( int i = 0; reasons != null && i < reasons.length; i++ )
         {
-            String moreInfo = req[i].getComment();
+            String moreInfo = reasons[i].getRequirement().getComment();
             if ( moreInfo == null )
             {
-                moreInfo = req[i].getFilter().toString();
+                moreInfo = reasons[i].getRequirement().getFilter().toString();
             }
-            logger.log( LogService.LOG_ERROR, "  " + i + ": " + req[i].getName() + " (" + moreInfo + ")" );
+            logger.log( LogService.LOG_ERROR, "  " + i + ": " + reasons[i].getRequirement().getName() + " (" + moreInfo + ")" );
         }
     }
 

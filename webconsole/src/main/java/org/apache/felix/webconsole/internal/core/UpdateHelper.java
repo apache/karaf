@@ -22,22 +22,22 @@ package org.apache.felix.webconsole.internal.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.felix.bundlerepository.Resolver;
+import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.webconsole.internal.obr.DeployerThread;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.log.LogService;
-import org.osgi.service.obr.RepositoryAdmin;
-import org.osgi.service.obr.Resolver;
-import org.osgi.service.obr.Resource;
 
 
 abstract class UpdateHelper extends BaseUpdateInstallHelper
 {
-
-    // Define a constant of that name to prevent NoClassDefFoundError in
-    // updateFromOBR trying to load the class with RepositoryAdmin.class
-    private static final String REPOSITORY_ADMIN_NAME = "org.osgi.service.obr.RepositoryAdmin";
 
     private final Bundle bundle;
 
@@ -63,7 +63,7 @@ abstract class UpdateHelper extends BaseUpdateInstallHelper
     }
 
 
-    protected Bundle doRun() throws BundleException, IOException
+    protected Bundle doRun() throws Exception
     {
         // update the bundle from the file if defined
         if ( getBundleFile() != null )
@@ -115,9 +115,9 @@ abstract class UpdateHelper extends BaseUpdateInstallHelper
     }
 
 
-    private boolean updateFromOBR()
+    private boolean updateFromOBR() throws InvalidSyntaxException
     {
-        RepositoryAdmin ra = ( RepositoryAdmin ) getService( REPOSITORY_ADMIN_NAME );
+        RepositoryAdmin ra = ( RepositoryAdmin ) getService( RepositoryAdmin.class.getName() );
         if ( ra != null )
         {
             getLog().log( LogService.LOG_DEBUG, "Trying to update from OSGi Bundle Repository" );
@@ -154,7 +154,7 @@ abstract class UpdateHelper extends BaseUpdateInstallHelper
                         .getOptionalResources() );
 
                     // deploy the resolved bundles and ensure they are started
-                    resolver.deploy( true );
+                    resolver.deploy( Resolver.START );
                     getLog().log( LogService.LOG_INFO, "Bundle updated from OSGi Bundle Repository" );
 
                     return true;
@@ -168,7 +168,7 @@ abstract class UpdateHelper extends BaseUpdateInstallHelper
         }
         else
         {
-            getLog().log( LogService.LOG_INFO, "Cannot update from OSGi Bundle Repository: Service not available" );
+            getLog().log( LogService.LOG_DEBUG, "Cannot updated from OSGi Bundle Repository: Service not available" );
         }
 
         // fallback to false, nothing done

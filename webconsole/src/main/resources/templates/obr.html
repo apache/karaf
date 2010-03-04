@@ -1,4 +1,5 @@
-﻿<script type="text/javascript" src="res/ui/obr.js"></script>
+<script type="text/javascript" src="res/ui/jquery.uuid.js"></script>
+<script type="text/javascript" src="res/ui/obr.js"></script>
 <script type="text/javascript">
 var i18n = {
 	status_ok : '${obr.status.ok}',
@@ -44,28 +45,57 @@ var obrData = ${__data__};
 
 <br/>
 
-<form id="installForm" method="post" action="">
-	<div class="ui-widget-header ui-corner-top buttonGroup">
-		<span style="float: left; margin-left: 1em">${obr.res.title}</span>
-		<input type="text" id="searchField" />
-		<button id="searchBtn">${obr.action.search}</button>
-		<input type="submit" name="deploy" value="${obr.action.deploy}" />
-		<input type="submit" name="deploystart" value="${obr.action.deploystart}" />
-	</div>
+<div class="ui-widget-header ui-corner-top buttonGroup">
+    <span style="float: left; margin-left: 1em">${obr.res.title}</span>
+    <span>
+        <a href="obr?list=a">A</a>
+        <a href="obr?list=b">B</a>
+        <a href="obr?list=c">C</a>
+        <a href="obr?list=d">D</a>
+        <a href="obr?list=e">E</a>
+        <a href="obr?list=f">F</a>
+        <a href="obr?list=g">G</a>
+        <a href="obr?list=h">H</a>
+        <a href="obr?list=i">I</a>
+        <a href="obr?list=j">J</a>
+        <a href="obr?list=k">K</a>
+        <a href="obr?list=l">L</a>
+        <a href="obr?list=m">M</a>
+        <a href="obr?list=n">N</a>
+        <a href="obr?list=o">O</a>
+        <a href="obr?list=p">P</a>
+        <a href="obr?list=q">Q</a>
+        <a href="obr?list=r">R</a>
+        <a href="obr?list=s">S</a>
+        <a href="obr?list=t">T</a>
+        <a href="obr?list=u">U</a>
+        <a href="obr?list=v">V</a>
+        <a href="obr?list=w">W</a>
+        <a href="obr?list=x">X</a>
+        <a href="obr?list=y">Y</a>
+        <a href="obr?list=z">Z</a>
+        <a href="obr?list=-">?</a>
+    </span>
+    <input type="text" id="searchField"/>
+    <button id="searchBtn">${obr.action.search}</button>
+</div>
 
-	<table id="resTable" class="nicetable">
-		<thead>
-			<tr>
-				<th class="col_Version">${version}</th>
-				<th class="col_ResName">${obr.res.name}</th>
-				<th class="col_VersionInst">${obr.res.installedVer}</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr><td colspan="2">dummy</td></tr>
-		</tbody>
-	</table>
-</form>
+<table id="resTable" class="nicetable">
+    <thead>
+        <tr>
+            <th class="col_ResName">${obr.res.name}</th>
+            <th class="col_VersionInst">${obr.res.installedVer}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="2">dummy</td></tr>
+    </tbody>
+</table>
+
+<table id="detailsTable" class="nicetable ui-helper-hidden">
+    <tbody id="detailsTableBody">
+    </tbody>
+</table>
 
 <br/>
 

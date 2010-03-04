@@ -40,10 +40,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.bundlerepository.R4Attribute;
-import org.apache.felix.bundlerepository.R4Export;
-import org.apache.felix.bundlerepository.R4Import;
-import org.apache.felix.bundlerepository.R4Package;
+import org.apache.felix.bundlerepository.impl.R4Attribute;
+import org.apache.felix.bundlerepository.impl.R4Export;
+import org.apache.felix.bundlerepository.impl.R4Import;
+import org.apache.felix.bundlerepository.impl.R4Package;
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;

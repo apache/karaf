@@ -71,7 +71,7 @@ abstract class BaseUpdateInstallHelper implements Runnable
      * @throws BundleException
      * @throws IOException
      */
-    protected Bundle doRun() throws BundleException, IOException
+    protected Bundle doRun() throws Exception
     {
         // now deploy the resolved bundles
         InputStream bundleStream = null;
@@ -121,13 +121,9 @@ abstract class BaseUpdateInstallHelper implements Runnable
                     { bundle } );
             }
         }
-        catch ( IOException ioe )
+        catch ( Exception ioe )
         {
             getLog().log( LogService.LOG_ERROR, "Cannot install or update bundle from " + bundleFile, ioe );
-        }
-        catch ( BundleException be )
-        {
-            getLog().log( LogService.LOG_ERROR, "Cannot install or update bundle from " + bundleFile, be );
         }
         finally
         {
