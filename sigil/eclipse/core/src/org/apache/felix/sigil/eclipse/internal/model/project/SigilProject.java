@@ -252,7 +252,6 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
                 return true;
             }
         });
-
     }
 
 
