@@ -277,10 +277,7 @@ public class ComponentManager implements SynchronousBundleListener
         }
 
         // Set service callbacks
-        setServiceCallbacks(service, parser);
-        
-        // Set composition
-        setServiceComposition(service, parser);
+        setCommonServiceParams(service, parser);
         
         // Set service interface with associated service properties
         Dictionary<String, String> serviceProperties = parser.getDictionary(
@@ -295,26 +292,17 @@ public class ComponentManager implements SynchronousBundleListener
     }
 
     /**
-     * Set Service callbacks, if provided from our Component descriptor
+     * Set common Service parameters, if provided from our Component descriptor
      * @param service
      * @param parser
      */
-    private void setServiceCallbacks(Service service, DescriptorParser parser)
+    private void setCommonServiceParams(Service service, DescriptorParser parser)
     {
         String init = parser.getString(DescriptorParam.init, null);
         String start = parser.getString(DescriptorParam.start, null);
         String stop = parser.getString(DescriptorParam.stop, null);
         String destroy = parser.getString(DescriptorParam.destroy, null);
         service.setCallbacks(init, start, stop, destroy);
-    }
-
-    /**
-     * Sets Service Composition, if provided from our Component descriptor.
-     * @param service
-     * @param parser
-     */
-    private void setServiceComposition(Service service, DescriptorParser parser)
-    {
         String composition = parser.getString(DescriptorParam.composition, null);
         if (composition != null)
         {
@@ -332,14 +320,26 @@ public class ComponentManager implements SynchronousBundleListener
     private Service createAspectService(Bundle b, DependencyManager dm, DescriptorParser parser)
         throws ClassNotFoundException
     {
+        Service service = null;
+
         Class<?> serviceInterface = b.loadClass(parser.getString(DescriptorParam.service));
         String serviceFilter = parser.getString(DescriptorParam.filter, null);
-        Class<?> aspectImplementation = b.loadClass(parser.getString(DescriptorParam.impl));
         Dictionary<String, String> aspectProperties = parser.getDictionary(DescriptorParam.properties, null);
-        int ranking = parser.getInt(DescriptorParam.ranking, 1);
-        Service service = dm.createAspectService(serviceInterface, serviceFilter, ranking, aspectImplementation, aspectProperties);
-        setServiceCallbacks(service, parser);
-        setServiceComposition(service, parser);
+        int ranking = parser.getInt(DescriptorParam.ranking, 1);          
+        String factory = parser.getString(DescriptorParam.factory, null);
+        if (factory == null)
+        {
+            String implClass = parser.getString(DescriptorParam.impl);
+            Object impl = b.loadClass(implClass);
+            service = dm.createAspectService(serviceInterface, serviceFilter, ranking, impl, aspectProperties);
+        }
+        else
+        {
+            String factoryMethod = parser.getString(DescriptorParam.factoryMethod, "create");
+            Class<?> factoryClass = b.loadClass(factory);
+            service = dm.createAspectService(serviceInterface, serviceFilter, ranking, factoryClass, factoryMethod, aspectProperties);
+        }               
+        setCommonServiceParams(service, parser);
         return service;
     }
 
@@ -360,8 +360,7 @@ public class ComponentManager implements SynchronousBundleListener
         String adapteeFilter = parser.getString(DescriptorParam.adapteeFilter, null);
      
         Service service = dm.createAdapterService(adapteeService, adapteeFilter, adapterService, adapterImpl, adapterProperties);
-        setServiceCallbacks(service, parser);
-        setServiceComposition(service, parser);
+        setCommonServiceParams(service, parser);
         return service;
     }
 
@@ -382,8 +381,7 @@ public class ComponentManager implements SynchronousBundleListener
         Dictionary<String, String> properties = parser.getDictionary(DescriptorParam.properties, null);
         boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
         Service srv = dm.createBundleAdapterService(stateMask, filter, adapterImpl, service, properties, propagate);  
-        setServiceCallbacks(srv, parser);
-        setServiceComposition(srv, parser);
+        setCommonServiceParams(srv, parser);
         return srv;
     }
 
