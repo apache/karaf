@@ -610,6 +610,12 @@ public class AnnotationCollector extends ClassDataCollector
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
         addInitStartStopDestroyCompositionParams(info);
         
+        // factory attribute
+        info.addClassParam(annotation, Params.factory, null);
+
+        // factoryMethod attribute
+        info.addParam(annotation, Params.factoryMethod, null);
+        
         // Parse service filter
         String filter = annotation.get(Params.filter.toString());
         if (filter != null) {

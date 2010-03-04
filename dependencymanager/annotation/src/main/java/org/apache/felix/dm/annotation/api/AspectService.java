@@ -62,4 +62,18 @@ public @interface AspectService
      * @return the ranking of this aspect
      */
     int ranking();
+    
+    /**
+     * Returns the Class of the class which acts as a factory for this Service. The default method
+     * factory name is "create". If you need to invoke another method, then you can use the 
+     * <code>factoryMethod</code> attribute.
+     * @return the factory Class name.
+     */
+    Class<?> factory() default Object.class;
+
+    /**
+     * Returns the method name of the factory class which will create our Service instance.
+     * @return the factory method name.
+     */
+    String factoryMethod() default "";
 }
