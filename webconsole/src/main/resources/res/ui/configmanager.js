@@ -181,8 +181,9 @@ function printTextArea(/* Element */ parent, props )
             td( "content", { style: { width: "99%" } }, [
                 createElement( "textarea", null, {
                         name: "properties",
-                        style: { height: "50%", width: "99%" }
+                        style: { height: "20em", width: "99%" }
                     }, [ text( propsValue ) ] ),
+                createElement( "br" ),
                 text( "Enter Name-Value pairs of configuration properties" )
             ])
         ])
