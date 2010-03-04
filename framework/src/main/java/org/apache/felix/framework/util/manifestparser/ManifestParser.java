@@ -1169,7 +1169,7 @@ public class ManifestParser
                     newAttrs));
             }
         }
-        else
+        else if (headerMap.get(Constants.FRAGMENT_HOST) != null)
         {
             String s = (String) headerMap.get(Constants.BUNDLE_SYMBOLICNAME);
             s = (s == null) ? (String) headerMap.get(Constants.BUNDLE_NAME) : s;
