@@ -881,28 +881,22 @@ public class OsgiManager extends GenericServlet
         }
 
         // might update http service registration
-        if ( !newWebManagerRoot.equals( this.webManagerRoot ) )
+        HttpService httpService = this.httpService;
+        if ( httpService != null )
         {
-            HttpService httpService = this.httpService;
-            if ( httpService != null )
-            {
-                synchronized ( this )
-                {
-                    // unbind old location first
-                    unbindHttpService( httpService );
+            // unbind old location first
+            unbindHttpService( httpService );
 
-                    // switch location
-                    this.webManagerRoot = newWebManagerRoot;
+            // switch location
+            this.webManagerRoot = newWebManagerRoot;
 
-                    // bind new location now
-                    bindHttpService( httpService );
-                }
-            }
-            else
-            {
-                // just set the configured location (FELIX-2034)
-                this.webManagerRoot = newWebManagerRoot;
-            }
+            // bind new location now
+            bindHttpService( httpService );
+        }
+        else
+        {
+            // just set the configured location (FELIX-2034)
+            this.webManagerRoot = newWebManagerRoot;
         }
     }
 
