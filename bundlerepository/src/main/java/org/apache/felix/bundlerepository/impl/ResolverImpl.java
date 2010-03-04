@@ -208,10 +208,16 @@ public class ResolverImpl implements Resolver
 
         // Clean up the resulting data structures.
         m_requiredSet.removeAll(m_addedSet);
-        m_requiredSet.removeAll(Arrays.asList(locals));
+        if ((flags & NO_LOCAL_RESOURCES) == 0)
+        {
+            m_requiredSet.removeAll(Arrays.asList(locals));
+        }
         m_optionalSet.removeAll(m_addedSet);
         m_optionalSet.removeAll(m_requiredSet);
-        m_optionalSet.removeAll(Arrays.asList(locals));
+        if ((flags & NO_LOCAL_RESOURCES) == 0)
+        {
+            m_optionalSet.removeAll(Arrays.asList(locals));
+        }
 
         // Return final result.
         return result;
