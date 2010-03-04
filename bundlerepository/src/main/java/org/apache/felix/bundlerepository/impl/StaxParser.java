@@ -187,7 +187,26 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
                 }
                 else
                 {
-                    ignoreTag(reader);
+                    StringBuffer sb = null;
+                    while ((event = reader.next()) != XMLStreamConstants.END_ELEMENT)
+                    {
+                        switch (event)
+                        {
+                            case XMLStreamConstants.START_ELEMENT:
+                                throw new Exception("Unexpected element inside <require/> element");
+                            case XMLStreamConstants.CHARACTERS:
+                                if (sb == null)
+                                {
+                                    sb = new StringBuffer();
+                                }
+                                sb.append(reader.getText());
+                                break;
+                        }
+                    }
+                    if (sb != null)
+                    {
+                        resource.put(element, sb.toString().trim());
+                    }
                 }
             }
             // Sanity check
