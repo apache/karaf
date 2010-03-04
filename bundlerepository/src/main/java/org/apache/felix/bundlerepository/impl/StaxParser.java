@@ -188,6 +188,7 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
                 else
                 {
                     StringBuffer sb = null;
+                    String type = reader.getAttributeValue(null, "type");
                     while ((event = reader.next()) != XMLStreamConstants.END_ELEMENT)
                     {
                         switch (event)
@@ -205,7 +206,7 @@ public class StaxParser implements RepositoryImpl.RepositoryParser
                     }
                     if (sb != null)
                     {
-                        resource.put(element, sb.toString().trim());
+                        resource.put(element, sb.toString().trim(), type);
                     }
                 }
             }

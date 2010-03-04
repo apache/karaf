@@ -36,12 +36,7 @@ public class ResourceImpl implements Resource
     private List m_capList = new ArrayList();
     private List m_reqList = new ArrayList();
 
-    private String m_resourceURI = null;
-    private String m_docURI = null;
-    private String m_licenseURI = null;
-    private String m_sourceURI = null;
-    private String m_javadocURI = null;
-    private boolean m_converted = false;
+    private Map m_uris;
 
     private int m_hash;
 
@@ -100,10 +95,7 @@ public class ResourceImpl implements Resource
 
     public Map getProperties()
     {
-        if (!m_converted)
-        {
-            convertURIs();
-        }
+        convertURIs();
         return m_map;
     }
 
@@ -131,10 +123,7 @@ public class ResourceImpl implements Resource
 
     public String getURI()
     {
-        if (!m_converted)
-        {
-            convertURIs();
-        }
+        convertURIs();
         return (String) m_map.get(Resource.URI);
     }
 
@@ -189,95 +178,67 @@ public class ResourceImpl implements Resource
     **/
     protected Object put(Object key, Object value)
     {
-        key = key.toString().toLowerCase();
-        m_converted = false;
+        put(key.toString(), value.toString(), null);
+        return null;
+    }
+
+    protected void put(String key, String value, String type)
+    {
+        key = key.toLowerCase();
         m_hash = 0;
-        // Capture the URIs since they might be relative, so we
-        // need to defer setting the actual URL value until they
-        // are used so that we will know our repository and its
-        // base URL.
-        if (key.equals(LICENSE_URI))
+        if ("uri".equals(type) || URI.equals(key))
         {
-            m_licenseURI = (String) value;
+            if (m_uris == null)
+            {
+                m_uris = new HashMap();
+            }
+            m_uris.put(key, value);
         }
-        else if (key.equals(DOCUMENTATION_URI))
+        else if ("version".equals(type) || VERSION.equals(key))
         {
-            m_docURI = (String) value;
+            m_map.put(key, Version.parseVersion(value));
         }
-        else if (key.equals(SOURCE_URI))
+        else if ("long".equals(type) || SIZE.equals(key))
         {
-            m_sourceURI = (String) value;
+            m_map.put(key, Long.valueOf(value.toString()));
         }
-        else if (key.equals(JAVADOC_URI))
+        else if (CATEGORY.equals(key))
         {
-            m_javadocURI = (String) value;
-        }
-        else if (key.equals(URI))
-        {
-            m_resourceURI = (String) value;
+            m_map.put(key, Arrays.asList(value.toString().split(",")));
         }
         else
         {
-            if (key.equals(VERSION))
-            {
-                value = Version.parseVersion(value.toString());
-            }
-            else if (key.equals(SIZE))
-            {
-                value = Long.valueOf(value.toString());
-            }
-            else if (key.equals(CATEGORY))
-            {
-                if (value instanceof Collection)
-                {
-                    value = new ArrayList((Collection) value);
-                }
-                else
-                {
-                    value = Arrays.asList(value.toString().split(","));
-                }
-            }
-    
-            return m_map.put(key, value);
+            m_map.put(key, value);
         }
-
-        return null;
     }
 
     private void convertURIs()
     {
-        if (m_repo != null)
+        if (m_uris != null)
         {
-            try
+            for (Iterator it = m_uris.keySet().iterator(); it.hasNext();)
             {
-                URI base = m_repo.getURI() != null ? new URI(m_repo.getURI()) : null;
-                if (m_resourceURI != null)
-                {
-                    m_map.put(URI, base != null ? base.resolve(m_resourceURI).toString() : m_resourceURI);
-                }
-                if (m_docURI != null)
-                {
-                    m_map.put(DOCUMENTATION_URI, base != null ? base.resolve(m_docURI).toString() : m_docURI);
-                }
-                if (m_licenseURI != null)
-                {
-                    m_map.put(LICENSE_URI, base != null ? base.resolve(m_licenseURI).toString() : m_licenseURI);
-                }
-                if (m_sourceURI != null)
-                {
-                    m_map.put(SOURCE_URI, base != null ? base.resolve(m_sourceURI).toString() : m_sourceURI);
-                }
-                if (m_javadocURI != null)
-                {
-                    m_map.put(JAVADOC_URI, base != null ? base.resolve(m_javadocURI).toString() : m_javadocURI);
-                }
-                m_converted = true;
+                String key = (String) it.next();
+                String val = (String) m_uris.get(key);
+                m_map.put(key, resolveUri(val));
             }
-            catch (URISyntaxException ex)
+            m_uris = null;
+        }
+    }
+
+    private String resolveUri(String uri)
+    {
+        try
+        {
+            if (m_repo != null && m_repo.getURI() != null)
             {
-                ex.printStackTrace(System.err);
+                return new URI(m_repo.getURI()).resolve(uri).toString();
             }
         }
+        catch (Throwable t)
+        {
+        }
+        return uri;
     }
 
     public String toString()
