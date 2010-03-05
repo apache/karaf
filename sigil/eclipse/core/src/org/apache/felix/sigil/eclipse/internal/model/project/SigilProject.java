@@ -99,6 +99,8 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
 
     private IEclipsePreferences preferences;
 
+    private List<IRequirementModelElement> lastReqs = new LinkedList<IRequirementModelElement>();
+    private List<ICapabilityModelElement> lastCaps = new LinkedList<ICapabilityModelElement>();
 
     public SigilProject()
     {
@@ -150,14 +152,21 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
         
         if ( reqsChanged ) {
             processRequirementsChanges(progress.newChild(600));
+            SigilCore.rebuild(this, progress.newChild(50));
         }
         
-        progress.setWorkRemaining( 300 );
+        progress.setWorkRemaining( 250 );
 
         if ( capsChanged ) {
             changes.addAll(caps);
-            SigilCore.rebuildBundleDependencies( this, changes, progress.newChild( 300 ) );
+            SigilCore.rebuildBundleDependencies( this, changes, progress.newChild( 250 ) );
         }        
+    }
+    
+    public void flushDependencyState() {
+        synchronized(this) {
+            lastReqs.clear();
+        }
     }
     
     private void processRequirementsChanges(IProgressMonitor monitor) throws CoreException 
@@ -220,9 +229,6 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
         }
     }
 
-    private List<IRequirementModelElement> lastReqs = new LinkedList<IRequirementModelElement>();
-    private List<ICapabilityModelElement> lastCaps = new LinkedList<ICapabilityModelElement>();
-            
     private void checkChanges(IProgressMonitor monitor, final List<IRequirementModelElement> reqs, final List<ICapabilityModelElement> caps)
     {
         visit(new IModelWalker()

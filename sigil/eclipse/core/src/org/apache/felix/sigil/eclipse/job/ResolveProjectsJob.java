@@ -26,14 +26,14 @@ import java.util.Collections;
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.jobs.Job;
 
 
-public class ResolveProjectsJob extends Job
+public class ResolveProjectsJob extends WorkspaceJob
 {
     final Collection<ISigilProjectModel> sigilProjects;
     
@@ -54,14 +54,17 @@ public class ResolveProjectsJob extends Job
 
 
     @Override
-    protected IStatus run( IProgressMonitor monitor )
+    public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
     {
         MultiStatus status = new MultiStatus( SigilCore.PLUGIN_ID, 0, "Error resolving Sigil projects", null );
 
+        boolean flush = sigilProjects.size() > 0;
+        
         for ( ISigilProjectModel sigilProject : sigilProjects )
         {
             try
             {
+                if ( flush ) sigilProject.flushDependencyState();
                 sigilProject.rebuildDependencies(monitor);
             }
             catch ( CoreException e )

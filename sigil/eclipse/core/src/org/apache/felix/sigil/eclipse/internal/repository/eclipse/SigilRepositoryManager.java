@@ -103,7 +103,8 @@ public class SigilRepositoryManager extends AbstractRepositoryManager implements
         ArrayList<IBundleRepository> repos = new ArrayList<IBundleRepository>();
         HashSet<String> ids = new HashSet<String>();
 
-        for ( IRepositoryModel repo : findRepositories() )
+        IRepositoryModel[] models = findRepositories();
+        for ( IRepositoryModel repo : models )
         {
             try
             {

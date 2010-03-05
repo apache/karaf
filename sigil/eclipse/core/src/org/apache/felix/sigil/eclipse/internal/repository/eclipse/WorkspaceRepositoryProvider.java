@@ -24,7 +24,6 @@ import java.util.Properties;
 
 import org.apache.felix.sigil.repository.IBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryProvider;
-import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 
@@ -44,7 +43,7 @@ public class WorkspaceRepositoryProvider implements IRepositoryProvider
         if ( repository == null )
         {
             repository = new WorkspaceRepository( id );
-            ResourcesPlugin.getWorkspace().addResourceChangeListener( repository, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_REFRESH );
+            ResourcesPlugin.getWorkspace().addResourceChangeListener( repository, WorkspaceRepository.EVENT_MASKS );            
         }
         return repository;
     }

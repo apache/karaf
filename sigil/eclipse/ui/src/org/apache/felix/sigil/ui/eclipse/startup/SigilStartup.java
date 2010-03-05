@@ -34,28 +34,16 @@ public class SigilStartup implements IStartup
 
     public void earlyStartup()
     {
-        // Create a task to run the resolver
-        final Runnable resolver = new Runnable()
+        // Register a repository change listener to re-run the resolver when repository changes
+        SigilCore.getGlobalRepositoryManager().addRepositoryChangeListener( new IRepositoryChangeListener()
         {
-            public void run()
+            public void repositoryChanged( RepositoryChangeEvent event )
             {
                 IWorkspace workspace = ResourcesPlugin.getWorkspace();
                 ResolveProjectsJob job = new ResolveProjectsJob( workspace );
                 job.setSystem( true );
                 job.schedule();
             }
-        };
-
-        // Register a repository change listener to re-run the resolver when repository changes
-        SigilCore.getGlobalRepositoryManager().addRepositoryChangeListener( new IRepositoryChangeListener()
-        {
-            public void repositoryChanged( RepositoryChangeEvent event )
-            {
-                resolver.run();
-            }
         } );
-
-        // Run the resolver now
-        resolver.run();
     }
 }

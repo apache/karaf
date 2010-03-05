@@ -39,7 +39,6 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
@@ -49,7 +48,9 @@ import org.eclipse.core.runtime.content.IContentTypeManager;
 public class WorkspaceRepository extends AbstractBundleRepository implements IResourceChangeListener
 {
 
-    private static final int UPDATE_MASK = IResourceDelta.CONTENT | IResourceDelta.DESCRIPTION | IResourceDelta.OPEN;
+    private static final int UPDATE_MASK = IResourceDelta.CONTENT | IResourceDelta.OPEN;
+    
+    static final int EVENT_MASKS = IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_REFRESH;
 
     public WorkspaceRepository( String id )
     {
@@ -147,6 +148,9 @@ public class WorkspaceRepository extends AbstractBundleRepository implements IRe
         try
         {
             switch (event.getType()) {
+                case IResourceChangeEvent.PRE_DELETE:
+                    handleDelete(event);
+                    break;
                 case IResourceChangeEvent.PRE_REFRESH:
                     handleRefresh(event);
                     break;
@@ -161,6 +165,19 @@ public class WorkspaceRepository extends AbstractBundleRepository implements IRe
         }
     }
 
+    private HashSet<IProject> deleted = new HashSet<IProject>();
+
+    private void handleDelete(IResourceChangeEvent event)
+    {
+        if ( event.getResource() instanceof IProject ) {
+            IProject project = (IProject) event.getResource();
+            if ( isSigilProject(project) )
+            {
+                deleted.add(project);
+            }
+        }
+    }
+
 
     private void handleRefresh(IResourceChangeEvent event)
     {
@@ -171,26 +188,25 @@ public class WorkspaceRepository extends AbstractBundleRepository implements IRe
 
     private void handleChange(IResourceChangeEvent event) throws CoreException
     {
+        final boolean[] notify = new boolean[1];
+        
         event.getDelta().accept( new IResourceDeltaVisitor()
         {
             public boolean visit( IResourceDelta delta ) throws CoreException
             {
-                boolean result;
+                boolean checkMembers = true;
 
                 IResource resource = delta.getResource();
-                if ( resource instanceof IWorkspaceRoot )
-                {
-                    result = true;
-                }
-                else if ( resource instanceof IProject )
+                if ( resource instanceof IProject )
                 {
                     IProject project = ( IProject ) resource;
-                    if ( SigilCore.isSigilProject( project ) )
+                    if ( isSigilProject(project) )
                     {
                         switch ( delta.getKind() )
                         {
                             case IResourceDelta.CHANGED:
-                                if ( ( delta.getFlags() & UPDATE_MASK ) == 0 )
+                                int flag = delta.getFlags();
+                                if ( ( flag & UPDATE_MASK ) == 0 )
                                 {
                                     break;
                                 }
@@ -198,14 +214,14 @@ public class WorkspaceRepository extends AbstractBundleRepository implements IRe
                                 // fall through on purpose
                             case IResourceDelta.ADDED: // fall through on purpose
                             case IResourceDelta.REMOVED: // fall through on purpose
-                                notifyChange();
+                                notify[0] = true;
                                 break;
                         }
-                        result = true;
+                        checkMembers = true;
                     }
                     else
                     {
-                        result = false;
+                        checkMembers = false;
                     }
                 }
                 else if ( resource.getName().equals( SigilCore.SIGIL_PROJECT_FILE ) )
@@ -215,17 +231,23 @@ public class WorkspaceRepository extends AbstractBundleRepository implements IRe
                         case IResourceDelta.CHANGED:
                         case IResourceDelta.ADDED:
                         case IResourceDelta.REMOVED:
-                            notifyChange();
+                            notify[0] = true;
                     }
-                    result = false;
+                    checkMembers = false;
                 }
-                else
-                {
-                    result = false;
-                }
-                return result;
+                return checkMembers && !notify[0];
             }
         } );
+        
+        if (notify[0]) {
+            notifyChange();
+        }
+    }
+
+
+    private boolean isSigilProject(IProject project)
+    {
+        return SigilCore.isSigilProject( project ) || deleted.remove(project);
     }
 
 }

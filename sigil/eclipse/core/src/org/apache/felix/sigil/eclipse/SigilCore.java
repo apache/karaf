@@ -278,6 +278,7 @@ public class SigilCore extends AbstractUIPlugin
         installs = new OSGiInstallManager();
 
         globalRepositoryManager = new GlobalRepositoryManager();
+        globalRepositoryManager.initialise();
         
         projectManager = new SigilProjectManager();
 
@@ -513,18 +514,19 @@ public class SigilCore extends AbstractUIPlugin
         Set<ISigilProjectModel> affected = SigilCore.getRoot().resolveDependentProjects( caps, monitor );
 
         if ( project != null ) {
-            affected.add( project );
+            affected.remove( project );
         }
 
         SubMonitor progress = SubMonitor.convert( monitor, affected.size() * 20 );
         for ( ISigilProjectModel dependent : affected )
         {
+            //dependent.flushDependencyState();
             rebuild( dependent, progress );
         }
     }
 
 
-    private static void rebuild( ISigilProjectModel dependent, SubMonitor progress )
+    public static void rebuild( ISigilProjectModel dependent, SubMonitor progress )
     {
         try
         {

@@ -83,6 +83,8 @@ public interface ISigilProjectModel extends ICompoundModelElement
     void save( IProgressMonitor monitor, boolean rebuildDependencies ) throws CoreException;
     
     void rebuildDependencies(IProgressMonitor monitor) throws CoreException;
+    
+    void flushDependencyState();
 
 
     /**

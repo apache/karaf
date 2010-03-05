@@ -46,7 +46,6 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -236,15 +235,30 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
 
     public void resourceChanged( IResourceChangeEvent event )
     {
-        switch (event.getType()) {
-            case IResourceChangeEvent.PRE_REFRESH:
-                handleRefresh(event);
-                break;
-            case IResourceChangeEvent.POST_CHANGE:
-                handleChange(event);
-                break;
+        try
+        {
+            switch (event.getType()) {
+                case IResourceChangeEvent.PRE_REFRESH:
+                    handleRefresh(event);
+                    break;
+                case IResourceChangeEvent.POST_BUILD:
+                    handleBuild(event);
+                    break;
+                case IResourceChangeEvent.POST_CHANGE:
+                    handleChange(event);
+                    break;
+            }
         }
+        catch ( CoreException e )
+        {
+            ErrorDialog.openError( getSite().getShell(), "Error", null, e.getStatus() );
+        }
+    }
 
+
+    private void handleBuild(IResourceChangeEvent event) throws CoreException
+    {
+        refreshView();
     }
 
 
@@ -255,39 +269,32 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
     }
 
 
-    private void handleChange(IResourceChangeEvent event)
+    private void handleChange(IResourceChangeEvent event) throws CoreException
     {
         IResourceDelta delta = event.getDelta();
         final IFile editorFile = ( ( IFileEditorInput ) getEditorInput() ).getFile();
-        try
+        delta.accept( new IResourceDeltaVisitor()
         {
-            delta.accept( new IResourceDeltaVisitor()
+            public boolean visit( IResourceDelta delta ) throws CoreException
             {
-                public boolean visit( IResourceDelta delta ) throws CoreException
+                int kind = delta.getKind();
+                IResource resource = delta.getResource();
+                if ( resource instanceof IProject )
                 {
-                    int kind = delta.getKind();
-                    IResource resource = delta.getResource();
-                    if ( resource instanceof IProject )
-                    {
-                        int flags = delta.getFlags();
-                        return handleProjectChange(editorFile, (IProject) resource, kind, flags);
-                    }
-
-                    if ( resource instanceof IFile )
-                    {
-                        handleFileChange(editorFile, (IFile) resource, kind);
-                        // Recurse no more
-                        return false;
-                    }
-
-                    return true;
+                    int flags = delta.getFlags();
+                    return handleProjectChange(editorFile, (IProject) resource, kind, flags);
                 }
-            } );
-        }
-        catch ( CoreException e )
-        {
-            ErrorDialog.openError( getSite().getShell(), "Error", null, e.getStatus() );
-        }
+
+                if ( resource instanceof IFile )
+                {
+                    handleFileChange(editorFile, (IFile) resource, kind);
+                    // Recurse no more
+                    return false;
+                }
+
+                return true;
+            }
+        } );
     }
 
 
@@ -324,12 +331,21 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
         {
             return false;
         }
-        if ( kind == IResourceDelta.CHANGED && ( flags & IResourceDelta.MARKERS ) > 0 )
+        if ( kind == IResourceDelta.CHANGED )
         {
-            loadUnresolvedDependencies();
-            refreshAllPages();
+            int mask = flags & (IResourceDelta.MARKERS);
+            if ( mask > 0 ) {
+                refreshView();
+            }
         }
         return true;
+    }
+
+
+    private void refreshView() throws CoreException
+    {
+        loadUnresolvedDependencies();
+        refreshAllPages();
     }
 
 
@@ -370,14 +386,8 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
         tempProject.setBundle(null);
         project.setBundle( null );
         refreshAllPages();
-        try
-        {
-            project.rebuildDependencies(Job.getJobManager().createProgressGroup());
-        }
-        catch (CoreException e)
-        {
-            SigilCore.error( "Failed to update depedencies " + this, e );
-        }
+        ResolveProjectsJob job = new ResolveProjectsJob(project);
+        job.schedule();        
     }
 
 
@@ -397,7 +407,7 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
         }
 
         ResourcesPlugin.getWorkspace().addResourceChangeListener( this, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_REFRESH );
-
+                
         if ( input instanceof IFileEditorInput )
         {
             try
