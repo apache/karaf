@@ -36,7 +36,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * 
  * @version $Rev$ $Date$
  */
-public class UserAdminEventDipatcherImpl extends Thread implements UserAdminEventDispatcher
+public class UserAdminEventDispatcherImpl extends Thread implements UserAdminEventDispatcher
 {
     private Vector queue;
     private ServiceTracker userAdminTrackerListener;
@@ -50,7 +50,7 @@ public class UserAdminEventDipatcherImpl extends Thread implements UserAdminEven
      * Setting thread as a daemon.
      * @param context bundle context
      */
-    public UserAdminEventDipatcherImpl(BundleContext context)
+    public UserAdminEventDispatcherImpl(BundleContext context)
     {
         super();
         this.queue = new Vector();
