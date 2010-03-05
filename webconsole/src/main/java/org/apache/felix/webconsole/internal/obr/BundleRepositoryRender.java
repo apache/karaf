@@ -398,7 +398,7 @@ public class BundleRepositoryRender extends SimpleWebConsolePlugin implements Os
             repos.addAll(Arrays.asList(admin.listRepositories()));
             Resolver resolver = admin.resolver((Repository[]) repos.toArray(new Repository[repos.size()]));
             resolver.add(resource);
-            resolver.resolve();
+            resolver.resolve(Resolver.NO_OPTIONAL_RESOURCES);
             Resource[] required = resolver.getRequiredResources();
             for (int i = 0; required != null && i < required.length; i++)
             {
