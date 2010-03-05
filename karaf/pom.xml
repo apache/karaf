@@ -80,7 +80,7 @@
         <felix.framework.version>2.0.4</felix.framework.version>
         <felix.gogo.version>0.2.2</felix.gogo.version>
         <felix.osgi.version>1.4.0</felix.osgi.version>
-        <felix.plugin.version>2.0.1</felix.plugin.version>
+        <felix.plugin.version>2.1.0-SNAPSHOT</felix.plugin.version>
         <felix.prefs.version>1.0.4</felix.prefs.version>
         <felix.webconsole.version>2.0.6</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
@@ -869,6 +869,25 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>cleanVersions</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>cleanVersions</goal>
+						</goals>
+						<configuration>
+							<versions>
+								<karaf.osgi.version>${pom.version}</karaf.osgi.version>
+							</versions>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
     </build>
 
