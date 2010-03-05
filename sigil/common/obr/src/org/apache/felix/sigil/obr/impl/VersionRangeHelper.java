@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.sigil.common.osgi.LDAPExpr;
-import org.apache.felix.sigil.common.osgi.LDAPParseException;
-import org.apache.felix.sigil.common.osgi.LDAPParser;
 import org.apache.felix.sigil.common.osgi.Not;
 import org.apache.felix.sigil.common.osgi.Ops;
 import org.apache.felix.sigil.common.osgi.SimpleTerm;
@@ -34,21 +32,10 @@ import org.apache.felix.sigil.common.osgi.VersionTable;
 import org.osgi.framework.Version;
 
 
-class VersionRangeHelper
+public class VersionRangeHelper
 {
 
-    // e.g. (&(version>=1.0.0)(version<=2.0.0)) (&(version>1.0.0)(version<2.0.0)) (&(!(version<1.0.0))(!(version>2.0.0))) (&(!(version<=1.0.0))(!(version>=2.0.0))) (version=1.0.0) (version>=1.0.0) (version<=2.0.0) (version>1.0.0) (version<2.0.0)  (!(version>2.0.0)) (!(version<1.0.0)) (!(version>=2.0.0)) (!(version<=1.0.0))
-    public static void main( String[] args ) throws LDAPParseException
-    {
-        for ( String arg : args )
-        {
-            LDAPExpr expr = LDAPParser.parseExpression( arg.trim() );
-            System.out.println( expr + " -> " + decodeVersions( expr ) );
-        }
-    }
-
-
-    static VersionRange decodeVersions( LDAPExpr expr ) throws NumberFormatException
+    public static VersionRange decodeVersions( LDAPExpr expr ) throws NumberFormatException
     {
         ArrayList<LDAPExpr> terms = new ArrayList<LDAPExpr>( 1 );
 
