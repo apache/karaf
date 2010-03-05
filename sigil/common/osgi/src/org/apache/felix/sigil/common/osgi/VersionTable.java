@@ -53,11 +53,10 @@ public class VersionTable
     public static Version getVersion(int major, int minor, int micro, String qualifier) {
         String key;
         
-        if ( qualifier == null ) {
+        if ( qualifier == null || qualifier.length() == 0 ) {
             key = major + "." + minor + "." + micro;
         }
         else {
-            assert qualifier.trim().length() > 0;
             key = major + "." + minor + "." + micro + "." + qualifier;            
         }
         
