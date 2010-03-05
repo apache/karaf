@@ -67,7 +67,7 @@ public class BldFactory
         return project;
     }
 
-    private static BldProject load(URI uri, boolean ignoreCache, Properties overrides) throws IOException
+    private synchronized static BldProject load(URI uri, boolean ignoreCache, Properties overrides) throws IOException
     {
         BldProject p = null;
         if (!ignoreCache)
