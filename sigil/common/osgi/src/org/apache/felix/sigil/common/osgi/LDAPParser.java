@@ -45,24 +45,6 @@ public class LDAPParser
         return parser.parse( strExpr );
     }
 
-
-    public static void main( String[] args )
-    {
-        for ( String arg : args )
-        {
-            try
-            {
-                System.out.println( parseExpression( arg ) );
-            }
-            catch ( LDAPParseException e )
-            {
-                System.out.println( "Failed to parse " + arg );
-                e.printStackTrace();
-            }
-        }
-    }
-
-
     public LDAPExpr parse( String strExpr ) throws LDAPParseException
     {
 
