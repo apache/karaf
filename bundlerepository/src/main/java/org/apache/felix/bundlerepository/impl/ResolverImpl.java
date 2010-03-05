@@ -223,40 +223,6 @@ public class ResolverImpl implements Resolver
         return result;
     }
 
-    private Resource[] filter(Resource[] resources, Requirement[] requirements)
-    {
-        if (requirements == null || requirements.length == 0)
-        {
-            return resources;
-        }
-        List res = new ArrayList();
-        for (int resIdx = 0; (resources != null) && resIdx < resources.length; resIdx++)
-        {
-            boolean resOk = true;
-            for (int reqIdx = 0; (requirements != null) && reqIdx < requirements.length; reqIdx++)
-            {
-                boolean reqOk = false;
-                Capability[] caps = resources[resIdx].getCapabilities();
-                for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
-                {
-                    if (requirements[reqIdx].isSatisfied(caps[capIdx]))
-                    {
-                        reqOk = true;
-                        break;
-                    }
-                }
-                if (!reqOk) {
-                    resOk = false;
-                    break;
-                }
-            }
-            if (resOk) {
-                res.add(resources[resIdx]);
-            }
-        }
-        return (Resource[]) res.toArray(new Resource[res.size()]);
-    }
-
     private boolean resolve(Resource resource, Resource[] locals, Resource[] remotes, boolean optional)
     {
         boolean result = true;
