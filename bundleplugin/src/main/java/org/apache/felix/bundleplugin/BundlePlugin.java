@@ -852,7 +852,7 @@ public class BundlePlugin extends AbstractMojo
         properties.put( MAVEN_SYMBOLICNAME, bsn );
         properties.put( Analyzer.BUNDLE_SYMBOLICNAME, bsn );
         properties.put( Analyzer.IMPORT_PACKAGE, "*" );
-        properties.put( Analyzer.BUNDLE_VERSION, currentProject.getVersion() );
+        properties.put( Analyzer.BUNDLE_VERSION, getMaven2OsgiConverter().getVersion(currentProject.getVersion()) );
 
         // remove the extraneous Include-Resource and Private-Package entries from generated manifest
         properties.put( Analyzer.REMOVE_HEADERS, Analyzer.INCLUDE_RESOURCE + ',' + Analyzer.PRIVATE_PACKAGE );

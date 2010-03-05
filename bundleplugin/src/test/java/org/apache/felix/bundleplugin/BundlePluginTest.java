@@ -83,22 +83,22 @@ public class BundlePluginTest extends AbstractBundlePluginTest
         assertEquals( "2.1.3.4", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "4aug2000r7-dev" );
-        assertEquals( "0.0.0.4aug2000r7_dev", osgiVersion );
+        assertEquals( "0.0.0.4aug2000r7-dev", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "1.1-alpha-2" );
-        assertEquals( "1.1.0.alpha_2", osgiVersion );
+        assertEquals( "1.1.0.alpha-2", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "1.0-alpha-16-20070122.203121-13" );
-        assertEquals( "1.0.0.alpha_16_20070122_203121_13", osgiVersion );
+        assertEquals( "1.0.0.alpha-16-20070122_203121-13", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "1.0-20070119.021432-1" );
-        assertEquals( "1.0.0.20070119_021432_1", osgiVersion );
+        assertEquals( "1.0.0.20070119_021432-1", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "1-20070119.021432-1" );
-        assertEquals( "1.0.0.20070119_021432_1", osgiVersion );
+        assertEquals( "1.0.0.20070119_021432-1", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "1.4.1-20070217.082013-7" );
-        assertEquals( "1.4.1.20070217_082013_7", osgiVersion );
+        assertEquals( "1.4.1.20070217_082013-7", osgiVersion );
     }
 
 

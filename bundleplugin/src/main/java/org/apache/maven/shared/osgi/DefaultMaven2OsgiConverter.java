@@ -46,15 +46,6 @@ public class DefaultMaven2OsgiConverter
     implements Maven2OsgiConverter
 {
 
-    /** Bundle-Version must match this pattern */
-    private static final Pattern OSGI_VERSION_PATTERN = Pattern
-        .compile( "[0-9]+\\.[0-9]+\\.[0-9]+(\\.[0-9A-Za-z_-]+)?" );
-
-    /** pattern used to change - to . */
-    // private static final Pattern P_VERSION = Pattern.compile("([0-9]+(\\.[0-9])*)-(.*)");
-    /** pattern that matches strings that contain only numbers */
-    private static final Pattern ONLY_NUMBERS = Pattern.compile( "[0-9]+" );
-
     private static final String FILE_SEPARATOR = System.getProperty( "file.separator" );
 
     private String getBundleSymbolicName( String groupId, String artifactId )
@@ -244,139 +235,70 @@ public class DefaultMaven2OsgiConverter
 
     public String getVersion( String version )
     {
-        String osgiVersion;
+        return cleanupVersion(version);
+    }
 
-        // Matcher m = P_VERSION.matcher(version);
-        // if (m.matches()) {
-        // osgiVersion = m.group(1) + "." + m.group(3);
-        // }
+    /**
+     * Clean up version parameters. Other builders use more fuzzy definitions of
+     * the version syntax. This method cleans up such a version to match an OSGi
+     * version.
+     *
+     * @param VERSION_STRING
+     * @return
+     */
+    static final Pattern FUZZY_VERSION = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
+                                                         Pattern.DOTALL);
 
-        /* TODO need a regexp guru here */
+    static public String cleanupVersion(String version) {
+        StringBuffer result = new StringBuffer();
+        Matcher m = FUZZY_VERSION.matcher(version);
+        if (m.matches()) {
+            String major = m.group(1);
+            String minor = m.group(3);
+            String micro = m.group(5);
+            String qualifier = m.group(7);
 
-        Matcher m;
-
-        /* if it's already OSGi compliant don't touch it */
-        m = OSGI_VERSION_PATTERN.matcher( version );
-        if ( m.matches() )
-        {
-            return version;
-        }
-
-        osgiVersion = version;
-
-        /* check for dated snapshot versions with only major or major and minor */
-        Pattern DATED_SNAPSHOT = Pattern.compile( "([0-9])(\\.([0-9]))?(\\.([0-9]))?\\-([0-9]{8}\\.[0-9]{6}\\-[0-9]*)" );
-        m = DATED_SNAPSHOT.matcher( osgiVersion );
-        if ( m.matches() )
-        {
-            String major = m.group( 1 );
-            String minor = ( m.group( 3 ) != null ) ? m.group( 3 ) : "0";
-            String service = ( m.group( 5 ) != null ) ? m.group( 5 ) : "0";
-            String qualifier = m.group( 6 ).replaceAll( "-", "_" ).replaceAll( "\\.", "_" );
-            osgiVersion = major + "." + minor + "." + service + "." + qualifier;
-        }
-
-        /* else transform first - to . and others to _ */
-        osgiVersion = osgiVersion.replaceFirst( "-", "\\." );
-        osgiVersion = osgiVersion.replaceAll( "-", "_" );
-        m = OSGI_VERSION_PATTERN.matcher( osgiVersion );
-        if ( m.matches() )
-        {
-            return osgiVersion;
-        }
-
-        /* remove dots in the middle of the qualifier */
-        Pattern DOTS_IN_QUALIFIER = Pattern.compile( "([0-9])(\\.[0-9])?\\.([0-9A-Za-z_-]+)\\.([0-9A-Za-z_-]+)" );
-        m = DOTS_IN_QUALIFIER.matcher( osgiVersion );
-        if ( m.matches() )
-        {
-            String s1 = m.group( 1 );
-            String s2 = m.group( 2 );
-            String s3 = m.group( 3 );
-            String s4 = m.group( 4 );
-
-            Matcher qualifierMatcher = ONLY_NUMBERS.matcher( s3 );
-            /*
-             * if last portion before dot is only numbers then it's not in the middle of the
-             * qualifier
-             */
-            if ( !qualifierMatcher.matches() )
-            {
-                osgiVersion = s1 + s2 + "." + s3 + "_" + s4;
+            if (major != null) {
+                result.append(major);
+                if (minor != null) {
+                    result.append(".");
+                    result.append(minor);
+                    if (micro != null) {
+                        result.append(".");
+                        result.append(micro);
+                        if (qualifier != null) {
+                            result.append(".");
+                            cleanupModifier(result, qualifier);
+                        }
+                    } else if (qualifier != null) {
+                        result.append(".0.");
+                        cleanupModifier(result, qualifier);
+                    } else {
+                        result.append(".0");
+                    }
+                } else if (qualifier != null) {
+                    result.append(".0.0.");
+                    cleanupModifier(result, qualifier);
+                } else {
+                    result.append(".0.0");
+                }
             }
+        } else {
+            result.append("0.0.0.");
+            cleanupModifier(result, version);
         }
+        return result.toString();
+    }
 
-        /* convert
-         * 1.string   -> 1.0.0.string
-         * 1.2.string -> 1.2.0.string
-         * 1          -> 1.0.0
-         * 1.1        -> 1.1.0
-         */
-        //Pattern NEED_TO_FILL_ZEROS = Pattern.compile( "([0-9])(\\.([0-9]))?\\.([0-9A-Za-z_-]+)" );
-        Pattern NEED_TO_FILL_ZEROS = Pattern.compile( "([0-9])(\\.([0-9]))?(\\.([0-9A-Za-z_-]+))?" );
-        m = NEED_TO_FILL_ZEROS.matcher( osgiVersion );
-        if ( m.matches() )
-        {
-            String major = m.group( 1 );
-            String minor = m.group( 3 );
-            String service = null;
-            String qualifier = m.group( 5 );
-
-            /* if there's no qualifier just fill with 0s */
-            if ( qualifier == null )
-            {
-                osgiVersion = getVersion( major, minor, service, qualifier );
-            }
+    static void cleanupModifier(StringBuffer result, String modifier) {
+        for (int i = 0; i < modifier.length(); i++) {
+            char c = modifier.charAt(i);
+            if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
+                    || (c >= 'A' && c <= 'Z') || c == '_' || c == '-')
+                result.append(c);
             else
-            {
-                /* if last portion is only numbers then it's not a qualifier */
-                Matcher qualifierMatcher = ONLY_NUMBERS.matcher( qualifier );
-                if ( qualifierMatcher.matches() )
-                {
-                    if ( minor == null )
-                    {
-                        minor = qualifier;
-                    }
-                    else
-                    {
-                        service = qualifier;
-                    }
-                    osgiVersion = getVersion( major, minor, service, null );
-                }
-                else
-                {
-                    osgiVersion = getVersion( major, minor, service, qualifier );
-                }
-            }
+                result.append('_');
         }
-
-        m = OSGI_VERSION_PATTERN.matcher( osgiVersion );
-        /* if still its not OSGi version then add everything as qualifier */
-        if ( !m.matches() )
-        {
-            String major = "0";
-            String minor = "0";
-            String service = "0";
-            String qualifier = osgiVersion.replaceAll( "\\.", "_" );
-            osgiVersion = major + "." + minor + "." + service + "." + qualifier;
-        }
-
-        return osgiVersion;
     }
 
-    private String getVersion( String major, String minor, String service, String qualifier )
-    {
-        StringBuffer sb = new StringBuffer();
-        sb.append( major != null ? major : "0" );
-        sb.append( '.' );
-        sb.append( minor != null ? minor : "0" );
-        sb.append( '.' );
-        sb.append( service != null ? service : "0" );
-        if ( qualifier != null )
-        {
-            sb.append( '.' );
-            sb.append( qualifier );
-        }
-        return sb.toString();
-    }
 }
