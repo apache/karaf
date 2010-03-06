@@ -38,6 +38,8 @@ import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Init;
 import org.apache.felix.dm.annotation.api.Properties;
+import org.apache.felix.dm.annotation.api.ResourceAdapterService;
+import org.apache.felix.dm.annotation.api.ResourceDependency;
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
@@ -72,6 +74,8 @@ public class AnnotationCollector extends ClassDataCollector
         + TemporalServiceDependency.class.getName().replace('.', '/') + ";";
     private final static String A_BUNDLE_DEPENDENCY = "L"
         + BundleDependency.class.getName().replace('.', '/') + ";";
+    private final static String A_RESOURCE_DEPENDENCY = "L"
+        + ResourceDependency.class.getName().replace('.', '/') + ";";
     private final static String A_PROPERTIES = "L"
         + Properties.class.getName().replace('.', '/') + ";";
     private final static String A_ASPECT_SERVICE = "L"
@@ -80,6 +84,8 @@ public class AnnotationCollector extends ClassDataCollector
         + AdapterService.class.getName().replace('.', '/') + ";";
     private final static String A_BUNDLE_ADAPTER_SERVICE = "L"
         + BundleAdapterService.class.getName().replace('.', '/') + ";";
+    private final static String A_RESOURCE_ADAPTER_SERVICE = "L"
+        + ResourceAdapterService.class.getName().replace('.', '/') + ";";
 
     private Reporter m_reporter;
     private String m_className;
@@ -97,8 +103,8 @@ public class AnnotationCollector extends ClassDataCollector
     private String m_destroyMethod;
     private String m_compositionMethod;
 
-    // Pattern used to parse the class parameter from the bind methods ("bind(Type)" or "bind(Map, Type)")
-    private final static Pattern m_bindClassPattern = Pattern.compile("\\((Ljava/util/Map;)?L([^;]+);\\)V");
+    // Pattern used to parse the class parameter from the bind methods ("bind(Type)" or "bind(Map, Type)" or "bind(BundleContext, Type)"
+    private final static Pattern m_bindClassPattern = Pattern.compile("\\((L[^;]+;)?L([^;]+);\\)V");
 
     // Pattern used to parse classes from class descriptors;
     private final static Pattern m_classPattern = Pattern.compile("L([^;]+);");
@@ -116,10 +122,12 @@ public class AnnotationCollector extends ClassDataCollector
         AspectService,
         AdapterService,
         BundleAdapterService,
+        ResourceAdapterService,
         ServiceDependency, 
         TemporalServiceDependency, 
         ConfigurationDependency,
         BundleDependency,
+        ResourceDependency
     };
 
     // List of component descriptor parameters
@@ -375,6 +383,10 @@ public class AnnotationCollector extends ClassDataCollector
         {
             parseBundleAdapterService(annotation);
         }
+        else if (annotation.getName().equals(A_RESOURCE_ADAPTER_SERVICE))
+        {
+            parseResourceAdapterService(annotation);
+        }
         else if (annotation.getName().equals(A_INIT))
         {
             checkMethod(m_voidMethodPattern);
@@ -420,6 +432,10 @@ public class AnnotationCollector extends ClassDataCollector
         {
             parseBundleDependencyAnnotation(annotation);
         }
+        else if (annotation.getName().equals(A_RESOURCE_DEPENDENCY)) 
+        {
+            parseRersourceDependencyAnnotation(annotation);
+        }
     }
 
     /**
@@ -432,7 +448,7 @@ public class AnnotationCollector extends ClassDataCollector
         m_infos.add(info);
 
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addInitStartStopDestroyCompositionParams(info);
+        addCommonServiceParams(info);
         
         // impl attribute
         info.addParam(Params.impl, m_className);
@@ -450,7 +466,7 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.factoryMethod, null);
     }
 
-    private void addInitStartStopDestroyCompositionParams(Info info)
+    private void addCommonServiceParams(Info info)
     {
         if (m_initMethod != null) {
             info.addParam(Params.init, m_initMethod);
@@ -608,7 +624,7 @@ public class AnnotationCollector extends ClassDataCollector
         m_infos.add(info);        
 
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addInitStartStopDestroyCompositionParams(info);
+        addCommonServiceParams(info);
         
         // factory attribute
         info.addClassParam(annotation, Params.factory, null);
@@ -665,7 +681,7 @@ public class AnnotationCollector extends ClassDataCollector
         m_infos.add(info);
         
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addInitStartStopDestroyCompositionParams(info);
+        addCommonServiceParams(info);
         
         // Generate Adapter Implementation
         info.addParam(Params.impl, m_className);
@@ -718,7 +734,7 @@ public class AnnotationCollector extends ClassDataCollector
         m_infos.add(info);
         
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addInitStartStopDestroyCompositionParams(info);
+        addCommonServiceParams(info);
         
         // Generate Adapter Implementation
         info.addParam(Params.impl, m_className);
@@ -764,6 +780,59 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.propagate, Boolean.FALSE);
     }
 
+    /**
+     * Parses a BundleAdapterService annotation.
+     * @param annotation
+     */
+    private void parseResourceAdapterService(Annotation annotation)
+    {
+        Info info = new Info(EntryTypes.ResourceAdapterService);
+        m_infos.add(info);
+        
+        // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
+        addCommonServiceParams(info);
+        
+        // Generate Adapter Implementation
+        info.addParam(Params.impl, m_className);
+      
+        // Parse resource filter
+        String filter = annotation.get(Params.filter.toString());
+        if (filter != null)
+        {
+            Verifier.verifyFilter(filter, 0);
+            info.addParam(Params.filter, filter);
+        }
+                
+        // Parse Adapter properties.
+        parseParameters(annotation, Params.properties, info);
+
+        // Parse the optional adapter service (use directly implemented interface by default).
+        Object service = annotation.get(Params.service.toString());
+        if (service == null) {
+            if (m_interfaces == null)
+            {
+                throw new IllegalStateException("Invalid ResourceAdapterService annotation: " +
+                    "the service attribute has not been set and the class " + m_className + 
+                    " does not implement any interfaces");
+            }
+            if (m_interfaces.length != 1) 
+            {
+                throw new IllegalStateException("Invalid ResourceAdapterService annotation: " +
+                    "the service attribute has not been set and the class " + m_className +
+                    " implements more than one interface");
+            }
+            
+            info.addParam(Params.service, m_interfaces[0]);
+        } else 
+        {
+            checkClassImplements(annotation, Params.service);
+            info.addClassParam(annotation, Params.service, null);
+        }
+        
+        // Parse propagate attribute
+        info.addParam(annotation, Params.propagate, Boolean.FALSE);
+    }
+
     private void parseBundleDependencyAnnotation(Annotation annotation)
     {
         Info info = new Info(EntryTypes.BundleDependency);
@@ -784,6 +853,25 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.propagate, null);
     }
     
+    private void parseRersourceDependencyAnnotation(Annotation annotation)
+    {
+        Info info = new Info(EntryTypes.ResourceDependency);
+        m_infos.add(info);
+
+        String filter = annotation.get(Params.filter.toString());
+        if (filter != null)
+        {
+            Verifier.verifyFilter(filter, 0);
+            info.addParam(Params.filter, filter);
+        }
+
+        info.addParam(annotation, Params.added, m_method);
+        info.addParam(annotation, Params.changed, null); // TODO check if "changed" callback exists
+        info.addParam(annotation, Params.removed, null); // TODO check if "removed" callback exists
+        info.addParam(annotation, Params.required, null);
+        info.addParam(annotation, Params.propagate, null);        
+    }
+
     /**
      * Checks if an annotation attribute references an implemented interface. 
      * @param annotation the parsed annotation
@@ -920,7 +1008,8 @@ public class AnnotationCollector extends ClassDataCollector
         }
 
         // We must have at least a Service or an AspectService annotation.
-        checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService, EntryTypes.AdapterService, EntryTypes.BundleAdapterService);
+        checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService, EntryTypes.AdapterService, EntryTypes.BundleAdapterService,
+            EntryTypes.ResourceAdapterService);
 
         StringBuilder sb = new StringBuilder();
         sb.append("Parsed annotation for class ");
