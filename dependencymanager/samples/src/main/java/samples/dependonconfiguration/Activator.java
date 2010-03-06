@@ -10,7 +10,15 @@ public class Activator extends DependencyActivatorBase {
             .setImplementation(Task.class)
             .add(createConfigurationDependency()
                 .setPid("config.pid")
-            )
+                .setHeading("English Dictionary") 
+                .setDescription("Configuration for the EnglishDictionary Service")
+                .add(createPropertyMetaData()
+                    .setCardinality(Integer.MAX_VALUE)
+                    .setType(String.class)
+                    .setHeading("English Words")
+                    .setDescription("Declare here some valid english words")
+                    .setDefaults(new String[] {"hello", "world"})
+                    .setId("words")))
         );
     }
     
