@@ -57,7 +57,7 @@ public @Retention(RetentionPolicy.CLASS)
     /**
      * Additional properties to use with the service registration
      */
-    Param[] properties() default {};
+    Property[] properties() default {};
     
     /**
      * Specifies if properties from the bundle should be propagated to the service.

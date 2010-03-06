@@ -37,7 +37,6 @@ import org.apache.felix.dm.annotation.api.Composition;
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Init;
-import org.apache.felix.dm.annotation.api.Properties;
 import org.apache.felix.dm.annotation.api.ResourceAdapterService;
 import org.apache.felix.dm.annotation.api.ResourceDependency;
 import org.apache.felix.dm.annotation.api.Service;
@@ -76,8 +75,6 @@ public class AnnotationCollector extends ClassDataCollector
         + BundleDependency.class.getName().replace('.', '/') + ";";
     private final static String A_RESOURCE_DEPENDENCY = "L"
         + ResourceDependency.class.getName().replace('.', '/') + ";";
-    private final static String A_PROPERTIES = "L"
-        + Properties.class.getName().replace('.', '/') + ";";
     private final static String A_ASPECT_SERVICE = "L"
         + AspectService.class.getName().replace('.', '/') + ";";
     private final static String A_ADAPTER_SERVICE = "L"
@@ -424,10 +421,6 @@ public class AnnotationCollector extends ClassDataCollector
         {
             parseServiceDependencyAnnotation(annotation, true);
         } 
-        else if (annotation.getName().equals(A_PROPERTIES)) 
-        {
-            parsePropertiesMetaData(annotation);
-        }
         else if (annotation.getName().equals(A_BUNDLE_DEPENDENCY)) 
         {
             parseBundleDependencyAnnotation(annotation);
@@ -571,47 +564,47 @@ public class AnnotationCollector extends ClassDataCollector
 
         // propagate attribute
         info.addParam(annotation, Params.propagate, null);
-    }
 
-    /**
-     * Parses a Properties annotation which declares Config Admin Properties meta data.
-     * @param properties the Properties annotation to be parsed.
-     */
-    private void parsePropertiesMetaData(Annotation properties)
-    {
-        String propertiesPid = get(properties, "pid", m_className);
-        String propertiesHeading = properties.get("heading");
-        String propertiesDesc = properties.get("description");
-
-        MetaType.OCD ocd = new MetaType.OCD(propertiesPid, propertiesHeading, propertiesDesc);
-        for (Object p : (Object[]) properties.get("properties"))
+        // Property Meta Types
+        if (annotation.get("properties") != null)
         {
-            Annotation property = (Annotation) p;
-            String heading = property.get("heading");
-            String id = property.get("id");
-            String type = (String) property.get("type");
-            type = (type != null) ? parseClass(type, m_classPattern, 1) : null;
-            Object[] defaults = (Object[]) property.get("defaults");
-            String description = property.get("description");
-            Integer cardinality = property.get("cardinality");
-            Boolean required = property.get("required");
+            String propertiesPid = get(annotation, "pid", m_className);
+            String propertiesHeading = annotation.get("heading");
+            String propertiesDesc = annotation.get("description");
 
-            MetaType.AD ad = new MetaType.AD(id, type, defaults, heading, description, cardinality, required);
-            Object[] options = property.get("options");
-            if (options != null) {
-                for (Object o : (Object[]) property.get("options"))
+            MetaType.OCD ocd = new MetaType.OCD(propertiesPid, propertiesHeading, propertiesDesc);
+            for (Object p : (Object[]) annotation.get("properties"))
+            {
+                Annotation property = (Annotation) p;
+                String heading = property.get("heading");
+                String id = property.get("id");
+                String type = (String) property.get("type");
+                type = (type != null) ? parseClass(type, m_classPattern, 1) : null;
+                Object[] defaults = (Object[]) property.get("defaults");
+                String description = property.get("description");
+                Integer cardinality = property.get("cardinality");
+                Boolean required = property.get("required");
+
+                MetaType.AD ad = new MetaType.AD(id, type, defaults, heading, description,
+                    cardinality, required);
+                Object[] options = property.get("options");
+                if (options != null)
                 {
-                    Annotation option = (Annotation) o;
-                    ad.add(new MetaType.Option((String) option.get("name"), (String) option.get("value")));
+                    for (Object o : (Object[]) property.get("options"))
+                    {
+                        Annotation option = (Annotation) o;
+                        ad.add(new MetaType.Option((String) option.get("name"),
+                            (String) option.get("value")));
+                    }
                 }
+                ocd.add(ad);
             }
-            ocd.add(ad);
-        }
 
-        m_metaType.add(ocd);
-        MetaType.Designate designate = new MetaType.Designate(propertiesPid);
-        m_metaType.add(designate);
-        m_reporter.warning("Parsed MetaType Properties from class " + m_className);
+            m_metaType.add(ocd);
+            MetaType.Designate designate = new MetaType.Designate(propertiesPid);
+            m_metaType.add(designate);
+            m_reporter.warning("Parsed MetaType Properties from class " + m_className);
+        }
     }
 
     /**

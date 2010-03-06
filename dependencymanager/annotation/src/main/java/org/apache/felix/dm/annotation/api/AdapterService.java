@@ -46,7 +46,7 @@ public @interface AdapterService
      * The adapter service properites. They will be added to the adapted service properties.
      * @return additional properties to use with the adapter service registration
      */
-    Param[] adapterProperties() default {};
+    Property[] adapterProperties() default {};
 
     /**
      * The adapted service interface

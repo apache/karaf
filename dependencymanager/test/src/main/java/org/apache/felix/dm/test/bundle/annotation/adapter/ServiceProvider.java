@@ -18,12 +18,12 @@
  */
 package org.apache.felix.dm.test.bundle.annotation.adapter;
 
-import org.apache.felix.dm.annotation.api.Param;
+import org.apache.felix.dm.annotation.api.Property;
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
-@Service(properties = { @Param(name = "param1", value = "value1") })
+@Service(properties = { @Property(name = "param1", value = "value1") })
 public class ServiceProvider implements ServiceInterface
 {
     @ServiceDependency

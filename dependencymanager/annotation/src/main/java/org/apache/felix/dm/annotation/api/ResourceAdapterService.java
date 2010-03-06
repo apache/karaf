@@ -49,7 +49,7 @@ public @interface ResourceAdapterService
     /**
      * Additional properties to use with the adapter service registration
      */
-    Param[] properties() default {};
+    Property[] properties() default {};
 
     /**
      * <code>true</code> if properties from the resource should be propagated to the service.

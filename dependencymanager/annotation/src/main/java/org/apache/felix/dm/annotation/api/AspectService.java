@@ -52,7 +52,7 @@ public @interface AspectService
      * Additional properties to use with the aspect service registration
      * @return additional properties to use with the aspect service registration
      */
-    Param[] properties() default {};
+    Property[] properties() default {};
     
     /**
      * Ranking of this aspect. Since aspects are chained, the ranking defines the order in which they are chained.

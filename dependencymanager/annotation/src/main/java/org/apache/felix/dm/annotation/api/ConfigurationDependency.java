@@ -42,4 +42,22 @@ public @interface ConfigurationDependency
      * @return true if configuration must be published along with the service, false if not.
      */
     boolean propagate() default false;
+    
+    /**
+     * The label used to display the tab name (or section) where the properties are displayed. Example: "Printer Service".
+     * @return The label used to display the tab name where the properties are displayed.
+     */
+    String heading() default "";
+
+    /**
+     * A human readable description of the PID this annotation is associated with. Example: "Configuration for the PrinterService bundle".
+     * @return A human readable description of the PID this annotation is associated with.
+     */
+    String description() default "";
+
+    /**
+     * The list of properties types used to expose properties in web console. 
+     * @return The list of properties types used to expose properties in web console. 
+     */
+    PropertyMetaData[] properties() default {};
 }

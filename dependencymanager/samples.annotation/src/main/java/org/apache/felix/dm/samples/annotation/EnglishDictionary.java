@@ -22,29 +22,15 @@ import java.util.Dictionary;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
-import org.apache.felix.dm.annotation.api.Param;
-import org.apache.felix.dm.annotation.api.Properties;
 import org.apache.felix.dm.annotation.api.Property;
+import org.apache.felix.dm.annotation.api.PropertyMetaData;
 import org.apache.felix.dm.annotation.api.Service;
 
 /**
  * An English Dictionary Service. We provide here our Properties MetaData in order to let webconsole configure us.
  * You must configure the PID that corresponds to this class through web console in order to activate this service.
  */
-@Service(properties={@Param(name="language", value="en")})
-@Properties(
-    heading="English Dictionary", 
-    description = "Configuration for the EnglishDictionary Service",
-    properties={
-        @Property(
-            heading="English Words",
-            description="Declare here some valid english words",
-            defaults={"hello", "world"},
-            id=EnglishDictionary.WORDS,
-            cardinality=Integer.MAX_VALUE
-        )
-    }
-)
+@Service(properties={@Property(name="language", value="en")})
 public class EnglishDictionary implements DictionaryService
 {
     /**
@@ -63,7 +49,18 @@ public class EnglishDictionary implements DictionaryService
      * (by default, our PID is our full class name).
      * @param config The configuration where we'll lookup our words list (key="words").
      */
-    @ConfigurationDependency
+    @ConfigurationDependency(
+        heading="English Dictionary", 
+        description = "Configuration for the EnglishDictionary Service",
+        properties={
+            @PropertyMetaData(
+                heading="English Words",
+                description="Declare here some valid english words",
+                defaults={"hello", "world"},
+                id=EnglishDictionary.WORDS,
+                cardinality=Integer.MAX_VALUE)
+        }
+    )
     protected void updated(Dictionary<String, ?> config) {
         m_words.clear();
         String[] words = (String[]) config.get(WORDS);

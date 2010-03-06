@@ -20,7 +20,7 @@ package org.apache.felix.dm.test.bundle.annotation.resource;
 
 import junit.framework.Assert;
 
-import org.apache.felix.dm.annotation.api.Param;
+import org.apache.felix.dm.annotation.api.Property;
 import org.apache.felix.dm.annotation.api.ResourceAdapterService;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.resources.Resource;
@@ -28,7 +28,7 @@ import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
 @ResourceAdapterService(
     filter = "(&(path=/test)(name=test1.txt)(repository=TestRepository))", 
-    properties = {@Param(name="foo", value="bar")},
+    properties = {@Property(name="foo", value="bar")},
     propagate = true)
 public class ServiceProvider implements ServiceInterface
 {

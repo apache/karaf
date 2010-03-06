@@ -19,7 +19,7 @@
 package org.apache.felix.dm.test.bundle.annotation.bundledependency;
 
 import org.apache.felix.dm.annotation.api.BundleAdapterService;
-import org.apache.felix.dm.annotation.api.Param;
+import org.apache.felix.dm.annotation.api.Property;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
@@ -32,7 +32,7 @@ import org.osgi.framework.Bundle;
     filter = "(Bundle-SymbolicName=org.apache.felix.dependencymanager)",
     stateMask = Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE,
     propagate = true,
-    properties = { @Param(name = "foo", value = "bar") })
+    properties = { @Property(name = "foo", value = "bar") })
 public class ServiceProvider implements ServiceInterface
 {
     // Adapted bundle (injected by reflection).
