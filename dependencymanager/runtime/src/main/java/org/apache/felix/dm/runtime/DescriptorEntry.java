@@ -28,8 +28,10 @@ public enum DescriptorEntry
     AspectService,
     AdapterService,
     BundleAdapterService,
+    ResourceAdapterService,
     ServiceDependency,
     TemporalServiceDependency,
     ConfigurationDependency,
-    BundleDependency
+    BundleDependency,
+    ResourceDependency
 }

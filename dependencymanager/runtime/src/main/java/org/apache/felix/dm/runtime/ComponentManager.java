@@ -31,6 +31,7 @@ import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.dependencies.BundleDependency;
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
 import org.apache.felix.dm.dependencies.Dependency;
+import org.apache.felix.dm.dependencies.ResourceDependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.dependencies.TemporalServiceDependency;
 import org.apache.felix.dm.service.Service;
@@ -164,6 +165,10 @@ public class ComponentManager implements SynchronousBundleListener
                         service = createBundleAdapterService(b, dm, parser);
                         break;
 
+                    case ResourceAdapterService:
+                        service = createResourceAdapterService(b, dm, parser);
+                        break;
+
                     case ServiceDependency:
                         checkServiceParsed(service);
                         service.add(createServiceDependency(b, dm, parser, false));
@@ -182,6 +187,11 @@ public class ComponentManager implements SynchronousBundleListener
                     case BundleDependency:
                         checkServiceParsed(service);
                         service.add(createBundleDependency(b, dm, parser));
+                        break;
+                        
+                    case ResourceDependency:
+                        checkServiceParsed(service);
+                        service.add(createResourceDependency(b, dm, parser));
                         break;
                 }
             }
@@ -386,6 +396,27 @@ public class ComponentManager implements SynchronousBundleListener
     }
 
     /**
+     * Creates a Resource Adapter Service.
+     * @param b
+     * @param dm
+     * @param parser
+     * @return
+     */
+    private Service createResourceAdapterService(Bundle b, DependencyManager dm, DescriptorParser parser)
+        throws ClassNotFoundException
+    {
+        String filter = parser.getString(DescriptorParam.filter, null);
+        Class<?> impl = b.loadClass(parser.getString(DescriptorParam.impl));
+        String service = parser.getString(DescriptorParam.service);
+        Class<?> serviceClass = b.loadClass(service);
+        Dictionary<String, String> properties = parser.getDictionary(DescriptorParam.properties, null);
+        boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
+        Service srv = dm.createResourceAdapterService(filter, serviceClass, properties, impl, propagate);  
+        setCommonServiceParams(srv, parser);
+        return srv;
+    }
+
+    /**
      * Creates a ServiceDependency that we parsed from a component descriptor "ServiceDependency" entry.
      * @param b
      * @param dm
@@ -510,7 +541,33 @@ public class ComponentManager implements SynchronousBundleListener
         }
 
         // propagate
-        bd.setPropagate("true".equals(parser.getString(DescriptorParam.stateMask, "false")));
+        bd.setPropagate("true".equals(parser.getString(DescriptorParam.propagate, "false")));
         return bd;
+    }
+
+    private Dependency createResourceDependency(Bundle b, DependencyManager dm,
+        DescriptorParser parser)
+    {
+        ResourceDependency rd = dm.createResourceDependency();
+
+        // Set add/changed/removed
+        String added = parser.getString(DescriptorParam.added, null);
+        String changed = parser.getString(DescriptorParam.changed, null);
+        String removed = parser.getString(DescriptorParam.removed, null);
+        rd.setCallbacks(added, changed, removed);
+
+        // required
+        rd.setRequired("true".equals(parser.getString(DescriptorParam.required, "true")));
+        
+        // filter
+        String filter = parser.getString(DescriptorParam.filter, null);
+        if (filter != null) 
+        {
+            rd.setFilter(filter);
+        }
+        
+        // propagate
+        rd.setPropagate("true".equals(parser.getString(DescriptorParam.propagate, "false")));
+        return rd;
     }
 }
