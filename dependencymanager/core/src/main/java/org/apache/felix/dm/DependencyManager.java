@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.felix.dm.dependencies.BundleDependency;
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
+import org.apache.felix.dm.dependencies.PropertyMetaData;
 import org.apache.felix.dm.dependencies.ResourceDependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.dependencies.TemporalServiceDependency;
@@ -39,6 +40,7 @@ import org.apache.felix.dm.impl.dependencies.ConfigurationDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.ResourceDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.ServiceDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.TemporalServiceDependencyImpl;
+import org.apache.felix.dm.impl.metatype.PropertyMetaDataImpl;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.BundleContext;
@@ -135,6 +137,14 @@ public class DependencyManager {
         return new ConfigurationDependencyImpl(m_context, m_logger);
     }
     
+    /**
+     * Creates a new configuration property MetaData.
+     * @return a new Configuration property MetaData.
+     */
+    public PropertyMetaData createPropertyMetaData() {
+        return new PropertyMetaDataImpl();
+    }
+
     /**
      * Creates a new bundle dependency.
      * 

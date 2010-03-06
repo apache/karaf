@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.felix.dm.dependencies.BundleDependency;
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
+import org.apache.felix.dm.dependencies.PropertyMetaData;
 import org.apache.felix.dm.dependencies.ResourceDependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.dependencies.TemporalServiceDependency;
@@ -133,6 +134,14 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      */
     public ConfigurationDependency createConfigurationDependency() {
     	return m_manager.createConfigurationDependency();
+    }
+    
+    /**
+     * Creates a new configuration property MetaData.
+     * @return a new configuration property MetaData
+     */
+    public PropertyMetaData createPropertyMetaData() {
+        return m_manager.createPropertyMetaData();
     }
 
     /**

@@ -28,7 +28,9 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
+import org.apache.felix.dm.dependencies.PropertyMetaData;
 import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.impl.metatype.MetaTypeProviderImpl;
 import org.apache.felix.dm.management.ServiceComponentDependency;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -67,6 +69,7 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
     private String m_callback;
     private boolean m_isStarted;
 	private final Set m_updateInvokedCache = new HashSet();
+    private MetaTypeProviderImpl m_metaType;
 	
 	public ConfigurationDependencyImpl(BundleContext context, Logger logger) {
 		m_context = context;
@@ -115,7 +118,11 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
 	    if (needsStarting) {
 	        Properties props = new Properties();
 	        props.put(Constants.SERVICE_PID, m_pid);
-	        m_registration = m_context.registerService(ManagedService.class.getName(), this, props);
+	        ManagedService ms = this;
+	        if (m_metaType != null) {
+	            ms = m_metaType;
+	        }
+	        m_registration = m_context.registerService(ManagedService.class.getName(), ms, props);
 	    }
 	}
 
@@ -306,5 +313,47 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
 
     public Dictionary getProperties() {
         return getConfiguration();
+    }
+    
+    public BundleContext getBundleContext() {
+        return m_context;
+    }
+    
+    public Logger getLogger() {
+        return m_logger;
+    }
+    
+    public ConfigurationDependency add(PropertyMetaData properties)
+    {
+        createMetaTypeImpl();
+        m_metaType.add(properties);
+       return this;
+    }
+
+    public ConfigurationDependency setDescription(String description)
+    {
+        createMetaTypeImpl();
+        m_metaType.setDescription(description);
+       return this;
+    }
+
+    public ConfigurationDependency setHeading(String heading)
+    {
+        createMetaTypeImpl();
+        m_metaType.setName(heading);
+       return this;
+    }
+    
+    public ConfigurationDependency setLocalization(String path)
+    {
+        createMetaTypeImpl();
+        m_metaType.setLocalization(path);
+        return this;
+    }
+    
+    private synchronized void createMetaTypeImpl() {
+        if (m_metaType == null) {
+            m_metaType = new MetaTypeProviderImpl(this);
+        }
     }
 }

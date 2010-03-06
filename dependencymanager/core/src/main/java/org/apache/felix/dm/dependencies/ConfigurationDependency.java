@@ -11,23 +11,7 @@
  */
 package org.apache.felix.dm.dependencies;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-
-import org.apache.felix.dm.dependencies.Dependency;
-import org.apache.felix.dm.impl.Logger;
 import org.apache.felix.dm.management.ServiceComponentDependency;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 
 /**
  * Configuration dependency that can track the availability of a (valid) configuration. To use
@@ -61,4 +45,29 @@ public interface ConfigurationDependency extends Dependency, ServiceComponentDep
    * service properties specified directly are merged with these.
    */
   ConfigurationDependency setPropagate(boolean propagate);
+  
+  /**
+   * The label used to display the tab name (or section) where the properties are displayed. Example: "Printer Service".
+   * @return The label used to display the tab name where the properties are displayed (may be localized)
+   */
+  ConfigurationDependency setHeading(String heading);
+
+  /**
+   * A human readable description of the PID this annotation is associated with. Example: "Configuration for the PrinterService bundle".
+   * @return A human readable description of the PID this annotation is associated with (may be localized)
+   */
+  ConfigurationDependency setDescription(String description);
+
+  /**
+   * Points to the basename of the Properties file that can localize the Meta Type informations.
+   * By default, (e.g. <code>setLocalization("person")</code> would match person_du_NL.properties in the root bundle directory.
+   * The default localization base name for the properties is OSGI-INF/l10n/bundle, but can
+   * be overridden by the manifest Bundle-Localization header (see core specification, in section Localization on page 68).
+   */
+  ConfigurationDependency setLocalization(String path);
+
+  /**
+   * Add Configuration MetaData
+   */
+  ConfigurationDependency add(PropertyMetaData properties);
 }
