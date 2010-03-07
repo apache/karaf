@@ -59,5 +59,5 @@ public @interface ConfigurationDependency
      * The list of properties types used to expose properties in web console. 
      * @return The list of properties types used to expose properties in web console. 
      */
-    PropertyMetaData[] properties() default {};
+    PropertyMetaData[] metadata() default {};
 }

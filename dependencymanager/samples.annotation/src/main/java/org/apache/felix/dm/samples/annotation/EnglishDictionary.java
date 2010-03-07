@@ -52,7 +52,7 @@ public class EnglishDictionary implements DictionaryService
     @ConfigurationDependency(
         heading="English Dictionary", 
         description = "Configuration for the EnglishDictionary Service",
-        properties={
+        metadata={
             @PropertyMetaData(
                 heading="English Words",
                 description="Declare here some valid english words",

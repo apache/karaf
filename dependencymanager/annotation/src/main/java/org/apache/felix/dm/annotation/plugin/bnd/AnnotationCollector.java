@@ -566,14 +566,14 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.propagate, null);
 
         // Property Meta Types
-        if (annotation.get("properties") != null)
+        if (annotation.get("metadata") != null)
         {
             String propertiesPid = get(annotation, "pid", m_className);
             String propertiesHeading = annotation.get("heading");
             String propertiesDesc = annotation.get("description");
 
             MetaType.OCD ocd = new MetaType.OCD(propertiesPid, propertiesHeading, propertiesDesc);
-            for (Object p : (Object[]) annotation.get("properties"))
+            for (Object p : (Object[]) annotation.get("metadata"))
             {
                 Annotation property = (Annotation) p;
                 String heading = property.get("heading");
