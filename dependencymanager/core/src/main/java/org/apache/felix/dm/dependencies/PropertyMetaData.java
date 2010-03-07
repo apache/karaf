@@ -1,5 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
+ * required by applicable law or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.felix.dm.dependencies;
 
+/**
+ * This interface defines meta data regarding a given configuration property.
+ */
 public interface PropertyMetaData
 {
     /**
@@ -15,7 +29,7 @@ public interface PropertyMetaData
     PropertyMetaData setId(String id);
 
     /**
-     * Return the property primitive type. If must be either one of the following types:<p>
+     * Returns the property primitive type. If must be either one of the following types:<p>
      * <ul>
      *    <li>String.class</li>
      *    <li>Long.class</li>
@@ -30,7 +44,7 @@ public interface PropertyMetaData
     PropertyMetaData setType(Class type);
 
     /**
-     * Return a default for this property. The object must be of the appropriate type as defined by the cardinality and getType(). 
+     * Returns a default for this property. The object must be of the appropriate type as defined by the cardinality and getType(). 
      * The return type is a list of String  objects that can be converted to the appropriate type. The cardinality of the return 
      * array must follow the absolute cardinality of this type. E.g. if the cardinality = 0, the array must contain 1 element. 
      * If the cardinality is 1, it must contain 0 or 1 elements. If it is -5, it must contain from 0 to max 5 elements. Note that 
@@ -41,7 +55,7 @@ public interface PropertyMetaData
     /**
      * Returns the property description. The description may be localized and must describe the semantics of this type and any 
      * constraints. Example: "Select the log level for the Printer Service".
-     * @return The localized description of the definition.
+     * @return a localizable description of the property.
      */
     PropertyMetaData setDescription(String description);
 

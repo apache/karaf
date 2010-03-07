@@ -53,21 +53,22 @@ public interface ConfigurationDependency extends Dependency, ServiceComponentDep
   ConfigurationDependency setHeading(String heading);
 
   /**
-   * A human readable description of the PID this annotation is associated with. Example: "Configuration for the PrinterService bundle".
-   * @return A human readable description of the PID this annotation is associated with (may be localized)
+   * A human readable description of the PID this configuration is associated with. Example: "Configuration for the PrinterService bundle".
+   * @return A human readable description of the PID this configuration is associated with (may be localized)
    */
   ConfigurationDependency setDescription(String description);
 
   /**
    * Points to the basename of the Properties file that can localize the Meta Type informations.
-   * By default, (e.g. <code>setLocalization("person")</code> would match person_du_NL.properties in the root bundle directory.
    * The default localization base name for the properties is OSGI-INF/l10n/bundle, but can
    * be overridden by the manifest Bundle-Localization header (see core specification, in section Localization on page 68).
+   * You can specify a specific localization basename file using this method (e.g. <code>setLocalization("person")</code> 
+   * will match person_du_NL.properties in the root bundle directory.
    */
   ConfigurationDependency setLocalization(String path);
 
   /**
-   * Add Configuration MetaData
+   * Adds a MetaData regarding a given configuration property.
    */
   ConfigurationDependency add(PropertyMetaData properties);
 }
