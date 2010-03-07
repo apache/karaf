@@ -133,6 +133,10 @@ public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService
         String base = (lastSlash == -1) ? m_localization : m_localization.substring(lastSlash + 1);
         Enumeration e = m_configDependency.getBundleContext().getBundle().findEntries(path,
             base + "*.properties", false);
+        if (e == null) {
+            return null;
+        }
+        
         TreeSet set = new TreeSet();
         while (e.hasMoreElements())
         {
