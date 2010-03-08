@@ -1155,36 +1155,9 @@ ex.printStackTrace();
                     else if ((currentImportedBlame != null)
                         && !isCompatible(currentImportedBlame.m_cap, candSourceBlame.m_cap, modulePkgMap))
                     {
-//System.out.println("+++ CIB " + currentImportedBlame + " SB " + sourceBlame);
-                        // Try to remove the previously selected candidate associated
-                        // with the requirement blamed for adding the constraint. This
-                        // Permutate the candidate map.
-                        if (currentImportedBlame.m_reqs.size() != 0)
-                        {
-                            // Permutate the candidate map.
-                            for (int reqIdx = 0; reqIdx < currentImportedBlame.m_reqs.size(); reqIdx++)
-                            {
-                                Map<Requirement, Set<Capability>> copy = copyCandidateMap(candidateMap);
-                                Set<Capability> candidates =
-                                    copy.get(currentImportedBlame.m_reqs.get(reqIdx));
-                                Iterator it = candidates.iterator();
-                                it.next();
-                                it.remove();
-// TODO: PROTO3 RESOLVER - We could check before doing the candidate map copy.
-                                if (candidates.size() > 0)
-                                {
-                                    m_candidatePermutations.add(copy);
-                                }
-                            }
-                        }
-
-                        throw new ResolveException(
-                            "Constraint violation for package '" + usedPkgName
-                            + "' when resolving module " + current
-                            + " between existing constraint "
-                            + currentImportedBlame
-                            + " and candidate constraint "
-                            + candSourceBlame, null, null);
+                        permutateCandidates(
+                            current, usedPkgName, currentImportedBlame,
+                            candSourceBlame, candidateMap);
                     }
                 }
 
