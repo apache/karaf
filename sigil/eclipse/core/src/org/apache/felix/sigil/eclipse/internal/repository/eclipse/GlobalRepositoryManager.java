@@ -31,9 +31,9 @@ import org.apache.felix.sigil.repository.IRepositoryManager;
 public class GlobalRepositoryManager extends SigilRepositoryManager implements IRepositoryManager
 {
 
-    public GlobalRepositoryManager()
+    public GlobalRepositoryManager(RepositoryMap map)
     {
-        super( null );
+        super( null, map );
     }
 
 

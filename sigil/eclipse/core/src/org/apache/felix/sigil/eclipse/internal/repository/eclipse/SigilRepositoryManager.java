@@ -24,12 +24,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.felix.sigil.eclipse.SigilCore;
+import org.apache.felix.sigil.eclipse.internal.repository.eclipse.RepositoryMap.RepositoryCache;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryModel;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositorySet;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryType;
@@ -55,25 +54,12 @@ public class SigilRepositoryManager extends AbstractRepositoryManager implements
 
     private final String repositorySet;
 
-    private HashMap<String, RepositoryCache> cachedRepositories = new HashMap<String, RepositoryCache>();
+    private RepositoryMap cachedRepositories;
 
-    class RepositoryCache
-    {
-        private final Properties pref;
-        private final IBundleRepository repo;
-
-
-        RepositoryCache( Properties pref, IBundleRepository repo )
-        {
-            this.pref = pref;
-            this.repo = repo;
-        }
-    }
-
-
-    public SigilRepositoryManager( String repositorySet )
+    public SigilRepositoryManager( String repositorySet, RepositoryMap cachedRepositories )
     {
         this.repositorySet = repositorySet;
+        this.cachedRepositories = cachedRepositories;
     }
 
 
@@ -134,13 +120,7 @@ public class SigilRepositoryManager extends AbstractRepositoryManager implements
 
         setRepositories( repos.toArray( new IBundleRepository[repos.size()] ) );
 
-        for ( Iterator<String> i = cachedRepositories.keySet().iterator(); i.hasNext(); )
-        {
-            if ( !ids.contains( i.next() ) )
-            {
-                i.remove();
-            }
-        }
+        cachedRepositories.retainAll( ids );
     }
 
 

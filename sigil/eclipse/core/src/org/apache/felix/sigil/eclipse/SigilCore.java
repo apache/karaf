@@ -40,6 +40,7 @@ import org.apache.felix.sigil.eclipse.internal.model.project.SigilModelRoot;
 import org.apache.felix.sigil.eclipse.internal.model.project.SigilProject;
 import org.apache.felix.sigil.eclipse.internal.model.repository.RepositoryConfiguration;
 import org.apache.felix.sigil.eclipse.internal.repository.eclipse.GlobalRepositoryManager;
+import org.apache.felix.sigil.eclipse.internal.repository.eclipse.RepositoryMap;
 import org.apache.felix.sigil.eclipse.internal.repository.eclipse.SigilRepositoryManager;
 import org.apache.felix.sigil.eclipse.internal.resources.ProjectResourceListener;
 import org.apache.felix.sigil.eclipse.internal.resources.SigilProjectManager;
@@ -132,14 +133,13 @@ public class SigilCore extends AbstractUIPlugin
     private ServiceTracker descriptorTracker;
     private ServiceTracker registryTracker;
     private ServiceTracker serializerTracker;
-
     private static IRepositoryConfiguration repositoryConfig;
     private static SigilProjectManager projectManager;
     private static OSGiInstallManager installs;
     private static ISigilModelRoot modelRoot;
     private static HashMap<Object, SigilRepositoryManager> repositoryManagers = new HashMap<Object, SigilRepositoryManager>();
     private static GlobalRepositoryManager globalRepositoryManager;
-
+    private static RepositoryMap repositoryMap;
 
     /**
      * Returns the shared instance
@@ -277,7 +277,8 @@ public class SigilCore extends AbstractUIPlugin
 
         installs = new OSGiInstallManager();
 
-        globalRepositoryManager = new GlobalRepositoryManager();
+        repositoryMap = new RepositoryMap();
+        globalRepositoryManager = new GlobalRepositoryManager(repositoryMap);
         globalRepositoryManager.initialise();
         
         projectManager = new SigilProjectManager();
@@ -449,7 +450,7 @@ public class SigilCore extends AbstractUIPlugin
             manager = repositoryManagers.get( NULL );
             if ( manager == null )
             {
-                manager = new SigilRepositoryManager( null );
+                manager = new SigilRepositoryManager( null, repositoryMap );
                 manager.initialise();
                 repositoryManagers.put( NULL, manager );
             }
@@ -460,7 +461,7 @@ public class SigilCore extends AbstractUIPlugin
 
             if ( manager == null )
             {
-                manager = new SigilRepositoryManager( set );
+                manager = new SigilRepositoryManager( set, repositoryMap );
                 manager.initialise();
                 repositoryManagers.put( set, manager );
             }
