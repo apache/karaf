@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.MultiStatus;
 
 public class ResolveProjectsJob extends WorkspaceJob
 {
-    final Collection<ISigilProjectModel> sigilProjects;
+    private final Collection<ISigilProjectModel> sigilProjects;
     
     public ResolveProjectsJob( IWorkspace workspace )
     {

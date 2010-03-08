@@ -181,8 +181,14 @@ public class WorkspaceRepository extends AbstractBundleRepository implements IRe
 
     private void handleRefresh(IResourceChangeEvent event)
     {
-        SigilCore.log("Refreshing workspace repository");
-        notifyChange();
+        if ( event.getResource() instanceof IProject ) {
+            IProject project = (IProject) event.getResource();
+            if ( isSigilProject(project) )
+            {
+                SigilCore.log("Refreshing workspace repository");
+                notifyChange();
+            }
+        }
     }
 
 
