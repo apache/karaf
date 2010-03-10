@@ -57,6 +57,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Category>console</Bundle-Category>
                         <Bundle-Activator>
                             org.apache.felix.shell.remote.Activator
