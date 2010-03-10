@@ -156,7 +156,13 @@ public class SigilRepositoryManager extends AbstractRepositoryManager implements
         else
         {
             IRepositorySet set = SigilCore.getRepositoryConfiguration().getRepositorySet( repositorySet );
-            return set.getRepositories();
+            if ( set == null ) {
+                SigilCore.error( "Unknown repository set " + repositorySet );
+                return SigilCore.getRepositoryConfiguration().getDefaultRepositorySet().getRepositories();
+            }
+            else {
+                return set.getRepositories();
+            }
         }
     }
 
