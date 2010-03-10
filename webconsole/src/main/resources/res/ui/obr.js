@@ -45,6 +45,12 @@ if (!Array.prototype.map)
   };
 }
 
+var uid = 0;
+function guid() {
+   uid = uid + 1;
+   return (0x10000 + uid).toString(16).substring(1) + (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+}
+
 /* displays a date in the user's local timezone */
 function localTm(time) {
 	return (time ? new Date(time) : new Date()).toLocaleString();
@@ -164,7 +170,7 @@ function getRequirementsByName(res, name) {
 
 function createDetailedTable(enclosing, name, headers, rows, callback) {
     if (rows && rows.length > 0) {
-        var uuid = jQuery.uuid();
+        var uuid = guid();
         var title = createElement('span', null, null, [
                                 createElement('span', 'ui-icon ui-icon-triangle-1-e', { id: "img"+uuid, style: {display: "inline-block"} }),
                                 text(" "),
@@ -301,11 +307,11 @@ function renderDetailedResource(res) {
             createElement('form', 'button-group', { method: "post"}, [
                 createElement('input', null, { type: "hidden", name: "bundle", value: res.id}),
                 createElement('input', 'ui-state-default ui-corner-all', { type: "submit", name: "deploy", value: "Deploy" }, [ text("dummy")]),
-                createElement('input', 'ui-state-default ui-corner-all', { type: "submit", name: "deploystart", value: "Start" }, [ text("dummy")]),
+                createElement('input', 'ui-state-default ui-corner-all', { type: "submit", name: "deploystart", value: "Deploy and Start" }, [ text("dummy")]),
                 text(" "),
                 createElement('input', 'ui-state-default ui-corner-all', { id: "optional", type: "checkbox", name: "optional" }),
                 text(" "),
-                createElement('label', 'ui-widget', { 'for': "optional" }, [ text("optional") ])
+                createElement('label', 'ui-widget', { 'for': "optional" }, [ text("deploy optional dependencies") ])
             ])
         ])
     ]));
@@ -368,7 +374,7 @@ function renderDetailedResource(res) {
                             return [ text(p.filter), text(""), text(p.optional) ];
                         });
     // Imported services
-    createDetailedTable(tbody, "Imported bundles", ["Service", "Optional"], getRequirementsByName(res, "service"), function(p) {
+    createDetailedTable(tbody, "Imported services", ["Service", "Optional"], getRequirementsByName(res, "service"), function(p) {
                             return [ text(p.filter), text(p.optional) ];
                         });
     // Required dependencies
