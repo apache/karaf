@@ -207,8 +207,8 @@ public class BundleInfo {
 				ri.setFilter(createServiceFilter(entry));
 				ri.setComment("Import Service " + entry.getName());
 
-				// TODO the following is arbitrary
-				ri.setOptional(false);
+                String avail = entry.getDirective("availability");
+				ri.setOptional("optional".equals(avail));
 				ri.setMultiple(true);
 				resource.addRequirement(ri);
 			}

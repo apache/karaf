@@ -87,8 +87,8 @@ public class ManifestEntry implements Comparable {
 					attributes = new HashMap();
 				attributes.put(parameter.key, parameter.value);
 				if (parameter.key.equalsIgnoreCase("version")
-						|| parameter.key
-								.equalsIgnoreCase("specification-version"))
+						|| parameter.key.equalsIgnoreCase("specification-version")
+						|| parameter.key.equalsIgnoreCase("bundle-version"))
 					this.version = new VersionRange(parameter.value);
 				break;
 
