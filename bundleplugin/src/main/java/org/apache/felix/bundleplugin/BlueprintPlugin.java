@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,8 +49,8 @@ public class BlueprintPlugin implements AnalyzerPlugin {
 
         String bpHeader = analyzer.getProperty("Bundle-Blueprint", "OSGI-INF/blueprint");
         Map<String, Map<String,String>> map = Processor.parseHeader(bpHeader, null);
-        for (String root : map.keySet()) {
-
+        for (String root : map.keySet())
+        {
             Jar jar = analyzer.getJar();
             Map<String, Resource> dir = jar.getDirectories().get(root);
             if(dir == null || dir.isEmpty())
@@ -115,22 +116,19 @@ public class BlueprintPlugin implements AnalyzerPlugin {
             {
                 Set<Attribute> orgAttr = parseHeader(analyzer.getProperty(header), null);
                 Set<Attribute> newAttr = hdrs.get(header);
-                for (Attribute a : newAttr)
+                for (Iterator<Attribute> it = newAttr.iterator(); it.hasNext();)
                 {
-                    boolean found = false;
+                    Attribute a = it.next();
                     for (Attribute b : orgAttr)
                     {
                         if (b.getName().equals(a.getName()))
                         {
-                            found = true;
+                            it.remove();
                             break;
                         }
                     }
-                    if (!found)
-                    {
-                        orgAttr.add(a);
-                    }
                 }
+                orgAttr.addAll(newAttr);
                 // Rebuild from orgAttr
                 StringBuilder sb = new StringBuilder();
                 for (Attribute a : orgAttr)

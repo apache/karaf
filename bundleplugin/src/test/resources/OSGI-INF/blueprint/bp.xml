@@ -45,6 +45,12 @@
         </service-properties>
     </service>
 
+    <service interface="p6.Foo">
+        <service-properties>
+            <entry key="k" value="v2" />
+        </service-properties>
+    </service>
+
     <service>
         <interfaces>
             <value>p7.Foo</value>

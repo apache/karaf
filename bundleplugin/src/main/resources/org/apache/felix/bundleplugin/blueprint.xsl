@@ -31,7 +31,7 @@
         <xsl:if test="not($nsh_interface = '' or $nsh_namespace = '')">
             <xsl:for-each select="descendant-or-self::node() | descendant-or-self::node()/attribute::*">
                 <xsl:if test="not(namespace-uri() = 'http://www.osgi.org/xmlns/blueprint/v1.0.0' or namespace-uri() = '')">
-                    <xsl:value-of select="concat('Import-Service:', $nsh_interface, ';', $nsh_namespace, '=', namespace-uri())" />
+                    <xsl:value-of select="concat('Import-Service:', $nsh_interface, ';', $nsh_namespace, '=&quot;', namespace-uri(), '&quot;')" />
                     <xsl:text>
                     </xsl:text>
                 </xsl:if>
@@ -80,7 +80,7 @@
                 </xsl:otherwise>
             </xsl:choose>
             <xsl:for-each select="bp:service-properties/bp:entry">
-                <xsl:value-of select="concat(';', @key, '=', @value)" />
+                <xsl:value-of select="concat(';', @key, '=&quot;', @value, '&quot;')" />
             </xsl:for-each>
             <xsl:text>
             </xsl:text>
