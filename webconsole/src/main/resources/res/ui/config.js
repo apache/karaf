@@ -14,58 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// tables container - will get hidden, when no config service available
+var configContent = false;
+
+// config table list
+var configTable = false;
+var configBody  = false;
+var configRow = false;
+
+// factories table list
+var factoryTable = false;
+var factoryBody  = false;
+var factoryRow = false;
 
 
-function configure() {
-    var select = document.getElementById('configSelection_pid');
-    var pid = select.options[select.selectedIndex].value;
-    var parm = pluginRoot + '/' + pid;
-	$.post(parm, null, displayConfigForm, "json");
-}
+// editor dialog
+var editor = false;
 
-
-function create() {
-    var select = document.getElementById('configSelection_factory');
-    var pid = select.options[select.selectedIndex].value;
-    var parm = pluginRoot + '/' + pid + '?create=true';
-	$.post(parm, null, displayConfigForm, "json");
+function configure(pid, create) {
+	var uri = pluginRoot + '/' + pid;
+	$.post(create ? uri + '?create=1' : uri, null, displayConfigForm, 'json');
 }
 
 function displayConfigForm(obj) {
-	var span1 = document.getElementById('configField');
-	var span2 = document.getElementById('factoryField');
-	if (!span1 && !span2) {
-		return;
-	} 
-    
-    var parent = span1 ? span1.parentNode : span2.parentNode;
-    
-    clearChildren( parent );
-    
-    if (span1) {
-        parent.appendChild( span1 );
-    }
-    if (span2) {
-        parent.appendChild( span2 );
-    }
-    
-    var trEl = tr( null );
-    var tdEl = createElement( "th", null, { colSpan: "2" } );
-    addText( tdEl, obj.title );
-    trEl.appendChild( tdEl );
-    parent.appendChild( trEl );
+	var parent = document.getElementById('editorTable');
+	clearChildren( parent )
 
-    trEl = tr( );
+    var trEl = tr( );
     parent.appendChild( trEl );
     
-    tdEl = td( );
-    addText( tdEl, "\u00a0" );
-    trEl.appendChild( tdEl );
-    
-    tdEl = td( );
+    var tdEl = td( null, { colSpan: "2" } );
     trEl.appendChild( tdEl );
     
     var formEl = createElement( "form", null, {
+			id    : "editorForm",
             method: "POST",
             action: pluginRoot + "/" + obj.pid
         });
@@ -133,28 +115,9 @@ function displayConfigForm(obj) {
     {
         printForm(bodyEl, obj);
     }
-    
-    trEl = tr( );
-    bodyEl.appendChild( trEl );
-    
-    tdEl = td( );
-    addText( tdEl, "\u00a0" );
-    trEl.appendChild( tdEl );
-    
-    tdEl = td( );
-    trEl.appendChild( tdEl );
-
-    // define this TD as innerHTML otherwise the onClick event handler
-    // of the Delete button is not accepted by IE6 (!)...    
-    var innerHTML = '<input type="submit" name="submit" value="'+i18n.save+'" />';
-    innerHTML += '&nbsp;&nbsp;&nbsp;';
-    innerHTML += '<input type="reset" name="reset" value="'+i18n.reset+'" />';
-    innerHTML += '&nbsp;&nbsp;&nbsp;';
-    innerHTML += '<input type="submit" name="delete" value="'+i18n.del+'" onClick="return confirmDelete(\'' + obj.pid + '\', \'' + obj.bundleLocation + '\');"/>';
-    tdEl.innerHTML = innerHTML;
 
     printConfigurationInfo(parent, obj);
-	initStaticWidgets($(parent));
+	initStaticWidgets(editor.attr('__pid', obj.pid).dialog('option', 'title', obj.title).dialog('open'));
 }
 
 function printTextArea(/* Element */ parent, props )
@@ -291,29 +254,7 @@ function printConfigurationInfo( /* Element */ parent, obj )
             ])
         ])
     );
-    
-    if (obj.bundleLocation)
-    {         
-        var form = createElement( "form", null, {
-                        method: "POST",
-                        action: pluginRoot + "/" + obj.pid
-                    });
 
-        // define this form contents as innerHTML otherwise the onClick
-        // event handler of the Unbind button is not accepted by IE6 (!)...
-        var formInner = '<input type="hidden" name="unbind" value="true"/>';
-        formInner += '<input type="submit" name="submit" value="'+i18n.unbind_btn+'" class="ui-state-default ui-corner-all" title="'+i18n.unbind_tip+'"  onClick="return confirmUnbind(\'' + obj.pid + '\', \'' + obj.bundleLocation + '\');"/>';
-        form.innerHTML = formInner;
-    
-        parent.appendChild( tr( null, null, [
-                td( null, null, [
-                    text( " " )
-                ]),
-                td( null, null, [ form ] )
-            ])
-        );
-    }
-	//$(form).ready(initStaticWidgets);
 }
 
 
@@ -475,7 +416,7 @@ function configConfirm(/* String */ message, /* String */ title, /* String */ lo
 
 function confirmDelete(/* String */ title, /* String */ location)
 {
-    return configConfirm(i18n.unbind_ask, title, location);
+    return configConfirm(i18n.del_ask, title, location);
 }
 
 function confirmUnbind(/* String */ title, /* String */ location)
@@ -483,26 +424,95 @@ function confirmUnbind(/* String */ title, /* String */ location)
     return configConfirm(i18n.unbind_ask, title, location);
 }
 
-function addOption(list, target) 
-{
-	var html = "";
-	for (i in list) {
-		var sel = list[i].id == selectedPid ? '" selected="selected' : '';
-		html += '<option value="' + list[i].id + sel + '">' + list[i].name + '</option>';
-	}
-	if (html) target.html(html);
+function addConfig(conf) {
+	var tr = configRow.clone().appendTo(configBody);
+	tr.find('td:eq(0)').text(conf.fpid ? conf.fpid : '-'); // fpid
+	tr.find('td:eq(1)').text(conf.name).click(function() { // name & edit
+		configure(conf.id);
+	});
+	tr.find('td:eq(2)').html(conf.bundle ? '<a href="' + pluginRoot + '/../bundles/' + conf.bundle + '">' + conf.bundle_name + '</a>' : '-'); // binding
+	
+	// buttons
+	tr.find('li:eq(0)').click(function() { // edit
+		configure(conf.id);
+	});
+	tr.find('li:eq(2)').click(function() { // delete
+		if ( confirmDelete(conf.id, conf.bundle_name) ) {
+			$.post(pluginRoot + '/' + conf.id + '?apply=1&delete=1', null, function() {
+				document.location.href = pluginRoot;
+			}, 'json');
+		}
+	});
+	if (conf.bundle) tr.find('li:eq(1)').click(function() { // unbind
+		if ( confirmUnbind(conf.id, conf.bundle_name) ) {
+			$.post(pluginRoot + '/' + conf.id + '?apply=1&delete=1', null, function() {
+				document.location.href = pluginRoot + '/' + conf.id;
+			}, 'json');
+		}
+	}).removeClass('ui-state-disabled');
 }
 
-var configSelection_pid = false;
-var configSelection_factory = false;
+function addFactoryConfig(conf) {
+	var tr = factoryRow.clone().appendTo(factoryBody);
+	tr.find('td:eq(0)').text(conf.id); // fpid
+	tr.find('td:eq(1)').text(conf.name).click(function() { // name & edit
+		configure(conf.id, true);
+	});
+	// buttons
+	tr.find('li:eq(0)').click(function() { // edit
+		configure(conf.id, true);
+	});
+}
+
 $(document).ready(function() {
-	configSelection_pid = $('#configSelection_pid');
-	configSelection_factory = $('#configSelection_factory');
-	$(".statline").html(configData.status ? i18n.stat_ok : i18n.stat_missing);
-	$("#config_content").css("display", configData.status ? "block" : "none");
-	if (configData.status) {
-		addOption(configData.pids, $("#configSelection_pid"));
-		addOption(configData.fpids, $("#configSelection_factory"));
+	configContent = $('#configContent');
+	// config table list
+	configTable   = configContent.find('table:eq(0)').tablesorter({
+		headers: { 3: { sorter: false } },
+		textExtraction:mixedLinksExtraction
+	});
+	configBody    = configTable.find('tbody');
+	configRow     = configBody.find('tr').clone();
+
+	// factories table list
+	factoryTable  = configContent.find('table:eq(1)').tablesorter({
+		headers: { 2: { sorter: false } }
+	});
+	factoryBody   = factoryTable.find('tbody');
+	factoryRow    = factoryBody.find('tr').clone();
+	
+	// setup button - cannot inline in dialog option because of i18n
+	var _buttons = {};
+	_buttons[i18n.abort] = function() {
+		$(this).dialog('close');
 	}
-	if (selectedPid) configure();
+	_buttons[i18n.reset] = function() {
+		var form = document.getElementById('editorForm');
+		if (form) form.reset();
+	}
+	_buttons[i18n.save] = function() {
+		$.post(pluginRoot + '/' + $(this).attr('__pid') + '?' + $(this).find('form').serialize());
+		$(this).dialog('close');
+	}
+	// prepare editor, but don't open yet!
+	editor = $('#editor').dialog({
+		autoOpen : false,
+		modal    : true,
+		width    : '90%',
+		closeText: i18n.abort,
+		buttons  : _buttons
+	});
+
+	// display the configuration data
+	$(".statline").html(configData.status ? i18n.stat_ok : i18n.stat_missing);
+	if (configData.status) {
+		configBody.empty(); factoryBody.empty();
+
+		for(var i in configData.pids) addConfig(configData.pids[i]);
+		for(var i in configData.fpids) addFactoryConfig(configData.fpids[i]);
+		initStaticWidgets(configContent);
+	} else {
+		configContent.addClass('ui-helper-hidden');
+	}
+	if (selectedPid) configure(selectedPid);
 });

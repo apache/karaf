@@ -1,4 +1,4 @@
-﻿<script type="text/javascript" src="res/ui/config.js"></script>
+<script type="text/javascript" src="res/ui/config.js"></script>
 <script type="text/javascript">
 // <![CDATA[
 // data
@@ -10,6 +10,7 @@ var i18n = { // i18n
 	save         : '${save}',
 	reset        : '${reset}',
 	del          : '${delete}',
+	abort        : '${abort}',
 	props_title  : '${config.properties}',
 	props_enter  : '${config.properties.enter}', // "Enter Name-Value pairs of configuration properties"
 	cfg_title    : '${config.info.title}', // "Configuration Information"
@@ -22,10 +23,7 @@ var i18n = { // i18n
 	del_ask      : '${config.del.ask}', // "Are you sure to delete this configuration ?";
 	del_config   : '${config.del.config}', // "Configuration: ";
 	del_bundle   : '${config.del.bundle}', // "Bundle: ";
-	unbind_ask   : '${config.unbind.ask}', // "Are you sure to unbind this configuration ?"
-	'xx' : '${config.form.properties}',
-	'xx' : '${config.form.properties}',
-
+	unbind_ask   : '${config.unbind.ask}' // "Are you sure to unbind this configuration ?"
 }
 // ]]>
 </script>
@@ -33,27 +31,65 @@ var i18n = { // i18n
 <!-- status line -->
 <p class="statline">&nbsp;</p>
 
-<div id="config_content" >
-	<table class="nicetable">
-	<tr id="configField">
-		<td>Configurations</td>
-		<td>
-			<select name="pid" id="configSelection_pid" onchange="configure();">
-				<option>&nbsp;</option>
-			</select>
-			&nbsp;
-			<button onclick="configure();">Configure</button>
-		</td>
-	</tr>
-	<tr id="factoryField">
-		<td>Factory Configurations</td>
-		<td>
-			<select name="pid" id="configSelection_factory" onchange="create();">
-				<option>&nbsp;</option>
-			</select>
-			&nbsp;
-			<button onclick="create();">Create</button>
-		</td>
-	</tr>
+
+<div id="configContent" >
+	<div id="fPidsSelect" class="ui-widget-header ui-corner-top buttonGroup">
+		${config.configurations.title}
+	</div>
+	<table class="tablesorter nicetable noauto">
+		<thead>
+			<tr>
+				<th class="col_FPID">Factory PID</th>
+				<th class="col_Name">Name</th>
+				<th class="col_Binding">Bundle</th>
+				<th class="col_Actions" style="width: 7em">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>&nbsp;</td>
+				<td class="pointer">&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>
+					<ul class="icons">
+						<li class="dynhover" title="${config.edit.tip}"><span class="ui-icon ui-icon-pencil">&nbsp;</span></li>
+						<li class="ui-state-disabled dynhover" title="${config.unbind.tip}"><span class="ui-icon ui-icon-transferthick-e-w">&nbsp;</span></li>
+						<li class="dynhover" title="${delete}"><span class="ui-icon ui-icon-trash">&nbsp;</span></li>
+					</ul>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div id="factoryTableCaption" class="ui-widget-header ui-corner-top buttonGroup">
+		${config.factories.title}
+	</div>
+	<table class="tablesorter nicetable noauto">
+		<thead>
+			<tr>
+				<th class="col_FPID">Factory PID</th>
+				<th class="col_Name">Name</th>
+				<th class="col_Actions" style="width: 7em">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>&nbsp;</td>
+				<td class="pointer">&nbsp;</td>
+				<td>
+					<ul class="icons">
+						<li class="dynhover" title="${config.create.tip}"><span class="ui-icon ui-icon-plusthick">&nbsp;</span></li>
+					</ul>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+</div>
+
+<!-- placeholder for property editor -->
+<div id="editor" class="ui-helper-hidden">
+	<table id="editorTable" class="nicetable">
+		<tr><td>&nbsp;</td></tr>
 	</table>
 </div>

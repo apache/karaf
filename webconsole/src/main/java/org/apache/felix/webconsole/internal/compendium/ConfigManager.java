@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.WebConsoleUtil;
+import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -131,6 +132,11 @@ public class ConfigManager extends ConfigManagerBase
 
                 WebConsoleUtil.sendRedirect(request, response, redirect);
             }
+            else
+            {
+                response.setContentType("text/plain");
+                response.getWriter().print("true");
+            }
 
             return;
         }
@@ -144,7 +150,8 @@ public class ConfigManager extends ConfigManagerBase
         if ( request.getParameter( "unbind" ) != null )
         {
             config.setBundleLocation( null );
-            WebConsoleUtil.sendRedirect( request, response, config.getPid() );
+            response.setContentType("text/plain");
+            response.getWriter().print("true");
             return;
         }
 
@@ -212,7 +219,7 @@ public class ConfigManager extends ConfigManagerBase
                 while ( i.hasNext() ) {
                     final String servicePid = i.next().toString();
 
-                    final Configuration config = this.getConfiguration(ca, servicePid);
+                    final Configuration config = getConfiguration(ca, servicePid);
                     if ( config != null ) {
                         if ( printColon ) {
                             pw.print(',');
@@ -283,7 +290,7 @@ public class ConfigManager extends ConfigManagerBase
         try
         {
             json.put("status", ca != null ? Boolean.TRUE : Boolean.FALSE);
-            listConfigurations(json, ca, pidFilter, locale);
+            listConfigurations(json, ca, pidFilter, locale, loc);
             listFactoryConfigurations(json, pidFilter, locale);
         }
         catch (JSONException e)
@@ -313,7 +320,7 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private Configuration getConfiguration( ConfigurationAdmin ca, String pid )
+    private static final Configuration getConfiguration( ConfigurationAdmin ca, String pid )
     {
         if ( ca != null && pid != null )
         {
@@ -367,7 +374,7 @@ public class ConfigManager extends ConfigManagerBase
     }
 
     private final void listConfigurations(JSONObject json, ConfigurationAdmin ca,
-        String pidFilter, String locale)
+        String pidFilter, String locale, Locale loc)
     {
         try
         {
@@ -411,13 +418,50 @@ public class ConfigManager extends ConfigManagerBase
             {
                 String id = (String) i.next();
                 Object name = optionsPlain.get(id);
-                json.append("pids", new JSONObject().put("id", id).put("name", name));
+
+                final Configuration config = getConfiguration(ca, id);
+                JSONObject data = new JSONObject().put("id", id).put("name", name);
+                if (null != config)
+                {
+                    final String fpid = config.getFactoryPid();
+                    if (null != fpid)
+                    {
+                        data.put("fpid", fpid);
+                    }
+
+                    final Bundle bundle = getBoundBundle(config);
+                    if (null != bundle)
+                    {
+                        data.put("bundle", bundle.getBundleId());
+                        data.put("bundle_name", Util.getName(bundle, loc));
+                    }
+                }
+
+                json.append("pids", data);
             }
         }
         catch (Exception e)
         {
             log("listConfigurations: Unexpected problem encountered", e);
         }
+    }
+
+    private final Bundle getBoundBundle(Configuration config)
+    {
+        if (null == config)
+            return null;
+        final String location = config.getBundleLocation();
+        if (null == location)
+            return null;
+
+        final Bundle bundles[] = getBundleContext().getBundles();
+        for (int i = 0; bundles != null && i < bundles.length; i++)
+        {
+            if (bundles[i].getLocation().equals(location))
+                return bundles[i];
+
+        }
+        return null;
     }
 
     private SortedMap getServices( String serviceClass, String serviceFilter, String locale, boolean ocdRequired )
@@ -767,7 +811,7 @@ public class ConfigManager extends ConfigManagerBase
                 Configuration config = ca.getConfiguration( pid, null );
                 config.delete();
             }
-            return request.getHeader( "Referer" );
+            return null; // return request.getHeader( "Referer" );
         }
 
         String factoryPid = request.getParameter( ConfigManager.factoryPID );
