@@ -33,7 +33,7 @@
                 <xsl:if test="not(namespace-uri() = 'http://www.osgi.org/xmlns/blueprint/v1.0.0'
                                         or namespace-uri() = 'http://www.w3.org/2001/XMLSchema-instance'
                                         or namespace-uri() = '')">
-                    <xsl:value-of select="concat('Import-Service:', $nsh_interface, ';', $nsh_namespace, '=&quot;', namespace-uri(), '&quot;')" />
+                    <xsl:value-of select="concat('Import-Service:', $nsh_interface, ';filter=&quot;(', $nsh_namespace, '=', namespace-uri(), ')&quot;')" />
                     <xsl:text>
                     </xsl:text>
                 </xsl:if>
@@ -89,18 +89,35 @@
         </xsl:for-each>
 
         <xsl:for-each select="//bp:reference[@interface] | //bp:reference-list[@interface]">
+            <xsl:value-of select="concat('Import-Service:', @interface)" />
             <xsl:choose>
                 <xsl:when test="@availability">
-                    <xsl:value-of select="concat('Import-Service:', @interface, ';availability:=', @availability)"/>
+                    <xsl:value-of select="concat(';availability:=', @availability)"/>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:choose>
                         <xsl:when test="/bp:blueprint/@default-availability">
-                            <xsl:value-of select="concat('Import-Service:', @interface, ';availability:=', /bp:blueprint/@default-availability)"/>
+                            <xsl:value-of select="concat(';availability:=', /bp:blueprint/@default-availability)"/>
                         </xsl:when>
+                    </xsl:choose>
+                </xsl:otherwise>
+            </xsl:choose>
+            <xsl:choose>
+                <xsl:when test="@filter">
+                    <xsl:choose>
+                        <xsl:when test="@component-name">
+                            <xsl:value-of select="concat(';filter=&quot;(&amp;', @filter, ')(osgi.service.blueprint.compname=',  @component-name, ')&quot;')" />
+                         </xsl:when>
                         <xsl:otherwise>
-                            <xsl:value-of select="concat('Import-Service:', @interface, ';availability:=mandatory')"/>
+                            <xsl:value-of select="concat(';filter=&quot;', @filter, '&quot;')" />
                         </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:choose>
+                        <xsl:when test="@component-name">
+                            <xsl:value-of select="concat(';filter=&quot;(osgi.service.blueprint.compname=', @component-name, ')&quot;')" />
+                        </xsl:when>
                     </xsl:choose>
                 </xsl:otherwise>
             </xsl:choose>

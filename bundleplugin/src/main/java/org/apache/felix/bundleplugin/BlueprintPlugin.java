@@ -140,7 +140,14 @@ public class BlueprintPlugin implements AnalyzerPlugin {
                     sb.append(a.getName());
                     for (Map.Entry<String, String> prop : a.getProperties().entrySet())
                     {
-                        sb.append(';').append(prop.getKey()).append("=").append(prop.getValue());
+                        sb.append(';').append(prop.getKey()).append("=");
+                        if (prop.getValue().matches("[0-9a-zA-Z_-]+")) {
+                            sb.append(prop.getValue());
+                        } else {
+                            sb.append("\"");
+                            sb.append(prop.getValue().replace("\"", "\\\""));
+                            sb.append("\"");
+                        }
                     }
                 }
                 analyzer.setProperty(header, sb.toString());

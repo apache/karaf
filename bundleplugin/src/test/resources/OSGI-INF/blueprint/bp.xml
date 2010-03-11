@@ -34,7 +34,7 @@
         </property>
     </bean>
 
-    <reference interface="p4.Foo"  availability="optional"/>
+    <reference interface="p4.Foo"  availability="optional" filter="(prop=a,b)" component-name="boo"/>
 
     <reference-list interface="p5.Foo">
     </reference-list>

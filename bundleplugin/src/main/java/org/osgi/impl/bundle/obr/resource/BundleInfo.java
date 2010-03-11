@@ -340,10 +340,18 @@ public class BundleInfo {
 	}
 
 	String createServiceFilter(ManifestEntry pack) {
+        String f = pack.getAttribute("filter");
 		StringBuffer filter = new StringBuffer();
+        if (f != null) {
+            filter.append("(&");
+        }
 		filter.append("(service=");
 		filter.append(pack.getName());
 		filter.append(")");
+        if (f != null) {
+            filter.append(f);
+            filter.append(")");
+        }
 		return filter.toString();
 	}
 
@@ -480,6 +488,13 @@ public class BundleInfo {
 	CapabilityImpl createServiceCapability(ManifestEntry pack) {
 		CapabilityImpl capability = new CapabilityImpl("service");
 		capability.addProperty("service", pack.getName());
+        Map attributes = pack.getAttributes();
+        if (attributes != null)
+            for (Iterator at = attributes.keySet().iterator(); at.hasNext();) {
+                String key = (String) at.next();
+                Object value = attributes.get(key);
+                capability.addProperty(key, value);
+            }
 		return capability;
 	}
 
