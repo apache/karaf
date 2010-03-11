@@ -30,7 +30,9 @@
 
         <xsl:if test="not($nsh_interface = '' or $nsh_namespace = '')">
             <xsl:for-each select="descendant-or-self::node() | descendant-or-self::node()/attribute::*">
-                <xsl:if test="not(namespace-uri() = 'http://www.osgi.org/xmlns/blueprint/v1.0.0' or namespace-uri() = '')">
+                <xsl:if test="not(namespace-uri() = 'http://www.osgi.org/xmlns/blueprint/v1.0.0'
+                                        or namespace-uri() = 'http://www.w3.org/2001/XMLSchema-instance'
+                                        or namespace-uri() = '')">
                     <xsl:value-of select="concat('Import-Service:', $nsh_interface, ';', $nsh_namespace, '=&quot;', namespace-uri(), '&quot;')" />
                     <xsl:text>
                     </xsl:text>
