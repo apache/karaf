@@ -284,30 +284,27 @@ public class ConfigManager extends ConfigManagerBase
 
         final Locale loc = getLocale( request );
         final String locale = ( loc != null ) ? loc.toString() : null;
-        
+
 
         JSONObject json = new JSONObject();
         try
         {
             json.put("status", ca != null ? Boolean.TRUE : Boolean.FALSE);
-            listConfigurations(json, ca, pidFilter, locale, loc);
-            listFactoryConfigurations(json, pidFilter, locale);
+            if ( ca != null )
+            {
+                listConfigurations( json, ca, pidFilter, locale, loc );
+                listFactoryConfigurations( json, pidFilter, locale );
+            }
         }
         catch (JSONException e)
         {
             throw new IOException(e.toString());
         }
-        
+
         // if a configuration is addressed, display it immediately
-        final Configuration config;
         if ( request.getParameter( "create" ) != null && pid != null )
         {
-            config = new PlaceholderConfiguration( pid );
-            pid = config.getPid();
-        }
-        else
-        {
-            config = getConfiguration( ca, pid );
+            pid = new PlaceholderConfiguration( pid ).getPid();
         }
 
 
@@ -709,7 +706,7 @@ public class ConfigManager extends ConfigManagerBase
                         }
                         else if ( value.getClass().isArray() )
                         {
-                            if ( value.getClass().getComponentType().isPrimitive() ) 
+                            if ( value.getClass().getComponentType().isPrimitive() )
                             {
                                 final int len = Array.getLength(value);
                                 final Object[] tmp = new Object[len];
