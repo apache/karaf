@@ -29,7 +29,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-
 import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -39,13 +38,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.Action;
 import org.apache.felix.webconsole.BrandingPlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
-import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
-import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.WebConsolePluginAdapter;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
 import org.apache.felix.webconsole.internal.filter.FilteringResponseWrapper;
@@ -132,7 +128,6 @@ public class OsgiManager extends GenericServlet
             "org.apache.felix.webconsole.internal.compendium.PreferencesConfigurationPrinter",
             "org.apache.felix.webconsole.internal.core.BundlesServlet",
             "org.apache.felix.webconsole.internal.core.ServicesServlet",
-            "org.apache.felix.webconsole.internal.core.InstallAction",
             "org.apache.felix.webconsole.internal.deppack.DepPackServlet",
             "org.apache.felix.webconsole.internal.misc.LicenseServlet",
             "org.apache.felix.webconsole.internal.misc.ConfigurationRender",
@@ -149,8 +144,6 @@ public class OsgiManager extends GenericServlet
 
     private HttpService httpService;
 
-    private ServiceTracker operationsTracker;
-
     private ServiceTracker pluginsTracker;
 
     private ServiceTracker brandingTracker;
@@ -164,8 +157,6 @@ public class OsgiManager extends GenericServlet
     // map of labels to plugin titles: indexed by plugin label (String, values
     // are plugin titles
     private Map labelMap = new HashMap();
-
-    private Map operations = new HashMap();
 
     private AbstractWebConsolePlugin defaultPlugin;
 
@@ -277,16 +268,9 @@ public class OsgiManager extends GenericServlet
                 {
                     bindServlet( ( AbstractWebConsolePlugin ) plugin );
                 }
-                else
+                else if ( plugin instanceof BrandingPlugin )
                 {
-                    if ( plugin instanceof Action )
-                    {
-                        bindOperation( ( Action ) plugin );
-                    }
-                    if ( plugin instanceof BrandingPlugin )
-                    {
-                        AbstractWebConsolePlugin.setBrandingPlugin((BrandingPlugin) plugin);
-                    }
+                    AbstractWebConsolePlugin.setBrandingPlugin( ( BrandingPlugin ) plugin );
                 }
             }
             catch ( NoClassDefFoundError ncdfe )
@@ -311,8 +295,6 @@ public class OsgiManager extends GenericServlet
         }
 
         // start tracking external plugins after setting up our own plugins
-        operationsTracker = new OperationServiceTracker( this );
-        operationsTracker.open();
         pluginsTracker = new PluginServiceTracker( this );
         pluginsTracker.open();
         brandingTracker = new BrandingServiceTracker(this);
@@ -328,14 +310,9 @@ public class OsgiManager extends GenericServlet
         HttpServletRequest request = ( HttpServletRequest ) req;
         HttpServletResponse response = ( HttpServletResponse ) res;
 
-        // handle the request action, terminate if done
-        if ( this.handleAction( request, response ) )
-        {
-            return;
-        }
-
         // check whether we are not at .../{webManagerRoot}
-        if ( request.getPathInfo() == null || request.getPathInfo().equals( "/" ) )
+        final String pathInfo = request.getPathInfo();
+        if ( pathInfo == null || pathInfo.equals( "/" ) )
         {
             String path = request.getRequestURI();
             if ( !path.endsWith( "/" ) )
@@ -347,15 +324,23 @@ public class OsgiManager extends GenericServlet
             return;
         }
 
-        String label = request.getPathInfo();
-        int slash = label.indexOf( "/", 1 );
+        int slash = pathInfo.indexOf( "/", 1 );
         if ( slash < 2 )
         {
-            slash = label.length();
+            slash = pathInfo.length();
         }
 
-        label = label.substring( 1, slash );
+        final String label = pathInfo.substring( 1, slash );
         AbstractWebConsolePlugin plugin = ( AbstractWebConsolePlugin ) plugins.get( label );
+
+        if ( plugin == null )
+        {
+            if ( "install".equals( label ) )
+            {
+                plugin = ( AbstractWebConsolePlugin ) plugins.get( BundlesServlet.NAME );
+            }
+        }
+
         if ( plugin != null )
         {
             // the official request attributes
@@ -393,11 +378,6 @@ public class OsgiManager extends GenericServlet
         }
 
         // stop listening for plugins
-        if ( operationsTracker != null )
-        {
-            operationsTracker.close();
-            operationsTracker = null;
-        }
         if ( pluginsTracker != null )
         {
             pluginsTracker.close();
@@ -422,61 +402,9 @@ public class OsgiManager extends GenericServlet
         // simply remove all operations, we should not be used anymore
         this.plugins.clear();
         this.labelMap.clear();
-        this.operations.clear();
     }
 
     //---------- internal
-
-    protected boolean handleAction( HttpServletRequest req, HttpServletResponse resp ) throws IOException, ServletException
-    {
-        // check action
-        String actionName = WebConsoleUtil.getParameter( req, Util.PARAM_ACTION );
-        if ( actionName != null )
-        {
-            Action action = ( Action ) this.operations.get( actionName );
-            if ( action != null )
-            {
-                boolean redirect = true;
-                try
-                {
-                    redirect = action.performAction( req, resp );
-                }
-                catch ( IOException ioe )
-                {
-                    log.log( LogService.LOG_WARNING, ioe.getMessage(), ioe );
-                }
-                catch ( ServletException se )
-                {
-                    log.log( LogService.LOG_WARNING, se.getMessage(), se.getRootCause() );
-                }
-
-                // maybe overwrite redirect
-                if ( PARAM_NO_REDIRECT_AFTER_ACTION.equals( WebConsoleUtil.getParameter( req,
-                    PARAM_NO_REDIRECT_AFTER_ACTION ) ) )
-                {
-                    resp.setStatus( HttpServletResponse.SC_OK );
-                    resp.setContentType( "text/html" );
-                    resp.getWriter().println( "Ok" );
-                    return true;
-                }
-
-                if ( redirect )
-                {
-                    String uri = req.getRequestURI();
-                    // Object pars =
-                    // req.getAttribute(Action.ATTR_REDIRECT_PARAMETERS);
-                    // if (pars instanceof String) {
-                    // uri += "?" + pars;
-                    // }
-                    resp.sendRedirect( uri );
-                }
-                return true;
-            }
-        }
-
-        return false;
-    }
-
 
     BundleContext getBundleContext()
     {
@@ -531,41 +459,6 @@ public class OsgiManager extends GenericServlet
             if ( service instanceof HttpService )
             {
                 osgiManager.unbindHttpService( ( HttpService ) service );
-            }
-
-            super.removedService( reference, service );
-        }
-    }
-
-    private static class OperationServiceTracker extends ServiceTracker
-    {
-
-        private final OsgiManager osgiManager;
-
-
-        OperationServiceTracker( OsgiManager osgiManager )
-        {
-            super( osgiManager.getBundleContext(), Action.SERVICE, null );
-            this.osgiManager = osgiManager;
-        }
-
-
-        public Object addingService( ServiceReference reference )
-        {
-            Object operation = super.addingService( reference );
-            if ( operation instanceof Action )
-            {
-                osgiManager.bindOperation( ( Action ) operation );
-            }
-            return operation;
-        }
-
-
-        public void removedService( ServiceReference reference, Object service )
-        {
-            if ( service instanceof Action )
-            {
-                osgiManager.bindOperation( ( Action ) service );
             }
 
             super.removedService( reference, service );
@@ -816,18 +709,6 @@ public class OsgiManager extends GenericServlet
 
             plugin.destroy();
         }
-    }
-
-
-    protected void bindOperation( Action operation )
-    {
-        operations.put( operation.getName(), operation );
-    }
-
-
-    protected void unbindOperation( Action operation )
-    {
-        operations.remove( operation.getName() );
     }
 
 

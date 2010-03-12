@@ -17,6 +17,7 @@
 package org.apache.felix.webconsole.internal.core;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -35,15 +36,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.felix.bundlerepository.impl.R4Attribute;
 import org.apache.felix.bundlerepository.impl.R4Export;
 import org.apache.felix.bundlerepository.impl.R4Import;
 import org.apache.felix.bundlerepository.impl.R4Package;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
@@ -65,6 +70,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -82,6 +88,15 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     public static final String NAME = "bundles";
     private static final String TITLE = "Bundles";
     private static final String CSS[] = { "/res/ui/bundles.css" };
+
+    private static final String FIELD_STARTLEVEL = "bundlestartlevel";
+
+    private static final String FIELD_START = "bundlestart";
+
+    private static final String FIELD_BUNDLEFILE = "bundlefile";
+
+    // set to ask for PackageAdmin.refreshPackages() after install/update
+    private static final String FIELD_REFRESH_PACKAGES = "refreshPackages";
 
     // bootdelegation property entries. wildcards are converted to package
     // name prefixes. whether an entry is a wildcard or not is set as a flag
@@ -257,82 +272,95 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
      */
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
-        final RequestInfo reqInfo = new RequestInfo(req);
-        if ( reqInfo.bundle == null && reqInfo.bundleRequested ) {
-            resp.sendError(404);
-            return;
-        }
-
         boolean success = false;
-
-        final String action = req.getParameter( "action" );
-
-        Bundle bundle = getBundle( req.getPathInfo() );
-
-        if ( bundle != null )
-        {
-            if ( action == null )
-            {
-                success = true;
-            }
-            else if ( "start".equals( action ) )
-            {
-                // start bundle
-                success = true;
-                try
-                {
-                    bundle.start();
-                }
-                catch ( BundleException be )
-                {
-                    log( "Cannot start", be );
-                }
-            }
-            else if ( "stop".equals( action ) )
-            {
-                // stop bundle
-                success = true;
-                try
-                {
-                    bundle.stop();
-                }
-                catch ( BundleException be )
-                {
-                    log( "Cannot stop", be );
-                }
-            }
-            else if ( "refresh".equals( action ) )
-            {
-                // refresh bundle wiring
-                refresh( bundle );
-                success = true;
-            }
-            else if ( "update".equals( action ) )
-            {
-                // update the bundle
-                update( bundle );
-                success = true;
-            }
-            else if ( "uninstall".equals( action ) )
-            {
-                // uninstall bundle
-                success = true;
-                try
-                {
-                    bundle.uninstall();
-                    bundle = null; // bundle has gone !
-                }
-                catch ( BundleException be )
-                {
-                    log( "Cannot uninstall", be );
-                }
-            }
-        }
-
+        final String action = WebConsoleUtil.getParameter( req, "action" );
         if ( "refreshPackages".equals( action ) )
         {
             getPackageAdmin().refreshPackages( null );
             success = true;
+        }
+        else if ( "install".equals( action ) )
+        {
+            installBundles( req );
+
+            if (req.getRequestURI().endsWith( "/install" )) {
+                // just send 200/OK, no content
+                resp.setContentLength( 0 );
+            } else {
+                // redirect to URL
+                resp.sendRedirect( req.getRequestURI() );
+            }
+
+            return;
+        }
+        else
+        {
+            final RequestInfo reqInfo = new RequestInfo( req );
+            if ( reqInfo.bundle == null && reqInfo.bundleRequested )
+            {
+                resp.sendError( 404 );
+                return;
+            }
+
+            final Bundle bundle = reqInfo.bundle;
+            if ( bundle != null )
+            {
+                if ( action == null )
+                {
+                    success = true;
+                }
+                else if ( "start".equals( action ) )
+                {
+                    // start bundle
+                    success = true;
+                    try
+                    {
+                        bundle.start();
+                    }
+                    catch ( BundleException be )
+                    {
+                        log( "Cannot start", be );
+                    }
+                }
+                else if ( "stop".equals( action ) )
+                {
+                    // stop bundle
+                    success = true;
+                    try
+                    {
+                        bundle.stop();
+                    }
+                    catch ( BundleException be )
+                    {
+                        log( "Cannot stop", be );
+                    }
+                }
+                else if ( "refresh".equals( action ) )
+                {
+                    // refresh bundle wiring
+                    refresh( bundle );
+                    success = true;
+                }
+                else if ( "update".equals( action ) )
+                {
+                    // update the bundle
+                    update( bundle );
+                    success = true;
+                }
+                else if ( "uninstall".equals( action ) )
+                {
+                    // uninstall bundle
+                    success = true;
+                    try
+                    {
+                        bundle.uninstall();
+                    }
+                    catch ( BundleException be )
+                    {
+                        log( "Cannot uninstall", be );
+                    }
+                }
+            }
         }
 
         if ( success )
@@ -346,7 +374,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             }
             final String pluginRoot = ( String ) req.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
             final String servicesRoot = getServicesRoot( req );
-            this.renderJSON(resp, null, pluginRoot, servicesRoot, req.getLocale() );
+            this.renderJSON( resp, null, pluginRoot, servicesRoot, req.getLocale() );
         }
         else
         {
@@ -1368,5 +1396,266 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         }
 
         return log;
+    }
+
+
+    //---------- Bundle Installation handler (former InstallAction)
+
+    private void installBundles( HttpServletRequest request ) throws IOException
+    {
+
+        // get the uploaded data
+        final Map params = ( Map ) request.getAttribute( AbstractWebConsolePlugin.ATTR_FILEUPLOAD );
+        if ( params == null )
+        {
+            return;
+        }
+
+        final FileItem startItem = getParameter( params, FIELD_START );
+        final FileItem startLevelItem = getParameter( params, FIELD_STARTLEVEL );
+        final FileItem[] bundleItems = getFileItems( params, FIELD_BUNDLEFILE );
+        final FileItem refreshPackagesItem = getParameter( params, FIELD_REFRESH_PACKAGES );
+
+        // don't care any more if no bundle item
+        if ( bundleItems.length == 0 )
+        {
+            return;
+        }
+
+        // default values
+        // it exists
+        int startLevel = -1;
+        String bundleLocation = "inputstream:";
+
+        // convert the start level value
+        if ( startLevelItem != null )
+        {
+            try
+            {
+                startLevel = Integer.parseInt( startLevelItem.getString() );
+            }
+            catch ( NumberFormatException nfe )
+            {
+                getLog().log( LogService.LOG_INFO,
+                    "Cannot parse start level parameter " + startLevelItem + " to a number, not setting start level" );
+            }
+        }
+
+        for ( int i = 0; i < bundleItems.length; i++ )
+        {
+            final FileItem bundleItem = bundleItems[i];
+            // write the bundle data to a temporary file to ease processing
+            File tmpFile = null;
+            try
+            {
+                // copy the data to a file for better processing
+                tmpFile = File.createTempFile( "install", ".tmp" );
+                bundleItem.write( tmpFile );
+            }
+            catch ( Exception e )
+            {
+                getLog().log( LogService.LOG_ERROR, "Problem accessing uploaded bundle file: " + bundleItem.getName(),
+                    e );
+
+                // remove the tmporary file
+                if ( tmpFile != null )
+                {
+                    tmpFile.delete();
+                    tmpFile = null;
+                }
+            }
+
+            // install or update the bundle now
+            if ( tmpFile != null )
+            {
+                // start, refreshPackages just needs to exist, don't care for value
+                boolean start = startItem != null;
+                boolean refreshPackages = refreshPackagesItem != null;
+
+                bundleLocation = "inputstream:" + bundleItem.getName();
+                installBundle( bundleLocation, tmpFile, startLevel, start, refreshPackages );
+            }
+        }
+    }
+
+
+    private FileItem getParameter( Map params, String name )
+    {
+        FileItem[] items = ( FileItem[] ) params.get( name );
+        if ( items != null )
+        {
+            for ( int i = 0; i < items.length; i++ )
+            {
+                if ( items[i].isFormField() )
+                {
+                    return items[i];
+                }
+            }
+        }
+
+        // nothing found, fail
+        return null;
+    }
+
+
+    private FileItem[] getFileItems( Map params, String name )
+    {
+        final List files = new ArrayList();
+        FileItem[] items = ( FileItem[] ) params.get( name );
+        if ( items != null )
+        {
+            for ( int i = 0; i < items.length; i++ )
+            {
+                if ( !items[i].isFormField() && items[i].getSize() > 0 )
+                {
+                    files.add( items[i] );
+                }
+            }
+        }
+
+        return ( FileItem[] ) files.toArray( new FileItem[files.size()] );
+    }
+
+
+    private void installBundle( String location, File bundleFile, int startLevel, boolean start, boolean refreshPackages )
+        throws IOException
+    {
+        if ( bundleFile != null )
+        {
+
+            // try to get the bundle name, fail if none
+            String symbolicName = getSymbolicName( bundleFile );
+            if ( symbolicName == null )
+            {
+                bundleFile.delete();
+                throw new IOException( Constants.BUNDLE_SYMBOLICNAME + " header missing, cannot install bundle" );
+            }
+
+            // check for existing bundle first
+            Bundle updateBundle = null;
+            if ( Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals( symbolicName ) )
+            {
+                updateBundle = getBundleContext().getBundle( 0 );
+            }
+            else
+            {
+                Bundle[] bundles = getBundleContext().getBundles();
+                for ( int i = 0; i < bundles.length; i++ )
+                {
+                    if ( ( bundles[i].getLocation() != null && bundles[i].getLocation().equals( location ) )
+                        || ( bundles[i].getSymbolicName() != null && bundles[i].getSymbolicName().equals( symbolicName ) ) )
+                    {
+                        updateBundle = bundles[i];
+                        break;
+                    }
+                }
+            }
+
+            if ( updateBundle != null )
+            {
+
+                updateBackground( updateBundle, bundleFile, refreshPackages );
+
+            }
+            else
+            {
+
+                installBackground( bundleFile, location, startLevel, start, refreshPackages );
+
+            }
+        }
+    }
+
+
+    private String getSymbolicName( File bundleFile )
+    {
+        JarFile jar = null;
+        try
+        {
+            jar = new JarFile( bundleFile );
+            Manifest m = jar.getManifest();
+            if ( m != null )
+            {
+                return m.getMainAttributes().getValue( Constants.BUNDLE_SYMBOLICNAME );
+            }
+        }
+        catch ( IOException ioe )
+        {
+            getLog().log( LogService.LOG_WARNING, "Cannot extract symbolic name of bundle file " + bundleFile, ioe );
+        }
+        finally
+        {
+            if ( jar != null )
+            {
+                try
+                {
+                    jar.close();
+                }
+                catch ( IOException ioe )
+                {
+                    // ignore
+                }
+            }
+        }
+
+        // fall back to "not found"
+        return null;
+    }
+
+
+    private void installBackground( final File bundleFile, final String location, final int startlevel,
+        final boolean doStart, final boolean refreshPackages )
+    {
+
+        InstallHelper t = new InstallHelper( getBundleContext(), bundleFile, location, startlevel, doStart,
+            refreshPackages )
+        {
+            protected Logger getLog()
+            {
+                return BundlesServlet.this.getLog();
+            }
+
+
+            protected Object getService( String serviceName )
+            {
+                if ( serviceName.equals( PackageAdmin.class.getName() ) )
+                {
+                    return BundlesServlet.this.getPackageAdmin();
+                }
+                else if ( serviceName.equals( StartLevel.class.getName() ) )
+                {
+                    return BundlesServlet.this.getStartLevel();
+                }
+
+                return null;
+            }
+        };
+
+        t.start();
+    }
+
+
+    private void updateBackground( final Bundle bundle, final File bundleFile, final boolean refreshPackages )
+    {
+        UpdateHelper t = new UpdateHelper( bundle, bundleFile, refreshPackages )
+        {
+            protected Logger getLog()
+            {
+                return BundlesServlet.this.getLog();
+            }
+
+
+            protected Object getService( String serviceName )
+            {
+                if ( serviceName.equals( PackageAdmin.class.getName() ) )
+                {
+                    return BundlesServlet.this.getPackageAdmin();
+                }
+
+                return null;
+            }
+        };
+
+        t.start();
     }
 }
