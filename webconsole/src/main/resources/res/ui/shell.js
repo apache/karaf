@@ -17,14 +17,14 @@
 
 // elements cache
 var consoleframe = false;
-var console = false;
+var konsole = false;
 var command = false;
 
 function executeCommand(cmd) {
 	$.post(document.location.href, { 'command' : encodeURIComponent(cmd) },
 		function(result) {
-			console.removeClass('ui-helper-hidden').append(result);
-			consoleframe.attr('scrollTop', console.attr('scrollHeight'));
+			konsole.removeClass('ui-helper-hidden').append(result);
+			consoleframe.attr('scrollTop', konsole.attr('scrollHeight'));
 			command.val('');
 			shellCommandFocus();
 		}, 'html');
@@ -34,22 +34,32 @@ function shellCommandFocus() { command.focus() }
 
 // automatically executed on load
 $(document).ready(function(){
-	// init cache
-	consoleframe = $('#consoleframe').click(shellCommandFocus);
-	console      = $('#console');
-	command      = $('#command').focus();
-
-	// attach action handlers
-	$('#clear').click(function() {
-		console.addClass('ui-helper-hidden').html('');
-		consoleframe.attr('scrollTop', 0);
-		shellCommandFocus();
-	});
-	$('#help').click(function() {
-		executeCommand('help');
-	});
-	$('form').submit(function() {
-		executeCommand(command.val());
-		return false;
-	});
+    
+    // disable the shell form if the shell service is not available
+    if (shellDisabled) {
+    
+        $('#shell_form').hide();
+    
+    } else {
+    
+    	// init cache
+    	consoleframe = $('#consoleframe').click(shellCommandFocus);
+    	konsole      = $('#console');
+    	command      = $('#command').focus();
+    
+    	// attach action handlers
+    	$('#clear').click(function() {
+    		konsole.addClass('ui-helper-hidden').html('');
+    		consoleframe.attr('scrollTop', 0);
+    		shellCommandFocus();
+    	});
+    	$('#help').click(function() {
+    		executeCommand('help');
+    	});
+    	$('form').submit(function() {
+    		executeCommand(command.val());
+    		return false;
+    	});
+    	
+	}
 });

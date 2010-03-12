@@ -1,8 +1,12 @@
 ﻿<script type="text/javascript" src="res/ui/shell.js"></script>
-
+<script type="text/javascript">
+// <![CDATA[
+var shellDisabled = ${shell.disabled};
+// ]]>
+</script>
 <p class="statline">${shell.status}</p>
 
-<form method="post" action="${pluginRoot}">
+<form id="shell_form" method="post" action="${pluginRoot}">
 	<!-- top header -->
 	<div class="ui-widget-header ui-corner-top buttonGroup">
 		<input id="help" value="${help}" type="button" />

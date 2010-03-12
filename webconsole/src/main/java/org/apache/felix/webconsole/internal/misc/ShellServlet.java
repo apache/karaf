@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.shell.ShellService;
+import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
@@ -125,6 +126,14 @@ public class ShellServlet extends SimpleWebConsolePlugin implements OsgiManagerP
      */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
+        DefaultVariableResolver vr = ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request );
+        if ( getShellService() == null )
+        {
+            vr.put( "shell.status", "Shell Service not available" );
+            vr.put( "shell.disabled", "true" );
+        } else {
+            vr.put( "shell.disabled", "false" );
+        }
         response.getWriter().print(TEMPLATE);
     }
 
