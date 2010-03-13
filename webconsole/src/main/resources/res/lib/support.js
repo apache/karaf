@@ -71,7 +71,9 @@ $(document).ready(function() {
 
 	// register global ajax error handler
 	$(document).ajaxError( function(event, req) {
-		Xalert('The request failed: <br/><pre>' + req.statusText + '</pre>', 'AJAX Error');
+		var text = req.responseXML ? x = req.responseXML :
+				(req.responseText ? x = req.responseText : req.statusText);
+		Xalert('The request failed: <br/><pre>' + text + '</pre>', 'AJAX Error');
 	});
 
 	initStaticWidgets();
