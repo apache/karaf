@@ -538,11 +538,18 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
         final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
 
+        // support localization of the plugin title
+        String title = getTitle();
+        if ( title.startsWith( "%" ) )
+        {
+            title = "${" + title.substring( 1 ) + "}";
+        }
+
         String header = MessageFormat.format( getHeader(), new Object[]
-            { brandingPlugin.getBrandName(), getTitle(), appRoot, getLabel(),
-                toUrl( brandingPlugin.getFavIcon(), appRoot ), toUrl( brandingPlugin.getMainStyleSheet(), appRoot ),
-                brandingPlugin.getProductURL(), brandingPlugin.getProductName(),
-                toUrl( brandingPlugin.getProductImage(), appRoot ), getCssLinks( appRoot ) } );
+            { brandingPlugin.getBrandName(), title, appRoot, getLabel(), toUrl( brandingPlugin.getFavIcon(), appRoot ),
+                toUrl( brandingPlugin.getMainStyleSheet(), appRoot ), brandingPlugin.getProductURL(),
+                brandingPlugin.getProductName(), toUrl( brandingPlugin.getProductImage(), appRoot ),
+                getCssLinks( appRoot ) } );
         pw.println( header );
 
         return pw;

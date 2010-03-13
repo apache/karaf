@@ -155,10 +155,6 @@ public class OsgiManager extends GenericServlet
     // AbstractWebConsolePlugin instances
     private Map plugins = new HashMap();
 
-    // map of labels to plugin titles: indexed by plugin label (String, values
-    // are plugin titles
-    private Map labelMap = new HashMap();
-
     private AbstractWebConsolePlugin defaultPlugin;
 
     private String defaultRenderName;
@@ -339,6 +335,8 @@ public class OsgiManager extends GenericServlet
 
         if ( plugin != null )
         {
+            final Map labelMap = getLocalizedLabelMap( request.getLocale() );
+
             // the official request attributes
             req.setAttribute( WebConsoleConstants.ATTR_LABEL_MAP, labelMap );
             req.setAttribute( WebConsoleConstants.ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
@@ -397,7 +395,6 @@ public class OsgiManager extends GenericServlet
 
         // simply remove all operations, we should not be used anymore
         this.plugins.clear();
-        this.labelMap.clear();
     }
 
 
@@ -710,7 +707,6 @@ public class OsgiManager extends GenericServlet
         {
             plugin.init( getServletConfig() );
             plugins.put( label, plugin );
-            labelMap.put( label, title );
 
             if ( this.defaultPlugin == null )
             {
@@ -734,8 +730,6 @@ public class OsgiManager extends GenericServlet
         AbstractWebConsolePlugin plugin = ( AbstractWebConsolePlugin ) plugins.remove( label );
         if ( plugin != null )
         {
-            labelMap.remove( label );
-
             if ( this.defaultPlugin == plugin )
             {
                 if ( this.plugins.isEmpty() )
@@ -914,5 +908,45 @@ public class OsgiManager extends GenericServlet
             stringConfig.put( key.toString(), String.valueOf( config.get( key ) ) );
         }
         return stringConfig;
+    }
+
+
+    /**
+     * Builds the map of labels to plugin titles to be stored as the
+     * <code>felix.webconsole.labelMap</code> request attribute. This map
+     * optionally localizes the plugin title using the providing bundle's
+     * resource bundle if the first character of the title is a percent
+     * sign (%). Titles not prefixed with a percent sign are added to the
+     * map unmodified.
+     *
+     * @param locale The locale to which the titles are to be localized
+     *
+     * @return The localized map of labels to titles
+     */
+    private final Map getLocalizedLabelMap( final Locale locale )
+    {
+        final Map map = new HashMap();
+        for ( Iterator pi = plugins.values().iterator(); pi.hasNext(); )
+        {
+            final AbstractWebConsolePlugin plugin = ( AbstractWebConsolePlugin ) pi.next();
+            final String label = plugin.getLabel();
+            String title = plugin.getTitle();
+            if ( title.startsWith( "%" ) )
+            {
+                try
+                {
+                    final ResourceBundle resourceBundle = resourceBundleManager.getResourceBundle( plugin.getBundle(),
+                        locale );
+                    title = resourceBundle.getString( title.substring( 1 ) );
+                }
+                catch ( Throwable e )
+                {
+                    /* ignore missing resource - use default title */
+                }
+            }
+            map.put( label, title );
+        }
+
+        return map;
     }
 }

@@ -208,7 +208,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         {
             final PrinterDesc desc = (PrinterDesc) i.next();
             final String label = desc.label;
-            final String title = desc.printer.getTitle();
+            final String title = getTitle( desc.printer );
             pw.print("<li><a href='" + pluginRoot + label + ".nfo'>" + title + "</a></li>" );
         }
         pw.println("</ul> <!-- end tabs on top -->");
@@ -273,7 +273,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     {
         if ( cfgPrinter != null )
         {
-            String sortKey = cfgPrinter.getTitle();
+            String sortKey = getTitle( cfgPrinter );
             if ( printers.containsKey( sortKey ) )
             {
                 int idx = -1;
@@ -328,7 +328,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
                                             final ConfigurationPrinter cp,
                                             final String mode )
     {
-        pw.title(  cp.getTitle() );
+        pw.title( getTitle( cp ) );
         if ( cp instanceof ModeAwareConfigurationPrinter )
         {
             ((ModeAwareConfigurationPrinter)cp).printConfiguration( pw , mode);
@@ -396,6 +396,17 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         {
             return value.toString();
         }
+    }
+
+
+    private static final String getTitle( final ConfigurationPrinter cp )
+    {
+        final String title = cp.getTitle();
+        if ( title.startsWith( "%" ) )
+        {
+            return title.substring( 1 );
+        }
+        return title;
     }
 
     private static class SystemPropertiesPrinter implements ConfigurationPrinter
@@ -648,7 +659,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
                     final URL[] attachments = ((AttachmentProvider)desc.printer).getAttachments(mode);
                     if ( attachments != null )
                     {
-                        cf.handleAttachments(desc.printer.getTitle(), attachments);
+                        cf.handleAttachments( getTitle( desc.printer ), attachments );
                     }
                 }
             }
