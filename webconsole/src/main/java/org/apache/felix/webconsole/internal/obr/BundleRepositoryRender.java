@@ -19,11 +19,7 @@
 package org.apache.felix.webconsole.internal.obr;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +30,6 @@ import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleUtil;
-import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -324,12 +319,12 @@ public class BundleRepositoryRender extends SimpleWebConsolePlugin implements Os
                 }
             }
 
-            DeployerThread dt = new DeployerThread(resolver, new Logger(getBundleContext()), start, optional);
+            DeployerThread dt = new DeployerThread( resolver, this, start, optional );
             dt.start();
         }
         catch (InvalidSyntaxException e)
         {
-            throw new IllegalStateException(e); 
+            throw new IllegalStateException(e);
         }
     }
 

@@ -90,6 +90,11 @@ class ConfigurationListener2 extends ConfigurationListener implements MetaTypePr
             adList.add( new AttributeDefinitionImpl( OsgiManager.PROP_PASSWORD, "Password",
                 "The password for the user allowed to access the OSGi Management Console.",
                 OsgiManager.DEFAULT_PASSWORD ) );
+            adList.add( new AttributeDefinitionImpl( OsgiManager.PROP_LOG_LEVEL, "Log Level", "Logging Level",
+                AttributeDefinition.INTEGER, new String[]
+                    { String.valueOf( OsgiManager.DEFAULT_LOG_LEVEL ) }, 0, new String[]
+                    { "Debug", "Information", "Warn", "Error" }, new String[]
+                    { "4", "3", "2", "1" } ) );
 
             final TreeMap namesByClassName = new TreeMap();
             final ClassLoader loader = getClass().getClassLoader();

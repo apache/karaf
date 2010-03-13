@@ -21,11 +21,10 @@ package org.apache.felix.webconsole.internal.core;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.webconsole.internal.Logger;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.log.LogService;
@@ -35,6 +34,8 @@ import org.osgi.service.packageadmin.PackageAdmin;
 abstract class BaseUpdateInstallHelper implements Runnable
 {
 
+    private final SimpleWebConsolePlugin plugin;
+
     private final File bundleFile;
 
     private final boolean refreshPackages;
@@ -42,8 +43,9 @@ abstract class BaseUpdateInstallHelper implements Runnable
     private Thread updateThread;
 
 
-    BaseUpdateInstallHelper( String name, File bundleFile, boolean refreshPackages )
+    BaseUpdateInstallHelper( SimpleWebConsolePlugin plugin, String name, File bundleFile, boolean refreshPackages )
     {
+        this.plugin = plugin;
         this.bundleFile = bundleFile;
         this.refreshPackages = refreshPackages;
         this.updateThread = new Thread( this, name );
@@ -60,10 +62,16 @@ abstract class BaseUpdateInstallHelper implements Runnable
     protected abstract Bundle doRun( InputStream bundleStream ) throws BundleException;
 
 
-    protected abstract Logger getLog();
+    protected final Object getService( String serviceName )
+    {
+        return plugin.getService( serviceName );
+    }
 
 
-    protected abstract Object getService( String serviceName );
+    protected final SimpleWebConsolePlugin getLog()
+    {
+        return plugin;
+    }
 
 
     /**

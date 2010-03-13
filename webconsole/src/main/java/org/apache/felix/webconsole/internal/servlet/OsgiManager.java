@@ -40,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.BrandingPlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
-import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.WebConsolePluginAdapter;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
@@ -104,6 +103,10 @@ public class OsgiManager extends GenericServlet
 
     static final String PROP_ENABLED_PLUGINS = "plugins";
 
+    static final String PROP_LOG_LEVEL = "loglevel";
+
+    public static final int DEFAULT_LOG_LEVEL = LogService.LOG_WARNING;
+
     static final String DEFAULT_PAGE = BundlesServlet.NAME;
 
     static final String DEFAULT_REALM = "OSGi Management Console";
@@ -137,8 +140,6 @@ public class OsgiManager extends GenericServlet
         };
 
     private BundleContext bundleContext;
-
-    private Logger log;
 
     private ServiceTracker httpServiceTracker;
 
@@ -176,11 +177,11 @@ public class OsgiManager extends GenericServlet
 
     private ResourceBundleManager resourceBundleManager;
 
+    private int logLevel = DEFAULT_LOG_LEVEL;
+
     public OsgiManager( BundleContext bundleContext )
     {
-
         this.bundleContext = bundleContext;
-        this.log = new Logger( bundleContext );
 
         updateConfiguration( null );
 
@@ -225,11 +226,6 @@ public class OsgiManager extends GenericServlet
             configurationListener = null;
         }
 
-        if ( log != null )
-        {
-            log.dispose();
-        }
-
         this.defaultPlugin = null;
         this.bundleContext = null;
     }
@@ -256,7 +252,7 @@ public class OsgiManager extends GenericServlet
                 // check whether enabled by configuration
                 if ( isPluginDisabled( pluginClassName, plugin ) )
                 {
-                    log.log( LogService.LOG_INFO, "Ignoring plugin " + pluginClassName + ": Disabled by configuration" );
+                    log( LogService.LOG_INFO, "Ignoring plugin " + pluginClassName + ": Disabled by configuration" );
                     continue;
                 }
 
@@ -286,11 +282,11 @@ public class OsgiManager extends GenericServlet
                     // message is just a class name, try to be more descriptive
                     message = "Class " + message + " missing";
                 }
-                log.log( LogService.LOG_INFO, pluginClassName + " not enabled. Reason: " + message );
+                log( LogService.LOG_INFO, pluginClassName + " not enabled. Reason: " + message );
             }
             catch ( Throwable t )
             {
-                log.log( LogService.LOG_INFO, "Failed to instantiate plugin " + pluginClassName + ". Reason: " + t );
+                log( LogService.LOG_INFO, "Failed to instantiate plugin " + pluginClassName + ". Reason: " + t );
             }
         }
 
@@ -404,6 +400,7 @@ public class OsgiManager extends GenericServlet
         this.labelMap.clear();
     }
 
+
     //---------- internal
 
     BundleContext getBundleContext()
@@ -419,6 +416,50 @@ public class OsgiManager extends GenericServlet
     String getConfigurationPid()
     {
         return getClass().getName();
+    }
+
+
+    /**
+     * Calls the <code>GenericServlet.log(String)</code> method if the
+     * configured log level is less than or equal to the given <code>level</code>.
+     * <p>
+     * Note, that the <code>level</code> paramter is only used to decide whether
+     * the <code>GenericServlet.log(String)</code> method is called or not. The
+     * actual implementation of the <code>GenericServlet.log</code> method is
+     * outside of the control of this method.
+     *
+     * @param level The log level at which to log the message
+     * @param message The message to log
+     */
+    private void log( int level, String message )
+    {
+        if ( logLevel >= level )
+        {
+            log( message );
+        }
+    }
+
+
+    /**
+     * Calls the <code>GenericServlet.log(String, Throwable)</code> method if
+     * the configured log level is less than or equal to the given
+     * <code>level</code>.
+     * <p>
+     * Note, that the <code>level</code> paramter is only used to decide whether
+     * the <code>GenericServlet.log(String, Throwable)</code> method is called
+     * or not. The actual implementation of the <code>GenericServlet.log</code>
+     * method is outside of the control of this method.
+     *
+     * @param level The log level at which to log the message
+     * @param message The message to log
+     * @param t The <code>Throwable</code> to log with the message
+     */
+    private void log( int level, String message, Throwable t )
+    {
+        if ( logLevel >= level )
+        {
+            log( message, t );
+        }
     }
 
 
@@ -584,7 +625,7 @@ public class OsgiManager extends GenericServlet
         // do not bind service, when we are already bound
         if ( this.httpService != null )
         {
-            log.log( LogService.LOG_DEBUG,
+            log( LogService.LOG_DEBUG,
                 "bindHttpService: Already bound to an HTTP Service, ignoring further services" );
             return;
         }
@@ -614,7 +655,7 @@ public class OsgiManager extends GenericServlet
         }
         catch ( Exception e )
         {
-            log.log( LogService.LOG_ERROR, "bindHttpService: Problem setting up", e );
+            log( LogService.LOG_ERROR, "bindHttpService: Problem setting up", e );
         }
 
         this.httpService = httpService;
@@ -625,7 +666,7 @@ public class OsgiManager extends GenericServlet
     {
         if ( this.httpService != httpService )
         {
-            log.log( LogService.LOG_DEBUG,
+            log( LogService.LOG_DEBUG,
                 "unbindHttpService: Ignoring unbind of an HttpService to which we are not registered" );
             return;
         }
@@ -641,7 +682,7 @@ public class OsgiManager extends GenericServlet
             }
             catch ( Throwable t )
             {
-                log.log( LogService.LOG_WARNING, "unbindHttpService: Failed unregistering Resources", t );
+                log( LogService.LOG_WARNING, "unbindHttpService: Failed unregistering Resources", t );
             }
             httpResourcesRegistered = false;
         }
@@ -654,7 +695,7 @@ public class OsgiManager extends GenericServlet
             }
             catch ( Throwable t )
             {
-                log.log( LogService.LOG_WARNING, "unbindHttpService: Failed unregistering Servlet", t );
+                log( LogService.LOG_WARNING, "unbindHttpService: Failed unregistering Servlet", t );
             }
             httpServletRegistered = false;
         }
@@ -682,7 +723,7 @@ public class OsgiManager extends GenericServlet
         }
         catch ( ServletException se )
         {
-            log.log( LogService.LOG_WARNING, "Initialization of plugin '" + title + "' (" + label
+            log( LogService.LOG_WARNING, "Initialization of plugin '" + title + "' (" + label
                 + ") failed; not using this plugin", se );
         }
     }
@@ -726,6 +767,9 @@ public class OsgiManager extends GenericServlet
         }
 
         configuration = config;
+
+        logLevel = getProperty( config, PROP_LOG_LEVEL, DEFAULT_LOG_LEVEL );
+        AbstractWebConsolePlugin.setLogLevel( logLevel );
 
         defaultRenderName = getProperty( config, PROP_DEFAULT_RENDER, DEFAULT_PAGE );
         if ( defaultRenderName != null && plugins.get( defaultRenderName ) != null )
@@ -806,6 +850,42 @@ public class OsgiManager extends GenericServlet
         }
 
         return String.valueOf( value );
+    }
+
+
+    /**
+     * Returns the named property from the configuration. If the property does
+     * not exist, the default value <code>def</code> is returned.
+     *
+     * @param config The properties from which to returned the named one
+     * @param name The name of the property to return
+     * @param def The default value if the named property does not exist
+     * @return The value of the named property as a string or <code>def</code>
+     *         if the property does not exist
+     */
+    private int getProperty( Dictionary config, String name, int def )
+    {
+        Object value = config.get( name );
+        if ( value instanceof Number )
+        {
+            return ( ( Number ) value ).intValue();
+        }
+
+        // try to convert the value to a number
+        if ( value != null )
+        {
+            try
+            {
+                return Integer.parseInt( value.toString() );
+            }
+            catch ( NumberFormatException nfe )
+            {
+                // don't care
+            }
+        }
+
+        // not a number, not convertible, not set, use default
+        return def;
     }
 
 

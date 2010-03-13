@@ -20,14 +20,12 @@ package org.apache.felix.webconsole.internal.core;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.internal.obr.DeployerThread;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -36,22 +34,23 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.log.LogService;
 
 
-abstract class UpdateHelper extends BaseUpdateInstallHelper
+class UpdateHelper extends BaseUpdateInstallHelper
 {
 
     private final Bundle bundle;
 
 
-    UpdateHelper( final Bundle bundle, boolean refreshPackages )
+    UpdateHelper( final SimpleWebConsolePlugin plugin, final Bundle bundle, boolean refreshPackages )
     {
-        this( bundle, null, refreshPackages );
+        this( plugin, bundle, null, refreshPackages );
     }
 
 
-    UpdateHelper( final Bundle bundle, final File bundleFile, boolean refreshPackages )
+    UpdateHelper( final SimpleWebConsolePlugin plugin, final Bundle bundle, final File bundleFile,
+        boolean refreshPackages )
     {
-        super( "Background Update " + bundle.getSymbolicName() + " (" + bundle.getBundleId() + ")", bundleFile,
-            refreshPackages );
+        super( plugin, "Background Update " + bundle.getSymbolicName() + " (" + bundle.getBundleId() + ")",
+            bundleFile, refreshPackages );
         this.bundle = bundle;
     }
 

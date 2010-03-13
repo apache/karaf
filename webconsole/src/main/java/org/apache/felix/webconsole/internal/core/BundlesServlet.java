@@ -54,7 +54,6 @@ import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.WebConsoleUtil;
-import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONArray;
@@ -1307,20 +1306,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
     private void update( final Bundle bundle )
     {
-        UpdateHelper t = new UpdateHelper( bundle, false )
-        {
-            protected Logger getLog()
-            {
-                return BundlesServlet.this.getLog();
-            }
-
-
-            protected Object getService( String serviceName )
-            {
-                return BundlesServlet.this.getService( serviceName );
-            }
-        };
-
+        UpdateHelper t = new UpdateHelper( this, bundle, false );
         t.start();
     }
 
@@ -1386,18 +1372,6 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         return ( StartLevel ) getService( StartLevel.class.getName() );
     }
 
-    // TODO: may remove later, when BaseWebConsolePlugin is made to extend SimpleWebConsolePlugin
-    private Logger log;
-    Logger getLog()
-    {
-        if ( log == null )
-        {
-            log = new Logger( getBundleContext() );
-        }
-
-        return log;
-    }
-
 
     //---------- Bundle Installation handler (former InstallAction)
 
@@ -1436,8 +1410,8 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             }
             catch ( NumberFormatException nfe )
             {
-                getLog().log( LogService.LOG_INFO,
-                    "Cannot parse start level parameter " + startLevelItem + " to a number, not setting start level" );
+                log( LogService.LOG_INFO, "Cannot parse start level parameter " + startLevelItem
+                    + " to a number, not setting start level" );
             }
         }
 
@@ -1454,8 +1428,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             }
             catch ( Exception e )
             {
-                getLog().log( LogService.LOG_ERROR, "Problem accessing uploaded bundle file: " + bundleItem.getName(),
-                    e );
+                log( LogService.LOG_ERROR, "Problem accessing uploaded bundle file: " + bundleItem.getName(), e );
 
                 // remove the tmporary file
                 if ( tmpFile != null )
@@ -1581,7 +1554,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         }
         catch ( IOException ioe )
         {
-            getLog().log( LogService.LOG_WARNING, "Cannot extract symbolic name of bundle file " + bundleFile, ioe );
+            log( LogService.LOG_WARNING, "Cannot extract symbolic name of bundle file " + bundleFile, ioe );
         }
         finally
         {
@@ -1607,55 +1580,15 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         final boolean doStart, final boolean refreshPackages )
     {
 
-        InstallHelper t = new InstallHelper( getBundleContext(), bundleFile, location, startlevel, doStart,
-            refreshPackages )
-        {
-            protected Logger getLog()
-            {
-                return BundlesServlet.this.getLog();
-            }
-
-
-            protected Object getService( String serviceName )
-            {
-                if ( serviceName.equals( PackageAdmin.class.getName() ) )
-                {
-                    return BundlesServlet.this.getPackageAdmin();
-                }
-                else if ( serviceName.equals( StartLevel.class.getName() ) )
-                {
-                    return BundlesServlet.this.getStartLevel();
-                }
-
-                return null;
-            }
-        };
-
+        InstallHelper t = new InstallHelper( this, getBundleContext(), bundleFile, location, startlevel, doStart,
+            refreshPackages );
         t.start();
     }
 
 
     private void updateBackground( final Bundle bundle, final File bundleFile, final boolean refreshPackages )
     {
-        UpdateHelper t = new UpdateHelper( bundle, bundleFile, refreshPackages )
-        {
-            protected Logger getLog()
-            {
-                return BundlesServlet.this.getLog();
-            }
-
-
-            protected Object getService( String serviceName )
-            {
-                if ( serviceName.equals( PackageAdmin.class.getName() ) )
-                {
-                    return BundlesServlet.this.getPackageAdmin();
-                }
-
-                return null;
-            }
-        };
-
+        UpdateHelper t = new UpdateHelper( this, bundle, bundleFile, refreshPackages );
         t.start();
     }
 }

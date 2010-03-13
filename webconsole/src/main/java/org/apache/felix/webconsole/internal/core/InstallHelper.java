@@ -22,23 +22,25 @@ package org.apache.felix.webconsole.internal.core;
 import java.io.File;
 import java.io.InputStream;
 
+import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.service.startlevel.StartLevel;
 
 
-abstract class InstallHelper extends BaseUpdateInstallHelper
+class InstallHelper extends BaseUpdateInstallHelper
 {
     private final BundleContext bundleContext;
     private final String location;
     private final int startlevel;
     private final boolean doStart;
 
-    InstallHelper( final BundleContext bundleContext, final File bundleFile, final String location, final int startlevel,
-        final boolean doStart, final boolean refreshPackages )
+
+    InstallHelper( final SimpleWebConsolePlugin plugin, final BundleContext bundleContext, final File bundleFile,
+        final String location, final int startlevel, final boolean doStart, final boolean refreshPackages )
     {
-        super( "Background Install " + bundleFile, bundleFile, refreshPackages );
+        super( plugin, "Background Install " + bundleFile, bundleFile, refreshPackages );
 
         this.bundleContext = bundleContext;
         this.location = location;

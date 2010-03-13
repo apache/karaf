@@ -22,7 +22,7 @@ package org.apache.felix.webconsole.internal.obr;
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
-import org.apache.felix.webconsole.internal.Logger;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.service.log.LogService;
 
 
@@ -31,20 +31,22 @@ public class DeployerThread extends Thread
 
     private final Resolver obrResolver;
 
-    private final Logger logger;
+    private final AbstractWebConsolePlugin logger;
 
     private final boolean startBundles;
 
     private final boolean optionalDependencies;
 
 
-    public DeployerThread( Resolver obrResolver, Logger logger, boolean startBundles, boolean optionalDependencies )
+    public DeployerThread( Resolver obrResolver, AbstractWebConsolePlugin logger, boolean startBundles,
+        boolean optionalDependencies )
     {
         this( obrResolver, logger, startBundles, optionalDependencies, "OBR Bundle Deployer" );
     }
 
 
-    public DeployerThread( Resolver obrResolver, Logger logger, boolean startBundles, boolean optionalDependencies, String name )
+    public DeployerThread( Resolver obrResolver, AbstractWebConsolePlugin logger, boolean startBundles,
+        boolean optionalDependencies, String name )
     {
         super( name );
         this.obrResolver = obrResolver;
@@ -83,7 +85,7 @@ public class DeployerThread extends Thread
     }
 
 
-    public static void logResource( Logger logger, String message, Resource[] res )
+    public static void logResource( AbstractWebConsolePlugin logger, String message, Resource[] res )
     {
         if ( res != null && res.length > 0 )
         {
@@ -97,7 +99,7 @@ public class DeployerThread extends Thread
     }
 
 
-    public static void logRequirements( Logger logger, String message, Reason[] reasons )
+    public static void logRequirements( AbstractWebConsolePlugin logger, String message, Reason[] reasons )
     {
         logger.log( LogService.LOG_ERROR, message );
         for ( int i = 0; reasons != null && i < reasons.length; i++ )

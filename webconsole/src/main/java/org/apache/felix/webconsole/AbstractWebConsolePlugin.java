@@ -95,6 +95,9 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
     private static BrandingPlugin brandingPlugin = DefaultBrandingPlugin.getInstance();
 
+    private static int logLevel;
+
+
     //---------- HttpServlet Overwrites ----------------------------------------
 
     /**
@@ -154,7 +157,6 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
             }
         }
     }
-
 
     /**
      * Detects whether this request is intended to have the headers and
@@ -369,6 +371,50 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
 
     /**
+     * Calls the <code>GenericServlet.log(String)</code> method if the
+     * configured log level is less than or equal to the given <code>level</code>.
+     * <p>
+     * Note, that the <code>level</code> paramter is only used to decide whether
+     * the <code>GenericServlet.log(String)</code> method is called or not. The
+     * actual implementation of the <code>GenericServlet.log</code> method is
+     * outside of the control of this method.
+     *
+     * @param level The log level at which to log the message
+     * @param message The message to log
+     */
+    public void log( int level, String message )
+    {
+        if ( logLevel >= level )
+        {
+            log( message );
+        }
+    }
+
+
+    /**
+     * Calls the <code>GenericServlet.log(String, Throwable)</code> method if
+     * the configured log level is less than or equal to the given
+     * <code>level</code>.
+     * <p>
+     * Note, that the <code>level</code> paramter is only used to decide whether
+     * the <code>GenericServlet.log(String, Throwable)</code> method is called
+     * or not. The actual implementation of the <code>GenericServlet.log</code>
+     * method is outside of the control of this method.
+     *
+     * @param level The log level at which to log the message
+     * @param message The message to log
+     * @param t The <code>Throwable</code> to log with the message
+     */
+    public void log( int level, String message, Throwable t )
+    {
+        if ( logLevel >= level )
+        {
+            log( message, t );
+        }
+    }
+
+
+    /**
      * If the request addresses a resource which may be served by the
      * <code>getResource</code> method of the
      * {@link #getResourceProvider() resource provider}, this method serves it
@@ -546,13 +592,13 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
                     }
                     else
                     {
-                        map.put( labelMapEntry.getValue(), "<div class='ui-state-active'><span>" + labelMapEntry.getValue() 
+                        map.put( labelMapEntry.getValue(), "<div class='ui-state-active'><span>" + labelMapEntry.getValue()
                             + "</span></div>");
                     }
                 }
                 else
                 {
-                    map.put( labelMapEntry.getValue(), "<div class='ui-state-default'><a href='" + appRoot + "/" + labelMapEntry.getKey() + "'>" 
+                    map.put( labelMapEntry.getValue(), "<div class='ui-state-default'><a href='" + appRoot + "/" + labelMapEntry.getKey() + "'>"
                         + labelMapEntry.getValue() + "</a></div>");
                 }
             }
@@ -622,6 +668,9 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     }
 
     /**
+     * Returns the {@link BrandingPlugin} currently used for web console
+     * branding.
+     *
      * @return the brandingPlugin
      */
     public static BrandingPlugin getBrandingPlugin() {
@@ -629,6 +678,12 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     }
 
     /**
+     * Sets the {@link BrandingPlugin} to use globally by all extensions of
+     * this class for branding.
+     * <p>
+     * Note: This method is intended to be used internally by the Web Console
+     * to update the branding plugin to use.
+     *
      * @param brandingPlugin the brandingPlugin to set
      */
     public static final void setBrandingPlugin(BrandingPlugin brandingPlugin) {
@@ -637,6 +692,21 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         } else {
             AbstractWebConsolePlugin.brandingPlugin = brandingPlugin;
         }
+    }
+
+
+    /**
+     * Sets the log level to be applied for calls to the {@link #log(int, String)}
+     * and {@link #log(int, String, Throwable)} methods.
+     * <p>
+     * Note: This method is intended to be used internally by the Web Console
+     * to update the log level according to the Web Console configuration.
+     *
+     * @param logLevel
+     */
+    public static final void setLogLevel( int logLevel )
+    {
+        AbstractWebConsolePlugin.logLevel = logLevel;
     }
 
 
