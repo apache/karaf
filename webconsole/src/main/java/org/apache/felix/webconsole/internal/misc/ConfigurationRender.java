@@ -245,11 +245,6 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         if ( cfgPrinterTrackerCount != cfgPrinterTracker.getTrackingCount() )
         {
             SortedMap cp = new TreeMap();
-
-            // add provided printers
-            addConfigurationPrinter( cp, new SystemPropertiesPrinter(), SystemPropertiesPrinter.LABEL, null );
-            addConfigurationPrinter( cp, new ThreadPrinter(), ThreadPrinter.LABEL, null );
-
             ServiceReference[] refs = cfgPrinterTracker.getServiceReferences();
             if ( refs != null )
             {
@@ -409,125 +404,6 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         return title;
     }
 
-    private static class SystemPropertiesPrinter implements ConfigurationPrinter
-    {
-
-        private static final String TITLE = "System Properties";
-
-        static final String LABEL = "_systemproperties";
-
-
-        public String getTitle()
-        {
-            return TITLE;
-        }
-
-
-        public void printConfiguration( PrintWriter printWriter )
-        {
-            Properties props = System.getProperties();
-            SortedSet keys = new TreeSet( props.keySet() );
-            for ( Iterator ki = keys.iterator(); ki.hasNext(); )
-            {
-                Object key = ki.next();
-                infoLine( printWriter, null, ( String ) key, props.get( key ) );
-            }
-
-        }
-
-    }
-
-    private static class ThreadPrinter implements ConfigurationPrinter
-    {
-
-        private static final String TITLE = "Threads";
-
-        static final String LABEL = "_threads";
-
-
-        public String getTitle()
-        {
-            return TITLE;
-        }
-
-
-        public void printConfiguration( PrintWriter pw )
-        {
-            // first get the root thread group
-            ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
-            while ( rootGroup.getParent() != null )
-            {
-                rootGroup = rootGroup.getParent();
-            }
-
-            printThreadGroup( pw, rootGroup );
-
-            int numGroups = rootGroup.activeGroupCount();
-            ThreadGroup[] groups = new ThreadGroup[2 * numGroups];
-            rootGroup.enumerate( groups );
-            for ( int i = 0; i < groups.length; i++ )
-            {
-                printThreadGroup( pw, groups[i] );
-            }
-        }
-
-        private static final void printThreadGroup( PrintWriter pw, ThreadGroup group )
-        {
-            if ( group != null )
-            {
-                StringBuffer info = new StringBuffer();
-                info.append( "ThreadGroup " ).append( group.getName() );
-                info.append( " [" );
-                info.append( "maxprio=" ).append( group.getMaxPriority() );
-
-                info.append( ", parent=" );
-                if ( group.getParent() != null )
-                {
-                    info.append( group.getParent().getName() );
-                }
-                else
-                {
-                    info.append( '-' );
-                }
-
-                info.append( ", isDaemon=" ).append( group.isDaemon() );
-                info.append( ", isDestroyed=" ).append( group.isDestroyed() );
-                info.append( ']' );
-
-                infoLine( pw, null, null, info.toString() );
-
-                int numThreads = group.activeCount();
-                Thread[] threads = new Thread[numThreads * 2];
-                group.enumerate( threads, false );
-                for ( int i = 0; i < threads.length; i++ )
-                {
-                    printThread( pw, threads[i] );
-                }
-
-                pw.println();
-            }
-        }
-
-
-        private static final void printThread( PrintWriter pw, Thread thread )
-        {
-            if ( thread != null )
-            {
-                StringBuffer info = new StringBuffer();
-                info.append( "Thread " ).append( thread.getName() );
-                info.append( " [" );
-                info.append( "priority=" ).append( thread.getPriority() );
-                info.append( ", alive=" ).append( thread.isAlive() );
-                info.append( ", daemon=" ).append( thread.isDaemon() );
-                info.append( ", interrupted=" ).append( thread.isInterrupted() );
-                info.append( ", loader=" ).append( thread.getContextClassLoader() );
-                info.append( ']' );
-
-                infoLine( pw, "  ", null, info.toString() );
-            }
-        }
-    }
-
     private abstract static class ConfigurationWriter extends PrintWriter
     {
 
@@ -542,10 +418,11 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
         abstract void end();
 
-        public void handleAttachments(final String title, final URL[] urls)
-        throws IOException
+
+        public void handleAttachments( final String title, final URL[] urls ) throws IOException
         {
-            throw new UnsupportedOperationException("handleAttachments not supported by this configuration writer: " + this);
+            throw new UnsupportedOperationException( "handleAttachments not supported by this configuration writer: "
+                + this );
         }
 
     }
