@@ -124,7 +124,20 @@ abstract class ConfigManagerBase extends SimpleWebConsolePlugin implements OsgiM
                     final String[] idList = idGetter.getIds( mti );
                     for ( int j = 0; idList != null && j < idList.length; j++ )
                     {
-                        ObjectClassDefinition ocd = mti.getObjectClassDefinition( idList[j], locale );
+                        // After getting the list of PIDs, a configuration  might be 
+                        // removed. So the getObjectClassDefinition will throw
+                        // an exception, and this will prevent ALL configuration from
+                        // being displayed. By catching it, the configurations will be
+                        // visible
+                        ObjectClassDefinition ocd = null;
+                        try 
+                        {
+                            ocd = mti.getObjectClassDefinition( idList[j], locale );
+                        }
+                        catch (IllegalArgumentException ignore)
+                        {
+                            // ignore - just don't show this configuration
+                        }
                         if ( ocd != null )
                         {
                             objectClasses.add( ocd );
@@ -189,7 +202,15 @@ abstract class ConfigManagerBase extends SimpleWebConsolePlugin implements OsgiM
                 MetaTypeInformation mti = mts.getMetaTypeInformation( bundle );
                 if ( mti != null )
                 {
-                    return mti.getObjectClassDefinition( pid, locale );
+                    // see #getObjectClasses( final IdGetter idGetter, final String locale )
+                    try
+                    {
+                        return mti.getObjectClassDefinition( pid, locale );
+                    }
+                    catch (IllegalArgumentException e)
+                    {
+                        // ignore - return null
+                    }
                 }
             }
         }

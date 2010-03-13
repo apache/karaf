@@ -426,8 +426,8 @@ function confirmUnbind(/* String */ title, /* String */ location)
 
 function addConfig(conf) {
 	var tr = configRow.clone().appendTo(configBody);
-	tr.find('td:eq(0)').text(conf.fpid ? conf.fpid : '-'); // fpid
-	tr.find('td:eq(1)').text(conf.name).click(function() { // name & edit
+	tr.find('td:eq(1)').text(conf.fpid ? conf.fpid : '-'); // fpid
+	tr.find('td:eq(0)').text(conf.name).click(function() { // name & edit
 		configure(conf.id);
 	});
 	tr.find('td:eq(2)').html(conf.bundle ? '<a href="' + pluginRoot + '/../bundles/' + conf.bundle + '">' + conf.bundle_name + '</a>' : '-'); // binding
@@ -454,8 +454,8 @@ function addConfig(conf) {
 
 function addFactoryConfig(conf) {
 	var tr = factoryRow.clone().appendTo(factoryBody);
-	tr.find('td:eq(0)').text(conf.id); // fpid
-	tr.find('td:eq(1)').text(conf.name).click(function() { // name & edit
+	tr.find('td:eq(1)').text(conf.id); // fpid
+	tr.find('td:eq(0)').text(conf.name).click(function() { // name & edit
 		configure(conf.id, true);
 	});
 	// buttons
@@ -480,7 +480,7 @@ $(document).ready(function() {
 	});
 	factoryBody   = factoryTable.find('tbody');
 	factoryRow    = factoryBody.find('tr').clone();
-	
+
 	// setup button - cannot inline in dialog option because of i18n
 	var _buttons = {};
 	_buttons[i18n.abort] = function() {
@@ -511,6 +511,11 @@ $(document).ready(function() {
 		for(var i in configData.pids) addConfig(configData.pids[i]);
 		for(var i in configData.fpids) addFactoryConfig(configData.fpids[i]);
 		initStaticWidgets(configContent);
+
+		// initial sorting orger by name
+		var sorting = [[0,0]]; 
+		configTable.trigger('sorton', [sorting]);
+		factoryTable.trigger('sorton', [sorting]);
 	} else {
 		configContent.addClass('ui-helper-hidden');
 	}
