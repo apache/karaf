@@ -18,6 +18,7 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -135,6 +137,8 @@ public class OsgiManager extends GenericServlet
             "org.apache.felix.webconsole.internal.misc.LicenseServlet",
             "org.apache.felix.webconsole.internal.misc.ConfigurationRender",
             "org.apache.felix.webconsole.internal.misc.ShellServlet",
+            "org.apache.felix.webconsole.internal.misc.SystemPropertiesPrinter",
+            "org.apache.felix.webconsole.internal.misc.ThreadPrinter",
             "org.apache.felix.webconsole.internal.obr.BundleRepositoryRender",
             "org.apache.felix.webconsole.internal.system.VMStatPlugin"
         };
@@ -154,6 +158,10 @@ public class OsgiManager extends GenericServlet
     // map of plugins: indexed by the plugin label (String), values are
     // AbstractWebConsolePlugin instances
     private Map plugins = new HashMap();
+
+    // list of OsgiManagerPlugin instances activated during init. All these
+    // instances will have to be deactivated during destroy
+    private List osgiManagerPlugins = new ArrayList();
 
     private AbstractWebConsolePlugin defaultPlugin;
 
@@ -255,6 +263,7 @@ public class OsgiManager extends GenericServlet
                 if ( plugin instanceof OsgiManagerPlugin )
                 {
                     ( ( OsgiManagerPlugin ) plugin ).activate( bundleContext );
+                    osgiManagerPlugins.add( plugin );
                 }
                 if ( plugin instanceof AbstractWebConsolePlugin )
                 {
@@ -384,7 +393,7 @@ public class OsgiManager extends GenericServlet
         }
 
         // deactivate any remaining plugins
-        for ( Iterator pi = plugins.values().iterator(); pi.hasNext(); )
+        for ( Iterator pi = osgiManagerPlugins.iterator(); pi.hasNext(); )
         {
             Object plugin = pi.next();
             if ( plugin instanceof OsgiManagerPlugin )
@@ -395,6 +404,7 @@ public class OsgiManager extends GenericServlet
 
         // simply remove all operations, we should not be used anymore
         this.plugins.clear();
+        this.osgiManagerPlugins.clear();
     }
 
 
