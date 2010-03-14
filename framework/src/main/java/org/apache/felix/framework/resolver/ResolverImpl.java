@@ -1173,17 +1173,25 @@ ex.printStackTrace();
         throws ResolveException
     {
 // TODO: FELIX3 - I think permutation is not as efficient as it could be, since
-//       we will end up generating permutations that are subsets of previous
-//       permutations as we cycle through candidates. We should check if an
-//       existing candidate map already has removed the conflicting candidate.
+//       the check for subsets is costly. Maybe we can just check if the candidates
+//       for the blamed requirements are a subset, rather than computing the
+//       entire permutation first.
 
-        // Try to remove the previously selected candidate associated
-        // with the requirement blamed for adding the constraint. This
-        // blamed requirement may be null if the bundle itself is
-        // exports the package imposing the uses constraint.
+        // When we detect a conflict, we need to permutate the candidate map
+        // we when we try again, we'll select different candidates. To achieve
+        // this, we create a different permutation for each requirement in
+        // the set of blames requirements by eliminating the first candidate
+        // (i.e., the selected candidate) for each. We need to create an separate
+        // permutation for each blamed requirement to ensure we try all possible
+        // combination. This is a form of back tracking, since we eliminate each
+        // requirement's selected candidate, which will force them to choose
+        // another in the new permutation.
+        //
+        // The blamed requirement may be null if the bundle itself is exports
+        // the package imposing the uses constraint.
         if ((currentBlame.m_reqs != null) && (currentBlame.m_reqs.size() != 0))
         {
-            // Permutate the candidate map.
+            // Permutate the candidate map for each blamed requirement.
             for (int reqIdx = 0; reqIdx < currentBlame.m_reqs.size(); reqIdx++)
             {
                 // Verify whether we have more than one candidate to create
@@ -1191,21 +1199,62 @@ ex.printStackTrace();
                 Set<Capability> candidates = candidateMap.get(currentBlame.m_reqs.get(reqIdx));
                 if (candidates.size() > 1)
                 {
+                    // Create a copy of the current candidate map and then remove
+                    // the first (i.e., selected) candidate for the current
+                    // blamed requirement.
                     Map<Requirement, Set<Capability>> copy = copyCandidateMap(candidateMap);
-                    candidates = copy.get(currentBlame.m_reqs.get(reqIdx));
-                    Iterator it = candidates.iterator();
+                    Set<Capability> candCopy = copy.get(currentBlame.m_reqs.get(reqIdx));
+                    Iterator it = candCopy.iterator();
                     it.next();
                     it.remove();
-                    m_candidatePermutations.add(copy);
+
+                    // Check if the created permutation is a subset of a previously
+                    // created permutation. If so, then we don't need to record it
+                    // since it will be generated again when the superset permutation
+                    // is processed.
+                    boolean isSubset = false;
+                    for (int permIdx = 0; !isSubset && (permIdx < m_candidatePermutations.size()); permIdx++)
+                    {
+                        if (isSubsetPermutation(m_candidatePermutations.get(permIdx), copy))
+                        {
+                            isSubset = true;
+                        }
+                    }
+                    if (!isSubset)
+                    {
+//System.out.println("+++ SETTING "
+//    + currentBlame.m_reqs.get(reqIdx)
+//    + " CANDS FROM " + candidates + " TO " + candCopy);
+                        m_candidatePermutations.add(0, copy);
+                    }
                 }
             }
         }
+
         throw new ResolveException(
             "Constraint violation for package '"
             + pkgName + "' when resolving module "
             + current + " between existing constraint "
             + currentBlame + " and candidate constraint "
             + candBlame, null, null);
+    }
+
+    private static boolean isSubsetPermutation(
+        Map<Requirement, Set<Capability>> orig, Map<Requirement, Set<Capability>> copy)
+    {
+        for (Entry<Requirement, Set<Capability>> entry : orig.entrySet())
+        {
+            Set<Capability> copyCands = copy.get(entry.getKey());
+            if (copyCands == null)
+            {
+                return false;
+            }
+            if (!entry.getValue().containsAll(copyCands))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isCompatible(
@@ -1549,7 +1598,7 @@ ex.printStackTrace();
         public String toString()
         {
             return m_cap.getModule() + "." + m_cap.getAttribute(Capability.PACKAGE_ATTR).getValue()
-                + " BLAMED ON " + m_reqs;
+                + " BLAMED ON " + m_reqs.get(m_reqs.size() - 1);
         }
 
         public boolean equals(Object o)
