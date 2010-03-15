@@ -711,62 +711,32 @@ public class FelixResolverState implements Resolver.ResolverState
     {
         if (module.isResolved())
         {
-            // At this point, we need to remove all of the resolved module's
-            // capabilities from the "unresolved" package map and put them in
-            // in the "resolved" package map, with the exception of any
-            // package exports that are also imported. In that case we need
-            // to make sure that the import actually points to the resolved
-            // module and not another module. If it points to another module
-            // then the capability should be ignored, since the framework
-            // decided to honor the import and discard the export.
-            List<Capability> caps = module.getCapabilities();
-
-            // Create a copy of the module's capabilities so we can
-            // null out any capabilities that should be ignored.
-            List<Capability> capsCopy = (caps == null) ? null : new ArrayList(caps);
-            // Loop through the module's capabilities to determine which ones
-            // can be ignored by seeing which ones satifies the wire requirements.
-// TODO: RB - Bug here because a requirement for a package need not overlap the
-//            capability for that package and this assumes it does. This might
-//            require us to introduce the notion of a substitutable capability.
+            // Loop through the module's package wires and determine if any
+            // of them overlap any of the packages exported by the module.
+            // If so, then the framework must have chosen to have the module
+            // import rather than export the package, so we need to remove the
+            // corresponding package capability from the package capability set.
             List<Wire> wires = module.getWires();
-            for (int capIdx = 0; (capsCopy != null) && (capIdx < caps.size()); capIdx++)
+            List<Capability> caps = module.getCapabilities();
+            for (int wireIdx = 0; (wires != null) && (wireIdx < wires.size()); wireIdx++)
             {
-                // Loop through all wires to see if the current capability
-                // satisfies any of the wire requirements.
-                for (int wireIdx = 0; (wires != null) && (wireIdx < wires.size()); wireIdx++)
+                Wire wire = wires.get(wireIdx);
+                if (wire.getCapability().getNamespace().equals(Capability.PACKAGE_NAMESPACE))
                 {
-                    // If one of the module's capabilities satifies the requirement
-                    // for an existing wire, this means the capability was
-                    // substituted with another provider by the resolver and
-                    // the module's capability was not used. Therefore, we should
-                    // null it here so it doesn't get added the list of resolved
-                    // capabilities for this module.
-                    if (CapabilitySet.matches(
-                        caps.get(capIdx), wires.get(wireIdx).getRequirement().getFilter()))
+                    for (int capIdx = 0;
+                        (caps != null) && (capIdx < caps.size());
+                        capIdx++)
                     {
-                        capsCopy.remove(caps.get(capIdx));
-                        break;
+                        if (caps.get(capIdx).getNamespace().equals(Capability.PACKAGE_NAMESPACE)
+                            && wire.getCapability().getAttribute(Capability.PACKAGE_ATTR).getValue()
+                                .equals(caps.get(capIdx).getAttribute(Capability.PACKAGE_ATTR).getValue()))
+                        {
+                            m_pkgCapSet.removeCapability(caps.get(capIdx));
+                            break;
+                        }
                     }
                 }
             }
-
-            // Now loop through all capabilities and add them to the "resolved"
-            // capability and package index maps, ignoring any that were nulled out.
-// TODO: FELIX3 - This is actually reversed, we need to remove exports that were imported.
-/*
-            for (int capIdx = 0; (capsCopy != null) && (capIdx < capsCopy.size()); capIdx++)
-            {
-                if (capsCopy.get(capIdx).getNamespace().equals(Capability.MODULE_NAMESPACE))
-                {
-                    m_modCapSet.addCapability(capsCopy.get(capIdx));
-                }
-                else if (capsCopy.get(capIdx).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-                {
-                    m_pkgCapSet.addCapability(capsCopy.get(capIdx));
-                }
-            }
-*/
         }
     }
 
