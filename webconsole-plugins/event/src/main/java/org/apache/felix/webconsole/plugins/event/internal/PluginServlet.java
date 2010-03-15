@@ -17,7 +17,9 @@
 package org.apache.felix.webconsole.plugins.event.internal;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.*;
@@ -43,10 +45,55 @@ public class PluginServlet extends HttpServlet
 
     /** Is the config admin available? */
     private volatile boolean configAdminAvailable = false;
+    
+    private final String TEMPLATE;
 
     public PluginServlet()
     {
         this.collector = new EventCollector(null);
+        TEMPLATE = readTemplateFile(getClass(), "/res/events.html");
+    }
+    
+    private final String readTemplateFile(final Class clazz, final String templateFile)
+    {
+        InputStream templateStream = getClass().getResourceAsStream(templateFile);
+        if (templateStream != null)
+        {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] data = new byte[1024];
+            try
+            {
+                int len = 0;
+                while ((len = templateStream.read(data)) > 0)
+                {
+                    baos.write(data, 0, len);
+                }
+                return baos.toString("UTF-8");
+            }
+            catch (IOException e)
+            {
+                // don't use new Exception(message, cause) because cause is 1.4+
+                throw new RuntimeException("readTemplateFile: Error loading "
+                    + templateFile + ": " + e);
+            }
+            finally
+            {
+                try
+                {
+                    templateStream.close();
+                }
+                catch (IOException e)
+                {
+                    /* ignore */
+                }
+
+            }
+        }
+
+        // template file does not exist, return an empty string
+        log("readTemplateFile: File '" + templateFile + "' not found through class "
+            + clazz);
+        return "";
     }
 
     /**
@@ -154,17 +201,9 @@ public class PluginServlet extends HttpServlet
     throws ServletException, IOException
     {
         final PrintWriter pw = response.getWriter();
-
-        final String appRoot = ( String ) request.getAttribute( "felix.webconsole.appRoot" );
-        pw.println( "<script src='" + appRoot + "/events/res/ui/" + "events.js" + "' language='JavaScript'></script>" );
-
-        pw.println( "<div id='plugin_content'/>");
-
-        pw.println( "<script type='text/javascript'>" );
-        pw.println( "// <![CDATA[" );
-        pw.println( "renderEvents( );" );
-        pw.println( "// ]]>" );
-        pw.println( "</script>" );
+        //final String appRoot = ( String ) request.getAttribute( "felix.webconsole.appRoot" );
+        //pw.println( "<script src='" + appRoot + "/events/res/ui/" + "events.js" + "' type='text/javascript'></script>" );
+        pw.print(TEMPLATE);
     }
 
     public URL getResource(String path)
