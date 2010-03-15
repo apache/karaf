@@ -61,7 +61,7 @@ public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiMan
     private static final long serialVersionUID = 1L;
 
     private static final String LABEL = "components";
-    private static final String TITLE = "Components";
+    private static final String TITLE = "%scr.pluginTitle";
     private static final String CSS[] = { "/res/ui/bundles.css" }; // yes, it's correct!
 
     // actions

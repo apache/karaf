@@ -113,7 +113,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
 
     /** the label for the services plugin */
     public static final String LABEL = "services";
-    private static final String TITLE = "Services";
+    private static final String TITLE = "%services.pluginTitle";
     private static final String CSS[] = null;
 
     private final String TEMPLATE;

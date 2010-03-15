@@ -42,7 +42,7 @@ import org.osgi.service.log.LogService;
 public class LogServlet extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
     private static final String LABEL = "logs";
-    private static final String TITLE = "Log Service";
+    private static final String TITLE = "%log.pluginTitle";
     private static final String CSS[] = { "/res/ui/logs.css" };
 
     private final static int MAX_LOGS = 200; //maximum number of log entries

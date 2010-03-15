@@ -66,7 +66,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
 public class ConfigManager extends ConfigManagerBase
 {
     private static final String LABEL = "configMgr"; // was name
-    private static final String TITLE = "Configuration";
+    private static final String TITLE = "%config.pluginTitle";
     private static final String CSS[] = { "/res/ui/config.css" };
 
     private static final String PID_FILTER = "pidFilter";

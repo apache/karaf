@@ -45,7 +45,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 {
 
     private static final String LABEL = "config";
-    private static final String TITLE = "Configuration Status";
+    private static final String TITLE = "%configStatus.pluginTitle";
     private static final String[] CSS_REFS = null;
 
     /**

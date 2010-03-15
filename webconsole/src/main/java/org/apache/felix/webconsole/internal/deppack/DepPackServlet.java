@@ -47,7 +47,7 @@ public class DepPackServlet extends SimpleWebConsolePlugin implements OsgiManage
 {
 
     private static final String LABEL = "deppack";
-    private static final String TITLE = "Deployment Packages";
+    private static final String TITLE = "%deployment.pluginTitle";
     private static final String CSS[] = { "/res/ui/deployment.css" };
 
     //

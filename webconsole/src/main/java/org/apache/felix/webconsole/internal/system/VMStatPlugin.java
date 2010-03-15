@@ -45,7 +45,7 @@ public class VMStatPlugin extends SimpleWebConsolePlugin implements OsgiManagerP
 {
 
     private static final String LABEL = "vmstat";
-    private static final String TITLE = "System Information";
+    private static final String TITLE = "%vmstat.pluginTitle";
     private static final String CSS[] = null;
 
     private static final String ATTR_TERMINATED = "terminated";

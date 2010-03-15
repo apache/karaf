@@ -43,7 +43,7 @@ public class ShellServlet extends SimpleWebConsolePlugin implements OsgiManagerP
 {
 
     private static final String LABEL = "shell";
-    private static final String TITLE = "Shell";
+    private static final String TITLE = "%shell.pluginTitle";
     private static final String[] CSS = { "/res/ui/shell.css" };
 
     // templates

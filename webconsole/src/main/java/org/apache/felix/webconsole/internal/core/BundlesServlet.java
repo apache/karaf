@@ -85,7 +85,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
     /** the label of the bundles plugin - used by other plugins to reference to plugin details */
     public static final String NAME = "bundles";
-    private static final String TITLE = "Bundles";
+    private static final String TITLE = "%bundles.pluginTitle";
     private static final String CSS[] = { "/res/ui/bundles.css" };
 
     private static final String FIELD_STARTLEVEL = "bundlestartlevel";
