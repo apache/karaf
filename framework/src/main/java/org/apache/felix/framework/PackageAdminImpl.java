@@ -220,10 +220,8 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         if (getBundleType(bundle) == BUNDLE_TYPE_FRAGMENT)
         {
             List<Bundle> hosts = m_felix.getDependentBundles((BundleImpl) bundle);
-            if (hosts != null)
-            {
-                return hosts.toArray(new Bundle[hosts.size()]);
-            }
+            return ((hosts != null) && (hosts.size() > 0))
+                ? hosts.toArray(new Bundle[hosts.size()]) : null;
         }
         return null;
     }
