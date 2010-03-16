@@ -121,8 +121,6 @@ table.tablelayout {
     text-align: left;
 }
 table.tablelayout tbody tr {
-    border-left: 1px solid #6181A9;
-    border-right: 1px solid #6181A9;
 }
 
 table.tablelayout thead tr th, table.tablelayout tfoot tr th {
