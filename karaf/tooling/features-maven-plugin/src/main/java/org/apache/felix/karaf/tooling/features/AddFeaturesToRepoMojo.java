@@ -46,6 +46,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.ops4j.pax.url.mvn.Handler;
 import org.xml.sax.SAXException;
 
 /**
@@ -99,6 +100,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 if (!bundle.startsWith("mvn:")) {
                     throw new MojoExecutionException("Bundle url is not a maven url: " + bundle);
                 }
+                              
                 String[] parts = bundle.substring("mvn:".length()).split("/");
                 String groupId = parts[0];
                 String artifactId = parts[1];
@@ -116,8 +118,8 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 }
                 String dir = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/";
                 String name = artifactId + "-" + version + (classifier != null ? "-" + classifier : "") + "." + type;
-                System.out.println("Copy:      " + dir + name);
-                copy(new URL(getLocalRepoUrl() + "/" + dir + name).openStream(),
+                System.out.println("Copy:      " + bundle);
+                copy(new URL(null, bundle, new Handler()).openStream(),
                      repository,
                      name,
                      dir,
