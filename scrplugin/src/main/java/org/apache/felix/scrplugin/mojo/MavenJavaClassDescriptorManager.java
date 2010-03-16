@@ -166,9 +166,7 @@ public class MavenJavaClassDescriptorManager extends JavaClassDescriptorManager
             final List<Component> components = new ArrayList<Component>();
             @SuppressWarnings("unchecked")
             final Map<String, Artifact> resolved = project.getArtifactMap();
-            @SuppressWarnings("unchecked")
-            final Set<Artifact> artifacts = project.getDependencyArtifacts();
-            final Iterator<Artifact> it = artifacts.iterator();
+            final Iterator<Artifact> it = resolved.values().iterator();
             while ( it.hasNext() )
             {
                 final Artifact declared = it.next();
