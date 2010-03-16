@@ -56,6 +56,10 @@
         <artifactId>org.apache.felix.karaf.features.core</artifactId>
       </dependency>
       <dependency>
+        <groupId>org.ops4j.pax.url</groupId>
+        <artifactId>pax-url-mvn</artifactId>
+      </dependency>
+      <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <scope>test</scope>
