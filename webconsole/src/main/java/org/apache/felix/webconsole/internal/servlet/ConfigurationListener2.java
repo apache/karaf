@@ -21,6 +21,8 @@ package org.apache.felix.webconsole.internal.servlet;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.TreeMap;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
@@ -37,6 +39,7 @@ class ConfigurationListener2 extends ConfigurationListener implements MetaTypePr
     final String pid; // reduces visibility because access to this was made though synthetic accessor method
 
     private ObjectClassDefinition ocd;
+    private final OsgiManager osgiManager;
 
 
     static ServiceRegistration create( OsgiManager osgiManager )
@@ -51,6 +54,7 @@ class ConfigurationListener2 extends ConfigurationListener implements MetaTypePr
     {
         super( osgiManager );
         this.pid = osgiManager.getConfigurationPid();
+        this.osgiManager = osgiManager;
     }
 
 
@@ -106,7 +110,14 @@ class ConfigurationListener2 extends ConfigurationListener implements MetaTypePr
                     final Object plugin = loader.loadClass( defaultPluginsClasses[i] ).newInstance();
                     if ( plugin instanceof AbstractWebConsolePlugin )
                     {
-                        final String name = ( ( AbstractWebConsolePlugin ) plugin ).getTitle();
+                        String name = ( ( AbstractWebConsolePlugin ) plugin ).getTitle();
+                        if (name.startsWith("%"))
+                        {
+                            final ResourceBundle rb = osgiManager.resourceBundleManager.getResourceBundle(
+                                ((AbstractWebConsolePlugin) plugin).getBundle(),
+                                Locale.ENGLISH);
+                            name = rb.getString(name.substring(1));
+                        }
                         namesByClassName.put( defaultPluginsClasses[i], name );
                     }
                 }

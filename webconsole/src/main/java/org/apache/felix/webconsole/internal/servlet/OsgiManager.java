@@ -179,7 +179,7 @@ public class OsgiManager extends GenericServlet
 
     private Set enabledPlugins;
 
-    private ResourceBundleManager resourceBundleManager;
+    ResourceBundleManager resourceBundleManager;
 
     private int logLevel = DEFAULT_LOG_LEVEL;
 
