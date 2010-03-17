@@ -400,8 +400,7 @@ public class ConfigManager extends ConfigManagerBase
                 String name;
                 if (ocd != null)
                 {
-                    name = ocd.getName() + " (";
-                    name += pid + ")";
+                    name = ocd.getName();
                 }
                 else
                 {
@@ -479,8 +478,7 @@ public class ConfigManager extends ConfigManagerBase
                 final ObjectClassDefinition ocd = this.getObjectClassDefinition( refs[i].getBundle(), pid, locale );
                 if ( ocd != null )
                 {
-                    name = ocd.getName() + " (";
-                    name += pid + ")";
+                    name = ocd.getName();
                 }
                 else
                 {
@@ -520,8 +518,7 @@ public class ConfigManager extends ConfigManagerBase
             props.put( type, pid );
             if ( filter == null || filter.match( props ) )
             {
-                final String name = ocd.getName() + " (" + pid + ")";
-                pidMap.put( pid, name );
+                pidMap.put( pid, ocd.getName() );
             }
         }
 

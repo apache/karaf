@@ -30,5 +30,7 @@ html>select { width: auto; min-width: 50em }
 .multiselect { display: block }
 .col_Actions { width: 6em !important }
 .pointer { cursor: pointer }
+.subpid   { display:inline-block; margin-left: 1em }
+tr.fpid   td   { font-style:italic }
 #editor, div.ui-dialog-buttonpane button { font-size: 50% }
 #factoryTableCaption { margin-top: 1.5em }

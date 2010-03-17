@@ -23,7 +23,6 @@ var configBody  = false;
 var configRow = false;
 
 // factories table list
-var factoryTable = false;
 var factoryBody  = false;
 var factoryRow = false;
 
@@ -426,11 +425,20 @@ function confirmUnbind(/* String */ title, /* String */ location)
 
 function addConfig(conf) {
 	var tr = configRow.clone().appendTo(configBody);
-	tr.find('td:eq(1)').text(conf.fpid ? conf.fpid : '-'); // fpid
-	tr.find('td:eq(0)').text(conf.name).click(function() { // name & edit
+
+	// rendering name - indented if factory pid is set
+	var nms = tr.find('td:eq(0) span')
+	if (conf.fpid) { 
+		nms.after(conf.id); 
+		tr.attr('fpid', conf.name);
+	} else {
+		nms.addClass('ui-helper-hidden').parent().text(conf.name);
+	}
+
+	tr.find('td:eq(0)').click(function() { // name & edit
 		configure(conf.id);
 	});
-	tr.find('td:eq(2)').html(conf.bundle ? '<a href="' + pluginRoot + '/../bundles/' + conf.bundle + '">' + conf.bundle_name + '</a>' : '-'); // binding
+	tr.find('td:eq(1)').html(conf.bundle ? '<a href="' + pluginRoot + '/../bundles/' + conf.bundle + '">' + conf.bundle_name + '</a>' : '-'); // binding
 	
 	// buttons
 	tr.find('li:eq(0)').click(function() { // edit
@@ -453,8 +461,8 @@ function addConfig(conf) {
 }
 
 function addFactoryConfig(conf) {
-	var tr = factoryRow.clone().appendTo(factoryBody);
-	tr.find('td:eq(1)').text(conf.id); // fpid
+	var tr = factoryRow.clone().appendTo(configTable).attr('fpid', conf.name);
+	//tr.find('td:eq(1)').text(conf.id); // fpid
 	tr.find('td:eq(0)').text(conf.name).click(function() { // name & edit
 		configure(conf.id, true);
 	});
@@ -464,22 +472,33 @@ function addFactoryConfig(conf) {
 	});
 }
 
+function treetableExtraction(node) {
+	var td = $(node);
+	var text = td.text();
+	if (!text) return text;
+
+	// current sort order
+	var desc = $(this)[0].sortList[0][1];
+
+	var row = td.parent();
+	var fpid = row.attr('fpid');
+	
+	// factory row
+	if ( row.hasClass('fpid') && fpid) return fpid + (desc==0?1:0) + text;
+
+	// bundle or name row
+	if ( fpid ) return fpid + desc + text;
+
+	return mixedLinksExtraction(node);
+};
+
 $(document).ready(function() {
 	configContent = $('#configContent');
 	// config table list
-	configTable   = configContent.find('table:eq(0)').tablesorter({
-		headers: { 3: { sorter: false } },
-		textExtraction:mixedLinksExtraction
-	});
+	configTable   = $('#configTable');
 	configBody    = configTable.find('tbody');
-	configRow     = configBody.find('tr').clone();
-
-	// factories table list
-	factoryTable  = configContent.find('table:eq(1)').tablesorter({
-		headers: { 2: { sorter: false } }
-	});
-	factoryBody   = factoryTable.find('tbody');
-	factoryRow    = factoryBody.find('tr').clone();
+	configRow     = configBody.find('tr:eq(0)').clone();
+	factoryRow    = configBody.find('tr:eq(1)').clone();
 
 	// setup button - cannot inline in dialog option because of i18n
 	var _buttons = {};
@@ -506,16 +525,36 @@ $(document).ready(function() {
 	// display the configuration data
 	$(".statline").html(configData.status ? i18n.stat_ok : i18n.stat_missing);
 	if (configData.status) {
-		configBody.empty(); factoryBody.empty();
+		configBody.empty();
+		var factories = {};
 
-		for(var i in configData.pids) addConfig(configData.pids[i]);
-		for(var i in configData.fpids) addFactoryConfig(configData.fpids[i]);
-		initStaticWidgets(configContent);
+		for(var i in configData.pids) {
+			var c = configData.pids[i];
+			if (c.fpid) {
+				if (!factories[c.fpid]) factories[c.fpid] = new Array();
+				factories[c.fpid].push(c);
+			} else {
+				addConfig(c);
+			}
+		}
+		for(var i in configData.fpids) {
+			addFactoryConfig(configData.fpids[i]);
 
-		// initial sorting orger by name
-		var sorting = [[0,0]]; 
-		configTable.trigger('sorton', [sorting]);
-		factoryTable.trigger('sorton', [sorting]);
+			var confs = factories[ configData.fpids[i].id ];
+			if (confs) for (var j in confs) {
+				addConfig(confs[j]);
+			}
+		}
+		initStaticWidgets(configTable);
+
+		// init tablesorte
+		configTable.tablesorter({
+			headers: { 2: { sorter: false }  },
+			sortList: [[0,1]],
+			textExtraction: treetableExtraction
+		}).bind('sortStart', function() { // clear cache, otherwse extraction will not work
+			var table = $(this).trigger('update'); 
+		}).find('th:eq(0)').click();
 	} else {
 		configContent.addClass('ui-helper-hidden');
 	}
