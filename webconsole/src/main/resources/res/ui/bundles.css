@@ -22,3 +22,5 @@
 
 .col_Status   { width: 50px;  }
 .col_Actions { width: 121px; }
+.filterBox      { float: left; margin-left: 1em }
+#uploadDialog, div.ui-dialog-buttonpane button { font-size: 50% }

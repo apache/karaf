@@ -14,14 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// ui elements
+var uploadDialog = false;
+var bundlesTable    = false;
+var bundlesBody     = false;
+var bundlesTemplate = false;
 
-function renderData( eventData )  {
+function renderData( eventData, filter )  {
+	lastBundleData = eventData;
 	var s = eventData.s;
-    $(".statline").html(i18n.statline.msgFormat(s[0], s[1], s[2], s[3], s[4]));
-    $("#plugin_table > tbody > tr").remove();
+    $('.statline').html(i18n.statline.msgFormat(s[0], s[1], s[2], s[3], s[4]));
+	bundlesBody.empty();
     for ( var idx in eventData.data ) {
         if ( currentBundle == null || !drawDetails || currentBundle == eventData.data[idx].id) {
-            entry( eventData.data[idx] );
+            entry( eventData.data[idx], filter );
         }
     }
     if ( drawDetails && eventData.data.length == 1 ) {
@@ -34,94 +40,66 @@ function renderData( eventData )  {
     initStaticWidgets();
 }
 
-function entry( /* Object */ dataEntry ) {
-    var trElement = tr( null, { id: "entry" + dataEntry.id } );
-    entryInternal( trElement,  dataEntry );
-    $("#plugin_table > tbody").append(trElement);   
+function entry( /* Object */ bundle, filter ) {
+	var matches = !(filter && typeof filter.test == 'function') ? true :
+		filter.test(bundle.id) || filter.test(bundle.name) || filter.test(bundle.symbolicName) || filter.test(bundle.version);
+
+	if (matches) entryInternal( bundle ).appendTo(bundlesBody);
 }
 
-function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action ) {
-    if ( !action.enabled ) {
-        return;
-    }
-    var enabled = action.enabled;
-    var op = action.link;
-    var opLabel = action.name;
-    var img = action.image;
-    // fixup JQuery UI icons
-    if(img == "start" ) img = "play";
-    if(img == "update") img = "transferthick-e-w";
-    if(img == "delete") img = "trash";
-
-	// apply i18n
-	opLabel = i18n[opLabel] ? i18n[opLabel] : opLabel;
-    
-    var input = createElement('li', 'dynhover', {
-        title: opLabel
-    });
-    $(input)
-        .html('<span class="ui-icon ui-icon-'+img+'"></span>')
-        .click(function() {changeDataEntryState(id, op)});
-
-    if (!enabled) {
-        $(input).attr("disabled", true).addClass("ui-state-disabled");
-    }
-    parent.appendChild( input );
+function hasStart(b) { return (!b.fragment) && (b.stateRaw == 2 || b.stateRaw == 4) } // !isFragment && (installed | resolved)
+function hasStop(b)  { return (!b.fragment) && (b.stateRaw == 32) } // !isFragment && active
+function hasUninstall(b)  { return b.stateRaw == 2 || b.stateRaw == 4 || b.stateRaw == 32 } // installed | resolved | active
+function stateString(b) {
+	var s = b.stateRaw;
+	return  b.fragment && s == 4 ? 
+		i18n.state.fragment : // fragment & resolved
+		i18n.state[s] ? i18n.state[s] : i18n.state.unknown.msgFormat(s)
 }
 
-function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
-    var id = dataEntry.id;
-    var name = dataEntry.name;
-    var state = dataEntry.state;
+function entryInternal( /* Object */ bundle ) {
+	var tr = bundlesTemplate.clone();
+    var id = bundle.id;
+    var name = bundle.name;
 
-    // right arrow
-    var inputElement = createElement('span', 'ui-icon ui-icon-triangle-1-e', {
-        title: "Details",
-        id: 'img' + id,
-        style: {display: "inline-block"}
-    });
-    $(inputElement).click(function() {showDetails(id)});
-    var titleElement;
-    if ( drawDetails ) {
-        titleElement = text(name);
-    } else {
-        titleElement = createElement ("a", null, {
-            href: window.location.pathname + "/" + id
-        });
-        titleElement.appendChild(text(name));
-    }
-    
-    parent.appendChild( td( null, null, [ text( id ) ] ) );
-    parent.appendChild( td( null, null, [ inputElement, text(" "), titleElement ] ) );
-    parent.appendChild( td( null, null, [ text( dataEntry.version ) ] ) );
-    parent.appendChild( td( null, null, [ text( dataEntry.symbolicName ) ] ) );
-    parent.appendChild( td( null, null, [ text( state ) ] ) );
-    var actionsTd = td( null, null );
-    var div = createElement('ul', 'icons ui-widget');
-    actionsTd.appendChild(div);
-    
-    for ( var a in dataEntry.actions ) {
-        actionButton( div, id, dataEntry.actions[a] );
-    }
-    parent.appendChild( actionsTd );
+	tr.attr('id', 'entry'+id);
+	tr.find('td:eq(0)').text(id);
+	tr.find('td:eq(1) span:eq(0)').attr('id', 'img'+id).click(function() {showDetails(id)});
+	tr.find('td:eq(1) span:eq(1)').html( drawDetails ? name : '<a href="' + pluginRoot + '/' + id + '">' + name + '</a>' );
+	tr.find('td:eq(2)').text( bundle.version );
+	tr.find('td:eq(3)').text( bundle.symbolicName );
+	tr.find('td:eq(4)').text( stateString(bundle) );
+	if (id == 0) { // system bundle has no actions
+		tr.find('td:eq(5) ul').addClass('ui-helper-hidden');
+	} else {
+		var start   = tr.find('td:eq(5) ul li:eq(0)');
+		var stop    = tr.find('td:eq(5) ul li:eq(1)');
+		var refresh = tr.find('td:eq(5) ul li:eq(2)').click(function() {changeDataEntryState(id, 'refresh')});
+		var update  = tr.find('td:eq(5) ul li:eq(3)').click(function() {changeDataEntryState(id, 'update')});
+		var remove  = tr.find('td:eq(5) ul li:eq(4)');
+		start = hasStart(bundle) ?
+			start.click(function() {changeDataEntryState(id, 'start')}) :
+			start.addClass('ui-helper-hidden');
+		stop = hasStop(bundle) ?
+			stop.click(function() {changeDataEntryState(id, 'stop')}) :
+			stop.addClass('ui-helper-hidden');
+		remove = hasUninstall(bundle) ?
+			remove.click(function() {changeDataEntryState(id, 'uninstall')}) :
+			remove.addClass('ui-helper-hidden');
+	}
+	return tr;
 }
 
 function loadData() {
-    $.get(pluginRoot + "/.json", null, function(data) {
-        renderData(data);
-    }, "json"); 
+    $.get(pluginRoot + "/.json", null, renderData, "json"); 
 }
 
 function changeDataEntryState(/* long */ id, /* String */ action) {
-    $.post(pluginRoot + "/" + id, {"action":action}, function(data) {
-        renderData(data);
-    }, "json"); 
+    $.post(pluginRoot + "/" + id, {"action":action}, renderData, "json"); 
 }
 
 function refreshPackages() {
-    $.post(window.location.pathname, {"action": "refreshPackages"}, function(data) {
-        renderData(data);
-    }, "json"); 
+    $.post(pluginRoot, {"action": "refreshPackages"}, renderData, "json"); 
 }
 
 function showDetails( id ) {
@@ -196,18 +174,47 @@ function renderDetails( data ) {
     }
 }
 
+
 $(document).ready(function(){
-	$(".refreshPackages").click(refreshPackages);
-	$(".reloadButton").click(loadData);
-	$(".installButton").click(function() {
-		document.location = pluginRoot + "/upload";
+	$('.refreshPackages').click(refreshPackages);
+	$('.reloadButton').click(loadData);
+	$('.installButton').click(function() {
+		uploadDialog.dialog('open');
+		return false;
 	});
-	renderData(__bundles__);
+
+	// filter
+	$('input.filter').click(function() {$(this).val('')});
+	$('.filterApply').click(function() {
+		var el = $(this).parent().find('input.filter');
+		var filter = el.length && el.val() ? new RegExp(el.val()) : false;
+		renderData(lastBundleData, filter);
+	});
+	$('.filterForm').submit(function() {
+		$(this).find('.filterApply').click();
+		return false;
+	});
+	$('.filterClear').click(function() {
+		$('input.filter').val('');
+		renderData(lastBundleData);
+	});
+
+	// upload dialog
+	var uploadDialogButtons = {};
+	uploadDialogButtons[i18n.install_update] = function() {
+		$(this).find('form').submit();
+	}
+	uploadDialog = $('#uploadDialog').dialog({
+		autoOpen: false,
+		modal   : true,
+		width   : '50%',
+		buttons : uploadDialogButtons
+	});
 
 	// check for cookie
 	var cv = $.cookies.get("webconsolebundlelist");
 	var lo = (cv ? cv.split(",") : [1,0]);
-	$("#plugin_table").tablesorter({
+	bundlesTable = $("#plugin_table").tablesorter({
 		headers: {
 			0: { sorter:"digit" },
 			5: { sorter: false }
@@ -215,8 +222,12 @@ $(document).ready(function(){
 		textExtraction:mixedLinksExtraction,
 		sortList: cv ? [lo] : false
 	}).bind("sortEnd", function() {
-		var table = $("#plugin_table").eq(0).attr("config");
-		$.cookies.set("webconsolebundlelist", table.sortList.toString());
+		bundlesTable.eq(0).attr("config");
+		$.cookies.set("webconsolebundlelist", bundlesTable.sortList.toString());
 	});
+	bundlesBody     = bundlesTable.find('tbody');
+	bundlesTemplate = bundlesBody.find('tr').clone();
+
+	renderData(lastBundleData);
 });
 

@@ -1,10 +1,11 @@
-﻿<script type="text/javascript" src="${appRoot}/res/ui/bundles.js"></script>
+﻿<script type="text/javascript" src="${appRoot}/res/lib/jquery.multifile-1.4.6.js"></script>
+<script type="text/javascript" src="${appRoot}/res/ui/bundles.js"></script>
 <script type="text/javascript">
 // <![CDATA[
 var startLevel = ${startLevel};
 var drawDetails = ${drawDetails};
 var currentBundle = ${currentBundle};
-var __bundles__ = ${__bundles__};
+var lastBundleData = ${__bundles__};
 var i18n = {
 	'Symbolic Name'       : '${bundles.name.symb}',
 	'Version'             : '${version}',
@@ -30,7 +31,18 @@ var i18n = {
 	'Uninstall'           : '${bundles.uninstall}',
 	'Refresh Package Imports' : '${bundles.refreshImports}',
 	//
-	statline              : '${bundles.statline}'
+	statline              : '${bundles.statline}',
+	install_update        : '${bundles.install_or_update}',
+	state                 : {
+		1  : '${bundles.state.1}', // uninstalled
+		2  : '${bundles.state.2}', // installed
+		4  : '${bundles.state.4}', // resolved
+		8  : '${bundles.state.8}', // starting
+		16 : '${bundles.state.16}', // stopping
+		32 : '${bundles.state.32}', // active
+		'unknown' : '${bundles.state.unknown}', // Unknown State: {0}
+		'fragment' : '${bundles.state.fragment}' // Fragment
+	}
 }
 // ]]>
 </script>
@@ -39,16 +51,16 @@ var i18n = {
 <p class="statline">&nbsp;</p>
 
 <!-- top header -->
-<form method="post" enctype="multipart/form-data" action="">
+<form method="post" enctype="multipart/form-data" action="" class="filterForm">
 	<div class="ui-widget-header ui-corner-top buttonGroup">
-		<input name="action" value="install" type="hidden" />
-		<input name="bundlestart" value="start" type="hidden" />
-		<input name="bundlestartlevel" value="5" type="hidden" />
-		<input name="bundlefile" style="margin-left: 10px;" type="file" />
-		<input value="${bundles.install_or_update}" style="margin-left: 10px;" type="submit" />
-		<button class="reloadButton" type="button" name="reload" style="margin-left: 60px;">${reload}</button>
-		<button class="installButton" type="button" name="install">${bundles.install_update}</button>
-		<button class="refreshPackages" type="button" name="refresh">${bundles.refreshPkg}</button>
+		<div class="filterBox">
+			<input class="filter" value="^Apache" title="${bundles.filter.help}" />
+			<button class="filterApply" type="button">${bundles.filter.apply}</button>
+			<button class="filterClear" type="button">${bundles.filter.clear}</button>
+		</div>
+		<button class="reloadButton" type="button" style="margin-left: 60px;">${reload}</button>
+		<button class="installButton" type="button">${bundles.install_update}</button>
+		<button class="refreshPackages" type="button">${bundles.refreshPkg}</button>
 	</div>
 </form>
 
@@ -64,23 +76,65 @@ var i18n = {
 		</tr>
 	</thead>
 	<tbody>
-		<tr><td colspan="6">&nbsp;</td></tr>
+		<tr><!-- template -->
+			<td>&nbsp;</td><!-- ID -->
+			<td>
+				<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block" title="Show Details">&nbsp;</span>
+				<span>&nbsp;</span> <!-- here goest bundle name/link -->
+			</td>
+			<td>&nbsp;</td><!-- version -->
+			<td>&nbsp;</td><!-- symbolic name -->
+			<td>&nbsp;</td><!-- status -->
+			<td><!-- actions -->
+				<ul class="icons ui-widget">
+					<li class="dynhover" title="${start}"><span class="ui-icon ui-icon-play">&nbsp;</span></li>
+					<li class="dynhover" title="${stop}"><span class="ui-icon ui-icon-stop">&nbsp;</span></li>
+					<li class="dynhover" title="${bundles.refreshImports}"><span class="ui-icon ui-icon-refresh">&nbsp;</span></li>
+					<li class="dynhover" title="${bundles.update}"><span class="ui-icon ui-icon-transferthick-e-w">&nbsp;</span></li>
+					<li class="dynhover" title="${bundles.uninstall}"><span class="ui-icon ui-icon-trash">&nbsp;</span></li>
+				</ul>
+			</td>
+		</tr>
 	</tbody>
 </table>
 
 <!-- bottom header -->
-<form method="post" enctype="multipart/form-data" action="">
+<form method="post" enctype="multipart/form-data" action="" class="filterForm">
 	<div class="ui-widget-header ui-corner-bottom buttonGroup">
-		<input name="action" value="install" type="hidden" />
-		<input name="bundlestart" value="start" type="hidden" />
-		<input name="bundlestartlevel" value="5" type="hidden" />
-		<input name="bundlefile" style="margin-left: 10px;" type="file" />
-		<input value="${bundles.install_or_update}" style="margin-left: 10px;" type="submit" />
-		<button class="reloadButton" type="button" name="reload" style="margin-left: 60px;">${reload}</button>
-		<button class="installButton" type="button" name="install">${bundles.install_update}</button>
-		<button class="refreshPackages" type="button" name="refresh">${bundles.refreshPkg}</button>
+		<div class="filterBox">
+			<input class="filter" value="^Apache" title="${bundles.filter.help}" />
+			<button class="filterApply" type="button">${bundles.filter.apply}</button>
+			<button class="filterClear" type="button">${bundles.filter.clear}</button>
+		</div>
+		<button class="reloadButton" type="button" style="margin-left: 60px;">${reload}</button>
+		<button class="installButton" type="button">${bundles.install_update}</button>
+		<button class="refreshPackages" type="button">${bundles.refreshPkg}</button>
 	</div>
 </form>
 
 <!-- status line -->
 <p class="statline">&nbsp;</p>
+
+<div id="uploadDialog" class="ui-helper-hidden" title="${bundles.upload.caption}">
+	<form method="post" enctype="multipart/form-data" action="${pluginRoot}">
+	<table class="nicetable">
+		<tr>
+			<td style="text-align:right">${bundles.upload.start}</td>
+			<td>
+				<input type="hidden" name="action" value="install"/>
+				<input type="checkbox" name="bundlestart" value="start"/>
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:right">${bundles.upload.level}</td>
+			<td><input type="text" name="bundlestartlevel" id="bundlestartlevel" value="${startLevel}" size="4"/></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<input class="multi" accept="jar" type="file" name="bundlefile" />
+			</td>
+		</tr>
+	</table>
+	</form>
+</div>

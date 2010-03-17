@@ -112,7 +112,6 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
     // templates
     private final String TEMPLATE_MAIN;
-    private final String TEMPLATE_UPLOAD;
 
     /** Default constructor */
     public BundlesServlet()
@@ -121,7 +120,6 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
         // load templates
         TEMPLATE_MAIN = readTemplateFile( "/templates/bundles.html" );
-        TEMPLATE_UPLOAD = readTemplateFile( "/templates/bundles_upload.html" );
     }
 
     /**
@@ -462,20 +460,13 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         vars.put( "drawDetails", reqInfo.bundleRequested ? Boolean.TRUE : Boolean.FALSE );
         vars.put( "currentBundle", (reqInfo.bundleRequested && reqInfo.bundle != null ? String.valueOf(reqInfo.bundle.getBundleId()) : "null"));
 
-        if ( "upload".equals(reqInfo.pathInfo) )
-        {
-            response.getWriter().print(TEMPLATE_UPLOAD);
-        }
-        else
-        {
-            final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
-            final String servicesRoot = getServicesRoot ( request );
-            StringWriter w = new StringWriter();
-            writeJSON(w, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale() );
-            vars.put( "__bundles__", w.toString());
+        final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
+        final String servicesRoot = getServicesRoot ( request );
+        StringWriter w = new StringWriter();
+        writeJSON(w, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale() );
+        vars.put( "__bundles__", w.toString());
 
-            response.getWriter().print(TEMPLATE_MAIN);
-        }
+        response.getWriter().print(TEMPLATE_MAIN);
     }
 
     private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale )
@@ -617,31 +608,16 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         jw.value( bundle.getBundleId() );
         jw.key( "name" );
         jw.value( Util.getName( bundle, locale ) );
+        jw.key( "fragment" );
+        jw.value( isFragmentBundle(bundle) );
+        jw.key( "stateRaw" );
+        jw.value( bundle.getState() );
         jw.key( "state" );
         jw.value( toStateString( bundle ) );
         jw.key( "version" );
         jw.value( Util.getHeaderValue(bundle, Constants.BUNDLE_VERSION) );
         jw.key( "symbolicName" );
         jw.value( Util.getHeaderValue(bundle, Constants.BUNDLE_SYMBOLICNAME) );
-
-        jw.key( "actions" );
-        jw.array();
-
-        if ( bundle.getBundleId() != 0 )
-        {
-            if ( hasStart(bundle) )
-            {
-                action( jw, hasStart( bundle ), "start", "Start", "start" );
-            }
-            else
-            {
-                action( jw, hasStop( bundle ), "stop", "Stop", "stop" );
-            }
-            action( jw, true, "refresh", "Refresh Package Imports", "refresh" );
-            action( jw, true, "update", "Update", "update" );
-            action( jw, hasUninstall( bundle ), "uninstall", "Uninstall", "delete" );
-        }
-        jw.endArray();
 
         if ( details )
         {
@@ -683,49 +659,10 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         }
     }
 
-
-    private void action( JSONWriter jw, boolean enabled, String op, String opLabel, String image ) throws JSONException
-    {
-        jw.object();
-        jw.key( "enabled" ).value( enabled );
-        jw.key( "name" ).value( opLabel );
-        jw.key( "link" ).value( op );
-        jw.key( "image" ).value( image );
-        jw.endObject();
-    }
-
     private final boolean isFragmentBundle( Bundle bundle)
     {
         return getPackageAdmin().getBundleType( bundle ) == PackageAdmin.BUNDLE_TYPE_FRAGMENT;
     }
-
-    private final boolean hasStart( Bundle bundle )
-    {
-        if ( isFragmentBundle(bundle) )
-        {
-            return false;
-        }
-        return bundle.getState() == Bundle.INSTALLED || bundle.getState() == Bundle.RESOLVED;
-    }
-
-
-    private final boolean hasStop( Bundle bundle )
-    {
-        if ( isFragmentBundle(bundle) )
-        {
-            return false;
-        }
-        return bundle.getState() == Bundle.ACTIVE;
-    }
-
-
-    private static final boolean hasUninstall( Bundle bundle )
-    {
-        return bundle.getState() == Bundle.INSTALLED || bundle.getState() == Bundle.RESOLVED
-            || bundle.getState() == Bundle.ACTIVE;
-
-    }
-
 
     private final void bundleDetails( JSONWriter jw, Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale)
         throws JSONException
