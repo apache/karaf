@@ -409,6 +409,12 @@ public class ImmediateComponentManager extends AbstractComponentManager
     }
 
     private boolean modify() {
+        // 0. no live update if there is no instance
+        if ( getInstance() == null )
+        {
+            return false;
+        }
+
         // 1. no live update if there is no declared method
         if ( getComponentMetadata().getModified() == null )
         {
