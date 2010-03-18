@@ -1,0 +1,151 @@
+<script type="text/javascript">
+// <![CDATA[
+
+function renderData(/* Object[] */ files) {
+    $("#plugin_table > tbody > tr").remove();
+    var tbody = $("#plugin_table > tbody");
+    for ( var idx in files ) {
+        var dumpFile = files[idx];
+        var trElement = tr( null, { id: "entry" + dumpFile.name } );
+        entryInternal( trElement,  dumpFile );
+        tbody.append(trElement);   
+    }
+}
+
+function entryInternal( /* Element */ parent, /* Object */ dumpFile ) {
+    var name = dumpFile.name;
+    var date = new Date(dumpFile.date).toLocaleString();
+    var size = dumpFile.size.toLocaleString();
+
+    var titleElement = createElement ("a", null, {
+        href: window.location.pathname + "/" + name
+    });
+    titleElement.appendChild(text(name));
+
+    var zipDL = createElement ("a", null, {
+        href: window.location.pathname + "/" + name + ".zip"
+    });
+    zipDL.appendChild(text("(zipped)"));
+
+    var liElement = createElement( "li", "dynhover ui-state-default ui-corner-all", {
+        title: "${dump.remove}"
+    });
+    var ulElement = createElement( "ul", "icons ui-widget", null, [
+        liElement
+    ]);
+    
+    parent.appendChild( td( null, null, [ titleElement, text(" "), zipDL ] ) );
+    parent.appendChild( td( null, null, [ text( date ) ] ) );
+    parent.appendChild( td( null, null, [ text( size ) ] ) );
+    parent.appendChild( td( null, null, [ ulElement ] ) );
+    
+    $(liElement)
+        .html('<span class="ui-icon ui-icon-trash"></span>')
+        .click(function() {
+            $.post(window.location.pathname + "/" + name,
+                { "X-Request-Method": "DELETE" },
+                function(data) {
+                    Xalert( data, "${dump.remove}" );
+                    window.location = window.location;
+                }
+            );
+        });
+}
+
+function renderOverall(/* Object */ overall) {
+    var tbody = $("#overview > tbody");
+    for ( var idx in overall ) {
+        var trElement = tr( null, null, [
+            td( null, null, [ text( idx ) ] ),
+            td( null, null, [ text( overall[idx] ) ] )
+        ]);
+        tbody.append(trElement);   
+    }
+}
+
+var __files__ = ${__files__};
+var __status__ = ${__status__};
+var __overall__ = ${__overall__};
+
+$(document).ready(function() {
+
+    $(".statline").html("${dump.statline}".msgFormat(__status__[0].toLocaleString(), __status__[1].toLocaleString()));
+
+    renderData(__files__);
+    renderOverall(__overall__);
+    
+    $("#dumpButton")
+        .click(function() {
+            $.post(window.location.pathname,
+                { "command": "dump" },
+                function(data) {
+                    Xalert( data, "${dump.dump}" );
+                    window.location = window.location;
+                }
+            );
+        });
+        
+    $("#gcButton")
+        .click(function() {
+            $.post(window.location.pathname,
+                { "command": "gc" },
+                function(data) {
+                    Xalert( data, "${dump.gc}" );
+                    window.location = window.location;
+                }
+            );
+        });
+
+    
+});
+
+
+
+// ]]>
+</script>
+
+<!-- status line -->
+<p class="statline">&nbsp;</p>
+
+<!-- top header -->
+<div class="ui-widget-header ui-corner-top buttonGroup">
+    <button type="button" id="dumpButton">${dump.dump}</button>
+    <button type="button" id="gcButton">${dump.gc}</button>
+</div>
+
+
+<table id="overview" class="tablesorter nicetable noauto">
+    <thead>
+        <tr>
+            <th colspan="2">${dump.overview}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>${dump.threshold}</td>
+            <td>
+                <form method="post" action="">
+                    <input type="hidden" name="command" value="threshold" />
+                    <input type="text" name="threshold" value="${__threshold__}" />
+                    <input type="submit" name="submit" value="${dump.threshold.set}" />
+                </form>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<p>&nbsp;</p>
+
+<table id="plugin_table" class="tablesorter nicetable noauto">
+    <thead>
+        <tr>
+            <th class="col_Name">${dump.name}</th>
+            <th class="col_Date">${dump.date}</th>
+            <th class="col_Size">${dump.size}</th>
+            <th class="col_Size">${dump.action}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="4">&nbsp;</td></tr>
+    </tbody>
+</table>
