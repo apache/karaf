@@ -18,6 +18,7 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
+import java.io.File;
 import java.net.URL;
 import java.util.Hashtable;
 
@@ -52,11 +53,27 @@ public class StaxParserTest extends TestCase
         assertTrue(resolver.resolve());
     }
 
+    public void testPullParser() throws Exception
+    {
+        URL url = getClass().getResource("/repo_for_resolvertest.xml");
+        RepositoryAdminImpl repoAdmin = createRepositoryAdmin(PullParser.class);
+        RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
+
+        Resolver resolver = repoAdmin.resolver();
+
+        Resource[] discoverResources = repoAdmin.discoverResources("(symbolicname=org.apache.felix.test*)");
+        assertNotNull(discoverResources);
+        assertEquals(1, discoverResources.length);
+
+        resolver.add(discoverResources[0]);
+        assertTrue(resolver.resolve());
+    }
+
     public void testPerfs() throws Exception
     {
-//        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
 //            testPerfs(new File(System.getProperty("user.home"), ".m2/repository/repository.xml").toURI().toURL(), 0, 100);
-//        }
+        }
     }
 
     protected void testPerfs(URL url, int nbWarm, int nbTest) throws Exception
@@ -98,17 +115,17 @@ public class StaxParserTest extends TestCase
 
         for (int i = 0; i < nbWarm; i++)
         {
-            RepositoryAdminImpl repoAdmin = createRepositoryAdmin(RepositoryImpl.KXml2Parser.class);
+            RepositoryAdminImpl repoAdmin = createRepositoryAdmin(PullParser.class);
             RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
         }
         t0 = System.currentTimeMillis();
         for (int i = 0; i < nbTest; i++)
         {
-            RepositoryAdminImpl repoAdmin = createRepositoryAdmin(RepositoryImpl.KXml2Parser.class);
+            RepositoryAdminImpl repoAdmin = createRepositoryAdmin(PullParser.class);
             RepositoryImpl repo = (RepositoryImpl) repoAdmin.addRepository(url);
         }
         t1 = System.currentTimeMillis();
-        System.err.println("KXmlParser: " + (t1 - t0) + " ms");
+        System.err.println("PullParser: " + (t1 - t0) + " ms");
     }
 
     public static void main(String[] args) throws Exception

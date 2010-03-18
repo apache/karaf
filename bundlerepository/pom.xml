@@ -47,6 +47,12 @@
       <artifactId>kxml2</artifactId>
       <version>2.2.2</version>
       <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>xmlpull</groupId>
+          <artifactId>xmlpull</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
         <groupId>org.osgi</groupId>
@@ -81,7 +87,11 @@
         <configuration>
           <instructions>
             <Export-Package>org.apache.felix.bundlerepository;version="2.0"</Export-Package>
-            <Private-Package>org.kxml2.*,org.xmlpull.*;-split-package:=merge-first,org.apache.felix.bundlerepository.impl.*</Private-Package>
+            <Private-Package>
+                org.kxml2.io,
+                org.xmlpull.v1,
+                org.apache.felix.bundlerepository.impl.*
+            </Private-Package>
             <Import-Package>!javax.xml.parsers,!org.xml.sax,org.osgi.service.log;resolution:=optional,org.osgi.service.obr;resolution:=optional,javax.xml.stream;resolution:=optional,*</Import-Package>
             <DynamicImport-Package>org.apache.felix.shell</DynamicImport-Package>
             <Bundle-Activator>${pom.artifactId}.impl.Activator</Bundle-Activator>

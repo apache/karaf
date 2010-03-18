@@ -39,8 +39,6 @@ import java.util.zip.ZipInputStream;
 import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
-import org.apache.felix.bundlerepository.impl.metadataparser.XmlCommonHandler;
-import org.apache.felix.bundlerepository.impl.metadataparser.kxmlsax.KXml2SAXParser;
 import org.apache.felix.bundlerepository.Repository;
 
 public class RepositoryImpl implements Repository
@@ -287,7 +285,7 @@ public class RepositoryImpl implements Repository
         }
         if (parser == null)
         {
-            parser = new KXml2Parser();
+            parser = new PullParser();
 
         }
         parser.parse(this, is);
@@ -295,45 +293,27 @@ public class RepositoryImpl implements Repository
 
     public interface RepositoryParser
     {
+        static final String REPOSITORY = "repository";
+        static final String NAME = "name";
+        static final String LASTMODIFIED = "lastmodified";
+        static final String REFERRAL = "referral";
+        static final String RESOURCE = "resource";
+        static final String DEPTH = "depth";
+        static final String URL = "url";
+        static final String CATEGORY = "category";
+        static final String ID = "id";
+        static final String CAPABILITY = "capability";
+        static final String REQUIRE = "require";
+        static final String P = "p";
+        static final String N = "n";
+        static final String T = "t";
+        static final String V = "v";
+        static final String FILTER = "filter";
+        static final String EXTEND = "extend";
+        static final String MULTIPLE = "multiple";
+        static final String OPTIONAL = "optional";
+
         void parse(RepositoryImpl repository, InputStream is) throws Exception;
     }
 
-    public static class KXml2Parser implements RepositoryParser
-    {
-        public void parse(final RepositoryImpl repository, final InputStream is) throws Exception
-        {
-            BufferedReader br;// Create the parser Kxml
-            XmlCommonHandler handler = new XmlCommonHandler(repository.m_logger);
-            Object factory = new Object()
-            {
-                public RepositoryImpl newInstance()
-                {
-                    return repository;
-                }
-            };
-
-            // Get default setter method for Repository.
-            Method repoSetter = RepositoryImpl.class.getDeclaredMethod(
-                "put", new Class[] { Object.class, Object.class });
-
-            // Get default setter method for Resource.
-            Method resSetter = ResourceImpl.class.getDeclaredMethod(
-                "put", new Class[] { Object.class, Object.class });
-
-            // Map XML tags to types.
-            handler.addType("repository", factory, Repository.class, repoSetter);
-            handler.addType("referral", Referral.class, null, null);
-            handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
-            handler.addType("category", CategoryImpl.class, null, null);
-            handler.addType("require", RequirementImpl.class, Requirement.class, null);
-            handler.addType("capability", CapabilityImpl.class, Capability.class, null);
-            handler.addType("p", PropertyImpl.class, null, null);
-            handler.setDefaultType(String.class, null, null);
-
-            br = new BufferedReader(new InputStreamReader(is));
-            KXml2SAXParser parser;
-            parser = new KXml2SAXParser(br);
-            parser.parseXML(handler);
-        }
-    }
 }
