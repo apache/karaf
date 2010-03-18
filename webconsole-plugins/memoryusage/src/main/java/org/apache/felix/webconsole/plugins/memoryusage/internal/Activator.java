@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.extensions.memoryusage.internal;
+package org.apache.felix.webconsole.plugins.memoryusage.internal;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -25,57 +25,66 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
-public class Activator implements BundleActivator {
+public class Activator implements BundleActivator
+{
 
     private MemoryUsageSupport support;
 
-    public void start(BundleContext bundleContext) {
+    public void start(BundleContext bundleContext)
+    {
 
         support = new MemoryUsageSupport(bundleContext);
 
         // install thread handler shell command
-        try {
-            register(bundleContext,
-                new String[] { "org.apache.felix.shell.Command" },
-                new MemoryUsageCommand(support), null);
-        } catch (Throwable t) {
+        try
+        {
+            register(bundleContext, new String[]
+                { "org.apache.felix.shell.Command" }, new MemoryUsageCommand(support), null);
+        }
+        catch (Throwable t)
+        {
             // shell service might not be available, don't care
         }
 
         // install Web Console plugin
-        try {
+        try
+        {
             MemoryUsagePanel tdp = new MemoryUsagePanel(support);
             tdp.activate(bundleContext);
 
             Dictionary<String, Object> properties = new Hashtable<String, Object>();
             properties.put("felix.webconsole.label", tdp.getLabel());
 
-            register(bundleContext, new String[] { "javax.servlet.Servlet",
-                "org.apache.felix.webconsole.ConfigurationPrinter" }, tdp,
-                properties);
-        } catch (Throwable t) {
+            register(bundleContext, new String[]
+                { "javax.servlet.Servlet", "org.apache.felix.webconsole.ConfigurationPrinter" }, tdp, properties);
+        }
+        catch (Throwable t)
+        {
             // web console might not be available, don't care
         }
     }
 
-    public void stop(BundleContext bundleContext) {
-        if (support != null) {
+    public void stop(BundleContext bundleContext)
+    {
+        if (support != null)
+        {
             support.dispose();
             support = null;
         }
     }
 
-    private void register(BundleContext context, String[] serviceNames,
-            Object service, Dictionary<String, Object> properties) {
+    private void register(BundleContext context, String[] serviceNames, Object service,
+        Dictionary<String, Object> properties)
+    {
 
         // ensure properties
-        if (properties == null) {
+        if (properties == null)
+        {
             properties = new Hashtable<String, Object>();
         }
 
         // default settings
-        properties.put(Constants.SERVICE_DESCRIPTION, "Memory Usage ("
-            + serviceNames[0] + ")");
+        properties.put(Constants.SERVICE_DESCRIPTION, "Memory Usage (" + serviceNames[0] + ")");
         properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
 
         context.registerService(serviceNames, service, properties);

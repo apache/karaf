@@ -21,16 +21,17 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>sling</artifactId>
-        <version>8</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>felix-parent</artifactId>
+        <version>1.2.0</version>
+        <relativePath>../../../pom/pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.sling.extensions.memoryusage</artifactId>
+    <artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
     <packaging>bundle</packaging>
     <version>0.1.0-SNAPSHOT</version>
 
-    <name>Apache Sling Memory Usage Tracker</name>
+    <name>Apache Felix Web Console Memory Usage Plugin</name>
     <description>
         Plugin providing plugins to the Felix Shell and Web Console to
         observe the VMs memory use and cause try to get thread dumps etc.
@@ -38,13 +39,13 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/sling/whiteboard/fmeschbe/memoryusage
+            scm:svn:http://svn.apache.org/repos/asf/felix/trunk/webconsole-plugins/memoryusage
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/sling/whiteboard/fmeschbe/memoryusage
+            scm:svn:https://svn.apache.org/repos/asf/felix/trunk/webconsole-plugins/memoryusage
         </developerConnection>
         <url>
-            http://svn.apache.org/viewvc/sling/whiteboard/fmeschbe/memoryusage
+            http://svn.apache.org/viewvc/felix/trunk/webconsole-plugins/memoryusage
         </url>
     </scm>
 
@@ -65,10 +66,10 @@
                             org.apache.felix.webconsole;resolution:=optional
                         </Import-Package>
                         <Private-Package>
-                            org.apache.sling.extensions.memoryusage.*
+                            org.apache.felix.webconsole.plugins.memoryusage.*
                         </Private-Package>
                         <Bundle-Activator>
-                            org.apache.sling.extensions.memoryusage.internal.Activator
+                            org.apache.felix.webconsole.plugins.memoryusage.internal.Activator
                         </Bundle-Activator>
                     </instructions>
                 </configuration>
@@ -79,32 +80,43 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>4.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
+            <version>4.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.shell</artifactId>
             <version>1.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.webconsole</artifactId>
             <version>2.0.7-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
+            <version>2.3</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>1.5.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>3.8.1</version>
         </dependency>
     </dependencies>
 </project>
