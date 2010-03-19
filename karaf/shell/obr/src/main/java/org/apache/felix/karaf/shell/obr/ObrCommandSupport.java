@@ -238,7 +238,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         if (!filter.startsWith("(")) {
             filter = "(" + filter + ")";
         }
-        return admin.requirement(name, filter);
+        return admin.getHelper().requirement(name, filter);
     }
 
     protected Requirement[] parseRequirements(RepositoryAdmin admin, List<String> requirements) throws InvalidSyntaxException {
