@@ -47,6 +47,7 @@ import org.apache.felix.webconsole.internal.WebConsolePluginAdapter;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
 import org.apache.felix.webconsole.internal.filter.FilteringResponseWrapper;
 import org.apache.felix.webconsole.internal.i18n.ResourceBundleManager;
+import org.apache.felix.webconsole.internal.misc.ConfigurationRender;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -135,7 +136,6 @@ public class OsgiManager extends GenericServlet
             "org.apache.felix.webconsole.internal.core.ServicesServlet",
             "org.apache.felix.webconsole.internal.deppack.DepPackServlet",
             "org.apache.felix.webconsole.internal.misc.LicenseServlet",
-            "org.apache.felix.webconsole.internal.misc.ConfigurationRender",
             "org.apache.felix.webconsole.internal.misc.ShellServlet",
             "org.apache.felix.webconsole.internal.misc.SystemPropertiesPrinter",
             "org.apache.felix.webconsole.internal.misc.ThreadPrinter",
@@ -295,14 +295,20 @@ public class OsgiManager extends GenericServlet
             }
         }
 
+        // the resource bundle manager
+        resourceBundleManager = new ResourceBundleManager( getBundleContext() );
+
+        // start the configuration render, providing the resource bundle manager
+        ConfigurationRender cr = new ConfigurationRender(resourceBundleManager);
+        cr.activate( bundleContext );
+        osgiManagerPlugins.add(cr);
+        bindServlet( cr );
+
         // start tracking external plugins after setting up our own plugins
         pluginsTracker = new PluginServiceTracker( this );
         pluginsTracker.open();
         brandingTracker = new BrandingServiceTracker(this);
         brandingTracker.open();
-
-        // the resource bundle manager
-        resourceBundleManager = new ResourceBundleManager( getBundleContext() );
     }
 
     public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException
@@ -396,10 +402,7 @@ public class OsgiManager extends GenericServlet
         for ( Iterator pi = osgiManagerPlugins.iterator(); pi.hasNext(); )
         {
             Object plugin = pi.next();
-            if ( plugin instanceof OsgiManagerPlugin )
-            {
-                ( ( OsgiManagerPlugin ) plugin ).deactivate();
-            }
+            ( ( OsgiManagerPlugin ) plugin ).deactivate();
         }
 
         // simply remove all operations, we should not be used anymore

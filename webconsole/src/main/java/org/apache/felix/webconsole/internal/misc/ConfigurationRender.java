@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.*;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
+import org.apache.felix.webconsole.internal.i18n.ResourceBundleManager;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -48,6 +50,9 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     private static final String TITLE = "%configStatus.pluginTitle";
     private static final String[] CSS_REFS = null;
 
+    // use English as the locale for all non-display titles
+    private static final Locale DEFAULT = Locale.ENGLISH;
+
     /**
      * Formatter pattern to generate a relative path for the generation
      * of the plain text or zip file representation of the status. The file
@@ -62,6 +67,12 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     private static final DateFormat DISPLAY_DATE_FORMAT = DateFormat.getDateTimeInstance( DateFormat.LONG,
         DateFormat.LONG, Locale.US );
 
+    /**
+     * The resource bundle manager to allow for status printer title
+     * localization
+     */
+    private final ResourceBundleManager resourceBundleManager;
+
     private ServiceTracker cfgPrinterTracker;
 
     private int cfgPrinterTrackerCount;
@@ -69,9 +80,10 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     private ArrayList configurationPrinters;
 
     /** Default constructor */
-    public ConfigurationRender()
+    public ConfigurationRender( final ResourceBundleManager resourceBundleManager )
     {
         super( LABEL, TITLE, CSS_REFS );
+        this.resourceBundleManager = resourceBundleManager;
     }
 
 
@@ -145,7 +157,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
                 final PrinterDesc desc = (PrinterDesc) i.next();
                 if (desc.label.equals( name ) )
                 {
-                    printConfigurationPrinter( pw, desc.printer, ConfigurationPrinter.MODE_WEB );
+                    printConfigurationPrinter( pw, desc, ConfigurationPrinter.MODE_WEB );
                     pw.println( "</div></body></html>" );
                     return;
                 }
@@ -208,7 +220,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         {
             final PrinterDesc desc = (PrinterDesc) i.next();
             final String label = desc.label;
-            final String title = getTitle( desc.printer );
+            final String title = desc.title;
             pw.print("<li><a href='" + pluginRoot + label + ".nfo'>" + title + "</a></li>" );
         }
         pw.println("</ul> <!-- end tabs on top -->");
@@ -227,7 +239,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
             final PrinterDesc desc = (PrinterDesc) cpi.next();
             if ( desc.match(mode) )
             {
-                printConfigurationPrinter( pw, desc.printer, mode );
+                printConfigurationPrinter( pw, desc, mode );
             }
         }
     }
@@ -251,8 +263,9 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
                 for ( int i = 0; i < refs.length; i++ )
                 {
                     ConfigurationPrinter cfgPrinter = ( ConfigurationPrinter ) cfgPrinterTracker.getService( refs[i] );
-                    addConfigurationPrinter( cp, cfgPrinter, refs[i].getProperty( WebConsoleConstants.PLUGIN_LABEL ),
-                        refs[i].getProperty( ConfigurationPrinter.PROPERTY_MODES ) );
+                    addConfigurationPrinter( cp, cfgPrinter, refs[i].getBundle(), refs[i]
+                        .getProperty( WebConsoleConstants.PLUGIN_LABEL ), refs[i]
+                        .getProperty( ConfigurationPrinter.PROPERTY_MODES ) );
                 }
             }
             configurationPrinters = new ArrayList(cp.values());
@@ -263,12 +276,13 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     }
 
 
-    private static final void addConfigurationPrinter( final SortedMap printers, final ConfigurationPrinter cfgPrinter,
-        final Object labelProperty, final Object mode )
+    private final void addConfigurationPrinter( final SortedMap printers, final ConfigurationPrinter cfgPrinter,
+        final Bundle provider, final Object labelProperty, final Object mode )
     {
         if ( cfgPrinter != null )
         {
-            String sortKey = getTitle( cfgPrinter );
+            final String title = getTitle( cfgPrinter.getTitle(), provider );
+            String sortKey = title;
             if ( printers.containsKey( sortKey ) )
             {
                 int idx = -1;
@@ -282,7 +296,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
                 sortKey = idxTitle;
             }
             String label = ( labelProperty instanceof String ) ? ( String ) labelProperty : sortKey;
-            printers.put( sortKey, new PrinterDesc( cfgPrinter, label, mode ) );
+            printers.put( sortKey, new PrinterDesc( cfgPrinter, title, label, mode ) );
         }
     }
 
@@ -319,14 +333,14 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     //    }
 
 
-    private static final void printConfigurationPrinter( final ConfigurationWriter pw,
-                                            final ConfigurationPrinter cp,
-                                            final String mode )
+    private final void printConfigurationPrinter( final ConfigurationWriter pw, final PrinterDesc desc,
+        final String mode )
     {
-        pw.title( getTitle( cp ) );
+        pw.title( desc.title );
+        final ConfigurationPrinter cp = desc.printer;
         if ( cp instanceof ModeAwareConfigurationPrinter )
         {
-            ((ModeAwareConfigurationPrinter)cp).printConfiguration( pw , mode);
+            ( ( ModeAwareConfigurationPrinter ) cp ).printConfiguration( pw, mode );
         }
         else
         {
@@ -394,14 +408,15 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     }
 
 
-    private static final String getTitle( final ConfigurationPrinter cp )
+    private final String getTitle( final String title, final Bundle provider )
     {
-        final String title = cp.getTitle();
-        if ( title.startsWith( "%" ) )
+        if ( !title.startsWith( "%" ) )
         {
-            return title.substring( 1 );
+            return title;
         }
-        return title;
+
+        ResourceBundle res = resourceBundleManager.getResourceBundle( provider, DEFAULT );
+        return res.getString( title.substring( 1 ) );
     }
 
     private abstract static class ConfigurationWriter extends PrintWriter
@@ -536,7 +551,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
                     final URL[] attachments = ((AttachmentProvider)desc.printer).getAttachments(mode);
                     if ( attachments != null )
                     {
-                        cf.handleAttachments( getTitle( desc.printer ), attachments );
+                        cf.handleAttachments( desc.title, attachments );
                     }
                 }
             }
@@ -546,23 +561,27 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
     private static final class PrinterDesc
     {
-        private final String[] modes;
         public final ConfigurationPrinter printer;
+        public final String title;
         public final String label;
+        private final String[] modes;
 
         private static final List CUSTOM_MODES = new ArrayList();
         static
         {
-            CUSTOM_MODES.add(ConfigurationPrinter.MODE_TXT);
-            CUSTOM_MODES.add(ConfigurationPrinter.MODE_WEB);
-            CUSTOM_MODES.add(ConfigurationPrinter.MODE_ZIP);
+            CUSTOM_MODES.add( ConfigurationPrinter.MODE_TXT );
+            CUSTOM_MODES.add( ConfigurationPrinter.MODE_WEB );
+            CUSTOM_MODES.add( ConfigurationPrinter.MODE_ZIP );
         }
 
-        public PrinterDesc(final ConfigurationPrinter printer, final String label, final Object modes)
+
+        public PrinterDesc( final ConfigurationPrinter printer, final String title, final String label,
+            final Object modes )
         {
             this.printer = printer;
+            this.title = title;
             this.label = label;
-            if ( modes == null || !(modes instanceof String || modes instanceof String[]) )
+            if ( modes == null || !( modes instanceof String || modes instanceof String[] ) )
             {
                 this.modes = null;
             }
