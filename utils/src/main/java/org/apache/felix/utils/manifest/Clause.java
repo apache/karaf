@@ -18,6 +18,8 @@
  */
 package org.apache.felix.utils.manifest;
 
+import java.util.Arrays;
+
 public class Clause
 {
 
@@ -71,4 +73,34 @@ public class Clause
         return null;
     }
 
+    public String toString()
+    {
+        StringBuffer sb = new StringBuffer();
+        sb.append(name);
+        for (int i = 0; directives != null && i < directives.length; i++)
+        {
+            sb.append(";").append(directives[i].getName()).append(":=");
+            if (directives[i].getValue().contains(","))
+            {
+                sb.append("\"").append(directives[i].getValue()).append("\"");
+            }
+            else
+            {
+                sb.append(directives[i].getValue());
+            }
+        }
+        for (int i = 0; attributes != null && i < attributes.length; i++)
+        {
+            sb.append(";").append(attributes[i].getName()).append("=");
+            if (attributes[i].getValue().contains(","))
+            {
+                sb.append("\"").append(attributes[i].getValue()).append("\"");
+            }
+            else
+            {
+                sb.append(attributes[i].getValue());
+            }
+        }
+        return sb.toString();
+    }
 }
