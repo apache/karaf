@@ -168,6 +168,10 @@ public class ObrUpdate
             try
             {
                 m_resourceBundle = (ResourceImpl) new DataModelHelperImpl().createResource( bundleJar.toURL() );
+                if (m_resourceBundle == null)
+                {
+                    return;
+                }
             }
             catch (IOException e)
             {
