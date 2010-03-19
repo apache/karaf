@@ -64,6 +64,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
@@ -87,6 +89,9 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     public static final String NAME = "bundles";
     private static final String TITLE = "%bundles.pluginTitle";
     private static final String CSS[] = { "/res/ui/bundles.css" };
+
+    // an LDAP filter, that is used to search manifest headers, see FELIX-1441
+    private static final String FILTER_PARAM = "filter";
 
     private static final String FIELD_STARTLEVEL = "bundlestartlevel";
 
@@ -175,7 +180,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         try
         {
             StringWriter w = new StringWriter();
-            writeJSON( w, null, null, null, true, Locale.ENGLISH );
+            writeJSON( w, null, null, null, true, Locale.ENGLISH, null );
             String jsonString = w.toString();
             JSONObject json = new JSONObject( jsonString );
 
@@ -255,7 +260,14 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         {
             final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
             final String servicesRoot = getServicesRoot( request );
-            this.renderJSON(response, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale());
+            try
+            {
+                this.renderJSON(response, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale(), request.getParameter(FILTER_PARAM) );
+            }
+            catch (InvalidSyntaxException e)
+            {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid LDAP filter specified");
+            }
 
             // nothing more to do
             return;
@@ -371,7 +383,14 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             }
             final String pluginRoot = ( String ) req.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
             final String servicesRoot = getServicesRoot( req );
-            this.renderJSON( resp, null, pluginRoot, servicesRoot, req.getLocale() );
+            try
+            {
+                this.renderJSON( resp, null, pluginRoot, servicesRoot, req.getLocale(), req.getParameter(FILTER_PARAM) );
+            }
+            catch (InvalidSyntaxException e)
+            {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid LDAP filter specified");
+            }
         }
         else
         {
@@ -447,7 +466,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     /**
      * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException, ServletException
     {
         // get request info from request attribute
         final RequestInfo reqInfo = getRequestInfo(request);
@@ -463,38 +482,70 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
         final String servicesRoot = getServicesRoot ( request );
         StringWriter w = new StringWriter();
-        writeJSON(w, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale() );
+        try
+        {
+            writeJSON(w, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale(), request.getParameter(FILTER_PARAM) );
+        }
+        catch (InvalidSyntaxException e)
+        {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid LDAP filter specified");
+            return;
+        }
         vars.put( "__bundles__", w.toString());
 
         response.getWriter().print(TEMPLATE_MAIN);
     }
 
-    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale )
-        throws IOException
+    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale, final String filter )
+        throws IOException, InvalidSyntaxException
     {
         response.setContentType( "application/json" );
         response.setCharacterEncoding( "UTF-8" );
 
         final PrintWriter pw = response.getWriter();
-        writeJSON(pw, bundle, pluginRoot, servicesRoot, locale);
+        writeJSON(pw, bundle, pluginRoot, servicesRoot, locale, filter);
     }
 
 
-    private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale )
-        throws IOException
+    private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale, final String filter )
+        throws IOException, InvalidSyntaxException
     {
-        writeJSON( pw, bundle, pluginRoot, servicesRoot, false, locale );
+        writeJSON( pw, bundle, pluginRoot, servicesRoot, false, locale, filter );
     }
 
 
     private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot,
-        final String servicesRoot, final boolean fullDetails, final Locale locale ) throws IOException
+        final String servicesRoot, final boolean fullDetails, final Locale locale, final String filter ) throws IOException, InvalidSyntaxException
     {
         final Bundle[] allBundles = this.getBundles();
         final Object[] status = getStatusLine(allBundles);
         final String statusLine = (String) status[5];
-        final Bundle[] bundles = ( bundle != null ) ? new Bundle[]
-            { bundle } : allBundles;
+        // filter bundles by headers
+        final Bundle[] bundles;
+        if (bundle != null)
+        {
+            bundles = new Bundle[] { bundle };
+        }
+        else if (filter != null)
+        {
+            Filter f = getBundleContext().createFilter(filter);
+            ArrayList list = new ArrayList(allBundles.length);
+            final String localeString = locale.toString();
+            for (int i = 0, size = allBundles.length; i < size; i++)
+            {
+                if (f.match(allBundles[i].getHeaders(localeString)))
+                {
+                    list.add(allBundles[i]);
+                }
+            }
+            bundles = new Bundle[list.size()];
+            list.toArray(bundles);
+        }
+        else
+        {
+            bundles = allBundles;
+        }
+        
         Util.sort( bundles, locale );
 
         final JSONWriter jw = new JSONWriter( pw );
@@ -618,6 +669,8 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         jw.value( Util.getHeaderValue(bundle, Constants.BUNDLE_VERSION) );
         jw.key( "symbolicName" );
         jw.value( Util.getHeaderValue(bundle, Constants.BUNDLE_SYMBOLICNAME) );
+        jw.key( "category" );
+        jw.value( Util.getHeaderValue(bundle, Constants.BUNDLE_CATEGORY) );
 
         if ( details )
         {

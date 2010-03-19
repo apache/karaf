@@ -54,11 +54,12 @@ var i18n = {
 <form method="post" enctype="multipart/form-data" action="" class="filterForm">
 	<div class="ui-widget-header ui-corner-top buttonGroup">
 		<div class="filterBox">
-			<input class="filter" value="^Apache" title="${bundles.filter.help}" />
-			<button class="filterApply" type="button">${bundles.filter.apply}</button>
-			<button class="filterClear" type="button">${bundles.filter.clear}</button>
+			<input  class="filter" value="" title="${bundles.filter.help}" />
+			<span   class="filterClear ui-icon ui-icon-close" title="${bundles.filter.clear}">&nbsp;</span>
+			<button class="filterApply" title="${bundles.filter.help}">${bundles.filter.apply}</button>
+			<button class="filterLDAP"  title="${bundles.filter.ldap.tip}">${bundles.filter.ldap}</button>
 		</div>
-		<button class="reloadButton" type="button" style="margin-left: 60px;">${reload}</button>
+		<button class="reloadButton" type="button">${reload}</button>
 		<button class="installButton" type="button">${bundles.install_update}</button>
 		<button class="refreshPackages" type="button">${bundles.refreshPkg}</button>
 	</div>
@@ -70,7 +71,7 @@ var i18n = {
 			<th class="col_Id">${id}</th>
 			<th class="col_Name">${bundles.name}</th>
 			<th class="col_Version">${version}</th>
-			<th class="col_Symbolic_Name">${bundles.name.symb}</th>
+			<th class="col_Symbolic_Name">${bundles.category}</th>
 			<th class="col_Status">${bundles.status}</th>
 			<th class="col_Actions">${bundles.actions}</th>
 		</tr>
@@ -102,11 +103,12 @@ var i18n = {
 <form method="post" enctype="multipart/form-data" action="" class="filterForm">
 	<div class="ui-widget-header ui-corner-bottom buttonGroup">
 		<div class="filterBox">
-			<input class="filter" value="^Apache" title="${bundles.filter.help}" />
-			<button class="filterApply" type="button">${bundles.filter.apply}</button>
-			<button class="filterClear" type="button">${bundles.filter.clear}</button>
+			<input  class="filter" value="" title="${bundles.filter.help}" />
+			<span   class="filterClear ui-icon ui-icon-close" title="${bundles.filter.clear}">&nbsp;</span>
+			<button class="filterApply" title="${bundles.filter.help}">${bundles.filter.apply}</button>
+			<button class="filterLDAP"  title="${bundles.filter.ldap.tip}">${bundles.filter.ldap}</button>
 		</div>
-		<button class="reloadButton" type="button" style="margin-left: 60px;">${reload}</button>
+		<button class="reloadButton" type="button">${reload}</button>
 		<button class="installButton" type="button">${bundles.install_update}</button>
 		<button class="refreshPackages" type="button">${bundles.refreshPkg}</button>
 	</div>

@@ -31,6 +31,7 @@ function renderData( eventData, filter )  {
         }
     }
     if ( drawDetails && eventData.data.length == 1 ) {
+		$('.filterBox input, .filterBox button').addClass('ui-state-disabled');
         renderDetails(eventData.data[0]);    
     } else if ( currentBundle != null ) {
         var id = currentBundle;
@@ -42,7 +43,7 @@ function renderData( eventData, filter )  {
 
 function entry( /* Object */ bundle, filter ) {
 	var matches = !(filter && typeof filter.test == 'function') ? true :
-		filter.test(bundle.id) || filter.test(bundle.name) || filter.test(bundle.symbolicName) || filter.test(bundle.version);
+		filter.test(bundle.id) || filter.test(bundle.name) || filter.test(bundle.symbolicName) || filter.test(bundle.version) || filter.test(bundle.category);
 
 	if (matches) entryInternal( bundle ).appendTo(bundlesBody);
 }
@@ -60,14 +61,14 @@ function stateString(b) {
 function entryInternal( /* Object */ bundle ) {
 	var tr = bundlesTemplate.clone();
     var id = bundle.id;
-    var name = bundle.name;
+    var name = bundle.name + '<span class="symName">' + bundle.symbolicName + '</span>';
 
 	tr.attr('id', 'entry'+id);
 	tr.find('td:eq(0)').text(id);
 	tr.find('td:eq(1) span:eq(0)').attr('id', 'img'+id).click(function() {showDetails(id)});
 	tr.find('td:eq(1) span:eq(1)').html( drawDetails ? name : '<a href="' + pluginRoot + '/' + id + '">' + name + '</a>' );
 	tr.find('td:eq(2)').text( bundle.version );
-	tr.find('td:eq(3)').text( bundle.symbolicName );
+	tr.find('td:eq(3)').text( bundle.category );
 	tr.find('td:eq(4)').text( stateString(bundle) );
 	if (id == 0) { // system bundle has no actions
 		tr.find('td:eq(5) ul').addClass('ui-helper-hidden');
@@ -184,8 +185,8 @@ $(document).ready(function(){
 	});
 
 	// filter
-	$('input.filter').click(function() {$(this).val('')});
 	$('.filterApply').click(function() {
+		if ($(this).hasClass('ui-state-disabled')) return;
 		var el = $(this).parent().find('input.filter');
 		var filter = el.length && el.val() ? new RegExp(el.val()) : false;
 		renderData(lastBundleData, filter);
@@ -195,8 +196,15 @@ $(document).ready(function(){
 		return false;
 	});
 	$('.filterClear').click(function() {
+		if ($(this).hasClass('ui-state-disabled')) return;
 		$('input.filter').val('');
-		renderData(lastBundleData);
+		loadData();
+	});
+	$('.filterLDAP').click(function() {
+		if ($(this).hasClass('ui-state-disabled')) return;
+		var el = $(this).parent().find('input.filter');
+		var filter = el.val();
+		if (filter) $.get(pluginRoot + '/.json', { 'filter' : filter }, renderData, 'json');
 	});
 
 	// upload dialog
