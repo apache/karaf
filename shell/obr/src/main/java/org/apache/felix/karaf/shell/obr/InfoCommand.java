@@ -98,7 +98,7 @@ public class InfoCommand extends ObrCommandSupport {
             out.println("Capabilities:");
             for (int i = 0; i < caps.length; i++)
             {
-                out.println("   " + caps[i].getName() + ":" + caps[i].getProperties());
+                out.println("   " + caps[i].getName() + ":" + caps[i].getPropertiesAsMap());
             }
         }
     }
