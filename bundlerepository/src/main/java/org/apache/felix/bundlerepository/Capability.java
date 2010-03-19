@@ -49,6 +49,13 @@ import java.util.Map;
  */
 public interface Capability
 {
+
+    String BUNDLE = "bundle";
+    String FRAGMENT = "fragment";
+    String PACKAGE = "package";
+    String SERVICE = "service";
+    String EXECUTIONENVIRONMENT = "ee";
+
     /**
      * Return the name of the capability.
      * 
@@ -56,12 +63,19 @@ public interface Capability
     String getName();
 
     /**
-     * Return the set of properties.
+     * Return the properties of this capability
      * 
-     * Notice that the value of the properties is a list of values.
-     * 
-     * @return a Map<String,List>
+     * @return
      */
-    Map getProperties();
+    Property[] getProperties();
+
+    /**
+     * Return the map of properties.
+     * 
+     * @return a Map<String,Object>
+     */
+    Map getPropertiesAsMap();
+
+
 
 }

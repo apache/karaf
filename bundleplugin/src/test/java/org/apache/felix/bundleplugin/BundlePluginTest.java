@@ -21,21 +21,10 @@ package org.apache.felix.bundleplugin;
  */
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Properties;
-import java.util.jar.Manifest;
 
-import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
@@ -44,9 +33,6 @@ import org.apache.maven.model.Organization;
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Builder;
 import aQute.lib.osgi.Jar;
-import org.osgi.framework.Constants;
-import org.osgi.impl.bundle.obr.resource.RepositoryImpl;
-import org.osgi.impl.bundle.obr.resource.BundleInfo;
 
 
 /**
@@ -73,10 +59,6 @@ public class BundlePluginTest extends AbstractBundlePluginTest
 
     public void testConvertVersionToOsgi()
     {
-        try {
-            new BundleInfo(new RepositoryImpl(new URL("file:.")), new File("/Users/gnodet/.m2/repository/org/apache/felix/karaf/webconsole/org.apache.felix.karaf.webconsole.branding/1.5.0-SNAPSHOT/org.apache.felix.karaf.webconsole.branding-1.5.0-SNAPSHOT.jar")).build();
-        } catch(Exception e ) {}
-
         String osgiVersion;
 
         osgiVersion = plugin.convertVersionToOsgi( "2.1.0-SNAPSHOT" );

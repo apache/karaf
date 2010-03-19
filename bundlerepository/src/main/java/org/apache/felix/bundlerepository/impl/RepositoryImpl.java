@@ -18,83 +18,32 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLConnection;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.Set;
+import java.util.TreeSet;
 
-import org.apache.felix.bundlerepository.Capability;
-import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.Repository;
+import org.apache.felix.bundlerepository.impl.ResourceImpl;
 
 public class RepositoryImpl implements Repository
 {
-    public static final String OBR_PARSER_CLASS = "obr.parser.class";
-    public static final String OBR_PARSER_CLASS_DEFAULT = "org.apache.felix.bundlerepository.impl.StaxParser";
-
     private String m_name = null;
-    private long m_lastmodified = 0;
+    private long m_lastmodified = System.currentTimeMillis();
     private String m_uri = null;
-    private final Logger m_logger;
     private Resource[] m_resources = null;
     private Referral[] m_referrals = null;
-    private RepositoryAdminImpl m_repoAdmin = null;
-    private List m_resourceList;
+    private Set m_resourceSet = new TreeSet(new ResourceComparator());
 
-    // Reusable comparator for sorting resources by name.
-    private ResourceComparator m_nameComparator = new ResourceComparator();
+    public RepositoryImpl()
+    {
+    }
 
     public RepositoryImpl(Resource[] resources)
     {
-        m_repoAdmin = null;
-        m_uri = null;
-        m_logger = null;
         m_resources = resources;
-        m_lastmodified = System.currentTimeMillis();
-    }
-
-    public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url, Logger logger)
-        throws Exception
-    {
-        this(repoAdmin, url, Integer.MAX_VALUE, logger);
-    }
-
-    public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url, final int hopCount, Logger logger)
-        throws Exception
-    {
-        m_repoAdmin = repoAdmin;
-        m_uri = url.toExternalForm();
-        m_logger = logger;
-        m_resourceList = new ArrayList();
-        try
-        {
-            AccessController.doPrivileged(new PrivilegedExceptionAction()
-            {
-                public Object run() throws Exception
-                {
-                    parseRepositoryFile(hopCount);
-                    return null;
-                }
-            });
-        }
-        catch (PrivilegedActionException ex)
-        {
-            throw (Exception) ex.getCause();
-        }
     }
 
     public String getURI()
@@ -109,9 +58,9 @@ public class RepositoryImpl implements Repository
 
     public Resource[] getResources()
     {
-        if (m_resources == null) {
-            Collections.sort(m_resourceList, m_nameComparator);
-            m_resources = (Resource[]) m_resourceList.toArray(new Resource[m_resourceList.size()]);
+        if (m_resources == null)
+        {
+            m_resources = (Resource[]) m_resourceSet.toArray(new Resource[m_resourceSet.size()]);
         }
         return m_resources;
     }
@@ -119,10 +68,14 @@ public class RepositoryImpl implements Repository
     public void addResource(Resource resource)
     {
         // Set resource's repository.
-        ((ResourceImpl) resource).setRepository(this);
+        if (resource instanceof ResourceImpl)
+        {
+            ((ResourceImpl) resource).setRepository(this);
+        }
 
         // Add to resource array.
-        m_resourceList.add(resource);
+        m_resourceSet.remove(resource);
+        m_resourceSet.add(resource);
         m_resources = null;
     }
 
@@ -162,7 +115,12 @@ public class RepositoryImpl implements Repository
         return m_lastmodified;
     }
 
-    public void setLastmodified(String s)
+    public void setLastModified(long lastModified)
+    {
+        m_lastmodified = lastModified;
+    }
+
+    public void setLastModified(String s)
     {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhhmmss.SSS");
         try
@@ -182,138 +140,6 @@ public class RepositoryImpl implements Repository
     {
         // Ignore everything for now.
         return null;
-    }
-
-    protected void parseRepositoryFile(int hopCount) throws Exception
-    {
-        InputStream is = null;
-        BufferedReader br = null;
-
-        try
-        {
-            URL url = new URL(m_uri);
-            // Do it the manual way to have a chance to
-            // set request properties as proxy auth (EW).
-            URLConnection conn = url.openConnection();
-
-            // Support for http proxy authentication
-            String auth = System.getProperty("http.proxyAuth");
-            if ((auth != null) && (auth.length() > 0))
-            {
-                if ("http".equals(url.getProtocol()) || "https".equals(url.getProtocol()))
-                {
-                    String base64 = Util.base64Encode(auth);
-                    conn.setRequestProperty("Proxy-Authorization", "Basic " + base64);
-                }
-            }
-
-            if (url.getPath().endsWith(".zip"))
-            {
-                ZipInputStream zin = new ZipInputStream(conn.getInputStream());
-                ZipEntry entry = zin.getNextEntry();
-                while (entry != null)
-                {
-                    if (entry.getName().equals("repository.xml"))
-                    {
-                        is = zin;
-                        break;
-                    }
-                    entry = zin.getNextEntry();
-                }
-            }
-            else
-            {
-                is = conn.getInputStream();
-            }
-
-            if (is != null)
-            {
-                parseRepository(is);
-
-
-                // resolve referrals
-                hopCount--;
-                if (hopCount > 0 && m_referrals != null)
-                {
-                    for (int i = 0; i < m_referrals.length; i++)
-                    {
-                        Referral referral = m_referrals[i];
-
-                        URL referralUrl = new URL(url, referral.getUrl());
-                        hopCount = (referral.getDepth() > hopCount) ? hopCount : referral.getDepth();
-
-                        m_repoAdmin.addRepository(referralUrl, hopCount);
-                    }
-                }
-            }
-            else
-            {
-                // This should not happen.
-                throw new Exception("Unable to get input stream for repository.");
-            }
-        }
-        finally
-        {
-            try
-            {
-                if (is != null)
-                {
-                    is.close();
-                }
-            }
-            catch (IOException ex)
-            {
-                // Not much we can do.
-            }
-        }
-    }
-
-    protected void parseRepository(InputStream is) throws Exception
-    {
-        RepositoryParser parser = null;
-        try
-        {
-            String className = (String) RepositoryAdminImpl.m_context.getProperty(OBR_PARSER_CLASS);
-            if (className == null || className.length() == 0)
-            {
-                className = OBR_PARSER_CLASS_DEFAULT;
-            }
-            parser = (RepositoryParser) Class.forName(className).newInstance();
-        }
-        catch (Throwable t)
-        {
-        }
-        if (parser == null)
-        {
-            parser = new PullParser();
-
-        }
-        parser.parse(this, is);
-    }
-
-    public interface RepositoryParser
-    {
-        static final String REPOSITORY = "repository";
-        static final String NAME = "name";
-        static final String LASTMODIFIED = "lastmodified";
-        static final String REFERRAL = "referral";
-        static final String RESOURCE = "resource";
-        static final String DEPTH = "depth";
-        static final String URL = "url";
-        static final String CATEGORY = "category";
-        static final String ID = "id";
-        static final String CAPABILITY = "capability";
-        static final String REQUIRE = "require";
-        static final String P = "p";
-        static final String N = "n";
-        static final String T = "t";
-        static final String V = "v";
-        static final String FILTER = "filter";
-        static final String EXTEND = "extend";
-        static final String MULTIPLE = "multiple";
-        static final String OPTIONAL = "optional";
-
-        void parse(RepositoryImpl repository, InputStream is) throws Exception;
     }
 
 }

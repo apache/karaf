@@ -40,9 +40,7 @@
 package org.apache.felix.bundlerepository;
 
 import java.net.URL;
-import java.util.Map;
 
-import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 
 /**
@@ -171,50 +169,10 @@ public interface RepositoryAdmin
     Repository getLocalRepository();
 
     /**
-     * Create a simple requirement to be used for selection
-     * @param name
-     * @param filter
-     * @return
-     * @throws InvalidSyntaxException
-     */
-    Requirement requirement(String name, String filter) throws InvalidSyntaxException;
-
-    /**
-     * Create an extender filter supporting the SUBSET, SUPERSET and other extensions
+     * Return a helper to perform various operations on the data model
      *
-     * @param filter the string filter
      * @return
-     * @throws InvalidSyntaxException
      */
-    Filter filter(String filter) throws InvalidSyntaxException;
-
-    /**
-     * Create a repository from the specified URL.
-     * 
-     * @param repository
-     * @return
-     * @throws Exception
-     */
-    Repository repository(URL repository) throws Exception;
-
-    /**
-     * Create a repository for the given set of resources.
-     * Such repositories can be used to create a resolver
-     * that would resolve on a subset of available resources
-     * instead of all of them.
-     *
-     * @param resources an array of resources
-     * @return a repository containing the given resources
-     */
-    Repository repository(Resource[] resources);
-
-    /**
-     * Create a capability
-     *
-     * @param name name of this capability
-     * @param properties the properties
-     * @return a new capability with the specified name and properties
-     */
-    Capability capability(String name, Map properties);
+    DataModelHelper getHelper();
 
 }

@@ -48,8 +48,6 @@ import org.osgi.framework.Version;
  * 
  * Resources have capabilities and requirements. All a resource's requirements
  * must be satisfied before it can be installed.
- * 
- * @version $Revision: 1.5 $
  */
 public interface Resource
 {
@@ -79,25 +77,68 @@ public interface Resource
 
     final String CATEGORY = "category";
 
-    // get readable name
+    final String MANIFEST_VERSION = "manifestversion";
 
+    /**
+     * Get all resource properties
+     * @return
+     */
     Map getProperties();
 
-    String getSymbolicName();
-
-    String getPresentationName();
-
-    Version getVersion();
-
+    /**
+     * Shortcut for {{getProperties().get(ID)}}
+     * @return
+     */
     String getId();
 
+    /**
+     * Shortcut for {{getProperties().get(SYMBOLIC_NAME)}}
+     * @return
+     */
+    String getSymbolicName();
+
+    /**
+     * Shortcut for {{getProperties().get(VERSION)}}
+     * @return
+     */
+    Version getVersion();
+
+    /**
+     * Shortcut for {{getProperties().get(PRESENTATION_NAME)}}
+     * @return
+     */
+    String getPresentationName();
+
+    /**
+     * Shortcut for {{getProperties().get(URI)}}
+     * @return
+     */
     String getURI();
 
-    Requirement[] getRequirements();
+    /**
+     * Shortcut for {{getProperties().get(SIZE)}}
+     * @return
+     */
+    Long getSize();
 
+    /**
+     * Retrieve this resource categories
+     * @return
+     */
+    String[] getCategories();
+
+    /**
+     * Retrieve the capabilities
+     * @return
+     */
     Capability[] getCapabilities();
 
-    String[] getCategories();
+    /**
+     * Retrieve the requirements
+     *
+     * @return
+     */
+    Requirement[] getRequirements();
 
     /**
      * Returns whether this resource is a local one or not.

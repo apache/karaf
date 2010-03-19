@@ -20,6 +20,7 @@ package org.apache.felix.bundlerepository.impl;
 
 import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.Requirement;
+import org.apache.felix.utils.filter.FilterImpl;
 import org.osgi.framework.InvalidSyntaxException;
 
 public class RequirementImpl implements Requirement
@@ -35,75 +36,89 @@ public class RequirementImpl implements Requirement
     {
     }
 
-    public synchronized String getName()
+    public RequirementImpl(String name) 
+    {
+        setName(name);
+    }
+
+    public String getName()
     {
         return m_name;
     }
 
-    public synchronized void setName(String name)
+    public void setName(String name)
     {
         // Name of capabilities and requirements are interned for performances
-        // (with a very slow inter consumption as there are only a handful of values)
+        // (with a very low memory consumption as there are only a handful of values)
         m_name = name.intern();
     }
 
-    public synchronized String getFilter()
+    public String getFilter()
     {
         return m_filter.toString();
     }
 
-    public synchronized void setFilter(String filter) throws InvalidSyntaxException
+    public void setFilter(String filter)
     {
-        m_filter = FilterImpl.newInstance(filter, true);
+        try
+        {
+            m_filter = FilterImpl.newInstance(filter, true);
+        }
+        catch (InvalidSyntaxException e)
+        {
+            IllegalArgumentException ex = new IllegalArgumentException();
+            ex.initCause(e);
+            throw ex;
+        }
     }
 
-    public synchronized boolean isSatisfied(Capability capability)
+    public boolean isSatisfied(Capability capability)
     {
-        return m_name.equals(capability.getName()) && m_filter.matchCase(capability.getProperties())
-                && (m_filter.toString().indexOf("(mandatory:<*") >= 0 || capability.getProperties().get("mandatory:") == null);
+        return m_name.equals(capability.getName()) && m_filter.matchCase(capability.getPropertiesAsMap())
+                && (m_filter.toString().indexOf("(mandatory:<*") >= 0 || capability.getPropertiesAsMap().get("mandatory:") == null);
     }
 
-    public synchronized boolean isExtend()
+    public boolean isExtend()
     {
         return m_extend;
     }
 
-    public synchronized void setExtend(String s)
+    public void setExtend(boolean extend)
     {
-        m_extend = Boolean.valueOf(s).booleanValue();
+        m_extend = extend;
     }
 
-    public synchronized boolean isMultiple()
+    public boolean isMultiple()
     {
         return m_multiple;
     }
 
-    public synchronized void setMultiple(String s)
+    public void setMultiple(boolean multiple)
     {
-        m_multiple = Boolean.valueOf(s).booleanValue();
+        m_multiple = multiple;
     }
 
-    public synchronized boolean isOptional()
+    public boolean isOptional()
     {
         return m_optional;
     }
 
-    public synchronized void setOptional(String s)
+    public void setOptional(boolean optional)
     {
-        m_optional = Boolean.valueOf(s).booleanValue();
+        m_optional = optional;
     }
 
-    public synchronized String getComment()
+    public String getComment()
     {
         return m_comment;
     }
 
-    public synchronized void addText(String s)
+    public void addText(String s)
     {
         m_comment = s;
     }
 
-    public synchronized boolean equals(Object o)
+    public boolean equals(Object o)
     {
         if (this == o)
         {
@@ -122,12 +137,12 @@ public class RequirementImpl implements Requirement
         return false;
     }
 
-    public synchronized int hashCode()
+    public int hashCode()
     {
         return m_filter.toString().hashCode();
     }
 
-    public synchronized String toString()
+    public String toString()
     {
         return m_name + ":" + getFilter();
     }

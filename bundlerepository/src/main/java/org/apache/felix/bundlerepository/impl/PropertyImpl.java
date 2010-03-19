@@ -18,83 +18,93 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 
-import org.osgi.framework.Version;
-import org.osgi.service.obr.Resource;
+import org.apache.felix.bundlerepository.Property;
+import org.apache.felix.utils.version.VersionTable;
 
-public class PropertyImpl
+public class PropertyImpl implements Property
 {
-    private String m_name = null;
-    private String m_type = null;
-    private Object m_value = null;
-
-    public PropertyImpl()
-    {
-    }
+    private final String name;
+    private final String type;
+    private final String value;
 
     public PropertyImpl(String name, String type, String value)
     {
-        setN(name);
-        setT(type);
-        setV(value);
+        this.name = name;
+        this.type = type;
+        this.value = value;
     }
 
-    public void setN(String name)
+    public String getName()
     {
-        m_name = name;
+        return name;
     }
 
-    public String getN()
+    public String getType()
     {
-        return m_name;
+        return type;
     }
 
-    public void setT(String type)
+    public String getValue()
     {
-        m_type = type;
-
-        // If there is an existing value, then convert
-        // it based on the new type.
-        if (m_value != null)
-        {
-            m_value = convertType(m_value.toString());
-        }
-    }
-
-    public String getT()
-    {
-        return m_type;
-    }
-
-    public void setV(String value)
-    {
-        m_value = convertType(value);
-    }
-
-    public Object getV()
-    {
-        return m_value;
-    }
-
-    private Object convertType(String value)
-    {
-        if ((m_type != null) && m_type.equalsIgnoreCase(Resource.VERSION))
-        {
-            return new Version(value);
-        }
-        else if ((m_type != null) && (m_type.equalsIgnoreCase(Resource.URL)))
-        {
-            try
-            {
-                return new URL(value);
-            }
-            catch (MalformedURLException ex)
-            {
-                ex.printStackTrace();
-            }
-        }
         return value;
+    }
+
+    public Object getConvertedValue()
+    {
+        return convert(value, type);
+    }
+
+    private static Object convert(String value, String type)
+    {
+        try
+        {
+            if (value != null && type != null)
+            {
+                if (VERSION.equalsIgnoreCase(type))
+                {
+                    return VersionTable.getVersion(value);
+                }
+                else if (URI.equalsIgnoreCase(type))
+                {
+                    return new URI(value);
+                }
+                else if (URL.equalsIgnoreCase(type))
+                {
+                    return new URL(value);
+                }
+                else if (LONG.equalsIgnoreCase(type))
+                {
+                    return new Long(value);
+                }
+                else if (DOUBLE.equalsIgnoreCase(type))
+                {
+                    return new Double(value);
+                }
+                else if (SET.equalsIgnoreCase(type))
+                {
+                    StringTokenizer st = new StringTokenizer(value, ",");
+                    Set s = new HashSet();
+                    while (st.hasMoreTokens())
+                    {
+                        s.add(st.nextToken().trim());
+                    }
+                    return s;
+                }
+            }
+            return value;
+        }
+        catch (Exception e)
+        {
+            IllegalArgumentException ex = new IllegalArgumentException();
+            ex.initCause(e);
+            throw ex;
+        }
     }
 }

@@ -337,7 +337,6 @@ public class RemoteFileManager
 
     /**
      * this method indicates if the targeted file is locked or not.
-     * @param remote connection manager
      * @param fileName name targeted
      * @return  true if the required file is locked, else false
      * @throws MojoExecutionException

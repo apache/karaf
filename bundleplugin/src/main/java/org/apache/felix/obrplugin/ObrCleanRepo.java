@@ -202,7 +202,7 @@ public class ObrCleanRepo extends AbstractMojo
     /**
      * Open an XML file.
      * 
-     * @param filename : XML file path
+     * @param file : XML file path
      * @param constructor DocumentBuilder get from xerces
      * @return Document which describes this file
      * @throws MojoExecutionException occurs when the given file cannot be opened or is a valid XML file.

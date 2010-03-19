@@ -815,7 +815,6 @@ public class BundlePlugin extends AbstractMojo
         {
             return finalName + '-' + classifier + ".jar";
         }
-
         return finalName + ".jar";
     }
 

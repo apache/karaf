@@ -25,6 +25,8 @@ import junit.framework.TestCase;
 
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.utils.filter.FilterImpl;
+import org.apache.felix.utils.log.Logger;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -61,7 +63,7 @@ public class ResolverImplTest extends TestCase
         repoAdmin.addRepository(getClass().getResource("/repo_for_resolvertest.xml"));
 
         Resource[] res = repoAdmin.discoverResources(
-            new Requirement[] { repoAdmin.requirement(
+            new Requirement[] { repoAdmin.getHelper().requirement(
                 "package", "(package=org.apache.felix.test.osgi)") });
         assertNotNull(res);
         assertEquals(1, res.length);
@@ -73,7 +75,7 @@ public class ResolverImplTest extends TestCase
         repoAdmin.addRepository(getClass().getResource("/repo_for_resolvertest.xml"));
 
         Resolver resolver = repoAdmin.resolver();
-        resolver.add(repoAdmin.requirement("package", "(package=org.apache.felix.test.osgi)"));
+        resolver.add(repoAdmin.getHelper().requirement("package", "(package=org.apache.felix.test.osgi)"));
         assertTrue(resolver.resolve());
     }
 
@@ -83,7 +85,7 @@ public class ResolverImplTest extends TestCase
         repoAdmin.addRepository(getClass().getResource("/repo_for_resolvertest.xml"));
 
         Resolver resolver = repoAdmin.resolver();
-        resolver.add(repoAdmin.requirement("package", "(package=org.apache.felix.test.osgi)"));
+        resolver.add(repoAdmin.getHelper().requirement("package", "(package=org.apache.felix.test.osgi)"));
 
         Thread.currentThread().interrupt();
         try
@@ -103,7 +105,7 @@ public class ResolverImplTest extends TestCase
         repoAdmin.addRepository(getClass().getResource("/repo_for_optional_resources.xml"));
 
         Resolver resolver = repoAdmin.resolver();
-        resolver.add(repoAdmin.requirement("bundle", "(symbolicname=res1)"));
+        resolver.add(repoAdmin.getHelper().requirement("bundle", "(symbolicname=res1)"));
 
         assertTrue(resolver.resolve());
         assertEquals(1, resolver.getRequiredResources().length);
@@ -116,15 +118,15 @@ public class ResolverImplTest extends TestCase
         repoAdmin.addRepository(getClass().getResource("/repo_for_mandatory.xml"));
 
         Resolver resolver = repoAdmin.resolver();
-        resolver.add(repoAdmin.requirement("bundle", "(symbolicname=res2)"));
+        resolver.add(repoAdmin.getHelper().requirement("bundle", "(symbolicname=res2)"));
         assertFalse(resolver.resolve());
 
         resolver = repoAdmin.resolver();
-        resolver.add(repoAdmin.requirement("bundle", "(symbolicname=res3)"));
+        resolver.add(repoAdmin.getHelper().requirement("bundle", "(symbolicname=res3)"));
         assertTrue(resolver.resolve());
 
         resolver = repoAdmin.resolver();
-        resolver.add(repoAdmin.requirement("bundle", "(symbolicname=res4)"));
+        resolver.add(repoAdmin.getHelper().requirement("bundle", "(symbolicname=res4)"));
         assertFalse(resolver.resolve());
 
     }
@@ -139,6 +141,7 @@ public class ResolverImplTest extends TestCase
         BundleContext bundleContext = (BundleContext) EasyMock.createMock(BundleContext.class);
         Bundle systemBundle = (Bundle) EasyMock.createMock(Bundle.class);
 
+        Activator.setContext(bundleContext);
         EasyMock.expect(bundleContext.getProperty(RepositoryAdminImpl.REPOSITORY_URL_PROP))
                     .andReturn(getClass().getResource("/referred.xml").toExternalForm());
         EasyMock.expect(bundleContext.getProperty((String) EasyMock.anyObject())).andReturn(null).anyTimes();

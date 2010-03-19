@@ -21,6 +21,7 @@ package org.apache.felix.bundlerepository.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.felix.utils.log.Logger;
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

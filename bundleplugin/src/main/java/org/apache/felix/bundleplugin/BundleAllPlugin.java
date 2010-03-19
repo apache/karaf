@@ -426,12 +426,6 @@ public class BundleAllPlugin extends ManifestPlugin
     }
 
 
-    protected String getBundleName( MavenProject project )
-    {
-        return getBundleName( project.getArtifact() );
-    }
-
-
     private String getBundleName( Artifact artifact )
     {
         return getMaven2OsgiConverter().getBundleFileName( artifact );

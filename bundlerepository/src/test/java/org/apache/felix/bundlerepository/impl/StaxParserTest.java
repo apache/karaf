@@ -18,13 +18,16 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.io.File;
 import java.net.URL;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
+import org.apache.felix.bundlerepository.impl.PullParser;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.bundlerepository.impl.StaxParser;
+import org.apache.felix.utils.filter.FilterImpl;
+import org.apache.felix.utils.log.Logger;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -80,7 +83,7 @@ public class StaxParserTest extends TestCase
     {
         long t0, t1;
 
-        StaxParser.factory = null;
+        StaxParser.setFactory(null);
         System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
         for (int i = 0; i < nbWarm; i++)
         {
@@ -97,7 +100,7 @@ public class StaxParserTest extends TestCase
         System.err.println("Woodstox: " + (t1 - t0) + " ms");
 
 
-        StaxParser.factory = null;
+        StaxParser.setFactory(null);
         System.setProperty("javax.xml.stream.XMLInputFactory", "com.sun.xml.internal.stream.XMLInputFactoryImpl");
         for (int i = 0; i < nbWarm; i++)
         {
@@ -138,9 +141,10 @@ public class StaxParserTest extends TestCase
         BundleContext bundleContext = (BundleContext) EasyMock.createMock(BundleContext.class);
         Bundle systemBundle = (Bundle) EasyMock.createMock(Bundle.class);
 
+        Activator.setContext(bundleContext);
         EasyMock.expect(bundleContext.getProperty(RepositoryAdminImpl.REPOSITORY_URL_PROP))
                     .andReturn(getClass().getResource("/referral1_repository.xml").toExternalForm());
-        EasyMock.expect(bundleContext.getProperty(RepositoryImpl.OBR_PARSER_CLASS))
+        EasyMock.expect(bundleContext.getProperty(RepositoryParser.OBR_PARSER_CLASS))
                     .andReturn(repositoryParser.getName());
         EasyMock.expect(bundleContext.getProperty((String) EasyMock.anyObject())).andReturn(null).anyTimes();
         EasyMock.expect(bundleContext.getBundle(0)).andReturn(systemBundle);

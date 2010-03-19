@@ -32,6 +32,12 @@
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.utils</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.service.obr</artifactId>
       <version>1.0.2</version>
       <optional>true</optional>
@@ -45,7 +51,7 @@
     <dependency>
       <groupId>net.sf.kxml</groupId>
       <artifactId>kxml2</artifactId>
-      <version>2.2.2</version>
+      <version>2.3.0</version>
       <optional>true</optional>
       <exclusions>
         <exclusion>
@@ -90,7 +96,8 @@
             <Private-Package>
                 org.kxml2.io,
                 org.xmlpull.v1,
-                org.apache.felix.bundlerepository.impl.*
+                org.apache.felix.bundlerepository.impl.*,
+                org.apache.felix.utils.*
             </Private-Package>
             <Import-Package>!javax.xml.parsers,!org.xml.sax,org.osgi.service.log;resolution:=optional,org.osgi.service.obr;resolution:=optional,javax.xml.stream;resolution:=optional,*</Import-Package>
             <DynamicImport-Package>org.apache.felix.shell</DynamicImport-Package>

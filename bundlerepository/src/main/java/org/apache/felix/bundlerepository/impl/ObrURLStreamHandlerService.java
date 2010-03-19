@@ -26,6 +26,7 @@ import java.net.URLStreamHandler;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.felix.utils.log.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;

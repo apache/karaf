@@ -28,6 +28,7 @@ import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.bundlerepository.impl.FileUtil;
 import org.apache.felix.shell.Command;
 import org.osgi.framework.*;
 
@@ -577,7 +578,7 @@ public class ObrCommandImpl implements Command
             out.println("Capabilities:");
             for (int i = 0; i < caps.length; i++)
             {
-                out.println("   " + caps[i].getProperties());
+                out.println("   " + caps[i].getPropertiesAsMap());
             }
         }
     }

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,31 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.bundlerepository.impl;
+package org.apache.felix.bundlerepository;
 
-import java.util.Enumeration;
-import java.util.Iterator;
-
-public class IteratorToEnumeration implements Enumeration
+public interface Property
 {
-    private Iterator m_iter = null;
 
-    public IteratorToEnumeration(Iterator iter)
-    {
-        m_iter = iter;
-    }
+    String VERSION = "version";
+    String URL = "url";
+    String URI = "uri";
+    String LONG = "long";
+    String DOUBLE = "double";
+    String SET = "set";
 
-    public boolean hasMoreElements()
-    {
-        if (m_iter == null)
-            return false;
-        return m_iter.hasNext();
-    }
+    String getName();
 
-    public Object nextElement()
-    {
-        if (m_iter == null)
-            return null;
-        return m_iter.next();
-    }
+    String getType();
+
+    String getValue();
+
+    Object getConvertedValue();
+
 }

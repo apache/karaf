@@ -21,15 +21,30 @@ package org.apache.felix.bundlerepository.impl;
 import java.util.*;
 
 import org.apache.felix.bundlerepository.Capability;
-import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.bundlerepository.Property;
 
 public class CapabilityImpl implements Capability
 {
     private String m_name = null;
     private final Map m_map = new HashMap();
+    private final List m_list = new ArrayList();
 
     public CapabilityImpl()
     {
+    }
+
+    public CapabilityImpl(String name)
+    {
+        setName(name);
+    }
+
+    public CapabilityImpl(String name, PropertyImpl[] properties)
+    {
+        setName(name);
+        for (int i = 0; properties != null && i < properties.length; i++)
+        {
+            addProperty(properties[i]);
+        }
     }
 
     public String getName()
@@ -42,19 +57,30 @@ public class CapabilityImpl implements Capability
         m_name = name.intern();
     }
 
-    public Map getProperties()
+    public Map getPropertiesAsMap()
     {
         return m_map;
     }
 
-    protected void addP(PropertyImpl prop)
+    public Property[] getProperties()
     {
-        addP(prop.getN(), prop.getV());
+        return (Property[]) m_list.toArray(new Property[m_list.size()]);
     }
 
-    protected void addP(String name, Object value)
+    public void addProperty(Property prop)
     {
-        m_map.put(name.toLowerCase(), value);
+        m_map.put(prop.getName().toLowerCase(), prop.getConvertedValue());
+        m_list.add(prop);
+    }
+
+    public void addProperty(String name, String value)
+    {
+        addProperty(name, null, value);
+    }
+
+    public void addProperty(String name, String type, String value)
+    {
+        addProperty(new PropertyImpl(name, type, value));
     }
 
     public String toString()

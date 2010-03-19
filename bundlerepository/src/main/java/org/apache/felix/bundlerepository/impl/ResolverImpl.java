@@ -23,6 +23,8 @@ import java.util.*;
 
 import org.apache.felix.bundlerepository.*;
 import org.apache.felix.bundlerepository.Resolver;
+import org.apache.felix.bundlerepository.impl.ResourceImpl;
+import org.apache.felix.utils.log.Logger;
 import org.osgi.framework.*;
 
 public class ResolverImpl implements Resolver
@@ -420,7 +422,7 @@ public class ResolverImpl implements Resolver
             {
                 best = current;
                 bestLocal = isCurrentLocal;
-                Object v = current.getCapability().getProperties().get(Resource.VERSION);
+                Object v = current.getCapability().getPropertiesAsMap().get(Resource.VERSION);
                 if ((v != null) && (v instanceof Version))
                 {
                     bestVersion = (Version) v;
@@ -428,7 +430,7 @@ public class ResolverImpl implements Resolver
             }
             else if ((m_resolutionFlags & DO_NOT_PREFER_LOCAL) != 0 || !bestLocal || isCurrentLocal)
             {
-                Object v = current.getCapability().getProperties().get(Resource.VERSION);
+                Object v = current.getCapability().getPropertiesAsMap().get(Resource.VERSION);
 
                 // If there is no version, then select the resource
                 // with the greatest number of capabilities.
@@ -575,7 +577,7 @@ public class ResolverImpl implements Resolver
                     {
                         m_logger.log(
                             Logger.LOG_ERROR,
-                            "Resolver: Update error - " + Util.getBundleName(localResource.getBundle()),
+                            "Resolver: Update error - " + getBundleName(localResource.getBundle()),
                             ex);
                         return;
                     }
@@ -767,4 +769,13 @@ public class ResolverImpl implements Resolver
         }
         return null;
     }
+
+    public static String getBundleName(Bundle bundle)
+    {
+        String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
+        return (name == null)
+            ? "Bundle " + Long.toString(bundle.getBundleId())
+            : name;
+    }
+
 }

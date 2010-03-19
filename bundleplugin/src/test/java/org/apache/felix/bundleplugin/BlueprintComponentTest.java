@@ -73,6 +73,9 @@ public class BlueprintComponentTest extends TestCase {
         instructions.put("nsh_interface", "foo.bar.Namespace");
         instructions.put("nsh_namespace", "ns");
 
+        instructions.put("Export-Service", "p7.Foo;mk=mv");
+        instructions.put("Import-Service", "org.osgi.service.cm.ConfigurationAdmin;availability:=optional");
+
         Properties props = new Properties();
         Builder builder = plugin.buildOSGiBundle(project, instructions, props, plugin.getClasspath(project));
 

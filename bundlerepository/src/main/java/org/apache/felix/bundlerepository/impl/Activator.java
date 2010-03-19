@@ -21,6 +21,7 @@ package org.apache.felix.bundlerepository.impl;
 import java.util.Hashtable;
 
 import org.apache.felix.bundlerepository.impl.wrapper.Wrapper;
+import org.apache.felix.utils.log.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
@@ -29,15 +30,44 @@ import org.osgi.service.url.URLStreamHandlerService;
 
 public class Activator implements BundleActivator
 {
-    private transient BundleContext m_context = null;
+    private static BundleContext context = null;
+    private static Logger logger = new Logger(null);
     private transient RepositoryAdminImpl m_repoAdmin = null;
+
+
+    public static BundleContext getContext()
+    {
+        return context;
+    }
+
+    static void setContext(BundleContext context)
+    {
+        Activator.context = context;
+    }
+
+    public static void log(int level, String message)
+    {
+        if (logger != null)
+        {
+            logger.log(level, message);
+        }
+    }
+
+    public static void log(int level, String message, Throwable exception)
+    {
+        if (logger != null)
+        {
+            logger.log(level, message, exception);
+        }
+    }
 
     public void start(BundleContext context)
     {
-        m_context = context;
+        Activator.context = context;
+        Activator.logger = new Logger(context);
 
         // Register bundle repository service.
-        m_repoAdmin = new RepositoryAdminImpl(m_context, new Logger(m_context));
+        m_repoAdmin = new RepositoryAdminImpl(context, logger);
         context.registerService(
             RepositoryAdmin.class.getName(),
             m_repoAdmin, null);
@@ -62,7 +92,7 @@ public class Activator implements BundleActivator
             // wrapper for the bundle repository service.
             context.registerService(
                 org.apache.felix.shell.Command.class.getName(),
-                new ObrCommandImpl(m_context, m_repoAdmin), null);
+                new ObrCommandImpl(Activator.context, m_repoAdmin), null);
         }
         catch (Throwable th)
         {
@@ -74,7 +104,7 @@ public class Activator implements BundleActivator
 			Hashtable dict = new Hashtable();
 			dict.put(URLConstants.URL_HANDLER_PROTOCOL, "obr");
 			context.registerService(URLStreamHandlerService.class.getName(),
-					new ObrURLStreamHandlerService(m_context, m_repoAdmin), dict);
+					new ObrURLStreamHandlerService(Activator.context, m_repoAdmin), dict);
 		}
         catch (Exception e)
 		{

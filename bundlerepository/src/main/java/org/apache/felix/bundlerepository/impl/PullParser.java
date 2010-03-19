@@ -18,34 +18,99 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * Repository XML parser based on StaX
+ * Repository XML xml based on StaX
  */
-public class PullParser implements RepositoryImpl.RepositoryParser
+public class PullParser extends RepositoryParser
 {
 
     public PullParser()
     {
     }
 
-    public void parse(RepositoryImpl repository, InputStream is) throws Exception
+    public RepositoryImpl parseRepository(InputStream is) throws Exception
     {
-        KXmlParser reader = new KXmlParser();
-        reader.setInput(new BufferedReader(new InputStreamReader(is)));
+        XmlPullParser reader = new KXmlParser();
+        reader.setInput(is, null);
         int event = reader.nextTag();
         if (event != XmlPullParser.START_TAG || !REPOSITORY.equals(reader.getName()))
         {
             throw new Exception("Expected element 'repository' at the root of the document");
         }
+        return parse(reader);
+    }
+
+    public RepositoryImpl parseRepository(Reader r) throws Exception
+    {
+        XmlPullParser reader = new KXmlParser();
+        reader.setInput(r);
+        int event = reader.nextTag();
+        if (event != XmlPullParser.START_TAG || !REPOSITORY.equals(reader.getName()))
+        {
+            throw new Exception("Expected element 'repository' at the root of the document");
+        }
+        return parse(reader);
+    }
+
+    public ResourceImpl parseResource(Reader r) throws Exception
+    {
+        XmlPullParser reader = new KXmlParser();
+        reader.setInput(r);
+        int event = reader.nextTag();
+        if (event != XmlPullParser.START_TAG || !RESOURCE.equals(reader.getName()))
+        {
+            throw new Exception("Expected element 'resource'");
+        }
+        return parseResource(reader);
+    }
+
+    public CapabilityImpl parseCapability(Reader r) throws Exception
+    {
+        XmlPullParser reader = new KXmlParser();
+        reader.setInput(r);
+        int event = reader.nextTag();
+        if (event != XmlPullParser.START_TAG || !CAPABILITY.equals(reader.getName()))
+        {
+            throw new Exception("Expected element 'capability'");
+        }
+        return parseCapability(reader);
+    }
+
+    public PropertyImpl parseProperty(Reader r) throws Exception
+    {
+        XmlPullParser reader = new KXmlParser();
+        reader.setInput(r);
+        int event = reader.nextTag();
+        if (event != XmlPullParser.START_TAG || !P.equals(reader.getName()))
+        {
+            throw new Exception("Expected element 'p'");
+        }
+        return parseProperty(reader);
+    }
+
+    public RequirementImpl parseRequirement(Reader r) throws Exception
+    {
+        XmlPullParser reader = new KXmlParser();
+        reader.setInput(r);
+        int event = reader.nextTag();
+        if (event != XmlPullParser.START_TAG || !REQUIRE.equals(reader.getName()))
+        {
+            throw new Exception("Expected element 'require'");
+        }
+        return parseRequire(reader);
+    }
+
+    public RepositoryImpl parse(XmlPullParser reader) throws Exception
+    {
+        RepositoryImpl repository = new RepositoryImpl();
         for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
         {
             String name = reader.getAttributeName(i);
@@ -56,9 +121,10 @@ public class PullParser implements RepositoryImpl.RepositoryParser
             }
             else if (LASTMODIFIED.equals(name))
             {
-                repository.setLastmodified(value);
+                repository.setLastModified(value);
             }
         }
+        int event;
         while ((event = reader.nextTag()) == XmlPullParser.START_TAG)
         {
             String element = reader.getName();
@@ -79,9 +145,10 @@ public class PullParser implements RepositoryImpl.RepositoryParser
         }
         // Sanity check
         sanityCheckEndElement(reader, event, REPOSITORY);
+        return repository;
     }
 
-    private void sanityCheckEndElement(KXmlParser reader, int event, String element)
+    private void sanityCheckEndElement(XmlPullParser reader, int event, String element)
     {
         if (event != XmlPullParser.END_TAG || !element.equals(reader.getName()))
         {
@@ -89,7 +156,7 @@ public class PullParser implements RepositoryImpl.RepositoryParser
         }
     }
 
-    private Referral parseReferral(KXmlParser reader) throws Exception
+    public Referral parseReferral(XmlPullParser reader) throws Exception
     {
         Referral referral = new Referral();
         for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
@@ -109,7 +176,7 @@ public class PullParser implements RepositoryImpl.RepositoryParser
         return referral;
     }
 
-    private ResourceImpl parseResource(KXmlParser reader) throws Exception
+    public ResourceImpl parseResource(XmlPullParser reader) throws Exception
     {
         ResourceImpl resource = new ResourceImpl();
         try
@@ -124,7 +191,7 @@ public class PullParser implements RepositoryImpl.RepositoryParser
                 String element = reader.getName();
                 if (CATEGORY.equals(element))
                 {
-                    CategoryImpl category = parseCategory(reader);
+                    String category = parseCategory(reader);
                     resource.addCategory(category);
                 }
                 else if (CAPABILITY.equals(element))
@@ -175,21 +242,21 @@ public class PullParser implements RepositoryImpl.RepositoryParser
         }
     }
 
-    private CategoryImpl parseCategory(KXmlParser reader) throws IOException, XmlPullParserException
+    public String parseCategory(XmlPullParser reader) throws IOException, XmlPullParserException
     {
-        CategoryImpl category = new CategoryImpl();
+        String id = null;
         for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
         {
             if (ID.equals(reader.getAttributeName(i)))
             {
-                category.setId(reader.getAttributeValue(i));
+                id = reader.getAttributeValue(i);
             }
         }
         sanityCheckEndElement(reader, reader.nextTag(), CATEGORY);
-        return category;
+        return id;
     }
 
-    private CapabilityImpl parseCapability(KXmlParser reader) throws Exception
+    public CapabilityImpl parseCapability(XmlPullParser reader) throws Exception
     {
         CapabilityImpl capability = new CapabilityImpl();
         for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
@@ -208,7 +275,7 @@ public class PullParser implements RepositoryImpl.RepositoryParser
             if (P.equals(element))
             {
                 PropertyImpl prop = parseProperty(reader);
-                capability.addP(prop);
+                capability.addProperty(prop);
             }
             else
             {
@@ -220,7 +287,7 @@ public class PullParser implements RepositoryImpl.RepositoryParser
         return capability;
     }
 
-    private PropertyImpl parseProperty(KXmlParser reader) throws Exception
+    public PropertyImpl parseProperty(XmlPullParser reader) throws Exception
     {
         String n = null, t = null, v = null;
         for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
@@ -246,7 +313,7 @@ public class PullParser implements RepositoryImpl.RepositoryParser
         return prop;
     }
 
-    private RequirementImpl parseRequire(KXmlParser reader) throws Exception
+    public RequirementImpl parseRequire(XmlPullParser reader) throws Exception
     {
         RequirementImpl requirement = new RequirementImpl();
         for (int i = 0, nb = reader.getAttributeCount(); i < nb; i++)
@@ -263,15 +330,15 @@ public class PullParser implements RepositoryImpl.RepositoryParser
             }
             else if (EXTEND.equals(name))
             {
-                requirement.setExtend(value);
+                requirement.setExtend(Boolean.parseBoolean(value));
             }
             else if (MULTIPLE.equals(name))
             {
-                requirement.setMultiple(value);
+                requirement.setMultiple(Boolean.parseBoolean(value));
             }
             else if (OPTIONAL.equals(name))
             {
-                requirement.setOptional(value);
+                requirement.setOptional(Boolean.parseBoolean(value));
             }
         }
         int event;
@@ -300,17 +367,16 @@ public class PullParser implements RepositoryImpl.RepositoryParser
         return requirement;
     }
 
-    private void ignoreTag(KXmlParser reader) throws IOException, XmlPullParserException {
+    public void ignoreTag(XmlPullParser reader) throws IOException, XmlPullParserException {
         int level = 1;
-        int event = 0;
         while (level > 0)
         {
-            event = reader.next();
-            if (event == XmlPullParser.START_TAG)
+            int eventType = reader.next();
+            if (eventType == XmlPullParser.START_TAG)
             {
                 level++;
             }
-            else if (event == XmlPullParser.END_TAG)
+            else if (eventType == XmlPullParser.END_TAG)
             {
                 level--;
             }

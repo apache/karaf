@@ -36,6 +36,6 @@ public class CapabilityWrapper implements org.osgi.service.obr.Capability {
     }
 
     public Map getProperties() {
-        return capability.getProperties();
+        return capability.getPropertiesAsMap();
     }
 }

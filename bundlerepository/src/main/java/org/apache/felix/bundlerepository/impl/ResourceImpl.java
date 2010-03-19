@@ -19,40 +19,28 @@
 package org.apache.felix.bundlerepository.impl;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.Property;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.utils.version.VersionTable;
 import org.osgi.framework.Version;
 
 public class ResourceImpl implements Resource
 {
 
     private final Map m_map = new HashMap();
+    private final List m_capList = new ArrayList();
+    private final List m_reqList = new ArrayList();
     private Repository m_repo;
-    private List m_capList = new ArrayList();
-    private List m_reqList = new ArrayList();
-
     private Map m_uris;
-
-    private int m_hash;
+    private transient int m_hash;
 
     public ResourceImpl()
     {
-        this(null);
-    }
-
-    public ResourceImpl(ResourceImpl resource)
-    {
-        if (resource != null)
-        {
-            m_map.putAll(resource.getProperties());
-            m_capList.addAll(resource.m_capList);
-            m_reqList.addAll(resource.m_reqList);
-        }
     }
 
     public boolean equals(Object o)
@@ -85,11 +73,13 @@ public class ResourceImpl implements Resource
         return m_hash;
     }
 
-    public Repository getRepository() {
+    public Repository getRepository()
+    {
         return m_repo;
     }
 
-    public void setRepository(Repository repository) {
+    public void setRepository(Repository repository)
+    {
         this.m_repo = repository;
     }
 
@@ -127,12 +117,17 @@ public class ResourceImpl implements Resource
         return (String) m_map.get(Resource.URI);
     }
 
+    public Long getSize()
+    {
+        return ((Long) m_map.get(Resource.SIZE));
+    }
+
     public Requirement[] getRequirements()
     {
         return (Requirement[]) m_reqList.toArray(new Requirement[m_reqList.size()]);
     }
 
-    protected void addRequire(Requirement req)
+    public void addRequire(Requirement req)
     {
         m_reqList.add(req);
     }
@@ -142,7 +137,7 @@ public class ResourceImpl implements Resource
         return (Capability[]) m_capList.toArray(new Capability[m_capList.size()]);
     }
 
-    protected void addCapability(Capability cap)
+    public void addCapability(Capability cap)
     {
         m_capList.add(cap);
     }
@@ -157,7 +152,7 @@ public class ResourceImpl implements Resource
         return (String[]) catList.toArray(new String[catList.size()]);
     }
 
-    protected void addCategory(CategoryImpl cat)
+    public void addCategory(String category)
     {
         List catList = (List) m_map.get(CATEGORY);
         if (catList == null)
@@ -165,7 +160,7 @@ public class ResourceImpl implements Resource
             catList = new ArrayList();
             m_map.put(CATEGORY, catList);
         }
-        catList.add(cat.getId());
+        catList.add(category);
     }
 
     public boolean isLocal()
@@ -175,18 +170,18 @@ public class ResourceImpl implements Resource
 
     /**
      * Default setter method when setting parsed data from the XML file. 
-    **/
-    protected Object put(Object key, Object value)
+     **/
+    public Object put(Object key, Object value)
     {
         put(key.toString(), value.toString(), null);
         return null;
     }
 
-    protected void put(String key, String value, String type)
+    public void put(String key, String value, String type)
     {
         key = key.toLowerCase();
         m_hash = 0;
-        if ("uri".equals(type) || URI.equals(key))
+        if (Property.URI.equals(type) || URI.equals(key))
         {
             if (m_uris == null)
             {
@@ -194,17 +189,23 @@ public class ResourceImpl implements Resource
             }
             m_uris.put(key, value);
         }
-        else if ("version".equals(type) || VERSION.equals(key))
+        else if (Property.VERSION.equals(type) || VERSION.equals(key))
         {
-            m_map.put(key, Version.parseVersion(value));
+            m_map.put(key, VersionTable.getVersion(value));
         }
-        else if ("long".equals(type) || SIZE.equals(key))
+        else if (Property.LONG.equals(type) || SIZE.equals(key))
         {
-            m_map.put(key, Long.valueOf(value.toString()));
+            m_map.put(key, Long.valueOf(value));
         }
-        else if (CATEGORY.equals(key))
+        else if (Property.SET.equals(type) || CATEGORY.equals(key))
         {
-            m_map.put(key, Arrays.asList(value.toString().split(",")));
+            StringTokenizer st = new StringTokenizer(value, ",");
+            Set s = new HashSet();
+            while (st.hasMoreTokens())
+            {
+                s.add(st.nextToken().trim());
+            }
+            m_map.put(key, s);
         }
         else
         {

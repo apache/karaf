@@ -19,19 +19,25 @@
 package org.apache.felix.bundlerepository.impl;
 
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.DataModelHelper;
 import org.apache.felix.bundlerepository.Requirement;
+import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.utils.collections.MapToDictionary;
+import org.apache.felix.utils.log.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -40,10 +46,11 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 
 public class RepositoryAdminImpl implements RepositoryAdmin
 {
-    static BundleContext m_context = null;
+    private final BundleContext m_context;
     private final Logger m_logger;
     private final SystemRepositoryImpl m_system;
     private final LocalRepositoryImpl m_local;
+    private final DataModelHelper m_helper = new DataModelHelperImpl();
     private Map m_repoMap = new HashMap();
     private boolean m_initialized = false;
 
@@ -61,12 +68,17 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         m_local = new LocalRepositoryImpl(context, logger);
     }
 
-    public org.apache.felix.bundlerepository.Repository getLocalRepository()
+    public DataModelHelper getHelper()
+    {
+        return m_helper;
+    }
+
+    public Repository getLocalRepository()
     {
         return m_local;
     }
 
-    public org.apache.felix.bundlerepository.Repository getSystemRepository()
+    public Repository getSystemRepository()
     {
         return m_system;
     }
@@ -86,16 +98,46 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         return addRepository(url, Integer.MAX_VALUE);
     }
 
-    public synchronized RepositoryImpl addRepository(URL url, int hopCount) throws Exception
+    public synchronized RepositoryImpl addRepository(final URL url, int hopCount) throws Exception
     {
         initialize();
 
         // If the repository URL is a duplicate, then we will just
         // replace the existing repository object with a new one,
         // which is effectively the same as refreshing the repository.
-        RepositoryImpl repo = new RepositoryImpl(this, url, hopCount, m_logger);
-        m_repoMap.put(url.toExternalForm(), repo);
-        return repo;
+        try
+        {
+            RepositoryImpl repository = (RepositoryImpl) AccessController.doPrivileged(new PrivilegedExceptionAction()
+            {
+                public Object run() throws Exception
+                {
+                    return m_helper.repository(url);
+                }
+            });
+            m_repoMap.put(url.toExternalForm(), repository);
+
+            // resolve referrals
+            hopCount--;
+            if (hopCount > 0 && repository.getReferrals() != null)
+            {
+                for (int i = 0; i < repository.getReferrals().length; i++)
+                {
+                    Referral referral = repository.getReferrals()[i];
+
+                    URL referralUrl = new URL(url, referral.getUrl());
+                    hopCount = (referral.getDepth() > hopCount) ? hopCount : referral.getDepth();
+
+                    addRepository(referralUrl, hopCount);
+                }
+            }
+
+            return repository;
+        }
+        catch (PrivilegedActionException ex)
+        {
+            throw (Exception) ex.getCause();
+        }
+
     }
 
     public synchronized boolean removeRepository(String uri)
@@ -138,7 +180,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     {
         initialize();
 
-        Filter filter = filterExpr != null ? filter(filterExpr) : null;
+        Filter filter = filterExpr != null ? m_helper.filter(filterExpr) : null;
         Resource[] resources;
         MapToDictionary dict = new MapToDictionary(null);
         Repository[] repos = listRepositories();
@@ -208,44 +250,6 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         return resources;
     }
 
-    public Requirement requirement(String name, String filter) throws InvalidSyntaxException
-    {
-        RequirementImpl req = new RequirementImpl();
-        req.setName(name);
-        if (filter != null)
-        {
-            req.setFilter(filter);
-        }
-        return req;
-    }
-
-    public Filter filter(String filter) throws InvalidSyntaxException
-    {
-        return FilterImpl.newInstance(filter);
-    }
-
-    public Repository repository(URL url) throws Exception
-    {
-        return new RepositoryImpl(null, url, 0, m_logger);
-    }
-
-    public Repository repository(Resource[] resources) 
-    {
-        return new RepositoryImpl(resources);
-    }
-
-    public Capability capability(String name, Map properties)
-    {
-        CapabilityImpl cap = new CapabilityImpl();
-        cap.setName(name);
-        for (Iterator it = properties.entrySet().iterator(); it.hasNext();)
-        {
-            Map.Entry e = (Map.Entry) it.next();
-            cap.addP((String) e.getKey(), e.getValue());
-        }
-        return cap;
-    }
-
     private void initialize()
     {
         if (m_initialized)
@@ -280,4 +284,5 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         }
 
     }
+
 }

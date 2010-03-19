@@ -23,6 +23,8 @@ import java.util.Hashtable;
 
 import junit.framework.TestCase;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.utils.filter.FilterImpl;
+import org.apache.felix.utils.log.Logger;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -55,6 +57,7 @@ public class RepositoryAdminTest extends TestCase
         BundleContext bundleContext = (BundleContext) EasyMock.createMock(BundleContext.class);
         Bundle systemBundle = (Bundle) EasyMock.createMock(Bundle.class);
 
+        Activator.setContext(bundleContext);
         EasyMock.expect(bundleContext.getProperty((String) EasyMock.anyObject())).andReturn(null).anyTimes();
         EasyMock.expect(bundleContext.getBundle(0)).andReturn(systemBundle);
         EasyMock.expect(systemBundle.getHeaders()).andReturn(new Hashtable());
