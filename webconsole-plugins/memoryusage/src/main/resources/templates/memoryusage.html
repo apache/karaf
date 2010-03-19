@@ -63,17 +63,60 @@ function renderOverall(/* Object */ overall) {
     }
 }
 
+function renderPools(/* Object[] */ pools) {
+    var tbody = $("#pools > tbody").empty();
+    for ( var idx = 0; idx < pools.length; idx++ ) {
+        var pool = pools[idx];
+        var trElement = tr( null, null, [
+            td( null, null, [ text( pool.name ) ] ),
+            td( null, null, [ text( pool.score ) ] ),
+            td( null, null, [ text( pool.used ) ] ),
+            td( null, null, [ text( pool.committed ) ] ),
+            td( null, null, [ text( pool.max ) ] ),
+            td( null, null, [ text( pool.init ) ] ),
+            td( null, null, [ text( pool.type ) ] ),
+        ]);
+
+        // append to body (unless last row append to tfoot)        
+        if (idx < pools.length - 1) {
+            tbody.append(trElement);
+        } else {
+            $("#pools > tfoot").empty().append(trElement);
+        }   
+    }
+}
+
 var __files__ = ${__files__};
 var __status__ = ${__status__};
 var __overall__ = ${__overall__};
+var __pools__ = ${__pools__};
 
 $(document).ready(function() {
 
     $(".statline").html("${dump.statline}".msgFormat(__status__[0].toLocaleString(), __status__[1].toLocaleString()));
 
-    renderData(__files__);
     renderOverall(__overall__);
-    
+    renderPools(__pools__);
+    renderData(__files__);
+
+    // check for cookie
+    var cv = $.cookies.get("webconsole.memusage");
+    var lo = (cv ? cv.split(",") : [1,0]);
+    var poolsTable = $("#pools").tablesorter({
+        headers: {
+            1: { sorter:"digit" },
+            2: { sorter:"digit" },
+            3: { sorter:"digit" },
+            4: { sorter:"digit" },
+            5: { sorter:"digit" },
+        },
+        // textExtraction:mixedLinksExtraction,
+        sortList: cv ? [lo] : false
+    }).bind("sortEnd", function() {
+        poolsTable.eq(0).attr("config");
+        $.cookies.set("webconsole.memusage", poolsTable.sortList.toString());
+    });
+        
     $("#dumpButton")
         .click(function() {
             $.post(window.location.pathname,
@@ -95,8 +138,6 @@ $(document).ready(function() {
                 }
             );
         });
-
-    
 });
 
 
@@ -114,7 +155,7 @@ $(document).ready(function() {
 </div>
 
 
-<table id="overview" class="tablesorter nicetable noauto">
+<table id="overview" class="nicetable">
     <thead>
         <tr>
             <th colspan="2">${dump.overview}</th>
@@ -136,13 +177,35 @@ $(document).ready(function() {
 
 <p>&nbsp;</p>
 
-<table id="plugin_table" class="tablesorter nicetable noauto">
+<table id="pools" class="tablesorter nicetable noauto">
     <thead>
         <tr>
-            <th class="col_Name">${dump.name}</th>
-            <th class="col_Date">${dump.date}</th>
-            <th class="col_Size">${dump.size}</th>
-            <th class="col_Size">${dump.action}</th>
+            <th class="col_pool_name">${dump.pools.name}</th>
+            <th class="col_pool_score">${dump.pools.score}</th>
+            <th class="col_pool_used">${dump.pools.used}</th>
+            <th class="col_pool_committed">${dump.pools.committed}</th>
+            <th class="col_pool_max">${dump.pools.max}</th>
+            <th class="col_pool_init">${dump.pools.init}</th>
+            <th class="col_pool_type">${dump.pools.type}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="7">&nbsp;</td></tr>
+    </tbody>
+    <tfoot class="ui-widget-header">
+        <tr><td colspan="4">&nbsp;</td></tr>
+    </tfoot>
+</table>
+
+<p>&nbsp;</p>
+
+<table id="plugin_table" class="nicetable">
+    <thead>
+        <tr>
+            <th>${dump.name}</th>
+            <th>${dump.date}</th>
+            <th>${dump.size}</th>
+            <th>${dump.action}</th>
         </tr>
     </thead>
     <tbody>

@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.NoSuchElementException;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -39,10 +40,15 @@ import org.apache.felix.webconsole.AttachmentProvider;
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.WebConsoleUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class MemoryUsagePanel extends AbstractWebConsolePlugin implements ConfigurationPrinter, AttachmentProvider
 {
+
+    /** default log */
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final MemoryUsageSupport support;
 
@@ -62,7 +68,7 @@ public class MemoryUsagePanel extends AbstractWebConsolePlugin implements Config
     @Override
     public String getTitle()
     {
-        return "Heap Dumps";
+        return "%dump.title";
     }
 
     @SuppressWarnings("unchecked")
@@ -114,6 +120,7 @@ public class MemoryUsagePanel extends AbstractWebConsolePlugin implements Config
         resolver.put("__status__", statusBuf.toString());
         resolver.put("__threshold__", String.valueOf(support.getThreshold()));
         resolver.put("__overall__", jph.getString());
+        resolver.put("__pools__", support.getMemoryPoolsJson());
 
         String template = readTemplateFile("/templates/memoryusage.html");
         pw.println(template);
@@ -183,15 +190,17 @@ public class MemoryUsagePanel extends AbstractWebConsolePlugin implements Config
             String command = req.getParameter("command");
             if ("dump".equals(command))
             {
+                resp.setContentType("text/plain; charset=UTF-8");
                 try
                 {
                     File file = support.dumpHeap(null, false);
-                    resp.setContentType("text/plain; charset=UTF-8");
                     resp.getWriter().print("Dumped heap to " + file.getName());
                 }
-                catch (Exception e)
+                catch (NoSuchElementException e)
                 {
-                    // TODO: handle
+                    resp.getWriter().print(
+                        "Failed dumping the heap, JVM does not provide known mechanism to create a Heap Dump");
+                    log.error("Heap Dump creation failed: JVM has no known Heap Dump API");
                 }
             }
             else if ("gc".equals(command))

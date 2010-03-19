@@ -23,9 +23,14 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryNotificationInfo;
 import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServer;
@@ -43,6 +48,8 @@ final class MemoryUsageSupport implements NotificationListener
 
     // This is the name of the HotSpot Diagnostic MBean
     private static final String HOTSPOT_BEAN_NAME = "com.sun.management:type=HotSpotDiagnostic";
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final File dumpLocation;
 
@@ -163,6 +170,86 @@ final class MemoryUsageSupport implements NotificationListener
         }
     }
 
+    final String getMemoryPoolsJson()
+    {
+        final StringBuilder buf = new StringBuilder();
+        buf.append("[");
+
+        long usedTotal = 0;
+        long initTotal = 0;
+        long committedTotal = 0;
+        long maxTotal = 0;
+
+        final List<MemoryPoolMXBean> pools = getMemoryPools();
+        for (MemoryPoolMXBean pool : pools)
+        {
+            buf.append("{");
+
+            buf.append("'name':'").append(pool.getName()).append('\'');
+            buf.append(",'type':'").append(pool.getType()).append('\'');
+
+            MemoryUsage usage = pool.getUsage();
+            usedTotal += doNumber(buf, "used", usage.getUsed());
+            initTotal += doNumber(buf, "init", usage.getInit());
+            committedTotal += doNumber(buf, "committed", usage.getCommitted());
+            maxTotal += doNumber(buf, "max", usage.getMax());
+
+            final long score = 100L * usage.getUsed() / usage.getMax();
+            buf.append(",'score':'").append(score).append("%'");
+
+            buf.append("},");
+        }
+
+        // totalisation
+        buf.append("{");
+        buf.append("'name':'Total','type':'TOTAL'");
+        doNumber(buf, "used", usedTotal);
+        doNumber(buf, "init", initTotal);
+        doNumber(buf, "committed", committedTotal);
+        doNumber(buf, "max", maxTotal);
+
+        final long score = 100L * usedTotal / maxTotal;
+        buf.append(",'score':'").append(score).append("%'");
+
+        buf.append("}");
+
+        buf.append("]");
+        return buf.toString();
+    }
+
+    private long doNumber(final StringBuilder buf, final String title, final long value)
+    {
+
+        final BigDecimal KB = new BigDecimal(1000L);
+        final BigDecimal MB = new BigDecimal(1000L * 1000);
+        final BigDecimal GB = new BigDecimal(1000L * 1000 * 1000);
+
+        BigDecimal bd = new BigDecimal(value);
+        final String suffix;
+        if (bd.compareTo(GB) > 0)
+        {
+            bd = bd.divide(GB);
+            suffix = "GB";
+        }
+        else if (bd.compareTo(MB) > 0)
+        {
+            bd = bd.divide(MB);
+            suffix = "MB";
+        }
+        else if (bd.compareTo(KB) > 0)
+        {
+            bd = bd.divide(KB);
+            suffix = "kB";
+        }
+        else
+        {
+            suffix = "B";
+        }
+        bd = bd.setScale(2, RoundingMode.UP);
+        buf.append(",'").append(title).append("':'").append(bd).append(suffix).append('\'');
+        return value;
+    }
+
     final void listDumpFiles(final PrintHelper pw)
     {
         pw.title(dumpLocation.getAbsolutePath(), 1);
@@ -230,34 +317,22 @@ final class MemoryUsageSupport implements NotificationListener
      *
      * @param live <code>true</code> if only live objects are to be returned
      * @return
-     * @see http://blogs.sun.com/sundararajan/entry/
-     *      programmatically_dumping_heap_from_java
+     * @throws NoSuchElementException If no provided mechanism is successfully used to create a heap dump
      */
-    final File dumpHeap(String name, final boolean live) throws Exception
+    final File dumpHeap(String name, final boolean live)
     {
-        try
+        File dump = dumpSunMBean(name, live);
+        if (dump == null)
         {
-            if (name == null)
-            {
-                name = "heap." + System.currentTimeMillis() + ".bin";
-            }
-            dumpLocation.mkdirs();
-            File tmpFile = new File(dumpLocation, name);
-            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-            server.invoke(new ObjectName(HOTSPOT_BEAN_NAME), "dumpHeap", new Object[]
-                { tmpFile.getAbsolutePath(), live }, new String[]
-                { String.class.getName(), boolean.class.getName() });
-            return tmpFile;
-            // } catch (JMException je) {
-            // } catch (IOException ioe) {
-        }
-        finally
-        {
-
+            dump = dumpIbmDump(name);
         }
 
-        // failure
-        // return null;
+        if (dump == null)
+        {
+            throw new NoSuchElementException();
+        }
+
+        return dump;
     }
 
     final MemoryMXBean getMemory()
@@ -272,18 +347,18 @@ final class MemoryUsageSupport implements NotificationListener
 
     public void handleNotification(Notification notification, Object handback)
     {
-        Logger log = LoggerFactory.getLogger(getClass());
         String notifType = notification.getType();
         if (notifType.equals(MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED))
         {
+            log.warn("Received Memory Threshold Exceed Notification, dumping Heap");
             try
             {
                 File file = dumpHeap(null, true);
                 log.warn("Heap dumped to " + file);
             }
-            catch (Exception e)
+            catch (NoSuchElementException e)
             {
-                log.error("Failed dumping heap", e);
+                log.error("Failed dumping the heap, JVM does not provide known mechanism to create a Heap Dump");
             }
         }
     }
@@ -295,5 +370,96 @@ final class MemoryUsageSupport implements NotificationListener
         void val(final String value);
 
         void keyVal(final String key, final Object value);
+    }
+
+    //---------- Various System Specific Heap Dump mechanisms
+
+    /**
+     * @see http://blogs.sun.com/sundararajan/entry/programmatically_dumping_heap_from_java
+     */
+    private File dumpSunMBean(String name, boolean live)
+    {
+        if (name == null)
+        {
+            name = "heap." + System.currentTimeMillis() + ".hprof";
+        }
+
+        dumpLocation.mkdirs();
+        File tmpFile = new File(dumpLocation, name);
+        MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
+        try
+        {
+            server.invoke(new ObjectName(HOTSPOT_BEAN_NAME), "dumpHeap", new Object[]
+                { tmpFile.getAbsolutePath(), live }, new String[]
+                { String.class.getName(), boolean.class.getName() });
+
+            log.debug("dumpSunMBean: Dumped Heap to {} using Sun HotSpot MBean", tmpFile);
+            return tmpFile;
+        }
+        catch (Throwable t)
+        {
+            log.debug("dumpSunMBean: Dump by Sun HotSpot MBean not working", t);
+            tmpFile.delete();
+        }
+
+        return null;
+    }
+
+    /**
+     * @param name
+     * @return
+     * @see http://publib.boulder.ibm.com/infocenter/javasdk/v5r0/index.jsp?topic=/com.ibm.java.doc.diagnostics.50/diag/tools/heapdump_enable.html
+     */
+    private File dumpIbmDump(String name)
+    {
+        try
+        {
+            // to try to indicate which file will contain the heap dump
+            long minFileTime = System.currentTimeMillis();
+
+            // call the com.ibm.jvm.Dump.HeapDump() method
+            Class<?> c = ClassLoader.getSystemClassLoader().loadClass("com.ibm.jvm.Dump");
+            Method m = c.getDeclaredMethod("HeapDump", (Class<?>[]) null);
+            m.invoke(null, (Object[]) null);
+
+            // find the file in the current working directory
+            File dir = new File("").getAbsoluteFile();
+            File[] files = dir.listFiles();
+            if (files != null)
+            {
+                for (File file : files)
+                {
+                    if (file.isFile() && file.lastModified() > minFileTime)
+                    {
+                        if (name == null)
+                        {
+                            name = file.getName();
+                        }
+                        File target = new File(dumpLocation, name);
+                        file.renameTo(target);
+
+                        log.debug("dumpSunMBean: Dumped Heap to {} using IBM Dump.HeapDump()", target);
+                        return target;
+                    }
+                }
+
+                log.debug("dumpIbmDump: None of {} files '{}' is younger than {}", new Object[]
+                    { files.length, dir, minFileTime });
+            }
+            else
+            {
+                log.debug("dumpIbmDump: Hmm '{}' does not seem to be a directory; isdir={} ??", dir, dir.isDirectory());
+            }
+
+            log.warn("dumpIbmDump: Heap Dump has been created but cannot be located");
+            return dumpLocation;
+        }
+        catch (Throwable t)
+        {
+            log.debug("dumpIbmDump: Dump by IBM Dump class not working", t);
+        }
+
+        return null;
     }
 }

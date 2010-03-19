@@ -20,6 +20,7 @@ package org.apache.felix.webconsole.plugins.memoryusage.internal;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import org.apache.felix.shell.Command;
@@ -189,10 +190,9 @@ public class MemoryUsageCommand implements Command
             File dumpFile = support.dumpHeap(dumpTarget, !all);
             out.println("Heap dumped to " + dumpFile + " (" + dumpFile.length() + " bytes)");
         }
-        catch (Exception e)
+        catch (NoSuchElementException e)
         {
-            err.println("Problem dumping heap");
-            e.printStackTrace(err);
+            err.println("Failed dumping the heap, JVM does not provide known mechanism to create a Heap Dump");
         }
     }
 
