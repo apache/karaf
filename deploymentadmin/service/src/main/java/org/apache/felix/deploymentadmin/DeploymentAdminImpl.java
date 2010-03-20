@@ -314,7 +314,7 @@ public class DeploymentAdminImpl implements DeploymentAdmin {
     private void sendCompleteEvent(String name, boolean success) {
         Dictionary props = new Hashtable();
         props.put(Constants.EVENTPROPERTY_DEPLOYMENTPACKAGE_NAME, name);
-        props.put(Constants.EVENTPROPERTY_SUCCESSFUL, Boolean.valueOf(success));
+        props.put(Constants.EVENTPROPERTY_SUCCESSFUL, new Boolean(success));
         Event completeEvent = new Event(Constants.EVENTTOPIC_COMPLETE, props);
         m_eventAdmin.postEvent(completeEvent);
     }

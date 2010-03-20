@@ -50,7 +50,8 @@ public class PersistencyManager {
 			return;
 		}
 		File targetDir = m_root;
-		name = name.replaceAll("/", File.separator);
+		name = name.replace('/', File.separatorChar);
+		
 		if (name.startsWith(File.separator)) {
 			name = name.substring(1);
 		}
@@ -103,7 +104,7 @@ public class PersistencyManager {
 	 * @throws IOException If the resource could not be properly read.
 	 */
 	public List load(String name) throws IOException {
-		name = name.replaceAll("/", File.separator);
+		name = name.replace('/', File.separatorChar);
 		List resources = new ArrayList();
 		File resourcesFile = new File(m_root, name);
 		if (resourcesFile.exists()) {
@@ -111,15 +112,19 @@ public class PersistencyManager {
 			try {
 				in = new ObjectInputStream(new FileInputStream(resourcesFile));
 				resources = (List) in.readObject();
-			} catch (FileNotFoundException fnfe) {
+			} 
+			catch (FileNotFoundException fnfe) {
 				throw new IOException("Resource does not exist: " + name);
-			} catch (ClassNotFoundException cnfe) {
+			} 
+			catch (ClassNotFoundException cnfe) {
 				throw new IOException("Unable to recreate persisted object from file: " + name);
-			} finally {
+			} 
+			finally {
 				if (in != null) {
 					try {
 						in.close();
-					} catch (Exception e) {
+					} 
+					catch (Exception e) {
 						// not much we can do
 					}
 				}
