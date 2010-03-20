@@ -33,7 +33,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param serviceName the name of the service
      * @return this service dependency
      */
-    ServiceDependency setService(Class serviceName);
+	public ServiceDependency setService(Class serviceName);
     
     /**
      * Sets the name of the service that should be tracked. You can either specify
@@ -46,7 +46,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param serviceFilter the filter condition
      * @return this service dependency
      */
-    ServiceDependency setService(Class serviceName, String serviceFilter);
+	public ServiceDependency setService(Class serviceName, String serviceFilter);
     
     /**
      * Sets the filter for the services that should be tracked. Any service object
@@ -56,7 +56,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param serviceFilter the filter condition
      * @return this service dependency
      */
-    ServiceDependency setService(String serviceFilter);
+	public ServiceDependency setService(String serviceFilter);
 
     /**
      * Sets the name of the service that should be tracked. You can either specify
@@ -68,7 +68,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param serviceReference the service reference to track
      * @return this service dependency
      */
-    ServiceDependency setService(Class serviceName, ServiceReference serviceReference);
+	public ServiceDependency setService(Class serviceName, ServiceReference serviceReference);
     
     /**
      * Sets the default implementation for this service dependency. You can use this to supply
@@ -80,7 +80,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      *     instantiate this implementation
      * @return this service dependency
      */
-    ServiceDependency setDefaultImplementation(Object implementation);
+	public ServiceDependency setDefaultImplementation(Object implementation);
 
     /**
      * Sets the required flag which determines if this service is required or not.
@@ -88,7 +88,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param required the required flag
      * @return this service dependency
      */
-    ServiceDependency setRequired(boolean required);
+	public ServiceDependency setRequired(boolean required);
     
     /**
      * Sets auto configuration for this service. Auto configuration allows the
@@ -98,7 +98,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param autoConfig the value of auto config
      * @return this service dependency
      */
-    ServiceDependency setAutoConfig(boolean autoConfig);
+	public ServiceDependency setAutoConfig(boolean autoConfig);
     
     /**
      * Sets auto configuration for this service. Auto configuration allows the
@@ -108,7 +108,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param instanceName the name of attribute to auto config
      * @return this service dependency
      */
-    ServiceDependency setAutoConfig(String instanceName);
+	public ServiceDependency setAutoConfig(String instanceName);
     
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
@@ -120,7 +120,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param removed the method to call when a service was removed
      * @return this service dependency
      */
-    ServiceDependency setCallbacks(String added, String removed);
+	public ServiceDependency setCallbacks(String added, String removed);
     
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
@@ -133,7 +133,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param removed the method to call when a service was removed
      * @return this service dependency
      */
-    ServiceDependency setCallbacks(String added, String changed, String removed);
+	public ServiceDependency setCallbacks(String added, String changed, String removed);
 
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
@@ -146,7 +146,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param removed the method to call when a service was removed
      * @return this service dependency
      */
-    ServiceDependency setCallbacks(Object instance, String added, String removed);
+	public ServiceDependency setCallbacks(Object instance, String added, String removed);
     
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
@@ -160,7 +160,7 @@ public interface ServiceDependency extends Dependency, ServiceComponentDependenc
      * @param removed the method to call when a service was removed
      * @return this service dependency
      */
-    ServiceDependency setCallbacks(Object instance, String added, String changed, String removed);
+	public ServiceDependency setCallbacks(Object instance, String added, String changed, String removed);
     
     public ServiceDependency setInstanceBound(boolean isInstanceBound);
 }

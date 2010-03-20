@@ -32,7 +32,7 @@ public interface ResourceDependency extends Dependency, ResourceHandler {
      * @param removed the method to call when a service was removed
      * @return this service dependency
      */
-     ResourceDependency setCallbacks(String added, String removed) ;
+	public ResourceDependency setCallbacks(String added, String removed) ;
 
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
@@ -45,7 +45,7 @@ public interface ResourceDependency extends Dependency, ResourceHandler {
      * @param removed the method to call when a service was removed
      * @return this service dependency
      */
-     ResourceDependency setCallbacks(String added, String changed, String removed);
+     public ResourceDependency setCallbacks(String added, String changed, String removed);
 
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
@@ -58,7 +58,7 @@ public interface ResourceDependency extends Dependency, ResourceHandler {
      * @param removed the method to call when a service was removed
      * @return this service dependency
      */
-     ResourceDependency setCallbacks(Object instance, String added, String removed);
+     public ResourceDependency setCallbacks(Object instance, String added, String removed);
     
     /**
      * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
@@ -72,7 +72,7 @@ public interface ResourceDependency extends Dependency, ResourceHandler {
      * @param removed the method to call when a service was removed
      * @return this service dependency
      */
-     ResourceDependency setCallbacks(Object instance, String added, String changed, String removed);
+     public ResourceDependency setCallbacks(Object instance, String added, String changed, String removed);
         
     /**
      * Sets auto configuration for this service. Auto configuration allows the
@@ -82,7 +82,7 @@ public interface ResourceDependency extends Dependency, ResourceHandler {
      * @param autoConfig the value of auto config
      * @return this service dependency
      */
-     ResourceDependency setAutoConfig(boolean autoConfig);
+     public ResourceDependency setAutoConfig(boolean autoConfig);
     
     /**
      * Sets auto configuration for this service. Auto configuration allows the
@@ -92,13 +92,15 @@ public interface ResourceDependency extends Dependency, ResourceHandler {
      * @param instanceName the name of attribute to auto config
      * @return this service dependency
      */
-     ResourceDependency setAutoConfig(String instanceName);
+     public ResourceDependency setAutoConfig(String instanceName);
     
-     ResourceDependency setResource(Resource resource);
+     public ResourceDependency setResource(Resource resource);
 	
-     ResourceDependency setRequired(boolean required);
+     public ResourceDependency setRequired(boolean required);
 
-     ResourceDependency setFilter(String resourceFilter);
+     public ResourceDependency setFilter(String resourceFilter);
      
-     ResourceDependency setPropagate(boolean propagate);
+     public ResourceDependency setPropagate(boolean propagate);
+     
+     public ResourceDependency setInstanceBound(boolean isInstanceBound);
 }

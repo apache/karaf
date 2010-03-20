@@ -53,6 +53,7 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     private List m_resources = new ArrayList();
     private Resource m_resourceInstance;
     private boolean m_propagate;
+	private boolean m_isInstanceBound;
 	
     public ResourceDependencyImpl(BundleContext context, Logger logger) {
     	m_context = context;
@@ -69,7 +70,12 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
 	}
 	
 	public boolean isInstanceBound() {
-		return false; // TODO for now we are never bound to the service implementation instance
+		return m_isInstanceBound;
+	}
+	
+	public ResourceDependency setInstanceBound(boolean isInstanceBound) {
+		m_isInstanceBound = isInstanceBound;
+		return this;
 	}
 
 	public void start(DependencyService service) {
