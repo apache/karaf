@@ -362,6 +362,7 @@ public class ResolverImpl implements Resolver
         }
     }
 
+// TODO: FELIX3 - Modify to not be recursive.
     private static void populateCandidates(
         ResolverState state, Module module, String fwkExecEnvStr, Set fwkExecEnvSet,
         Map<Requirement, Set<Capability>> candidateMap, Map<Module, Object> resultCache)
@@ -383,9 +384,9 @@ public class ResolverImpl implements Resolver
         //   3. An array containing the cycle count, current map of candidates
         //      for already processed requirements, and a list of remaining
         //      requirements whose candidates still need to be calculated.
-        // For case 1, rethrow the exception. For case 3, simply return immediately.
+        // For case 1, rethrow the exception. For case 2, simply return immediately.
         // For case 3, this means we have a cycle so we should continue to populate
-        // the candidate where we left off and not record any results globally
+        // the candidates where we left off and not record any results globally
         // until we've popped completely out of the cycle.
 
         // Keeps track of the number of times we've reentered this method
@@ -416,10 +417,13 @@ public class ResolverImpl implements Resolver
         // This is case 3.
         else if (cacheValue != null)
         {
-            cycleCount = (Integer) ((Object[]) cacheValue)[0];
-            ((Object[]) cacheValue)[0] = new Integer(cycleCount.intValue() + 1);
-            cycleCount = (Integer) ((Object[]) cacheValue)[0];
+            // Increment and get the cycle count.
+            cycleCount = (Integer)
+                (((Object[]) cacheValue)[0]
+                    = new Integer(((Integer) ((Object[]) cacheValue)[0]).intValue() + 1));
+            // Get the already populated candidates.
             localCandidateMap = (Map) ((Object[]) cacheValue)[1];
+            // Get the remaining requirements.
             remainingReqs = (List) ((Object[]) cacheValue)[2];
         }
 
@@ -437,8 +441,8 @@ public class ResolverImpl implements Resolver
             // Record cycle count.
             cycleCount = new Integer(0);
 
-            // Store candidates in a local map first, just in case the module
-            // is not resolvable.
+            // Create a local map for populating candidates first, just in case
+            // the module is not resolvable.
             localCandidateMap = new HashMap();
 
             // Create a modifiable list of the module's requirements.
@@ -572,11 +576,12 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         }
     }
 
+// TODO: FELIX3 - Modify to not be recursive.
     private void findConsistentCandidates(
         Module module, List<Requirement> incomingReqs,
         Map<Requirement, Set<Capability>> candidateMap,
         Map<Module, Packages> modulePkgMap,
-        Map<Module, Object> cycleMap)
+        Map<Module, Object> resultCache)
     {
         if (m_isInvokeCount)
         {
@@ -586,9 +591,20 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             m_invokeCounts.put(methodName, count);
         }
 
+        // Determine if we've already checked candidate consistency for this
+        // module. The result cache will have one of two values:
+        //   1. Boolean.TRUE if candidate consistency has been checked.
+        //   2. An array containing the cycle count and a list of wires for an
+        //      already resolved (and consistent) module or a list of remaining
+        //      requirments whose candidates still need to be checked for an
+        //      unresolved module.
+        // For case 1, return immediately. For case 2, this means we are in a
+        // cycle so we should just continue checking consistency where we left
+        // off.
+
         Integer cycleCount = null;
 
-        Object o = cycleMap.get(module);
+        Object o = resultCache.get(module);
 
         if (o instanceof Boolean)
         {
@@ -605,14 +621,15 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             {
                 list = new ArrayList(module.getRequirements());
             }
-            cycleMap.put(module, o = new Object[] { cycleCount = new Integer(0), list });
+            resultCache.put(module, o = new Object[] { cycleCount = new Integer(0), list });
             calculateExportedPackages(module, incomingReqs, modulePkgMap);
         }
         else
         {
-            cycleCount = (Integer) ((Object[]) o)[0];
-            ((Object[]) o)[0] = new Integer(cycleCount.intValue() + 1);
-            cycleCount = (Integer) ((Object[]) o)[0];
+            // Increment and get the cycle count.
+            cycleCount = (Integer)
+                (((Object[]) o)[0]
+                    = new Integer(((Integer) ((Object[]) o)[0]).intValue() + 1));
         }
 
 //System.out.println("+++ RESOLVING " + module);
@@ -631,7 +648,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     incomingReqs,
                     candidateMap,
                     modulePkgMap,
-                    cycleMap);
+                    resultCache);
 
                 // If we are here, the candidate was consistent. Try to
                 // merge the candidate into the target module's packages.
@@ -674,7 +691,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                             outgoingReqs,
                             candidateMap,
                             modulePkgMap,
-                            cycleMap);
+                            resultCache);
 
                         // If we are here, the candidate was consistent. Try to
                         // merge the candidate into the target module's packages.
@@ -718,7 +735,7 @@ ex.printStackTrace();
         else if (cycleCount.intValue() == 0)
         {
             // Record that the module was successfully populated.
-            cycleMap.put(module, Boolean.TRUE);
+            resultCache.put(module, Boolean.TRUE);
         }
     }
 
