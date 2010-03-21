@@ -1309,9 +1309,23 @@ ex.printStackTrace();
             }
             cycleMap.add(cap);
 
-            Packages pkgs = modulePkgMap.get(cap.getModule());
-            sources.add(cap);
+            // Get the package name associated with the capability.
             String pkgName = cap.getAttribute(Capability.PACKAGE_ATTR).getValue().toString();
+
+            // Since a module can export the same package more than once, get
+            // all package capabilities for the specified package name.
+            List<Capability> caps = cap.getModule().getCapabilities();
+            for (int capIdx = 0; capIdx < caps.size(); capIdx++)
+            {
+                if (caps.get(capIdx).getNamespace().equals(Capability.PACKAGE_NAMESPACE)
+                    && caps.get(capIdx).getAttribute(Capability.PACKAGE_ATTR).getValue().equals(pkgName))
+                {
+                    sources.add(caps.get(capIdx));
+                }
+            }
+
+            // Then get any addition sources for the package from required bundles.
+            Packages pkgs = modulePkgMap.get(cap.getModule());
             List<Blame> required = pkgs.m_requiredPkgs.get(pkgName);
             if (required != null)
             {
