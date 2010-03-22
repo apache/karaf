@@ -64,9 +64,8 @@
 }
 
 /* CENTRAL CONTENT AREA STYLING */
-#content {
-	font-size: 8pt;
-}
+#content, .ui-widget, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button { font-size: 8pt }
+
 
 /* used in some plugins - showing ID (long) element in tables */
 .col_Id {
