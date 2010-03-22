@@ -95,6 +95,7 @@ function addDevice(device) {
 
 	var node = treeNode(udn, name, icon, 'lightbulb').click(function() {
 		renderDevice(device);
+		return false;
 	});
 
 	var ul, hasChildren;
@@ -113,7 +114,7 @@ function addDevice(device) {
 	ul = $(createElement('ul'));
 	for(var i in device.children) {
 		hasChildren = true;
-		addDevice(device.children[i]);
+		ul.append( addDevice(device.children[i]) );
 	}
 	if (hasChildren) node.append(ul);
 
