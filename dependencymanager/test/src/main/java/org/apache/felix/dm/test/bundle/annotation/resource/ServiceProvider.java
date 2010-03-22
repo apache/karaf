@@ -26,6 +26,9 @@ import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
+/**
+ * Our ServiceInterface provider, which service is activated by a ResourceAdapter.
+ */
 @ResourceAdapterService(
     filter = "(&(path=/test)(name=test1.txt)(repository=TestRepository))", 
     properties = {@Property(name="foo", value="bar")},

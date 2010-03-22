@@ -18,6 +18,9 @@
 */
 package org.apache.felix.dm.test.bundle.annotation.resource;
 
+/**
+ * A Service provided the ServiceProvider, which is a ResourceAdapter.
+ */
 public interface ServiceInterface extends Runnable
 {
     

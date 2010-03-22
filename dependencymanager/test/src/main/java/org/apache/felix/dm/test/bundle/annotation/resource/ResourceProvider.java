@@ -34,8 +34,10 @@ import org.apache.felix.dm.resources.ResourceHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
+/**
+ * Provides some simple resources.
+ */
 @Service
 public class ResourceProvider
 {
@@ -63,10 +65,15 @@ public class ResourceProvider
                 };
             } };
 
+    /**
+     * Handles a new Resource consumer
+     * @param serviceProperties
+     * @param handler
+     */
     @ServiceDependency(removed = "remove", required=false)
-    public void add(ServiceReference ref, ResourceHandler handler)
+    public void add(Map serviceProperties, ResourceHandler handler)
     {
-        String filterString = (String) ref.getProperty("filter");
+        String filterString = (String) serviceProperties.get("filter");
         Filter filter;
         try
         {
@@ -90,7 +97,11 @@ public class ResourceProvider
         }
     }
 
-    public void remove(ServiceReference ref, ResourceHandler handler)
+    /**
+     * Remove a Resource consumer.
+     * @param handler
+     */
+    public void remove(ResourceHandler handler)
     {
         Filter filter;
         synchronized (m_handlers)
@@ -111,6 +122,10 @@ public class ResourceProvider
         }
     }
 
+    /**
+     * Our component is being destroyed: notify all our registered Resource consumers that we don't
+     * provide our Resources anymore.
+     */
     @Destroy
     public void destroy()
     {

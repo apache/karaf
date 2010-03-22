@@ -23,6 +23,10 @@ import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
+/**
+ * A Component with a dependency over the ServiceInterface, which is actually provided
+ * by a ResourceAdapter.
+ */
 @Service
 public class ServiceConsumer
 {

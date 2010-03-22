@@ -27,6 +27,9 @@ import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
+/**
+ * A Component which has a resource dependency.
+ */
 @Service
 public class ResourceConsumer
 {
