@@ -48,7 +48,7 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
     private static final String LABEL = "config";
     private static final String TITLE = "%configStatus.pluginTitle";
-    private static final String[] CSS_REFS = null;
+    private static final String[] CSS_REFS = { "/res/ui/configurationrender.css" };
 
     // use English as the locale for all non-display titles
     private static final Locale DEFAULT = Locale.ENGLISH;
@@ -87,6 +87,9 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.SimpleWebConsolePlugin#deactivate()
+     */
     public void deactivate()
     {
         // make sure the service tracker is closed and removed on deactivate
@@ -180,10 +183,10 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
 
         //ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
         PrintWriter pw = response.getWriter();
-
+        pw.println( "<script type='text/javascript' src='${appRoot}/res/ui/ui.tabs.paging.js'></script>" );
         pw.println( "<script type='text/javascript'>" );
         pw.println( "// <![CDATA[" );
-        pw.println("$(document).ready(function() {$('#tabs').tabs()} );");
+        pw.println( "$(document).ready(function() {$('#tabs').tabs().tabs('paging')} );" );
         pw.println( "// ]]>" );
         pw.println( "</script>" );
 

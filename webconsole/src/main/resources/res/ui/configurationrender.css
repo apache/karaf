@@ -15,77 +15,33 @@
  * limitations under the License.
  */
 
-/* tabbed view */
-
-#divcfgprttabs {
+.ui-tabs-paging-next { 
+	float: right !important;
 }
-
-.divcfgprttabshidden {
-    display: none;
+.ui-tabs-paging-prev,
+.ui-tabs-paging-next {
+	background: transparent !important;
+	border: 0 !important;
+	margin-bottom: 1px !important;
 }
-
-#divcfgprttabs ul { 
-    list-style: none;
+.ui-tabs-paging-prev a,
+.ui-tabs-paging-next a {
+	display: block;
+	position: relative;
+	top: 1px;
+	border: 0;
+	z-index: 2;
+	padding: 0;
+	text-decoration: none;
+	background: transparent !important;
+	cursor: pointer;
 }
-
-#divcfgprttabs ul li {
-    display: inline-block; 
-    background: #fff;
+.ui-tabs-paging-next a:hover,
+.ui-tabs-paging-next a:focus,
+.ui-tabs-paging-next a:active,
+.ui-tabs-paging-prev a:hover,
+.ui-tabs-paging-prev a:focus,
+.ui-tabs-paging-prev a:active {
+	background: transparent 
 }
-
-#divcfgprttabs ul li.tabactive {
-}
-
-#divcfgprttabs ul li a {
-    color: #6181A9;
-    background-color: white;
-    display: block;
-    float: left;
-    height: 100%;
-    line-height: 2;
-    padding: 0 10px 0 10px;
-    cursor: pointer;
-}
-
-#divcfgprttabs ul li a.tabactive {
-    background-color: #6181A9;
-    color: white;
-}
-
-#divcfgprttabs ul li a:hover {
-    color: white;
-    background-color: #6181A9;
-}
-
-.menu {
-    background: none;
-    margin-bottom: 0;
-    padding-left: 0;
-}
-.area {
-    background: #fff;
-    border: 1px solid #999;
-    padding: 1px;
-}
-
-/* Contents container of the tabs */
-.tabcont {
-    background: #fff;
-    border: 1px solid #999;
-    border-right: none;
-    padding: 1px;
-}
-
-/* The actual content of the tabs */
-.space {
-    padding: 10px;
-    
-    /* don't let this area make the display wider */
-    width: 100px;
-    overflow: visible;
-}
-
-.space div {
-    font-family: monospace;
-    white-space: pre;
-}
+.ui-tabs-paging-disabled { visibility: hidden }
