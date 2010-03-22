@@ -19,14 +19,14 @@
 package org.apache.felix.webconsole.internal.obr;
 
 
-import org.apache.felix.bundlerepository.Reason;
-import org.apache.felix.bundlerepository.Resolver;
-import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.service.log.LogService;
+import org.osgi.service.obr.Requirement;
+import org.osgi.service.obr.Resolver;
+import org.osgi.service.obr.Resource;
 
 
-public class DeployerThread extends Thread
+public class OsgiDeployer implements Runnable
 {
 
     private final Resolver obrResolver;
@@ -35,42 +35,35 @@ public class DeployerThread extends Thread
 
     private final boolean startBundles;
 
-    private final boolean optionalDependencies;
 
-
-    public DeployerThread( Resolver obrResolver, AbstractWebConsolePlugin logger, boolean startBundles,
-        boolean optionalDependencies )
+    static void deploy( Resolver obrResolver, AbstractWebConsolePlugin logger, boolean startBundles )
     {
-        this( obrResolver, logger, startBundles, optionalDependencies, "OBR Bundle Deployer" );
+        final OsgiDeployer d = new OsgiDeployer( obrResolver, logger, startBundles );
+        final Thread t = new Thread( d, "OBR Bundle Deployer (OSGi API)" );
+        t.start();
     }
 
 
-    public DeployerThread( Resolver obrResolver, AbstractWebConsolePlugin logger, boolean startBundles,
-        boolean optionalDependencies, String name )
+    public OsgiDeployer( Resolver obrResolver, AbstractWebConsolePlugin logger, boolean startBundles )
     {
-        super( name );
         this.obrResolver = obrResolver;
         this.logger = logger;
         this.startBundles = startBundles;
-        this.optionalDependencies = optionalDependencies;
     }
 
 
     public void run()
     {
-        int flags = 0;
-        flags += (startBundles ? Resolver.START : 0);
-        flags += (optionalDependencies ? 0 : Resolver.NO_OPTIONAL_RESOURCES);
         try
         {
-            if ( obrResolver.resolve( flags ) )
+            if ( obrResolver.resolve() )
             {
 
                 logResource( logger, "Installing Requested Resources", obrResolver.getAddedResources() );
                 logResource( logger, "Installing Required Resources", obrResolver.getRequiredResources() );
                 logResource( logger, "Installing Optional Resources", obrResolver.getOptionalResources() );
 
-                obrResolver.deploy( flags );
+                obrResolver.deploy( startBundles );
             }
             else
             {
@@ -99,17 +92,17 @@ public class DeployerThread extends Thread
     }
 
 
-    public static void logRequirements( AbstractWebConsolePlugin logger, String message, Reason[] reasons )
+    public static void logRequirements( AbstractWebConsolePlugin logger, String message, Requirement[] reasons )
     {
         logger.log( LogService.LOG_ERROR, message );
         for ( int i = 0; reasons != null && i < reasons.length; i++ )
         {
-            String moreInfo = reasons[i].getRequirement().getComment();
+            String moreInfo = reasons[i].getComment();
             if ( moreInfo == null )
             {
-                moreInfo = reasons[i].getRequirement().getFilter().toString();
+                moreInfo = reasons[i].getFilter().toString();
             }
-            logger.log( LogService.LOG_ERROR, "  " + i + ": " + reasons[i].getRequirement().getName() + " (" + moreInfo + ")" );
+            logger.log( LogService.LOG_ERROR, "  " + i + ": " + reasons[i].getName() + " (" + moreInfo + ")" );
         }
     }
 
