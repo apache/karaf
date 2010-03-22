@@ -44,10 +44,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.felix.bundlerepository.impl.R4Attribute;
-import org.apache.felix.bundlerepository.impl.R4Export;
-import org.apache.felix.bundlerepository.impl.R4Import;
-import org.apache.felix.bundlerepository.impl.R4Package;
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.DefaultVariableResolver;
@@ -545,7 +543,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         {
             bundles = allBundles;
         }
-        
+
         Util.sort( bundles, locale );
 
         final JSONWriter jw = new JSONWriter( pw );
@@ -754,7 +752,10 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             listImportExport( jw, bundle, pluginRoot );
         }
 
-        listServices( jw, bundle, servicesRoot );
+        if ( bundle.getState() != Bundle.UNINSTALLED )
+        {
+            listServices( jw, bundle, servicesRoot );
+        }
 
         listHeaders( jw, bundle );
 
@@ -764,8 +765,17 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
     private final Integer getStartLevel( Bundle bundle )
     {
-        StartLevel sl = getStartLevel();
-        return ( sl != null ) ? new Integer( sl.getBundleStartLevel( bundle ) ) : null;
+        if ( bundle.getState() != Bundle.UNINSTALLED )
+        {
+            StartLevel sl = getStartLevel();
+            if ( sl != null )
+            {
+                return new Integer( sl.getBundleStartLevel( bundle ) );
+            }
+        }
+
+        // bundle has been uninstalled or StartLevel service is not available
+        return null;
     }
 
 
@@ -895,13 +905,13 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         String target = ( String ) dict.get( Constants.EXPORT_PACKAGE );
         if ( target != null )
         {
-            R4Package[] pkgs = R4Package.parseImportOrExportHeader( target );
+            Clause[] pkgs = Parser.parseHeader( target );
             if ( pkgs != null && pkgs.length > 0 )
             {
                 // do alphabetical sort
                 Arrays.sort( pkgs, new Comparator()
                 {
-                    public int compare( R4Package p1, R4Package p2 )
+                    public int compare( Clause p1, Clause p2 )
                     {
                         return p1.getName().compareTo( p2.getName() );
                     }
@@ -909,15 +919,15 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
                     public int compare( Object o1, Object o2 )
                     {
-                        return compare( ( R4Package ) o1, ( R4Package ) o2 );
+                        return compare( ( Clause) o1, ( Clause ) o2 );
                     }
                 } );
 
                 JSONArray val = new JSONArray();
                 for ( int i = 0; i < pkgs.length; i++ )
                 {
-                    R4Export export = new R4Export( pkgs[i] );
-                    collectExport( val, export.getName(), export.getVersion() );
+                    Clause export = new Clause( pkgs[i].getName(), pkgs[i].getDirectives(), pkgs[i].getAttributes() );
+                    collectExport( val, export.getName(), export.getAttribute( Constants.VERSION_ATTRIBUTE ) );
                 }
                 WebConsoleUtil.keyVal( jw, "Exported Packages", val );
             }
@@ -930,14 +940,14 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         target = ( String ) dict.get( Constants.IMPORT_PACKAGE );
         if ( target != null )
         {
-            R4Package[] pkgs = R4Package.parseImportOrExportHeader( target );
+            Clause[] pkgs = Parser.parseHeader( target );
             if ( pkgs != null && pkgs.length > 0 )
             {
                 Map imports = new TreeMap();
                 for ( int i = 0; i < pkgs.length; i++ )
                 {
-                    R4Package pkg = pkgs[i];
-                    imports.put( pkg.getName(), new R4Import( pkg ) );
+                    Clause pkg = pkgs[i];
+                    imports.put( pkg.getName(), new Clause( pkg.getName(), pkg.getDirectives(), pkg.getAttributes() ) );
                 }
 
                 // collect import packages first
@@ -953,8 +963,8 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
                         {
                             final ExportedPackage ep = exports[i];
 
-                            R4Import imp = ( R4Import ) imports.get( ep.getName() );
-                            if ( imp != null && imp.isSatisfied( toR4Export( ep ) ) )
+                            Clause imp = ( Clause ) imports.get( ep.getName() );
+                            if ( imp != null && isSatisfied( imp, ep ) )
                             {
                                 candidates.put( ep.getName(), ep );
                             }
@@ -968,7 +978,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
                 {
                     for ( Iterator ii = imports.values().iterator(); ii.hasNext(); )
                     {
-                        R4Import r4Import = ( R4Import ) ii.next();
+                        Clause r4Import = ( Clause ) ii.next();
                         ExportedPackage ep = ( ExportedPackage ) candidates.get( r4Import.getName() );
 
                         // if there is no matching export, check whether this
@@ -982,7 +992,9 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
                             }
                         }
 
-                        collectImport( val, r4Import.getName(), r4Import.getVersion(), r4Import.isOptional(), ep, pluginRoot );
+                        collectImport( val, r4Import.getName(), r4Import.getAttribute( Constants.VERSION_ATTRIBUTE ),
+                            Constants.RESOLUTION_OPTIONAL.equals( r4Import
+                                .getDirective( Constants.RESOLUTION_DIRECTIVE ) ), ep, pluginRoot );
                     }
                 }
                 else
@@ -1139,6 +1151,12 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
     private void collectExport( JSONArray array, String name, Version version )
     {
+        collectExport( array, name, ( version == null ) ? null : version.toString() );
+    }
+
+
+    private void collectExport( JSONArray array, String name, String version )
+    {
         StringBuffer val = new StringBuffer();
         boolean bootDel = isBootDelegated( name );
         if ( bootDel )
@@ -1147,8 +1165,11 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         }
 
         val.append( name );
-        val.append( ",version=" );
-        val.append( version );
+
+        if ( version != null )
+        {
+            val.append( ",version=" ).append( version );
+        }
 
         if ( bootDel )
         {
@@ -1160,14 +1181,25 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
 
 
     private void collectImport( JSONArray array, String name, Version version, boolean optional,
-            ExportedPackage export, final String pluginRoot )
+        ExportedPackage export, final String pluginRoot )
+    {
+        collectImport( array, name, ( version == null ) ? null : version.toString(), optional, export, pluginRoot );
+    }
+
+
+    private void collectImport( JSONArray array, String name, String version, boolean optional, ExportedPackage export,
+        final String pluginRoot )
     {
         StringBuffer val = new StringBuffer();
         boolean bootDel = isBootDelegated( name );
 
         String marker = null;
         val.append( name );
-        val.append( ",version=" ).append( version );
+
+        if ( version != null )
+        {
+            val.append( ",version=" ).append( version );
+        }
 
         if ( export != null )
         {
@@ -1242,11 +1274,16 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     }
 
 
-    private R4Export toR4Export( ExportedPackage export )
+    private boolean isSatisfied( Clause imported, ExportedPackage exported )
     {
-        R4Attribute version = new R4Attribute( Constants.VERSION_ATTRIBUTE, export.getVersion().toString(), false );
-        return new R4Export( export.getName(), null, new R4Attribute[]
-            { version } );
+        if ( imported.getName().equals( exported.getName() ) )
+        {
+            Version required = Version.parseVersion( imported.getAttribute( Constants.VERSION_ATTRIBUTE ) );
+            return exported.getVersion().compareTo( required ) > 0;
+        }
+
+        // no this export does not satisfy the import
+        return false;
     }
 
 
