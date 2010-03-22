@@ -29,6 +29,7 @@ var factoryRow = false;
 
 // editor dialog
 var editor = false;
+var editorMessage = false;
 
 function configure(pid, create) {
 	var uri = pluginRoot + '/' + pid;
@@ -116,6 +117,9 @@ function displayConfigForm(obj) {
     }
 
     printConfigurationInfo(parent, obj);
+	if ( obj.service_location && obj.bundle_location && obj.service_location != obj.bundle_location) {
+		editorMessage.removeClass('ui-helper-hidden').text(i18n.err_bind.msgFormat(obj.pid, obj.bundle_location, obj.service_location));
+	} else editorMessage.addClass('ui-helper-hidden');
 	initStaticWidgets(editor.attr('__pid', obj.pid).dialog('option', 'title', obj.title).dialog('open'));
 }
 
@@ -521,6 +525,7 @@ $(document).ready(function() {
 		closeText: i18n.abort,
 		buttons  : _buttons
 	});
+	editorMessage = editor.find('p');
 
 	// display the configuration data
 	$(".statline").html(configData.status ? i18n.stat_ok : i18n.stat_missing);

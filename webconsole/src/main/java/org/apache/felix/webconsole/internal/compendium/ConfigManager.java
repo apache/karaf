@@ -790,6 +790,28 @@ public class ConfigManager extends ConfigManagerBase
         }
         json.key( "bundleLocation" );
         json.value( location );
+        // raw bundle location and service locations
+        final String pid = config.getPid();
+        String serviceLocation = "";
+        try
+        {
+            final ServiceReference[] refs = getBundleContext().getServiceReferences(
+                null,
+                "(&(" + Constants.OBJECTCLASS + '=' + ManagedService.class.getName()
+                    + ")(" + Constants.SERVICE_PID + '=' + pid + "))");
+            if ( refs != null && refs.length > 0 )
+            {
+                serviceLocation = refs[0].getBundle().getLocation();
+            }
+        }
+        catch (Throwable t)
+        {
+            log( "Error getting service associated with configuration " + pid, t );
+        }
+        json.key( "bundle_location" );
+        json.value ( config.getBundleLocation() );
+        json.key( "service_location" );
+        json.value ( serviceLocation );
     }
 
 

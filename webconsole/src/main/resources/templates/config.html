@@ -23,7 +23,8 @@ var i18n = { // i18n
 	del_ask      : '${config.del.ask}', // "Are you sure to delete this configuration ?";
 	del_config   : '${config.del.config}', // "Configuration: ";
 	del_bundle   : '${config.del.bundle}', // "Bundle: ";
-	unbind_ask   : '${config.unbind.ask}' // "Are you sure to unbind this configuration ?"
+	unbind_ask   : '${config.unbind.ask}', // "Are you sure to unbind this configuration ?"
+	err_bind     : '${config.bind.error}' // Error: the PID'{0}' is bound to '{1}' but the actual managed service is registered from '{2}' bundle
 }
 // ]]>
 </script>
@@ -72,6 +73,7 @@ var i18n = { // i18n
 
 <!-- placeholder for property editor -->
 <div id="editor" class="ui-helper-hidden">
+	<p class="ui-state-error ui-helper-hidden">&nbsp;</p>
 	<table id="editorTable" class="nicetable">
 		<tr><td>&nbsp;</td></tr>
 	</table>
