@@ -350,6 +350,12 @@ public final class WebConsoleUtil
      */
     public static String urlDecode( final String value )
     {
+        // shortcut for empty or missing values
+        if ( value == null || value.length() == 0 )
+        {
+            return null;
+        }
+
         try
         {
             return URLDecoder.decode( value, "UTF-8" );
