@@ -31,9 +31,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -74,18 +72,9 @@ public class DataModelHelperImpl implements DataModelHelper
         return req;
     }
 
-    public Filter filter(String filter)
+    public Filter filter(String filter) throws InvalidSyntaxException
     {
-        try
-        {
-            return FilterImpl.newInstance(filter);
-        }
-        catch (InvalidSyntaxException e)
-        {
-            IllegalArgumentException ex = new IllegalArgumentException();
-            ex.initCause(e);
-            throw ex;
-        }
+        return FilterImpl.newInstance(filter);
     }
 
     public Repository repository(final URL url) throws Exception
@@ -407,7 +396,7 @@ public class DataModelHelperImpl implements DataModelHelper
             private Properties localization;
             {
                 // Do not use a JarInputStream so that we can read the manifest even if it's not
-                // the first entry in the JAR.  
+                // the first entry in the JAR.
                 byte[] man = loadEntry(JarFile.MANIFEST_NAME);
                 if (man == null)
                 {

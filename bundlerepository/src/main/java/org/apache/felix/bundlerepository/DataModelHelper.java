@@ -48,6 +48,7 @@ import java.util.jar.Attributes;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 
 public interface DataModelHelper {
 
@@ -67,7 +68,7 @@ public interface DataModelHelper {
      * @return
      * @throws org.osgi.framework.InvalidSyntaxException
      */
-    Filter filter(String filter);
+    Filter filter(String filter) throws InvalidSyntaxException;
 
     /**
      * Create a repository from the specified URL.
