@@ -60,7 +60,7 @@ public class MultipleAnnotationTest extends AnnotationBase
     }
 
     @Test
-    public void testComplexAnnotations(BundleContext context)
+    public void testMultipleAnnotations(BundleContext context)
     {
         DependencyManager m = new DependencyManager(context);
         // Provide the Sequencer service to the MultipleAnnotationTest class.
