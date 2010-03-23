@@ -32,6 +32,11 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
+/**
+ * This filter implementation is based on the official OSGi filter with additional
+ * support for the SUPERSET (&gt;*) and SUBSET (&lt;*) operators.
+ * This filter also has a few optimizations (cached transformation).
+ */
 public class FilterImpl implements Filter {
 
     /* filter operators */
