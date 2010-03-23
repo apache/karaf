@@ -78,7 +78,7 @@ public class MemoryUsagePanel extends AbstractWebConsolePlugin implements Config
         final PrintWriter pw = res.getWriter();
 
         final StringBuilder statusBuf = new StringBuilder(1024);
-        statusBuf.append('[');
+        statusBuf.append('{');
 
         final StringBuilder filesBuf = new StringBuilder(1024);
         filesBuf.append('[');
@@ -91,26 +91,22 @@ public class MemoryUsagePanel extends AbstractWebConsolePlugin implements Config
             for (File file : files)
             {
                 filesBuf.append('{');
-                filesBuf.append("'name':'").append(file.getName()).append("',");
-                filesBuf.append("'date':").append(file.lastModified()).append(",");
-                filesBuf.append("'size':").append(file.length());
+                filesBuf.append("'name':'").append(file.getName());
+                filesBuf.append("',").append("'date':").append(file.lastModified());
+                totalSize += support.formatNumber(filesBuf, "size", file.length());
                 filesBuf.append("},");
-
-                totalSize += file.length();
             }
 
-            statusBuf.append(files.length);
-            statusBuf.append(',');
-            statusBuf.append(totalSize);
-
+            statusBuf.append("'files':").append(files.length);
+            support.formatNumber(statusBuf, "total", totalSize);
         }
         else
         {
-            statusBuf.append("0,0");
+            statusBuf.append("'files:0,total:0'");
         }
 
         filesBuf.append(']');
-        statusBuf.append(']');
+        statusBuf.append('}');
 
         JsonPrintHelper jph = new JsonPrintHelper();
         support.printOverallMemory(jph);

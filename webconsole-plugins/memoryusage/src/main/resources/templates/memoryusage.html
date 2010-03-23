@@ -93,7 +93,7 @@ var __pools__ = ${__pools__};
 
 $(document).ready(function() {
 
-    $(".statline").html("${dump.statline}".msgFormat(__status__[0].toLocaleString(), __status__[1].toLocaleString()));
+    $(".statline").html("${dump.statline}".msgFormat(__status__.files, __status__.total));
 
     renderOverall(__overall__);
     renderPools(__pools__);
