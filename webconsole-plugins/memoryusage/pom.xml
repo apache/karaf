@@ -69,9 +69,17 @@
                             javax.management.*,
                             org.osgi.framework,
                             org.slf4j.*,
-                            javax.servlet.*;
+                            
+                            <!-- plug into the traditional Felix shell -->
                             org.apache.felix.shell;
-                            org.apache.felix.webconsole;resolution:=optional
+                            
+                            <!-- plug into the web console -->
+                            javax.servlet.*;
+                            org.apache.felix.webconsole;
+                            
+                            <!-- support configuration -->
+                            org.osgi.service.cm;
+                            org.osgi.service.metatype;resolution:=optional
                         </Import-Package>
                         <Private-Package>
                             org.apache.felix.webconsole.plugins.memoryusage.*

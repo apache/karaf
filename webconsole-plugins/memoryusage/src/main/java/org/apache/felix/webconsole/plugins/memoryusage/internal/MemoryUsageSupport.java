@@ -1,18 +1,18 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
+ * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
+ * regarding copyright ownership. The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -46,28 +46,56 @@ import org.slf4j.LoggerFactory;
 final class MemoryUsageSupport implements NotificationListener
 {
 
+    /**
+     * The minimum allowed automatic heap dump threshold (value is 50).
+     */
+    static final int MIN_DUMP_THRESHOLD = 50;
+
+    /**
+     * The maximum allowed automatic heap dump threshold (value is 99).
+     */
+    static final int MAX_DUMP_THRESHOLD = 99;
+
+    /**
+     * The default automatic heap dump threshold if none has been configured
+     * (or no configuration has yet been provided) (value is 95).
+     */
+    static final int DEFAULT_DUMP_THRESHOLD = 95;
+
     // This is the name of the HotSpot Diagnostic MBean
     private static final String HOTSPOT_BEAN_NAME = "com.sun.management:type=HotSpotDiagnostic";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final File dumpLocation;
+    // the default dump location: the dumps folder in the bundle private data
+    // or the current working directory
+    private final File defaultDumpLocation;
 
+    // the configured dump location
+    private File dumpLocation;
+
+    // the actual threshold (configured or dynamically set in the console UI)
     private int threshold;
 
     MemoryUsageSupport(final BundleContext context)
     {
+        // get the dump location
         File dumps = context.getDataFile("dumps");
         if (dumps == null)
         {
             dumps = new File("dumps");
         }
+        defaultDumpLocation = dumps.getAbsoluteFile();
 
-        dumpLocation = dumps;
-        dumpLocation.mkdirs();
+        // prepare the dump location
+        setDumpLocation(null);
 
+        // register for memory threshold notifications
         NotificationEmitter memEmitter = (NotificationEmitter) getMemory();
         memEmitter.addNotificationListener(this, null, null);
+
+        // set the initial automatic dump threshold
+        setThreshold(DEFAULT_DUMP_THRESHOLD);
     }
 
     void dispose()
@@ -77,19 +105,26 @@ final class MemoryUsageSupport implements NotificationListener
         {
             memEmitter.removeNotificationListener(this);
         }
-        catch (ListenerNotFoundException lnfes)
+        catch (ListenerNotFoundException e)
         {
-            // TODO: not expected really ?
+            // don't care
         }
     }
 
+    /**
+     * Sets the threshold percentage.
+     *
+     * @param percentage The threshold as a percentage of memory consumption.
+     *            This value may be 0 (zero) to switch off automatic heap dumps
+     *            or in the range {@link #MIN_DUMP_THRESHOLD} to
+     *            {@link #MAX_DUMP_THRESHOLD}.
+     * @throws IllegalArgumentException if the percentage value is outside of
+     *             the valid range of thresholds. The message is the percentage
+     *             value which is not accepted.
+     */
     final void setThreshold(final int percentage)
     {
-        if (percentage < 50 || percentage > 100)
-        {
-            // wrong value
-        }
-        else
+        if (threshold == 0 || (threshold >= MIN_DUMP_THRESHOLD && threshold <= MAX_DUMP_THRESHOLD))
         {
             List<MemoryPoolMXBean> pools = getMemoryPools();
             for (MemoryPoolMXBean pool : pools)
@@ -101,6 +136,10 @@ final class MemoryUsageSupport implements NotificationListener
                 }
             }
             this.threshold = percentage;
+        }
+        else
+        {
+            throw new IllegalArgumentException(String.valueOf(threshold));
         }
     }
 
@@ -189,10 +228,10 @@ final class MemoryUsageSupport implements NotificationListener
             buf.append(",'type':'").append(pool.getType()).append('\'');
 
             MemoryUsage usage = pool.getUsage();
-            usedTotal += doNumber(buf, "used", usage.getUsed());
-            initTotal += doNumber(buf, "init", usage.getInit());
-            committedTotal += doNumber(buf, "committed", usage.getCommitted());
-            maxTotal += doNumber(buf, "max", usage.getMax());
+            usedTotal += formatNumber(buf, "used", usage.getUsed());
+            initTotal += formatNumber(buf, "init", usage.getInit());
+            committedTotal += formatNumber(buf, "committed", usage.getCommitted());
+            maxTotal += formatNumber(buf, "max", usage.getMax());
 
             final long score = 100L * usage.getUsed() / usage.getMax();
             buf.append(",'score':'").append(score).append("%'");
@@ -203,10 +242,10 @@ final class MemoryUsageSupport implements NotificationListener
         // totalisation
         buf.append("{");
         buf.append("'name':'Total','type':'TOTAL'");
-        doNumber(buf, "used", usedTotal);
-        doNumber(buf, "init", initTotal);
-        doNumber(buf, "committed", committedTotal);
-        doNumber(buf, "max", maxTotal);
+        formatNumber(buf, "used", usedTotal);
+        formatNumber(buf, "init", initTotal);
+        formatNumber(buf, "committed", committedTotal);
+        formatNumber(buf, "max", maxTotal);
 
         final long score = 100L * usedTotal / maxTotal;
         buf.append(",'score':'").append(score).append("%'");
@@ -217,7 +256,7 @@ final class MemoryUsageSupport implements NotificationListener
         return buf.toString();
     }
 
-    private long doNumber(final StringBuilder buf, final String title, final long value)
+    long formatNumber(final StringBuilder buf, final String title, final long value)
     {
 
         final BigDecimal KB = new BigDecimal(1000L);
@@ -248,6 +287,28 @@ final class MemoryUsageSupport implements NotificationListener
         bd = bd.setScale(2, RoundingMode.UP);
         buf.append(",'").append(title).append("':'").append(bd).append(suffix).append('\'');
         return value;
+    }
+
+    final String getDefaultDumpLocation()
+    {
+        return defaultDumpLocation.getAbsolutePath();
+    }
+
+    final void setDumpLocation(final String dumpLocation)
+    {
+        if (dumpLocation == null || dumpLocation.length() == 0)
+        {
+            this.dumpLocation = defaultDumpLocation;
+        }
+        else
+        {
+            this.dumpLocation = new File(dumpLocation).getAbsoluteFile();
+        }
+    }
+
+    final File getDumpLocation()
+    {
+        return dumpLocation;
     }
 
     final void listDumpFiles(final PrintHelper pw)
@@ -317,10 +378,14 @@ final class MemoryUsageSupport implements NotificationListener
      *
      * @param live <code>true</code> if only live objects are to be returned
      * @return
-     * @throws NoSuchElementException If no provided mechanism is successfully used to create a heap dump
+     * @throws NoSuchElementException If no provided mechanism is successfully
+     *             used to create a heap dump
      */
     final File dumpHeap(String name, final boolean live)
     {
+        // ensure dumplocation exists
+        dumpLocation.mkdirs();
+
         File dump = dumpSunMBean(name, live);
         if (dump == null)
         {
@@ -372,10 +437,11 @@ final class MemoryUsageSupport implements NotificationListener
         void keyVal(final String key, final Object value);
     }
 
-    //---------- Various System Specific Heap Dump mechanisms
+    // ---------- Various System Specific Heap Dump mechanisms
 
     /**
-     * @see http://blogs.sun.com/sundararajan/entry/programmatically_dumping_heap_from_java
+     * @see http://blogs.sun.com/sundararajan/entry/
+     *      programmatically_dumping_heap_from_java
      */
     private File dumpSunMBean(String name, boolean live)
     {
@@ -384,7 +450,6 @@ final class MemoryUsageSupport implements NotificationListener
             name = "heap." + System.currentTimeMillis() + ".hprof";
         }
 
-        dumpLocation.mkdirs();
         File tmpFile = new File(dumpLocation, name);
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 
@@ -409,7 +474,9 @@ final class MemoryUsageSupport implements NotificationListener
     /**
      * @param name
      * @return
-     * @see http://publib.boulder.ibm.com/infocenter/javasdk/v5r0/index.jsp?topic=/com.ibm.java.doc.diagnostics.50/diag/tools/heapdump_enable.html
+     * @see http
+     *      ://publib.boulder.ibm.com/infocenter/javasdk/v5r0/index.jsp?topic
+     *      =/com.ibm.java.doc.diagnostics.50/diag/tools/heapdump_enable.html
      */
     private File dumpIbmDump(String name)
     {

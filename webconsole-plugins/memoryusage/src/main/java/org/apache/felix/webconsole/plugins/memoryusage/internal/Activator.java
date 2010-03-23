@@ -62,6 +62,20 @@ public class Activator implements BundleActivator
         {
             // web console might not be available, don't care
         }
+
+        // register for configuration
+        try
+        {
+            MemoryUsageConfigurator tdp = new MemoryUsageConfigurator(support);
+            Dictionary<String, Object> properties = new Hashtable<String, Object>();
+            properties.put(Constants.SERVICE_PID, MemoryUsageConfigurator.NAME);
+            register(bundleContext, new String[]
+                { "org.osgi.service.cm.ManagedService" }, tdp, properties);
+        }
+        catch (Throwable t)
+        {
+            // Configuration Admin and Metatype Service API might not be available, don't care
+        }
     }
 
     public void stop(BundleContext bundleContext)
