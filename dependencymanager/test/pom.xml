@@ -72,17 +72,17 @@
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam</artifactId>
-      <version>1.2.0</version>
+      <version>1.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-container-default</artifactId>
-      <version>1.2.0</version>
+      <version>1.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-junit</artifactId>
-      <version>1.2.0</version>
+      <version>1.1.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
