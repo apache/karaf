@@ -68,7 +68,7 @@ function doRepoAction(action, url) {
 }
 
 function showDetails( symbolicname, version ) {
-    window.location.href = window.location.pathname + '?details&symbolicname=' + symbolicname + '&version=' + version;
+    window.location.href = pluginRoot + '/' + symbolicname + '/' + version;
 }
 
 function showVersions( symbolicname ) {
@@ -379,13 +379,13 @@ function renderDetailedResource(res) {
                         });
     // Required dependencies
     createDetailedTable(tbody, "Dependencies", ["Name", "Version"], res.required, function(p) {
-                            var a = createElement('a', null, { href: (window.location.pathname + '?details&symbolicname=' + p.symbolicname + '&version=' + p.version) });
+                            var a = createElement('a', null, { href: (pluginRoot + '/' + p.symbolicname + '/' + p.version) });
                             a.appendChild(text(p.presentationname ? p.presentationname : p.symbolicname));
                             return [ a, text(p.version) ];
                         });
     // Optional dependencies
     createDetailedTable(tbody, "Optional Dependencies", ["Name", "Version"], res.optional, function(p) {
-                            var a = createElement('a', null, { href: (window.location.pathname + '?details&symbolicname=' + p.symbolicname + '&version=' + p.version) });
+                            var a = createElement('a', null, { href: (pluginRoot + '/' + p.symbolicname + '/' + p.version) });
                             a.appendChild(text(p.presentationname ? p.presentationname : p.symbolicname));
                             return [ a, text(p.version) ];
                         });
@@ -421,7 +421,7 @@ function renderData() {
 		for (var i in obrData.repositories ) {
 			renderRepository( obrData.repositories[i] );
 		}
-		if ($.getUrlVar('details')) {
+		if (obrData.details) {
 		    $('#resTable').addClass('ui-helper-hidden');
 		    $('#detailsTable').removeClass('ui-helper-hidden');
 		    for (var i in obrData.resources ) {
@@ -470,7 +470,11 @@ $(document).ready( function() {
 	resTable = $('#resTable tbody').empty();
 	searchField = $('#searchField');
 	ifStatusOK = $('#ifStatusOK');
-    searchField.val($.getUrlVar('query'));
+	
+	var query = $.getUrlVar('query');
+	if (query) {
+        searchField.val(decodeURIComponent(query));
+    }
 
 	$('#addRepoBtn').click(function(event) {
         event.preventDefault();
@@ -478,7 +482,7 @@ $(document).ready( function() {
 	});
 	$('#searchBtn').click(function(event) {
         event.preventDefault();
-        window.location.href = window.location.pathname + '?query=' + searchField.val();
+        window.location.href = pluginRoot + '?query=' + encodeURIComponent(searchField.val());
 	});
 	searchField.keypress(function(event) {
         if (event.keyCode == 13) {

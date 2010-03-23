@@ -22,6 +22,7 @@ package org.apache.felix.webconsole.internal.obr;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.Property;
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
@@ -59,15 +60,14 @@ public class FelixBundleRepositoryRenderHelper extends AbstractBundleRepositoryR
             {
                 JSONObject json = new JSONObject();
                 json.put( "status", admin != null );
-                if ( admin != null )
+                json.put( "details", details );
+
+                final Repository repositories[] = admin.listRepositories();
+                for ( int i = 0; repositories != null && i < repositories.length; i++ )
                 {
-                    final Repository repositories[] = admin.listRepositories();
-                    for ( int i = 0; repositories != null && i < repositories.length; i++ )
-                    {
-                        json.append( "repositories", new JSONObject().put( "lastModified",
-                            repositories[i].getLastModified() ).put( "name", repositories[i].getName() ).put( "url",
-                            repositories[i].getURI() ) );
-                    }
+                    json.append( "repositories", new JSONObject().put( "lastModified",
+                        repositories[i].getLastModified() ).put( "name", repositories[i].getName() ).put( "url",
+                        repositories[i].getURI() ) );
                 }
 
                 Resource[] resources = admin.discoverResources( filter );
@@ -89,7 +89,7 @@ public class FelixBundleRepositoryRenderHelper extends AbstractBundleRepositoryR
         }
 
         // fall back to no data
-        return "";
+        return "{}";
     }
 
 
@@ -211,7 +211,7 @@ public class FelixBundleRepositoryRenderHelper extends AbstractBundleRepositoryR
             for ( int i = 0; caps != null && i < caps.length; i++ )
             {
                 json.append( "capabilities", new JSONObject().put( "name", caps[i].getName() ).put( "properties",
-                    new JSONObject( caps[i].getProperties() ) ) );
+                    toJSON( caps[i].getProperties() ) ) );
             }
             Requirement[] reqs = resource.getRequirements();
             for ( int i = 0; reqs != null && i < reqs.length; i++ )
@@ -241,6 +241,17 @@ public class FelixBundleRepositoryRenderHelper extends AbstractBundleRepositoryR
                     .put( "filter", unsatisfied[i].getRequirement().getFilter() ).put( "optional",
                         unsatisfied[i].getRequirement().isOptional() ) );
             }
+        }
+        return json;
+    }
+
+
+    private JSONObject toJSON( final Property[] props ) throws JSONException
+    {
+        JSONObject json = new JSONObject();
+        for ( int i = 0; props != null && i < props.length; i++ )
+        {
+            json.put( props[i].getName(), props[i].getValue() );
         }
         return json;
     }

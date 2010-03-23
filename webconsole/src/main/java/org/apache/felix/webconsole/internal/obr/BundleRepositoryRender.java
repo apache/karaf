@@ -78,12 +78,6 @@ public class BundleRepositoryRender extends SimpleWebConsolePlugin implements Os
      */
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        String query = request.getQueryString();
-        if ( query == null || query.length() == 0 )
-        {
-            response.sendRedirect( LABEL + "?list=a" );
-            return;
-        }
         // prepare variables
         DefaultVariableResolver vars = ( ( DefaultVariableResolver ) WebConsoleUtil.getVariableResolver( request ) );
         vars.put( "__data__", getData( request ) );
@@ -166,14 +160,13 @@ public class BundleRepositoryRender extends SimpleWebConsolePlugin implements Os
         AbstractBundleRepositoryRenderHelper helper = getHelper();
         if ( helper == null || !helper.hasRepositoryAdmin() )
         {
-            return "";
+            return "{}";
         }
 
-        boolean details = request.getParameter( "details" ) != null;
+        RequestInfo info = new RequestInfo( request );
 
         final String filter;
-        String list = WebConsoleUtil.urlDecode( request.getParameter( "list" ) );
-        String query = WebConsoleUtil.urlDecode( request.getParameter( "query" ) );
+        String list = info.getList();
         if ( list != null )
         {
             if ( "-".equals( list ) )
@@ -193,39 +186,46 @@ public class BundleRepositoryRender extends SimpleWebConsolePlugin implements Os
                     + "*))";
             }
         }
-        else if ( query != null )
+        else
         {
-            if ( query.indexOf( '=' ) > 0 )
+            String query = info.getQuery();
+            if ( query != null )
             {
-                if (query.startsWith( "(" )) {
-                    filter = query;
-                } else {
-                    filter = "(" + query + ")";
+                if ( query.indexOf( '=' ) > 0 )
+                {
+                    if ( query.startsWith( "(" ) )
+                    {
+                        filter = query;
+                    }
+                    else
+                    {
+                        filter = "(" + query + ")";
+                    }
+                }
+                else
+                {
+                    filter = "(|(presentationame=*" + query + "*)(symbolicname=*" + query + "*))";
                 }
             }
             else
             {
-                filter = "(|(presentationame=*" + query + "*)(symbolicname=*" + query + "*))";
-            }
-        }
-        else
-        {
-            StringBuffer sb = new StringBuffer( "(&" );
-            for ( Enumeration e = request.getParameterNames(); e.hasMoreElements(); )
-            {
-                String k = ( String ) e.nextElement();
-                String v = request.getParameter( k );
-                if ( v != null && v.length() > 0 && !"details".equals( k ) && !"deploy".equals( k )
-                    && !"deploystart".equals( k ) && !"bundle".equals( k ) && !"optional".equals( k ) )
+                StringBuffer sb = new StringBuffer( "(&" );
+                for ( Enumeration e = request.getParameterNames(); e.hasMoreElements(); )
                 {
-                    sb.append( "(" ).append( k ).append( "=" ).append( v ).append( ")" );
+                    String k = ( String ) e.nextElement();
+                    String v = request.getParameter( k );
+                    if ( v != null && v.length() > 0 && !"details".equals( k ) && !"deploy".equals( k )
+                        && !"deploystart".equals( k ) && !"bundle".equals( k ) && !"optional".equals( k ) )
+                    {
+                        sb.append( "(" ).append( k ).append( "=" ).append( v ).append( ")" );
+                    }
                 }
+                sb.append( ")" );
+                filter = sb.toString();
             }
-            sb.append( ")" );
-            filter = sb.toString();
         }
 
-        return helper.getData( filter, details, getBundleContext().getBundles() );
+        return helper.getData( filter, info.showDetails(), getBundleContext().getBundles() );
     }
 
 
@@ -248,4 +248,70 @@ public class BundleRepositoryRender extends SimpleWebConsolePlugin implements Os
         }
     }
 
+    private static class RequestInfo {
+
+        private final HttpServletRequest request;
+
+        private boolean details;
+        private String query;
+        private String list;
+
+
+        RequestInfo( final HttpServletRequest request )
+        {
+            this.request = request;
+        }
+
+
+        boolean showDetails()
+        {
+            getQuery();
+            return details;
+        }
+
+
+        String getQuery()
+        {
+            if ( query == null )
+            {
+                String query = WebConsoleUtil.urlDecode( request.getParameter( "query" ) );
+                boolean details = false;
+                if ( query == null && request.getPathInfo().length() > 5 )
+                {
+                    // cut off "/obr/" prefix (might want to use getTitle ??)
+                    String path = request.getPathInfo().substring( 5 );
+                    int slash = path.indexOf( '/' );
+                    if ( slash < 0 )
+                    {
+                        // symbolic name only, version ??
+                        query = "(symbolicname=" + path + ")";
+                    }
+                    else
+                    {
+                        query = "(&(symbolicname=" + path.substring( 0, slash ) + ")(version="
+                            + path.substring( slash + 1 ) + "))";
+                        details = true;
+                    }
+                }
+
+                this.query = query;
+                this.details = details;
+            }
+            return query;
+        }
+
+
+        String getList()
+        {
+            if ( list == null )
+            {
+                list = WebConsoleUtil.urlDecode( request.getParameter( "list" ) );
+                if ( list == null && !request.getParameterNames().hasMoreElements() && getQuery() == null )
+                {
+                    list = "a";
+                }
+            }
+            return list;
+        }
+    }
 }

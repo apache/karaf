@@ -50,18 +50,15 @@ public class OsgiBundleRepositoryRenderHelper extends AbstractBundleRepositoryRe
 
     String getData( final String filter, final boolean details, Bundle[] bundles )
     {
-        try
+        RepositoryAdmin admin = ( RepositoryAdmin ) getRepositoryAdmin();
+        if ( admin != null )
         {
-            RepositoryAdmin admin = ( RepositoryAdmin ) getRepositoryAdmin();
-            if ( admin == null )
+            try
             {
-                return "";
-            }
+                JSONObject json = new JSONObject();
+                json.put( "status", admin != null );
+                json.put( "details", details );
 
-            JSONObject json = new JSONObject();
-            json.put( "status", admin != null );
-            if ( admin != null )
-            {
                 final Repository repositories[] = admin.listRepositories();
                 for ( int i = 0; repositories != null && i < repositories.length; i++ )
                 {
@@ -69,21 +66,23 @@ public class OsgiBundleRepositoryRenderHelper extends AbstractBundleRepositoryRe
                         repositories[i].getLastModified() ).put( "name", repositories[i].getName() ).put( "url",
                         repositories[i].getURL() ) );
                 }
-            }
 
-            Resource[] resources = admin.discoverResources( filter );
-            for ( int i = 0; resources != null && i < resources.length; i++ )
+                Resource[] resources = admin.discoverResources( filter );
+                for ( int i = 0; resources != null && i < resources.length; i++ )
+                {
+                    json.append( "resources", toJSON( resources[i], bundles, details ) );
+                }
+
+                return json.toString();
+            }
+            catch ( JSONException e )
             {
-                json.append( "resources", toJSON( resources[i], bundles, details ) );
+                logger.log( "Failed to serialize repository to JSON object.", e );
             }
+        }
 
-            return json.toString();
-        }
-        catch ( JSONException e )
-        {
-            logger.log( "Failed to serialize repository to JSON object.", e );
-            return "";
-        }
+        // fall back to no data
+        return "{}";
     }
 
 
