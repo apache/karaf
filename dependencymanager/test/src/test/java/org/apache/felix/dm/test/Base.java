@@ -48,9 +48,14 @@ public class Base implements LogService
      * Always cleanup our bundle location file (because pax seems to forget to cleanup it)
      * @param context
      */
+    
     @After
     public void tearDown(BundleContext context)
     {
+        // The following code forces the temporary bundle files (from /tmp/tb/*) to be deleted when jvm exits
+        // (this patch seems to be only required with pax examp 2.0.0)
+
+        /*
         try
         {
             File f = new File(new URL(context.getBundle().getLocation()).getPath());
@@ -60,6 +65,7 @@ public class Base implements LogService
         {
             t.printStackTrace();
         }
+        */
     }
 
     public void log(int level, String message)
