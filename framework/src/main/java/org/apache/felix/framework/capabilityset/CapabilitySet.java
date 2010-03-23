@@ -331,6 +331,13 @@ public class CapabilitySet
 
     private static boolean compare(Object lhs, Object rhsUnknown, int op)
     {
+        // If this is a PRESENT operation, then just return true immediately
+        // since we wouldn't be here if the attribute wasn't present.
+        if (op == SimpleFilter.PRESENT)
+        {
+            return true;
+        }
+
         // If the type is comparable, then we can just return the
         // result immediately.
         if (lhs instanceof Comparable)

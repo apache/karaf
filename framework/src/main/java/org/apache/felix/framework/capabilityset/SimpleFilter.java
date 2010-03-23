@@ -32,6 +32,7 @@ public class SimpleFilter
 // TODO: FELIX3 - Should we handle substring as a separate operator or as a
 //       special case of string equality comparison?
     public static final int SUBSTRING = 7;
+    public static final int PRESENT = 8;
 
     private final String m_name;
     private final Object m_value;
@@ -84,6 +85,9 @@ public class SimpleFilter
                 break;
             case SUBSTRING:
                 s = "(" + m_name + "=" + unparseSubstring((List<String>) m_value) + ")";
+                break;
+            case PRESENT:
+                s = "(" + m_name + "=*)";
                 break;
         }
         return s;
@@ -329,11 +333,17 @@ public class SimpleFilter
         Object value = sb.toString();
 
         // Check if the equality comparison is actually a substring
-        // comparison.
+        // or present operation.
         if (op == EQ)
         {
             List<String> values = parseSubstring((String) value);
-            if (values.size() > 1)
+            if ((values.size() == 2)
+                && (values.get(0).length() == 0)
+                && (values.get(1).length() == 0))
+            {
+                op = PRESENT;
+            }
+            else if (values.size() > 1)
             {
                 op = SUBSTRING;
                 value = values;
