@@ -33,7 +33,7 @@ public class WebConsolePlugin extends SimpleWebConsolePlugin
 {
 
     private static final String LABEL = "upnp";
-    private static final String TITLE = "UPnP";
+    private static final String TITLE = "%pluginTitle";
     private static final String CSS[] = { "/" + LABEL + "/res/upnp.css", //
             "/" + LABEL + "/res/jquery-treeview-1.4/jquery.treeview.css", //
     };
