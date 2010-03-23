@@ -142,9 +142,10 @@ public class BundleCache
                 }
                 catch (Exception ex)
                 {
-                    // Log and ignore.
+                    // Log exception and remove bundle archive directory.
                     m_logger.log(Logger.LOG_ERROR,
-                        "Error creating archive.", ex);
+                        "Error reloading cached bundle, removing it: " + children[i], ex);
+                    deleteDirectoryTree(children[i]);
                 }
             }
         }
