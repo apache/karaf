@@ -38,7 +38,7 @@ import org.osgi.framework.Constants;
  * Use case: Verify complex Annotation usage.
  */
 @RunWith(JUnit4TestRunner.class)
-public class MultipleAnnotationTest extends AnnotationBase
+public class MultipleAnnotationsTest extends AnnotationBase
 {
     @Configuration
     public static Option[] configuration()
@@ -51,7 +51,7 @@ public class MultipleAnnotationTest extends AnnotationBase
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.dependencymanager.runtime").versionAsInProject()),
             provision(
                 new BundleGenerator()
-                    .set(Constants.BUNDLE_SYMBOLICNAME, "MultipleAnnotationTest")
+                    .set(Constants.BUNDLE_SYMBOLICNAME, "MultipleAnnotationsTest")
                     .set("Export-Package", "org.apache.felix.dm.test.bundle.annotation.sequencer")
                     .set("Private-Package", "org.apache.felix.dm.test.bundle.annotation.multiple")
                     .set("Import-Package", "*")
@@ -63,14 +63,14 @@ public class MultipleAnnotationTest extends AnnotationBase
     public void testMultipleAnnotations(BundleContext context)
     {
         DependencyManager m = new DependencyManager(context);
-        // Provide the Sequencer service to the MultipleAnnotationTest class.
+        // Provide the Sequencer service to the MultipleAnnotationsTest class.
         m.add(m.createService()
             .setImplementation(this)
             .setInterface(Sequencer.class.getName(), null));
         // Check if the test.annotation components have been initialized orderly
         m_ensure.waitForStep(7, 10000);
         // Stop the test.annotation bundle
-        stopBundle("MultipleAnnotationTest", context);
+        stopBundle("MultipleAnnotationsTest", context);
         // And check if the test.annotation bundle has been deactivated orderly
         m_ensure.waitForStep(11, 10000);
     }
