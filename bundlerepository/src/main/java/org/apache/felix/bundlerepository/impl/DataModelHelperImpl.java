@@ -19,6 +19,7 @@
 package org.apache.felix.bundlerepository.impl;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -72,9 +73,18 @@ public class DataModelHelperImpl implements DataModelHelper
         return req;
     }
 
-    public Filter filter(String filter) throws InvalidSyntaxException
+    public Filter filter(String filter)
     {
-        return FilterImpl.newInstance(filter);
+        try
+        {
+            return FilterImpl.newInstance(filter);
+        }
+        catch (InvalidSyntaxException e)
+        {
+            IllegalArgumentException ex = new IllegalArgumentException();
+            ex.initCause(e);
+            throw ex;
+        }
     }
 
     public Repository repository(final URL url) throws Exception
@@ -313,15 +323,15 @@ public class DataModelHelperImpl implements DataModelHelper
             .attribute(Resource.ID, resource.getId())
             .attribute(Resource.SYMBOLIC_NAME, resource.getSymbolicName())
             .attribute(Resource.PRESENTATION_NAME, resource.getPresentationName())
-            .attribute(Resource.URI, resource.getURI())
+            .attribute(Resource.URI, getRelativeUri(resource, Resource.URI))
             .attribute(Resource.VERSION, resource.getVersion().toString());
 
         w.textElement(Resource.DESCRIPTION, resource.getProperties().get(Resource.DESCRIPTION))
             .textElement(Resource.SIZE, resource.getProperties().get(Resource.SIZE))
-            .textElement(Resource.DOCUMENTATION_URI, resource.getProperties().get(Resource.DOCUMENTATION_URI))
-            .textElement(Resource.SOURCE_URI, resource.getProperties().get(Resource.SOURCE_URI))
-            .textElement(Resource.JAVADOC_URI, resource.getProperties().get(Resource.JAVADOC_URI))
-            .textElement(Resource.LICENSE_URI, resource.getProperties().get(Resource.LICENSE_URI));
+            .textElement(Resource.DOCUMENTATION_URI, getRelativeUri(resource, Resource.DOCUMENTATION_URI))
+            .textElement(Resource.SOURCE_URI, getRelativeUri(resource, Resource.SOURCE_URI))
+            .textElement(Resource.JAVADOC_URI, getRelativeUri(resource, Resource.JAVADOC_URI))
+            .textElement(Resource.LICENSE_URI, getRelativeUri(resource, Resource.LICENSE_URI));
 
         String[] categories = resource.getCategories();
         for (int i = 0; categories != null && i < categories.length; i++)
@@ -341,6 +351,22 @@ public class DataModelHelperImpl implements DataModelHelper
             toXml(w, requirements[i]);
         }
         w.end();
+    }
+
+    private static String getRelativeUri(Resource resource, String name) 
+    {
+        String uri = (String) resource.getProperties().get(name);
+        if (resource instanceof ResourceImpl)
+        {
+            try
+            {
+                uri = URI.create(((ResourceImpl) resource).getRepository().getURI()).relativize(URI.create(uri)).toASCIIString();
+            }
+            catch (Throwable t)
+            {
+            }
+        }
+        return uri;
     }
 
     private static void toXml(XmlWriter w, Capability capability) throws IOException
@@ -536,7 +562,6 @@ public class DataModelHelperImpl implements DataModelHelper
             resource.put(Resource.SOURCE_URI, headers.getHeader(BUNDLE_SOURCE));
         }
 
-        doSize(resource, headers);
         doCategories(resource, headers);
         doBundle(resource, headers);
         doImportExportServices(resource, headers);
@@ -545,11 +570,6 @@ public class DataModelHelperImpl implements DataModelHelper
         doExports(resource, headers);
         doImports(resource, headers);
         doExecutionEnvironment(resource, headers);
-    }
-
-    private static void doSize(ResourceImpl resource, Headers headers)
-    {
-        //To change body of created methods use File | Settings | File Templates.
     }
 
     private static void doCategories(ResourceImpl resource, Headers headers)
