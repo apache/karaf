@@ -33,6 +33,7 @@ public class SimpleFilter
 //       special case of string equality comparison?
     public static final int SUBSTRING = 7;
     public static final int PRESENT = 8;
+    public static final int APPROX = 9;
 
     private final String m_name;
     private final Object m_value;
@@ -88,6 +89,9 @@ public class SimpleFilter
                 break;
             case PRESENT:
                 s = "(" + m_name + "=*)";
+                break;
+            case APPROX:
+                s = "(" + m_name + "~=" + toEncodedString(m_value) + ")";
                 break;
         }
         return s;
@@ -249,7 +253,7 @@ public class SimpleFilter
 
     private static SimpleFilter subfilter(String filter, int startIdx, int endIdx)
     {
-        final String opChars = "=<>";
+        final String opChars = "=<>~";
 
         // Determine the ending index of the attribute name.
         int attrEndIdx = startIdx;
@@ -299,6 +303,15 @@ public class SimpleFilter
                         "Unknown operator: " + filter.substring(startIdx, endIdx));
                 }
                 op = GTE;
+                startIdx += 2;
+                break;
+            case '~':
+                if (filter.charAt(startIdx + 1) != '=')
+                {
+                    throw new IllegalArgumentException(
+                        "Unknown operator: " + filter.substring(startIdx, endIdx));
+                }
+                op = APPROX;
                 startIdx += 2;
                 break;
             default:

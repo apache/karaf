@@ -19,6 +19,7 @@
 package org.apache.felix.framework.capabilityset;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -338,19 +339,19 @@ public class CapabilitySet
             return true;
         }
 
+        // The substring operator only works on string values, so if the
+        // lhs is not a string, then do an equality comparison using the
+        // original string containing wildcards.
+        if ((op == SimpleFilter.SUBSTRING) && !(lhs instanceof String))
+        {
+            op = SimpleFilter.EQ;
+            rhsUnknown = SimpleFilter.unparseSubstring((List<String>) rhsUnknown);
+        }
+
         // If the type is comparable, then we can just return the
         // result immediately.
         if (lhs instanceof Comparable)
         {
-            // The substring operator only works on string values, so if the
-            // lhs is not a string, then do an equality comparison using the
-            // original string containing wildcards.
-            if ((op == SimpleFilter.SUBSTRING) && !(lhs instanceof String))
-            {
-                op = SimpleFilter.EQ;
-                rhsUnknown = SimpleFilter.unparseSubstring((List<String>) rhsUnknown);
-            }
-
             Object rhs;
             if (op == SimpleFilter.SUBSTRING)
             {
@@ -376,8 +377,8 @@ public class CapabilitySet
                     return (((Comparable) lhs).compareTo(rhs) >= 0);
                 case SimpleFilter.LTE :
                     return (((Comparable) lhs).compareTo(rhs) <= 0);
-//                case SimpleFilter.APPROX :
-//                    return compareToApprox(((Comparable) lhs), rhs);
+                case SimpleFilter.APPROX :
+                    return compareApproximate(((Comparable) lhs), rhs);
                 case SimpleFilter.SUBSTRING :
                     return SimpleFilter.compareSubstring((String) lhs, (List<String>) rhs);
                 default:
@@ -403,7 +404,7 @@ public class CapabilitySet
                 case SimpleFilter.EQ :
                 case SimpleFilter.GTE :
                 case SimpleFilter.LTE :
-//                case SimpleFilter.APPROX:
+                case SimpleFilter.APPROX :
                     return (lhs.equals(rhs));
                 default:
                     throw new RuntimeException(
@@ -446,6 +447,30 @@ public class CapabilitySet
         }
     }
 
+    private static boolean compareApproximate(Object lhs, Object rhs)
+    {
+        if (rhs instanceof String)
+        {
+            String s = (String) rhs;
+            StringBuffer sb = new StringBuffer(s.length());
+            for (int i = 0; i < s.length(); i++)
+            {
+                if (!Character.isWhitespace(s.charAt(i)))
+                {
+                    sb.append(s.charAt(i));
+                }
+            }
+            s = sb.toString();
+            return s.equalsIgnoreCase((String) lhs);
+        }
+        else if (rhs instanceof Character)
+        {
+            return Character.toLowerCase(((Character) lhs))
+                == Character.toLowerCase(((Character) rhs));
+        }
+        return lhs.equals(rhs);
+    }
+
     private static Object coerceType(Object lhs, String rhsString) throws Exception
     {
         // If the LHS expects a string, then we can just return
@@ -468,9 +493,10 @@ public class CapabilitySet
             }
             else
             {
-                rhs = lhs.getClass()
-                    .getConstructor(STRING_CLASS)
-                        .newInstance(new Object[] { rhsString });
+// TODO: FELIX3 - Use SecureAction.
+                Constructor ctor = lhs.getClass().getConstructor(STRING_CLASS);
+                ctor.setAccessible(true);
+                rhs = ctor.newInstance(new Object[] { rhsString });
             }
         }
         catch (Exception ex)
