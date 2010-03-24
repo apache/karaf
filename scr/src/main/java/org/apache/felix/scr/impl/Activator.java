@@ -21,7 +21,6 @@ package org.apache.felix.scr.impl;
 
 import java.io.PrintStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.felix.scr.impl.config.ConfigurationComponentRegistry;
@@ -214,16 +213,6 @@ public class Activator implements BundleActivator, SynchronousBundleListener
             return;
         }
 
-        // FELIX-1666 method is called for the LAZY_ACTIVATION event and
-        // the started event. Both events cause this method to be called;
-        // so we have to make sure to not load components twice
-        if ( m_componentBundles.containsKey( new Long( bundle.getBundleId() ) ) )
-        {
-            log( LogService.LOG_DEBUG, m_context.getBundle(), "Components for bundle  " + bundle.getSymbolicName()
-                + "/" + bundle.getBundleId() + " already loaded. Nothing to do.", null );
-            return;
-        }
-
         // there should be components, load them with a bundle context
         BundleContext context = bundle.getBundleContext();
         if ( context == null )
@@ -233,14 +222,54 @@ public class Activator implements BundleActivator, SynchronousBundleListener
             return;
         }
 
+        // FELIX-1666 method is called for the LAZY_ACTIVATION event and
+        // the started event. Both events cause this method to be called;
+        // so we have to make sure to not load components twice
+        // FELIX-2231 Mark bundle loaded early to prevent concurrent loading
+        // if LAZY_ACTIVATION and STARTED event are fired at the same time
+        final boolean loaded;
+        final Long bundleId = new Long( bundle.getBundleId() );
+        synchronized ( m_componentBundles )
+        {
+            if ( m_componentBundles.containsKey( bundleId ) )
+            {
+                loaded = true;
+            }
+            else
+            {
+                m_componentBundles.put( bundleId, bundleId );
+                loaded = false;
+            }
+        }
+
+        // terminate if already loaded (or currently being loaded)
+        if ( loaded )
+        {
+            log( LogService.LOG_DEBUG, m_context.getBundle(), "Components for bundle  " + bundle.getSymbolicName()
+                + "/" + bundle.getBundleId() + " already loaded. Nothing to do.", null );
+            return;
+        }
+
         try
         {
             BundleComponentActivator ga = new BundleComponentActivator( m_componentRegistry, m_componentActor, context,
                 m_configuration );
-            m_componentBundles.put( new Long( bundle.getBundleId() ), ga );
+
+            // replace bundle activator in the map
+            synchronized ( m_componentBundles )
+            {
+                m_componentBundles.put( bundleId, ga );
+            }
         }
         catch ( Exception e )
         {
+            // remove the bundle id from the bundles map to ensure it is
+            // not marked as being loaded
+            synchronized ( m_componentBundles )
+            {
+                m_componentBundles.remove( bundleId );
+            }
+
             if ( e instanceof IllegalStateException && bundle.getState() != Bundle.ACTIVE )
             {
                 log(
@@ -268,13 +297,17 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      */
     private void disposeComponents( Bundle bundle )
     {
-        BundleComponentActivator ga = ( BundleComponentActivator ) m_componentBundles.remove( new Long( bundle
-            .getBundleId() ) );
-        if ( ga != null )
+        final Object ga;
+        synchronized ( m_componentBundles )
+        {
+            ga = m_componentBundles.remove( new Long( bundle.getBundleId() ) );
+        }
+
+        if ( ga instanceof BundleComponentActivator )
         {
             try
             {
-                ga.dispose( ComponentConstants.DEACTIVATION_REASON_BUNDLE_STOPPED );
+                ( ( BundleComponentActivator ) ga ).dispose( ComponentConstants.DEACTIVATION_REASON_BUNDLE_STOPPED );
             }
             catch ( Exception e )
             {
@@ -288,19 +321,29 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     // Unloads all components registered with the SCR
     private void disposeAllComponents()
     {
-        for ( Iterator it = m_componentBundles.values().iterator(); it.hasNext(); )
+        final Object[] activators;
+        synchronized ( m_componentBundles )
         {
-            BundleComponentActivator ga = ( BundleComponentActivator ) it.next();
-            try
+            activators = m_componentBundles.values().toArray();
+            m_componentBundles.clear();
+        }
+
+        for ( int i = 0; i < activators.length; i++ )
+        {
+            if ( activators[i] instanceof BundleComponentActivator )
             {
-                ga.dispose( ComponentConstants.DEACTIVATION_REASON_DISPOSED );
+                final BundleComponentActivator ga = ( BundleComponentActivator ) activators[i];
+                final Bundle bundle = ga.getBundleContext().getBundle();
+                try
+                {
+                    ga.dispose( ComponentConstants.DEACTIVATION_REASON_DISPOSED );
+                }
+                catch ( Exception e )
+                {
+                    log( LogService.LOG_ERROR, m_context.getBundle(), "Error while disposing components of bundle "
+                        + bundle.getSymbolicName() + "/" + bundle.getBundleId(), e );
+                }
             }
-            catch ( Exception e )
-            {
-                log( LogService.LOG_ERROR, m_context.getBundle(), "Error while disposing components of bundle "
-                    + ga.getBundleContext().getBundle().getSymbolicName(), e );
-            }
-            it.remove();
         }
     }
 
