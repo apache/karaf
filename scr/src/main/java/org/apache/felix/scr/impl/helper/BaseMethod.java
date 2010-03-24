@@ -209,8 +209,17 @@ abstract class BaseMethod
     {
         try
         {
-            final Object[] params = getParameters( m_method, rawParameter );
-            m_method.invoke( componentInstance, params );
+            if ( componentInstance != null )
+            {
+                final Object[] params = getParameters( m_method, rawParameter );
+                m_method.invoke( componentInstance, params );
+            }
+            else
+            {
+                getComponentManager().log( LogService.LOG_WARNING, "Method {0} cannot be called on null object",
+                    new Object[]
+                        { getMethodName() }, null );
+            }
         }
         catch ( IllegalStateException ise )
         {
