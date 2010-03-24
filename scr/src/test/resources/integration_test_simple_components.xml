@@ -58,6 +58,14 @@
         <property name="service.pid" value="FactoryConfigurationComponent" />
     </scr:component>
 
+    <!-- component instances created by factory configuration -->
+    <scr:component name="FactoryConfigurationComponent_enabled"
+        enabled="true"
+        configuration-policy="require" >
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="service.pid" value="FactoryConfigurationComponent" />
+    </scr:component>
+
     <!-- component is a simple service to verify non-use of private props -->
     <scr:component name="ServiceComponent"
         enabled="false" immediate="true"

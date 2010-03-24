@@ -305,4 +305,97 @@ public class ComponentConfigurationTest extends ComponentTestBase
         TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
     }
 
+    @Test
+    public void test_SimpleComponent_factory_configuration_enabled()
+    {
+        final String factoryPid = "FactoryConfigurationComponent_enabled";
+
+        deleteFactoryConfigurations( factoryPid );
+        delay();
+
+        // one single component exists without configuration
+        final Component[] enabledNoConfigs = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( enabledNoConfigs );
+        TestCase.assertEquals( 1, enabledNoConfigs.length );
+        TestCase.assertEquals( Component.STATE_UNSATISFIED, enabledNoConfigs[0].getState() );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.isEmpty() );
+
+        // create two factory configurations expecting two components
+        final String pid0 = createFactoryConfiguration( factoryPid );
+        final String pid1 = createFactoryConfiguration( factoryPid );
+        delay();
+
+        // expect two components, all active
+        final Component[] twoConfigs = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( twoConfigs );
+        TestCase.assertEquals( 2, twoConfigs.length );
+        TestCase.assertEquals( Component.STATE_ACTIVE, twoConfigs[0].getState() );
+        TestCase.assertEquals( Component.STATE_ACTIVE, twoConfigs[1].getState() );
+        TestCase.assertEquals( 2, SimpleComponent.INSTANCES.size() );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
+
+        // disable the name component
+        SimpleComponent.INSTANCES.values().iterator().next().m_activateContext.disableComponent( factoryPid );
+        delay();
+
+        // expect two disabled components
+        final Component[] twoConfigsDisabled = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( twoConfigsDisabled );
+        TestCase.assertEquals( 2, twoConfigsDisabled.length );
+        TestCase.assertEquals( Component.STATE_DISABLED, twoConfigsDisabled[0].getState() );
+        TestCase.assertEquals( Component.STATE_DISABLED, twoConfigsDisabled[1].getState() );
+        TestCase.assertEquals( 0, SimpleComponent.INSTANCES.size() );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
+
+        // create a configuration
+        final String pid3 = createFactoryConfiguration( factoryPid );
+        delay();
+
+        // expect three disabled components
+        final Component[] threeConfigsDisabled = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( threeConfigsDisabled );
+        TestCase.assertEquals( 3, threeConfigsDisabled.length );
+        TestCase.assertEquals( Component.STATE_DISABLED, threeConfigsDisabled[0].getState() );
+        TestCase.assertEquals( Component.STATE_DISABLED, threeConfigsDisabled[1].getState() );
+        TestCase.assertEquals( Component.STATE_DISABLED, threeConfigsDisabled[2].getState() );
+        TestCase.assertEquals( 0, SimpleComponent.INSTANCES.size() );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( threeConfigsDisabled[0].getId() ) );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( threeConfigsDisabled[1].getId() ) );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( threeConfigsDisabled[2].getId() ) );
+
+        // enable a single component (to get ComponentContext later)
+        threeConfigsDisabled[0].enable();
+        delay();
+
+        // expect one enabled and two disabled components
+        final Component[] threeConfigs21 = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( threeConfigs21 );
+        TestCase.assertEquals( 3, threeConfigs21.length );
+        TestCase.assertEquals( Component.STATE_ACTIVE, threeConfigs21[0].getState() );
+        TestCase.assertEquals( Component.STATE_DISABLED, threeConfigs21[1].getState() );
+        TestCase.assertEquals( Component.STATE_DISABLED, threeConfigs21[2].getState() );
+        TestCase.assertEquals( 1, SimpleComponent.INSTANCES.size() );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( threeConfigs21[0].getId() ) );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( threeConfigs21[1].getId() ) );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( threeConfigs21[2].getId() ) );
+
+        // enable all components now
+        SimpleComponent.INSTANCES.values().iterator().next().m_activateContext.enableComponent( factoryPid );
+        delay();
+
+        // expect all enabled
+        final Component[] threeConfigsEnabled = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( threeConfigsEnabled );
+        TestCase.assertEquals( 3, threeConfigsEnabled.length );
+        TestCase.assertEquals( Component.STATE_ACTIVE, threeConfigsEnabled[0].getState() );
+        TestCase.assertEquals( Component.STATE_ACTIVE, threeConfigsEnabled[1].getState() );
+        TestCase.assertEquals( Component.STATE_ACTIVE, threeConfigsEnabled[2].getState() );
+        TestCase.assertEquals( 3, SimpleComponent.INSTANCES.size() );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( threeConfigsEnabled[0].getId() ) );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( threeConfigsEnabled[1].getId() ) );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( threeConfigsEnabled[2].getId() ) );
+    }
+
 }

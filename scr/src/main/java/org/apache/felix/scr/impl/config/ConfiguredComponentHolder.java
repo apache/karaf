@@ -247,6 +247,8 @@ public class ConfiguredComponentHolder extends AbstractComponentHolder
 
     public void disableComponents()
     {
+        m_enabled = false;
+
         final ImmediateComponentManager[] cms = getComponentManagers( false );
         if ( cms == null )
         {
