@@ -64,13 +64,16 @@ public class ConfiguredComponentHolder extends AbstractComponentHolder
 
     /**
      * The special component used if there is no configuration or a singleton
-     * configuration. This field is always non-<code>null</code> and is first
-     * created in the constructor. As factory configurations are provided this
-     * instance may be configured or "deconfigured".
+     * configuration. This field is only <code>null</code> once all components
+     * held by this holder have been disposed off by
+     * {@link #disposeComponents(int)} and is first created in the constructor.
+     * As factory configurations are provided this instance may be configured
+     * or "deconfigured".
      * <p>
      * Expected invariants:
      * <ul>
-     * <li>This field is never <code>null</code></li>
+     * <li>This field is only <code>null</code> after disposal of all held
+     * components</li>
      * <li>The {@link #m_components} map is empty or the component pointed to
      * by this field is also contained in the map</li>
      * <ul>
@@ -119,6 +122,11 @@ public class ConfiguredComponentHolder extends AbstractComponentHolder
      */
     public void configurationDeleted( final String pid )
     {
+        // FELIX-2231: nothing to do any more, all components have been disposed off
+        if (m_singleComponent == null) {
+            return;
+        }
+
         if ( pid.equals( getComponentName() ) )
         {
             // singleton configuration deleted
@@ -181,6 +189,11 @@ public class ConfiguredComponentHolder extends AbstractComponentHolder
      */
     public void configurationUpdated( final String pid, final Dictionary props )
     {
+        // FELIX-2231: nothing to do any more, all components have been disposed off
+        if (m_singleComponent == null) {
+            return;
+        }
+
         if ( pid.equals( getComponentName() ) )
         {
             // singleton configuration has pid equal to component name
