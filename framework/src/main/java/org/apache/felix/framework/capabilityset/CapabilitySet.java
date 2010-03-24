@@ -339,19 +339,19 @@ public class CapabilitySet
             return true;
         }
 
-        // The substring operator only works on string values, so if the
-        // lhs is not a string, then do an equality comparison using the
-        // original string containing wildcards.
-        if ((op == SimpleFilter.SUBSTRING) && !(lhs instanceof String))
-        {
-            op = SimpleFilter.EQ;
-            rhsUnknown = SimpleFilter.unparseSubstring((List<String>) rhsUnknown);
-        }
-
         // If the type is comparable, then we can just return the
         // result immediately.
         if (lhs instanceof Comparable)
         {
+            // The substring operator only works on string values, so if the
+            // lhs is not a string, then do an equality comparison using the
+            // original string containing wildcards.
+            if ((op == SimpleFilter.SUBSTRING) && !(lhs instanceof String))
+            {
+                op = SimpleFilter.EQ;
+                rhsUnknown = SimpleFilter.unparseSubstring((List<String>) rhsUnknown);
+            }
+
             Object rhs;
             if (op == SimpleFilter.SUBSTRING)
             {
@@ -435,6 +435,15 @@ public class CapabilitySet
             return false;
         }
 
+        // The substring operator only works on string values, so if the
+        // lhs is not a string, then do an equality comparison using the
+        // original string containing wildcards.
+        if ((op == SimpleFilter.SUBSTRING) && !(lhs instanceof String))
+        {
+            op = SimpleFilter.EQ;
+            rhsUnknown = SimpleFilter.unparseSubstring((List<String>) rhsUnknown);
+        }
+
         // Since we cannot identify the LHS type, then we can only perform
         // equality comparison.
         try
@@ -451,17 +460,8 @@ public class CapabilitySet
     {
         if (rhs instanceof String)
         {
-            String s = (String) rhs;
-            StringBuffer sb = new StringBuffer(s.length());
-            for (int i = 0; i < s.length(); i++)
-            {
-                if (!Character.isWhitespace(s.charAt(i)))
-                {
-                    sb.append(s.charAt(i));
-                }
-            }
-            s = sb.toString();
-            return s.equalsIgnoreCase((String) lhs);
+            return removeWhitespace((String) lhs)
+                .equalsIgnoreCase(removeWhitespace((String) rhs));
         }
         else if (rhs instanceof Character)
         {
@@ -469,6 +469,19 @@ public class CapabilitySet
                 == Character.toLowerCase(((Character) rhs));
         }
         return lhs.equals(rhs);
+    }
+
+    private static String removeWhitespace(String s)
+    {
+        StringBuffer sb = new StringBuffer(s.length());
+        for (int i = 0; i < s.length(); i++)
+        {
+            if (!Character.isWhitespace(s.charAt(i)))
+            {
+                sb.append(s.charAt(i));
+            }
+        }
+        return sb.toString();
     }
 
     private static Object coerceType(Object lhs, String rhsString) throws Exception
