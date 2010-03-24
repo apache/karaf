@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 #timeline          { width: 100%; overflow-x: scroll }
+#timelineLegend .event { display: inline-block; width: 12em; margin: .2em 0; text-align: center }
 .event                 { overflow:visible; white-space:nowrap }
 .eventservice { background-color: #ADFF2F }
 .eventbundle   { background-color: #FFCACD }
 .eventconfig   { background-color: #FFD700 }
 .eventframework { background-color: #DCDCDC }
 
-.propName { padding: 0 4px 0 0 }
-.propVal   { padding: 0 0 0 4px }
+table.propTable, table.propTable tr, table.propTable td { border: none !important }
+td.propName { padding: 0 4px 0 0; text-align: right !important; text-decoration: underline }
+td.propVal   { padding: 0 0 0 4px }

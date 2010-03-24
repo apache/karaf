@@ -51,30 +51,30 @@ function entry( /* Object */ dataEntry ) {
     if ( dataEntry.info ) {
     	propE = text(dataEntry.info);
     } else {
-	    var propE = createElement('table', 'nicetable');
 	    var bodyE = createElement('tbody');
-	    propE.appendChild(bodyE);
-	
 	    for( var p in dataEntry.properties ) {
 	    	bodyE.appendChild(tr(null, null, [ 
-				td(null, 'propName', [text(p)]),
-				td(null, 'propVal', [text(dataEntry.properties[p])])
+				td('propName', null, [text(p)]),
+				td('propVal' , null, [text(dataEntry.properties[p])])
 			]));
 	    }
+	    propE = createElement('table', 'propTable', null, [ bodyE ]);
     }
 
 	$(tr( null, { id: 'entry' + dataEntry.id }, [
 		td( null, null, [ text( printDate(dataEntry.received) ) ] ),
 		td( null, null, [ text( dataEntry.topic ) ] ),
-		propE
+		td( null, null, [ propE ] )
 	])).appendTo(eventsBody);
 }
 
 var timeline = false;
+var timelineLegend = false;
 $(document).ready(function(){
 	eventsTable = $('#eventsTable');
 	eventsBody  = eventsTable.find('tbody');
 	timeline = $('#timeline');
+	timelineLegend = $('#timelineLegend');
 
 	$('#clear').click(function () {
 		$.post(pluginRoot, { 'action':'clear' }, renderData, 'json');
@@ -84,15 +84,16 @@ $(document).ready(function(){
 		if (timelineHidden) {
 			$(this).text(i18n.displayList);
 			timeline.removeClass('ui-helper-hidden');
+			timelineLegend.removeClass('ui-helper-hidden');
 			eventsTable.addClass('ui-helper-hidden');
 		} else {
 			$(this).text(i18n.displayTimeline);
 			timeline.addClass('ui-helper-hidden');
+			timelineLegend.addClass('ui-helper-hidden');
 			eventsTable.removeClass('ui-helper-hidden');
 		}
 	});
 	$('#reload').click(function() {
 		$.get(pluginRoot + '/data.json', null, renderData, 'json');
-		//renderData(eventData);
 	}).click();
 });
