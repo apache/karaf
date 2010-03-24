@@ -98,8 +98,7 @@ class BundleContextImpl implements FelixBundleContext
         throws InvalidSyntaxException
     {
         checkValidity();
-
-        return FrameworkUtil.createFilter(expr);
+        return new FilterImpl(expr);
     }
 
     public Bundle installBundle(String location)
