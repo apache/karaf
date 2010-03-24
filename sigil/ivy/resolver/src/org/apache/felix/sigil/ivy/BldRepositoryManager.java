@@ -56,6 +56,11 @@ public class BldRepositoryManager extends AbstractRepositoryManager
         for (String name : repos.keySet())
         {
             Properties repo = repos.get(name);
+            if (Boolean.parseBoolean(repo.getProperty("disabled", "false")))
+            {
+                continue;
+            }
+            
             String optStr = repo.getProperty("optional", "false");
             boolean optional = Boolean.parseBoolean(optStr.trim());
 

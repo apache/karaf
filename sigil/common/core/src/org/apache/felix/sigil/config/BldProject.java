@@ -337,7 +337,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
 
     /**
      * set internal OSGiImport and isDependency flags, based on external
-     * resolution= attribute.
+     * resolve= attribute.
      * 
      * OSGiImport: AUTO ALWAYS NEVER dependency: default - compile !dependency:
      * auto runtime ignore
