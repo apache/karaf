@@ -83,26 +83,36 @@ public class FilterImpl implements Filter
     static class DictionaryCapability implements Capability
     {
         private final StringMap m_map;
+        private final Dictionary m_dict;
 
         public DictionaryCapability(Dictionary dict, boolean caseSensitive)
         {
-            m_map = new StringMap(caseSensitive);
-            if (dict != null)
+            if (!caseSensitive)
             {
-                Enumeration keys = dict.keys();
-                while (keys.hasMoreElements())
+                m_dict = null;
+                m_map = new StringMap(caseSensitive);
+                if (dict != null)
                 {
-                    Object key = keys.nextElement();
-                    if (m_map.get(key) == null)
+                    Enumeration keys = dict.keys();
+                    while (keys.hasMoreElements())
                     {
-                        m_map.put(key, new Attribute((String) key, dict.get(key), false));
-                    }
-                    else
-                    {
-                        throw new IllegalArgumentException(
-                            "Duplicate attribute: " + key.toString());
+                        Object key = keys.nextElement();
+                        if (m_map.get(key) == null)
+                        {
+                            m_map.put(key, new Attribute((String) key, dict.get(key), false));
+                        }
+                        else
+                        {
+                            throw new IllegalArgumentException(
+                                "Duplicate attribute: " + key.toString());
+                        }
                     }
                 }
+            }
+            else
+            {
+                m_map = null;
+                m_dict = dict;
             }
         }
 
@@ -128,12 +138,18 @@ public class FilterImpl implements Filter
 
         public Attribute getAttribute(String name)
         {
-            return (Attribute) m_map.get(name);
+            if (m_map != null)
+            {
+                return (Attribute) m_map.get(name);
+            }
+
+            Object value = m_dict.get(name);
+            return (value == null) ? null : new Attribute(name, value, false);
         }
 
         public List<Attribute> getAttributes()
         {
-            return new ArrayList(m_map.values());
+            return new ArrayList();
         }
 
         public List<String> getUses()
@@ -144,25 +160,11 @@ public class FilterImpl implements Filter
 
     static class ServiceReferenceCapability implements Capability
     {
-        private final StringMap m_map;
+        private final ServiceReference m_sr;
 
         public ServiceReferenceCapability(ServiceReference sr)
         {
-            m_map = new StringMap(false);
-
-            String[] keys = sr.getPropertyKeys();
-            for (int i = 0; i < keys.length; i++)
-            {
-                if (m_map.get(keys[i]) == null)
-                {
-                    m_map.put(keys[i], new Attribute(keys[i], sr.getProperty(keys[i]), false));
-                }
-                else
-                {
-                    throw new IllegalArgumentException(
-                        "Duplicate attribute: " + keys[i].toString());
-                }
-            }
+            m_sr = sr;
         }
 
         public Module getModule()
@@ -187,12 +189,13 @@ public class FilterImpl implements Filter
 
         public Attribute getAttribute(String name)
         {
-            return (Attribute) m_map.get(name);
+            Object value = m_sr.getProperty(name);
+            return (value == null) ? null : new Attribute(name, value, false);
         }
 
         public List<Attribute> getAttributes()
         {
-            return new ArrayList(m_map.values());
+            return new ArrayList();
         }
 
         public List<String> getUses()
