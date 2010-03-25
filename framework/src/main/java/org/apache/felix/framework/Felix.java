@@ -1133,10 +1133,14 @@ ex.printStackTrace();
                 }
                 catch (IllegalStateException ex)
                 {
-                    fireFrameworkEvent(FrameworkEvent.ERROR, impl, ex);
-                    m_logger.log(
-                        Logger.LOG_ERROR,
-                        "Error locking " + impl._getLocation(), ex);
+                    // Ignore if the bundle has been uninstalled.
+                    if (impl.getState() != Bundle.UNINSTALLED)
+                    {
+                        fireFrameworkEvent(FrameworkEvent.ERROR, impl, ex);
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Error locking " + impl._getLocation(), ex);
+                    }
                     continue;
                 }
 
