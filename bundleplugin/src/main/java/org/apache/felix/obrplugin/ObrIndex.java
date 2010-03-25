@@ -109,7 +109,7 @@ public final class ObrIndex extends AbstractMojo {
                 }
                 catch (Exception e)
                 {
-                    log.warn("Error processing bundle: " + file, e);
+                    log.warn("Error processing bundle: " + file + " " + e.getMessage());
                 }
             }
             Writer writer = new FileWriter( new File(repositoryXml) );
@@ -178,7 +178,7 @@ public final class ObrIndex extends AbstractMojo {
                 finalUri = sb.toString();
             }
         }
-        else
+        else if (urlTemplate != null)
         {
             String dir = path.getParentFile().toURI().toURL().toString();
             if (dir.endsWith("/"))
@@ -199,9 +199,8 @@ public final class ObrIndex extends AbstractMojo {
     private final FileFilter filter = new FileFilter() {
 
         public boolean accept(File pathname) {
-            return pathname.getName().endsWith(".jar");
+            return pathname.getName().endsWith("ar");
         }
-
     };
 
 
