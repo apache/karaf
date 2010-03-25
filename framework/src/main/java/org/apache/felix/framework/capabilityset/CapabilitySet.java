@@ -132,10 +132,13 @@ public class CapabilitySet
         Map<Object, Set<Capability>> index, Capability cap, Object capValue)
     {
         Set<Capability> caps = index.get(capValue);
-        caps.remove(cap);
-        if (caps.size() == 0)
+        if (caps != null)
         {
-            index.remove(capValue);
+            caps.remove(cap);
+            if (caps.size() == 0)
+            {
+                index.remove(capValue);
+            }
         }
     }
 

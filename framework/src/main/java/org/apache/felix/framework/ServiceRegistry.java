@@ -19,8 +19,10 @@
 package org.apache.felix.framework;
 
 import java.util.*;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.CapabilitySet;
+import org.apache.felix.framework.capabilityset.SimpleFilter;
 
-import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.*;
 import org.osgi.framework.launch.Framework;
@@ -30,13 +32,16 @@ public class ServiceRegistry
     private final Logger m_logger;
     private long m_currentServiceId = 1L;
     // Maps bundle to an array of service registrations.
-    private final Map m_serviceRegsMap = Collections.synchronizedMap(new HashMap());
+    private final Map m_regsMap = Collections.synchronizedMap(new HashMap());
+    // Capability set for all service registrations.
+    private final CapabilitySet m_regCapSet;
+
     // Maps registration to thread to keep track when a
     // registration is in use, which will cause other
     // threads to wait.
-    private Map m_lockedRegsMap = new HashMap();
+    private final Map m_lockedRegsMap = new HashMap();
     // Maps bundle to an array of usage counts.
-    private Map m_inUseMap = new HashMap();
+    private final Map m_inUseMap = new HashMap();
 
     private final ServiceRegistryCallbacks m_callbacks;
 
@@ -48,11 +53,15 @@ public class ServiceRegistry
     {
         m_logger = logger;
         m_callbacks = callbacks;
+
+        List indices = new ArrayList();
+        indices.add(Constants.OBJECTCLASS);
+        m_regCapSet = new CapabilitySet(indices);
     }
 
     public ServiceReference[] getRegisteredServices(Bundle bundle)
     {
-        ServiceRegistration[] regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
+        ServiceRegistration[] regs = (ServiceRegistration[]) m_regsMap.get(bundle);
         if (regs != null)
         {
             List refs = new ArrayList(regs.length);
@@ -75,7 +84,7 @@ public class ServiceRegistry
     public ServiceRegistration registerService(
         Bundle bundle, String[] classNames, Object svcObj, Dictionary dict)
     {
-        ServiceRegistration reg = null;
+        ServiceRegistrationImpl reg = null;
 
         synchronized (this)
         {
@@ -87,8 +96,9 @@ public class ServiceRegistry
             addHooks(classNames, svcObj, reg.getReference());
 
             // Get the bundles current registered services.
-            ServiceRegistration[] regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
-            m_serviceRegsMap.put(bundle, addServiceRegistration(regs, reg));
+            ServiceRegistration[] regs = (ServiceRegistration[]) m_regsMap.get(bundle);
+            m_regsMap.put(bundle, addServiceRegistration(regs, reg));
+            m_regCapSet.addCapability((Capability) reg.getReference());
         }
 
         // Notify callback objects about registered service.
@@ -114,8 +124,9 @@ public class ServiceRegistry
             // new bundles will be able to look up the service.
 
             // Now remove the registered service.
-            ServiceRegistration[] regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
-            m_serviceRegsMap.put(bundle, removeServiceRegistration(regs, reg));
+            ServiceRegistration[] regs = (ServiceRegistration[]) m_regsMap.get(bundle);
+            m_regsMap.put(bundle, removeServiceRegistration(regs, reg));
+            m_regCapSet.removeCapability((Capability) reg.getReference());
         }
 
         // Notify callback objects about unregistering service.
@@ -151,7 +162,7 @@ public class ServiceRegistry
         ServiceRegistration[] regs = null;
         synchronized (this)
         {
-            regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
+            regs = (ServiceRegistration[]) m_regsMap.get(bundle);
         }
 
         // Note, there is no race condition here with respect to the
@@ -171,73 +182,35 @@ public class ServiceRegistry
         // Now remove the bundle itself.
         synchronized (this)
         {
-            m_serviceRegsMap.remove(bundle);
+            m_regsMap.remove(bundle);
         }
     }
 
-    public List getServiceReferences(String className, Filter filter)
+    public synchronized List getServiceReferences(String className, SimpleFilter filter)
     {
-        // Create a filtered list of service references.
-        List list = new ArrayList();
-
-        Object[] registrations = m_serviceRegsMap.values().toArray();
-        
-        // Iterator over all service registrations.
-        for (int i = 0; i < registrations.length; i++)
+        if ((className == null) && (filter == null))
         {
-            ServiceRegistration[] regs = (ServiceRegistration[]) registrations[i];
-
-            for (int regIdx = 0;
-                (regs != null) && (regIdx < regs.length);
-                regIdx++)
-            {
-                try
-                {
-                    // Determine if the registered services matches
-                    // the search criteria.
-                    boolean matched = false;
-
-                    // If className is null, then look at filter only.
-                    if ((className == null) &&
-                        ((filter == null) || filter.match(regs[regIdx].getReference())))
-                    {
-                        matched = true;
-                    }
-                    // If className is not null, then first match the
-                    // objectClass property before looking at the
-                    // filter.
-                    else if (className != null)
-                    {
-                        String[] objectClass = (String[])
-                            ((ServiceRegistrationImpl) regs[regIdx])
-                                .getProperty(FelixConstants.OBJECTCLASS);
-                        for (int classIdx = 0;
-                            classIdx < objectClass.length;
-                            classIdx++)
-                        {
-                            if (objectClass[classIdx].equals(className) &&
-                                ((filter == null) || filter.match(regs[regIdx].getReference())))
-                            {
-                                matched = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Add reference if it was a match.
-                    if (matched)
-                    {
-                        list.add(regs[regIdx].getReference());
-                    }
-                }
-                catch (IllegalStateException ex)
-                {
-                    // Don't include the reference as it is not valid anymore
-                }
-            }
+            // Return all services.
+            filter = new SimpleFilter(Constants.OBJECTCLASS, "*", SimpleFilter.PRESENT);
         }
+        else if ((className != null) && (filter == null))
+        {
+            // Return services matching the class name.
+            filter = new SimpleFilter(Constants.OBJECTCLASS, className, SimpleFilter.EQ);
+        }
+        else if ((className != null) && (filter != null))
+        {
+            // Return services matching the class name and filter.
+            List filters = new ArrayList(2);
+            filters.add(new SimpleFilter(Constants.OBJECTCLASS, className, SimpleFilter.EQ));
+            filters.add(filter);
+            filter = new SimpleFilter(null, filters, SimpleFilter.AND);
+        }
+        // else just use the specified filter.
 
-        return list;
+        Set<Capability> matches = m_regCapSet.match(filter, false);
+
+        return new ArrayList(matches);
     }
 
     public synchronized ServiceReference[] getServicesInUse(Bundle bundle)

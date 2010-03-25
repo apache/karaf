@@ -22,6 +22,9 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
+import org.apache.felix.framework.capabilityset.Attribute;
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.Directive;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.Wire;
 
@@ -69,9 +72,6 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
         // This reference is the "standard" reference for this
         // service and will always be returned by getReference().
-        // Since all reference to this service are supposed to
-        // be equal, we use the hashcode of this reference for
-        // a references to this service in ServiceReference.
         m_ref = new ServiceReferenceImpl();
     }
 
@@ -164,7 +164,8 @@ class ServiceRegistrationImpl implements ServiceRegistration
         // Case 2.
         if ((m_factory != null)
             && (m_factory.getClass().getClassLoader() instanceof BundleReference)
-            && !((BundleReference) m_factory.getClass().getClassLoader()).getBundle().equals(m_bundle))
+            && !((BundleReference) m_factory.getClass()
+                .getClassLoader()).getBundle().equals(m_bundle))
         {
             return true;
         }
@@ -315,7 +316,8 @@ class ServiceRegistrationImpl implements ServiceRegistration
         {
             for (int i = 0; i < m_classes.length; i++)
             {
-                Class clazz = Util.loadClassUsingClass(svcObj.getClass(), m_classes[i], Felix.m_secureAction);
+                Class clazz = Util.loadClassUsingClass(
+                    svcObj.getClass(), m_classes[i], Felix.m_secureAction);
                 if ((clazz == null) || !clazz.isAssignableFrom(svcObj.getClass()))
                 {
                     if (clazz == null)
@@ -376,13 +378,57 @@ class ServiceRegistrationImpl implements ServiceRegistration
         }
     }
 
-    class ServiceReferenceImpl implements ServiceReference
+    //
+    // ServiceReference implementation
+    //
+
+    class ServiceReferenceImpl implements ServiceReference, Capability
     {
         private ServiceReferenceImpl() {}
 
         ServiceRegistrationImpl getRegistration()
         {
             return ServiceRegistrationImpl.this;
+        }
+
+        //
+        // Capability methods.
+        //
+
+        public Module getModule()
+        {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String getNamespace()
+        {
+            return "service-reference";
+        }
+
+        public Directive getDirective(String name)
+        {
+            return null;
+        }
+
+        public List<Directive> getDirectives()
+        {
+            return Collections.emptyList();
+        }
+
+        public Attribute getAttribute(String name)
+        {
+            Object value = ServiceRegistrationImpl.this.getProperty(name);
+            return (value == null) ? null : new Attribute(name, value, false);
+        }
+
+        public List<Attribute> getAttributes()
+        {
+            return Collections.emptyList();
+        }
+
+        public List<String> getUses()
+        {
+            return Collections.emptyList();
         }
 
         public Object getProperty(String s)

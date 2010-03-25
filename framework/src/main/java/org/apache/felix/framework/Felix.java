@@ -34,6 +34,7 @@ import org.apache.felix.framework.capabilityset.CapabilitySet;
 import org.apache.felix.framework.capabilityset.Directive;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.capabilityset.SimpleFilter;
 import org.apache.felix.framework.resolver.Wire;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.resolver.ResolveException;
@@ -2848,10 +2849,17 @@ ex.printStackTrace();
         throws InvalidSyntaxException
     {
         // Define filter if expression is not null.
-        Filter filter = null;
+        SimpleFilter filter = null;
         if (expr != null)
         {
-            filter = FrameworkUtil.createFilter(expr);
+            try
+            {
+                filter = SimpleFilter.parse(expr);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidSyntaxException(ex.getMessage(), expr);
+            }
         }
 
         // Ask the service registry for all matching service references.
