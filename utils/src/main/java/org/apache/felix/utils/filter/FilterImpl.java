@@ -40,29 +40,31 @@ import org.osgi.framework.Version;
 public class FilterImpl implements Filter {
 
     /* filter operators */
-    private static final int			EQUAL		= 1;
-    private static final int			APPROX		= 2;
-    private static final int			GREATER		= 3;
-    private static final int			LESS		= 4;
-    private static final int			PRESENT		= 5;
-    private static final int			SUBSTRING	= 6;
-    private static final int			AND			= 7;
-    private static final int			OR			= 8;
-    private static final int			NOT			= 9;
-    private static final int			SUBSET		= 10;
-    private static final int			SUPERSET	= 11;
+    private static final int            EQUAL       = 1;
+    private static final int            APPROX      = 2;
+    private static final int            GTEQ        = 3;
+    private static final int            LTEQ        = 4;
+    private static final int            GT          = 5;
+    private static final int            LT          = 6;
+    private static final int            PRESENT     = 7;
+    private static final int            SUBSTRING   = 8;
+    private static final int            AND         = 9;
+    private static final int            OR          = 10;
+    private static final int            NOT         = 11;
+    private static final int            SUBSET      = 12;
+    private static final int            SUPERSET    = 13;
 
     /** filter operation */
-    private final int					op;
+    private final int                   op;
     /** filter attribute or null if operation AND, OR or NOT */
-    private final String				attr;
+    private final String                attr;
     /** filter operands */
-    private final Object				value;
+    private final Object                value;
     /** optim in case of version */
     private final Object                converted;
 
     /* normalized filter string for Filter object */
-    private transient volatile String	filterString;
+    private transient volatile String   filterString;
 
     /**
      * Constructs a {@link FilterImpl} object. This filter object may be
@@ -263,16 +265,30 @@ public class FilterImpl implements Filter {
 
                 break;
             }
-            case GREATER : {
+            case GTEQ: {
                 sb.append(attr);
                 sb.append(">=");
                 sb.append(encodeValue((String) value));
 
                 break;
             }
-            case LESS : {
+            case LTEQ: {
                 sb.append(attr);
                 sb.append("<=");
+                sb.append(encodeValue((String) value));
+
+                break;
+            }
+            case GT: {
+                sb.append(attr);
+                sb.append(">");
+                sb.append(encodeValue((String) value));
+
+                break;
+            }
+            case LT: {
+                sb.append(attr);
+                sb.append("<");
                 sb.append(encodeValue((String) value));
 
                 break;
@@ -389,8 +405,10 @@ public class FilterImpl implements Filter {
 
             case SUBSTRING :
             case EQUAL :
-            case GREATER :
-            case LESS :
+            case GTEQ:
+            case LTEQ:
+            case GT:
+            case LT:
             case APPROX :
             case SUBSET :
             case SUPERSET : {
@@ -443,8 +461,10 @@ public class FilterImpl implements Filter {
 
             case SUBSTRING :
             case EQUAL :
-            case GREATER :
-            case LESS :
+            case GTEQ:
+            case LTEQ:
+            case GT:
+            case LT:
             case APPROX :
             case SUBSET :
             case SUPERSET : {
@@ -577,11 +597,17 @@ public class FilterImpl implements Filter {
                     case EQUAL : {
                         return ((Version) value1).compareTo(converted) == 0;
                     }
-                    case GREATER : {
+                    case GTEQ: {
                         return ((Version) value1).compareTo(converted) >= 0;
                     }
-                    case LESS : {
+                    case LTEQ: {
                         return ((Version) value1).compareTo(converted) <= 0;
+                    }
+                    case GT: {
+                        return ((Version) value1).compareTo(converted) > 0;
+                    }
+                    case LT: {
+                        return ((Version) value1).compareTo(converted) < 0;
                     }
                 }
             } else {
@@ -808,11 +834,17 @@ public class FilterImpl implements Filter {
 
                 return string.equalsIgnoreCase(string2);
             }
-            case GREATER : {
+            case GTEQ: {
                 return string.compareTo((String) value2) >= 0;
             }
-            case LESS : {
+            case LTEQ: {
                 return string.compareTo((String) value2) <= 0;
+            }
+            case GT: {
+                return string.compareTo((String) value2) > 0;
+            }
+            case LT: {
+                return string.compareTo((String) value2) < 0;
             }
         }
         return false;
@@ -834,11 +866,17 @@ public class FilterImpl implements Filter {
             case EQUAL : {
                 return intval == intval2;
             }
-            case GREATER : {
+            case GTEQ: {
                 return intval >= intval2;
             }
-            case LESS : {
+            case LTEQ: {
                 return intval <= intval2;
+            }
+            case GT: {
+                return intval > intval2;
+            }
+            case LT: {
+                return intval < intval2;
             }
         }
         return false;
@@ -861,11 +899,17 @@ public class FilterImpl implements Filter {
             case EQUAL : {
                 return longval == longval2;
             }
-            case GREATER : {
+            case GTEQ: {
                 return longval >= longval2;
             }
-            case LESS : {
+            case LTEQ: {
                 return longval <= longval2;
+            }
+            case GT: {
+                return longval > longval2;
+            }
+            case LT: {
+                return longval < longval2;
             }
         }
         return false;
@@ -888,11 +932,17 @@ public class FilterImpl implements Filter {
             case EQUAL : {
                 return byteval == byteval2;
             }
-            case GREATER : {
+            case GTEQ: {
                 return byteval >= byteval2;
             }
-            case LESS : {
+            case LTEQ: {
                 return byteval <= byteval2;
+            }
+            case GT: {
+                return byteval > byteval2;
+            }
+            case LT: {
+                return byteval < byteval2;
             }
         }
         return false;
@@ -916,11 +966,17 @@ public class FilterImpl implements Filter {
             case EQUAL : {
                 return shortval == shortval2;
             }
-            case GREATER : {
+            case GTEQ: {
                 return shortval >= shortval2;
             }
-            case LESS : {
+            case LTEQ: {
                 return shortval <= shortval2;
+            }
+            case GT: {
+                return shortval > shortval2;
+            }
+            case LT: {
+                return shortval < shortval2;
             }
         }
         return false;
@@ -950,11 +1006,17 @@ public class FilterImpl implements Filter {
                         || (Character.toLowerCase(charval) == Character
                                 .toLowerCase(charval2));
             }
-            case GREATER : {
+            case GTEQ: {
                 return charval >= charval2;
             }
-            case LESS : {
+            case LTEQ: {
                 return charval <= charval2;
+            }
+            case GT: {
+                return charval > charval2;
+            }
+            case LT: {
+                return charval < charval2;
             }
         }
         return false;
@@ -970,8 +1032,8 @@ public class FilterImpl implements Filter {
         switch (operation) {
             case APPROX :
             case EQUAL :
-            case GREATER :
-            case LESS : {
+            case GTEQ:
+            case LTEQ: {
                 return boolval == boolval2;
             }
         }
@@ -996,11 +1058,17 @@ public class FilterImpl implements Filter {
             case EQUAL : {
                 return Float.compare(floatval, floatval2) == 0;
             }
-            case GREATER : {
+            case GTEQ: {
                 return Float.compare(floatval, floatval2) >= 0;
             }
-            case LESS : {
+            case LTEQ: {
                 return Float.compare(floatval, floatval2) <= 0;
+            }
+            case GT: {
+                return Float.compare(floatval, floatval2) > 0;
+            }
+            case LT: {
+                return Float.compare(floatval, floatval2) < 0;
             }
         }
         return false;
@@ -1024,11 +1092,17 @@ public class FilterImpl implements Filter {
             case EQUAL : {
                 return Double.compare(doubleval, doubleval2) == 0;
             }
-            case GREATER : {
+            case GTEQ: {
                 return Double.compare(doubleval, doubleval2) >= 0;
             }
-            case LESS : {
+            case LTEQ: {
                 return Double.compare(doubleval, doubleval2) <= 0;
+            }
+            case GT: {
+                return Double.compare(doubleval, doubleval2) > 0;
+            }
+            case LT: {
+                return Double.compare(doubleval, doubleval2) < 0;
             }
         }
         return false;
@@ -1070,11 +1144,17 @@ public class FilterImpl implements Filter {
             case EQUAL : {
                 return value1.compareTo(value2) == 0;
             }
-            case GREATER : {
+            case GTEQ: {
                 return value1.compareTo(value2) >= 0;
             }
-            case LESS : {
+            case LTEQ: {
                 return value1.compareTo(value2) <= 0;
+            }
+            case GT: {
+                return value1.compareTo(value2) > 0;
+            }
+            case LT: {
+                return value1.compareTo(value2) < 0;
             }
         }
         return false;
@@ -1112,8 +1192,8 @@ public class FilterImpl implements Filter {
         switch (operation) {
             case APPROX :
             case EQUAL :
-            case GREATER :
-            case LESS : {
+            case GTEQ:
+            case LTEQ: {
                 return value1.equals(value2);
             }
         }
@@ -1312,23 +1392,29 @@ public class FilterImpl implements Filter {
                 case '>' : {
                     if (filterChars[pos + 1] == '=') {
                         pos += 2;
-                        return new FilterImpl(FilterImpl.GREATER, attr,
+                        return new FilterImpl(FilterImpl.GTEQ, attr,
                                 parse_value());
                     }
-                    break;
+                    else {
+                        pos += 1;
+                        return new FilterImpl(FilterImpl.GT, attr,
+                                parse_value());
+                    }
                 }
                 case '<' : {
                     if (filterChars[pos + 1] == '=') {
                         pos += 2;
-                        return new FilterImpl(FilterImpl.LESS, attr,
+                        return new FilterImpl(FilterImpl.LTEQ, attr,
                                 parse_value());
-                    }
-                    if (filterChars[pos + 1] == '*') {
+                    } else if (filterChars[pos + 1] == '*') {
                         pos += 2;
                         return new FilterImpl(FilterImpl.SUBSET, attr,
                                 parse_value());
+                    } else {
+                        pos += 1;
+                        return new FilterImpl(FilterImpl.LT, attr,
+                                parse_value());
                     }
-                    break;
                 }
                 case '=' : {
                     if (filterChars[pos + 1] == '*') {
