@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
+import org.apache.felix.scr.impl.BundleComponentActivator;
 import org.apache.felix.scr.impl.helper.BindMethod;
 import org.apache.felix.scr.impl.helper.UnbindMethod;
 import org.apache.felix.scr.impl.helper.UpdatedMethod;
@@ -570,10 +571,28 @@ public class DependencyManager implements ServiceListener, Reference
     {
         if ( hasGetPermission() )
         {
+            // component activator may be null if disposed concurrently
+            BundleComponentActivator bca = m_componentManager.getActivator();
+            if ( bca == null )
+            {
+                return null;
+            }
+
+            // get bundle context, may be null if component deactivated since getting bca
+            BundleContext bc = bca.getBundleContext();
+            if ( bc == null )
+            {
+                return null;
+            }
+
             try
             {
-                return m_componentManager.getActivator().getBundleContext().getServiceReferences(
+                return bc.getServiceReferences(
                     m_dependencyMetadata.getInterface(), targetFilter );
+            }
+            catch ( IllegalStateException ise )
+            {
+                // bundle context is not valid any longer, cannot log
             }
             catch ( InvalidSyntaxException ise )
             {
