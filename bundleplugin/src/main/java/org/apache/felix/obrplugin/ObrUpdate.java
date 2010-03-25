@@ -192,36 +192,6 @@ public class ObrUpdate
         {
             m_logger.info( "Adding " + m_obrXml );
 
-            try
-            {
-                KXmlParser kxp = new KXmlParser();
-                kxp.setInput(new FileInputStream(new File(m_obrXml)), null);
-                PullParser parser = new PullParser();
-                for (int event = kxp.nextTag(); event != XmlPullParser.START_TAG; event = kxp.nextTag())
-                {
-                    if (RepositoryParser.CATEGORY.equals(kxp.getName()))
-                    {
-                        m_resourceBundle.addCategory(parser.parseCategory(kxp));
-                    }
-                    else if (RepositoryParser.REQUIRE.equals(kxp.getName()))
-                    {
-                        m_resourceBundle.addRequire(parser.parseRequire(kxp));
-                    }
-                    else if (RepositoryParser.CAPABILITY.equals(kxp.getName()))
-                    {
-                        m_resourceBundle.addCapability(parser.parseCapability(kxp));
-                    }
-                    else
-                    {
-                        parser.ignoreTag(kxp);
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                throw new MojoExecutionException("Unable to parse obr xml: " + m_obrXml, e);
-            }
             // URL url = getClass().getResource("/SchemaObr.xsd");
             // TODO validate obr.xml file
 
@@ -339,7 +309,8 @@ public class ObrUpdate
             {
                 KXmlParser kxp = new KXmlParser();
                 kxp.setInput(is, null);
-                kxp.nextTag();
+                kxp.nextTag(); // skip top level element
+                kxp.nextTag(); // go to first child element
                 parseObrXml(kxp);
             }
             finally
