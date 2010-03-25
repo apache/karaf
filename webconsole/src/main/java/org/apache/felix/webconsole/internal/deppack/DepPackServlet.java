@@ -55,6 +55,8 @@ public class DepPackServlet extends SimpleWebConsolePlugin implements OsgiManage
     private static final String ACTION_UNINSTALL = "uninstalldp";
     private static final String PARAMETER_PCK_FILE = "pckfile";
 
+    private static final String DEPL_SERVICE = DeploymentAdmin.class.getName();
+
     // templates
     private final String TEMPLATE;
 
@@ -81,7 +83,7 @@ public class DepPackServlet extends SimpleWebConsolePlugin implements OsgiManage
             if ( params != null )
             {
                 final FileItem pck = getFileItem( params, PARAMETER_PCK_FILE, false );
-                final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DeploymentAdmin.class.getName() );
+                final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DEPL_SERVICE );
                 if ( admin != null )
                 {
                     try
@@ -105,7 +107,7 @@ public class DepPackServlet extends SimpleWebConsolePlugin implements OsgiManage
             final String pckId = req.getPathInfo().substring( req.getPathInfo().lastIndexOf( '/' ) + 1 );
             if ( pckId != null && pckId.length() > 0 )
             {
-                final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DeploymentAdmin.class.getName() );
+                final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DEPL_SERVICE );
                 if ( admin != null )
                 {
                     try
@@ -158,7 +160,7 @@ public class DepPackServlet extends SimpleWebConsolePlugin implements OsgiManage
         IOException
     {
 
-        final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DeploymentAdmin.class.getName() );
+        final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DEPL_SERVICE );
 
         StringWriter w = new StringWriter();
         PrintWriter w2 = new PrintWriter(w);
