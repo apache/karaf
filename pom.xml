@@ -63,6 +63,8 @@
       </activation>
       <modules>
         <module>maven-obr-plugin</module>
+        <module>utils</module>
+        <module>bundlerepository</module>
         <module>bundleplugin</module>
         <module>scr-annotations</module>
         <module>scrplugin</module>
@@ -105,6 +107,7 @@
         <module>shell.gui.plugin</module>
         <module>shell.remote</module>
         <module>org.osgi.service.obr</module>
+        <module>utils</module>
         <module>bundlerepository</module>
         <module>log</module>
         <module>eventadmin</module>
