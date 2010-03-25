@@ -157,26 +157,45 @@ public class ConfigurationComponentRegistry extends ComponentRegistry implements
                     break;
 
                 case ConfigurationEvent.CM_UPDATED:
-                    final BundleContext bundleContext = cm.getActivator().getBundleContext();
+                    final BundleComponentActivator activator = cm.getActivator();
+                    if ( activator == null )
+                    {
+                        break;
+                    }
+
+                    final BundleContext bundleContext = activator.getBundleContext();
+                    if ( bundleContext == null )
+                    {
+                        break;
+                    }
+
                     final ServiceReference caRef = bundleContext.getServiceReference( ConfigurationAdmin.class
                         .getName() );
                     if ( caRef != null )
                     {
-                        final ConfigurationAdmin ca = ( ConfigurationAdmin ) bundleContext.getService( caRef );
-                        if ( ca != null )
+                        try
                         {
-                            try
+                            final ConfigurationAdmin ca = ( ConfigurationAdmin ) bundleContext.getService( caRef );
+                            if ( ca != null )
                             {
-                                final Dictionary dict = getConfiguration( ca, pid, bundleContext.getBundle().getLocation() );
-                                if ( dict != null )
+                                try
                                 {
-                                    cm.configurationUpdated( pid, dict );
+                                    final Dictionary dict = getConfiguration( ca, pid, bundleContext.getBundle()
+                                        .getLocation() );
+                                    if ( dict != null )
+                                    {
+                                        cm.configurationUpdated( pid, dict );
+                                    }
+                                }
+                                finally
+                                {
+                                    bundleContext.ungetService( caRef );
                                 }
                             }
-                            finally
-                            {
-                                bundleContext.ungetService( caRef );
-                            }
+                        }
+                        catch ( IllegalStateException ise )
+                        {
+                            // If the bundle has been stopped conurrently
                         }
                     }
                     break;
