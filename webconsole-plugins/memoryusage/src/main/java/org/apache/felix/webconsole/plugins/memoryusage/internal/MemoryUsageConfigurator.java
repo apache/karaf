@@ -1,18 +1,18 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
+ * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
+ * regarding copyright ownership. The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -21,20 +21,16 @@ package org.apache.felix.webconsole.plugins.memoryusage.internal;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeProvider;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
-public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
+class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
 {
-
-    static final String NAME = "org.apache.felix.webconsole.plugins.memoryusage.internal.MemoryUsageConfigurator";
-
-    private static final String PROP_DUMP_THRESHOLD = "dump.threshold";
-
-    private static final String PROP_DUMP_LOCATION = "dump.location";
 
     private final MemoryUsageSupport support;
 
@@ -48,7 +44,13 @@ public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
     @SuppressWarnings("unchecked")
     public void updated(Dictionary properties) throws ConfigurationException
     {
-        final Object thresholdValue = properties.get(PROP_DUMP_THRESHOLD);
+        // ensure default values if there is no config or config is deleted
+        if (properties == null)
+        {
+            properties = new Hashtable();
+        }
+
+        final Object thresholdValue = properties.get(MemoryUsageConstants.PROP_DUMP_THRESHOLD);
         if (thresholdValue != null)
         {
             final int threshold;
@@ -78,11 +80,19 @@ public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
                 throw failure(iae.getMessage());
             }
         }
+        else
+        {
+            support.setThreshold(-1);
+        }
 
-        final Object locationValue = properties.get(PROP_DUMP_LOCATION);
+        final Object locationValue = properties.get(MemoryUsageConstants.PROP_DUMP_LOCATION);
         if (locationValue instanceof String)
         {
             support.setDumpLocation((String) locationValue);
+        }
+        else
+        {
+            support.setDumpLocation(null);
         }
     }
 
@@ -93,7 +103,7 @@ public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
 
     public ObjectClassDefinition getObjectClassDefinition(String id, String locale)
     {
-        if (!NAME.equals(id))
+        if (!MemoryUsageConstants.PID.equals(id))
         {
             return null;
         }
@@ -102,11 +112,11 @@ public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
         {
 
             final ArrayList<AttributeDefinition> adList = new ArrayList<AttributeDefinition>();
-            adList.add(new AttributeDefinitionImpl(PROP_DUMP_THRESHOLD, "Dump Threshold",
+            adList.add(new AttributeDefinitionImpl(MemoryUsageConstants.PROP_DUMP_THRESHOLD, "Dump Threshold",
                 "Threshold at which to automatically create a memory dump as a percentage in the range "
-                    + MemoryUsageSupport.MIN_DUMP_THRESHOLD + " to " + MemoryUsageSupport.MAX_DUMP_THRESHOLD
+                    + MemoryUsageConstants.MIN_DUMP_THRESHOLD + " to " + MemoryUsageConstants.MAX_DUMP_THRESHOLD
                     + " or zero to disable automatic dump creation.", AttributeDefinition.INTEGER, new String[]
-                    { String.valueOf(MemoryUsageSupport.DEFAULT_DUMP_THRESHOLD) }, 0, null, null)
+                    { String.valueOf(MemoryUsageConstants.DEFAULT_DUMP_THRESHOLD) }, 0, null, null)
             {
                 @Override
                 public String validate(String value)
@@ -114,11 +124,10 @@ public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
                     try
                     {
                         int threshold = Integer.parseInt(value);
-                        if (threshold != 0
-                            && (threshold < MemoryUsageSupport.MIN_DUMP_THRESHOLD || threshold > MemoryUsageSupport.MAX_DUMP_THRESHOLD))
+                        if (!MemoryUsageConstants.isThresholdValid(threshold))
                         {
-                            return "Threshold must in the range " + MemoryUsageSupport.MIN_DUMP_THRESHOLD + " to "
-                                + MemoryUsageSupport.MAX_DUMP_THRESHOLD + " or zero";
+                            return "Threshold must in the range " + MemoryUsageConstants.MIN_DUMP_THRESHOLD + " to "
+                                + MemoryUsageConstants.MAX_DUMP_THRESHOLD + " or zero";
                         }
                         return ""; // everything ok
                     }
@@ -128,7 +137,7 @@ public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
                     }
                 }
             });
-            adList.add(new AttributeDefinitionImpl(PROP_DUMP_LOCATION, "Dumpe Location",
+            adList.add(new AttributeDefinitionImpl(MemoryUsageConstants.PROP_DUMP_LOCATION, "Dumpe Location",
                 "The filesystem location where heap dumps are stored. If this is null or empty (the default) the dumps are stored in "
                     + support.getDefaultDumpLocation(), ""));
 
@@ -149,7 +158,7 @@ public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
 
                 public String getID()
                 {
-                    return NAME;
+                    return MemoryUsageConstants.PID;
                 }
 
                 public String getDescription()
@@ -169,9 +178,9 @@ public class MemoryUsageConfigurator implements ManagedService, MetaTypeProvider
 
     private ConfigurationException failure(final Object invalidValue)
     {
-        return new ConfigurationException(PROP_DUMP_THRESHOLD, "Invalid Dump Threshold value '" + invalidValue
-            + "': Must be an integer number in the range " + MemoryUsageSupport.MIN_DUMP_THRESHOLD + " to "
-            + MemoryUsageSupport.MAX_DUMP_THRESHOLD + " or zero to disable");
+        return new ConfigurationException(MemoryUsageConstants.PROP_DUMP_THRESHOLD, "Invalid Dump Threshold value '"
+            + invalidValue + "': Must be an integer number in the range " + MemoryUsageConstants.MIN_DUMP_THRESHOLD
+            + " to " + MemoryUsageConstants.MAX_DUMP_THRESHOLD + " or zero to disable");
     }
 
     private static class AttributeDefinitionImpl implements AttributeDefinition

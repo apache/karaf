@@ -40,11 +40,12 @@ import org.apache.felix.webconsole.AttachmentProvider;
 import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.WebConsoleUtil;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
-public class MemoryUsagePanel extends AbstractWebConsolePlugin implements ConfigurationPrinter, AttachmentProvider
+class MemoryUsagePanel extends AbstractWebConsolePlugin implements ConfigurationPrinter, AttachmentProvider
 {
 
     /** default log */
@@ -52,9 +53,10 @@ public class MemoryUsagePanel extends AbstractWebConsolePlugin implements Config
 
     private final MemoryUsageSupport support;
 
-    public MemoryUsagePanel(final MemoryUsageSupport support)
+    MemoryUsagePanel(final BundleContext bundleContext, final MemoryUsageSupport support)
     {
         this.support = support;
+        activate(bundleContext);
     }
 
     // ---------- AbstractWebConsolePlugin
@@ -62,7 +64,7 @@ public class MemoryUsagePanel extends AbstractWebConsolePlugin implements Config
     @Override
     public String getLabel()
     {
-        return "memoryusage";
+        return MemoryUsageConstants.LABEL;
     }
 
     @Override

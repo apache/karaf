@@ -1,18 +1,18 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
+ * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
+ * regarding copyright ownership. The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -49,14 +49,12 @@ public class Activator implements BundleActivator
         // install Web Console plugin
         try
         {
-            MemoryUsagePanel tdp = new MemoryUsagePanel(support);
-            tdp.activate(bundleContext);
-
             Dictionary<String, Object> properties = new Hashtable<String, Object>();
-            properties.put("felix.webconsole.label", tdp.getLabel());
+            properties.put("felix.webconsole.label", MemoryUsageConstants.LABEL);
 
             register(bundleContext, new String[]
-                { "javax.servlet.Servlet", "org.apache.felix.webconsole.ConfigurationPrinter" }, tdp, properties);
+                { "javax.servlet.Servlet", "org.apache.felix.webconsole.ConfigurationPrinter" }, new MemoryUsagePanel(
+                bundleContext, support), properties);
         }
         catch (Throwable t)
         {
@@ -66,15 +64,15 @@ public class Activator implements BundleActivator
         // register for configuration
         try
         {
-            MemoryUsageConfigurator tdp = new MemoryUsageConfigurator(support);
             Dictionary<String, Object> properties = new Hashtable<String, Object>();
-            properties.put(Constants.SERVICE_PID, MemoryUsageConfigurator.NAME);
+            properties.put(Constants.SERVICE_PID, MemoryUsageConstants.PID);
             register(bundleContext, new String[]
-                { "org.osgi.service.cm.ManagedService" }, tdp, properties);
+                { "org.osgi.service.cm.ManagedService" }, new MemoryUsageConfigurator(support), properties);
         }
         catch (Throwable t)
         {
-            // Configuration Admin and Metatype Service API might not be available, don't care
+            // Configuration Admin and Metatype Service API might not be
+            // available, don't care
         }
     }
 
@@ -87,7 +85,7 @@ public class Activator implements BundleActivator
         }
     }
 
-    private void register(BundleContext context, String[] serviceNames, Object service,
+    static void register(BundleContext context, String[] serviceNames, Object service,
         Dictionary<String, Object> properties)
     {
 

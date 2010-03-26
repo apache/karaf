@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.TreeSet;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServer;
@@ -46,22 +47,6 @@ import org.slf4j.LoggerFactory;
 final class MemoryUsageSupport implements NotificationListener
 {
 
-    /**
-     * The minimum allowed automatic heap dump threshold (value is 50).
-     */
-    static final int MIN_DUMP_THRESHOLD = 50;
-
-    /**
-     * The maximum allowed automatic heap dump threshold (value is 99).
-     */
-    static final int MAX_DUMP_THRESHOLD = 99;
-
-    /**
-     * The default automatic heap dump threshold if none has been configured
-     * (or no configuration has yet been provided) (value is 95).
-     */
-    static final int DEFAULT_DUMP_THRESHOLD = 95;
-
     // This is the name of the HotSpot Diagnostic MBean
     private static final String HOTSPOT_BEAN_NAME = "com.sun.management:type=HotSpotDiagnostic";
 
@@ -71,6 +56,9 @@ final class MemoryUsageSupport implements NotificationListener
     // or the current working directory
     private final File defaultDumpLocation;
 
+    // the default threshold value
+    private final int defaultThreshold;
+
     // the configured dump location
     private File dumpLocation;
 
@@ -79,13 +67,25 @@ final class MemoryUsageSupport implements NotificationListener
 
     MemoryUsageSupport(final BundleContext context)
     {
-        // get the dump location
-        File dumps = context.getDataFile("dumps");
-        if (dumps == null)
+
+        // the default dump location
+        String propDumps = context.getProperty(MemoryUsageConstants.PROP_DUMP_LOCATION);
+        if (propDumps == null)
         {
-            dumps = new File("dumps");
+            propDumps = "dumps";
         }
-        defaultDumpLocation = dumps.getAbsoluteFile();
+
+        // ensure dump location is an absolute path/location
+        File dumps = new File(propDumps);
+        if (!dumps.isAbsolute())
+        {
+            File bundleDumps = context.getDataFile(propDumps);
+            if (bundleDumps != null)
+            {
+                dumps = bundleDumps;
+            }
+        }
+        this.defaultDumpLocation = dumps.getAbsoluteFile();
 
         // prepare the dump location
         setDumpLocation(null);
@@ -95,7 +95,37 @@ final class MemoryUsageSupport implements NotificationListener
         memEmitter.addNotificationListener(this, null, null);
 
         // set the initial automatic dump threshold
-        setThreshold(DEFAULT_DUMP_THRESHOLD);
+        int defaultThreshold;
+        String propThreshold = context.getProperty(MemoryUsageConstants.PROP_DUMP_THRESHOLD);
+        if (propThreshold != null)
+        {
+            try
+            {
+                defaultThreshold = Integer.parseInt(propThreshold);
+                setThreshold(defaultThreshold);
+            }
+            catch (Exception e)
+            {
+                // NumberFormatException - if propTreshold cannot be parsed to
+                // int
+                // IllegalArgumentException - if threshold is invalid
+                defaultThreshold = -1;
+            }
+        }
+        else
+        {
+            defaultThreshold = -1;
+        }
+
+        // default threshold has not been configured (correctly), assume fixed
+        // default
+        if (defaultThreshold < 0)
+        {
+            defaultThreshold = MemoryUsageConstants.DEFAULT_DUMP_THRESHOLD;
+            setThreshold(defaultThreshold);
+        }
+
+        this.defaultThreshold = defaultThreshold;
     }
 
     void dispose()
@@ -117,15 +147,23 @@ final class MemoryUsageSupport implements NotificationListener
      * @param percentage The threshold as a percentage of memory consumption.
      *            This value may be 0 (zero) to switch off automatic heap dumps
      *            or in the range {@link #MIN_DUMP_THRESHOLD} to
-     *            {@link #MAX_DUMP_THRESHOLD}.
+     *            {@link #MAX_DUMP_THRESHOLD}. If set to a negative value,
+     *            the default threshold is assumed.
      * @throws IllegalArgumentException if the percentage value is outside of
      *             the valid range of thresholds. The message is the percentage
      *             value which is not accepted.
      */
-    final void setThreshold(final int percentage)
+    final void setThreshold(int percentage)
     {
-        if (threshold == 0 || (threshold >= MIN_DUMP_THRESHOLD && threshold <= MAX_DUMP_THRESHOLD))
+        if (percentage < 0)
         {
+            percentage = defaultThreshold;
+        }
+
+        if (MemoryUsageConstants.isThresholdValid(percentage))
+        {
+            TreeSet<String> thresholdPools = new TreeSet<String>();
+            TreeSet<String> noThresholdPools = new TreeSet<String>();
             List<MemoryPoolMXBean> pools = getMemoryPools();
             for (MemoryPoolMXBean pool : pools)
             {
@@ -133,13 +171,21 @@ final class MemoryUsageSupport implements NotificationListener
                 {
                     long threshold = pool.getUsage().getMax() * percentage / 100;
                     pool.setUsageThreshold(threshold);
+                    thresholdPools.add(pool.getName());
+                }
+                else
+                {
+                    noThresholdPools.add(pool.getName());
                 }
             }
             this.threshold = percentage;
+
+            log.info("Setting Automatic Memory Dump Threshold to {}% for pools {}", threshold, thresholdPools);
+            log.info("Automatic Memory Dump cannot be set for pools {}", noThresholdPools);
         }
         else
         {
-            throw new IllegalArgumentException(String.valueOf(threshold));
+            throw new IllegalArgumentException(String.valueOf(percentage));
         }
     }
 
@@ -304,6 +350,8 @@ final class MemoryUsageSupport implements NotificationListener
         {
             this.dumpLocation = new File(dumpLocation).getAbsoluteFile();
         }
+
+        log.info("Storing Memory Dumps in {}", this.dumpLocation);
     }
 
     final File getDumpLocation()

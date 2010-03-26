@@ -25,7 +25,7 @@ import java.util.StringTokenizer;
 
 import org.apache.felix.shell.Command;
 
-public class MemoryUsageCommand implements Command
+class MemoryUsageCommand implements Command
 {
 
     private static final String HELP_CMD = "help";
@@ -42,7 +42,7 @@ public class MemoryUsageCommand implements Command
 
     private final MemoryUsageSupport support;
 
-    public MemoryUsageCommand(final MemoryUsageSupport support)
+    MemoryUsageCommand(final MemoryUsageSupport support)
     {
         this.support = support;
     }
