@@ -73,6 +73,7 @@ public class Console implements Runnable
     private InputStream in;
     private PrintStream out;
     private PrintStream err;
+    private Thread thread;
 
     public Console(CommandProcessor processor,
                    InputStream in,
@@ -134,6 +135,7 @@ public class Console implements Runnable
 
     public void run()
     {
+        thread = Thread.currentThread();
         running = true;
         pipe.start();
         welcome();
@@ -165,6 +167,7 @@ public class Console implements Runnable
         }
         while (running) {
             try {
+                checkInterrupt();
                 String line = reader.readLine(getPrompt());
                 if (line == null)
                 {
@@ -280,7 +283,7 @@ public class Console implements Runnable
     }
 
     private void checkInterrupt() throws IOException {
-        if (interrupt) {
+        if (Thread.interrupted() || interrupt) {
             interrupt = false;
             throw new InterruptedIOException("Keyboard interruption");
         }
@@ -288,6 +291,7 @@ public class Console implements Runnable
 
     private void interrupt() {
         interrupt = true;
+        thread.interrupt();
     }
 
     private class ConsoleInputStream extends InputStream
