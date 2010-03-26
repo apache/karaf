@@ -62,7 +62,7 @@ public class CandidateComparator implements Comparator
                 c = v2.compareTo(v1);
             }
         }
-// TODO: PROTO3 RESOLVER - Need to change this to handle arbitrary capabilities
+// TODO: FELIX3 - Need to change this to handle arbitrary capabilities
 //       that may not have a natural ordering.
         // Assume everything else is a package capability.
         else if (c == 0)

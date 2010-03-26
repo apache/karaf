@@ -270,7 +270,7 @@ public class JarContent implements Content
         return null;
     }
 
-// TODO: This will need to consider security.
+// TODO: SECURITY - This will need to consider security.
     public String getEntryAsNativeLibrary(String entryName)
     {
         // Return result.

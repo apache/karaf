@@ -284,7 +284,7 @@ class ExtensionManager extends URLStreamHandler implements Content
             }
             catch (SecurityException ex)
             {
-                // TODO: security - we need to throw this exception because of the 4.2.0 ct
+                // TODO: SECURITY - we need to throw this exception because of the 4.2.0 ct
                 throw new AccessControlException(ex.getMessage());
             }
         }

@@ -532,7 +532,7 @@ public class Felix extends BundleImpl implements Framework
                 security = security.trim();
                 if (Constants.FRAMEWORK_SECURITY_OSGI.equalsIgnoreCase(security) || (security.length() == 0))
                 {
-                    // TODO: security - we only need our own security manager to convert the exceptions
+                    // TODO: SECURITY - we only need our own security manager to convert the exceptions
                     //       because the 4.2.0 ct does expect them like this in one case. 
                     System.setSecurityManager(m_securityManager = new SecurityManager()
                     {
@@ -3968,8 +3968,7 @@ ex.printStackTrace();
             // dynamic import is allowed without holding any locks, but this is
             // okay since the resolver will double check later after we have
             // acquired the global lock below.
-            if (module.isResolved()
-                && (ResolverImpl.isAllowedDynamicImport(m_resolverState, module, pkgName, new HashMap())))
+            if (module.isResolved() && isAllowedDynamicImport(module, pkgName))
             {
                 // Acquire global lock.
                 boolean locked = acquireGlobalLock();
@@ -4030,6 +4029,12 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + wires.get(wires.size() - 1));
             Module reqModule, Requirement req, boolean obeyMandatory)
         {
             return m_resolverState.getCandidates(reqModule, req, obeyMandatory);
+        }
+
+        public boolean isAllowedDynamicImport(Module module, String pkgName)
+        {
+            return ResolverImpl.getDynamicImportCandidates(
+                m_resolverState, module, pkgName) != null;
         }
 
         private void markResolvedModules(Map<Module, List<Wire>> wireMap)

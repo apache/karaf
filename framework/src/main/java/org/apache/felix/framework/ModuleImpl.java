@@ -2078,41 +2078,28 @@ public class ModuleImpl implements Module
         }
 */
         // Next, check to see if the package is dynamically imported by the module.
-// TODO: FELIX3 - Add Resolver.findAllowedDynamicImport().
-/*
-        Requirement pkgReq = Resolver.findAllowedDynamicImport(module, pkgName);
-        if (pkgReq != null)
+        if (resolver.isAllowedDynamicImport(module, pkgName))
         {
             // Try to see if there is an exporter available.
-            List exports =
-                resolver.getResolvedCandidates(pkgReq, module);
-            exports = (exports.size() == 0)
-                ? resolver.getUnresolvedCandidates(pkgReq, module)
-                : exports;
+            List<Directive> dirs = Collections.EMPTY_LIST;
+            List<Attribute> attrs = new ArrayList(1);
+            attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
+            Requirement req = new RequirementImpl(
+            Capability.PACKAGE_NAMESPACE, dirs, attrs);
+            Set<Capability> exporters = resolver.getCandidates(module, req, false);
 
-            // An exporter might be available, but it may have attributes
-            // that do not match the importer's required attributes, so
-            // check that case by simply looking for an exporter of the
-            // desired package without any attributes.
-            if (exports.size() == 0)
+            Wire wire = null;
+            try
             {
-                try
-                {
-                    IRequirement req = new Requirement(
-                        ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-                    exports = resolver.getResolvedCandidates(req, module);
-                    exports = (exports.size() == 0)
-                        ? resolver.getUnresolvedCandidates(req, module)
-                        : exports;
-                }
-                catch (InvalidSyntaxException ex)
-                {
-                    // This should never happen.
-                }
+                wire = resolver.resolve(module, pkgName);
+            }
+            catch (Exception ex)
+            {
+                wire = null;
             }
 
-            String exporter = (exports.size() == 0)
-                ? null : ((ICapability) exports.get(0)).getModule().getBundle().toString();
+            String exporter = (exporters.size() == 0)
+                ? null : exporters.iterator().next().getModule().getBundle().toString();
 
             StringBuffer sb = new StringBuffer("*** Class '");
             sb.append(name);
@@ -2121,27 +2108,24 @@ public class ModuleImpl implements Module
             sb.append("' is dynamically imported by bundle ");
             sb.append(importer);
             sb.append(".");
-            if (exports.size() > 0)
+            if ((exporters.size() > 0) && (wire == null))
             {
-                if (!pkgReq.isSatisfied((ICapability) exports.get(0)))
-                {
-                    sb.append(" However, bundle ");
-                    sb.append(exporter);
-                    sb.append(" does export this package with attributes that do not match.");
-                }
+                sb.append(" However, bundle ");
+                sb.append(exporter);
+                sb.append(" does export this package with attributes that do not match.");
             }
             sb.append(" ***");
 
             return sb.toString();
         }
-*/
+
         // Next, check to see if there are any exporters for the package at all.
-        Requirement pkgReq = null;
+        List<Directive> dirs = Collections.EMPTY_LIST;
         List<Attribute> attrs = new ArrayList(1);
         attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
-        pkgReq = new RequirementImpl(
-            Capability.PACKAGE_NAMESPACE, new ArrayList<Directive>(0), attrs);
-        Set<Capability> exports = resolver.getCandidates(module, pkgReq, false);
+        Requirement req = new RequirementImpl(
+            Capability.PACKAGE_NAMESPACE, dirs, attrs);
+        Set<Capability> exports = resolver.getCandidates(module, req, false);
         if (exports.size() > 0)
         {
             boolean classpath = false;

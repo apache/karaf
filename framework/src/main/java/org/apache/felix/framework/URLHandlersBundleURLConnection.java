@@ -188,7 +188,7 @@ class URLHandlersBundleURLConnection extends URLConnection
 
     public Permission getPermission()
     {
-        // TODO: This should probably return a FilePermission
+        // TODO: SECURITY - This should probably return a FilePermission
         // to access the bundle JAR file, but we don't have the
         // necessary information here to construct the absolute
         // path of the JAR file...so it would take some

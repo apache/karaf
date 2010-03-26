@@ -19,6 +19,7 @@
 package org.apache.felix.framework.resolver;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -156,19 +157,19 @@ public class ResolverImpl implements Resolver
         // The following call checks all of these conditions and returns
         // a matching dynamic requirement if possible.
         Map<Requirement, Set<Capability>> candidateMap =
-            new HashMap<Requirement, Set<Capability>>();
-        if (isAllowedDynamicImport(state, module, pkgName, candidateMap))
+            getDynamicImportCandidates(state, module, pkgName);
+        if (candidateMap != null)
         {
             m_candidatePermutations.clear();
 
-            Map<Module, List<Wire>> wireMap = new HashMap<Module, List<Wire>>();
-
-            Map<Module, Packages> modulePkgMap = new HashMap<Module, Packages>();
+            Map<Module, List<Wire>> wireMap = new HashMap();
+            Map<Module, Packages> modulePkgMap = new HashMap();
 
 //System.out.println("+++ DYNAMICALLY RESOLVING " + module + " - " + pkgName);
             populateDynamicCandidates(state, module,
                 m_fwkExecEnvStr, m_fwkExecEnvSet, candidateMap);
             m_candidatePermutations.add(candidateMap);
+
             ResolveException rethrow = null;
 
             do
@@ -212,17 +213,14 @@ public class ResolverImpl implements Resolver
     }
 
     // TODO: FELIX3 - It would be nice to make this private.
-    // TODO: FELIX3 - At a minimum, figure out a different way than passing in the
-    //       candidate map.
-    public static boolean isAllowedDynamicImport(
-        ResolverState state, Module module, String pkgName, Map<Requirement,
-        Set<Capability>> candidateMap)
+    public static Map<Requirement, Set<Capability>> getDynamicImportCandidates(
+        ResolverState state, Module module, String pkgName)
     {
         // Unresolved modules cannot dynamically import, nor can the default
         // package be dynamically imported.
         if (!module.isResolved() || pkgName.length() == 0)
         {
-            return false;
+            return null;
         }
 
         // If any of the module exports this package, then we cannot
@@ -233,7 +231,7 @@ public class ResolverImpl implements Resolver
             if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE)
                 && caps.get(i).getAttribute(Capability.PACKAGE_ATTR).getValue().equals(pkgName))
             {
-                return false;
+                return null;
             }
         }
         // If any of our wires have this package, then we cannot
@@ -243,17 +241,18 @@ public class ResolverImpl implements Resolver
         {
             if (wires.get(i).hasPackage(pkgName))
             {
-                return false;
+                return null;
             }
         }
 
         // Loop through the importer's dynamic requirements to determine if
         // there is a matching one for the package from which we want to
         // load a class.
-        List<Directive> dirs = new ArrayList(0);
+        List<Directive> dirs = Collections.EMPTY_LIST;
         List<Attribute> attrs = new ArrayList(1);
         attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
-        Requirement req = new RequirementImpl(Capability.PACKAGE_NAMESPACE, dirs, attrs);
+        Requirement req = new RequirementImpl(
+            Capability.PACKAGE_NAMESPACE, dirs, attrs);
         Set<Capability> candidates = state.getCandidates(module, req, false);
         List<Requirement> dynamics = module.getDynamicRequirements();
 
@@ -286,18 +285,21 @@ public class ResolverImpl implements Resolver
                     itCand.remove();
                 }
             }
-            
-            if (candidates.size() > 0)
-            {
-                candidateMap.put(dynReq, candidates);
-            }
         }
         else
         {
             candidates.clear();
         }
 
-        return !candidates.isEmpty();
+
+        if (candidates.size() > 0)
+        {
+            Map<Requirement, Set<Capability>> candidateMap = new HashMap();
+            candidateMap.put(dynReq, candidates);
+            return candidateMap;
+        }
+
+        return null;
     }
 
     private static void dumpCandidateMap(
@@ -708,10 +710,10 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     }
                     catch (ResolveException ex)
                     {
-System.out.println("RE: " + ex);
-ex.printStackTrace();
+//System.out.println("RE: " + ex);
+//ex.printStackTrace();
 
-// TODO: FELIX3 RESOLVER - Is it ok to remove the failed candidate? By removing
+// TODO: FELIX3 - Is it ok to remove the failed candidate? By removing
 //       it we keep the candidateMap up to date with the selected candidate, but
 //       theoretically this eliminates some potential combinations. Are those
 //       combinations guaranteed to be failures so eliminating them is ok?
@@ -801,7 +803,7 @@ ex.printStackTrace();
                 {
 System.out.println("RE: " + ex);
 ex.printStackTrace();
-// TODO: FELIX3 RESOLVER - Is it ok to remove the failed candidate? By removing
+// TODO: FELIX3 - Is it ok to remove the failed candidate? By removing
 //       it we keep the candidateMap up to date with the selected candidate, but
 //       theoretically this eliminates some potential combinations. Are those
 //       combinations guaranteed to be failures so eliminating them is ok?
@@ -835,7 +837,7 @@ ex.printStackTrace();
         {
             for (int i = 0; i < caps.size(); i++)
             {
-// TODO: PROTO3 RESOLVER - Assume if a module imports the same package it
+// TODO: FELIX3 - Assume if a module imports the same package it
 //       exports that the import will overlap the export.
                 if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE)
                     && !hasOverlappingImport(module, caps.get(i)))
@@ -896,8 +898,6 @@ ex.printStackTrace();
             // will be visible to the current module.
             Packages candPkgs = modulePkgMap.get(candCap.getModule());
 
-// TODO: PROTO3 RESOLVER - For now assume only exports, but eventually we also
-//       have to support re-exported packages.
             for (Entry<String, Blame> entry : candPkgs.m_exportedPkgs.entrySet())
             {
                 mergeCandidatePackage(
@@ -912,7 +912,7 @@ ex.printStackTrace();
                 List<Blame> blames = entry.getValue();
                 for (Blame blame : blames)
                 {
-// TODO: FELIX3 RESOLVER - Since a single module requirement can include many packages,
+// TODO: FELIX3 - Since a single module requirement can include many packages,
 //       it is likely we call merge too many times for the same module req. If we knew
 //       which candidates were being used to resolve this candidate's module dependencies,
 //       then we could just try to merge them directly. This info would also help in
@@ -953,7 +953,7 @@ ex.printStackTrace();
             m_invokeCounts.put(methodName, count);
         }
 
-// TODO: PROTO3 RESOLVER - Check for merging where module imports from itself,
+// TODO: FELIX3 - Check for merging where module imports from itself,
 //       then it should be listed as an export for requiring bundles.
         if (candBlame.m_cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
@@ -1027,7 +1027,7 @@ ex.printStackTrace();
                     currentRequiredBlames = new ArrayList<Blame>();
                     currentPkgsCopy.m_requiredPkgs.put(pkgName, currentRequiredBlames);
                 }
-// TODO: PROTO3 RESOLVER - This is potentially modifying the original, we need to modify a copy.
+// TODO: FELIX3 - This is potentially modifying the original, we need to modify a copy.
                 currentRequiredBlames.add(candBlame);
             }
             else
@@ -1079,7 +1079,7 @@ ex.printStackTrace();
         }
     }
 
-// TODO: PROTO3 RESOLVER - We end up with duplicates in uses constraints,
+// TODO: FELIX3 - We end up with duplicates in uses constraints,
 //       see scenario 2 for an example.
     private void verifyAndMergeUses(
         Module current, Packages currentPkgs,
@@ -1115,7 +1115,7 @@ ex.printStackTrace();
             {
                 Blame currentExportedBlame = currentPkgs.m_exportedPkgs.get(usedPkgName);
                 Blame currentImportedBlame = currentPkgs.m_importedPkgs.get(usedPkgName);
-// TODO: PROTO3 RESOLVER - What do we do with required packages?
+// TODO: FELIX3 - What do we do with required packages?
                 List<Blame> currentRequiredBlames = currentPkgs.m_requiredPkgs.get(usedPkgName);
 
                 Packages candSourcePkgs = modulePkgMap.get(candSourceCap.getModule());
@@ -1190,9 +1190,7 @@ ex.printStackTrace();
         throws ResolveException
     {
 // TODO: FELIX3 - I think permutation is not as efficient as it could be, since
-//       the check for subsets is costly. Maybe we can just check if the candidates
-//       for the blamed requirements are a subset, rather than computing the
-//       entire permutation first.
+//       the check for subsets is costly.
 
         // When we detect a conflict, we need to permutate the candidate map
         // we when we try again, we'll select different candidates. To achieve

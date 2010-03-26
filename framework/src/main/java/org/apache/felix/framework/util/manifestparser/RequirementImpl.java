@@ -36,7 +36,6 @@ public class RequirementImpl implements Requirement
     private final List<Directive> m_dirs;
     private final List<Directive> m_dirsConst;
 
-// TODO: FELIX3 - Get rid of dynamic argument.
     public RequirementImpl(
         String namespace, List<Directive> dirs, List<Attribute> attrs)
     {

@@ -181,7 +181,7 @@ public class DirectoryContent implements Content
         return null;
     }
 
-// TODO: This will need to consider security.
+// TODO: SECURITY - This will need to consider security.
     public synchronized String getEntryAsNativeLibrary(String entryName)
     {
         // Return result.
