@@ -54,6 +54,20 @@
   <profiles>
 
     <profile>
+      <id>packaging-obr</id>
+      <activation>
+        <property>
+          <name>packaging</name>
+          <value>obr</value>
+        </property>
+      </activation>
+      <modules>
+        <module>utils</module>
+        <module>bundlerepository</module>
+     </modules>
+   </profile>
+
+    <profile>
       <id>packaging-plugins</id>
       <activation>
         <property>
@@ -63,8 +77,6 @@
       </activation>
       <modules>
         <module>maven-obr-plugin</module>
-        <module>utils</module>
-        <module>bundlerepository</module>
         <module>bundleplugin</module>
         <module>scr-annotations</module>
         <module>scrplugin</module>
@@ -107,8 +119,6 @@
         <module>shell.gui.plugin</module>
         <module>shell.remote</module>
         <module>org.osgi.service.obr</module>
-        <module>utils</module>
-        <module>bundlerepository</module>
         <module>log</module>
         <module>eventadmin</module>
         <module>http</module>
