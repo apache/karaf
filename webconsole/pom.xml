@@ -44,6 +44,24 @@
     </scm>
 
     <build>
+        <resources>
+            <!-- default resources (may be removed when compat is removed) -->
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <targetPath>META-INF</targetPath>
+                <directory>${basedir}</directory>
+                <includes>
+                    <include>LICENSE*</include>
+                    <include>NOTICE*</include>
+                </includes>
+            </resource>
+            <!-- CSS and images for backwards compatibility -->
+            <resource>
+                <directory>${basedir}/src/main/compat</directory>
+            </resource>
+        </resources>
         <plugins>
             <!-- translate UTF-8 encoded properties files to ISO-8859-1 -->
             <plugin>
