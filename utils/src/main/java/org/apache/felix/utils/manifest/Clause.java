@@ -18,8 +18,6 @@
  */
 package org.apache.felix.utils.manifest;
 
-import java.util.Arrays;
-
 public class Clause
 {
 
