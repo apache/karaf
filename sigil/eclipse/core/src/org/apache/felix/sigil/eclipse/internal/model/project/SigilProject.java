@@ -392,11 +392,13 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
     {
         ISigilBundle b = null;
         
-        synchronized ( bldProjectFile )
+        try
         {
-            if ( bundle == null )
+            boolean newProject = false;
+            
+            synchronized ( bldProjectFile )
             {
-                try
+                if ( bundle == null )
                 {
                     if ( bldProjectFile.getLocation().toFile().exists() )
                     {
@@ -405,18 +407,22 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
                     else
                     {
                         bundle = setupDefaults();
-                        NullProgressMonitor npm = new NullProgressMonitor();
-                        bldProjectFile.create( buildContents(), true /* force */, npm );
-                        project.refreshLocal( IResource.DEPTH_INFINITE, npm );
+                        newProject = true;
                     }
                 }
-                catch ( CoreException e )
-                {
-                    SigilCore.error( "Failed to build bundle", e );
-                }
+
+                b = bundle;
             }
-            
-            b = bundle;
+
+            if ( newProject ) {
+                NullProgressMonitor npm = new NullProgressMonitor();
+                bldProjectFile.create( buildContents(), true /* force */, npm );
+                project.refreshLocal( IResource.DEPTH_ONE, npm );
+            }
+        }
+        catch ( CoreException e )
+        {
+            SigilCore.error( "Failed to build bundle", e );
         }
         
         return b;
@@ -633,10 +639,6 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
 
     private ISigilBundle parseContents( IFile projectFile ) throws CoreException
     {
-        /*if ( !projectFile.isSynchronized(IResource.DEPTH_ONE) ) {
-        	projectFile.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-        }*/
-
         if ( projectFile.getName().equals( SigilCore.SIGIL_PROJECT_FILE ) )
         {
             return parseBldContents( projectFile.getLocationURI() );
