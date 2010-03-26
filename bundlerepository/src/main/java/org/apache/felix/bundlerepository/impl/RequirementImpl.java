@@ -18,6 +18,8 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
+import java.util.regex.Pattern;
+
 import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.utils.filter.FilterImpl;
@@ -25,6 +27,10 @@ import org.osgi.framework.InvalidSyntaxException;
 
 public class RequirementImpl implements Requirement
 {
+    private static final Pattern REMOVE_LT = Pattern.compile("\\(([^<>=~()]*)<([^*=]([^\\\\\\*\\(\\)]|\\\\|\\*|\\(|\\))*)\\)");
+    private static final Pattern REMOVE_GT = Pattern.compile("\\(([^<>=~()]*)>([^*=]([^\\\\\\*\\(\\)]|\\\\|\\*|\\(|\\))*)\\)");
+    private static final Pattern REMOVE_NV = Pattern.compile("\\(version>=0.0.0\\)");
+
     private String m_name = null;
     private boolean m_extend = false;
     private boolean m_multiple = false;
@@ -62,7 +68,10 @@ public class RequirementImpl implements Requirement
     {
         try
         {
-            m_filter = FilterImpl.newInstance(filter, true);
+            String nf = REMOVE_LT.matcher(filter).replaceAll("(!($1>=$2))");
+            nf = REMOVE_GT.matcher(nf).replaceAll("(!($1<=$2))");
+            nf = REMOVE_NV.matcher(nf).replaceAll("");
+            m_filter = FilterImpl.newInstance(nf, true);
         }
         catch (InvalidSyntaxException e)
         {

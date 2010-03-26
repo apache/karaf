@@ -52,4 +52,14 @@ public class DataModelHelperTest extends TestCase
 
         assertEquals(xml, xml2);
     }
+
+    public void testRequirementFilter() throws Exception
+    {
+        RequirementImpl r = new RequirementImpl();
+        r.setFilter("(&(package=foo.bar)(version>=0.0.0)(version<3.0.0))");
+        assertEquals("(&(package=foo.bar)(!(version>=3.0.0)))", r.getFilter());
+
+        r.setFilter("(&(package=javax.transaction)(partial=true)(mandatory:<*partial))");
+        assertEquals("(&(package=javax.transaction)(partial=true)(mandatory:<*partial))", r.getFilter());
+    }
 }
