@@ -38,7 +38,6 @@
         <bundle>mvn:org.apache.felix.karaf.shell/org.apache.felix.karaf.shell.wrapper/${version}</bundle>
     </feature>
     <feature name="obr" version="${version}">
-        <feature>woodstox</feature>
         <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.shell/org.apache.felix.karaf.shell.obr/${version}</bundle>
     </feature>
