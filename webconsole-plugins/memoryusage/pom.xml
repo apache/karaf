@@ -29,7 +29,7 @@
 
     <artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <name>Apache Felix Web Console Memory Usage Plugin</name>
     <description>
@@ -39,13 +39,13 @@
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/felix/releases/org.apache.felix.webconsole.plugins.memoryusage-1.0.0
+            scm:svn:http://svn.apache.org/repos/asf/felix/trunk/webconsole-plugins/memoryusage
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.webconsole.plugins.memoryusage-1.0.0
+            scm:svn:https://svn.apache.org/repos/asf/felix/trunk/webconsole-plugins/memoryusage
         </developerConnection>
         <url>
-            http://svn.apache.org/viewvc/felix/releases/org.apache.felix.webconsole.plugins.memoryusage-1.0.0
+            http://svn.apache.org/viewvc/felix/trunk/webconsole-plugins/memoryusage
         </url>
     </scm>
 
