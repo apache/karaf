@@ -26,7 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
   <name>Apache Felix Utils</name>
   <description>Utility classes for OSGi.</description>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <artifactId>org.apache.felix.utils</artifactId>
   <dependencies>
     <dependency>
@@ -66,10 +66,4 @@
 	   </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.utils-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.utils-1.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.utils-1.0.0</url>
-  </scm>
 </project>
