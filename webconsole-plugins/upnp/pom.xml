@@ -28,7 +28,7 @@
 
     <artifactId>org.apache.felix.webconsole.plugins.upnp</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <name>Apache Felix Web Console UPnP Plugin</name>
     <description>
@@ -37,9 +37,9 @@
     </description>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/felix/releases/org.apache.felix.webconsole.plugins.upnp-1.0.0</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.webconsole.plugins.upnp-1.0.0</developerConnection>
-        <url>http://svn.apache.org/viewvc/felix/releases/org.apache.felix.webconsole.plugins.upnp-1.0.0</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/webconsole-plugins/upnp</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/webconsole-plugins/upnp</developerConnection>
+        <url>http://svn.apache.org/viewvc/felix/trunk/webconsole-plugins/upnp</url>
     </scm>
 
     <build>
