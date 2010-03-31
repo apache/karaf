@@ -333,11 +333,10 @@ public class Felix extends BundleImpl implements Framework
         m_bundleStreamHandler = new URLHandlersBundleStreamHandler(this);
 
         // Create a resolver and its state.
-        m_resolverState = new FelixResolverState(m_logger);
+        m_resolverState = new FelixResolverState(
+            m_logger, (String) m_configMap.get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT));
         m_felixResolver = new FelixResolver(
-            new ResolverImpl(m_logger,
-                (String) m_configMap.get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT)),
-            m_resolverState);
+            new ResolverImpl(m_logger), m_resolverState);
 
         // Create the extension manager, which we will use as the module
         // definition for creating the system bundle module.

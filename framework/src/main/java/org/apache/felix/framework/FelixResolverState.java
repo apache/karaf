@@ -20,10 +20,12 @@ package org.apache.felix.framework;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.CapabilitySet;
@@ -54,11 +56,17 @@ public class FelixResolverState implements Resolver.ResolverState
     private final Map<String, List<Module>> m_fragmentMap = new HashMap();
     // Maps singleton symbolic names to list of modules sorted by version.
     private final Map<String, List<Module>> m_singletons = new HashMap();
+    // Execution environment.
+    private final String m_fwkExecEnvStr;
+    private final Set m_fwkExecEnvSet;
 
-    public FelixResolverState(Logger logger)
+    public FelixResolverState(Logger logger, String fwkExecEnvStr)
     {
         m_logger = logger;
         m_modules = new ArrayList<Module>();
+
+        m_fwkExecEnvStr = (fwkExecEnvStr != null) ? fwkExecEnvStr.trim() : null;
+        m_fwkExecEnvSet = parseExecutionEnvironments(fwkExecEnvStr);
 
         List indices = new ArrayList();
         indices.add(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
@@ -756,9 +764,73 @@ public class FelixResolverState implements Resolver.ResolverState
         return result;
     }
 
+    /**
+     * Checks to see if the passed in module's required execution environment
+     * is provided by the framework.
+     * @param fwkExecEvnStr The original property value of the framework's
+     *        supported execution environments.
+     * @param fwkExecEnvSet Parsed set of framework's supported execution environments.
+     * @param module The module whose required execution environment is to be to verified.
+     * @throws ResolveException if the module's required execution environment does
+     *         not match the framework's supported execution environment.
+    **/
+    public void checkExecutionEnvironment(Module module) throws ResolveException
+    {
+        String bundleExecEnvStr = (String)
+            module.getHeaders().get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
+        if (bundleExecEnvStr != null)
+        {
+            bundleExecEnvStr = bundleExecEnvStr.trim();
+
+            // If the bundle has specified an execution environment and the
+            // framework has an execution environment specified, then we must
+            // check for a match.
+            if (!bundleExecEnvStr.equals("")
+                && (m_fwkExecEnvStr != null)
+                && (m_fwkExecEnvStr.length() > 0))
+            {
+                StringTokenizer tokens = new StringTokenizer(bundleExecEnvStr, ",");
+                boolean found = false;
+                while (tokens.hasMoreTokens() && !found)
+                {
+                    if (m_fwkExecEnvSet.contains(tokens.nextToken().trim()))
+                    {
+                        found = true;
+                    }
+                }
+                if (!found)
+                {
+                    throw new ResolveException(
+                        "Execution environment not supported: "
+                        + bundleExecEnvStr, module, null);
+                }
+            }
+        }
+    }
+
     //
     // Utility methods.
     //
+
+    /**
+     * Updates the framework wide execution environment string and a cached Set of
+     * execution environment tokens from the comma delimited list specified by the
+     * system variable 'org.osgi.framework.executionenvironment'.
+     * @param frameworkEnvironment Comma delimited string of provided execution environments
+    **/
+    private static Set parseExecutionEnvironments(String fwkExecEnvStr)
+    {
+        Set newSet = new HashSet();
+        if (fwkExecEnvStr != null)
+        {
+            StringTokenizer tokens = new StringTokenizer(fwkExecEnvStr, ",");
+            while (tokens.hasMoreTokens())
+            {
+                newSet.add(tokens.nextToken().trim());
+            }
+        }
+        return newSet;
+    }
 
     /**
      * Returns true if the specified module is a singleton

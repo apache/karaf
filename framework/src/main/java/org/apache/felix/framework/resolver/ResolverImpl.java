@@ -47,23 +47,16 @@ public class ResolverImpl implements Resolver
 {
     private final Logger m_logger;
 
-    // Execution environment.
-// TODO: FELIX3 - Move EE checking to ResolverState interface.
-    private final String m_fwkExecEnvStr;
-    private final Set m_fwkExecEnvSet;
-
     private static final Map<String, Long> m_invokeCounts = new HashMap<String, Long>();
     private static boolean m_isInvokeCount = false;
 
     // Reusable empty array.
     private static final List<Wire> m_emptyWires = new ArrayList<Wire>(0);
 
-    public ResolverImpl(Logger logger, String fwkExecEnvStr)
+    public ResolverImpl(Logger logger)
     {
 //System.out.println("+++ PROTO3 RESOLVER");
         m_logger = logger;
-        m_fwkExecEnvStr = (fwkExecEnvStr != null) ? fwkExecEnvStr.trim() : null;
-        m_fwkExecEnvSet = parseExecutionEnvironments(fwkExecEnvStr);
 
         String v = System.getProperty("invoke.count");
         m_isInvokeCount = (v == null) ? false : Boolean.valueOf(v);
@@ -94,8 +87,7 @@ public class ResolverImpl implements Resolver
             Map<Requirement, Set<Capability>> candidateMap =
                 new HashMap<Requirement, Set<Capability>>();
 
-            populateCandidates(state, module, m_fwkExecEnvStr, m_fwkExecEnvSet,
-                candidateMap, new HashMap<Module, Object>());
+            populateCandidates(state, module, candidateMap, new HashMap<Module, Object>());
             m_candidatePermutations.add(candidateMap);
 
             ResolveException rethrow = null;
@@ -166,8 +158,7 @@ public class ResolverImpl implements Resolver
             Map<Module, Packages> modulePkgMap = new HashMap();
 
 //System.out.println("+++ DYNAMICALLY RESOLVING " + module + " - " + pkgName);
-            populateDynamicCandidates(state, module,
-                m_fwkExecEnvStr, m_fwkExecEnvSet, candidateMap);
+            populateDynamicCandidates(state, module, candidateMap);
             m_candidatePermutations.add(candidateMap);
 
             ResolveException rethrow = null;
@@ -366,8 +357,9 @@ public class ResolverImpl implements Resolver
 
 // TODO: FELIX3 - Modify to not be recursive.
     private static void populateCandidates(
-        ResolverState state, Module module, String fwkExecEnvStr, Set fwkExecEnvSet,
-        Map<Requirement, Set<Capability>> candidateMap, Map<Module, Object> resultCache)
+        ResolverState state, Module module,
+        Map<Requirement, Set<Capability>> candidateMap,
+        Map<Module, Object> resultCache)
     {
         if (m_isInvokeCount)
         {
@@ -435,7 +427,7 @@ public class ResolverImpl implements Resolver
         if ((remainingReqs == null) && (localCandidateMap == null))
         {
             // Verify that any required execution environment is satisfied.
-            verifyExecutionEnvironment(fwkExecEnvStr, fwkExecEnvSet, module);
+            state.checkExecutionEnvironment(module);
 
             // Verify that any native libraries match the current platform.
             verifyNativeLibraries(module);
@@ -472,7 +464,7 @@ public class ResolverImpl implements Resolver
                     try
                     {
                         populateCandidates(state, candCap.getModule(),
-                            fwkExecEnvStr, fwkExecEnvSet, candidateMap, resultCache);
+                            candidateMap, resultCache);
                     }
                     catch (ResolveException ex)
                     {
@@ -524,7 +516,6 @@ System.out.println("RE: Candidate not resolveable: " + ex);
 
     private static void populateDynamicCandidates(
         ResolverState state, Module module,
-        String fwkExecEnvStr, Set fwkExecEnvSet,
         Map<Requirement, Set<Capability>> candidateMap)
     {
         if (m_isInvokeCount)
@@ -549,8 +540,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                 try
                 {
                     populateCandidates(state, candCap.getModule(),
-                        fwkExecEnvStr, fwkExecEnvSet, candidateMap,
-                        new HashMap<Module, Object>());
+                        candidateMap, new HashMap<Module, Object>());
                 }
                 catch (ResolveException ex)
                 {
@@ -1495,72 +1485,6 @@ ex.printStackTrace();
                 throw new ResolveException(msg, module, null);
             }
         }
-    }
-
-    /**
-     * Checks to see if the passed in module's required execution environment
-     * is provided by the framework.
-     * @param fwkExecEvnStr The original property value of the framework's
-     *        supported execution environments.
-     * @param fwkExecEnvSet Parsed set of framework's supported execution environments.
-     * @param module The module whose required execution environment is to be to verified.
-     * @throws ResolveException if the module's required execution environment does
-     *         not match the framework's supported execution environment.
-    **/
-    private static void verifyExecutionEnvironment(
-        String fwkExecEnvStr, Set fwkExecEnvSet, Module module)
-        throws ResolveException
-    {
-        String bundleExecEnvStr = (String)
-            module.getHeaders().get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
-        if (bundleExecEnvStr != null)
-        {
-            bundleExecEnvStr = bundleExecEnvStr.trim();
-
-            // If the bundle has specified an execution environment and the
-            // framework has an execution environment specified, then we must
-            // check for a match.
-            if (!bundleExecEnvStr.equals("")
-                && (fwkExecEnvStr != null)
-                && (fwkExecEnvStr.length() > 0))
-            {
-                StringTokenizer tokens = new StringTokenizer(bundleExecEnvStr, ",");
-                boolean found = false;
-                while (tokens.hasMoreTokens() && !found)
-                {
-                    if (fwkExecEnvSet.contains(tokens.nextToken().trim()))
-                    {
-                        found = true;
-                    }
-                }
-                if (!found)
-                {
-                    throw new ResolveException(
-                        "Execution environment not supported: "
-                        + bundleExecEnvStr, module, null);
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates the framework wide execution environment string and a cached Set of
-     * execution environment tokens from the comma delimited list specified by the
-     * system variable 'org.osgi.framework.executionenvironment'.
-     * @param frameworkEnvironment Comma delimited string of provided execution environments
-    **/
-    private static Set parseExecutionEnvironments(String fwkExecEnvStr)
-    {
-        Set newSet = new HashSet();
-        if (fwkExecEnvStr != null)
-        {
-            StringTokenizer tokens = new StringTokenizer(fwkExecEnvStr, ",");
-            while (tokens.hasMoreTokens())
-            {
-                newSet.add(tokens.nextToken().trim());
-            }
-        }
-        return newSet;
     }
 
     private static class Packages

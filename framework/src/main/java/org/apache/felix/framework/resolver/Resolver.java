@@ -32,5 +32,6 @@ public interface Resolver
     public static interface ResolverState
     {
         Set<Capability> getCandidates(Module module, Requirement req, boolean obeyMandatory);
+        void checkExecutionEnvironment(Module module) throws ResolveException;
     }
 }
