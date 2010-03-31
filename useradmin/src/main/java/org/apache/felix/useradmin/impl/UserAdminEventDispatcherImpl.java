@@ -158,10 +158,11 @@ public class UserAdminEventDispatcherImpl extends Thread implements UserAdminEve
      * Closing UserAdminTrackers and putting running state to false.
      * @see org.apache.felix.useradmin.impl.UserAdminEventDispatcher#close()
      */
-    public void close()
+    public synchronized void close()
     {
         userAdminTrackerListener.close();
-        running = true;
+        running = false;
+        notifyAll();
     }
 
     /**
