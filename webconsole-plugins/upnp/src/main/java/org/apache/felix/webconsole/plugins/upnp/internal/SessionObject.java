@@ -128,7 +128,18 @@ final class SessionObject implements HttpSessionBindingListener, UPnPEventListen
         vars.clear();
         if (reg != null)
         {
-            reg.unregister();
+            try
+            {
+                reg.unregister();
+            }
+            catch (Throwable t)
+            {
+                // When the bundle is stopped, the session object might remain hanging
+                // in the session, until it expires. After being stopped, the framework
+                // however will automatically destroy the registration. But after session
+                // expires this method will be called once again and will try to 
+                // unregister the service. This will throw exception, that should be caught.
+            }
             reg = null;
         }
         return this;
