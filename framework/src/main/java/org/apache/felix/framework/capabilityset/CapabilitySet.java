@@ -383,7 +383,7 @@ public class CapabilitySet
                 case SimpleFilter.APPROX :
                     return compareApproximate(((Comparable) lhs), rhs);
                 case SimpleFilter.SUBSTRING :
-                    return SimpleFilter.compareSubstring((String) lhs, (List<String>) rhs);
+                    return SimpleFilter.compareSubstring((List<String>) rhs, (String) lhs);
                 default:
                     throw new RuntimeException(
                         "Unknown comparison operator: " + op);

@@ -25,6 +25,7 @@ import java.util.StringTokenizer;
 import org.apache.felix.framework.capabilityset.Attribute;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Directive;
+import org.apache.felix.framework.capabilityset.SimpleFilter;
 import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
@@ -83,7 +84,7 @@ public class CapabilityImpl implements Capability
 
                 for (int filterIdx = 0; filterIdx < filters.size(); filterIdx++)
                 {
-                    List<String> substrings = Util.parseSubstring(filters.get(filterIdx));
+                    List<String> substrings = SimpleFilter.parseSubstring(filters.get(filterIdx));
                     filterList.add(substrings);
                 }
 
@@ -198,7 +199,7 @@ public class CapabilityImpl implements Capability
             (!included) && (m_includeFilter != null) && (i < m_includeFilter.size());
             i++)
         {
-            included = Util.checkSubstring(m_includeFilter.get(i), className);
+            included = SimpleFilter.compareSubstring(m_includeFilter.get(i), className);
         }
 
         // If there are no exclude filters then no classes are excluded
@@ -208,7 +209,7 @@ public class CapabilityImpl implements Capability
             (!excluded) && (m_excludeFilter != null) && (i < m_excludeFilter.size());
             i++)
         {
-            excluded = Util.checkSubstring(m_excludeFilter.get(i), className);
+            excluded = SimpleFilter.compareSubstring(m_excludeFilter.get(i), className);
         }
         return included && !excluded;
     }

@@ -366,7 +366,6 @@ public class SimpleFilter
         return new SimpleFilter(attr, value, op);
     }
 
-// TODO: FELIX3 - Merge with Util class.
     public static List<String> parseSubstring(String value)
     {
         List<String> pieces = new ArrayList();
@@ -457,8 +456,7 @@ loop:   for (;;)
         return sb.toString();
     }
 
-// TODO: FELIX3 - Merge with Util class.
-    public static boolean compareSubstring(String s, List<String> pieces)
+    public static boolean compareSubstring(List<String> pieces, String s)
     {
         // Walk the pieces to match the string
         // There are implicit stars between each piece,

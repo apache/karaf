@@ -19,9 +19,9 @@
 package org.apache.felix.framework;
 
 import java.util.*;
+import org.apache.felix.framework.capabilityset.SimpleFilter;
 import org.apache.felix.framework.resolver.Module;
 
-import org.apache.felix.framework.util.Util;
 
 class FindEntriesEnumeration implements Enumeration
 {
@@ -75,7 +75,7 @@ class FindEntriesEnumeration implements Enumeration
         // File pattern defaults to "*" if not specified.
         filePattern = (filePattern == null) ? "*" : filePattern;
 
-        m_filePattern = Util.parseSubstring(filePattern);
+        m_filePattern = SimpleFilter.parseSubstring(filePattern);
 
         m_next = findNext();
     }
@@ -135,7 +135,7 @@ class FindEntriesEnumeration implements Enumeration
                         String lastElement = entryName.substring(startIdx, endIdx);
 
                         // See if the file pattern matches the last element of the path.
-                        if (Util.checkSubstring(m_filePattern, lastElement))
+                        if (SimpleFilter.compareSubstring(m_filePattern, lastElement))
                         {
                             // Convert entry name into an entry URL.
                             return m_modules.get(m_moduleIndex).getEntry(entryName);
