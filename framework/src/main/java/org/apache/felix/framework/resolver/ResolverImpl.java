@@ -1626,8 +1626,11 @@ ex.printStackTrace();
 
         public String toString()
         {
-            return m_cap.getModule() + "." + m_cap.getAttribute(Capability.PACKAGE_ATTR).getValue()
-                + " BLAMED ON " + m_reqs.get(m_reqs.size() - 1);
+            return m_cap.getModule()
+                + "." + m_cap.getAttribute(Capability.PACKAGE_ATTR).getValue()
+                + ((m_reqs.size() == 0)
+                    ? " NO BLAME"
+                    : " BLAMED ON " + m_reqs.get(m_reqs.size() - 1));
         }
 
         public boolean equals(Object o)
