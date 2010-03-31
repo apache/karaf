@@ -104,7 +104,7 @@ class MemoryUsagePanel extends AbstractWebConsolePlugin implements Configuration
         }
         else
         {
-            statusBuf.append("'files:0,total:0'");
+            statusBuf.append("'files':0,'total':0");
         }
 
         filesBuf.append(']');
@@ -185,7 +185,7 @@ class MemoryUsagePanel extends AbstractWebConsolePlugin implements Configuration
         }
         else
         {
-            String command = req.getParameter("command");
+            String command = WebConsoleUtil.getParameter(req, "command");
             if ("dump".equals(command))
             {
                 resp.setContentType("text/plain; charset=UTF-8");
