@@ -37,6 +37,7 @@ import org.apache.felix.framework.resolver.CandidateComparator;
 import org.apache.felix.framework.resolver.ResolveException;
 import org.apache.felix.framework.resolver.Resolver;
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.osgi.framework.BundlePermission;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -804,6 +805,41 @@ public class FelixResolverState implements Resolver.ResolverState
                         "Execution environment not supported: "
                         + bundleExecEnvStr, module, null);
                 }
+            }
+        }
+    }
+
+    public void checkNativeLibraries(Module module) throws ResolveException
+    {
+        // Next, try to resolve any native code, since the module is
+        // not resolvable if its native code cannot be loaded.
+        List<R4Library> libs = module.getNativeLibraries();
+        if (libs != null)
+        {
+            String msg = null;
+            // Verify that all native libraries exist in advance; this will
+            // throw an exception if the native library does not exist.
+            for (int libIdx = 0; (msg == null) && (libIdx < libs.size()); libIdx++)
+            {
+                String entryName = libs.get(libIdx).getEntryName();
+                if (entryName != null)
+                {
+                    if (!module.getContent().hasEntry(entryName))
+                    {
+                        msg = "Native library does not exist: " + entryName;
+                    }
+                }
+            }
+            // If we have a zero-length native library array, then
+            // this means no native library class could be selected
+            // so we should fail to resolve.
+            if (libs.size() == 0)
+            {
+                msg = "No matching native libraries found.";
+            }
+            if (msg != null)
+            {
+                throw new ResolveException(msg, module, null);
             }
         }
     }

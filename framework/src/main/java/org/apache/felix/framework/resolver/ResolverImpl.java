@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TreeSet;
 import org.apache.felix.framework.FelixResolverState;
 import org.apache.felix.framework.Logger;
@@ -36,7 +35,6 @@ import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.CapabilitySet;
 import org.apache.felix.framework.capabilityset.Directive;
 import org.apache.felix.framework.capabilityset.Requirement;
-import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.osgi.framework.Constants;
 
@@ -430,7 +428,7 @@ public class ResolverImpl implements Resolver
             state.checkExecutionEnvironment(module);
 
             // Verify that any native libraries match the current platform.
-            verifyNativeLibraries(module);
+            state.checkNativeLibraries(module);
 
             // Record cycle count.
             cycleCount = new Integer(0);
@@ -1449,42 +1447,6 @@ ex.printStackTrace();
         wireMap.put(module, packageWires);
 
         return wireMap;
-    }
-
-// TODO: FELIX3 - This check should be moved to ResolverState.
-    private static void verifyNativeLibraries(Module module)
-    {
-        // Next, try to resolve any native code, since the module is
-        // not resolvable if its native code cannot be loaded.
-        List<R4Library> libs = module.getNativeLibraries();
-        if (libs != null)
-        {
-            String msg = null;
-            // Verify that all native libraries exist in advance; this will
-            // throw an exception if the native library does not exist.
-            for (int libIdx = 0; (msg == null) && (libIdx < libs.size()); libIdx++)
-            {
-                String entryName = libs.get(libIdx).getEntryName();
-                if (entryName != null)
-                {
-                    if (!module.getContent().hasEntry(entryName))
-                    {
-                        msg = "Native library does not exist: " + entryName;
-                    }
-                }
-            }
-            // If we have a zero-length native library array, then
-            // this means no native library class could be selected
-            // so we should fail to resolve.
-            if (libs.size() == 0)
-            {
-                msg = "No matching native libraries found.";
-            }
-            if (msg != null)
-            {
-                throw new ResolveException(msg, module, null);
-            }
-        }
     }
 
     private static class Packages

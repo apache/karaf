@@ -33,5 +33,6 @@ public interface Resolver
     {
         Set<Capability> getCandidates(Module module, Requirement req, boolean obeyMandatory);
         void checkExecutionEnvironment(Module module) throws ResolveException;
+        void checkNativeLibraries(Module module) throws ResolveException;
     }
 }
