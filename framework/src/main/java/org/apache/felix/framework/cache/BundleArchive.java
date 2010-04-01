@@ -1039,8 +1039,8 @@ public class BundleArchive
         return result;
     }
 
-    //method from Harmony java.net.URIEncoderDecoder (luni subproject) used by URI to decode uri components.
-    static final String encoding = "UTF8"; //$NON-NLS-1$
+    // Method from Harmony java.net.URIEncoderDecoder (luni subproject)
+    // used by URI to decode uri components.
     private static String decode(String s) throws UnsupportedEncodingException 
     {
         StringBuffer result = new StringBuffer();
@@ -1053,20 +1053,24 @@ public class BundleArchive
                 out.reset();
                 do 
                 {
-                    if (i + 2 >= s.length()) 
+                    if ((i + 2) >= s.length()) 
                     {
-                        throw new IllegalArgumentException("Incomplete % sequence at: " + i);
+                        throw new IllegalArgumentException(
+                            "Incomplete % sequence at: " + i);
                     }
                     int d1 = Character.digit(s.charAt(i + 1), 16);
                     int d2 = Character.digit(s.charAt(i + 2), 16);
-                    if (d1 == -1 || d2 == -1) 
+                    if ((d1 == -1) || (d2 == -1))
                     {
-                        throw new IllegalArgumentException("Invalid % sequence (" + s.substring(i, i + 3) + ") at: " + String.valueOf(i));
+                        throw new IllegalArgumentException("Invalid % sequence ("
+                            + s.substring(i, i + 3)
+                            + ") at: " + String.valueOf(i));
                     }
                     out.write((byte) ((d1 << 4) + d2));
                     i += 3;
-                } while (i < s.length() && s.charAt(i) == '%');
-                result.append(out.toString(encoding));
+                }
+                while ((i < s.length()) && (s.charAt(i) == '%'));
+                result.append(out.toString("UTF-8"));
                 continue;
             }
             result.append(c);
