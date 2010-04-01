@@ -135,6 +135,14 @@ public class ResolverImpl implements Resolver
 
     public Map<Module, List<Wire>> resolve(ResolverState state, Module module, String pkgName)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
         Capability candidate = null;
 
         // We can only create a dynamic import if the following
@@ -205,6 +213,14 @@ public class ResolverImpl implements Resolver
     public static Map<Requirement, Set<Capability>> getDynamicImportCandidates(
         ResolverState state, Module module, String pkgName)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
         // Unresolved modules cannot dynamically import, nor can the default
         // package be dynamically imported.
         if (!module.isResolved() || pkgName.length() == 0)
@@ -700,11 +716,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     {
 //System.out.println("RE: " + ex);
 //ex.printStackTrace();
-
-// TODO: FELIX3 - Is it ok to remove the failed candidate? By removing
-//       it we keep the candidateMap up to date with the selected candidate, but
-//       theoretically this eliminates some potential combinations. Are those
-//       combinations guaranteed to be failures so eliminating them is ok?
+                        // Remove the current candidate since it failed to resolve.
                         it.remove();
                         if (!it.hasNext() && !req.isOptional())
                         {
@@ -791,10 +803,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                 {
 System.out.println("RE: " + ex);
 ex.printStackTrace();
-// TODO: FELIX3 - Is it ok to remove the failed candidate? By removing
-//       it we keep the candidateMap up to date with the selected candidate, but
-//       theoretically this eliminates some potential combinations. Are those
-//       combinations guaranteed to be failures so eliminating them is ok?
+                    // Remove the current candidate since it failed to resolve.
                     it.remove();
                     if (!it.hasNext() && !req.isOptional())
                     {
@@ -1050,6 +1059,14 @@ ex.printStackTrace();
         Blame candBlame, Map<Module, Packages> modulePkgMap,
         Map<Requirement, Set<Capability>> candidateMap)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
         for (int i = 0; (currentUsedBlames != null) && (i < currentUsedBlames.size()); i++)
         {
 //System.out.println("+++ CHECK " + candBlame + " IN EXISTING " + currentUsedBlames.get(i));
@@ -1177,6 +1194,14 @@ ex.printStackTrace();
         Map<Requirement, Set<Capability>> candidateMap)
         throws ResolveException
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
 // TODO: FELIX3 - I think permutation is not as efficient as it could be, since
 //       the check for subsets is costly.
 
@@ -1245,6 +1270,14 @@ ex.printStackTrace();
     private static boolean isSubsetPermutation(
         Map<Requirement, Set<Capability>> orig, Map<Requirement, Set<Capability>> copy)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
         for (Entry<Requirement, Set<Capability>> entry : orig.entrySet())
         {
             Set<Capability> copyCands = copy.get(entry.getKey());
@@ -1263,6 +1296,14 @@ ex.printStackTrace();
     private static boolean isCompatible(
         Capability currentCap, Capability candCap, Map<Module, Packages> modulePkgMap)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
         if ((currentCap != null) && (candCap != null))
         {
             List<Capability> currentSources =
@@ -1287,6 +1328,14 @@ ex.printStackTrace();
         Capability cap, Map<Module, Packages> modulePkgMap, List<Capability> sources,
         Set<Capability> cycleMap)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
         if (cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
             if (cycleMap.contains(cap))
@@ -1328,6 +1377,14 @@ ex.printStackTrace();
     private static Map<Requirement, Set<Capability>> copyCandidateMap(
         Map<Requirement, Set<Capability>> candidateMap)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
         Map<Requirement, Set<Capability>> copy =
             new HashMap<Requirement, Set<Capability>>();
         for (Entry<Requirement, Set<Capability>> entry : candidateMap.entrySet())
