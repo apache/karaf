@@ -205,6 +205,7 @@ $(document).ready(function(){
 		var el = $(this).parent().find('input.filter');
 		var filter = el.val();
 		if (filter) $.get(pluginRoot + '/.json', { 'filter' : filter }, renderData, 'json');
+		return false;
 	});
 
 	// upload dialog
