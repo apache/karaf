@@ -65,6 +65,8 @@ public class ResolverImpl implements Resolver
 
     public Map<Module, List<Wire>> resolve(ResolverState state, Module module)
     {
+        m_invokeCounts.clear();
+
         if (m_isInvokeCount)
         {
             String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
@@ -895,6 +897,8 @@ ex.printStackTrace();
             // will be visible to the current module.
             Packages candPkgs = modulePkgMap.get(candCap.getModule());
 
+            // We have to merge all exported packages from the candidate,
+            // since the current module requires it.
             for (Entry<String, Blame> entry : candPkgs.m_exportedPkgs.entrySet())
             {
                 mergeCandidatePackage(
@@ -904,31 +908,21 @@ ex.printStackTrace();
                     modulePkgMap,
                     candidateMap);
             }
-            for (Entry<String, List<Blame>> entry : candPkgs.m_requiredPkgs.entrySet())
-            {
-                List<Blame> blames = entry.getValue();
-                for (Blame blame : blames)
-                {
-// TODO: FELIX3 - Since a single module requirement can include many packages,
-//       it is likely we call merge too many times for the same module req. If we knew
-//       which candidates were being used to resolve this candidate's module dependencies,
-//       then we could just try to merge them directly. This info would also help in
-//       in creating wires, since we ultimately want to create wires for the selected
-//       candidates, which we are trying to deduce from the package space, but if we
-//       knew the selected candidates, we'd be done.
-                    if (blame.m_cap.getModule().equals(current))
-                    {
-                        continue;
-                    }
 
-                    Directive dir = blame.m_reqs.get(blame.m_reqs.size() - 1)
-                        .getDirective(Constants.VISIBILITY_DIRECTIVE);
-                    if ((dir != null) && dir.getValue().equals(Constants.VISIBILITY_REEXPORT))
+            // If the candidate requires any other bundles with reexport visibility,
+            // then we also need to merge their packages too.
+            for (Requirement req : candCap.getModule().getRequirements())
+            {
+                if (req.getNamespace().equals(Capability.MODULE_NAMESPACE))
+                {
+                    Directive dir = req.getDirective(Constants.VISIBILITY_DIRECTIVE);
+                    if ((dir != null) && dir.getValue().equals(Constants.VISIBILITY_REEXPORT)
+                        && (candidateMap.get(req) != null))
                     {
-                        mergeCandidatePackage(
+                        mergeCandidatePackages(
                             current,
-                            true,
-                            new Blame(outgoingReqs, blame.m_cap),
+                            outgoingReqs,
+                            candidateMap.get(req).iterator().next(),
                             modulePkgMap,
                             candidateMap);
                     }
