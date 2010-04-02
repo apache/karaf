@@ -225,13 +225,15 @@ public class CommandSessionImpl implements CommandSession, Converter
                 if (level == Converter.LINE)
                 {
                     StringBuilder sb = new StringBuilder();
-                    String del = "[";
                     Collection<?> c = (Collection<?>) target;
+					sb.append("[");
                     for (Object o : c)
                     {
-                        sb.append(del);
+						if (sb.length() > 1) 
+						{
+							sb.append(", ");
+						}
                         sb.append(format(o, level + 1, this));
-                        del = ", ";
                     }
                     sb.append("]");
                     return sb;
@@ -272,13 +274,15 @@ public class CommandSessionImpl implements CommandSession, Converter
                 if (level == Converter.LINE)
                 {
                     StringBuilder sb = new StringBuilder();
-                    String del = "[";
                     Map<?, ?> c = (Map<?, ?>) target;
+					sb.append("[");
                     for (Map.Entry<?, ?> entry : c.entrySet())
                     {
-                        sb.append(del);
+						if (sb.length() > 1) 
+						{
+							sb.append(", ");
+						}
                         sb.append(format(entry, level + 1, this));
-                        del = ", ";
                     }
                     sb.append("]");
                     return sb;
