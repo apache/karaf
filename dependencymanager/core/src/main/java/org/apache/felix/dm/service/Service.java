@@ -150,6 +150,7 @@ public interface Service {
      * @return the service instance
      */
     public Service setCallbacks(String init, String start, String stop, String destroy);
+    public Service setCallbacks(Object instance, String init, String start, String stop, String destroy);
 
     // listener
     /**
