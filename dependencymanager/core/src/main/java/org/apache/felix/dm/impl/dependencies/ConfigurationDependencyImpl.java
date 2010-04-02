@@ -58,22 +58,21 @@ import org.osgi.service.cm.ManagedService;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ConfigurationDependencyImpl implements ConfigurationDependency, ManagedService, ServiceComponentDependency, DependencyActivation {
+public class ConfigurationDependencyImpl extends DependencyBase implements ConfigurationDependency, ManagedService, ServiceComponentDependency, DependencyActivation {
 	private BundleContext m_context;
 	private String m_pid;
 	private ServiceRegistration m_registration;
     protected List m_services = new ArrayList();
 	private Dictionary m_settings;
 	private boolean m_propagate;
-	private final Logger m_logger;
     private String m_callback;
     private boolean m_isStarted;
 	private final Set m_updateInvokedCache = new HashSet();
     private MetaTypeProviderImpl m_metaType;
 	
 	public ConfigurationDependencyImpl(BundleContext context, Logger logger) {
+	    super(logger);
 		m_context = context;
-		m_logger = logger;
 	}
 	
 	public synchronized boolean isAvailable() {
@@ -89,11 +88,6 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
 		return true;
 	}
 	
-	public boolean isInstanceBound() {
-	    // for now, configuration dependencies never are
-	    return false;
-	}
-	
 	/**
 	 * Returns <code>true</code> when configuration properties should be propagated
 	 * as service properties.
@@ -101,6 +95,12 @@ public class ConfigurationDependencyImpl implements ConfigurationDependency, Man
 	public boolean isPropagated() {
 		return m_propagate;
 	}
+	
+    public ConfigurationDependency setInstanceBound(boolean isInstanceBound) {
+        setIsInstanceBound(isInstanceBound);
+        return this;
+    }
+
 	
 	public Dictionary getConfiguration() {
 		return m_settings;

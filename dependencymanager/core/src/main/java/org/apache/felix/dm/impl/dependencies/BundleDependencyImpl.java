@@ -35,7 +35,7 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 
-public class BundleDependencyImpl extends AbstractDependency implements BundleDependency, BundleTrackerCustomizer, ServiceComponentDependency {
+public class BundleDependencyImpl extends DependencyBase implements BundleDependency, BundleTrackerCustomizer, ServiceComponentDependency {
 	private final BundleContext m_context;
 	private boolean m_isStarted;
 	private BundleTracker m_tracker;
@@ -63,14 +63,14 @@ public class BundleDependencyImpl extends AbstractDependency implements BundleDe
 		m_autoConfig = true;
 	}
 
-	public boolean isInstanceBound() {
-		return false; // TODO for now we are never bound to the service implementation instance
-	}
-
+    public BundleDependency setInstanceBound(boolean isInstanceBound) {
+        setIsInstanceBound(isInstanceBound);
+        return this;
+    }
+    
 	public synchronized boolean isAvailable() {
         return m_isAvailable;
     }
-
 
     public void start(DependencyService service) {
         boolean needsStarting = false;

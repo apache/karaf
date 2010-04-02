@@ -77,4 +77,7 @@ public interface BundleDependency extends Dependency, ServiceComponentDependency
   BundleDependency setStateMask(int mask);
   
   BundleDependency setPropagate(boolean propagate);
+  
+  BundleDependency setInstanceBound(boolean isInstanceBound);
+
 }

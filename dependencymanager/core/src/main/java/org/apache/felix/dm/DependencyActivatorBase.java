@@ -164,15 +164,24 @@ public abstract class DependencyActivatorBase implements BundleActivator {
         return m_manager.createAspectService(serviceInterface, serviceFilter, ranking, factory, factoryCreateMethod, properties);
     }
     
-    public Service createAdapterService(Class serviceInterface, String serviceFilter, Class adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
+    public Service createAdapterService(Class serviceInterface, String serviceFilter, String adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
+        return m_manager.createAdapterService(serviceInterface, serviceFilter, adapterInterface, adapterImplementation, adapterProperties);
+    }
+    public Service createAdapterService(Class serviceInterface, String serviceFilter, String[] adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
         return m_manager.createAdapterService(serviceInterface, serviceFilter, adapterInterface, adapterImplementation, adapterProperties);
     }
     
-    public Service createResourceAdapter(String resourceFilter, Class adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+    public Service createResourceAdapter(String resourceFilter, String adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+        return m_manager.createResourceAdapterService(resourceFilter, adapterInterface, adapterProperties, adapterImplementation, propagate);
+    }
+    public Service createResourceAdapter(String resourceFilter, String[] adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
         return m_manager.createResourceAdapterService(resourceFilter, adapterInterface, adapterProperties, adapterImplementation, propagate);
     }
     
     public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
+        return m_manager.createBundleAdapterService(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface, adapterProperties, propagate);
+    }
+    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String[] adapterInterface, Dictionary adapterProperties, boolean propagate) {
         return m_manager.createBundleAdapterService(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface, adapterProperties, propagate);
     }
 

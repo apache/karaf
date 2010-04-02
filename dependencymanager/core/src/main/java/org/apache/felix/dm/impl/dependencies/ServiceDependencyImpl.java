@@ -45,7 +45,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceDependencyImpl extends AbstractDependency implements ServiceDependency, ServiceTrackerCustomizer, ServiceComponentDependency {
+public class ServiceDependencyImpl extends DependencyBase implements ServiceDependency, ServiceTrackerCustomizer, ServiceComponentDependency {
     protected List m_services = new ArrayList();
     protected volatile ServiceTracker m_tracker;
     protected BundleContext m_context;
@@ -66,7 +66,6 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
     private boolean m_autoConfigInvoked;
     private Object m_defaultImplementation;
     private Object m_defaultImplementationInstance;
-    private boolean m_isInstanceBound;
     private boolean m_isAvailable;
     
     private static final Comparator COMPARATOR = new Comparator() {
@@ -185,10 +184,6 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
     
     public synchronized boolean isAvailable() {
         return m_isAvailable;
-    }
-
-    public boolean isInstanceBound() {
-        return m_isInstanceBound;
     }
 
     public synchronized Object getService() {
@@ -611,7 +606,7 @@ public class ServiceDependencyImpl extends AbstractDependency implements Service
     }
     
     public ServiceDependency setInstanceBound(boolean isInstanceBound) {
-        m_isInstanceBound = isInstanceBound;
+        setIsInstanceBound(isInstanceBound);
         return this;
     }
 

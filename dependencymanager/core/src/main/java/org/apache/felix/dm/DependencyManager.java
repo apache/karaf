@@ -222,9 +222,19 @@ public class DependencyManager {
      * @param adapterProperties additional properties to use with the adapter service registration
      * @return a service that acts as a factory for generating adapters
      */
-    public Service createAdapterService(Class serviceInterface, String serviceFilter, Class adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
+    public Service createAdapterService(Class serviceInterface, String serviceFilter, String adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
         return createService()
-            .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, adapterImplementation, adapterInterface.getName(), adapterProperties))
+            .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, adapterImplementation, adapterInterface, adapterProperties))
+            .add(createServiceDependency()
+                .setService(serviceInterface)
+                .setAutoConfig(false)
+                .setCallbacks("added", "removed")
+            );
+    }
+    
+    public Service createAdapterService(Class serviceInterface, String serviceFilter, String[] adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
+        return createService()
+            .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, adapterImplementation, adapterInterface, adapterProperties))
             .add(createServiceDependency()
                 .setService(serviceInterface)
                 .setAutoConfig(false)
@@ -249,9 +259,18 @@ public class DependencyManager {
      * @return a service that acts as a factory for generating resource adapters
      * @see Resource
      */
-    public Service createResourceAdapterService(String resourceFilter, Class adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+    public Service createResourceAdapterService(String resourceFilter, String adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
         return createService()
-            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterImplementation, adapterInterface.getName(), adapterProperties, propagate))
+            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
+            .add(createResourceDependency()
+                .setFilter(resourceFilter)
+                .setAutoConfig(false)
+                .setCallbacks("added", "removed")
+            );
+    }
+    public Service createResourceAdapterService(String resourceFilter, String[] adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+        return createService()
+            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
             .add(createResourceDependency()
                 .setFilter(resourceFilter)
                 .setAutoConfig(false)
@@ -278,6 +297,15 @@ public class DependencyManager {
      * @return a service that acts as a factory for generating bundle adapters
      */
     public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
+        return createService()
+            .setImplementation(new BundleAdapterImpl(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
+            .add(createBundleDependency()
+                .setFilter(bundleFilter)
+                .setStateMask(bundleStateMask)
+                .setCallbacks("added", "removed")
+            );
+    }
+    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String[] adapterInterface, Dictionary adapterProperties, boolean propagate) {
         return createService()
             .setImplementation(new BundleAdapterImpl(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
             .add(createBundleDependency()

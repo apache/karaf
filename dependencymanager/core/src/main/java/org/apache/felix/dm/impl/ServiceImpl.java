@@ -20,7 +20,6 @@ package org.apache.felix.dm.impl;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -65,6 +64,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
     private String m_callbackDestroy;
     private Object m_serviceName;
     private Object m_implementation;
+    private Object m_callbackInstance;
 
     // configuration (dynamic, but does not affect state)
     private Dictionary m_serviceProperties;
@@ -370,6 +370,18 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 	    m_callbackDestroy = destroy;
 	    return this;
 	}
+	
+    public synchronized Service setCallbacks(Object instance, String init, String start, String stop, String destroy) {
+        ensureNotActive();
+        m_callbackInstance = instance;
+        m_callbackInit = init;
+        m_callbackStart = start;
+        m_callbackStop = stop;
+        m_callbackDestroy = destroy;
+        return this;
+    }
+	
+	
 
 	public synchronized Service setImplementation(Object implementation) {
 	    ensureNotActive();
@@ -572,26 +584,12 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         if (name != null) {
             // invoke method if it exists
             try {
-                Class clazz = m_serviceInstance.getClass();
-                while (clazz != null) {
-                	try {
-                	Method method = clazz.getDeclaredMethod(name, null);
-	                	if (method != null) {
-	                		method.setAccessible(true);
-	                		try {
-    	                		method.invoke(m_serviceInstance, null);
-	                		}
-	                		catch (InvocationTargetException e) {
-	                		    m_logger.log(Logger.LOG_ERROR, "Exception while invoking method " + method + ".", e);
-	                		}
-	                		return;
-	                	}
-                	}
-                	catch (NoSuchMethodException e) {
-                		// ignore this, we keep searching if the method does not exist
-                	}
-                	clazz = clazz.getSuperclass();
-                }
+                // if a callback instance was specified, look for the method there, if not, look for the method in the
+                // instance itself
+                Object instance = m_callbackInstance != null ? m_callbackInstance : m_serviceInstance;
+                InvocationUtil.invokeCallbackMethod(instance, name, 
+                    new Class[][] {{ Object.class, DependencyManager.class, Service.class }, { DependencyManager.class, Service.class }, { Object.class }, {}}, 
+                    new Object[][] {{ m_serviceInstance, m_manager, this }, { m_manager, this }, { m_serviceInstance }, {}});
             }
             catch (Exception e) {
                 m_logger.log(Logger.LOG_ERROR, "Error trying to invoke method named " + name + ".", e);

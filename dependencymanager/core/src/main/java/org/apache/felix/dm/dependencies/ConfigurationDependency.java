@@ -71,4 +71,7 @@ public interface ConfigurationDependency extends Dependency, ServiceComponentDep
    * Adds a MetaData regarding a given configuration property.
    */
   ConfigurationDependency add(PropertyMetaData properties);
+  
+  ConfigurationDependency setInstanceBound(boolean isInstanceBound);
+
 }

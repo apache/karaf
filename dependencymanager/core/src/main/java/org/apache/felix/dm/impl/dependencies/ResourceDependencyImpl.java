@@ -18,9 +18,6 @@
  */
 package org.apache.felix.dm.impl.dependencies;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -33,7 +30,7 @@ import org.apache.felix.dm.resources.ResourceHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-public class ResourceDependencyImpl implements ResourceDependency, ResourceHandler, DependencyActivation {
+public class ResourceDependencyImpl extends DependencyBase implements ResourceDependency, ResourceHandler, DependencyActivation {
 	private volatile BundleContext m_context;
 	private volatile ServiceRegistration m_registration;
 //	private long m_resourceCounter;
@@ -43,7 +40,6 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     private String m_callbackChanged;
     private String m_callbackRemoved;
     private boolean m_autoConfig;
-    private final Logger m_logger;
     private String m_autoConfigInstance;
     protected List m_services = new ArrayList();
 	private boolean m_isRequired;
@@ -53,29 +49,15 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     private List m_resources = new ArrayList();
     private Resource m_resourceInstance;
     private boolean m_propagate;
-	private boolean m_isInstanceBound;
 	
     public ResourceDependencyImpl(BundleContext context, Logger logger) {
+        super(logger);
     	m_context = context;
-    	m_logger = logger;
     	m_autoConfig = true;
     }
     
 	public synchronized boolean isAvailable() {
 		return m_resources.size() > 0;
-	}
-
-	public boolean isRequired() {
-		return m_isRequired;
-	}
-	
-	public boolean isInstanceBound() {
-		return m_isInstanceBound;
-	}
-	
-	public ResourceDependency setInstanceBound(boolean isInstanceBound) {
-		m_isInstanceBound = isInstanceBound;
-		return this;
 	}
 
 	public void start(DependencyService service) {
@@ -178,21 +160,30 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
     public void invokeAdded(DependencyService ds, Resource serviceInstance) {
         Object[] callbackInstances = getCallbackInstances(ds);
         if ((callbackInstances != null) && (m_callbackAdded != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackAdded, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackAdded, 
+                new Class[][] {{ Resource.class }, { Object.class }, {}},
+                new Object[][] {{ serviceInstance}, { serviceInstance }, {}}
+            );
         }
     }
 
     public void invokeChanged(DependencyService ds, Resource serviceInstance) {
         Object[] callbackInstances = getCallbackInstances(ds);
         if ((callbackInstances != null) && (m_callbackChanged != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackChanged, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackChanged,
+                new Class[][] {{ Resource.class }, { Object.class }, {}},
+                new Object[][] {{ serviceInstance}, { serviceInstance }, {}}
+            );
         }
     }
 
     public void invokeRemoved(DependencyService ds, Resource serviceInstance) {
         Object[] callbackInstances = getCallbackInstances(ds);
         if ((callbackInstances != null) && (m_callbackRemoved != null)) {
-            invokeCallbackMethod(callbackInstances, m_callbackRemoved, serviceInstance);
+            invokeCallbackMethod(callbackInstances, m_callbackRemoved,
+                new Class[][] {{ Resource.class }, { Object.class }, {}},
+                new Object[][] {{ serviceInstance}, { serviceInstance }, {}}
+            );
         }
     }
 
@@ -300,62 +291,62 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
         return this;
     }
     
-    private void invokeCallbackMethod(Object[] instances, String methodName, Object service) {
-        for (int i = 0; i < instances.length; i++) {
-            try {
-                invokeCallbackMethod(instances[i], methodName, service);
-            }
-            catch (NoSuchMethodException e) {
-                m_logger.log(Logger.LOG_DEBUG, "Method '" + methodName + "' does not exist on " + instances[i] + ". Callback skipped.");
-            }
-        }
-    }
-
-    private void invokeCallbackMethod(Object instance, String methodName, Object service) throws NoSuchMethodException {
-        Class currentClazz = instance.getClass();
-        boolean done = false;
-        while (!done && currentClazz != null) {
-            done = invokeMethod(instance, currentClazz, methodName,
-                new Class[][] {{Resource.class}, {Object.class}, {}},
-                new Object[][] {{service}, {service}, {}},
-                false);
-            if (!done) {
-                currentClazz = currentClazz.getSuperclass();
-            }
-        }
-        if (!done && currentClazz == null) {
-            throw new NoSuchMethodException(methodName);
-        }
-    }
-    
-    private boolean invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) {
-        Method m = null;
-        for (int i = 0; i < signatures.length; i++) {
-            Class[] signature = signatures[i];
-            try {
-                m = clazz.getDeclaredMethod(name, signature);
-                if (!(isSuper && Modifier.isPrivate(m.getModifiers()))) {
-                    m.setAccessible(true);
-                    try {
-                        m.invoke(object, parameters[i]);
-                    }
-                    catch (InvocationTargetException e) {
-                        m_logger.log(Logger.LOG_ERROR, "Exception while invoking method " + m + ".", e);
-                    }
-                    // we did find and invoke the method, so we return true
-                    return true;
-                }
-            }
-            catch (NoSuchMethodException e) {
-                // ignore this and keep looking
-            }
-            catch (Exception e) {
-                // could not even try to invoke the method
-                m_logger.log(Logger.LOG_ERROR, "Exception while trying to invoke method " + m + ".", e);
-            }
-        }
-        return false;
-    }
+//    private void invokeCallbackMethod(Object[] instances, String methodName, Object service) {
+//        for (int i = 0; i < instances.length; i++) {
+//            try {
+//                invokeCallbackMethod(instances[i], methodName, service);
+//            }
+//            catch (NoSuchMethodException e) {
+//                m_logger.log(Logger.LOG_DEBUG, "Method '" + methodName + "' does not exist on " + instances[i] + ". Callback skipped.");
+//            }
+//        }
+//    }
+//
+//    private void invokeCallbackMethod(Object instance, String methodName, Object service) throws NoSuchMethodException {
+//        Class currentClazz = instance.getClass();
+//        boolean done = false;
+//        while (!done && currentClazz != null) {
+//            done = invokeMethod(instance, currentClazz, methodName,
+//                new Class[][] {{Resource.class}, {Object.class}, {}},
+//                new Object[][] {{service}, {service}, {}},
+//                false);
+//            if (!done) {
+//                currentClazz = currentClazz.getSuperclass();
+//            }
+//        }
+//        if (!done && currentClazz == null) {
+//            throw new NoSuchMethodException(methodName);
+//        }
+//    }
+//    
+//    private boolean invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) {
+//        Method m = null;
+//        for (int i = 0; i < signatures.length; i++) {
+//            Class[] signature = signatures[i];
+//            try {
+//                m = clazz.getDeclaredMethod(name, signature);
+//                if (!(isSuper && Modifier.isPrivate(m.getModifiers()))) {
+//                    m.setAccessible(true);
+//                    try {
+//                        m.invoke(object, parameters[i]);
+//                    }
+//                    catch (InvocationTargetException e) {
+//                        m_logger.log(Logger.LOG_ERROR, "Exception while invoking method " + m + ".", e);
+//                    }
+//                    // we did find and invoke the method, so we return true
+//                    return true;
+//                }
+//            }
+//            catch (NoSuchMethodException e) {
+//                // ignore this and keep looking
+//            }
+//            catch (Exception e) {
+//                // could not even try to invoke the method
+//                m_logger.log(Logger.LOG_ERROR, "Exception while trying to invoke method " + m + ".", e);
+//            }
+//        }
+//        return false;
+//    }
     
     private synchronized Object[] getCallbackInstances(DependencyService ds) {
         if (m_callbackInstance == null) {
@@ -373,7 +364,7 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
 	
     public synchronized ResourceDependency setRequired(boolean required) {
         ensureNotActive();
-        m_isRequired = required;
+        setIsRequired(required);
         return this;
     }
 
@@ -444,5 +435,10 @@ public class ResourceDependencyImpl implements ResourceDependency, ResourceHandl
 
     public boolean isPropagated() {
         return m_propagate;
+    }
+
+    public ResourceDependency setInstanceBound(boolean isInstanceBound) {
+        setIsInstanceBound(isInstanceBound);
+        return this;
     }
 }
