@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
@@ -1278,8 +1279,15 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     {
         if ( imported.getName().equals( exported.getName() ) )
         {
-            Version required = Version.parseVersion( imported.getAttribute( Constants.VERSION_ATTRIBUTE ) );
-            return exported.getVersion().compareTo( required ) > 0;
+            String versionAttr = imported.getAttribute( Constants.VERSION_ATTRIBUTE );
+            if ( versionAttr == null )
+            {
+                // no specific version required, this export surely satisfies it
+                return true;
+            }
+
+            VersionRange required = VersionRange.parse( versionAttr );
+            return required.isInRange( exported.getVersion() );
         }
 
         // no this export does not satisfy the import
