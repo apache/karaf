@@ -870,7 +870,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
             }
             installationFailures.remove(path);
             currentManagedArtifacts.put(path, artifact);
-            log(Logger.LOG_DEBUG, "Installed " + path, null);
+            log(Logger.LOG_INFO, "Installed " + path, null);
         }
         catch (Exception e)
         {
@@ -956,7 +956,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     "Uninstalling bundle " + bundle.getBundleId() + " (" + bundle.getSymbolicName() + ")", null);
                 bundle.uninstall();
             }
-            log(Logger.LOG_DEBUG, "Uninstalled " + path, null);
+            log(Logger.LOG_INFO, "Uninstalled " + path, null);
         }
         catch (Exception e)
         {
@@ -1028,7 +1028,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     in.close();
                 }
             }
-            log(Logger.LOG_DEBUG, "Updated " + path, null);
+            log(Logger.LOG_INFO, "Updated " + path, null);
         }
         catch (Throwable t)
         {
@@ -1088,7 +1088,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
             try
             {
                 bundle.start();
-                log(Logger.LOG_DEBUG, "Started bundle: " + bundle.getLocation(), null);
+                log(Logger.LOG_INFO, "Started bundle: " + bundle.getLocation(), null);
             }
             catch (BundleException e)
             {
