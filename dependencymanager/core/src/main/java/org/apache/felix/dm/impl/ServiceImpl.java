@@ -591,8 +591,12 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
                     new Class[][] {{ Object.class, DependencyManager.class, Service.class }, { DependencyManager.class, Service.class }, { Object.class }, {}}, 
                     new Object[][] {{ m_serviceInstance, m_manager, this }, { m_manager, this }, { m_serviceInstance }, {}});
             }
+            catch (NoSuchMethodException e) {
+            	// we ignore the fact that the method was not found
+            }
             catch (Exception e) {
-                m_logger.log(Logger.LOG_ERROR, "Error trying to invoke method named " + name + ".", e);
+            	// but any other exception means that the method was invoked but somehow failed
+                m_logger.log(Logger.LOG_WARNING, "Error trying to invoke method named " + name + ".", e);
             }
         }
     }
