@@ -186,7 +186,9 @@ public class AnnotationMojo extends AbstractMojo
         finally
         {
             jar.close();
-            tmp.delete();
+            if (tmp.exists() && ! tmp.delete()) {
+                throw new MojoExecutionException("Could not remove " + tmp);
+            }
         }
     }
 }
