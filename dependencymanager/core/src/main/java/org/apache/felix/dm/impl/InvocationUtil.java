@@ -5,13 +5,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 public class InvocationUtil {
-    public static void invokeCallbackMethod(Object[] instances, String methodName, Class[][] signatures, Object[][] parameters) throws NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        for (int i = 0; i < instances.length; i++) {
-            invokeCallbackMethod(instances[i], methodName, signatures, parameters);
-        }
-        throw new NoSuchMethodException("Method '" + methodName + "' does not exist. Callback skipped.");
-    }
-
     public static void invokeCallbackMethod(Object instance, String methodName, Class[][] signatures, Object[][] parameters) throws NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         Class currentClazz = instance.getClass();
         while (currentClazz != null) {
@@ -43,6 +36,6 @@ public class InvocationUtil {
                 // ignore this and keep looking
             }
         }
-        throw new NoSuchMethodException();
+        throw new NoSuchMethodException(name);
     }
 }

@@ -30,14 +30,16 @@ public abstract class DependencyBase implements Dependency, DependencyActivation
     }
     
     protected void invokeCallbackMethod(Object[] instances, String methodName, Class[][] signatures, Object[][] parameters) {
-        try {
-            InvocationUtil.invokeCallbackMethod(instances, methodName, signatures, parameters);
-        }
-        catch (NoSuchMethodException e) {
-            m_logger.log(Logger.LOG_DEBUG, "Method '" + methodName + "' does not exist. Callback skipped.");
-        }
-        catch (Exception e) {
-            m_logger.log(Logger.LOG_DEBUG, "Invocation of '" + methodName + "' failed.", e);
+        for (int i = 0; i < instances.length; i++) {
+        	try {
+                InvocationUtil.invokeCallbackMethod(instances[i], methodName, signatures, parameters);
+            }
+            catch (NoSuchMethodException e) {
+                // if the method does not exist, ignore it
+            }
+            catch (Exception e) {
+                m_logger.log(Logger.LOG_WARNING, "Invocation of '" + methodName + "' failed.", e);
+            }
         }
     }
 }
