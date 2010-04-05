@@ -79,7 +79,6 @@ public class ResourceAnnotationTest extends AnnotationBase
      * Tests a ResourceAdapter
      * @param context
      */
-  /*
     @Test
     public void testResourceAdapterAnnotation(BundleContext context)
     {
@@ -91,5 +90,4 @@ public class ResourceAnnotationTest extends AnnotationBase
         super.stopBundle("ResourceTest", context);
         m_ensure.waitForStep(2, 10000);
     }
-  */
 }
