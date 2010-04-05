@@ -741,7 +741,7 @@ public class AnnotationCollector extends ClassDataCollector
         }
         
         // Parse stateMask attribute
-        info.addParam(annotation, Params.stateMask, new Integer(Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE));
+        info.addParam(annotation, Params.stateMask, Integer.valueOf(Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE));
         
         // Parse Adapter properties.
         parseParameters(annotation, Params.properties, info);
