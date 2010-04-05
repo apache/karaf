@@ -8,7 +8,6 @@ public class InvocationUtil {
     public static void invokeCallbackMethod(Object[] instances, String methodName, Class[][] signatures, Object[][] parameters) throws NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         for (int i = 0; i < instances.length; i++) {
             invokeCallbackMethod(instances[i], methodName, signatures, parameters);
-            return;
         }
         throw new NoSuchMethodException("Method '" + methodName + "' does not exist. Callback skipped.");
     }
