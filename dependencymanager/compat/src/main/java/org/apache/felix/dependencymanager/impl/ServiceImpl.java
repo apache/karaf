@@ -73,11 +73,11 @@ public class ServiceImpl implements Service
     {
         if (dependency instanceof ServiceDependencyImpl)
         {
-            m_delegate.remove(((org.apache.felix.dependencymanager.impl.ConfigurationDependencyImpl) dependency).getDelegate());
+            m_delegate.remove(((org.apache.felix.dependencymanager.impl.ServiceDependencyImpl) dependency).getDelegate());
         }
         else if (dependency instanceof ConfigurationDependencyImpl)
         {
-            m_delegate.remove(((org.apache.felix.dependencymanager.impl.ServiceDependencyImpl) dependency).getDelegate());
+            m_delegate.remove(((org.apache.felix.dependencymanager.impl.ConfigurationDependencyImpl) dependency).getDelegate());
         }
         else
         {
