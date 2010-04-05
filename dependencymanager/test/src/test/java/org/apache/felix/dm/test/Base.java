@@ -55,7 +55,6 @@ public class Base implements LogService
         // The following code forces the temporary bundle files (from /tmp/tb/*) to be deleted when jvm exits
         // (this patch seems to be only required with pax examp 2.0.0)
 
-        /*
         try
         {
             File f = new File(new URL(context.getBundle().getLocation()).getPath());
@@ -65,7 +64,6 @@ public class Base implements LogService
         {
             t.printStackTrace();
         }
-        */
     }
 
     public void log(int level, String message)
