@@ -45,3 +45,6 @@
 	background: transparent 
 }
 .ui-tabs-paging-disabled { visibility: hidden }
+
+#waitDlg { text-align: center; padding: 2em; font-weight: bold }
+#waitDlg img { margin-right: 1em }

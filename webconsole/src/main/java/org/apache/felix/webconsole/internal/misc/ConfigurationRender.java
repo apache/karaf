@@ -184,13 +184,9 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         //ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
         PrintWriter pw = response.getWriter();
         pw.println( "<script type='text/javascript' src='${appRoot}/res/ui/ui.tabs.paging.js'></script>" );
-        pw.println( "<script type='text/javascript'>" );
-        pw.println( "// <![CDATA[" );
-        pw.println( "$(document).ready(function() {$('#tabs').tabs().tabs('paging')} );" );
-        pw.println( "// ]]>" );
-        pw.println( "</script>" );
+        pw.println( "<script type='text/javascript' src='${appRoot}/res/ui/configurationrender.js'></script>" );
 
-        pw.println("<br/><p class=\"statline\">");
+        pw.println( "<br/><p class=\"statline\">");
 
         final Date currentTime = new Date();
         synchronized ( DISPLAY_DATE_FORMAT )
@@ -230,6 +226,8 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         pw.println();
 
         pw.println("</div> <!-- end tabs container -->");
+
+        pw.println("<div id=\"waitDlg\" title=\"${configStatus.wait}\" class=\"ui-helper-hidden\"><img src=\"${appRoot}/res/imgs/loading.gif\" alt=\"${configStatus.wait}\" />${configStatus.wait.msg}</div>");
 
         pw.flush();
     }
