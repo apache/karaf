@@ -411,7 +411,7 @@ public class ComponentManager implements SynchronousBundleListener
         Class<?> serviceClass = b.loadClass(service);
         Dictionary<String, String> properties = parser.getDictionary(DescriptorParam.properties, null);
         boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
-        Service srv = dm.createResourceAdapterService(filter, serviceClass.getName(), properties, impl, propagate);  
+        Service srv = dm.createResourceAdapterService(filter, null, serviceClass.getName(), properties, impl, propagate);  
         setCommonServiceParams(srv, parser);
         return srv;
     }

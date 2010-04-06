@@ -252,6 +252,8 @@ public class DependencyManager {
      * service as a member it will be injected.
      * 
      * @param resourceFilter the filter condition to use with the resource
+     * @param adapterHandler a handler to invoke life cycle methods on for the adapter instance, or <code>null</code>
+     *     if you want to invoke these methods on the instance
      * @param adapterInterface the interface to use when registering adapters
      * @param adapterProperties additional properties to use with the adapter service registration
      * @param adapterImplementation the implementation of the adapter
@@ -259,18 +261,18 @@ public class DependencyManager {
      * @return a service that acts as a factory for generating resource adapters
      * @see Resource
      */
-    public Service createResourceAdapterService(String resourceFilter, String adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+    public Service createResourceAdapterService(String resourceFilter, Object adapterHandler, String adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
         return createService()
-            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
+            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterHandler, adapterImplementation, adapterInterface, adapterProperties, propagate))
             .add(createResourceDependency()
                 .setFilter(resourceFilter)
                 .setAutoConfig(false)
                 .setCallbacks("added", "removed")
             );
     }
-    public Service createResourceAdapterService(String resourceFilter, String[] adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+    public Service createResourceAdapterService(String resourceFilter, Object adapterHandler, String[] adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
         return createService()
-            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
+            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterHandler, adapterImplementation, adapterInterface, adapterProperties, propagate))
             .add(createResourceDependency()
                 .setFilter(resourceFilter)
                 .setAutoConfig(false)

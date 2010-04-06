@@ -171,11 +171,11 @@ public abstract class DependencyActivatorBase implements BundleActivator {
         return m_manager.createAdapterService(serviceInterface, serviceFilter, adapterInterface, adapterImplementation, adapterProperties);
     }
     
-    public Service createResourceAdapter(String resourceFilter, String adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
-        return m_manager.createResourceAdapterService(resourceFilter, adapterInterface, adapterProperties, adapterImplementation, propagate);
+    public Service createResourceAdapter(String resourceFilter, Object adapterHandler, String adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+        return m_manager.createResourceAdapterService(resourceFilter, adapterHandler, adapterInterface, adapterProperties, adapterImplementation, propagate);
     }
-    public Service createResourceAdapter(String resourceFilter, String[] adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
-        return m_manager.createResourceAdapterService(resourceFilter, adapterInterface, adapterProperties, adapterImplementation, propagate);
+    public Service createResourceAdapter(String resourceFilter, Object adapterHandler, String[] adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
+        return m_manager.createResourceAdapterService(resourceFilter, adapterHandler, adapterInterface, adapterProperties, adapterImplementation, propagate);
     }
     
     public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {

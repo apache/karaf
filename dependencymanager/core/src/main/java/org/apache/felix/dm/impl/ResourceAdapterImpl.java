@@ -33,17 +33,20 @@ public class ResourceAdapterImpl extends AbstractDecorator {
     private final Object m_adapterInterface;
     private final Dictionary m_adapterProperties;
     private final boolean m_propagate;
+    private final Object m_adapterHandler;
 
-    public ResourceAdapterImpl(String resourceFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
+    public ResourceAdapterImpl(String resourceFilter, Object adapterHandler, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
         m_resourceFilter = resourceFilter;
+        m_adapterHandler = adapterHandler;
         m_adapterImplementation = adapterImplementation;
         m_adapterInterface = adapterInterface;
         m_adapterProperties = adapterProperties;
         m_propagate = propagate;
     }
 
-    public ResourceAdapterImpl(String resourceFilter, Object adapterImplementation, String[] adapterInterfaces, Dictionary adapterProperties, boolean propagate) {
+    public ResourceAdapterImpl(String resourceFilter, Object adapterHandler, Object adapterImplementation, String[] adapterInterfaces, Dictionary adapterProperties, boolean propagate) {
         m_resourceFilter = resourceFilter;
+        m_adapterHandler = adapterHandler;
         m_adapterImplementation = adapterImplementation;
         m_adapterInterface = adapterInterfaces;
         m_adapterProperties = adapterProperties;
@@ -68,6 +71,7 @@ public class ResourceAdapterImpl extends AbstractDecorator {
             return m_manager.createService()
                 .setInterface((String) m_adapterInterface, props)
                 .setImplementation(m_adapterImplementation)
+                .setCallbacks(m_adapterHandler, "init", "start", "stop", "destroy")
                 .add(dependencies)
                 .add(m_manager.createResourceDependency()
                     .setResource(resource)
@@ -81,6 +85,7 @@ public class ResourceAdapterImpl extends AbstractDecorator {
             return m_manager.createService()
                 .setInterface((String[]) m_adapterInterface, props)
                 .setImplementation(m_adapterImplementation)
+                .setCallbacks(m_adapterHandler, "init", "start", "stop", "destroy")
                 .add(dependencies)
                 .add(m_manager.createResourceDependency()
                     .setResource(resource)
