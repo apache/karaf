@@ -19,3 +19,6 @@
 	margin: 0;
 	padding: 0
 }
+th.col_Level  { width: 6em }
+th.col_Received,
+th.col_Exception { min-width: 10em }

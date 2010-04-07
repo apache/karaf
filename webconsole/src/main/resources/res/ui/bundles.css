@@ -20,8 +20,10 @@
 	padding: 0;
 }
 
-.col_Status   { width: 50px;  }
-.col_Actions { width: 121px; }
+th.col_Symbolic_Name { width: 9em }
+th.col_Version,
+th.col_Status   { width: 7em }
+th.col_Actions { width: 121px }
 .filterBox      { float: left; margin-left: 1em }
 .symName                 { font-style: italic }
 .symName:before { content: " (" }
