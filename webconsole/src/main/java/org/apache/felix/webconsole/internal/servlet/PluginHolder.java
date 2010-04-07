@@ -301,25 +301,21 @@ class PluginHolder implements ServiceListener
      */
     public void serviceChanged( ServiceEvent event )
     {
-        final String label = getProperty( event.getServiceReference(), WebConsoleConstants.PLUGIN_LABEL );
-        if ( label != null )
+        switch ( event.getType() )
         {
-            switch ( event.getType() )
-            {
-                case ServiceEvent.REGISTERED:
-                    // add service
-                    serviceAdded( event.getServiceReference() );
-                    break;
+            case ServiceEvent.REGISTERED:
+                // add service
+                serviceAdded( event.getServiceReference() );
+                break;
 
-                case ServiceEvent.UNREGISTERING:
-                    // remove service
-                    serviceRemoved( event.getServiceReference() );
-                    break;
+            case ServiceEvent.UNREGISTERING:
+                // remove service
+                serviceRemoved( event.getServiceReference() );
+                break;
 
-                default:
-                    // update service
-                    break;
-            }
+            default:
+                // update service
+                break;
         }
     }
 
