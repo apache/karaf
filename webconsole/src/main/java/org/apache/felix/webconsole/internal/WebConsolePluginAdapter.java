@@ -48,9 +48,6 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     // the plugin label (aka address)
     private final String label;
 
-    // the plugin title rendered in the top bar
-    private final String title;
-
     // the actual plugin to forward rendering requests to
     private final Servlet plugin;
 
@@ -65,10 +62,9 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
      * @param plugin the plugin itself
      * @param serviceReference reference to the plugin
      */
-    public WebConsolePluginAdapter( String label, String title, Servlet plugin, ServiceReference serviceReference )
+    public WebConsolePluginAdapter( String label, Servlet plugin, ServiceReference serviceReference )
     {
         this.label = label;
-        this.title = title;
         this.plugin = plugin;
         this.cssReferences = toStringArray( serviceReference.getProperty( WebConsoleConstants.PLUGIN_CSS_REFERENCES ) );
 
@@ -91,13 +87,17 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
 
 
     /**
-     * Returns the title of this plugin page as defined in the constructor.
+     * Returns the title of this plugin page as defined by the
+     * {@link WebConsoleConstants#PLUGIN_TITLE} service registration attribute
+     * which is exposed as the servlet name in the servlet configuration.
      *
      * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#getTitle()
      */
     public String getTitle()
     {
-        return title;
+        // return the servlet name from the configuration but don't call
+        // the base class implementation, which calls getTitle()
+        return getServletConfig().getServletName();
     }
 
 
@@ -189,6 +189,7 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
         final String requestUri = request.getRequestURI();
         return requestUri.endsWith( ".html" ) || requestUri.lastIndexOf( '.' ) < 0;
     }
+
 
     /**
      * Directly refer to the plugin's service method unless the request method

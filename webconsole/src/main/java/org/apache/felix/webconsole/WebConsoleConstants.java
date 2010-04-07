@@ -43,12 +43,18 @@ public interface WebConsoleConstants
 
     /**
      * The title under which the OSGi Manager plugin is called by
-     * the OSGi Manager (value is "felix.webconsole.label").
+     * the OSGi Manager (value is "felix.webconsole.title").
      * <p>
      * For {@link #SERVICE_NAME Servlet} services not extending the
      * {@link AbstractWebConsolePlugin} this property is required for the
      * service to be used as a plugin. Otherwise the service is just ignored
      * by the Felix Web Console.
+     * <p>
+     * For {@link #SERVICE_NAME Servlet} services extending from the
+     * {@link AbstractWebConsolePlugin} abstract class this property is not
+     * technically required. To support lazy service access, e.g. for plugins
+     * implemented using the OSGi <i>Service Factory</i> pattern, the use
+     * of this service registration property is encouraged.
      *
      * @since 2.0.0
      */
