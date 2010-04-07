@@ -48,6 +48,9 @@
 	float: right;
 	height: 73px; /* must be the same as #lead height */
 }
+#lead p img { /* This is the logo */
+	height: 63px; /* must be #lead.height - #lead.padding-top */
+}
 
 
 /* TOP NAVIGATION */
