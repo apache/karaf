@@ -66,6 +66,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Bundle-SymbolicName>
+                            ${project.artifactId}
+                        </Bundle-SymbolicName>
                         <Import-Package>
                             javax.management.*,
                             org.osgi.framework,
@@ -77,7 +80,7 @@
                             <!-- plug into the web console -->
                             javax.servlet.*;
                             org.apache.felix.webconsole;
-                            
+
                             <!-- support configuration -->
                             org.osgi.service.cm;
                             org.osgi.service.metatype;resolution:=optional
