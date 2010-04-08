@@ -302,12 +302,20 @@ public class OsgiManager extends GenericServlet
     }
 
 
-    public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException
+    public void service( final ServletRequest req, final ServletResponse res ) throws ServletException, IOException
     {
+        // don't really expect to be called within a non-HTTP environment
+        service( ( HttpServletRequest ) req, ( HttpServletResponse ) res );
 
-        HttpServletRequest request = ( HttpServletRequest ) req;
-        HttpServletResponse response = ( HttpServletResponse ) res;
+        // ensure response has been sent back and response is committed
+        // (we are authorative for our URL space and no other servlet should interfere)
+        res.flushBuffer();
+    }
 
+
+    private void service( final HttpServletRequest request, HttpServletResponse response ) throws ServletException,
+        IOException
+    {
         // check whether we are not at .../{webManagerRoot}
         final String pathInfo = request.getPathInfo();
         if ( pathInfo == null || pathInfo.equals( "/" ) )
@@ -344,14 +352,14 @@ public class OsgiManager extends GenericServlet
             final Map labelMap = holder.getLocalizedLabelMap( resourceBundleManager, request.getLocale() );
 
             // the official request attributes
-            req.setAttribute( WebConsoleConstants.ATTR_LABEL_MAP, labelMap );
-            req.setAttribute( WebConsoleConstants.ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
-            req.setAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT, request.getContextPath() + request.getServletPath()
+            request.setAttribute( WebConsoleConstants.ATTR_LABEL_MAP, labelMap );
+            request.setAttribute( WebConsoleConstants.ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
+            request.setAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT, request.getContextPath() + request.getServletPath()
                 + '/' + label );
 
             // deprecated request attributes
-            req.setAttribute( ATTR_LABEL_MAP_OLD, labelMap );
-            req.setAttribute( ATTR_APP_ROOT_OLD, request.getContextPath() + request.getServletPath() );
+            request.setAttribute( ATTR_LABEL_MAP_OLD, labelMap );
+            request.setAttribute( ATTR_APP_ROOT_OLD, request.getContextPath() + request.getServletPath() );
 
             // wrap the response for localization and template variable replacement
             response = wrapResponse( request, response, plugin );
@@ -361,9 +369,7 @@ public class OsgiManager extends GenericServlet
         else
         {
             response.sendError( HttpServletResponse.SC_NOT_FOUND );
-            return;
         }
-
     }
 
 
