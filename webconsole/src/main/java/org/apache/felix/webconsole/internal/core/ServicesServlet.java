@@ -254,7 +254,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
         String filterStr = filter.toString();
         try
         {
-            ServiceReference[] refs = getBundleContext().getServiceReferences( null, filterStr );
+            ServiceReference[] refs = getBundleContext().getAllServiceReferences( null, filterStr );
             if ( refs == null || refs.length != 1 )
             {
                 return null;
@@ -274,7 +274,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
     {
         try
         {
-            return getBundleContext().getServiceReferences( null, null );
+            return getBundleContext().getAllServiceReferences( null, null );
         }
         catch ( InvalidSyntaxException e )
         {
