@@ -274,13 +274,19 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
     {
         try
         {
-            return getBundleContext().getAllServiceReferences( null, null );
+            final ServiceReference[] refs = getBundleContext().getAllServiceReferences( null, null );
+            if ( refs != null )
+            {
+                return refs;
+            }
         }
         catch ( InvalidSyntaxException e )
         {
             log( "Unable to access service reference list.", e );
-            return NO_REFS;
         }
+
+        // no services or invalid filter syntax (unlikely)
+        return NO_REFS;
     }
 
 
