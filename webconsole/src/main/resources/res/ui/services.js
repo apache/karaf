@@ -108,8 +108,17 @@ function renderDetails(data) {
 				unbind('click').click(function() {hideDetails(data.id)});
 		}
 	});
-	if (data.props) 
-		$('#pluginInlineDetails' + data.id).append( renderObjectAsTable(data.props) );
+	var details = "";
+	if (data.props) {
+		details += renderObjectAsTable(data.props);
+	}
+	if (data.usingBundles) {
+	   details += renderUsingBundlesAsTable(data.usingBundles);
+	}
+	if (details) {
+        details = '<table border="0"><tbody>' + details + '</tbody></table>';
+	    $('#pluginInlineDetails' + data.id).append( details );
+    }
 }
 
 function renderObjectAsTable(/* Object*/ details) {
@@ -141,9 +150,26 @@ function renderObjectAsTable(/* Object*/ details) {
 		txt = txt + '</td></tr>';
 	}
 
-	if ( txt ) {
-		txt = '<table border="0"><tbody>' + txt + '</tbody></table>';
+	return txt;
+}
+
+function renderUsingBundlesAsTable(/* Object[] */ bundles) {
+	var txt = '';
+
+	for (var idx in bundles) {
+		var bundle = bundles[idx];
+		txt += '<a href="' + bundlePath + '/' + bundle.bundleId + '">'
+		    + bundle.bundleSymbolicName + ' (' + bundle.bundleId + ')' 
+		    + '</a><br/>';
 	}
+
+    if (txt) {
+        txt = '<tr><td class="aligntop" noWrap="true" style="border:0px none">'
+            + i18n.usingBundles
+            + '</td><td class="aligntop" style="border:0px none">'
+            + txt
+            + '</td></tr>';
+    }
 
 	return txt;
 }

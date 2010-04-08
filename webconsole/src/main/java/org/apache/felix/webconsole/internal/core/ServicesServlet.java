@@ -422,7 +422,7 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
         jw.key( "bundleVersion" );
         jw.value( Util.getHeaderValue( bundle, Constants.BUNDLE_VERSION ) );
         jw.key( "bundleSymbolicName" );
-        jw.value( Util.getHeaderValue( bundle, Constants.BUNDLE_SYMBOLICNAME ) );
+        jw.value( bundle.getSymbolicName() );
     }
 
 
