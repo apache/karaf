@@ -709,7 +709,8 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      * Note: This method is intended to be used internally by the Web Console
      * to update the log level according to the Web Console configuration.
      *
-     * @param logLevel
+     * @param logLevel the maximum allowed log level. If message is logged with 
+     *        lower level it will not be forwarded to the logger.
      */
     public static final void setLogLevel( int logLevel )
     {
@@ -778,7 +779,15 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         {
             try
             {
-                return IOUtils.toString( templateStream, "UTF-8" );
+                String str = IOUtils.toString( templateStream, "UTF-8" );
+                switch ( str.charAt(0) )
+                { // skip BOM
+                    case 0xFEFF: // UTF-16/UTF-32, big-endian
+                    case 0xFFFE: // UTF-16, little-endian
+                    case 0xEFBB: // UTF-8
+                        return str.substring(1);
+                }
+                return str;
             }
             catch ( IOException e )
             {
