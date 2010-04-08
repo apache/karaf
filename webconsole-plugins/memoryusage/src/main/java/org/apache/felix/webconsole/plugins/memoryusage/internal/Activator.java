@@ -21,59 +21,56 @@ package org.apache.felix.webconsole.plugins.memoryusage.internal;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 
 public class Activator implements BundleActivator
 {
 
     private MemoryUsageSupport support;
 
-    public void start(BundleContext bundleContext)
+    public void start(final BundleContext bundleContext)
     {
-
         support = new MemoryUsageSupport(bundleContext);
 
         // install thread handler shell command
-        try
+        new AbstractServiceFactory(bundleContext, null, "org.apache.felix.shell.Command")
         {
-            register(bundleContext, new String[]
-                { "org.apache.felix.shell.Command" }, new MemoryUsageCommand(support), null);
-        }
-        catch (Throwable t)
-        {
-            // shell service might not be available, don't care
-        }
+            @Override
+            protected Object createObject()
+            {
+                return new MemoryUsageCommand(support);
+            }
+        };
 
         // install Web Console plugin
-        try
+        Dictionary<String, Object> pluginProps = new Hashtable<String, Object>();
+        pluginProps.put("felix.webconsole.label", MemoryUsageConstants.LABEL);
+        new AbstractServiceFactory(bundleContext, pluginProps, "javax.servlet.Servlet",
+            "org.apache.felix.webconsole.ConfigurationPrinter")
         {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>();
-            properties.put("felix.webconsole.label", MemoryUsageConstants.LABEL);
-
-            register(bundleContext, new String[]
-                { "javax.servlet.Servlet", "org.apache.felix.webconsole.ConfigurationPrinter" }, new MemoryUsagePanel(
-                bundleContext, support), properties);
-        }
-        catch (Throwable t)
-        {
-            // web console might not be available, don't care
-        }
+            @Override
+            public Object createObject()
+            {
+                return new MemoryUsagePanel(support);
+            }
+        };
 
         // register for configuration
-        try
+        Dictionary<String, Object> cmProps = new Hashtable<String, Object>();
+        cmProps.put(Constants.SERVICE_PID, MemoryUsageConstants.PID);
+        new AbstractServiceFactory(bundleContext, cmProps, "org.osgi.service.cm.ManagedService")
         {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>();
-            properties.put(Constants.SERVICE_PID, MemoryUsageConstants.PID);
-            register(bundleContext, new String[]
-                { "org.osgi.service.cm.ManagedService" }, new MemoryUsageConfigurator(support), properties);
-        }
-        catch (Throwable t)
-        {
-            // Configuration Admin and Metatype Service API might not be
-            // available, don't care
-        }
+            @Override
+            public Object createObject()
+            {
+                return new MemoryUsageConfigurator(support);
+            }
+        };
     }
 
     public void stop(BundleContext bundleContext)
@@ -85,21 +82,46 @@ public class Activator implements BundleActivator
         }
     }
 
-    static void register(BundleContext context, String[] serviceNames, Object service,
-        Dictionary<String, Object> properties)
+    private static abstract class AbstractServiceFactory implements ServiceFactory
     {
+        private int counter;
+        private Object service;
 
-        // ensure properties
-        if (properties == null)
+        public AbstractServiceFactory(BundleContext context, Dictionary<String, Object> properties,
+            String... serviceNames)
         {
-            properties = new Hashtable<String, Object>();
+            // ensure properties
+            if (properties == null)
+            {
+                properties = new Hashtable<String, Object>();
+            }
+
+            // default settings
+            properties.put(Constants.SERVICE_DESCRIPTION, "Memory Usage (" + serviceNames[0] + ")");
+            properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
+
+            context.registerService(serviceNames, this, properties);
         }
 
-        // default settings
-        properties.put(Constants.SERVICE_DESCRIPTION, "Memory Usage (" + serviceNames[0] + ")");
-        properties.put(Constants.SERVICE_VENDOR, "Apache Software Foundation");
+        public synchronized void ungetService(Bundle bundle, ServiceRegistration registration, Object service)
+        {
+            counter--;
+            if (counter <= 0)
+            {
+                service = null;
+            }
+        }
 
-        context.registerService(serviceNames, service, properties);
+        public synchronized Object getService(Bundle bundle, ServiceRegistration registration)
+        {
+            counter++;
+            if (service == null)
+            {
+                service = createObject();
+            }
+            return service;
+        }
+
+        protected abstract Object createObject();
     }
-
 }

@@ -41,22 +41,18 @@ import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.WebConsoleUtil;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.log.LogService;
 
 @SuppressWarnings("serial")
 class MemoryUsagePanel extends AbstractWebConsolePlugin implements ConfigurationPrinter, AttachmentProvider
 {
 
-    /** default log */
-    private final Logger log = LoggerFactory.getLogger(getClass());
-
     private final MemoryUsageSupport support;
 
-    MemoryUsagePanel(final BundleContext bundleContext, final MemoryUsageSupport support)
+    MemoryUsagePanel(final MemoryUsageSupport support)
     {
         this.support = support;
-        activate(bundleContext);
+        activate(support.getBundleContext());
     }
 
     // ---------- AbstractWebConsolePlugin
@@ -198,7 +194,7 @@ class MemoryUsagePanel extends AbstractWebConsolePlugin implements Configuration
                 {
                     resp.getWriter().print(
                         "Failed dumping the heap, JVM does not provide known mechanism to create a Heap Dump");
-                    log.error("Heap Dump creation failed: JVM has no known Heap Dump API");
+                    support.log(LogService.LOG_ERROR, "Heap Dump creation failed: JVM has no known Heap Dump API");
                 }
             }
             else if ("gc".equals(command))

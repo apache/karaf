@@ -19,6 +19,7 @@
 package org.apache.felix.webconsole.plugins.memoryusage.internal;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryNotificationInfo;
@@ -41,16 +42,20 @@ import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 
-final class MemoryUsageSupport implements NotificationListener
+final class MemoryUsageSupport implements NotificationListener, ServiceListener
 {
 
     // This is the name of the HotSpot Diagnostic MBean
     private static final String HOTSPOT_BEAN_NAME = "com.sun.management:type=HotSpotDiagnostic";
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    // to get the LogService
+    private final BundleContext context;
 
     // the default dump location: the dumps folder in the bundle private data
     // or the current working directory
@@ -65,8 +70,28 @@ final class MemoryUsageSupport implements NotificationListener
     // the actual threshold (configured or dynamically set in the console UI)
     private int threshold;
 
+    // log service
+    private ServiceReference logServiceReference;
+    private Object logService;
+
     MemoryUsageSupport(final BundleContext context)
     {
+        this.context = context;
+
+        // register for the log service
+        try
+        {
+            context.addServiceListener(this, "(objectclass=org.osgi.service.log.LogService)");
+            logServiceReference = context.getServiceReference("org.osgi.service.log.LogService");
+            if (logServiceReference != null)
+            {
+                logService = context.getService(logServiceReference);
+            }
+        }
+        catch (InvalidSyntaxException ise)
+        {
+            // TODO
+        }
 
         // the default dump location
         String propDumps = context.getProperty(MemoryUsageConstants.PROP_DUMP_LOCATION);
@@ -139,6 +164,19 @@ final class MemoryUsageSupport implements NotificationListener
         {
             // don't care
         }
+
+        context.removeServiceListener(this);
+        if (logServiceReference != null)
+        {
+            context.ungetService(logServiceReference);
+            logServiceReference = null;
+            logService = null;
+        }
+    }
+
+    public BundleContext getBundleContext()
+    {
+        return context;
     }
 
     /**
@@ -180,8 +218,9 @@ final class MemoryUsageSupport implements NotificationListener
             }
             this.threshold = percentage;
 
-            log.info("Setting Automatic Memory Dump Threshold to {}% for pools {}", threshold, thresholdPools);
-            log.info("Automatic Memory Dump cannot be set for pools {}", noThresholdPools);
+            log(LogService.LOG_INFO, "Setting Automatic Memory Dump Threshold to %d%% for pools %s", threshold,
+                thresholdPools);
+            log(LogService.LOG_INFO, "Automatic Memory Dump cannot be set for pools %s", noThresholdPools);
         }
         else
         {
@@ -351,7 +390,7 @@ final class MemoryUsageSupport implements NotificationListener
             this.dumpLocation = new File(dumpLocation).getAbsoluteFile();
         }
 
-        log.info("Storing Memory Dumps in {}", this.dumpLocation);
+        log(LogService.LOG_INFO, "Storing Memory Dumps in %s", this.dumpLocation);
     }
 
     final File getDumpLocation()
@@ -463,15 +502,16 @@ final class MemoryUsageSupport implements NotificationListener
         String notifType = notification.getType();
         if (notifType.equals(MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED))
         {
-            log.warn("Received Memory Threshold Exceed Notification, dumping Heap");
+            log(LogService.LOG_WARNING, "Received Memory Threshold Exceed Notification, dumping Heap");
             try
             {
                 File file = dumpHeap(null, true);
-                log.warn("Heap dumped to " + file);
+                log(LogService.LOG_WARNING, "Heap dumped to " + file);
             }
             catch (NoSuchElementException e)
             {
-                log.error("Failed dumping the heap, JVM does not provide known mechanism to create a Heap Dump");
+                log(LogService.LOG_ERROR,
+                    "Failed dumping the heap, JVM does not provide known mechanism to create a Heap Dump");
             }
         }
     }
@@ -507,12 +547,12 @@ final class MemoryUsageSupport implements NotificationListener
                 { tmpFile.getAbsolutePath(), live }, new String[]
                 { String.class.getName(), boolean.class.getName() });
 
-            log.debug("dumpSunMBean: Dumped Heap to {} using Sun HotSpot MBean", tmpFile);
+            log(LogService.LOG_DEBUG, "dumpSunMBean: Dumped Heap to %s using Sun HotSpot MBean", tmpFile);
             return tmpFile;
         }
         catch (Throwable t)
         {
-            log.debug("dumpSunMBean: Dump by Sun HotSpot MBean not working", t);
+            log(LogService.LOG_DEBUG, "dumpSunMBean: Dump by Sun HotSpot MBean not working", t);
             tmpFile.delete();
         }
 
@@ -522,9 +562,7 @@ final class MemoryUsageSupport implements NotificationListener
     /**
      * @param name
      * @return
-     * @see http
-     *      ://publib.boulder.ibm.com/infocenter/javasdk/v5r0/index.jsp?topic
-     *      =/com.ibm.java.doc.diagnostics.50/diag/tools/heapdump_enable.html
+     * @see <a href="http://publib.boulder.ibm.com/infocenter/javasdk/v5r0/index.jsp?topic=/com.ibm.java.doc.diagnostics.50/diag/tools/heapdump_enable.html">Getting Heapdumps</a>
      */
     private File dumpIbmDump(String name)
     {
@@ -554,27 +592,87 @@ final class MemoryUsageSupport implements NotificationListener
                         File target = new File(dumpLocation, name);
                         file.renameTo(target);
 
-                        log.debug("dumpSunMBean: Dumped Heap to {} using IBM Dump.HeapDump()", target);
+                        log(LogService.LOG_DEBUG, "dumpSunMBean: Dumped Heap to %s using IBM Dump.HeapDump()", target);
                         return target;
                     }
                 }
 
-                log.debug("dumpIbmDump: None of {} files '{}' is younger than {}", new Object[]
-                    { files.length, dir, minFileTime });
+                log(LogService.LOG_DEBUG, "dumpIbmDump: None of %d files '%s' is younger than %d", files.length, dir,
+                    minFileTime);
             }
             else
             {
-                log.debug("dumpIbmDump: Hmm '{}' does not seem to be a directory; isdir={} ??", dir, dir.isDirectory());
+                log(LogService.LOG_DEBUG, "dumpIbmDump: Hmm '%s' does not seem to be a directory; isdir=%b ??", dir,
+                    dir.isDirectory());
             }
 
-            log.warn("dumpIbmDump: Heap Dump has been created but cannot be located");
+            log(LogService.LOG_WARNING, "dumpIbmDump: Heap Dump has been created but cannot be located");
             return dumpLocation;
         }
         catch (Throwable t)
         {
-            log.debug("dumpIbmDump: Dump by IBM Dump class not working", t);
+            log(LogService.LOG_DEBUG, "dumpIbmDump: Dump by IBM Dump class not working", t);
         }
 
         return null;
+    }
+
+    // ---------- Logging support
+
+    public void serviceChanged(ServiceEvent event)
+    {
+        if (event.getType() == ServiceEvent.REGISTERED && logServiceReference == null)
+        {
+            logServiceReference = event.getServiceReference();
+            logService = context.getService(event.getServiceReference());
+        }
+        else if (event.getType() == ServiceEvent.UNREGISTERING && logServiceReference == event.getServiceReference())
+        {
+            logServiceReference = null;
+            logService = null;
+            context.ungetService(event.getServiceReference());
+        }
+    }
+
+    void log(int level, String format, Object... args)
+    {
+        log(level, null, format, args);
+    }
+
+    void log(int level, Throwable t, String format, Object... args)
+    {
+        Object logService = this.logService;
+        final String message = String.format(format, args);
+        if (logService != null)
+        {
+            ((LogService) logService).log(level, message, t);
+        }
+        else
+        {
+            PrintStream out = (level <= LogService.LOG_ERROR) ? System.err : System.out;
+            out.printf("%s: %s (%d): %s%n", toLevelString(level), context.getBundle().getSymbolicName(), context
+                .getBundle().getBundleId(), message);
+            if (t != null)
+            {
+                t.printStackTrace(out);
+            }
+        }
+    }
+
+    private String toLevelString(int level)
+    {
+        switch (level)
+        {
+            case LogService.LOG_DEBUG:
+                return "DEBUG";
+            case LogService.LOG_INFO:
+                return "INFO ";
+            case LogService.LOG_WARNING:
+                return "WARN ";
+            case LogService.LOG_ERROR:
+                return "ERROR";
+            default:
+                return "unknown(" + level + ")";
+        }
     }
 }
