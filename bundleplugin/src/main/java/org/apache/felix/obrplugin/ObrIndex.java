@@ -63,6 +63,13 @@ public final class ObrIndex extends AbstractMojo {
     private String urlTemplate;
 
     /**
+     * The repository to index
+     *
+     * @parameter expression="${mavenRepository}
+     */
+    private String mavenRepository;
+
+    /**
      * Local Repository.
      *
      * @parameter expression="${localRepository}"
@@ -77,10 +84,13 @@ public final class ObrIndex extends AbstractMojo {
         {
             log.info("Indexing...");
 
-            String mavenRepository = localRepository.getBasedir();
-            URI mavenRepoUri = new File(mavenRepository).toURI();
+            String repo = mavenRepository;
+            if (repo == null) {
+                repo = localRepository.getBasedir();
+            }
+            URI mavenRepoUri = new File(repo).toURI();
 
-            URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
+            URI repositoryXml = ObrUtils.findRepositoryXml( repo, obrRepository );
 
             log.info("Repository:   " + mavenRepoUri);
             log.info("OBR xml:      " + repositoryXml);
@@ -90,7 +100,15 @@ public final class ObrIndex extends AbstractMojo {
             findAllJars( new File(mavenRepository), files );
 
             DataModelHelperImpl dmh = new DataModelHelperImpl();
-            RepositoryImpl repository = (RepositoryImpl) dmh.repository( repositoryXml.toURL() );
+            RepositoryImpl repository;
+
+            File obrRepoFile = new File(repositoryXml);
+            if (obrRepoFile.isFile()) {
+                repository = (RepositoryImpl) dmh.repository( repositoryXml.toURL() );
+            } else {
+                repository = new RepositoryImpl();
+            }
+
             for (File file : files)
             {
                 try
@@ -112,7 +130,7 @@ public final class ObrIndex extends AbstractMojo {
                     log.warn("Error processing bundle: " + file + " " + e.getMessage());
                 }
             }
-            Writer writer = new FileWriter( new File(repositoryXml) );
+            Writer writer = new FileWriter( obrRepoFile );
             try
             {
                 dmh.writeRepository( repository, writer );
