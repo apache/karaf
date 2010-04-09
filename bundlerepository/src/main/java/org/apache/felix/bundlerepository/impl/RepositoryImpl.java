@@ -20,13 +20,12 @@ package org.apache.felix.bundlerepository.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.Repository;
-import org.apache.felix.bundlerepository.impl.ResourceImpl;
 
 public class RepositoryImpl implements Repository
 {
@@ -35,7 +34,7 @@ public class RepositoryImpl implements Repository
     private String m_uri = null;
     private Resource[] m_resources = null;
     private Referral[] m_referrals = null;
-    private Set m_resourceSet = new TreeSet(new ResourceComparator());
+    private Set m_resourceSet = new HashSet();
 
     public RepositoryImpl()
     {
@@ -61,6 +60,8 @@ public class RepositoryImpl implements Repository
         if (m_resources == null)
         {
             m_resources = (Resource[]) m_resourceSet.toArray(new Resource[m_resourceSet.size()]);
+            Arrays.sort(m_resources, new ResourceComparator());
+
         }
         return m_resources;
     }
