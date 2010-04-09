@@ -1059,7 +1059,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 {
                     if (bundle.getState() != Bundle.STARTING && bundle.getState() != Bundle.ACTIVE
                             && FileInstall.getStartLevel().isBundlePersistentlyStarted(bundle)
-                            && FileInstall.getStartLevel().getStartLevel() > FileInstall.getStartLevel().getBundleStartLevel(bundle))
+                            && FileInstall.getStartLevel().getStartLevel() >= FileInstall.getStartLevel().getBundleStartLevel(bundle))
                     {
                         bundles.add(bundle);
                     }
