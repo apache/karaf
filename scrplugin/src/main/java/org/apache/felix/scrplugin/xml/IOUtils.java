@@ -46,7 +46,6 @@ public class IOUtils {
      * Parse a file and send the sax events to the content handler.
      * @param file
      * @param handler
-     * @throws IOException
      * @throws TransformerException
      */
     public static final void parse(InputStream file, ContentHandler handler)

@@ -47,7 +47,7 @@ public class AnnotationTagProviderManager {
     /**
      * @param annotationTagProviderClasses List of classes that implements
      *            {@link AnnotationTagProvider} interface.
-     * @throws MojoFailureException
+     * @throws SCRDescriptorFailureException
      */
     public AnnotationTagProviderManager(String[] annotationTagProviderClasses) throws SCRDescriptorFailureException {
 

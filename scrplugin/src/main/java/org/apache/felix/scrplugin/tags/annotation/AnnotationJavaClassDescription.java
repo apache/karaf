@@ -18,14 +18,11 @@
  */
 package org.apache.felix.scrplugin.tags.annotation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.apache.felix.scrplugin.JavaClassDescriptorManager;
 import org.apache.felix.scrplugin.SCRDescriptorException;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 import org.apache.felix.scrplugin.tags.qdox.QDoxJavaClassDescription;
 
 import com.thoughtworks.qdox.model.JavaClass;
@@ -39,7 +36,7 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
 
     /**
      * @param clazz Java class
-     * @param source QDox source
+     * @param javaClass QDox source
      * @param manager description manager
      */
     public AnnotationJavaClassDescription(Class<?> clazz, JavaClass javaClass, JavaClassDescriptorManager manager) {
@@ -47,7 +44,7 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
     }
 
     /**
-     * @see JavaClassDescription#getTagByName(String)
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagByName(String)
      */
     @Override
     public JavaTag getTagByName(String name) {
@@ -63,7 +60,7 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
     }
 
     /**
-     * @see JavaClassDescription#getTagsByName(String, boolean)
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagsByName(String, boolean)
      */
     @Override
     public JavaTag[] getTagsByName(String name, boolean inherited) throws SCRDescriptorException {
@@ -89,7 +86,7 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
     }
 
     /**
-     * @see JavaClassDescription#getFields()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getFields()
      */
     @Override
     public JavaField[] getFields() {

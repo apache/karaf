@@ -20,19 +20,17 @@ package org.apache.felix.scrplugin;
 
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.om.Components;
-import org.apache.felix.scrplugin.tags.ClassUtil;
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.*;
 import org.apache.felix.scrplugin.tags.annotation.AnnotationJavaClassDescription;
 import org.apache.felix.scrplugin.tags.annotation.AnnotationTagProviderManager;
 import org.apache.felix.scrplugin.tags.cl.ClassLoaderJavaClassDescription;
 import org.apache.felix.scrplugin.tags.qdox.QDoxJavaClassDescription;
 import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
+
 import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaSource;
 
@@ -71,13 +69,10 @@ public abstract class JavaClassDescriptorManager
     /**
      * Construct a new manager.
      * @param log
-     * @param project
      * @param annotationTagProviders List of annotation tag providers
-     * @param excludeString The exclude information for sources
      * @param parseJavadocs Should the javadocs be parsed?
      * @param processAnnotations Should the annotations be processed?
      * @throws SCRDescriptorFailureException
-     * @throws SCRDescriptorException
      */
     public JavaClassDescriptorManager( final Log log, final ClassLoader classLoader,
         final String[] annotationTagProviders, final boolean parseJavadocs, final boolean processAnnotations )

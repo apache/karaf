@@ -291,7 +291,7 @@ public abstract class Util {
     public static Class<?> getClassValue(Annotation annotation, String name, final Class<?> clazz) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
-            if ( obj instanceof Class ) {
+            if ( obj instanceof Class<?> ) {
                 return (Class<?>)obj;
             }
             return ClassUtil.getClass(obj.toString());
@@ -304,6 +304,7 @@ public abstract class Util {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Enum> T getEnumValue(Annotation annotation,
                                                   String name,
                                                   final Class<T> enumClass,
@@ -336,6 +337,7 @@ public abstract class Util {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Enum> T getEnumValue(Annotation annotation,
             String name,
             final Class<T> enumClass,
@@ -399,7 +401,8 @@ public abstract class Util {
             }
 
         };
-        List<Object> valueList = evaluatingVisitor.getListValue(annotation, name);
+        @SuppressWarnings("unchecked")
+        final List<Object> valueList = evaluatingVisitor.getListValue(annotation, name);
         if (valueList==null) {
             return null;
         }

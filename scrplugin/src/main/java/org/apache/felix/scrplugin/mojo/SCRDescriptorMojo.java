@@ -22,21 +22,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.felix.scrplugin.JavaClassDescriptorManager;
-import org.apache.felix.scrplugin.SCRDescriptorException;
-import org.apache.felix.scrplugin.SCRDescriptorFailureException;
-import org.apache.felix.scrplugin.SCRDescriptorGenerator;
+import org.apache.felix.scrplugin.*;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Resource;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -193,7 +184,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
             throw new MojoFailureException( "Unable to add target directory to classloader.");
         }
 
-        int i = 1;
         for (Iterator<Artifact> ai=artifacts.iterator(); ai.hasNext(); ) {
             Artifact a = ai.next();
             try {

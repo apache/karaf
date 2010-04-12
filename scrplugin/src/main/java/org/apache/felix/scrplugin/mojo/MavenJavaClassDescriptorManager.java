@@ -19,27 +19,11 @@
 package org.apache.felix.scrplugin.mojo;
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+import java.io.*;
+import java.util.*;
+import java.util.jar.*;
 
-import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.JavaClassDescriptorManager;
-import org.apache.felix.scrplugin.Log;
-import org.apache.felix.scrplugin.SCRDescriptorException;
-import org.apache.felix.scrplugin.SCRDescriptorFailureException;
+import org.apache.felix.scrplugin.*;
 import org.apache.felix.scrplugin.helper.StringUtils;
 import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.om.Components;
@@ -47,6 +31,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.DirectoryScanner;
+
 import com.thoughtworks.qdox.JavaDocBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
 
