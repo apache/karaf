@@ -45,7 +45,8 @@
     <module>handler/whiteboard</module>
     <module>api</module>
     <module>online-manipulator</module>
-    <module>junit4osgi</module>
+    <!-- remove junit4osgi during the release process 
+    <module>junit4osgi</module> -->
   </modules>
 
 

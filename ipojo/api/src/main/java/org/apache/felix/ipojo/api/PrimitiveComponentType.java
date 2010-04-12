@@ -524,5 +524,22 @@ public class PrimitiveComponentType extends ComponentType {
         m_properties.add(prop);
         return this;
     }
+    
+    /**
+     * Adds a configuration property.
+     * @param key the key
+     * @param obj the value (can be <code>null</code>)
+     * @return the current component type
+     */
+    public PrimitiveComponentType addProperty(String key, Object obj) { 
+        String value = null;
+        if (obj != null) {
+            value = obj.toString();
+        }
+
+        addProperty(new Property().setName(key)
+           .setValue(value)); 
+        return this; 
+     } 
 
 }

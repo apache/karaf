@@ -41,7 +41,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.metadata</artifactId>
-    <version>${pom.version}</version>
+    <version>1.4.0</version>
   </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -69,6 +69,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>iPOJO Ant Task</Bundle-Name>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
             <Bundle-Description> iPOJO Ant Task </Bundle-Description>
             <Bundle-DocURL>http://felix.apache.org/site/ipojo-ant-task.html</Bundle-DocURL>

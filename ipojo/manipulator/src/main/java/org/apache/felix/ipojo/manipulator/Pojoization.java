@@ -67,7 +67,7 @@ public class Pojoization {
     /**
      * iPOJO Imported Package Version.
      */
-    public static final String IPOJO_PACKAGE_VERSION = " 1.4.0";
+    public static final String IPOJO_PACKAGE_VERSION = " 1.6.0";
 
     /**
      * List of component types.

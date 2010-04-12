@@ -180,6 +180,27 @@ public class Service implements HandlerConfiguration {
         m_properties.add(ps);
         return this;
     }
+    
+    /**
+     * Adds a service property.
+     * @param key the property key
+     * @param obj the initial value (can be <code>null</code>)
+     * @return the current service object.
+     */
+    public Service addProperty(String key, Object obj) { 
+        Class clazz = String.class;
+        String value = null;
+        if (obj != null) {
+            clazz = obj.getClass();
+            value = obj.toString();
+        }
+
+        addProperty(new ServiceProperty().setName(key) 
+           .setType(clazz.getName())
+           .setValue(value));
+        
+        return this; 
+     } 
 
     /**
      * Sets the provided service specification.
