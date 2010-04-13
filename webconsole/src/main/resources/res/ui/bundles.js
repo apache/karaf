@@ -19,6 +19,7 @@ var uploadDialog = false;
 var bundlesTable    = false;
 var bundlesBody     = false;
 var bundlesTemplate = false;
+var bundleOpError   = false;
 
 function renderData( eventData, filter )  {
 	lastBundleData = eventData;
@@ -39,6 +40,9 @@ function renderData( eventData, filter )  {
         showDetails(id);
     }
     initStaticWidgets();
+	
+	// show dialog on error
+	if (eventData.error) bundleOpError.dialog('open').find('pre').text(eventData.error)
 }
 
 function entry( /* Object */ bundle, filter ) {
@@ -69,26 +73,30 @@ function entryInternal( /* Object */ bundle ) {
 	tr.find('td:eq(1) span:eq(1)').html( drawDetails ? name : '<a href="' + pluginRoot + '/' + id + '">' + name + '</a>' );
 	tr.find('td:eq(2)').text( bundle.version );
 	tr.find('td:eq(3)').text( bundle.category );
-	tr.find('td:eq(4)').text( stateString(bundle) );
 	if (id == 0) { // system bundle has no actions
+		tr.find('td:eq(4)').text( stateString(bundle) );
 		tr.find('td:eq(5) ul').addClass('ui-helper-hidden');
 	} else {
-		var start   = tr.find('td:eq(5) ul li:eq(0)');
-		var stop    = tr.find('td:eq(5) ul li:eq(1)');
-		var refresh = tr.find('td:eq(5) ul li:eq(2)').click(function() {changeDataEntryState(id, 'refresh')});
-		var update  = tr.find('td:eq(5) ul li:eq(3)').click(function() {changeDataEntryState(id, 'update')});
-		var remove  = tr.find('td:eq(5) ul li:eq(4)');
-		start = hasStart(bundle) ?
-			start.click(function() {changeDataEntryState(id, 'start')}) :
-			start.addClass('ui-helper-hidden');
-		stop = hasStop(bundle) ?
-			stop.click(function() {changeDataEntryState(id, 'stop')}) :
-			stop.addClass('ui-helper-hidden');
-		remove = hasUninstall(bundle) ?
-			remove.click(function() {changeDataEntryState(id, 'uninstall')}) :
-			remove.addClass('ui-helper-hidden');
+		entrySetupState( bundle, tr, id );
 	}
 	return tr;
+}
+function entrySetupState( /* Object */ bundle, tr, id) {
+	var start   = tr.find('td:eq(5) ul li:eq(0)').removeClass('ui-helper-hidden').unbind('click');
+	var stop    = tr.find('td:eq(5) ul li:eq(1)').removeClass('ui-helper-hidden').unbind('click');
+	var refresh = tr.find('td:eq(5) ul li:eq(2)').unbind('click').click(function() {return changeDataEntryState(id, 'refresh')});
+	var update  = tr.find('td:eq(5) ul li:eq(3)').unbind('click').click(function() {return changeDataEntryState(id, 'update')});
+	var remove  = tr.find('td:eq(5) ul li:eq(4)').removeClass('ui-helper-hidden').unbind('click');
+	start = hasStart(bundle) ?
+		start.click(function() {return changeDataEntryState(id, 'start')}) :
+		start.addClass('ui-helper-hidden');
+	stop = hasStop(bundle) ?
+		stop.click(function() {return changeDataEntryState(id, 'stop')}) :
+		stop.addClass('ui-helper-hidden');
+	remove = hasUninstall(bundle) ?
+		remove.click(function() {return changeDataEntryState(id, 'uninstall')}) :
+		remove.addClass('ui-helper-hidden');
+	tr.find('td:eq(4)').text( stateString(bundle) );
 }
 
 function loadData() {
@@ -96,7 +104,15 @@ function loadData() {
 }
 
 function changeDataEntryState(/* long */ id, /* String */ action) {
-    $.post(pluginRoot + "/" + id, {"action":action}, renderData, "json"); 
+    $.post(pluginRoot + '/' + id, {'action':action}, function(b) {
+		var _tr = bundlesBody.find('#entry' + id);
+		if (1 == b.stateRaw)  { // uninstalled
+			_tr.remove(); 
+		} else {
+			entrySetupState( b, _tr, id );
+		}
+	}, 'json');
+	return false;
 }
 
 function refreshPackages() {
@@ -183,6 +199,13 @@ $(document).ready(function(){
 		uploadDialog.dialog('open');
 		return false;
 	});
+
+	bundleOpError = $('#bundleOpError').dialog({
+		autoOpen: false,
+		modal   : true,
+		width   : '80%'
+	});
+	bundleOpError.parent().addClass('ui-state-error');
 
 	// filter
 	$('.filterApply').click(function() {

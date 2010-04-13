@@ -179,7 +179,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         try
         {
             StringWriter w = new StringWriter();
-            writeJSON( w, null, null, null, true, Locale.ENGLISH, null );
+            writeJSON( w, null, null, null, true, Locale.ENGLISH, null, null );
             String jsonString = w.toString();
             JSONObject json = new JSONObject( jsonString );
 
@@ -261,7 +261,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             final String servicesRoot = getServicesRoot( request );
             try
             {
-                this.renderJSON(response, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale(), request.getParameter(FILTER_PARAM) );
+                this.renderJSON(response, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale(), request.getParameter(FILTER_PARAM), null );
             }
             catch (InvalidSyntaxException e)
             {
@@ -281,6 +281,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
         boolean success = false;
+        BundleException bundleException = null;
         final String action = WebConsoleUtil.getParameter( req, "action" );
         if ( "refreshPackages".equals( action ) )
         {
@@ -327,6 +328,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
                     }
                     catch ( BundleException be )
                     {
+                        bundleException = be;
                         log( "Cannot start", be );
                     }
                 }
@@ -340,6 +342,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
                     }
                     catch ( BundleException be )
                     {
+                        bundleException = be;
                         log( "Cannot stop", be );
                     }
                 }
@@ -365,9 +368,23 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
                     }
                     catch ( BundleException be )
                     {
+                        bundleException = be;
                         log( "Cannot uninstall", be );
                     }
                 }
+
+                // let's wait a little bit to give the framework time
+                // to process our request
+                try {
+                    Thread.sleep(800);
+                } catch (InterruptedException e) {
+                    // we ignore this
+                }
+
+                // write the state only
+                resp.getWriter().print("{fragment:" + isFragmentBundle(bundle) //
+                    + ",stateRaw:" + bundle.getState() + "}");
+                return;
             }
         }
 
@@ -384,7 +401,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
             final String servicesRoot = getServicesRoot( req );
             try
             {
-                this.renderJSON( resp, null, pluginRoot, servicesRoot, req.getLocale(), req.getParameter(FILTER_PARAM) );
+                this.renderJSON( resp, null, pluginRoot, servicesRoot, req.getLocale(), req.getParameter(FILTER_PARAM), bundleException );
             }
             catch (InvalidSyntaxException e)
             {
@@ -483,7 +500,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         StringWriter w = new StringWriter();
         try
         {
-            writeJSON(w, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale(), request.getParameter(FILTER_PARAM) );
+            writeJSON(w, reqInfo.bundle, pluginRoot, servicesRoot, request.getLocale(), request.getParameter(FILTER_PARAM), null );
         }
         catch (InvalidSyntaxException e)
         {
@@ -495,26 +512,26 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         response.getWriter().print(TEMPLATE_MAIN);
     }
 
-    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale, final String filter )
+    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale, final String filter, final BundleException be )
         throws IOException, InvalidSyntaxException
     {
         response.setContentType( "application/json" );
         response.setCharacterEncoding( "UTF-8" );
 
         final PrintWriter pw = response.getWriter();
-        writeJSON(pw, bundle, pluginRoot, servicesRoot, locale, filter);
+        writeJSON(pw, bundle, pluginRoot, servicesRoot, locale, filter, be);
     }
 
 
-    private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale, final String filter )
+    private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot, final String servicesRoot, final Locale locale, final String filter, final BundleException be )
         throws IOException, InvalidSyntaxException
     {
-        writeJSON( pw, bundle, pluginRoot, servicesRoot, false, locale, filter );
+        writeJSON( pw, bundle, pluginRoot, servicesRoot, false, locale, filter, be );
     }
 
 
     private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot,
-        final String servicesRoot, final boolean fullDetails, final Locale locale, final String filter ) throws IOException, InvalidSyntaxException
+        final String servicesRoot, final boolean fullDetails, final Locale locale, final String filter, final BundleException be ) throws IOException, InvalidSyntaxException
     {
         final Bundle[] allBundles = this.getBundles();
         final Object[] status = getStatusLine(allBundles);
@@ -553,9 +570,18 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
         {
             jw.object();
 
+            if (null != be)
+            {
+                final StringWriter s = new StringWriter();
+                final Throwable t = be.getNestedException() != null ? be.getNestedException() : be;
+                t.printStackTrace( new PrintWriter(s) );
+                jw.key( "error" );
+                jw.value( s.toString() );
+            }
+
             jw.key( "status" );
             jw.value( statusLine );
-
+            
             // add raw status
             jw.key( "s" );
             jw.array();
@@ -1059,7 +1085,7 @@ public class BundlesServlet extends SimpleWebConsolePlugin implements OsgiManage
     {
         JSONArray val = new JSONArray();
 
-        Dictionary headers = bundle.getHeaders();
+        Dictionary headers = bundle.getHeaders(""); // don't localize at all - raw headers
         Enumeration he = headers.keys();
         while ( he.hasMoreElements() )
         {
