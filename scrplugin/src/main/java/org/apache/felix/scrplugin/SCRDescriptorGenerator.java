@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -488,7 +489,7 @@ public class SCRDescriptorGenerator
         this.doServices( description.getTagsByName( Constants.SERVICE, inherited ), component, description );
 
         // collect references from class tags and fields
-        final Map<String, Object[]> references = new HashMap<String, Object[]>();
+        final Map<String, Object[]> references = new LinkedHashMap<String, Object[]>();
         // Utility handler for propertie
         final PropertyHandler propertyHandler = new PropertyHandler( component, ocd );
 
