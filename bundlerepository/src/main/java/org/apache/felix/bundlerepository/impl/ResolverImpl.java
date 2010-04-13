@@ -560,7 +560,7 @@ public class ResolverImpl implements Resolver
                             localResource.getBundle().stop();
                         }
                         
-                        localResource.getBundle().update(new URL(deployResources[i].getURI()).openStream());
+                        localResource.getBundle().update(FileUtil.openURL(new URL(deployResources[i].getURI())));
 
                         // If necessary, save the updated bundle to be
                         // started later.
@@ -599,7 +599,7 @@ public class ResolverImpl implements Resolver
                             "obr://"
                             + deployResources[i].getSymbolicName()
                             + "/-" + System.currentTimeMillis(),
-                            url.openStream());
+                            FileUtil.openURL(url));
 
                         // If necessary, save the installed bundle to be
                         // started later.

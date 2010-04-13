@@ -94,24 +94,9 @@ public class DataModelHelperImpl implements DataModelHelper
 
         try
         {
-            // Do it the manual way to have a chance to
-            // set request properties as proxy auth (EW).
-            URLConnection conn = url.openConnection();
-
-            // Support for http proxy authentication
-            String auth = System.getProperty("http.proxyAuth");
-            if ((auth != null) && (auth.length() > 0))
-            {
-                if ("http".equals(url.getProtocol()) || "https".equals(url.getProtocol()))
-                {
-                    String base64 = Base64Encoder.base64Encode(auth);
-                    conn.setRequestProperty("Proxy-Authorization", "Basic " + base64);
-                }
-            }
-
             if (url.getPath().endsWith(".zip"))
             {
-                ZipInputStream zin = new ZipInputStream(conn.getInputStream());
+                ZipInputStream zin = new ZipInputStream(FileUtil.openURL(url));
                 ZipEntry entry = zin.getNextEntry();
                 while (entry != null)
                 {
@@ -125,7 +110,7 @@ public class DataModelHelperImpl implements DataModelHelper
             }
             else
             {
-                is = conn.getInputStream();
+                is = FileUtil.openURL(url);
             }
 
             if (is != null)
@@ -464,7 +449,7 @@ public class DataModelHelperImpl implements DataModelHelper
             }
             private byte[] loadEntry(String name) throws IOException
             {
-                InputStream is = bundleUrl.openStream();
+                InputStream is = FileUtil.openURL(bundleUrl);
                 try
                 {
                     ZipInputStream jis = new ZipInputStream(is);

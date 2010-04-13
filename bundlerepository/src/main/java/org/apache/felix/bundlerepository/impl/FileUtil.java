@@ -18,7 +18,14 @@
  */
 package org.apache.felix.bundlerepository.impl;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.jar.JarEntry;
@@ -48,6 +55,7 @@ public class FileUtil
 
             OutputStream os = new FileOutputStream(file);
             URLConnection conn = srcURL.openConnection();
+            FileUtil.setProxyAuth(conn);
             int total = conn.getContentLength();
             InputStream is = conn.getInputStream();
 
@@ -167,4 +175,32 @@ public class FileUtil
         }
         bos.close();
     }
+
+    public static void setProxyAuth(URLConnection conn) throws IOException {
+        // Support for http proxy authentication
+        String auth = System.getProperty("http.proxyAuth");
+        if ((auth != null) && (auth.length() > 0))
+        {
+            if ("http".equals(conn.getURL().getProtocol()) || "https".equals(conn.getURL().getProtocol()))
+            {
+                String base64 = Base64Encoder.base64Encode(auth);
+                conn.setRequestProperty("Proxy-Authorization", "Basic " + base64);
+            }
+        }
+
+    }
+
+    public static InputStream openURL(final URL url) throws IOException {
+        // Do it the manual way to have a chance to
+        // set request properties as proxy auth (EW).
+        return openURL(url.openConnection());
+    }
+
+    public static InputStream openURL(final URLConnection conn) throws IOException {
+        // Do it the manual way to have a chance to
+        // set request properties as proxy auth (EW).
+        setProxyAuth(conn);
+        return conn.getInputStream();
+    }
+
 }
