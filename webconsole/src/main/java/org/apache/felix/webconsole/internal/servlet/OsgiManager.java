@@ -18,6 +18,7 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -34,13 +35,16 @@ import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.BrandingPlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
+import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
 import org.apache.felix.webconsole.internal.filter.FilteringResponseWrapper;
 import org.apache.felix.webconsole.internal.i18n.ResourceBundleManager;
@@ -90,6 +94,13 @@ public class OsgiManager extends GenericServlet
      */
     public static final String PARAM_NO_REDIRECT_AFTER_ACTION = "_noredir_";
 
+    /**
+     * The name of the cookie storing user-configured locale
+     * See https://issues.apache.org/jira/browse/FELIX-2267
+     */
+    private static final String COOKIE_LOCALE = "felix.webconsole.locale";
+
+
     static final String PROP_MANAGER_ROOT = "manager.root";
 
     static final String PROP_DEFAULT_RENDER = "default.render";
@@ -103,6 +114,8 @@ public class OsgiManager extends GenericServlet
     static final String PROP_ENABLED_PLUGINS = "plugins";
 
     static final String PROP_LOG_LEVEL = "loglevel";
+
+    static final String PROP_LOCALE = "locale";
 
     public static final int DEFAULT_LOG_LEVEL = LogService.LOG_WARNING;
 
@@ -162,6 +175,9 @@ public class OsgiManager extends GenericServlet
     private boolean httpResourcesRegistered;
 
     private Dictionary configuration;
+
+    // See https://issues.apache.org/jira/browse/FELIX-2267
+    private Locale configuredLocale;
 
     private Set enabledPlugins;
 
@@ -313,7 +329,7 @@ public class OsgiManager extends GenericServlet
     }
 
 
-    private void service( final HttpServletRequest request, HttpServletResponse response ) throws ServletException,
+    private void service( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
         // check whether we are not at .../{webManagerRoot}
@@ -336,6 +352,7 @@ public class OsgiManager extends GenericServlet
             slash = pathInfo.length();
         }
 
+        final Locale locale = getConfiguredLocale( request );
         final String label = pathInfo.substring( 1, slash );
         AbstractWebConsolePlugin plugin = holder.getPlugin( label );
 
@@ -349,7 +366,7 @@ public class OsgiManager extends GenericServlet
 
         if ( plugin != null )
         {
-            final Map labelMap = holder.getLocalizedLabelMap( resourceBundleManager, request.getLocale() );
+            final Map labelMap = holder.getLocalizedLabelMap( resourceBundleManager, locale );
 
             // the official request attributes
             request.setAttribute( WebConsoleConstants.ATTR_LABEL_MAP, labelMap );
@@ -362,6 +379,7 @@ public class OsgiManager extends GenericServlet
             request.setAttribute( ATTR_APP_ROOT_OLD, request.getContextPath() + request.getServletPath() );
 
             // wrap the response for localization and template variable replacement
+            request = wrapRequest( request, locale );
             response = wrapResponse( request, response, plugin );
 
             plugin.service( request, response );
@@ -372,6 +390,30 @@ public class OsgiManager extends GenericServlet
         }
     }
 
+    // See https://issues.apache.org/jira/browse/FELIX-2267
+    private final Locale getConfiguredLocale(HttpServletRequest request)
+    {
+        Locale locale = null;
+
+        Cookie[] cookies = request.getCookies();
+        for (int i = 0; cookies != null && i < cookies.length; i++)
+        {
+            if (COOKIE_LOCALE.equals(cookies[i].getName()))
+            {
+                locale = Util.parseLocaleString(cookies[i].getValue());
+                break;
+            }
+        }
+
+        // TODO: check UserAdmin ?
+
+        if (locale == null)
+            locale = configuredLocale;
+        if (locale == null)
+            locale = request.getLocale();
+
+        return locale;
+    }
 
     public void destroy()
     {
@@ -468,6 +510,17 @@ public class OsgiManager extends GenericServlet
         }
     }
 
+    private HttpServletRequest wrapRequest( final HttpServletRequest request, final Locale locale ) {
+        return new HttpServletRequestWrapper( request ) {
+            /**
+             * @see javax.servlet.ServletRequestWrapper#getLocale()
+             */
+            public Locale getLocale()
+            {
+                return locale;
+            }
+        };
+    }
 
     private HttpServletResponse wrapResponse( final HttpServletRequest request, final HttpServletResponse response,
         final AbstractWebConsolePlugin plugin )
@@ -642,6 +695,10 @@ public class OsgiManager extends GenericServlet
         }
 
         configuration = config;
+
+        final Object locale = config.get( PROP_LOCALE );
+        configuredLocale = locale == null || locale.toString().trim().length() == 0 //
+            ? null : Util.parseLocaleString( locale.toString().trim() );
 
         logLevel = getProperty( config, PROP_LOG_LEVEL, DEFAULT_LOG_LEVEL );
         AbstractWebConsolePlugin.setLogLevel( logLevel );

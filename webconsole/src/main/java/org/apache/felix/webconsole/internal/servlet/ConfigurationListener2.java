@@ -94,6 +94,9 @@ class ConfigurationListener2 extends ConfigurationListener implements MetaTypePr
             adList.add( new AttributeDefinitionImpl( OsgiManager.PROP_PASSWORD, "Password",
                 "The password for the user allowed to access the OSGi Management Console.",
                 OsgiManager.DEFAULT_PASSWORD ) );
+            adList.add( new AttributeDefinitionImpl( OsgiManager.PROP_LOCALE, "Locale",
+                "If set, this locale forces the localization to use this locale instead of the one, requested by the web browser",
+                "" ) );
             adList.add( new AttributeDefinitionImpl( OsgiManager.PROP_LOG_LEVEL, "Log Level", "Logging Level",
                 AttributeDefinition.INTEGER, new String[]
                     { String.valueOf( OsgiManager.DEFAULT_LOG_LEVEL ) }, 0, new String[]

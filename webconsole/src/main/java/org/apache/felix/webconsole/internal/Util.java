@@ -142,6 +142,43 @@ public class Util
         }
         return l;
     }
+    
+    /**
+     * This method expects a locale string in format language_COUNTRY, or
+     * language. The method will determine which is the correct form of locale
+     * string and construct a <code>Locale</code> object.
+     * 
+     * @param locale the locale string, if <code>null</code> - default locale is
+     *          returned
+     * @return a locale object
+     * @see Locale
+     */
+    public static final Locale parseLocaleString(String locale)
+    {
+        if (locale == null)
+        {
+            return Locale.getDefault();
+        }
+        int idx = locale.indexOf('_');
+        String language;
+        String country = "";
+        if (idx < 0)
+        { // "en"
+            language = locale;
+        }
+        else
+        { // "en_US"
+            language = locale.substring(0, idx); // "en"
+            idx++; // "_"
+            int last = locale.indexOf('_', idx); // "US"
+            if (last < 0)
+            {
+                last = locale.length();
+            }
+            country = locale.substring(idx, last);
+        }
+        return new Locale(language, country);
+    }
 
     private static final class BundleNameComparator implements Comparator
     {
