@@ -28,6 +28,7 @@ import java.security.AllPermission;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -121,11 +122,16 @@ public final class Permissions
         Permissions result = null;
         synchronized (m_permissions)
         {
-            result = (Permissions) m_permissions.get(permissionInfos);
+            result = (Permissions) m_permissions.get(new Entry(permissionInfos));
         }
         if (result == null)
         {
-            result = new Permissions(permissionInfos, m_context, m_action);
+			//permissionInfos may not be referenced by the new Permissions, as
+			//otherwise the reference in m_permissions prevents the key from
+			//being garbage collectable.
+            PermissionInfo[] permissionInfosClone = new PermissionInfo[permissionInfos.length];
+            System.arraycopy(permissionInfos, 0, permissionInfosClone, 0, permissionInfos.length);
+            result = new Permissions(permissionInfosClone, m_context, m_action);
             synchronized (m_permissions)
             {
                 m_permissions.put(
@@ -175,13 +181,26 @@ public final class Permissions
 
             Object entry = super.get();
 
-            if (entry == null)
-            {
-                return false;
-            }
-
             if (o instanceof Entry)
             {
+
+                Object otherEntry = ((Entry) o).get();
+				if (entry == null)
+				{
+					return otherEntry == null;
+				}
+				if (otherEntry == null)
+				{
+					return false;
+				}
+				if (!entry.getClass().equals(otherEntry.getClass()))
+				{
+					return false;
+				}
+				if (entry instanceof Object[])
+				{
+					return Arrays.equals((Object[])entry, (Object[])otherEntry);
+				}		
                 return entry.equals(((Entry) o).get());
             }
             else
