@@ -33,9 +33,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
+import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.version.VersionRange;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.InvalidArtifactRTException;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
@@ -50,9 +53,7 @@ import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
-import org.osgi.impl.bundle.obr.resource.Manifest;
-import org.osgi.impl.bundle.obr.resource.ManifestEntry;
-import org.osgi.impl.bundle.obr.resource.VersionRange;
+
 
 /**
  * Generates the features XML file
@@ -225,11 +226,9 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
     private void registerKernelBundle(Artifact artifact) throws ArtifactResolutionException, ArtifactNotFoundException, ZipException,
             IOException {
         Manifest manifest = getManifest(artifact);
-        if (manifest.getExports() != null) {
-            for (ManifestEntry entry : (List<ManifestEntry>)manifest.getExports()) {
-                kernelExports.put(entry.getName(), entry.getVersion());
-                getLog().debug(" adding kernel export " + entry.getName() + " (" + entry.getVersion() + ")");
-            }
+        for (Clause clause : ManifestUtils.getExports(manifest)) {
+        	kernelExports.put(clause.getName(), ManifestUtils.getVersionRange(clause));
+        	getLog().debug(" adding kernel export " + clause.getName() + " (" + ManifestUtils.getVersionRange(clause) + ")");
         }
         registerBundle(artifact);
     }
@@ -346,9 +345,9 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
         } else {
             try {
                 Manifest manifest = getManifest(artifact);
-                if (manifest.getBsn() != null) {
+                if (ManifestUtils.getBsn(manifest) != null) {
                     getLog().debug(String.format("MANIFEST.MF for '%s' contains Bundle-Name '%s'",
-                                                 artifact, manifest.getBsn().getName()));
+                                                 artifact, ManifestUtils.getBsn(manifest)));
                     return true;
                 }
             } catch (ZipException e) {
@@ -367,29 +366,29 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
      */
     private void addRequirements(Artifact artifact, Feature feature) throws ArtifactResolutionException, ArtifactNotFoundException, ZipException, IOException {
         Manifest manifest = getManifest(artifact);
-        Collection<ManifestEntry> remaining = getRemainingImports(manifest);
+        Collection<Clause> remaining = getRemainingImports(manifest);
         Artifact previous = null;
-        for (ManifestEntry entry : remaining) {
+        for (Clause clause : remaining) {
             Artifact add = null;
-            Map<VersionRange, Artifact> versions = bundleExports.get(entry.getName());
+            Map<VersionRange, Artifact> versions = bundleExports.get(clause.getName());
             if (versions != null) {
                 for (VersionRange range : versions.keySet()) {
                     add = versions.get(range);
-                    if (range.compareTo(entry.getVersion()) == 0) {
+                    if (range.intersect(ManifestUtils.getVersionRange(clause)) != null) {
                         add = versions.get(range);
                     }
                 }
             }
             if (add == null) {
-                if (isOptional(entry)) {
+                if (ManifestUtils.isOptional(clause)) {
                     // debug logging for optional dependency...
                     getLog().debug(String.format("  Unable to find suitable bundle for optional dependency %s (%s)", 
-                                                 entry.getName(), entry.getVersion()));
+                                                 clause.getName(), ManifestUtils.getVersionRange(clause)));
                 } else {
                     // ...but a warning for a mandatory dependency
                     getLog().warn(
                                   String.format("  Unable to find suitable bundle for dependency %s (%s) (required by %s)", 
-                                                entry.getName(), entry.getVersion(), artifact.getArtifactId()));
+                                                clause.getName(), ManifestUtils.getVersionRange(clause), artifact.getArtifactId()));
                 }
             } else {
                 if (!add.equals(previous) && feature.push(add) && !isFeature(add)) {
@@ -409,14 +408,7 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
         return features.containsKey(artifact);
     }
 
-    /*
-     * Check a manifest entry and check if the resolution for the import has been marked as optional 
-     */
-    private boolean isOptional(ManifestEntry entry) {
-        return entry.getAttributes() != null && entry.getAttributes().get("resolution:") != null
-               && entry.getAttributes().get("resolution:").equals("optional");
-    }
-
+   
     /*
      * Register a bundle, enlisting all packages it provides
      */
@@ -425,14 +417,14 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
         getLog().debug("Registering bundle " + artifact);
         knownBundles.add(toString(artifact));
         Manifest manifest = getManifest(artifact);
-        for (ManifestEntry entry : getManifestEntries(manifest.getExports())) {
-            Map<VersionRange, Artifact> versions = bundleExports.get(entry.getName());
+        for (Clause clause : getManifestEntries(ManifestUtils.getExports(manifest))) {
+            Map<VersionRange, Artifact> versions = bundleExports.get(clause.getName());
             if (versions == null) {
                 versions = new HashMap<VersionRange, Artifact>();
             }
-            versions.put(entry.getVersion(), artifact);
-            getLog().debug(String.format(" %s exported by bundle %s", entry.getName(), artifact));
-            bundleExports.put(entry.getName(), versions);
+            versions.put(ManifestUtils.getVersionRange(clause), artifact);
+            getLog().debug(String.format(" %s exported by bundle %s", clause.getName(), artifact));
+            bundleExports.put(clause.getName(), versions);
         }
     }
 
@@ -448,40 +440,40 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
     /*
      * Determine the list of imports to be resolved
      */
-    private Collection<ManifestEntry> getRemainingImports(Manifest manifest) {
+    private Collection<Clause> getRemainingImports(Manifest manifest) {
         // take all imports
-        Collection<ManifestEntry> input = getManifestEntries(manifest.getImports());
-        Collection<ManifestEntry> output = new LinkedList<ManifestEntry>(input);
+        Collection<Clause> input = getManifestEntries(ManifestUtils.getImports(manifest));
+        Collection<Clause> output = new LinkedList<Clause>(input);
         // remove imports satisfied by exports in the same bundle
-        for (ManifestEntry entry : input) {
-            for (ManifestEntry export : getManifestEntries(manifest.getExports())) {
-                if (entry.getName().equals(export.getName())) {
-                    output.remove(entry);
+        for (Clause clause : input) {
+            for (Clause export : getManifestEntries(ManifestUtils.getExports(manifest))) {
+                if (clause.getName().equals(export.getName())) {
+                    output.remove(clause);
                 }
             }
         }
         // remove imports for packages exported by the kernel
-        for (ManifestEntry entry : input) {
+        for (Clause clause : input) {
             for (String export : kernelExports.keySet()) {
-                if (entry.getName().equals(export)) {
-                    output.remove(entry);
+                if (clause.getName().equals(export)) {
+                    output.remove(clause);
                 }
             }
         }
         // remove imports for packages exported by the system bundle
-        for (ManifestEntry entry : input) {
-            if (systemExports.contains(entry.getName())) {
-                output.remove(entry);
+        for (Clause clause : input) {
+            if (systemExports.contains(clause.getName())) {
+                output.remove(clause);
             }
         }
         return output;
     }
 
-    private Collection<ManifestEntry> getManifestEntries(List imports) {
+    private Collection<Clause> getManifestEntries(List imports) {
         if (imports == null) {
-            return new LinkedList<ManifestEntry>();
+            return new LinkedList<Clause>();
         } else {
-            return (Collection<ManifestEntry>)imports;
+            return (Collection<Clause>)imports;
         }
     }
 

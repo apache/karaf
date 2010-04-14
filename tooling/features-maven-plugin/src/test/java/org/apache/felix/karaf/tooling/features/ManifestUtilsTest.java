@@ -20,10 +20,13 @@ package org.apache.felix.karaf.tooling.features;
 import static org.apache.felix.karaf.tooling.features.ManifestUtils.matches;
 
 import junit.framework.TestCase;
-import org.osgi.impl.bundle.obr.resource.ManifestEntry;
-import org.osgi.impl.bundle.obr.resource.VersionRange;
 
 import java.util.HashMap;
+
+import org.apache.felix.utils.manifest.Attribute;
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Directive;
+import org.osgi.framework.Constants;
 
 /**
  * Test cased for {@link org.apache.felix.karaf.tooling.features.ManifestUtils} 
@@ -31,40 +34,48 @@ import java.util.HashMap;
 public class ManifestUtilsTest extends TestCase {
 
     public void testIsOptional() {
-        ManifestEntry entry = new ManifestEntry("org.apache.karaf.test");
-        assertFalse(ManifestUtils.isOptional(entry));
+    	Directive[] directive = new Directive[0];
+    	Attribute[] attribute = new Attribute[0];
+        Clause clause = new Clause("org.apache.karaf.test", directive, attribute);
+        assertFalse(ManifestUtils.isOptional(clause));
 
-        entry.directives = new HashMap();
-        assertFalse(ManifestUtils.isOptional(entry));
+        directive = new Directive[1];
+        directive[0] = new Directive("resolution", "mandatory");
+        clause = new Clause("org.apache.karaf.test", directive, attribute);
+        
+        assertFalse(ManifestUtils.isOptional(clause));
 
-        entry.directives.put("resolution", "mandatory");
-        assertFalse(ManifestUtils.isOptional(entry));
-
-        entry.directives.put("resolution", "optional");
-        assertTrue(ManifestUtils.isOptional(entry));
+        directive[0] = new Directive("resolution", "optional");
+        clause = new Clause("org.apache.karaf.test", directive, attribute);
+        assertTrue(ManifestUtils.isOptional(clause));
     }
 
     public void testMatches() {
-        assertFalse(matches(entry("org.apache.karaf.dev"), entry("org.apache.karaf.test")));
-        assertTrue(matches(entry("org.apache.karaf.test"), entry("org.apache.karaf.test")));
+        assertFalse(matches(clause("org.apache.karaf.dev"), clause("org.apache.karaf.test")));
+        assertTrue(matches(clause("org.apache.karaf.test"), clause("org.apache.karaf.test")));
 
-        assertFalse(matches(entry("org.apache.karaf.test", "1.2.0"), entry("org.apache.karaf.test", "1.1.0")));
-        assertTrue(matches(entry("org.apache.karaf.test", "1.1.0"), entry("org.apache.karaf.test", "1.1.0")));
+        assertFalse(matches(clause("org.apache.karaf.test", "1.2.0"), clause("org.apache.karaf.test", "[1.1.0, 1.1.0]")));
+        assertTrue(matches(clause("org.apache.karaf.test", "1.1.0"), clause("org.apache.karaf.test", "[1.1.0, 1.1.0]")));
 
         // a single version means >= 1.0.0, so 1.1.O should be a match
-        assertTrue(matches(entry("org.apache.karaf.test", "1.0.0"), entry("org.apache.karaf.test", "1.1.0")));
+        assertTrue(matches(clause("org.apache.karaf.test", "1.0.0"), clause("org.apache.karaf.test", "1.1.0")));
+        assertTrue(matches(clause("org.apache.karaf.test", "1.0.0"), clause("org.apache.karaf.test")));
 
-        assertFalse(matches(entry("org.apache.karaf.test", "[1.1.0, 1.2.0)"), entry("org.apache.karaf.test", "1.0.0")));
-        assertFalse(matches(entry("org.apache.karaf.test", "[1.1.0, 1.2.0)"), entry("org.apache.karaf.test", "1.2.0")));
-        assertTrue(matches(entry("org.apache.karaf.test", "[1.1.0, 1.2.0)"), entry("org.apache.karaf.test", "1.1.0")));
-        assertTrue(matches(entry("org.apache.karaf.test", "[1.1.0, 1.2.0)"), entry("org.apache.karaf.test", "1.1.1")));
+        assertFalse(matches(clause("org.apache.karaf.test", "[1.1.0, 1.2.0)"), clause("org.apache.karaf.test", "[1.0.0, 1.0.0]")));
+        assertFalse(matches(clause("org.apache.karaf.test", "[1.1.0, 1.2.0)"), clause("org.apache.karaf.test", "[1.2.0, 1.2.0]")));
+        assertTrue(matches(clause("org.apache.karaf.test", "[1.1.0, 1.2.0)"), clause("org.apache.karaf.test", "[1.1.0, 1.1.0]")));
+        assertTrue(matches(clause("org.apache.karaf.test", "[1.1.0, 1.2.0)"), clause("org.apache.karaf.test", "[1.1.1, 1.1.1]")));
+        assertTrue(matches(clause("org.apache.karaf.test", "[1.1.0, 1.1.0]"), clause("org.apache.karaf.test", "[1.1.0, 1.1.0]")));
+        assertFalse(matches(clause("org.apache.karaf.test", "[1.1.0, 1.1.0]"), clause("org.apache.karaf.test", "1.1.1")));
+        assertTrue(matches(clause("org.apache.karaf.test", "[1.1.0, 1.1.0]"), clause("org.apache.karaf.test", "1.0.0")));
     }
 
-    private ManifestEntry entry(String name) {
-        return new ManifestEntry(name);
+    private Clause clause(String name) {
+        return new Clause(name, new Directive[0], new Attribute[0]);
     }
 
-    private ManifestEntry entry(String name, String version) {
-        return new ManifestEntry(name, new VersionRange(version));
+    private Clause clause(String name, String version) {
+    	Attribute[] attribute = {new Attribute(Constants.VERSION_ATTRIBUTE, version)};
+        return new Clause(name, new Directive[0], attribute);
     }
 }
