@@ -165,7 +165,7 @@ public class IPOJOURLHandler extends org.osgi.service.url.AbstractURLStreamHandl
         }
         out.deleteOnExit();
         // Returns the URL Connection
-        return out.toURL().openConnection();
+        return out.toURI().toURL().openConnection();
         
         
     }

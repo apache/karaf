@@ -531,15 +531,14 @@ public class PrimitiveComponentType extends ComponentType {
      * @param obj the value (can be <code>null</code>)
      * @return the current component type
      */
-    public PrimitiveComponentType addProperty(String key, Object obj) { 
+    public PrimitiveComponentType addProperty(String key, Object obj) {
         String value = null;
         if (obj != null) {
             value = obj.toString();
         }
 
-        addProperty(new Property().setName(key)
-           .setValue(value)); 
-        return this; 
-     } 
+        addProperty(new Property().setName(key).setValue(value));
+        return this;
+    }
 
 }

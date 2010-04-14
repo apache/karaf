@@ -1,3 +1,14 @@
+Changes from the 1.4.2 to 1.6.0
+-------------------------------
+** Improvement
+    * [FELIX-1427] - Service injection with Smart Proxies
+    * [FELIX-1646] - Add @Handler annotation to declare handlers without metadata.xml
+    * [FELIX-1906] - Allow calling a method when service properties of an already injected service are modified
+
+** Wish
+    * [FELIX-1940] - Add @Instance annotation to declare instances without metadata.xml
+    
+        
 Changes from the 1.4.0 to 1.4.2
 -------------------------------
 ** Bug

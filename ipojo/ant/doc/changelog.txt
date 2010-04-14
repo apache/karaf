@@ -1,3 +1,13 @@
+Changes from the 1.4.2 to 1.6.0
+-------------------------------
+** Bug
+    * [FELIX-1411] - Issue on windows to find components inside bundle
+    
+** Improvement
+    * [FELIX-1427] - Service injection with Smart Proxies
+    * [FELIX-1906] - Allow calling a method when service properties of an already injected service are modified
+    
+    
 Changes from the 1.4.0 to 1.4.2
 -------------------------------
 ** Bug

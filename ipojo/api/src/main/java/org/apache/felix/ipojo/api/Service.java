@@ -187,7 +187,7 @@ public class Service implements HandlerConfiguration {
      * @param obj the initial value (can be <code>null</code>)
      * @return the current service object.
      */
-    public Service addProperty(String key, Object obj) { 
+    public Service addProperty(String key, Object obj) {
         Class clazz = String.class;
         String value = null;
         if (obj != null) {
@@ -195,12 +195,11 @@ public class Service implements HandlerConfiguration {
             value = obj.toString();
         }
 
-        addProperty(new ServiceProperty().setName(key) 
-           .setType(clazz.getName())
-           .setValue(value));
-        
-        return this; 
-     } 
+        addProperty(new ServiceProperty().setName(key).setType(clazz.getName())
+                .setValue(value));
+
+        return this;
+    }
 
     /**
      * Sets the provided service specification.

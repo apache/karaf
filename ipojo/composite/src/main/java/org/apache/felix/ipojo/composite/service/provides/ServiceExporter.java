@@ -134,8 +134,8 @@ public class ServiceExporter extends DependencyModel {
                 .registerService(getSpecification().getName(), svc, getProps(reference));
             m_registrations.put(reference, reg);
         } else {
-            throw new SecurityException("The bundle " + m_destination.getBundle().getBundleId() + " does not have the " +
-                    "permission to register the service " + getSpecification().getName());
+            throw new SecurityException("The bundle " + m_destination.getBundle().getBundleId() + " does not have the "
+                    + "permission to register the service " + getSpecification().getName());
         }
     }
 

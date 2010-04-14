@@ -232,16 +232,16 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
             }
         } else { // if non null value, make sure it is assignable to the
             // attribute
-            if (true /* TODO type.class.isAssignableFrom(value.getClass()) */) {
+//            if (true /* TODO type.class.isAssignableFrom(value.getClass()) */) {
                 // propertyField.setValue(value);
                 // setValue(attributeField.getField(),null);
-                m_instanceManager.onSet(null, propertyField.getField(), value);
-            } else {
-                throw new InvalidAttributeValueException(
-                    "Cannot set attribute " + name + " to a "
-                            + value.getClass().getName()
-                            + " object, String expected");
-            }
+            m_instanceManager.onSet(null, propertyField.getField(), value);
+//            } else {
+//                throw new InvalidAttributeValueException(
+//                    "Cannot set attribute " + name + " to a "
+//                            + value.getClass().getName()
+//                            + " object, String expected");
+//            }
         }
 
     }
