@@ -55,7 +55,7 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
 		case 4: level = i18n.debug; break;
 	}
     parent.appendChild( td( null, null, [ text( printDate(dataEntry.received) ) ] ) );
-    parent.appendChild( td( null, null, [ text( level ) ] ) );    
+    parent.appendChild( td( null, { lvl:dataEntry.raw_level }, [ text( level ) ] ) );    
     parent.appendChild( td( null, null, [ text( wordWrap(message) ) ] ) );
     parent.appendChild( td( null, null, [ text( wordWrap(service) ) ] ) );
     parent.appendChild( td( null, null, [ text( exception ) ] ) );
@@ -82,6 +82,14 @@ $(document).ready(function() {
     	    renderData(data);
     	}, "json");
     });
+		// init tablesorte
+	$('#plugin_table').tablesorter({
+		textExtraction: function(node) {
+			var _ = $(node);
+			return _.attr('lvl') ? _.attr('lvl') : _.text();
+		}
+	});
+	
 	logsElem  = $("#logs");
     logs2Elem = $("#logs2");
 	tableElem = $("#plugin_table");
