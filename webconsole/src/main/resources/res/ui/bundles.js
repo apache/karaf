@@ -40,7 +40,10 @@ function renderData( eventData, filter )  {
         showDetails(id);
     }
     initStaticWidgets();
-	
+
+	var cv = $.cookies.get("webconsolebundlelist");
+	if (cv) bundlesTable.trigger('sorton', [cv]);
+
 	// show dialog on error
 	if (eventData.error) bundleOpError.dialog('open').find('pre').text(eventData.error)
 }
@@ -244,18 +247,15 @@ $(document).ready(function(){
 	});
 
 	// check for cookie
-	var cv = $.cookies.get("webconsolebundlelist");
-	var lo = (cv ? cv.split(",") : [1,0]);
 	bundlesTable = $("#plugin_table").tablesorter({
 		headers: {
 			0: { sorter:"digit" },
 			5: { sorter: false }
 		},
 		textExtraction:mixedLinksExtraction,
-		sortList: cv ? [lo] : false
 	}).bind("sortEnd", function() {
-		bundlesTable.eq(0).attr("config");
-		$.cookies.set("webconsolebundlelist", bundlesTable.sortList.toString());
+		var t = bundlesTable.eq(0).attr("config");
+		if (t.sortList) $.cookies.set("webconsolebundlelist", t.sortList);
 	});
 	bundlesBody     = bundlesTable.find('tbody');
 	bundlesTemplate = bundlesBody.find('tr').clone();
