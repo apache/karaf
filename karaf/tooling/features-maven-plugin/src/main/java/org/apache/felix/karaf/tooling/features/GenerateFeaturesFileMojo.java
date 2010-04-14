@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -53,7 +54,6 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.osgi.impl.bundle.obr.resource.Manifest;
 
 /**
  * Generates the features XML file
@@ -409,9 +409,9 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
                 ZipFile file = new ZipFile(artifact.getFile());
                 ZipEntry entry = file.getEntry("META-INF/MANIFEST.MF");
                 Manifest manifest = new Manifest(file.getInputStream(entry));
-                if (manifest.getBsn() != null) {
+                if (ManifestUtils.isBundle(manifest)) {
                     getLog().debug(String.format("MANIFEST.MF for '%s' contains Bundle-Name '%s'",
-                                                 artifact, manifest.getBsn().getName()));
+                                                 artifact, ManifestUtils.getBsn(manifest)));
                     return true;
                 }
             } catch (ZipException e) {

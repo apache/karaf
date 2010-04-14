@@ -24,12 +24,14 @@ import static org.apache.felix.karaf.tooling.features.ManifestUtils.matches;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
+import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.apache.felix.karaf.features.Feature;
 import org.apache.felix.karaf.features.Repository;
 import org.apache.felix.karaf.features.internal.RepositoryImpl;
+import org.apache.felix.utils.manifest.Clause;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -43,8 +45,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
-import org.osgi.impl.bundle.obr.resource.Manifest;
-import org.osgi.impl.bundle.obr.resource.ManifestEntry;
 
 /**
  * Validates a features XML file
@@ -96,7 +96,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
     /*
      * The packages exported by the features themselves -- useful when features depend on other features
      */
-    private Map<String, Set<ManifestEntry>> featureExports = new HashMap<String, Set<ManifestEntry>>();
+    private Map<String, Set<Clause>> featureExports = new HashMap<String, Set<Clause>>();
 
     /*
      * The set of packages exported by the system bundle and by Karaf itself
@@ -190,9 +190,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
                     info("    scanning %s for exports", artifact);
                     if (Artifact.SCOPE_PROVIDED.equals(artifact.getScope()) && !artifact.getType().equals("pom")) {
                         try {
-                            for (ManifestEntry entry : ManifestUtils.getExports(getManifest(artifact))) {
-                                getLog().debug(" adding " + entry.getName() + " to list of available packages");
-                                systemExports.add(entry.getName());
+                            for (Clause clause : ManifestUtils.getExports(getManifest(artifact))) {
+                                getLog().debug(" adding " + clause.getName() + " to list of available packages");
+                                systemExports.add(clause.getName());
                             }
                         } catch (ArtifactResolutionException e) {
                             error("Unable to find bundle exports for %s: %s", e, artifact, e.getMessage());
@@ -228,7 +228,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private void analyzeExports(Repository repository) throws Exception {
         for (Feature feature : repository.getFeatures()) {
-            Set<ManifestEntry> exports = new HashSet<ManifestEntry>();
+            Set<Clause> exports = new HashSet<Clause>();
             for (String bundle : feature.getBundles()) {
                 exports.addAll(getExports(getManifest(bundles.get(bundle))));
             }
@@ -271,8 +271,8 @@ public class ValidateFeaturesMojo extends MojoSupport {
      * Validate if all imports for a feature are being matched with exports
      */
     private void validateImportsExports(Feature feature) throws Exception {
-        Map<ManifestEntry, String> imports = new HashMap<ManifestEntry, String>();
-        Set<ManifestEntry> exports = new HashSet<ManifestEntry>();
+        Map<Clause, String> imports = new HashMap<Clause, String>();
+        Set<Clause> exports = new HashSet<Clause>();
         for (Feature dependency : feature.getDependencies()) {
             if (featureExports.containsKey(dependency.getName())) {
                 exports.addAll(featureExports.get(dependency.getName()));
@@ -283,23 +283,23 @@ public class ValidateFeaturesMojo extends MojoSupport {
         for (String bundle : feature.getBundles()) {
             Manifest meta = manifests.get(bundles.get(bundle));
             exports.addAll(getExports(meta));
-            for (ManifestEntry entry : getMandatoryImports(meta)) {
-                imports.put(entry, bundle);   
+            for (Clause clause : getMandatoryImports(meta)) {
+                imports.put(clause, bundle);   
             }
         }
 
         // setting up the set of required imports
-        Set<ManifestEntry> requirements = new HashSet<ManifestEntry>();
+        Set<Clause> requirements = new HashSet<Clause>();
         requirements.addAll(imports.keySet());
 
         // now, let's remove requirements whenever we find a matching export for them
-        for (ManifestEntry element : imports.keySet()) {
+        for (Clause element : imports.keySet()) {
             if (systemExports.contains(element.getName())) {
                 debug("%s is resolved by a system bundle export or provided bundle", element);
                 requirements.remove(element);
                 continue;
             }
-            for (ManifestEntry export : exports) {
+            for (Clause export : exports) {
                 if (matches(element, export)) {
                     debug("%s is resolved by export %s", element, export);
                     requirements.remove(element);
@@ -312,7 +312,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
         // if there are any more requirements left here, there's a problem with the feature 
         if (!requirements.isEmpty()) {
             warn("Failed to validate feature %s", feature.getName());
-            for (ManifestEntry entry : requirements) {
+            for (Clause entry : requirements) {
                 warn("No export found to match %s (imported by %s)",
                      entry, imports.get(entry));
             }
