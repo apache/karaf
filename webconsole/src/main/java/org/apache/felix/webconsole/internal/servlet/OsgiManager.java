@@ -386,7 +386,15 @@ public class OsgiManager extends GenericServlet
         }
         else
         {
-            response.sendError( HttpServletResponse.SC_NOT_FOUND );
+            final String body404 = MessageFormat.format(
+                resourceBundleManager.getResourceBundle(bundleContext.getBundle(), locale).getString(
+                    "404"), new Object[] {
+                    request.getContextPath() + request.getServletPath() + '/' + BundlesServlet.NAME
+                });
+            response.setCharacterEncoding( "utf-8" );
+            response.setContentType( "text/html" );
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            response.getWriter().println( body404 );
         }
     }
 
