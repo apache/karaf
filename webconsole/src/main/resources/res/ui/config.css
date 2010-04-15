@@ -30,6 +30,6 @@ html>select { width: auto; min-width: 50em }
 .multiselect { display: block }
 .col_Actions { width: 7em !important }
 .pointer { cursor: pointer }
-.subpid   { display:inline-block; margin-left: 1em }
+.subpid   { margin-left: 1em; float: left }
 tr.fpid   td   { font-style:italic }
 #factoryTableCaption { margin-top: 1.5em }

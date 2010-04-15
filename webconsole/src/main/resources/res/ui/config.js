@@ -120,6 +120,11 @@ function displayConfigForm(obj) {
 	if ( obj.service_location && obj.bundle_location && obj.service_location != obj.bundle_location) {
 		editorMessage.removeClass('ui-helper-hidden').text(i18n.err_bind.msgFormat(obj.pid, obj.bundle_location, obj.service_location));
 	} else editorMessage.addClass('ui-helper-hidden');
+
+	// ugly workaround for IE6 and IE7 - these browsers don't show correctly the dialog
+	var ua = navigator.userAgent;
+	if (ua.indexOf('MSIE 6') != -1 || ua.indexOf('MSIE 7') != -1) $(parent).html(parent.innerHTML);
+
 	initStaticWidgets(editor.attr('__pid', obj.pid).dialog('option', 'title', obj.title).dialog('open'));
 }
 
@@ -431,7 +436,7 @@ function addConfig(conf) {
 	var tr = configRow.clone().appendTo(configBody);
 
 	// rendering name - indented if factory pid is set
-	var nms = tr.find('td:eq(0) span')
+	var nms = tr.find('td:eq(0) div');
 	if (conf.fpid) { 
 		nms.after(conf.id); 
 		tr.attr('fpid', conf.name);
