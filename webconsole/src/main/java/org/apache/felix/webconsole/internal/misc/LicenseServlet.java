@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleUtil;
@@ -118,6 +120,7 @@ public final class LicenseServlet extends SimpleWebConsolePlugin implements Osgi
                 Bundle bundle = bundles[i];
 
                 JSONObject files = findResource(bundle, LICENSE_FILES);
+                addLicensesFromHeader(bundle, files);
                 if (files.length() > 0)
                 { // has resources
                     JSONObject data = new JSONObject();
@@ -141,6 +144,45 @@ public final class LicenseServlet extends SimpleWebConsolePlugin implements Osgi
         return path.substring( path.lastIndexOf( '/' ) + 1 );
     }
 
+    private static final JSONObject addLicensesFromHeader(Bundle bundle, JSONObject files)
+        throws JSONException
+    {
+        String target = (String) bundle.getHeaders("").get("Bundle-License");
+        if (target != null)
+        {
+            Clause[] licenses = Parser.parseHeader(target);
+            for (int i = 0; licenses != null && i < licenses.length; i++)
+            {
+                final String name = licenses[i].getName();
+                if (!"<<EXTERNAL>>".equals(name))
+                {
+                    final String link = licenses[i].getAttribute("link");
+                    final String path;
+                    final String url;
+                    if (link == null)
+                    {
+                        path = name;
+                        url = getName(name);
+                    }
+                    else
+                    {
+                        path = link;
+                        url = name;
+                    }
+
+                    // skip entry URL is bundle resources, but doesn't exists
+                    if (path.indexOf("://") == -1 && null == bundle.getEntry(path))
+                        continue;
+
+                    JSONObject entry = new JSONObject();
+                    entry.put("path", path);
+                    entry.put("url", url);
+                    files.append("__res__", entry);
+                }
+            }
+        }
+        return files;
+    }
 
     private static final JSONObject findResource( Bundle bundle, String[] patterns ) throws IOException, JSONException
     {

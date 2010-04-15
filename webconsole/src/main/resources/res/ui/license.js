@@ -59,6 +59,7 @@ function displayBundle(/* String */ bundleIndex)
                     link += descr.jar + "!/"; // inner jar attribute
                 }
                 link += descr.path;
+				if (descr.path.indexOf('http:') == 0 || descr.path.indexOf('ftp:') == 0) link = descr.path;
 
 				buttons += '<a href="' + link + '">' + descr.url + '</a> ';
 
@@ -79,7 +80,7 @@ function displayBundle(/* String */ bundleIndex)
     }
     
     if (firstPage) {
-        $.get(firstPage, insertLicenseData);
+		openLicenseLink(firstPage);
     } else {
         licenseDetails.html("");
     }
@@ -88,9 +89,17 @@ function displayBundle(/* String */ bundleIndex)
 	$("#licenseLeft #" +bundleIndex).addClass('ui-state-default ui-corner-all');
 
     $('#licenseButtons a').click(function() {
-        $.get(this.href, insertLicenseData);
-       return false;
+		openLicenseLink(this.href);
+		return false;
     });
+}
+
+function openLicenseLink(uri) {
+	if (uri.indexOf(window.location.href) == 0 || uri.indexOf(pluginRoot) == 0) { // local URI
+        $.get(uri, insertLicenseData);
+	} else {
+		licenseDetails.html( '<iframe frameborder="0" src="' + uri+ '"></iframe>' );
+	}
 }
 
 
