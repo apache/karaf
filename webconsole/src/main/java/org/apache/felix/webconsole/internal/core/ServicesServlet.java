@@ -23,36 +23,30 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.MessageFormat;
 import java.util.Locale;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.DefaultVariableResolver;
 import org.apache.felix.webconsole.SimpleWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 
 
 /**
  * ServicesServlet provides a plugin for inspecting the registered services.
  */
-public class ServicesServlet extends SimpleWebConsolePlugin implements ConfigurationPrinter, OsgiManagerPlugin
+public class ServicesServlet extends SimpleWebConsolePlugin implements OsgiManagerPlugin
 {
     // don't create empty reference array all the time, create it only once - it is immutable
     private static final ServiceReference[] NO_REFS = new ServiceReference[0];
@@ -109,8 +103,6 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
         return ( RequestInfo ) request.getAttribute( ServicesServlet.class.getName() );
     }
 
-    private ServiceRegistration configurationPrinter;
-
     /** the label for the services plugin */
     public static final String LABEL = "services";
     private static final String TITLE = "%services.pluginTitle";
@@ -124,122 +116,6 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
 
         // load templates
         TEMPLATE = readTemplateFile( "/templates/services.html" );
-    }
-
-
-    /**
-     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#activate(org.osgi.framework.BundleContext)
-     */
-    public void activate( BundleContext bundleContext )
-    {
-        super.activate( bundleContext );
-        configurationPrinter = bundleContext.registerService( ConfigurationPrinter.SERVICE, this, null );
-    }
-
-
-    /**
-     * @see org.apache.felix.webconsole.SimpleWebConsolePlugin#deactivate()
-     */
-    public void deactivate()
-    {
-        if ( configurationPrinter != null )
-        {
-            configurationPrinter.unregister();
-            configurationPrinter = null;
-        }
-
-        super.deactivate();
-    }
-
-
-    /**
-     * @see org.apache.felix.webconsole.ConfigurationPrinter#printConfiguration(java.io.PrintWriter)
-     */
-    public void printConfiguration( PrintWriter pw )
-    {
-        try
-        {
-            StringWriter w = new StringWriter();
-            writeJSON( w, null, true, Locale.ENGLISH );
-            String jsonString = w.toString();
-            JSONObject json = new JSONObject( jsonString );
-
-            pw.println( "Status: " + json.get( "status" ) );
-            pw.println();
-
-            JSONArray data = json.getJSONArray( "data" );
-            for ( int i = 0; i < data.length(); i++ )
-            {
-                if ( !data.isNull( i ) )
-                {
-                    JSONObject service = data.getJSONObject( i );
-
-                    pw.println( MessageFormat.format( "Service {0} - {1} (pid: {2})", new Object[]
-                        { service.get( "id" ), service.get( "types" ), service.get( "pid" ) } ) );
-                    pw.println( MessageFormat.format( "  from Bundle {0} - {1} ({2}), version {3}", new Object[]
-                        { service.get( "bundleId" ), service.get( "bundleName" ), service.get( "bundleSymbolicName" ),
-                            service.get( "bundleVersion" ) } ) );
-
-                    JSONArray props = service.getJSONArray( "props" );
-                    for ( int pi = 0; pi < props.length(); pi++ )
-                    {
-                        if ( !props.isNull( pi ) )
-                        {
-                            JSONObject entry = props.getJSONObject( pi );
-
-                            pw.print( "    " + entry.get( "key" ) + ": " );
-
-                            Object entryValue = entry.get( "value" );
-                            if ( entryValue instanceof JSONArray )
-                            {
-                                pw.println();
-                                JSONArray entryArray = ( JSONArray ) entryValue;
-                                for ( int ei = 0; ei < entryArray.length(); ei++ )
-                                {
-                                    if ( !entryArray.isNull( ei ) )
-                                    {
-                                        pw.println( "        " + entryArray.get( ei ) );
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                pw.println( entryValue );
-                            }
-                        }
-                    }
-
-                    JSONArray usingBundles = service.getJSONArray( "usingBundles" );
-                    for ( int ui = 0; ui < usingBundles.length(); ui++ )
-                    {
-                        if ( !usingBundles.isNull( ui ) )
-                        {
-                            JSONObject bundle = usingBundles.getJSONObject( ui );
-                            pw.println( MessageFormat.format( "  Using Bundle {0} - {1} ({2}), version {3}", new Object[]
-                                { bundle.get( "bundleId" ), bundle.get( "bundleName" ),
-                                    bundle.get( "bundleSymbolicName" ), bundle.get( "bundleVersion" ) } ) );
-                        }
-                    }
-
-                    pw.println();
-                }
-            }
-        }
-        catch ( Exception e )
-        {
-            log( "Problem rendering Bundle details for configuration status", e );
-        }
-    }
-
-
-    private static final void appendServiceInfoCount( final StringBuffer buf, String msg, int count )
-    {
-        buf.append( count );
-        buf.append( " service" );
-        if ( count != 1 )
-            buf.append( 's' );
-        buf.append( ' ' );
-        buf.append( msg );
     }
 
 
@@ -290,16 +166,21 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements Configura
     }
 
 
-    private static final String getStatusLine( final ServiceReference[] services )
+    static final String getStatusLine( final ServiceReference[] services )
     {
+        final int count = services.length;
         final StringBuffer buffer = new StringBuffer();
         buffer.append( "Services information: " );
-        appendServiceInfoCount( buffer, "in total", services.length );
+        buffer.append( count );
+        buffer.append( " service" );
+        if ( count != 1 )
+            buffer.append( 's' );
+        buffer.append( " in total" );
         return buffer.toString();
     }
 
 
-    private String propertyAsString( ServiceReference ref, String name )
+    static final String propertyAsString( ServiceReference ref, String name )
     {
         Object value = ref.getProperty( name );
         if ( value instanceof Object[] )

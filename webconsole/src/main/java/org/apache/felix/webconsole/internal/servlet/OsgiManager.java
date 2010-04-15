@@ -70,7 +70,7 @@ public class OsgiManager extends GenericServlet
     private static final long serialVersionUID = 1L;
 
     /**
-     * Old name of the request attribute provding the root to the web console.
+     * Old name of the request attribute providing the root to the web console.
      * This attribute is no deprecated and replaced by
      * {@link WebConsoleConstants#ATTR_APP_ROOT}.
      *
@@ -79,7 +79,7 @@ public class OsgiManager extends GenericServlet
     private static final String ATTR_APP_ROOT_OLD = OsgiManager.class.getName() + ".appRoot";
 
     /**
-     * Old name of the request attribute provding the mappings from label to
+     * Old name of the request attribute providing the mappings from label to
      * page title. This attribute is no deprecated and replaced by
      * {@link WebConsoleConstants#ATTR_LABEL_MAP}.
      *
@@ -141,6 +141,7 @@ public class OsgiManager extends GenericServlet
             "org.apache.felix.webconsole.internal.compendium.LogServlet",
             "org.apache.felix.webconsole.internal.compendium.PreferencesConfigurationPrinter",
             "org.apache.felix.webconsole.internal.core.BundlesServlet",
+            "org.apache.felix.webconsole.internal.core.ServicesConfigurationPrinter",
             "org.apache.felix.webconsole.internal.core.ServicesServlet",
             "org.apache.felix.webconsole.internal.deppack.DepPackServlet",
             "org.apache.felix.webconsole.internal.misc.LicenseServlet",
@@ -240,6 +241,9 @@ public class OsgiManager extends GenericServlet
 
     //---------- Servlet API
 
+    /**
+     * @see javax.servlet.GenericServlet#init()
+     */
     public void init()
     {
         // base class initialization not needed, since the GenericServlet.init
@@ -318,6 +322,9 @@ public class OsgiManager extends GenericServlet
     }
 
 
+    /**
+     * @see javax.servlet.GenericServlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     */
     public void service( final ServletRequest req, final ServletResponse res ) throws ServletException, IOException
     {
         // don't really expect to be called within a non-HTTP environment
@@ -423,6 +430,9 @@ public class OsgiManager extends GenericServlet
         return locale;
     }
 
+    /**
+     * @see javax.servlet.GenericServlet#destroy()
+     */
     public void destroy()
     {
         // base class destroy not needed, since the GenericServlet.destroy
@@ -479,7 +489,7 @@ public class OsgiManager extends GenericServlet
      * Calls the <code>GenericServlet.log(String)</code> method if the
      * configured log level is less than or equal to the given <code>level</code>.
      * <p>
-     * Note, that the <code>level</code> paramter is only used to decide whether
+     * Note, that the <code>level</code> parameter is only used to decide whether
      * the <code>GenericServlet.log(String)</code> method is called or not. The
      * actual implementation of the <code>GenericServlet.log</code> method is
      * outside of the control of this method.
@@ -501,7 +511,7 @@ public class OsgiManager extends GenericServlet
      * the configured log level is less than or equal to the given
      * <code>level</code>.
      * <p>
-     * Note, that the <code>level</code> paramter is only used to decide whether
+     * Note, that the <code>level</code> parameter is only used to decide whether
      * the <code>GenericServlet.log(String, Throwable)</code> method is called
      * or not. The actual implementation of the <code>GenericServlet.log</code>
      * method is outside of the control of this method.
