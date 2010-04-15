@@ -28,7 +28,7 @@ function renderData( eventData )  {
 			$(".statline").html(i18n.stat_ok.msgFormat(eventData.status));
 			$('#scr').removeClass('ui-helper-hidden');
 			
-			$("#plugin_table > tbody > tr").remove();
+			tableBody.empty();
 			for ( var idx in eventData.data ) {
 				entry( eventData.data[idx] );
 			}
@@ -39,75 +39,27 @@ function renderData( eventData )  {
 }
 
 function entry( /* Object */ dataEntry ) {
-	var trElement = tr( null, { id: "entry" + dataEntry.id } );
-	entryInternal( trElement,  dataEntry );
-	$("#plugin_table > tbody").append(trElement);	
-}
-
-function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action, /* string */ pid ) {
-	var enabled = action.enabled;
-	var op = action.link;
-	var opLabel = action.name;
-	var img = action.image;
-	// fixup JQuery UI icons
-	if (img == 'configure')	  { img = 'wrench'
-	} else if (img == 'disable') { img = 'stop' //locked
-	} else if (img == 'enable')  { img = 'play' //unlocked
-	}
-	
-	// apply i18n
-	opLabel = i18n[opLabel] ? i18n[opLabel] : opLabel;
-	
-	var arg = id;
-	if ( op == "configure" ) {
-		arg = pid
-	}
-	var input = createElement('li', 'dynhover', {
-		title: opLabel
-	});
-	$(input)
-		.html('<span class="ui-icon ui-icon-'+img+'"></span>')
-		.click(function() {changeDataEntryState(arg, op)});
-
-	if (!enabled) {
-		$(input).attr('disabled', true).addClass('ui-state-disabled');
-		
-	}
-	parent.appendChild( input );
-}
-
-function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
 	var id = dataEntry.id;
 	var name = dataEntry.name;
-	var state = dataEntry.state;
 
-	var inputElement = createElement('span', 'ui-icon ui-icon-triangle-1-e', {
-		title: "Details",
-		id: 'img' + id,
-		style: {display: "inline-block"}
-	});
-	$(inputElement).click(function() {showDetails(id)});
-	var titleElement;
-	if ( drawDetails ) {
-		titleElement = text(name);
+	var _ = tableEntryTemplate.clone().appendTo(tableBody).attr('id', 'entry' + dataEntry.id);
+
+	_.find('.bIcon').attr('id', 'img' + id).click(function() {
+		showDetails(id);
+	}).after(drawDetails ? name : ('<a href="' + window.location.pathname + '/' + id + '">' + name + '</a>'));
+
+	_.find('td:eq(0)').text( id );
+	_.find('td:eq(2)').text( dataEntry.state );
+
+	// setup buttons
+	if ( dataEntry.stateRaw == 1 || dataEntry.stateRaw == 1024 ) { // disabled or disabling
+		_.find('li:eq(0)').removeClass('ui-helper-hidden').click(function() { changeDataEntryState(id, 'enable') });
 	} else {
-		titleElement = createElement ("a", null, {
-			href: window.location.pathname + "/" + id
-		});
-		titleElement.appendChild(text(name));
+		_.find('li:eq(1)').removeClass('ui-helper-hidden').click(function() { changeDataEntryState(id, 'disable') });
 	}
-
-	parent.appendChild( td( null, null, [ text( id ) ] ) );
-	parent.appendChild( td( null, null, [ inputElement, text(" "), titleElement ] ) );
-	parent.appendChild( td( null, null, [ text( state ) ] ) );
-	var actionsTd = td( null, null );
-	var div = createElement('ul', 'icons ui-widget');
-	actionsTd.appendChild(div);
-
-	for ( var a in dataEntry.actions ) {
-		actionButton( div, id, dataEntry.actions[a], dataEntry.pid );
-	}
-	parent.appendChild( actionsTd );
+	if ( dataEntry.configurable ) _.find('li:eq(2)').removeClass('ui-helper-hidden').click(function() { // configure
+		changeDataEntryState(dataEntry.pid, 'configure');
+	});	
 }
 
 function changeDataEntryState(/* long */ id, /* String */ action) {
@@ -199,9 +151,14 @@ function renderDetails( data ) {
 	}
 }
 
+var tableBody = false;
+var tableEntryTemplate = false;
 
 $(document).ready(function(){
-	renderData (scrData);
+	tableBody = $('#plugin_table tbody');
+	tableEntryTemplate = tableBody.find('tr').clone();
+
+	renderData(scrData);
 
 	$(".reloadButton").click(loadData);
 

@@ -13,7 +13,7 @@ var i18n = {
 // data
 var bundlePath = "${bundlePath}";
 var drawDetails = ${drawDetails};
-renderServices(${__data__});
+var data = ${__data__};
 // ]]>
 </script>
 
@@ -30,7 +30,13 @@ renderServices(${__data__});
 		</tr>
 	</thead>
 	<tbody>
-		<tr><td colspan="3">dummy</td></tr>
+		<tr>
+			<td>
+				<div class="bIcon ui-icon ui-icon-triangle-1-e" style="float:left" title="${services.details.tip}">&nbsp;</div>
+			</td>
+			<td>&nbsp;</td><!-- type -->
+			<td>&nbsp;</td><!-- bundle -->
+		</tr>
 	</tbody>
 </table>
 

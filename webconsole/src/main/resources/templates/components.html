@@ -5,9 +5,6 @@ var drawDetails = ${__drawDetails__};
 var scrData = ${__data__};
 // i18n
 var i18n = {
-	'Enable'           : '${scr.action.enable}',
-	'Disable'          : '${scr.action.disable}',
-	'Configure'        : '${scr.action.configure}',
 	'Bundle'           : '${scr.prop.bundle}',
 	'Default State'    : '${scr.prop.defstate}',
 	'Activation'       : '${scr.prop.activation}',
@@ -41,7 +38,20 @@ var i18n = {
 		</tr>
 	</thead>
 	<tbody>
-		<tr><td colspan="4">&nbsp;</td></tr>
+		<tr>
+			<td>&nbsp;</td> <!-- id -->
+			<td> <!-- name with arrow -->
+				<div class="bIcon ui-icon ui-icon-triangle-1-e" style="float:left" title="${scr.details.tip}">&nbsp;</div>
+			</td> 
+			<td>&nbsp;</td> <!-- status -->
+			<td>
+				<ul class="icons">
+					<li class="dynhover ui-helper-hidden" title="${scr.action.enable}"><span class="ui-icon ui-icon-play">&nbsp;</span></li>
+					<li class="dynhover ui-helper-hidden" title="${scr.action.disable}"><span class="ui-icon ui-icon-stop">&nbsp;</span></li>
+					<li class="dynhover ui-helper-hidden" title="${scr.action.configure}"><span class="ui-icon ui-icon-wrench">&nbsp;</span></li>
+				</ul>
+			</td>
+		</tr>
 	</tbody>
 	</table>
 </div> <!-- end data available -->

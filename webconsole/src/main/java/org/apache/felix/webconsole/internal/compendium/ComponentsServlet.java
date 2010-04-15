@@ -68,7 +68,7 @@ public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiMan
     private static final String OPERATION = "action";
     private static final String OPERATION_ENABLE = "enable";
     private static final String OPERATION_DISABLE = "disable";
-    private static final String OPERATION_CONFIGURE = "configure";
+    //private static final String OPERATION_CONFIGURE = "configure";
 
     // needed services
     private static final String SCR_SERVICE = ScrService.class.getName();
@@ -249,34 +249,22 @@ public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiMan
         jw.value( name );
         jw.key( "state" );
         jw.value( ComponentConfigurationPrinter.toStateString( state ) );
+        jw.key( "stateRaw" );
+        jw.value( state );
+        
+        final Dictionary props = component.getProperties();
 
-        final String pid = ( String ) component.getProperties().get( Constants.SERVICE_PID );
+        final String pid = (String) (props != null ?  props.get( Constants.SERVICE_PID ) : null);
         if ( pid != null )
         {
             jw.key("pid");
             jw.value(pid);
-        }
-        // component actions
-        jw.key( "actions" );
-        jw.array();
-
-        if ( state == Component.STATE_DISABLED )
-        {
-            action(jw, true, OPERATION_ENABLE, "Enable", "enable" );
-        }
-        if ( state != Component.STATE_DISABLED && state != Component.STATE_DESTROYED )
-        {
-            action(jw, true, OPERATION_DISABLE, "Disable", "disable" );
-        }
-        if ( pid != null )
-        {
-            if ( isConfigurable( component.getBundle(), pid ) )
+            if ( isConfigurable( component.getBundle(), pid ) ) 
             {
-                action(jw, true, OPERATION_CONFIGURE, "Configure", "configure" );
+                jw.key("configurable");
+                jw.value(pid);
             }
         }
-
-        jw.endArray();
 
         // component details
         if ( details )
@@ -287,15 +275,6 @@ public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiMan
         jw.endObject();
     }
 
-    private void action( JSONWriter jw, boolean enabled, String op, String opLabel, String image ) throws JSONException
-    {
-        jw.object();
-        jw.key( "enabled" ).value( enabled );
-        jw.key( "name" ).value( opLabel );
-        jw.key( "link" ).value( op );
-        jw.key( "image" ).value( image );
-        jw.endObject();
-    }
 
     private void gatherComponentDetails( JSONWriter jw, Component component ) throws JSONException
     {
