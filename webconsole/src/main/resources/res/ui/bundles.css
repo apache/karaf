@@ -29,3 +29,5 @@ th.col_Actions { width: 121px }
 .symName:before { content: " (" }
 .symName:after   { content: ")"  }
 .filterClear        { display: inline-block; vertical-align: middle }
+.bIcon, .bName   { display: inline-block }
+.bIcon { float: left }

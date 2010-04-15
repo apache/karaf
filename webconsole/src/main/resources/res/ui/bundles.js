@@ -72,8 +72,8 @@ function entryInternal( /* Object */ bundle ) {
 
 	tr.attr('id', 'entry'+id);
 	tr.find('td:eq(0)').text(id);
-	tr.find('td:eq(1) span:eq(0)').attr('id', 'img'+id).click(function() {showDetails(id)});
-	tr.find('td:eq(1) span:eq(1)').html( drawDetails ? name : '<a href="' + pluginRoot + '/' + id + '">' + name + '</a>' );
+	tr.find('.bIcon').attr('id', 'img'+id).click(function() {showDetails(id)});
+	tr.find('.bName').html( drawDetails ? name : '<a href="' + pluginRoot + '/' + id + '">' + name + '</a>' );
 	tr.find('td:eq(2)').text( bundle.version );
 	tr.find('td:eq(3)').text( bundle.category );
 	if (id == 0) { // system bundle has no actions
@@ -252,7 +252,7 @@ $(document).ready(function(){
 			0: { sorter:"digit" },
 			5: { sorter: false }
 		},
-		textExtraction:mixedLinksExtraction,
+		textExtraction:mixedLinksExtraction
 	}).bind("sortEnd", function() {
 		var t = bundlesTable.eq(0).attr("config");
 		if (t.sortList) $.cookies.set("webconsolebundlelist", t.sortList);
