@@ -78,6 +78,15 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private File file;
 
+    /**
+     * karaf config.properties
+     * 
+     * @parameter default-value="config.properties"
+     */
+    private String karafConfig;
+
+    
+    
     /*
      * A map to cache the mvn: uris and the artifacts that correspond with them
      */
@@ -215,9 +224,17 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private void readSystemPackages() throws IOException {
         Properties properties = new Properties();
-        properties.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
+        if (karafConfig.equals("config.properties")) {
+        	properties.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
+        } else {
+        	properties.load(new FileInputStream(new File(karafConfig)));
+        }
+
         String packages = (String) properties.get("jre-1.5");
         for (String pkg : packages.split(";")) {
+            systemExports .add(pkg.trim());
+        }
+        for (String pkg : packages.split(",")) {
             systemExports .add(pkg.trim());
         }
     }
