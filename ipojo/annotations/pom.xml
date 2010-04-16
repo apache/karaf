@@ -26,7 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.apache.felix.ipojo.annotations</artifactId>
   <groupId>org.apache.felix</groupId>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.6.0</version>
   <packaging>bundle</packaging>
   <name>Apache Felix iPOJO Annotations</name>
   
@@ -99,4 +99,10 @@
       </plugin>
     </plugins>
   </build>
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.annotations-1.6.0</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.annotations-1.6.0</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.annotations-1.6.0</url>
+  </scm>
 </project>
