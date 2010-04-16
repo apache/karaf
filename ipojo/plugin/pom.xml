@@ -72,7 +72,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-      <version>1.6.0</version>
+      <version>${pom.version}</version>
     </dependency>
   </dependencies>
   <build>

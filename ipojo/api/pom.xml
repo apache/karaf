@@ -101,17 +101,17 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>1.6.0</version>
+      <version>${pom.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.composite</artifactId>
-      <version>1.6.0</version>
+      <version>${pom.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-      <version>1.6.0</version>
+      <version>${pom.version}</version>
     </dependency>
     <dependency>
       <groupId>asm</groupId>
