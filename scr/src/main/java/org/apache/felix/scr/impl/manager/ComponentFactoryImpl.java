@@ -119,7 +119,11 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             throw new ComponentException( "Failed activating component" );
         }
 
-        m_componentInstances.put( cm, cm );
+        synchronized ( m_componentInstances )
+        {
+            m_componentInstances.put( cm, cm );
+        }
+
         return instance;
     }
 
@@ -231,9 +235,15 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         }
         else if ( m_isConfigurationFactory )
         {
-            if ( m_configuredServices != null )
+            Map configuredServices = m_configuredServices;
+            if ( configuredServices != null )
             {
-                ImmediateComponentManager cm = ( ImmediateComponentManager ) m_configuredServices.remove( pid );
+                ImmediateComponentManager cm;
+                synchronized ( configuredServices )
+                {
+                    cm = ( ImmediateComponentManager ) configuredServices.remove( pid );
+                }
+
                 if ( cm != null )
                 {
                     log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", null );
@@ -259,13 +269,18 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         else if ( m_isConfigurationFactory )
         {
             ImmediateComponentManager cm;
-            if ( m_configuredServices != null )
+            Map configuredServices = m_configuredServices;
+            if ( configuredServices != null )
             {
-                cm = ( ImmediateComponentManager ) m_configuredServices.get( pid );
+                synchronized ( configuredServices )
+                {
+                    cm = ( ImmediateComponentManager ) configuredServices.get( pid );
+                }
             }
             else
             {
                 m_configuredServices = new HashMap();
+                configuredServices = m_configuredServices;
                 cm = null;
             }
 
@@ -285,7 +300,10 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
                 }
 
                 // keep a reference for future updates
-                m_configuredServices.put( pid, cm );
+                synchronized ( configuredServices )
+                {
+                    configuredServices.put( pid, cm );
+                }
 
             }
             else
@@ -336,7 +354,10 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             cms[i].dispose( reason );
         }
 
-        m_componentInstances.clear();
+        synchronized ( m_componentInstances )
+        {
+            m_componentInstances.clear();
+        }
 
         cms = getComponentManagers( m_configuredServices );
         for ( int i = 0; i < cms.length; i++ )
