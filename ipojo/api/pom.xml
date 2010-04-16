@@ -30,7 +30,7 @@
   <name>Apache Felix iPOJO API</name>
   
   <description>
-  iPOJO API used to definie component types and instances from Java code.
+  iPOJO API used to define component types and instances in Java.
   </description>
   <url>http://felix.apache.org/site/apache-felix-ipojo-api.html</url>
   
@@ -101,17 +101,17 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>${pom.version}</version>
+      <version>1.6.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.composite</artifactId>
-      <version>${pom.version}</version>
+      <version>1.6.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-      <version>${pom.version}</version>
+      <version>1.6.0</version>
     </dependency>
     <dependency>
       <groupId>asm</groupId>
