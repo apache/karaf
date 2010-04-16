@@ -25,7 +25,7 @@ import org.osgi.framework.ServicePermission;
 
 
 /**
- * Methods checking security permissions
+ * Methods checking security permissions.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class SecurityHelper {
@@ -36,7 +36,7 @@ public class SecurityHelper {
      * This method can be used only if iPOJO is able to
      * registers the services (so for ManagedServiceFactory,
      * Factory and Architecture)
-     * @param itf the service interfaces
+     * @param itfs the service interfaces
      * @param comp the component bundle context
      * @param ipojo the ipojo bundle context
      * @return <code>comp</code> if the bundle has enough permission
@@ -124,7 +124,7 @@ public class SecurityHelper {
     /**
      * Checks if the component bundle context has enough permission
      * to get the given services.
-     * @param itf the service interfaces
+     * @param itfs the service interfaces
      * @param comp the component bundle context
      * @return <code>true</code> if the bundle has enough permission
      * to get the services, <code>false</code> otherwise.
@@ -164,7 +164,7 @@ public class SecurityHelper {
     /**
      * Checks if the component bundle context has enough permission
      * to register the given services.
-     * @param itf the service interfaces
+     * @param itfs the service interfaces
      * @param comp the component bundle context
      * @return <code>true</code> if the bundle has enough permission
      * to register the services, <code>false</code> otherwise.

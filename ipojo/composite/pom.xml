@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix-parent</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <relativePath>../../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -35,15 +35,15 @@
   </properties>
   
   <description>
-  iPOJO Compoistion Model. This is an iPOJO extension to execute service composition.
+  iPOJO Composition Model. This is an iPOJO extension to execute service composition.
   </description>
   <url>http://felix.apache.org/site/ipojo-composition-tutorial.html</url>
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.felix</groupId>
+      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>1.0.1</version>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

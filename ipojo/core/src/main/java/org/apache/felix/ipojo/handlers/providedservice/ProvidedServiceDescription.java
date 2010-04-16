@@ -104,6 +104,10 @@ public class ProvidedServiceDescription {
         return m_ps.getState();
     }
     
+    /**
+     * Gets the controller value as a String.
+     * @return the value
+     */
     public String getController() {
         if (m_ps.getController() == null) {
             return null; 

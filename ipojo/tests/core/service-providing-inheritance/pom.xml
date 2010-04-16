@@ -55,6 +55,11 @@
       <artifactId>org.apache.felix.ipojo</artifactId>
       <version>${pom.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>4.2.0</version>
+    </dependency>
 
   <!-- Pax Exam API: -->
     <dependency>

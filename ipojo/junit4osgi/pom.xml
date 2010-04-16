@@ -17,11 +17,11 @@
  under the License.
 -->
 <project>
-	<parent>
-		<groupId>org.apache.felix</groupId>
-		<artifactId>felix-parent</artifactId>
-		<version>1.2.0</version>
-	</parent>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix-parent</artifactId>
+    <version>1.2.1</version>
+  </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>Junit4OSGi</artifactId>
   <groupId>org.apache.felix</groupId>
@@ -30,30 +30,30 @@
   <packaging>pom</packaging>
   
   <modules>
-		<module>junit4osgi</module>
-		<module>felix-command</module>
-		<module>maven-junit4osgi-plugin</module>
-		<module>immediate-launcher</module>
+    <module>junit4osgi</module>
+    <module>felix-command</module>
+    <module>maven-junit4osgi-plugin</module>
+    <module>immediate-launcher</module>
   </modules>
 
   <profiles>
-	<profile>
-		<id>java5</id>
-		<activation>
-			<jdk>1.5</jdk>
-		</activation>
-		<modules>
-			<module>swing-runner</module>
-		</modules>
-	</profile>
-	<profile>
-		<id>java6</id>
-		<activation>
-			<jdk>1.6</jdk>
-		</activation>
-		<modules>
-			<module>swing-runner</module>
-		</modules>
-	</profile>
+  <profile>
+    <id>java5</id>
+    <activation>
+      <jdk>1.5</jdk>
+    </activation>
+    <modules>
+      <module>swing-runner</module>
+    </modules>
+  </profile>
+  <profile>
+    <id>java6</id>
+    <activation>
+      <jdk>1.6</jdk>
+    </activation>
+    <modules>
+      <module>swing-runner</module>
+    </modules>
+  </profile>
   </profiles>
 </project>

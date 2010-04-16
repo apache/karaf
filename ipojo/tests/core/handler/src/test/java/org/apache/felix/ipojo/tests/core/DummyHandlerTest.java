@@ -86,7 +86,7 @@ public class DummyHandlerTest {
                              .build(asiPOJOBundle(new File("src/test/resources/dummy-component.xml")))
                          ),
                     provision(
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.osgi.compendium").versionAsInProject()
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.osgi.compendium").version("1.4.0")
                             ));
         Option[] r = OptionUtils.combine(platform, bundles);
 

@@ -72,6 +72,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @see InstanceStateListener
      */
     protected List m_listeners = null;
+    
+    /**
+     * The content of the current instance.
+     */
+    protected List m_pojoObjects;
 
     /**
      * The instance factory.
@@ -107,11 +112,6 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     private Class m_clazz;
 
     /**
-     * The content of the current instance.
-     */
-    protected List m_pojoObjects;
-
-    /**
      * The factory method used to create content objects.
      * If <code>null</code>, the regular constructor is used.
      * Once set, this field is immutable.
@@ -139,6 +139,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * [id=>{@link Method}].
      */
     private Map m_methods = new HashMap();
+    
 
     /**
      * Creates a new Component Manager.

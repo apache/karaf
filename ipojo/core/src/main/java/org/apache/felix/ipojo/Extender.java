@@ -75,14 +75,14 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     private static final String IPOJO_EXTENSION = "IPOJO-Extension";
 
     /**
-     * The iPOJO Extender logger.
-     */
-    private Logger m_logger;
-
-    /**
      * The Bundle Context of the iPOJO Core bundle.
      */
     private static BundleContext m_context;
+    
+    /**
+     * The iPOJO Extender logger.
+     */
+    private Logger m_logger;
 
     /**
      * The instance creator used to create instances.

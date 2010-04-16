@@ -495,12 +495,20 @@ public class ProvidedService implements ServiceFactory {
             return m_field;
         }
         
+        /**
+         * Gets the value.
+         * @return the value
+         */
         public boolean getValue() {
             synchronized (ProvidedService.this) {
                 return m_value;
             }
         }
 
+        /**
+         * Sets the value.
+         * @param value the value
+         */
         public void setValue(Boolean value) {
             synchronized (ProvidedService.this) {
                 if (value.booleanValue() != m_value) {

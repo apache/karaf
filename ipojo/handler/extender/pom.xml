@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix-parent</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <relativePath>../../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -42,9 +42,9 @@
       <version>${pom.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
+      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>1.0.1</version>
+      <version>4.0.0</version>
     </dependency>
   </dependencies>
   <build>

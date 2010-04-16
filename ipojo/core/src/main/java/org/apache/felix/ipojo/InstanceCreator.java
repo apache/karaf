@@ -284,23 +284,6 @@ public class InstanceCreator implements FactoryStateListener {
         }
 
         /**
-         * Returns the used factory.
-         * @return the factory
-         */
-        IPojoFactory getFactory() {
-            return m_factory;
-        }
-
-        /**
-         * Returns the created instance.
-         * @return the instance (or <code>null</code> if no instance are created).
-         */
-        ComponentInstance getInstance() {
-            return m_instance;
-        }
-
-
-        /**
          * Checks if the required factory name match with the given factory.
          * This methods checks only the name, and not the configuration.
          * @param factory the factory to test

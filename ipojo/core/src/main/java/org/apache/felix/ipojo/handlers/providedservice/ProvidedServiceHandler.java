@@ -411,11 +411,11 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             if (update) {
                 svc.update();
             }
-            if (svc.getController() != null  && svc.getController().getField().equals(fieldName) ) {
+            if (svc.getController() != null  && svc.getController().getField().equals(fieldName)) {
                 if (value instanceof Boolean) {
                     svc.getController().setValue((Boolean) value);
                 } else {
-                    warn ("Boolean value expected for the service controler " + fieldName);
+                    warn("Boolean value expected for the service controler " + fieldName);
                 }
             }
         }
@@ -442,7 +442,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     return prop.onGet(pojo, fieldName, value); 
                 }
             }
-            if (svc.getController() != null  && svc.getController().getField().equals(fieldName) ) {
+            if (svc.getController() != null  && svc.getController().getField().equals(fieldName)) {
                 return new Boolean(svc.getController().getValue());
             }
         }
