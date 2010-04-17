@@ -18,6 +18,7 @@
  */
 package org.apache.felix.dm.impl;
 
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,12 +28,60 @@ import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationException;
 
-public abstract class AbstractDecorator {
+public abstract class AbstractDecorator  {
     protected volatile DependencyManager m_manager;
     private final Map m_services = new HashMap();
     
     public abstract Service createService(Object[] properties);
+    
+    /**
+     * Extra method, which may be used by sub-classes, when adaptee has changed.
+     * For now, it's only used by the FactoryConfigurationAdapterImpl class, 
+     * but it might also make sense to use this for Resource Adapters ...
+     */
+    public void updateService(Object[] properties) {
+        throw new NoSuchMethodError("Method updateService not implemented");
+    }
+    
+    // callbacks for FactoryConfigurationAdapterImpl
+    public void updated(String pid, Dictionary properties) throws ConfigurationException {
+        try {
+            Service service = (Service) m_services.get(pid);
+            if (service == null) { 
+                service = createService(new Object[] { properties });
+                synchronized (this) {
+                    m_services.put(pid, service);
+                }
+                m_manager.add(service);
+            } else {
+                updateService(new Object[] { properties, service });
+            }
+        }
+        
+        catch (Throwable t) {
+            if (t instanceof ConfigurationException) {
+                throw (ConfigurationException) t;
+            } else if (t.getCause() instanceof ConfigurationException) {
+                throw (ConfigurationException) t.getCause();
+            } else {
+                throw new ConfigurationException(null, "Could not create service for ManagedServiceFactory Pid " + pid, t);
+            }
+        }
+    }
+
+    public synchronized void deleted(String pid)
+    {
+        Service service = null;
+        synchronized (this) {
+            service = (Service) m_services.remove(pid);
+        }
+        if (service != null)
+        {
+            m_manager.remove(service);
+        }
+    }
 
     // callbacks for resources
     public void added(Resource resource) {
@@ -94,5 +143,5 @@ public abstract class AbstractDecorator {
             m_manager.remove((Service) i.next());
         }
         m_services.clear();
-    }
+    }    
 }

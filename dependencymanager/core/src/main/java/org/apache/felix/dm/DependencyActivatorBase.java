@@ -186,6 +186,46 @@ public abstract class DependencyActivatorBase implements BundleActivator {
     }
 
     /**
+     * Creates a new Managed Service Factory Configuration Adapter. For each new Config Admin factory configuration matching
+     * the factoryPid, an adapter will be created based on the adapter implementation class.
+     * The adapter will be registered with the specified interface, and with the specified adapter service properties.
+     * Depending on the <code>propagate</code> parameter, every public factory configuration properties 
+     * (which don't start with ".") will be propagated along with the adapter service properties. 
+     * It will also inherit all dependencies.
+     * 
+     * @param factoryPid the pid matching the factory configuration
+     * @param update the adapter method name that will be notified when the factory configuration is created/updated.
+     * @param adapterInterface the interface to use when registering adapters (can be either a String, String array) 
+     * @param adapterImplementation the implementation of the adapter (can be a Class or an Object instance)
+     * @param adapterProperties additional properties to use with the service registration
+     * @param propagate true if public factory configuration should be propagated to the adapter service properties
+     * @return a service that acts as a factory for generating the managed service factory configuration adapter
+     */
+    public Service createFactoryConfigurationAdapterService(String factoryPid, String update, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
+        return m_manager.createFactoryConfigurationAdapterService(factoryPid, update, adapterImplementation, adapterInterface, adapterProperties, propagate);
+    }
+    
+    /**
+     * Creates a new Managed Service Factory Configuration Adapter. For each new Config Admin factory configuration matching
+     * the factoryPid, an adapter will be created based on the adapter implementation class.
+     * The adapter will be registered with the specified interface, and with the specified adapter service properties.
+     * Depending on the <code>propagate</code> parameter, every public factory configuration properties 
+     * (which don't start with ".") will be propagated along with the adapter service properties. 
+     * It will also inherit all dependencies.
+     * 
+     * @param factoryPid the pid matching the factory configuration
+     * @param update the adapter method name that will be notified when the factory configuration is created/updated.
+     * @param adapterInterfaces the interfaces to use when registering adapters (can be either a String, String array) 
+     * @param adapterImplementation the implementation of the adapter (can be a Class or an Object instance)
+     * @param adapterProperties additional properties to use with the service registration
+     * @param propagate true if public factory configuration should be propagated to the adapter service properties
+     * @return a service that acts as a factory for generating the managed service factory configuration adapter
+     */
+   public Service createFactoryConfigurationAdapterService(String factoryPid, String update, Object adapterImplementation, String[] adapterInterfaces, Dictionary adapterProperties, boolean propagate) {
+        return m_manager.createFactoryConfigurationAdapterService(factoryPid, update, adapterImplementation, adapterInterfaces, adapterProperties, propagate);
+    }
+
+    /**
      * Cleans up all services and their dependencies.
      * 
      * @param manager the dependency manager

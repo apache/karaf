@@ -21,6 +21,7 @@ package org.apache.felix.dm;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.apache.felix.dm.dependencies.BundleDependency;
@@ -33,6 +34,7 @@ import org.apache.felix.dm.impl.AdapterImpl;
 import org.apache.felix.dm.impl.AspectImpl;
 import org.apache.felix.dm.impl.BundleAdapterImpl;
 import org.apache.felix.dm.impl.Logger;
+import org.apache.felix.dm.impl.FactoryConfigurationAdapterImpl;
 import org.apache.felix.dm.impl.ResourceAdapterImpl;
 import org.apache.felix.dm.impl.ServiceImpl;
 import org.apache.felix.dm.impl.dependencies.BundleDependencyImpl;
@@ -44,6 +46,8 @@ import org.apache.felix.dm.impl.metatype.PropertyMetaDataImpl;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
  * The dependency manager manages all services and their dependencies. Using 
@@ -315,6 +319,54 @@ public class DependencyManager {
                 .setStateMask(bundleStateMask)
                 .setCallbacks("added", "removed")
             );
+    }
+
+    /**
+     * Creates a new Managed Service Factory Configuration Adapter. For each new Config Admin factory configuration matching
+     * the factoryPid, an adapter will be created based on the adapter implementation class.
+     * The adapter will be registered with the specified interface, and with the specified adapter service properties.
+     * Depending on the <code>propagate</code> parameter, every public factory configuration properties 
+     * (which don't start with ".") will be propagated along with the adapter service properties. 
+     * It will also inherit all dependencies.
+     * 
+     * @param factoryPid the pid matching the factory configuration
+     * @param update the adapter method name that will be notified when the factory configuration is created/updated.
+     * @param adapterInterface the interface to use when registering adapters (can be either a String, String array) 
+     * @param adapterImplementation the implementation of the adapter (can be a Class or an Object instance)
+     * @param adapterProperties additional properties to use with the service registration
+     * @param propagate true if public factory configuration should be propagated to the adapter service properties
+     * @return a service that acts as a factory for generating the managed service factory configuration adapter
+     */
+    public Service createFactoryConfigurationAdapterService(String factoryPid, String update, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
+        Hashtable props = new Hashtable();
+        props.put(Constants.SERVICE_PID, factoryPid);
+        return createService()
+            .setInterface(ManagedServiceFactory.class.getName(), props)
+            .setImplementation(new FactoryConfigurationAdapterImpl(factoryPid, update, adapterImplementation, adapterInterface, adapterProperties, propagate));
+    }
+    
+    /**
+     * Creates a new Managed Service Factory Configuration Adapter. For each new Config Admin factory configuration matching
+     * the factoryPid, an adapter will be created based on the adapter implementation class.
+     * The adapter will be registered with the specified interface, and with the specified adapter service properties.
+     * Depending on the <code>propagate</code> parameter, every public factory configuration properties 
+     * (which don't start with ".") will be propagated along with the adapter service properties. 
+     * It will also inherit all dependencies.
+     * 
+     * @param factoryPid the pid matching the factory configuration
+     * @param update the adapter method name that will be notified when the factory configuration is created/updated.
+     * @param adapterInterfaces the interfaces to use when registering adapters (can be either a String, String array) 
+     * @param adapterImplementation the implementation of the adapter (can be a Class or an Object instance)
+     * @param adapterProperties additional properties to use with the service registration
+     * @param propagate true if public factory configuration should be propagated to the adapter service properties
+     * @return a service that acts as a factory for generating the managed service factory configuration adapter
+     */
+    public Service createFactoryConfigurationAdapterService(String factoryPid, String update, Object adapterImplementation, String[] adapterInterfaces, Dictionary adapterProperties, boolean propagate) {
+        Hashtable props = new Hashtable();
+        props.put(Constants.SERVICE_PID, factoryPid);
+        return createService()
+            .setInterface(ManagedServiceFactory.class.getName(), props)
+            .setImplementation(new FactoryConfigurationAdapterImpl(factoryPid, update, adapterImplementation, adapterInterfaces, adapterProperties, propagate));
     }
 
     /**
