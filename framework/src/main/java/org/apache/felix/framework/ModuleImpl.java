@@ -2085,7 +2085,7 @@ public class ModuleImpl implements Module
             List<Attribute> attrs = new ArrayList(1);
             attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
             Requirement req = new RequirementImpl(
-            Capability.PACKAGE_NAMESPACE, dirs, attrs);
+                module, Capability.PACKAGE_NAMESPACE, dirs, attrs);
             Set<Capability> exporters = resolver.getCandidates(module, req, false);
 
             Wire wire = null;
@@ -2124,7 +2124,7 @@ public class ModuleImpl implements Module
         List<Attribute> attrs = new ArrayList(1);
         attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
         Requirement req = new RequirementImpl(
-            Capability.PACKAGE_NAMESPACE, dirs, attrs);
+            module, Capability.PACKAGE_NAMESPACE, dirs, attrs);
         Set<Capability> exports = resolver.getCandidates(module, req, false);
         if (exports.size() > 0)
         {
@@ -2242,6 +2242,11 @@ public class ModuleImpl implements Module
         public Module getFragment()
         {
             return m_fragment;
+        }
+
+        public Module getModule()
+        {
+            return m_req.getModule();
         }
 
         public String getNamespace()

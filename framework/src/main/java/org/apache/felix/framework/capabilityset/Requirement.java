@@ -19,9 +19,11 @@
 package org.apache.felix.framework.capabilityset;
 
 import java.util.List;
+import org.apache.felix.framework.resolver.Module;
 
 public interface Requirement
 {
+    Module getModule();
     String getNamespace();
     SimpleFilter getFilter();
     boolean isOptional();

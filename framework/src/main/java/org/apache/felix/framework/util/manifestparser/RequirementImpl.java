@@ -25,11 +25,13 @@ import org.apache.felix.framework.capabilityset.Attribute;
 import org.apache.felix.framework.capabilityset.Directive;
 import org.apache.felix.framework.capabilityset.Requirement;
 import org.apache.felix.framework.capabilityset.SimpleFilter;
+import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.util.VersionRange;
 import org.osgi.framework.Constants;
 
 public class RequirementImpl implements Requirement
 {
+    private final Module m_module;
     private final String m_namespace;
     private final SimpleFilter m_filter;
     private final boolean m_optional;
@@ -37,8 +39,10 @@ public class RequirementImpl implements Requirement
     private final List<Directive> m_dirsConst;
 
     public RequirementImpl(
-        String namespace, List<Directive> dirs, List<Attribute> attrs)
+        Module module, String namespace,
+        List<Directive> dirs, List<Attribute> attrs)
     {
+        m_module = module;
         m_namespace = namespace;
         m_dirs = dirs;
         m_dirsConst = Collections.unmodifiableList(m_dirs);
@@ -54,6 +58,11 @@ public class RequirementImpl implements Requirement
             }
         }
         m_optional = optional;
+    }
+
+    public Module getModule()
+    {
+        return m_module;
     }
 
     public String getNamespace()
@@ -90,7 +99,7 @@ public class RequirementImpl implements Requirement
 
     public String toString()
     {
-        return m_namespace + "; " + getFilter().toString();
+        return "[" + m_module + "] " + m_namespace + "; " + getFilter().toString();
     }
 
     private static SimpleFilter convertToFilter(List<Attribute> attrs)

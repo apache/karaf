@@ -3043,7 +3043,7 @@ ex.printStackTrace();
         List<Directive> dirs = new ArrayList<Directive>(0);
         List<Attribute> attrs = new ArrayList<Attribute>(1);
         attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
-        Requirement req = new RequirementImpl(Capability.PACKAGE_NAMESPACE, dirs, attrs);
+        Requirement req = new RequirementImpl(null, Capability.PACKAGE_NAMESPACE, dirs, attrs);
         Set<Capability> exports = m_resolverState.getCandidates(null, req, false);
 
         // We only want resolved capabilities.
@@ -3184,7 +3184,7 @@ ex.printStackTrace();
                         List<Attribute> attrs = new ArrayList<Attribute>(1);
                         attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
                         Requirement req =
-                            new RequirementImpl(Capability.PACKAGE_NAMESPACE, dirs, attrs);
+                            new RequirementImpl(null, Capability.PACKAGE_NAMESPACE, dirs, attrs);
                         Set<Capability> exports = m_resolverState.getCandidates(null, req, false);
                         // We only want resolved capabilities.
                         for (Iterator<Capability> it = exports.iterator(); it.hasNext(); )
@@ -3356,7 +3356,7 @@ ex.printStackTrace();
                 throw new BundleException(
                     "Unresolved constraint in bundle " + b + ": "
                     + ((ex.getRequirement() == null)
-                        ? ex.getMessage() : ex.getRequirement().toString()));
+                        ? ex.getMessage() : ex.getMessage() + " - " + ex.getRequirement().toString()));
             }
             else
             {

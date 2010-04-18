@@ -125,7 +125,7 @@ public class ManifestParser
         // Parse Fragment-Host.
         //
 
-        List<Requirement> hostReqs = parseFragmentHost(m_logger, m_headerMap);
+        List<Requirement> hostReqs = parseFragmentHost(m_logger, owner, m_headerMap);
 
         //
         // Parse Require-Bundle
@@ -134,7 +134,7 @@ public class ManifestParser
         List<ParsedHeaderClause> requireClauses =
             parseStandardHeader((String) headerMap.get(Constants.REQUIRE_BUNDLE));
         requireClauses = normalizeRequireClauses(m_logger, requireClauses, getManifestVersion());
-        List<Requirement> requireReqs = convertRequires(requireClauses);
+        List<Requirement> requireReqs = convertRequires(requireClauses, owner);
 
         //
         // Parse Import-Package.
@@ -143,7 +143,7 @@ public class ManifestParser
         List<ParsedHeaderClause> importClauses =
             parseStandardHeader((String) headerMap.get(Constants.IMPORT_PACKAGE));
         importClauses = normalizeImportClauses(m_logger, importClauses, getManifestVersion());
-        List<Requirement> importReqs = convertImports(importClauses);
+        List<Requirement> importReqs = convertImports(importClauses, owner);
 
         //
         // Parse DynamicImport-Package.
@@ -152,7 +152,7 @@ public class ManifestParser
         List<ParsedHeaderClause> dynamicClauses =
             parseStandardHeader((String) headerMap.get(Constants.DYNAMICIMPORT_PACKAGE));
         dynamicClauses = normalizeDynamicImportClauses(m_logger, dynamicClauses, getManifestVersion());
-        m_dynamicRequirements = convertImports(dynamicClauses);
+        m_dynamicRequirements = convertImports(dynamicClauses, owner);
 
         //
         // Parse Export-Package.
@@ -173,7 +173,7 @@ public class ManifestParser
         {
             List<ParsedHeaderClause> implicitClauses =
                 calculateImplicitImports(exportCaps, importClauses);
-            importReqs.addAll(convertImports(implicitClauses));
+            importReqs.addAll(convertImports(implicitClauses, owner));
 
             List<ParsedHeaderClause> allImportClauses =
                 new ArrayList<ParsedHeaderClause>(implicitClauses.size() + importClauses.size());
@@ -376,7 +376,8 @@ public class ManifestParser
         return clauses;
     }
 
-    private static List<Requirement> convertImports(List<ParsedHeaderClause> clauses)
+    private static List<Requirement> convertImports(
+        List<ParsedHeaderClause> clauses, Module owner)
     {
         // Now convert generic header clauses into requirements.
         List reqList = new ArrayList();
@@ -397,6 +398,7 @@ public class ManifestParser
                 // Create package requirement and add to requirement list.
                 reqList.add(
                     new RequirementImpl(
+                        owner,
                         Capability.PACKAGE_NAMESPACE,
                         clauses.get(clauseIdx).m_dirs,
                         newAttrs));
@@ -1113,7 +1115,8 @@ public class ManifestParser
         return null;
     }
 
-    private static List<Requirement> parseFragmentHost(Logger logger, Map headerMap)
+    private static List<Requirement> parseFragmentHost(
+        Logger logger, Module owner, Map headerMap)
         throws BundleException
     {
         List<Requirement> reqs = new ArrayList();
@@ -1164,7 +1167,8 @@ public class ManifestParser
                     clauses.get(0).m_paths.get(0), false));
                 newAttrs.addAll(attrs);
 
-                reqs.add(new RequirementImpl(Capability.HOST_NAMESPACE,
+                reqs.add(new RequirementImpl(
+                    owner, Capability.HOST_NAMESPACE,
                     clauses.get(0).m_dirs,
                     newAttrs));
             }
@@ -1262,7 +1266,8 @@ public class ManifestParser
         return clauses;
     }
 
-    private static List<Requirement> convertRequires(List<ParsedHeaderClause> clauses)
+    private static List<Requirement> convertRequires(
+        List<ParsedHeaderClause> clauses, Module owner)
     {
         List<Requirement> reqList = new ArrayList();
         for (int clauseIdx = 0; clauseIdx < clauses.size(); clauseIdx++)
@@ -1283,6 +1288,7 @@ public class ManifestParser
                 // Create package requirement and add to requirement list.
                 reqList.add(
                     new RequirementImpl(
+                        owner,
                         Capability.MODULE_NAMESPACE,
                         clauses.get(clauseIdx).m_dirs,
                         newAttrs));
