@@ -125,7 +125,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
         logLevel = getInt(properties, LOG_LEVEL, 0);
         originatingFileName = (String) properties.get(FILENAME);
         watchedDirectory = getFile(properties, DIR, new File("./load"));
-        prepareDir(watchedDirectory);
+        verifyWatchedDir();
         tmpDir = getFile(properties, TMPDIR, null);
         prepareTempDir();
         startBundles = getBoolean(properties, START_NEW_BUNDLES, true);  // by default, we start bundles.
@@ -138,7 +138,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
         {
             flt = new FilenameFilter()
             {
-                public boolean accept(File dir, String name) {
+                public boolean accept(File dir, String name)
+                {
                     return name.matches(filter);
                 }
             };
@@ -150,15 +151,40 @@ public class DirectoryWatcher extends Thread implements BundleListener
         scanner = new Scanner(watchedDirectory, flt);
     }
 
-    public static String getThreadName(Dictionary properties) {
+    private void verifyWatchedDir()
+    {
+        if (!watchedDirectory.exists())
+        {
+            // Issue #2069: Do not create the directory if it does not exist,
+            // instead, warn user and continue. We will automatically start
+            // monitoring the dir when it becomes available.
+            log(Logger.LOG_WARNING,
+                watchedDirectory + " does not exist, please create it.",
+                null);
+        }
+        else if (!watchedDirectory.isDirectory())
+        {
+            log(Logger.LOG_ERROR,
+                "Cannot use "
+                + watchedDirectory
+                + " because it's not a directory", null);
+            throw new RuntimeException(
+                "File Install can't monitor " + watchedDirectory + " because it is not a directory");
+        }
+    }
+
+    public static String getThreadName(Dictionary properties)
+    {
         return (properties.get(DIR) != null ? properties.get(DIR) : "./load").toString();
     }
 
-    public Dictionary getProperties() {
+    public Dictionary getProperties()
+    {
         return properties;
     }
 
-    public void start() {
+    public void start()
+    {
         if (noInitialDelay)
         {
             log(Logger.LOG_DEBUG, "Starting initial scan", null);
@@ -267,7 +293,7 @@ public class DirectoryWatcher extends Thread implements BundleListener
         files.addAll(processingFailures);
         processingFailures.clear();
 
-        for (Iterator it = files.iterator(); it.hasNext();)
+        for (Iterator it = files.iterator(); it.hasNext(); )
         {
             File file = (File) it.next();
             boolean exists = file.exists();
@@ -275,7 +301,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
             // File has been deleted
             if (!exists)
             {
-                if (artifact != null) {
+                if (artifact != null)
+                {
                     deleteJaredDirectory(artifact);
                     deleteTransformedFile(artifact);
                     deleted.add(artifact);
@@ -884,7 +911,10 @@ public class DirectoryWatcher extends Thread implements BundleListener
         return bundle;
     }
 
-    private Bundle installOrUpdateBundle(String bundleLocation, BufferedInputStream is, long checksum) throws IOException, BundleException {
+    private Bundle installOrUpdateBundle(
+        String bundleLocation, BufferedInputStream is, long checksum)
+        throws IOException, BundleException
+    {
         is.mark(256 * 1024);
         JarInputStream jar = new JarInputStream(is);
         Manifest m = jar.getManifest();
@@ -892,16 +922,22 @@ public class DirectoryWatcher extends Thread implements BundleListener
         String vStr = m.getMainAttributes().getValue(Constants.BUNDLE_VERSION);
         Version v = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
         Bundle[] bundles = context.getBundles();
-        for (int i = 0; i < bundles.length; i++) {
+        for (int i = 0; i < bundles.length; i++)
+        {
             Bundle b = bundles[i];
-            if (b.getSymbolicName() != null && b.getSymbolicName().equals(sn)) {
+            if (b.getSymbolicName() != null && b.getSymbolicName().equals(sn))
+            {
                 vStr = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
                 Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
-                if (v.equals(bv)) {
+                if (v.equals(bv))
+                {
                     is.reset();
-                    if (Util.loadChecksum(b, context) != checksum) {
+                    if (Util.loadChecksum(b, context) != checksum)
+                    {
                         log(Logger.LOG_WARNING,
-                            "A bundle with the same symbolic name (" + sn + ") and version (" + vStr + ") is already installed.  Updating this bundle instead.", null);
+                            "A bundle with the same symbolic name ("
+                            + sn + ") and version (" + vStr
+                            + ") is already installed.  Updating this bundle instead.", null);
                         stopTransient(b);
                         Util.storeChecksum(b, checksum, context);
                         b.update(is);
@@ -926,7 +962,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
         {
             File path = artifact.getPath();
             // Find a listener for this artifact if needed
-            if (artifact.getListener() == null) {
+            if (artifact.getListener() == null)
+            {
                 artifact.setListener(findListener(path, FileInstall.getListeners()));
             }
             // Forget this artifact
@@ -953,7 +990,9 @@ public class DirectoryWatcher extends Thread implements BundleListener
                     return null;
                 }
                 log(Logger.LOG_DEBUG,
-                    "Uninstalling bundle " + bundle.getBundleId() + " (" + bundle.getSymbolicName() + ")", null);
+                    "Uninstalling bundle "
+                    + bundle.getBundleId() + " ("
+                    + bundle.getSymbolicName() + ")", null);
                 bundle.uninstall();
             }
             log(Logger.LOG_INFO, "Uninstalled " + path, null);
@@ -992,7 +1031,9 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 }
                 stopTransient(bundle);
                 Util.storeChecksum(bundle, artifact.getChecksum(), context);
-                InputStream in = (transformed != null) ? transformed.openStream() : new FileInputStream(path);
+                InputStream in = (transformed != null)
+                    ? transformed.openStream()
+                    : new FileInputStream(path);
                 try
                 {
                     bundle.update(in);
@@ -1037,11 +1078,13 @@ public class DirectoryWatcher extends Thread implements BundleListener
         return bundle;
     }
 
-    private void stopTransient(Bundle bundle) throws BundleException {
+    private void stopTransient(Bundle bundle) throws BundleException
+    {
         // Stop the bundle transiently so that it will be restarted when startAllBundles() is called
         // but this avoids the need to restart the bundle twice (once for the update and another one
         // when refreshing packages).
-        if (startBundles) {
+        if (startBundles)
+        {
             bundle.stop(Bundle.STOP_TRANSIENT);
         }
     }
@@ -1058,8 +1101,8 @@ public class DirectoryWatcher extends Thread implements BundleListener
                 if (bundle != null)
                 {
                     if (bundle.getState() != Bundle.STARTING && bundle.getState() != Bundle.ACTIVE
-                            && FileInstall.getStartLevel().isBundlePersistentlyStarted(bundle)
-                            && FileInstall.getStartLevel().getStartLevel() >= FileInstall.getStartLevel().getBundleStartLevel(bundle))
+                        && FileInstall.getStartLevel().isBundlePersistentlyStarted(bundle)
+                        && FileInstall.getStartLevel().getStartLevel() >= FileInstall.getStartLevel().getBundleStartLevel(bundle))
                     {
                         bundles.add(bundle);
                     }
