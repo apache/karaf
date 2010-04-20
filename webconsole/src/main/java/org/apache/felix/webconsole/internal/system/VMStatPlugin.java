@@ -109,7 +109,7 @@ public class VMStatPlugin extends SimpleWebConsolePlugin implements OsgiManagerP
             System.gc();
             System.gc(); // twice for sure
         }
-        else if ( request.getParameter( PARAM_SHUTDOWN_TIMER ) == null )        
+        else if ( request.getParameter( PARAM_SHUTDOWN_TIMER ) == null )
         {
 
             // whether to stop or restart the framework
@@ -206,6 +206,7 @@ public class VMStatPlugin extends SimpleWebConsolePlugin implements OsgiManagerP
             json.put( "jvm", System.getProperty( "java.vm.name" ) + "(build " + System.getProperty( "java.vm.version" )
                 + ", " + System.getProperty( "java.vm.info" ) + ")" );
             json.put( "shutdownTimer", shutdownTimer );
+            json.put( "processors", Runtime.getRuntime().availableProcessors() );
             json.put( "mem_total", totalMem );
             json.put( "mem_free", freeMem );
             json.put( "mem_used", usedMem );
