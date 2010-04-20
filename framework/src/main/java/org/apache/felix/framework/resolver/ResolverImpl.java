@@ -105,6 +105,7 @@ public class ResolverImpl implements Resolver
 
                 modulePkgMap.clear();
                 capDepSet.clear();
+                m_packageSourcesCache.clear();
 
                 candidateMap = (m_usesPermutations.size() > 0)
                     ? m_usesPermutations.remove(0)
@@ -618,6 +619,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
             m_invokeCounts.put(methodName, count);
         }
+
         if (cycle.contains(module))
         {
             return;
@@ -959,6 +961,14 @@ System.out.println("RE: Candidate not resolveable: " + ex);
     private static void addCapabilityDependency(
         Capability cap, Requirement req, Map<Capability, Set<Requirement>> capDepSet)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
         Set<Requirement> reqs = capDepSet.get(cap);
         if (reqs == null)
         {
@@ -970,7 +980,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
 
 // TODO: FELIX3 - We end up with duplicates in uses constraints,
 //       see scenario 2 for an example.
-    private static void mergeUses(
+    private void mergeUses(
         Module current, Packages currentPkgs,
         Capability mergeCap, List<Requirement> blameReqs, Map<Module, Packages> modulePkgMap,
         Map<Requirement, Set<Capability>> candidateMap,
@@ -1009,8 +1019,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         cycleMap.put(pkgName, list);
 
 //System.out.println("+++ MERGING USES " + current + " FOR " + candBlame);
-        for (Capability candSourceCap : getPackageSources(
-            mergeCap, modulePkgMap, new ArrayList<Capability>(), new HashSet<Capability>()))
+        for (Capability candSourceCap : getPackageSources(mergeCap, modulePkgMap))
         {
             for (String usedPkgName : candSourceCap.getUses())
             {
@@ -1240,6 +1249,14 @@ System.out.println("+++ ADDING CONFLICT PERM " + mutated);
         Module invalid, Map<Capability, Set<Requirement>> capDepSet,
         Map<Requirement, Set<Capability>> candidateMap)
     {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
 System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.getSymbolicName());
         Set<Module> invalidated = new HashSet();
 
@@ -1350,7 +1367,7 @@ System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.
         return false;
     }
 
-    private static boolean isCompatible(
+    private boolean isCompatible(
         Capability currentCap, Capability candCap, Map<Module, Packages> modulePkgMap)
     {
         if (m_isInvokeCount)
@@ -1371,22 +1388,46 @@ System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.
             List<Capability> currentSources =
                 getPackageSources(
                     currentCap,
-                    modulePkgMap,
-                    new ArrayList<Capability>(),
-                    new HashSet<Capability>());
+                    modulePkgMap);
             List<Capability> candSources =
                 getPackageSources(
                     candCap,
-                    modulePkgMap,
-                    new ArrayList<Capability>(),
-                    new HashSet<Capability>());
+                    modulePkgMap);
 //System.out.println("+++ currentSources " + currentSources + " - candSources " + candSources);
             return currentSources.containsAll(candSources) || candSources.containsAll(currentSources);
         }
         return true;
     }
 
-    private static List<Capability> getPackageSources(
+    private Map<Capability, List<Capability>> m_packageSourcesCache = new HashMap();
+
+    private List<Capability> getPackageSources(
+        Capability cap, Map<Module, Packages> modulePkgMap)
+    {
+        if (m_isInvokeCount)
+        {
+            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
+            Long count = m_invokeCounts.get(methodName);
+            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
+            m_invokeCounts.put(methodName, count);
+        }
+
+        if (cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
+        {
+            List<Capability> sources = m_packageSourcesCache.get(cap);
+            if (sources == null)
+            {
+                sources = getPackageSourcesInternal(
+                    cap, modulePkgMap, new ArrayList(), new HashSet());
+                m_packageSourcesCache.put(cap, sources);
+            }
+            return sources;
+        }
+
+        return Collections.emptyList();
+    }
+
+    private static List<Capability> getPackageSourcesInternal(
         Capability cap, Map<Module, Packages> modulePkgMap, List<Capability> sources,
         Set<Capability> cycleMap)
     {
@@ -1428,7 +1469,7 @@ System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.
             {
                 for (Blame blame : required)
                 {
-                    getPackageSources(blame.m_cap, modulePkgMap, sources, cycleMap);
+                    getPackageSourcesInternal(blame.m_cap, modulePkgMap, sources, cycleMap);
                 }
             }
         }
