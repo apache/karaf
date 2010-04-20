@@ -346,13 +346,10 @@ public class CapabilitySet
         // result immediately.
         if (lhs instanceof Comparable)
         {
-            // The substring operator only works on string values, so if the
-            // lhs is not a string, then do an equality comparison using the
-            // original string containing wildcards.
+            // Spec says SUBSTRING is false for all types other than string.
             if ((op == SimpleFilter.SUBSTRING) && !(lhs instanceof String))
             {
-                op = SimpleFilter.EQ;
-                rhsUnknown = SimpleFilter.unparseSubstring((List<String>) rhsUnknown);
+                return false;
             }
 
             Object rhs;
@@ -438,13 +435,10 @@ public class CapabilitySet
             return false;
         }
 
-        // The substring operator only works on string values, so if the
-        // lhs is not a string, then do an equality comparison using the
-        // original string containing wildcards.
+        // Spec says SUBSTRING is false for all types other than string.
         if ((op == SimpleFilter.SUBSTRING) && !(lhs instanceof String))
         {
-            op = SimpleFilter.EQ;
-            rhsUnknown = SimpleFilter.unparseSubstring((List<String>) rhsUnknown);
+            return false;
         }
 
         // Since we cannot identify the LHS type, then we can only perform

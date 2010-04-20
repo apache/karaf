@@ -107,28 +107,44 @@ public class SimpleFilter
         return sb.toString();
     }
 
+    private static String toDecodedString(String s, int startIdx, int endIdx)
+    {
+        StringBuffer sb = new StringBuffer(endIdx - startIdx);
+        boolean escaped = false;
+        for (int i = 0; i < (endIdx - startIdx); i++)
+        {
+            char c = s.charAt(startIdx + i);
+            if (!escaped && (c == '\\'))
+            {
+                escaped = true;
+            }
+            else
+            {
+                escaped = false;
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+
     private static String toEncodedString(Object o)
     {
         if (o instanceof String)
         {
             String s = (String) o;
-            if ((s.indexOf('\\') >= 0)
-                || (s.indexOf('(') >= 0)
-                || (s.indexOf(')') >= 0))
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < s.length(); i++)
             {
-                StringBuffer sb = new StringBuffer();
-                for (int i = 0; i < s.length(); i++)
+                char c = s.charAt(i);
+                if ((c == '\\') || (c == '(') || (c == ')') || (c == '*'))
                 {
-                    char c = s.charAt(i);
-                    if ((c == '\\') || (c == '(') || (c == ')'))
-                    {
-                        sb.append('\\');
-                    }
-                    sb.append(c);
+                    sb.append('\\');
                 }
-
-                o = sb.toString();
+                sb.append(c);
             }
+
+            o = sb.toString();
         }
 
         return o.toString();
@@ -320,36 +336,14 @@ public class SimpleFilter
         }
 
         // Parse value.
-        StringBuffer sb = new StringBuffer(endIdx - startIdx);
-        for (int offset = 0; offset < (endIdx - startIdx); )
-        {
-            char c = filter.charAt(startIdx + offset);
-            if ((c == '(') || (c == ')'))
-            {
-                throw new IllegalArgumentException(
-                    "Illegal value: " + filter.substring(startIdx, endIdx));
-            }
-            else if (c == '\\')
-            {
-                offset++;
-            }
-
-            if ((startIdx + offset) >= endIdx)
-            {
-                throw new IllegalArgumentException(
-                    "Illegal value: " + filter.substring(startIdx, endIdx));
-            }
-
-            sb.append(filter.charAt(startIdx + offset));
-            offset++;
-        }
-        Object value = sb.toString();
+        Object value = toDecodedString(filter, startIdx, endIdx);
 
         // Check if the equality comparison is actually a substring
         // or present operation.
         if (op == EQ)
         {
-            List<String> values = parseSubstring((String) value);
+            String valueStr = filter.substring(startIdx, endIdx);
+            List<String> values = parseSubstring(valueStr);
             if ((values.size() == 2)
                 && (values.get(0).length() == 0)
                 && (values.get(1).length() == 0))
@@ -378,6 +372,7 @@ public class SimpleFilter
         int idx = 0;
 
         // We assume (sub)strings can contain leading and trailing blanks
+        boolean escaped = false;
 loop:   for (;;)
         {
             if (idx >= value.length())
@@ -399,8 +394,14 @@ loop:   for (;;)
                 break loop;
             }
 
+            // Read the next character and account for escapes.
             char c = value.charAt(idx++);
-            if (c == '*')
+            if (!escaped && ((c == '(') || (c == ')')))
+            {
+                throw new IllegalArgumentException(
+                    "Illegal value: " + value);
+            }
+            else if (!escaped && (c == '*'))
             {
                 if (wasStar)
                 {
@@ -421,8 +422,13 @@ loop:   for (;;)
                 }
                 wasStar = true;
             }
+            else if (!escaped && (c == '\\'))
+            {
+                escaped = true;
+            }
             else
             {
+                escaped = false;
                 wasStar = false;
                 ss.append(c);
             }
