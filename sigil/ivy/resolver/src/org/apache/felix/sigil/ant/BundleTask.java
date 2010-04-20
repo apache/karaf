@@ -42,6 +42,7 @@ public class BundleTask extends Task
     private boolean force;
     private String property;
     private String sigilFile;
+    private String revision;
 
     @Override
     public void execute() throws BuildException
@@ -129,6 +130,12 @@ public class BundleTask extends Task
                 log(id + ": " + count(nErr, "error") + ", " + count(nWarn, "warning")
                     + msg);
             }
+        
+            if (revision != null)
+            {
+                // FIXME: hopefully if we have multiple bundles they all have the same version
+                getProject().setProperty(revision, bundle.getVersion());
+            }
         }
 
         if (anyModified && property != null)
@@ -166,6 +173,11 @@ public class BundleTask extends Task
     public void setProperty(String property)
     {
         this.property = property;
+    }
+
+    public void setRevision(String revision)
+    {
+        this.revision = revision;
     }
 
     public void setClasspathref(String value)

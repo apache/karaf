@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,8 +76,10 @@ public class BundleBuilder
      * 
      * @param classpath
      * @param destPattern
-     *            ivy-like pattern: PATH/[id].[ext] [id] is replaced with the
-     *            bundle id. [name] is replaced with the Bundle-SymbolicName
+     *            ivy-like pattern: PATH/[name]-[revision].[ext].
+     *            [id] is replaced with the bundle id.
+     *            [name] is replaced with the Bundle-SymbolicName
+     *            [revision] is replaced with the Bundle-Version
      *            [ext] is replaced with "jar".
      * @param hashtable
      */
@@ -168,13 +171,14 @@ public class BundleBuilder
 
         String dest = destPattern.replaceFirst("\\[id\\]", bundle.getId());
         dest = dest.replaceFirst("\\[name\\]", bundle.getSymbolicName());
+        dest = dest.replaceFirst("\\[revision\\]", bundle.getVersion());
         dest = dest.replaceFirst("\\[ext\\]", "jar");
 
         bracket = dest.indexOf('[');
         if (bracket >= 0)
         {
             String token = dest.substring(bracket);
-            throw new Exception("destPattern: expected [id] or [name]: " + token);
+            throw new Exception("destPattern: expected [id],  [name] or [revision]: " + token);
         }
 
         errors.clear();
@@ -185,6 +189,7 @@ public class BundleBuilder
         if (log != null)
         {
             log.verbose("BND instructions: " + spec.toString());
+            log.verbose("BND classpath: " + Arrays.asList(classpath));
         }
 
         Builder builder = new Builder();
@@ -199,6 +204,10 @@ public class BundleBuilder
 
         convertErrors("BND: ", builder.getErrors());
         convertWarnings("BND: ", builder.getWarnings());
+        
+        Attributes main = jar.getManifest().getMainAttributes();
+        String expHeader = main.getValue(Constants.EXPORT_PACKAGE);
+        log.verbose("BND exports: " + expHeader);
 
         augmentImports(builder, jar, bundle);
 
