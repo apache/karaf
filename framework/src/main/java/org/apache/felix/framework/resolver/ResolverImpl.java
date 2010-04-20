@@ -46,16 +46,7 @@ public class ResolverImpl implements Resolver
     private static boolean m_isInvokeCount = false;
 
     // Reusable empty array.
-    private static final List<Wire> m_emptyWires = new ArrayList<Wire>(0);
-
-    public ResolverImpl(Logger logger)
-    {
-//System.out.println("+++ PROTO3 RESOLVER");
-        m_logger = logger;
-
-        String v = System.getProperty("invoke.count");
-        m_isInvokeCount = (v == null) ? false : Boolean.valueOf(v);
-    }
+    private static final List<Wire> m_emptyWires = Collections.emptyList();
 
     // Holds candidate permutations based on permutating "uses" chains.
     // These permutations are given higher priority.
@@ -65,6 +56,15 @@ public class ResolverImpl implements Resolver
     // These permutations represent backtracking on previous decisions.
     private final List<Map<Requirement, Set<Capability>>> m_importPermutations =
         new ArrayList<Map<Requirement, Set<Capability>>>();
+
+    public ResolverImpl(Logger logger)
+    {
+//System.out.println("+++ PROTO3 RESOLVER");
+        m_logger = logger;
+
+        String v = System.getProperty("invoke.count");
+        m_isInvokeCount = (v == null) ? false : Boolean.valueOf(v);
+    }
 
     public Map<Module, List<Wire>> resolve(ResolverState state, Module module)
     {
@@ -84,6 +84,7 @@ public class ResolverImpl implements Resolver
 
         if (!module.isResolved())
         {
+// TODO: FELIX3 - Should we clear these in a finally block?
             m_usesPermutations.clear();
             m_importPermutations.clear();
 
@@ -158,8 +159,6 @@ public class ResolverImpl implements Resolver
             m_invokeCounts.put(methodName, count);
         }
 
-        Capability candidate = null;
-
         // We can only create a dynamic import if the following
         // conditions are met:
         // 1. The specified module is resolved.
@@ -173,7 +172,9 @@ public class ResolverImpl implements Resolver
             getDynamicImportCandidates(state, module, pkgName);
         if (candidateMap != null)
         {
+// TODO: FELIX3 - Should we clear these in a finally block?
             m_usesPermutations.clear();
+            m_importPermutations.clear();
 
             Map<Module, List<Wire>> wireMap = new HashMap();
             Map<Module, Packages> modulePkgMap = new HashMap();
@@ -218,10 +219,10 @@ public class ResolverImpl implements Resolver
             {
                 throw rethrow;
             }
+
 //dumpModulePkgMap(modulePkgMap);
-            wireMap =
-                populateDynamicWireMap(
-                    module, pkgName, modulePkgMap, wireMap, candidateMap);
+            wireMap = populateDynamicWireMap(
+                module, pkgName, modulePkgMap, wireMap, candidateMap);
 
 //System.out.println("+++ DYNAMIC SUCCESS: " + wireMap.get(module));
             return wireMap;
@@ -231,7 +232,7 @@ public class ResolverImpl implements Resolver
         return null;
     }
 
-    // TODO: FELIX3 - It would be nice to make this private.
+// TODO: FELIX3 - It would be nice to make this private.
     public static Map<Requirement, Set<Capability>> getDynamicImportCandidates(
         ResolverState state, Module module, String pkgName)
     {
@@ -597,7 +598,6 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         // Add existing wires as candidates.
         for (Wire wire : module.getWires())
         {
-// TODO: FELIX3 - HOW ARE CAPABILITIES BEING SORTED NOW?
             Set<Capability> cs = new TreeSet();
             cs.add(wire.getCapability());
             candidateMap.put(wire.getRequirement(), cs);
@@ -631,14 +631,12 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             Packages modulePkgs = modulePkgMap.get(module);
 
             // Second, add all imported packages to our candidate space.
-            List<Wire> wires = new ArrayList(module.getWires());
             List<Capability> selected = new ArrayList();
-            while (wires.size() > 0)
+            for (Wire wire : module.getWires())
             {
-                Wire wire = wires.remove(0);
                 selected.add(wire.getCapability());
                 calculateExportedPackages(wire.getCapability().getModule(), modulePkgMap);
-                mergeCandidatePackagesNoUses(
+                mergeCandidatePackages(
                     module,
                     wire.getRequirement(),
                     wire.getCapability(),
@@ -695,12 +693,9 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             Packages modulePkgs = modulePkgMap.get(module);
 
             // Second, add all imported packages to our candidate space.
-            List<Requirement> list = new ArrayList(module.getRequirements());
             List<Capability> selected = new ArrayList();
-            while (list.size() > 0)
+            for (Requirement req : module.getRequirements())
             {
-                Requirement req = list.remove(0);
-
                 // Get the candidates for the current requirement.
                 Set<Capability> candCaps = candidateMap.get(req);
                 // Optional requirements may not have any candidates.
@@ -709,11 +704,10 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     continue;
                 }
 
-                calculateExportedPackages(module, modulePkgMap);
                 Capability candidate = candCaps.iterator().next();
                 selected.add(candidate);
                 calculateExportedPackages(candidate.getModule(), modulePkgMap);
-                mergeCandidatePackagesNoUses(module, req, candidate, modulePkgMap, candidateMap);
+                mergeCandidatePackages(module, req, candidate, modulePkgMap, candidateMap);
                 addCapabilityDependency(candidate, req, capDepSet);
             }
 
@@ -784,10 +778,8 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         List<Requirement> reqs = new ArrayList(module.getRequirements());
         reqs.addAll(module.getDynamicRequirements());
         List<Capability> selected = new ArrayList();
-        while (reqs.size() > 0)
+        for (Requirement req : reqs)
         {
-            Requirement req = reqs.remove(0);
-
             // Get the candidates for the current requirement.
             Set<Capability> candCaps = candidateMap.get(req);
             // Optional requirements may not have any candidates.
@@ -800,7 +792,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             Capability candidate = candCaps.iterator().next();
             selected.add(candidate);
             calculateExportedPackages(candidate.getModule(), modulePkgMap);
-            mergeCandidatePackagesNoUses(module, req, candidate, modulePkgMap, candidateMap);
+            mergeCandidatePackages(module, req, candidate, modulePkgMap, candidateMap);
             addCapabilityDependency(candidate, req, capDepSet);
         }
 
@@ -848,7 +840,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         }
     }
 
-    private void mergeCandidatePackagesNoUses(
+    private void mergeCandidatePackages(
         Module current, Requirement currentReq, Capability candCap,
         Map<Module, Packages> modulePkgMap, Map<Requirement, Set<Capability>> candidateMap)
     {
@@ -862,7 +854,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
 
         if (candCap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
-            mergeCandidatePackageNoUses(
+            mergeCandidatePackage(
                 current, false, currentReq, candCap, modulePkgMap);
         }
         else if (candCap.getNamespace().equals(Capability.MODULE_NAMESPACE))
@@ -878,7 +870,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             // since the current module requires it.
             for (Entry<String, Blame> entry : candPkgs.m_exportedPkgs.entrySet())
             {
-                mergeCandidatePackageNoUses(
+                mergeCandidatePackage(
                     current,
                     true,
                     currentReq,
@@ -896,7 +888,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     if ((dir != null) && dir.getValue().equals(Constants.VISIBILITY_REEXPORT)
                         && (candidateMap.get(req) != null))
                     {
-                        mergeCandidatePackagesNoUses(
+                        mergeCandidatePackages(
                             current,
                             currentReq,
                             candidateMap.get(req).iterator().next(),
@@ -908,7 +900,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         }
     }
 
-    private void mergeCandidatePackageNoUses(
+    private void mergeCandidatePackage(
         Module current, boolean requires,
         Requirement currentReq, Capability candCap,
         Map<Module, Packages> modulePkgMap)
