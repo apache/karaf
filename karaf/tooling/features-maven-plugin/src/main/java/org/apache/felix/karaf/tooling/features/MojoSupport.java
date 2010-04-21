@@ -296,4 +296,46 @@ public abstract class MojoSupport extends AbstractMojo {
                     "Error during setting up classpath", e);
         }
     }
+    
+    protected String translateFromMaven(String uri) {
+        if (uri.startsWith("mvn:")) {
+            String[] parts = uri.substring("mvn:".length()).split("/");
+            String groupId = parts[0];
+            String artifactId = parts[1];
+            String version = null;
+            String classifier = null;
+            String type = "jar";
+            if (parts.length > 2) {
+                version = parts[2];
+                if (parts.length > 3) {
+                    type = parts[3];
+                    if (parts.length > 4) {
+                        classifier = parts[4];
+                    }
+                }
+            }
+            String dir = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/";
+            String name = artifactId + "-" + version + (classifier != null ? "-" + classifier : "") + "." + type;
+
+            return getLocalRepoUrl() + "/" + dir + name;
+        }
+        if (System.getProperty("os.name").startsWith("Windows") && uri.startsWith("file:")) {
+                String baseDir = uri.substring(5).replace('\\', '/').replaceAll(" ", "%20");
+                String result = baseDir;
+                if (baseDir.indexOf(":") > 0) {
+                        result = "file:///" + baseDir;
+                }
+                return result;
+        }
+        return uri;
+    }
+
+    protected String getLocalRepoUrl() {
+         if (System.getProperty("os.name").startsWith("Windows")) {
+             String baseDir = localRepo.getBasedir().replace('\\', '/').replaceAll(" ", "%20");
+             return localRepo.getProtocol() + ":///" + baseDir;
+         } else {
+                 return localRepo.getUrl();
+         }
+    }
 }

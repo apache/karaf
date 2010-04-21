@@ -85,7 +85,11 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private String karafConfig;
 
-    
+    /**
+     *  The repositories which are included from the plugin config   
+     *  @parameter 
+     */
+     private List<String> repositories;   
     
     /*
      * A map to cache the mvn: uris and the artifacts that correspond with them
@@ -147,6 +151,15 @@ public class ValidateFeaturesMojo extends MojoSupport {
         info(" - read %s", file.getAbsolutePath());
 
         features.add(repository.getFeatures());
+        
+        // add the repositories from the plugin configuration
+	for (String uri : repositories) {
+	    getLog().info(String.format(" - adding repository from %s", uri));
+            Repository dependency = new RepositoryImpl(URI.create(translateFromMaven(uri)));
+            features.add(dependency.getFeatures());
+            validateBundlesAvailable(dependency);
+            analyzeExports(dependency);
+        }
 
         for (URI uri : repository.getRepositories()) {
             Artifact artifact = resolve(uri.toString());
