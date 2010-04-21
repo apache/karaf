@@ -206,11 +206,17 @@ public class VMStatPlugin extends SimpleWebConsolePlugin implements OsgiManagerP
             json.put( "jvm", System.getProperty( "java.vm.name" ) + "(build " + System.getProperty( "java.vm.version" )
                 + ", " + System.getProperty( "java.vm.info" ) + ")" );
             json.put( "shutdownTimer", shutdownTimer );
-            json.put( "processors", Runtime.getRuntime().availableProcessors() );
             json.put( "mem_total", totalMem );
             json.put( "mem_free", freeMem );
             json.put( "mem_used", usedMem );
             json.put( "shutdownType", shutdownType );
+
+            // only add the processors if the number is available
+            final int processors = getAvailableProcessors();
+            if ( processors > 0 )
+            {
+                json.put( "processors", processors );
+            }
         }
         catch ( JSONException e )
         {
@@ -227,5 +233,25 @@ public class VMStatPlugin extends SimpleWebConsolePlugin implements OsgiManagerP
     private final StartLevel getStartLevel()
     {
         return ( StartLevel ) getService( START_LEVEL_NAME );
+    }
+
+
+    /**
+     * Returns the number of processor available on Java 1.4 and newer runtimes.
+     * If the Runtime.availableProcessors() method is not available, this
+     * method returns -1.
+     */
+    private int getAvailableProcessors()
+    {
+        try
+        {
+            return Runtime.getRuntime().availableProcessors();
+        }
+        catch ( Throwable t )
+        {
+            // NoSuchMethodError on pre-1.4 runtimes
+        }
+
+        return -1;
     }
 }
