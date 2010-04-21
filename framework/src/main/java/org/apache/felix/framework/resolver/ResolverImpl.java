@@ -1579,17 +1579,17 @@ System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.
         Packages pkgs = modulePkgMap.get(module);
         for (Entry<String, Blame> entry : pkgs.m_importedPkgs.entrySet())
         {
-            if (!entry.getValue().m_cap.getModule().isResolved())
-            {
-                populateWireMap(entry.getValue().m_cap.getModule(), modulePkgMap, wireMap,
-                    candidateMap);
-            }
-
             // Ignore modules that import themselves.
             if (!module.equals(entry.getValue().m_cap.getModule())
                 && entry.getValue().m_cap.getAttribute(
                     Capability.PACKAGE_ATTR).getValue().equals(pkgName))
             {
+                if (!entry.getValue().m_cap.getModule().isResolved())
+                {
+                    populateWireMap(entry.getValue().m_cap.getModule(), modulePkgMap, wireMap,
+                        candidateMap);
+                }
+
                 List<Attribute> attrs = new ArrayList();
                 attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
                 packageWires.add(
@@ -1611,14 +1611,10 @@ System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.
 
     private static class Packages
     {
-        public final Map<String, Blame> m_exportedPkgs
-            = new HashMap<String, Blame>();
-        public final Map<String, Blame> m_importedPkgs
-            = new HashMap<String, Blame>();
-        public final Map<String, List<Blame>> m_requiredPkgs
-            = new HashMap<String, List<Blame>>();
-        public final Map<String, List<Blame>> m_usedPkgs
-            = new HashMap<String, List<Blame>>();
+        public final Map<String, Blame> m_exportedPkgs = new HashMap();
+        public final Map<String, Blame> m_importedPkgs = new HashMap();
+        public final Map<String, List<Blame>> m_requiredPkgs = new HashMap();
+        public final Map<String, List<Blame>> m_usedPkgs = new HashMap();
 
         public Packages()
         {
