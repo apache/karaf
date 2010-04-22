@@ -84,6 +84,13 @@ public class ValidateFeaturesMojo extends MojoSupport {
      * @parameter default-value="config.properties"
      */
     private String karafConfig;
+    
+    /**
+     * which jre version we wanna parse to get jre exported package in config.properties
+     * 
+     * @parameter default-value="jre-1.5"
+     */
+    private String jreVersion;
 
     /**
      *  The repositories which are included from the plugin config   
@@ -243,7 +250,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
         	properties.load(new FileInputStream(new File(karafConfig)));
         }
 
-        String packages = (String) properties.get("jre-1.5");
+        String packages = (String) properties.get(jreVersion);
         for (String pkg : packages.split(";")) {
             systemExports .add(pkg.trim());
         }
