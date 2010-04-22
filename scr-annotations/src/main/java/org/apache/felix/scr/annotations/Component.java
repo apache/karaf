@@ -125,8 +125,15 @@ public @interface Component {
     /**
      * Set the metatype factory pid property (only for non factory components).
      * @since 1.0
+     * @deprecated Use {@link #configurationFactory()}
      */
     boolean getConfigurationFactory() default false;
+
+    /**
+     * Set the metatype factory pid property (only for non factory components).
+     * @since 1.3
+     */
+    boolean configurationFactory() default false;
 
     /**
      * The configuration policy

@@ -99,6 +99,14 @@ public class ComponentTag extends AbstractTag {
                 return Util.getBooleanValue(annotation, "getConfigurationFactory", Component.class);
             }
 
+            public boolean configurationFactory() {
+                final Object obj = annotation.getNamedParameter("configurationFactory");
+                if ( obj != null ) {
+                    return Boolean.valueOf(obj.toString());
+                }
+                return getConfigurationFactory();
+            }
+
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
                 return null;
             }
@@ -119,7 +127,7 @@ public class ComponentTag extends AbstractTag {
         map.put(Constants.COMPONENT_DESCRIPTION, emptyToNull(this.annotation.description()));
         map.put(Constants.COMPONENT_ENABLED, String.valueOf(this.annotation.enabled()));
         map.put(Constants.COMPONENT_FACTORY, emptyToNull(this.annotation.factory()));
-        map.put(Constants.COMPONENT_SET_METATYPE_FACTORY_PID, String.valueOf(this.annotation.getConfigurationFactory()));
+        map.put(Constants.COMPONENT_SET_METATYPE_FACTORY_PID, String.valueOf(this.annotation.configurationFactory()));
 
         // FELIX-593: immediate attribute does not default to true all the
         // times hence we only set it if declared in the tag
