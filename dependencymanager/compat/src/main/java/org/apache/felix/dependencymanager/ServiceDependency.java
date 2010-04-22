@@ -167,7 +167,28 @@ public abstract class ServiceDependency implements Dependency
     public abstract ServiceDependency setCallbacks(Object instance, String added, String changed,
         String removed);
 
+    /**
+     * Returns <code>true>code> if auto configuration is enabled for this dependency.
+     * Auto configuration means that a dependency is injected in the service instance
+     * when it's available, and if it's unavailable, a "null object" will be inserted
+     * instead.
+     * 
+     * @return <code>true>code> if auto configuration is enabled for this dependency
+     */
+    public abstract boolean isAutoConfig();
+
+    /**
+     * Returns <code>true</code> if the dependency is available.
+     * 
+     * @return <code>true</code> if the dependency is available
+     */
     public abstract boolean isAvailable();
 
+    /**
+     * Returns <code>true</code> if this a required dependency. Required dependencies
+     * are dependencies that must be available before the service can be activated.
+     * 
+     * @return <code>true</code> if the dependency is required
+     */
     public abstract boolean isRequired();
 }

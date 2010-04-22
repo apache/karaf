@@ -86,6 +86,11 @@ public class ServiceDependencyImpl extends ServiceDependency
         return this;
     }
 
+    public boolean isAutoConfig()
+    {
+        return m_delegate.isAutoConfig();
+    }
+    
     public boolean isAvailable()
     {
         return m_delegate.isAvailable();
