@@ -330,7 +330,7 @@ public class ModuleImpl implements Module
                     {
                         reqList.add(
                             new FragmentRequirement(
-                                reqs.get(reqIdx), m_fragments.get(fragIdx)));
+                                this, reqs.get(reqIdx)));
                     }
                 }
             }
@@ -2230,48 +2230,53 @@ public class ModuleImpl implements Module
 
     static class FragmentRequirement implements Requirement
     {
-        private final Requirement m_req;
-        private final Module m_fragment;
+        private final Module m_owner;
+        private final Requirement m_fragmentReq;
 
-        public FragmentRequirement(Requirement req, Module fragment)
+        public FragmentRequirement(Module owner, Requirement fragmentReq)
         {
-            m_req = req;
-            m_fragment = fragment;
+            m_owner = owner;
+            m_fragmentReq = fragmentReq;
         }
 
         public Module getFragment()
         {
-            return m_fragment;
+            return m_fragmentReq.getModule();
         }
 
         public Module getModule()
         {
-            return m_req.getModule();
+            return m_owner;
         }
 
         public String getNamespace()
         {
-            return m_req.getNamespace();
+            return m_fragmentReq.getNamespace();
         }
 
         public SimpleFilter getFilter()
         {
-            return m_req.getFilter();
+            return m_fragmentReq.getFilter();
         }
 
         public boolean isOptional()
         {
-            return m_req.isOptional();
+            return m_fragmentReq.isOptional();
         }
 
         public Directive getDirective(String name)
         {
-            return m_req.getDirective(name);
+            return m_fragmentReq.getDirective(name);
         }
 
         public List<Directive> getDirectives()
         {
-            return m_req.getDirectives();
+            return m_fragmentReq.getDirectives();
+        }
+
+        public String toString()
+        {
+            return m_fragmentReq.toString();
         }
     }
 }

@@ -40,6 +40,7 @@ import org.osgi.framework.Constants;
 
 public class ResolverImpl implements Resolver
 {
+// TODO: FELIX3 - Add logging messages.
     private final Logger m_logger;
 
     private static final Map<String, Long> m_invokeCounts = new HashMap<String, Long>();
@@ -59,7 +60,6 @@ public class ResolverImpl implements Resolver
 
     public ResolverImpl(Logger logger)
     {
-//System.out.println("+++ PROTO3 RESOLVER");
         m_logger = logger;
 
         String v = System.getProperty("invoke.count");
@@ -88,7 +88,6 @@ public class ResolverImpl implements Resolver
             m_usesPermutations.clear();
             m_importPermutations.clear();
 
-//System.out.println("+++ RESOLVING " + module);
             Map<Requirement, Set<Capability>> candidateMap =
                 new HashMap<Requirement, Set<Capability>>();
 
@@ -113,7 +112,8 @@ public class ResolverImpl implements Resolver
 //dumpCandidateMap(state, candidateMap);
 
                 calculatePackageSpaces(
-                    module, candidateMap, modulePkgMap, capDepSet, new HashSet());
+                    module, candidateMap, modulePkgMap,
+                    capDepSet, new HashMap(), new HashSet());
 //System.out.println("+++ PACKAGE SPACES START +++");
 //dumpModulePkgMap(modulePkgMap);
 //System.out.println("+++ PACKAGE SPACES END +++");
@@ -180,7 +180,6 @@ public class ResolverImpl implements Resolver
             Map<Module, List<Wire>> wireMap = new HashMap();
             Map<Module, Packages> modulePkgMap = new HashMap();
 
-//System.out.println("+++ DYNAMICALLY RESOLVING " + module + " - " + pkgName);
             populateDynamicCandidates(state, module, candidateMap);
             m_usesPermutations.add(candidateMap);
 
@@ -199,8 +198,9 @@ public class ResolverImpl implements Resolver
                     ? m_usesPermutations.remove(0)
                     : m_importPermutations.remove(0);
 
-                calculateDynamicPackageSpaces(
-                    module, candidateMap, modulePkgMap, capDepSet);
+                calculatePackageSpaces(
+                    module, candidateMap, modulePkgMap,
+                    capDepSet, new HashMap(), new HashSet());
 
                 try
                 {
@@ -225,11 +225,9 @@ public class ResolverImpl implements Resolver
             wireMap = populateDynamicWireMap(
                 module, pkgName, modulePkgMap, wireMap, candidateMap);
 
-//System.out.println("+++ DYNAMIC SUCCESS: " + wireMap.get(module));
             return wireMap;
         }
 
-//System.out.println("+++ DYNAMIC FAILURE");
         return null;
     }
 
@@ -328,68 +326,6 @@ public class ResolverImpl implements Resolver
         }
 
         return null;
-    }
-
-    private static void dumpCandidateMap(
-        ResolverState state, Map<Requirement, Set<Capability>> candidateMap)
-    {
-        System.out.println("=== BEGIN CANDIDATE MAP ===");
-        for (Module module : ((FelixResolverState) state).getModules())
-        {
-            System.out.println("  " + module
-                 + " (" + (module.isResolved() ? "RESOLVED)" : "UNRESOLVED)"));
-            for (Requirement req : module.getRequirements())
-            {
-                Set<Capability> candidates = candidateMap.get(req);
-                if ((candidates != null) && (candidates.size() > 0))
-                {
-                        System.out.println("    " + req + ": " + candidates);
-                }
-            }
-            for (Requirement req : module.getDynamicRequirements())
-            {
-                Set<Capability> candidates = candidateMap.get(req);
-                if ((candidates != null) && (candidates.size() > 0))
-                {
-                    System.out.println("    " + req + ": " + candidates);
-                }
-            }
-        }
-        System.out.println("=== END CANDIDATE MAP ===");
-    }
-
-    private static void dumpModulePkgMap(Map<Module, Packages> modulePkgMap)
-    {
-        System.out.println("+++MODULE PKG MAP+++");
-        for (Entry<Module, Packages> entry : modulePkgMap.entrySet())
-        {
-            dumpModulePkgs(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private static void dumpModulePkgs(Module module, Packages packages)
-    {
-        System.out.println(module + " (" + (module.isResolved() ? "RESOLVED)" : "UNRESOLVED)"));
-        System.out.println("  EXPORTED");
-        for (Entry<String, Blame> entry : packages.m_exportedPkgs.entrySet())
-        {
-            System.out.println("    " + entry.getKey() + " - " + entry.getValue());
-        }
-        System.out.println("  IMPORTED");
-        for (Entry<String, Blame> entry : packages.m_importedPkgs.entrySet())
-        {
-            System.out.println("    " + entry.getKey() + " - " + entry.getValue());
-        }
-        System.out.println("  REQUIRED");
-        for (Entry<String, List<Blame>> entry : packages.m_requiredPkgs.entrySet())
-        {
-            System.out.println("    " + entry.getKey() + " - " + entry.getValue());
-        }
-        System.out.println("  USED");
-        for (Entry<String, List<Blame>> entry : packages.m_usedPkgs.entrySet())
-        {
-            System.out.println("    " + entry.getKey() + " - " + entry.getValue());
-        }
     }
 
 // TODO: FELIX3 - Modify to not be recursive.
@@ -595,14 +531,6 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             candidateMap.remove(dynReq);
             throw new ResolveException("Dynamic import failed.", module, dynReq);
         }
-
-        // Add existing wires as candidates.
-        for (Wire wire : module.getWires())
-        {
-            Set<Capability> cs = new TreeSet();
-            cs.add(wire.getCapability());
-            candidateMap.put(wire.getRequirement(), cs);
-        }
     }
 
     private void calculatePackageSpaces(
@@ -610,6 +538,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         Map<Requirement, Set<Capability>> candidateMap,
         Map<Module, Packages> modulePkgMap,
         Map<Capability, Set<Requirement>> capDepSet,
+        Map<Capability, List<Module>> usesCycleMap,
         Set<Module> cycle)
     {
         if (m_isInvokeCount)
@@ -626,76 +555,42 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         }
         cycle.add(module);
 
+        // Create a map of wires or proposed wired depending on whether
+        // the module is resolved or not.
+        List<Requirement> reqs = new ArrayList();
+        List<Capability> caps = new ArrayList();
         if (module.isResolved())
         {
-            // First, add all exported packages to our package space.
-            calculateExportedPackages(module, modulePkgMap);
-            Packages modulePkgs = modulePkgMap.get(module);
-
-            // Second, add all imported packages to our candidate space.
-            List<Capability> selected = new ArrayList();
+            // Use wires to get actual requirements and satisfying capabilities.
             for (Wire wire : module.getWires())
             {
-                selected.add(wire.getCapability());
-                calculateExportedPackages(wire.getCapability().getModule(), modulePkgMap);
-                mergeCandidatePackages(
-                    module,
-                    wire.getRequirement(),
-                    wire.getCapability(),
-                    modulePkgMap,
-                    candidateMap);
-                addCapabilityDependency(wire.getCapability(), wire.getRequirement(), capDepSet);
+                reqs.add(wire.getRequirement());
+                caps.add(wire.getCapability());
             }
 
-            // Third, ask our candidates to calculate their package space.
-            while (selected.size() > 0)
+            // Since the module is resolved, it could be dynamically importing,
+            // so check to see if there are candidates for any of its dynamic
+            // imports.
+            for (Requirement req : module.getDynamicRequirements())
             {
-                Capability candidate = selected.remove(0);
-                calculatePackageSpaces(candidate.getModule(), candidateMap, modulePkgMap, capDepSet, cycle);
-            }
-
-            // Fourth, add all of the uses constraints implied by our imported
-            // and required packages.
-            for (Entry<String, Blame> entry : modulePkgs.m_importedPkgs.entrySet())
-            {
-                List<Requirement> blameReqs = new ArrayList();
-                blameReqs.add(entry.getValue().m_reqs.get(0));
-
-                mergeUses(
-                    module,
-                    modulePkgs,
-                    entry.getValue().m_cap,
-                    blameReqs,
-                    modulePkgMap,
-                    candidateMap,
-                    new HashMap<String, List<Module>>());
-            }
-            for (Entry<String, List<Blame>> entry : modulePkgs.m_requiredPkgs.entrySet())
-            {
-                for (Blame blame : entry.getValue())
+                // Get the candidates for the current requirement.
+                Set<Capability> candCaps = candidateMap.get(req);
+                // Optional requirements may not have any candidates.
+                if (candCaps == null)
                 {
-                    List<Requirement> blameReqs = new ArrayList();
-                    blameReqs.add(blame.m_reqs.get(0));
-
-                    mergeUses(
-                        module,
-                        modulePkgs,
-                        blame.m_cap,
-                        blameReqs,
-                        modulePkgMap,
-                        candidateMap,
-                        new HashMap<String, List<Module>>());
+                    continue;
                 }
+
+                Capability cap = candCaps.iterator().next();
+                reqs.add(req);
+                caps.add(cap);
+                // Can only dynamically import one at a time, so break
+                // out of the loop after the first.
+                break;
             }
         }
         else
         {
-            // First, add all exported packages to our package space.
-            calculateExportedPackages(module, modulePkgMap);
-            Packages modulePkgs = modulePkgMap.get(module);
-
-            // Second, add all imported packages to our candidate space.
-            List<Capability> selected = new ArrayList();
             for (Requirement req : module.getRequirements())
             {
                 // Get the candidates for the current requirement.
@@ -706,40 +601,42 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     continue;
                 }
 
-                Capability candidate = candCaps.iterator().next();
-                selected.add(candidate);
-                calculateExportedPackages(candidate.getModule(), modulePkgMap);
-                mergeCandidatePackages(module, req, candidate, modulePkgMap, candidateMap);
-                addCapabilityDependency(candidate, req, capDepSet);
+                Capability cap = candCaps.iterator().next();
+                reqs.add(req);
+                caps.add(cap);
             }
+        }
 
-            // Third, ask our candidates to calculate their package space.
-            while (selected.size() > 0)
-            {
-                Capability candidate = selected.remove(0);
-                calculatePackageSpaces(candidate.getModule(), candidateMap, modulePkgMap, capDepSet, cycle);
-            }
+        // First, add all exported packages to our package space.
+        calculateExportedPackages(module, modulePkgMap);
+        Packages modulePkgs = modulePkgMap.get(module);
 
-            // Fourth, add all of the uses constraints implied by our imported
-            // and required packages.
-// TODO: FELIX3 - DUPLICATES CODE ABOVE FOR RESOLVED MODULES.
-            for (Entry<String, Blame> entry : modulePkgs.m_importedPkgs.entrySet())
-            {
-                List<Requirement> blameReqs = new ArrayList();
-                blameReqs.add(entry.getValue().m_reqs.get(0));
+        // Second, add all imported packages to our candidate space.
+        for (int i = 0; i < reqs.size(); i++)
+        {
+            Requirement req = reqs.get(i);
+            Capability cap = caps.get(i);
+            calculateExportedPackages(cap.getModule(), modulePkgMap);
+            mergeCandidatePackages(module, req, cap, modulePkgMap, candidateMap);
+            addCapabilityDependency(cap, req, capDepSet);
+        }
 
-                mergeUses(
-                    module,
-                    modulePkgs,
-                    entry.getValue().m_cap,
-                    blameReqs,
-                    modulePkgMap,
-                    candidateMap,
-                    new HashMap<String, List<Module>>());
-            }
-            for (Entry<String, List<Blame>> entry : modulePkgs.m_requiredPkgs.entrySet())
+        // Third, ask our candidates to calculate their package spaces.
+        for (int i = 0; i < caps.size(); i++)
+        {
+            calculatePackageSpaces(
+                caps.get(i).getModule(), candidateMap, modulePkgMap,
+                capDepSet, usesCycleMap, cycle);
+        }
+
+        // Fourth, add all of the uses constraints implied by our imported
+        // and required packages.
+        for (Entry<String, List<Blame>> entry : modulePkgs.m_importedPkgs.entrySet())
+        {
+            for (Blame blame : entry.getValue())
             {
-                for (Blame blame : entry.getValue())
+                // Ignore modules that import from themselves.
+                if (!blame.m_cap.getModule().equals(module))
                 {
                     List<Requirement> blameReqs = new ArrayList();
                     blameReqs.add(blame.m_reqs.get(0));
@@ -751,77 +648,9 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                         blameReqs,
                         modulePkgMap,
                         candidateMap,
-                        new HashMap<String, List<Module>>());
+                        usesCycleMap);
                 }
             }
-        }
-    }
-
-// TODO: FELIX3 - This code duplicates a lot of calculatePackageSpaces()
-    private void calculateDynamicPackageSpaces(
-        Module module,
-        Map<Requirement, Set<Capability>> candidateMap,
-        Map<Module, Packages> modulePkgMap,
-        Map<Capability, Set<Requirement>> capDepSet)
-    {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
-        // First, add all exported packages to our package space.
-        calculateExportedPackages(module, modulePkgMap);
-        Packages modulePkgs = modulePkgMap.get(module);
-
-        // Second, add all imported packages to our candidate space.
-        List<Requirement> reqs = new ArrayList(module.getRequirements());
-        reqs.addAll(module.getDynamicRequirements());
-        List<Capability> selected = new ArrayList();
-        for (Requirement req : reqs)
-        {
-            // Get the candidates for the current requirement.
-            Set<Capability> candCaps = candidateMap.get(req);
-            // Optional requirements may not have any candidates.
-            if (candCaps == null)
-            {
-                continue;
-            }
-
-            calculateExportedPackages(module, modulePkgMap);
-            Capability candidate = candCaps.iterator().next();
-            selected.add(candidate);
-            calculateExportedPackages(candidate.getModule(), modulePkgMap);
-            mergeCandidatePackages(module, req, candidate, modulePkgMap, candidateMap);
-            addCapabilityDependency(candidate, req, capDepSet);
-        }
-
-        // Third, ask our candidates to calculate their package space.
-        while (selected.size() > 0)
-        {
-            Capability candidate = selected.remove(0);
-            calculatePackageSpaces(
-                candidate.getModule(), candidateMap,
-                modulePkgMap, capDepSet, new HashSet());
-        }
-
-        // Fourth, add all of the uses constraints implied by our imported
-        // and required packages.
-        for (Entry<String, Blame> entry : modulePkgs.m_importedPkgs.entrySet())
-        {
-            List<Requirement> blameReqs = new ArrayList();
-            blameReqs.add(entry.getValue().m_reqs.get(0));
-
-            mergeUses(
-                module,
-                modulePkgs,
-                entry.getValue().m_cap,
-                blameReqs,
-                modulePkgMap,
-                candidateMap,
-                new HashMap<String, List<Module>>());
         }
         for (Entry<String, List<Blame>> entry : modulePkgs.m_requiredPkgs.entrySet())
         {
@@ -837,7 +666,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     blameReqs,
                     modulePkgMap,
                     candidateMap,
-                    new HashMap<String, List<Module>>());
+                    usesCycleMap);
             }
         }
     }
@@ -937,10 +766,10 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             //
 
             Packages currentPkgs = modulePkgMap.get(current);
-            List<Blame> currentRequiredBlames = currentPkgs.m_requiredPkgs.get(pkgName);
 
             if (requires)
             {
+                List<Blame> currentRequiredBlames = currentPkgs.m_requiredPkgs.get(pkgName);
                 if (currentRequiredBlames == null)
                 {
                     currentRequiredBlames = new ArrayList<Blame>();
@@ -950,8 +779,13 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             }
             else
             {
-// TODO: FELIX3 - We might need to make this a list, since fragments can add duplicates.
-                currentPkgs.m_importedPkgs.put(pkgName, new Blame(candCap, blameReqs));
+                List<Blame> currentImportedBlames = currentPkgs.m_importedPkgs.get(pkgName);
+                if (currentImportedBlames == null)
+                {
+                    currentImportedBlames = new ArrayList<Blame>();
+                    currentPkgs.m_importedPkgs.put(pkgName, currentImportedBlames);
+                }
+                currentImportedBlames.add(new Blame(candCap, blameReqs));
             }
 
 //dumpModulePkgs(current, currentPkgs);
@@ -984,7 +818,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         Module current, Packages currentPkgs,
         Capability mergeCap, List<Requirement> blameReqs, Map<Module, Packages> modulePkgMap,
         Map<Requirement, Set<Capability>> candidateMap,
-        Map<String, List<Module>> cycleMap)
+        Map<Capability, List<Module>> cycleMap)
     {
         if (m_isInvokeCount)
         {
@@ -1007,16 +841,14 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         }
 
         // Check for cycles.
-        String pkgName = (String)
-            mergeCap.getAttribute(Capability.PACKAGE_ATTR).getValue();
-        List<Module> list = cycleMap.get(pkgName);
+        List<Module> list = cycleMap.get(mergeCap);
         if ((list != null) && list.contains(current))
         {
             return;
         }
         list = (list == null) ? new ArrayList<Module>() : list;
         list.add(current);
-        cycleMap.put(pkgName, list);
+        cycleMap.put(mergeCap, list);
 
 //System.out.println("+++ MERGING USES " + current + " FOR " + candBlame);
         for (Capability candSourceCap : getPackageSources(mergeCap, modulePkgMap))
@@ -1024,12 +856,19 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             for (String usedPkgName : candSourceCap.getUses())
             {
                 Packages candSourcePkgs = modulePkgMap.get(candSourceCap.getModule());
-                Blame candSourceBlame = candSourcePkgs.m_exportedPkgs.get(usedPkgName);
-                candSourceBlame = (candSourceBlame != null)
-                    ? candSourceBlame
-                    : candSourcePkgs.m_importedPkgs.get(usedPkgName);
+                Blame candExportedBlame = candSourcePkgs.m_exportedPkgs.get(usedPkgName);
+                List<Blame> candSourceBlames = null;
+                if (candExportedBlame != null)
+                {
+                    candSourceBlames = new ArrayList(1);
+                    candSourceBlames.add(candExportedBlame);
+                }
+                else
+                {
+                    candSourceBlames = candSourcePkgs.m_importedPkgs.get(usedPkgName);
+                }
 
-                if (candSourceBlame == null)
+                if (candSourceBlames == null)
                 {
                     continue;
                 }
@@ -1040,19 +879,22 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     usedCaps = new ArrayList<Blame>();
                     currentPkgs.m_usedPkgs.put(usedPkgName, usedCaps);
                 }
-                if (candSourceBlame.m_reqs != null)
+                for (Blame blame : candSourceBlames)
                 {
-                    List<Requirement> blameReqs2 = new ArrayList(blameReqs);
-                    blameReqs2.add(candSourceBlame.m_reqs.get(candSourceBlame.m_reqs.size() - 1));
-                    usedCaps.add(new Blame(candSourceBlame.m_cap, blameReqs2));
-                    mergeUses(current, currentPkgs, candSourceBlame.m_cap, blameReqs2,
-                        modulePkgMap, candidateMap, cycleMap);
-                }
-                else
-                {
-                    usedCaps.add(new Blame(candSourceBlame.m_cap, blameReqs));
-                    mergeUses(current, currentPkgs, candSourceBlame.m_cap, blameReqs,
-                        modulePkgMap, candidateMap, cycleMap);
+                    if (blame.m_reqs != null)
+                    {
+                        List<Requirement> blameReqs2 = new ArrayList(blameReqs);
+                        blameReqs2.add(blame.m_reqs.get(blame.m_reqs.size() - 1));
+                        usedCaps.add(new Blame(blame.m_cap, blameReqs2));
+                            mergeUses(current, currentPkgs, blame.m_cap, blameReqs2,
+                            modulePkgMap, candidateMap, cycleMap);
+                    }
+                    else
+                    {
+                        usedCaps.add(new Blame(blame.m_cap, blameReqs));
+                        mergeUses(current, currentPkgs, blame.m_cap, blameReqs,
+                            modulePkgMap, candidateMap, cycleMap);
+                    }
                 }
             }
         }
@@ -1089,6 +931,57 @@ System.out.println("RE: Candidate not resolveable: " + ex);
 
         Set<Module> checkModules = new HashSet();
 
+        // Check for conflicting imports from fragments.
+        for (Entry<String, List<Blame>> entry : pkgs.m_importedPkgs.entrySet())
+        {
+            if (entry.getValue().size() > 1)
+            {
+                Blame sourceBlame = null;
+                for (Blame blame : entry.getValue())
+                {
+                    if (sourceBlame == null)
+                    {
+                        sourceBlame = blame;
+                    }
+                    else if (!sourceBlame.m_cap.equals(blame.m_cap))
+                    {
+                        // Try to permutate the conflicting requirement.
+                        Requirement req = blame.m_reqs.get(0);
+                        Set<Capability> candidates = candidateMap.get(req);
+                        if (candidates.size() > 1)
+                        {
+                            Map<Requirement, Set<Capability>> importPerm =
+                                copyCandidateMap(candidateMap);
+                            candidates = importPerm.get(req);
+                            Iterator it = candidates.iterator();
+                            it.next();
+                            it.remove();
+                            m_importPermutations.add(importPerm);
+                        }
+                        // Try to permutate the source requirement.
+                        req = sourceBlame.m_reqs.get(0);
+                        candidates = candidateMap.get(req);
+                        if (candidates.size() > 1)
+                        {
+                            Map<Requirement, Set<Capability>> importPerm =
+                                copyCandidateMap(candidateMap);
+                            candidates = importPerm.get(req);
+                            Iterator it = candidates.iterator();
+                            it.next();
+                            it.remove();
+                            m_importPermutations.add(importPerm);
+                        }
+                        throw new ResolveException(
+                            "Constraint violation for package '"
+                            + entry.getKey() + "' when resolving module "
+                            + module + " between an imported constraint "
+                            + sourceBlame + " and an additional imported constraint "
+                            + blame, module, blame.m_reqs.get(0));
+                    }
+                }
+            }
+        }
+
         for (Entry<String, Blame> entry : pkgs.m_exportedPkgs.entrySet())
         {
             String pkgName = entry.getKey();
@@ -1106,7 +999,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     rethrow = (rethrow != null)
                         ? rethrow
                         : new ResolveException(
-                            "3Constraint violation for package '"
+                            "Constraint violation for package '"
                             + pkgName + "' when resolving module "
                             + module + " between existing exported constraint "
                             + entry.getValue() + " and uses constraint "
@@ -1139,99 +1032,100 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         }
 
         // Check if there are any conflicts with imported packages.
-        for (Entry<String, Blame> entry : pkgs.m_importedPkgs.entrySet())
+        for (Entry<String, List<Blame>> entry : pkgs.m_importedPkgs.entrySet())
         {
-            if (!module.equals(entry.getValue().m_cap.getModule()))
+            for (Blame importBlame : entry.getValue())
             {
-                checkModules.add(entry.getValue().m_cap.getModule());
-            }
-
-            String pkgName = entry.getKey();
-            if (!pkgs.m_usedPkgs.containsKey(pkgName))
-            {
-                continue;
-            }
-            for (Blame blame : pkgs.m_usedPkgs.get(pkgName))
-            {
-                if (!isCompatible(entry.getValue().m_cap, blame.m_cap, modulePkgMap))
+                if (!module.equals(importBlame.m_cap.getModule()))
                 {
-                    // Create a candidate permutation that eliminates any candidates
-                    // that conflict with existing selected candidates.
-                    copyConflict = (copyConflict != null)
-                        ? copyConflict
-                        : copyCandidateMap(candidateMap);
-                    rethrow = (rethrow != null)
-                        ? rethrow
-                        : new ResolveException(
-                            "4Constraint violation for package '"
-                            + pkgName + "' when resolving module "
-                            + module + " between existing imported constraint "
-                            + entry.getValue() + " and uses constraint "
-                            + blame, null, null);
+                    checkModules.add(importBlame.m_cap.getModule());
+                }
 
-                    mutated = (mutated != null)
-                        ? mutated
-                        : new HashSet();
-
-                    for (int reqIdx = blame.m_reqs.size() - 1; reqIdx >= 0; reqIdx--)
+                String pkgName = entry.getKey();
+                if (!pkgs.m_usedPkgs.containsKey(pkgName))
+                {
+                    continue;
+                }
+                for (Blame usedBlame : pkgs.m_usedPkgs.get(pkgName))
+                {
+                    if (!isCompatible(importBlame.m_cap, usedBlame.m_cap, modulePkgMap))
                     {
-                        Requirement req = blame.m_reqs.get(reqIdx);
+                        // Create a candidate permutation that eliminates any candidates
+                        // that conflict with existing selected candidates.
+                        copyConflict = (copyConflict != null)
+                            ? copyConflict
+                            : copyCandidateMap(candidateMap);
+                        rethrow = (rethrow != null)
+                            ? rethrow
+                            : new ResolveException(
+                                "Constraint violation for package '"
+                                + pkgName + "' when resolving module "
+                                + module + " between existing imported constraint "
+                                + importBlame + " and uses constraint "
+                                + usedBlame, null, null);
 
-                        // If we've already permutated this requirement in another
-                        // uses constraint, don't permutate it again just continue
-                        // with the next uses constraint.
-                        if (mutated.contains(req))
+                        mutated = (mutated != null)
+                            ? mutated
+                            : new HashSet();
+
+                        for (int reqIdx = usedBlame.m_reqs.size() - 1; reqIdx >= 0; reqIdx--)
                         {
-                            break;
+                            Requirement req = usedBlame.m_reqs.get(reqIdx);
+
+                            // If we've already permutated this requirement in another
+                            // uses constraint, don't permutate it again just continue
+                            // with the next uses constraint.
+                            if (mutated.contains(req))
+                            {
+                                break;
+                            }
+
+                            // See if we can permutate the candidates for blamed
+                            // requirement; there may be no candidates if the module
+                            // associated with the requirement is already resolved.
+                            Set<Capability> candidates = copyConflict.get(req);
+                            if ((candidates != null) && (candidates.size() > 1))
+                            {
+                                mutated.add(req);
+                                Iterator it = candidates.iterator();
+                                it.next();
+                                it.remove();
+                                // Continue with the next uses constraint.
+                                break;
+                            }
                         }
+                    }
+                }
 
-                        // See if we can permutate the candidates for blamed
-                        // requirement; there may be no candidates if the module
-                        // associated with the requirement is already resolved.
-                        Set<Capability> candidates = copyConflict.get(req);
-                        if ((candidates != null) && (candidates.size() > 1))
+                if (rethrow != null)
+                {
+                    // If we couldn't permutate the uses constraints,
+                    // then try to permutate the import.
+// TODO: FELIX3 - Maybe we will push too many permutations this way, since
+//       we will push one on each level as we move down.
+                    Requirement req = importBlame.m_reqs.get(0);
+                    if (!mutated.contains(req))
+                    {
+                        Set<Capability> candidates = candidateMap.get(req);
+                        if (candidates.size() > 1)
                         {
-                            mutated.add(req);
+                            Map<Requirement, Set<Capability>> importPerm =
+                                copyCandidateMap(candidateMap);
+                            candidates = importPerm.get(req);
                             Iterator it = candidates.iterator();
                             it.next();
                             it.remove();
-                            // Continue with the next uses constraint.
-                            break;
+                            m_importPermutations.add(importPerm);
                         }
                     }
-                }
-            }
 
-            if (rethrow != null)
-            {
-                // If we couldn't permutate the uses constraints,
-                // then try to permutate the import.
-// TODO: FELIX3 - Maybe we will push too many permutations this way, since
-//       we will push one on each level as we move down.
-                Requirement req = entry.getValue().m_reqs.get(0);
-                if (!mutated.contains(req))
-                {
-                    Set<Capability> candidates = candidateMap.get(req);
-                    if (candidates.size() > 1)
+                    if (mutated.size() > 0)
                     {
-                        Map<Requirement, Set<Capability>> importPerm =
-                            copyCandidateMap(candidateMap);
-                        candidates = importPerm.get(req);
-                        Iterator it = candidates.iterator();
-                        it.next();
-                        it.remove();
-System.out.println("+++ ADDING IMPORT PERM " + req);
-                        m_importPermutations.add(importPerm);
+                        m_usesPermutations.add(copyConflict);
                     }
-                }
 
-                if (mutated.size() > 0)
-                {
-System.out.println("+++ ADDING CONFLICT PERM " + mutated);
-                    m_usesPermutations.add(copyConflict);
+                    throw rethrow;
                 }
-
-                throw rethrow;
             }
         }
 
@@ -1257,7 +1151,6 @@ System.out.println("+++ ADDING CONFLICT PERM " + mutated);
             m_invokeCounts.put(methodName, count);
         }
 
-System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.getSymbolicName());
         Set<Module> invalidated = new HashSet();
 
         for (Requirement req : invalid.getRequirements())
@@ -1278,18 +1171,11 @@ System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.
             for (Requirement req : reqs)
             {
                 Set<Capability> candidates = candidateMap.get(req);
-                if (candidates != null)
+                candidates.remove(cap);
+                if (candidates.size() == 0)
                 {
-                    candidates.remove(cap);
-                    if (candidates.size() == 0)
-                    {
-                        candidateMap.remove(req);
-                        invalidated.add(req.getModule());
-                    }
-                }
-                else
-                {
-                    System.out.println("+++ INVALIDATED REQ WITH NULL CAPS: " + req);
+                    candidateMap.remove(req);
+                    invalidated.add(req.getModule());
                 }
             }
         }
@@ -1577,30 +1463,37 @@ System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.
         List<Wire> packageWires = new ArrayList<Wire>();
 
         Packages pkgs = modulePkgMap.get(module);
-        for (Entry<String, Blame> entry : pkgs.m_importedPkgs.entrySet())
+        for (Entry<String, List<Blame>> entry : pkgs.m_importedPkgs.entrySet())
         {
-            // Ignore modules that import themselves.
-            if (!module.equals(entry.getValue().m_cap.getModule())
-                && entry.getValue().m_cap.getAttribute(
-                    Capability.PACKAGE_ATTR).getValue().equals(pkgName))
+            for (Blame blame : entry.getValue())
             {
-                if (!entry.getValue().m_cap.getModule().isResolved())
+                // Ignore modules that import themselves.
+                if (!module.equals(blame.m_cap.getModule())
+                    && blame.m_cap.getAttribute(
+                        Capability.PACKAGE_ATTR).getValue().equals(pkgName))
                 {
-                    populateWireMap(entry.getValue().m_cap.getModule(), modulePkgMap, wireMap,
-                        candidateMap);
-                }
+                    if (!blame.m_cap.getModule().isResolved())
+                    {
+                        populateWireMap(blame.m_cap.getModule(), modulePkgMap, wireMap,
+                            candidateMap);
+                    }
 
-                List<Attribute> attrs = new ArrayList();
-                attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
-                packageWires.add(
-                    new WireImpl(
-                        module,
-                        // We need an unique requirement here or else subsequent
-                        // dynamic imports for the same dynamic requirement will
-                        // conflict with previous ones.
-                        new RequirementImpl(module, Capability.PACKAGE_NAMESPACE, new ArrayList(0), attrs),
-                        entry.getValue().m_cap.getModule(),
-                        entry.getValue().m_cap));
+                    List<Attribute> attrs = new ArrayList();
+                    attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
+                    packageWires.add(
+                        new WireImpl(
+                            module,
+                            // We need an unique requirement here or else subsequent
+                            // dynamic imports for the same dynamic requirement will
+                            // conflict with previous ones.
+                            new RequirementImpl(
+                                module,
+                                Capability.PACKAGE_NAMESPACE,
+                                new ArrayList(0),
+                                attrs),
+                            blame.m_cap.getModule(),
+                            blame.m_cap));
+                }
             }
         }
 
@@ -1609,10 +1502,72 @@ System.out.println("+++ REMOVING INVALID CANDIDATE: " + invalid + ":" + invalid.
         return wireMap;
     }
 
+    private static void dumpCandidateMap(
+        ResolverState state, Map<Requirement, Set<Capability>> candidateMap)
+    {
+        System.out.println("=== BEGIN CANDIDATE MAP ===");
+        for (Module module : ((FelixResolverState) state).getModules())
+        {
+            System.out.println("  " + module
+                 + " (" + (module.isResolved() ? "RESOLVED)" : "UNRESOLVED)"));
+            for (Requirement req : module.getRequirements())
+            {
+                Set<Capability> candidates = candidateMap.get(req);
+                if ((candidates != null) && (candidates.size() > 0))
+                {
+                        System.out.println("    " + req + ": " + candidates);
+                }
+            }
+            for (Requirement req : module.getDynamicRequirements())
+            {
+                Set<Capability> candidates = candidateMap.get(req);
+                if ((candidates != null) && (candidates.size() > 0))
+                {
+                    System.out.println("    " + req + ": " + candidates);
+                }
+            }
+        }
+        System.out.println("=== END CANDIDATE MAP ===");
+    }
+
+    private static void dumpModulePkgMap(Map<Module, Packages> modulePkgMap)
+    {
+        System.out.println("+++MODULE PKG MAP+++");
+        for (Entry<Module, Packages> entry : modulePkgMap.entrySet())
+        {
+            dumpModulePkgs(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private static void dumpModulePkgs(Module module, Packages packages)
+    {
+        System.out.println(module + " (" + (module.isResolved() ? "RESOLVED)" : "UNRESOLVED)"));
+        System.out.println("  EXPORTED");
+        for (Entry<String, Blame> entry : packages.m_exportedPkgs.entrySet())
+        {
+            System.out.println("    " + entry.getKey() + " - " + entry.getValue());
+        }
+        System.out.println("  IMPORTED");
+        for (Entry<String, List<Blame>> entry : packages.m_importedPkgs.entrySet())
+        {
+            System.out.println("    " + entry.getKey() + " - " + entry.getValue());
+        }
+        System.out.println("  REQUIRED");
+        for (Entry<String, List<Blame>> entry : packages.m_requiredPkgs.entrySet())
+        {
+            System.out.println("    " + entry.getKey() + " - " + entry.getValue());
+        }
+        System.out.println("  USED");
+        for (Entry<String, List<Blame>> entry : packages.m_usedPkgs.entrySet())
+        {
+            System.out.println("    " + entry.getKey() + " - " + entry.getValue());
+        }
+    }
+
     private static class Packages
     {
         public final Map<String, Blame> m_exportedPkgs = new HashMap();
-        public final Map<String, Blame> m_importedPkgs = new HashMap();
+        public final Map<String, List<Blame>> m_importedPkgs = new HashMap();
         public final Map<String, List<Blame>> m_requiredPkgs = new HashMap();
         public final Map<String, List<Blame>> m_usedPkgs = new HashMap();
 
