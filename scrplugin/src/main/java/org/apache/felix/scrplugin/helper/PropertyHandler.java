@@ -114,15 +114,7 @@ public class PropertyHandler {
 
         // property is private if explicitly marked or a well known
         // service property such as service.pid
-        final boolean isPrivate = SCRDescriptorGenerator.getBoolean(tag,
-            Constants.PROPERTY_PRIVATE, false)
-            || name.equals(org.osgi.framework.Constants.SERVICE_PID)
-            || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
-            || name.equals(org.osgi.framework.Constants.SERVICE_ID)
-            || name.equals(org.osgi.framework.Constants.SERVICE_RANKING)
-            || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
-            || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
-            || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
+        final boolean isPrivate = isPrivate(name, tag);
 
         // if this is an abstract component we store the extra info in the property
         if ( component.isAbstract() ) {
@@ -189,6 +181,22 @@ public class PropertyHandler {
         }
 
         component.addProperty(prop);
+    }
+    
+    private boolean isPrivate(String name, JavaTag tag) {
+        if (name.equals(org.osgi.framework.Constants.SERVICE_RANKING)) {
+            return SCRDescriptorGenerator.getBoolean(tag,
+                Constants.PROPERTY_PRIVATE, true);
+        } else {
+            return SCRDescriptorGenerator.getBoolean(tag,
+                Constants.PROPERTY_PRIVATE, false)
+                || name.equals(org.osgi.framework.Constants.SERVICE_PID)
+                || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
+                || name.equals(org.osgi.framework.Constants.SERVICE_ID)
+                || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
+                || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
+                || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
+        }
     }
 
     /**
