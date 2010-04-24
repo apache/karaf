@@ -48,7 +48,10 @@ public abstract class AbstractDecorator  {
     // callbacks for FactoryConfigurationAdapterImpl
     public void updated(String pid, Dictionary properties) throws ConfigurationException {
         try {
-            Service service = (Service) m_services.get(pid);
+            Service service;
+            synchronized (this) {
+                service = (Service) m_services.get(pid);
+            }
             if (service == null) { 
                 service = createService(new Object[] { properties });
                 synchronized (this) {
