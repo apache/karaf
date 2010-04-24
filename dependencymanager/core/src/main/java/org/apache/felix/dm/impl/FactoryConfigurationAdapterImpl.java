@@ -36,7 +36,7 @@ public class FactoryConfigurationAdapterImpl extends AbstractDecorator implement
     // The Adapter Service (we need to inherit all its dependencies).
     private volatile Service m_service;
 
-    // Our injected dependency manager (we will register CM configuration as DM services)
+    // Our injected dependency manager
     protected volatile DependencyManager m_dm;
     
     // Our adapter implementation (either a Class, or an Object instance)
