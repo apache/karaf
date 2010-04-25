@@ -49,7 +49,7 @@
     <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
-      <version>0.0.394</version>
+      <version>0.0.401</version>
     </dependency>
 
     <dependency>
