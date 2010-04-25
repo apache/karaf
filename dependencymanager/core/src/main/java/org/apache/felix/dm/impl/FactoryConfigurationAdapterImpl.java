@@ -25,7 +25,10 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.dependencies.PropertyMetaData;
+import org.apache.felix.dm.impl.metatype.MetaTypeProviderImpl;
 import org.apache.felix.dm.service.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
@@ -34,29 +37,29 @@ import org.osgi.service.cm.ManagedServiceFactory;
 public class FactoryConfigurationAdapterImpl extends AbstractDecorator implements ManagedServiceFactory
 {
     // The Adapter Service (we need to inherit all its dependencies).
-    private volatile Service m_service;
+    protected volatile Service m_service;
 
     // Our injected dependency manager
     protected volatile DependencyManager m_dm;
     
     // Our adapter implementation (either a Class, or an Object instance)
-    private final Object m_adapterImplementation;
+    protected final Object m_adapterImplementation;
 
     // Our adapter interface(s) (either null, a String, or a String array)
-    private final Object m_adapterInterface;
+    protected final Object m_adapterInterface;
     
     // Our adapter service properties (may be null)
-    private final Dictionary m_adapterProperties;
+    protected final Dictionary m_adapterProperties;
     
     // Our Managed Service Factory PID
-    private String m_factoryPid;
+    protected String m_factoryPid;
     
     // The adapter "update" method used to provide the configuration
-    private String m_update;
+    protected String m_update;
 
     // Tells if the CM config must be propagated along with the adapter service properties
-    private boolean m_propagate;
-    
+    protected boolean m_propagate;
+
     /**
      * Creates a new CM factory configuration adapter.
      * 
