@@ -42,9 +42,9 @@ public @interface ResourceAdapterService
     String filter();
 
     /**
-     * The interface to use when registering adapters
+     * The interface(s) to use when registering adapters
      */
-    Class<?> service() default Object.class;
+    Class<?>[] service() default {};
 
     /**
      * Additional properties to use with the adapter service registration

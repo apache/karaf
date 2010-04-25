@@ -37,10 +37,10 @@ import java.lang.annotation.Target;
 public @interface AdapterService
 {
     /**
-     * Returns the adapter service interface . By default, the directly implemented interface is used.
-     * @return The service interface to apply the adapter to.
+     * Returns the adapter service interface(s). By default, the directly implemented interface(s) is (are) used.
+     * @return The service interface(s) provided by this adapter.
      */
-    Class<?> adapterService() default Object.class;
+    Class<?>[] adapterService() default {};
 
     /**
      * The adapter service properites. They will be added to the adapted service properties.

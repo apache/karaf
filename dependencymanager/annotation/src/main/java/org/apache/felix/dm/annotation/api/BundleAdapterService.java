@@ -49,10 +49,10 @@ public @Retention(RetentionPolicy.CLASS)
     int stateMask() default Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE;
     
     /**
-     * The interface to use when registering adapters. By default, the interface directly implemented
-     * by the annotated class is used.
+     * The interface(s) to use when registering adapters. By default, the interface(s) directly implemented
+     * by the annotated class is (are) used.
      */
-    Class<?> service() default Object.class;
+    Class<?>[] service() default {};
     
     /**
      * Additional properties to use with the service registration

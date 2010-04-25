@@ -659,7 +659,6 @@ public class AnnotationCollector extends ClassDataCollector
             info.addParam(Params.service, m_interfaces[0]);
         } else
         {
-            checkClassImplements(annotation, Params.service);
             info.addClassParam(annotation, Params.service, null);
         }
     }
@@ -694,27 +693,7 @@ public class AnnotationCollector extends ClassDataCollector
         parseParameters(annotation, Params.adapterProperties, info);
 
         // Parse the optional adapter service (use directly implemented interface by default).
-        Object adapterService = annotation.get(Params.adapterService.toString());
-        if (adapterService == null) {
-            if (m_interfaces == null)
-            {
-                throw new IllegalStateException("Invalid AdapterService annotation: " +
-                    "the adapterService attribute has not been set and the class " + m_className + 
-                    " does not implement any interfaces");
-            }
-            if (m_interfaces.length != 1) 
-            {
-                throw new IllegalStateException("Invalid AdapterService annotation: " +
-                    "the adapterService attribute has not been set and the class " + m_className +
-                    " implements more than one interface");
-            }
-            
-            info.addParam(Params.adapterService, m_interfaces[0]);
-        } else 
-        {
-            checkClassImplements(annotation, Params.adapterService);
-            info.addClassParam(annotation, Params.adapterService, null);
-        }
+        info.addClassParam(annotation, Params.adapterService, m_interfaces);
     }
 
     /**
@@ -747,27 +726,7 @@ public class AnnotationCollector extends ClassDataCollector
         parseParameters(annotation, Params.properties, info);
 
         // Parse the optional adapter service (use directly implemented interface by default).
-        Object service = annotation.get(Params.service.toString());
-        if (service == null) {
-            if (m_interfaces == null)
-            {
-                throw new IllegalStateException("Invalid BundleAdapterService annotation: " +
-                    "the service attribute has not been set and the class " + m_className + 
-                    " does not implement any interfaces");
-            }
-            if (m_interfaces.length != 1) 
-            {
-                throw new IllegalStateException("Invalid AdapterService annotation: " +
-                    "the service attribute has not been set and the class " + m_className +
-                    " implements more than one interface");
-            }
-            
-            info.addParam(Params.service, m_interfaces[0]);
-        } else 
-        {
-            checkClassImplements(annotation, Params.service);
-            info.addClassParam(annotation, Params.service, null);
-        }
+        info.addClassParam(annotation, Params.service, m_interfaces);
         
         // Parse propagate attribute
         info.addParam(annotation, Params.propagate, Boolean.FALSE);
@@ -800,27 +759,7 @@ public class AnnotationCollector extends ClassDataCollector
         parseParameters(annotation, Params.properties, info);
 
         // Parse the optional adapter service (use directly implemented interface by default).
-        Object service = annotation.get(Params.service.toString());
-        if (service == null) {
-            if (m_interfaces == null)
-            {
-                throw new IllegalStateException("Invalid ResourceAdapterService annotation: " +
-                    "the service attribute has not been set and the class " + m_className + 
-                    " does not implement any interfaces");
-            }
-            if (m_interfaces.length != 1) 
-            {
-                throw new IllegalStateException("Invalid ResourceAdapterService annotation: " +
-                    "the service attribute has not been set and the class " + m_className +
-                    " implements more than one interface");
-            }
-            
-            info.addParam(Params.service, m_interfaces[0]);
-        } else 
-        {
-            checkClassImplements(annotation, Params.service);
-            info.addClassParam(annotation, Params.service, null);
-        }
+        info.addClassParam(annotation, Params.service, m_interfaces);
         
         // Parse propagate attribute
         info.addParam(annotation, Params.propagate, Boolean.FALSE);
@@ -865,32 +804,6 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.propagate, null);        
     }
 
-    /**
-     * Checks if an annotation attribute references an implemented interface. 
-     * @param annotation the parsed annotation
-     * @param attribute an annotation attribute that references an interface this class must
-     * implement.
-     */
-    private void checkClassImplements(Annotation annotation, Params attribute)
-    {
-        String iface = annotation.get(attribute.toString());
-        iface = parseClass(iface, m_classPattern, 1);
-        
-        if (m_interfaces != null)
-        {
-            for (String implemented : m_interfaces)
-            {
-                if (implemented.equals(iface))
-                {
-                    return;
-                }
-            }
-        }
-
-        throw new IllegalArgumentException("Class " + m_className + " does not implement the "
-            + iface + " interface.");
-    }
-    
     /**
      * Parses a Param annotation (which represents a list of key-value pari).
      * @param annotation the annotation where the Param annotation is defined
