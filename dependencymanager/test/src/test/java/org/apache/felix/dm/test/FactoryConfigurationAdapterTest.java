@@ -82,7 +82,7 @@ public class FactoryConfigurationAdapterTest extends Base
             .setRequired(true)
             .setAutoConfig(true));
         
-        // Create extra adapter service dependency which our adapter depends on.
+        // Create extra adapter service dependency upon which our adapter depends on.
         Service s3 = m.createService()
             .setImplementation(new AdapterExtraDependency())
             .setInterface(AdapterExtraDependency.class.getName(), null);
@@ -185,6 +185,8 @@ public class FactoryConfigurationAdapterTest extends Base
                 m_ensure.step(9);
                 Assert.assertEquals(true, "value2".equals(settings.get("key")));
                 m_ensure.step(10);
+            } else {
+                Assert.fail("wrong call to updated method: count=" + updateCount);
             }
         }
 
