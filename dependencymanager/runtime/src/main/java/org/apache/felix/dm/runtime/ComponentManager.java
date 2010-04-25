@@ -364,12 +364,12 @@ public class ComponentManager implements SynchronousBundleListener
         throws ClassNotFoundException
     {
         Class<?> adapterImpl = b.loadClass(parser.getString(DescriptorParam.impl));
-        Class<?> adapterService = b.loadClass(parser.getString(DescriptorParam.adapterService));
+        String[] adapterService = parser.getStrings(DescriptorParam.adapterService, null);
         Dictionary<String, String> adapterProperties = parser.getDictionary(DescriptorParam.adapterProperties, null);
         Class<?> adapteeService = b.loadClass(parser.getString(DescriptorParam.adapteeService));
         String adapteeFilter = parser.getString(DescriptorParam.adapteeFilter, null);
      
-        Service service = dm.createAdapterService(adapteeService, adapteeFilter, adapterService.getName(), adapterImpl, adapterProperties);
+        Service service = dm.createAdapterService(adapteeService, adapteeFilter, adapterService, adapterImpl, adapterProperties);
         setCommonServiceParams(service, parser);
         return service;
     }
@@ -387,7 +387,7 @@ public class ComponentManager implements SynchronousBundleListener
         int stateMask = parser.getInt(DescriptorParam.stateMask, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
         String filter = parser.getString(DescriptorParam.filter, null);
         Class<?> adapterImpl = b.loadClass(parser.getString(DescriptorParam.impl));
-        String service = parser.getString(DescriptorParam.service);
+        String service = parser.getString(DescriptorParam.service, null);
         Dictionary<String, String> properties = parser.getDictionary(DescriptorParam.properties, null);
         boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
         Service srv = dm.createBundleAdapterService(stateMask, filter, adapterImpl, service, properties, propagate);  
@@ -407,11 +407,10 @@ public class ComponentManager implements SynchronousBundleListener
     {
         String filter = parser.getString(DescriptorParam.filter, null);
         Class<?> impl = b.loadClass(parser.getString(DescriptorParam.impl));
-        String service = parser.getString(DescriptorParam.service);
-        Class<?> serviceClass = b.loadClass(service);
+        String service = parser.getString(DescriptorParam.service, null);
         Dictionary<String, String> properties = parser.getDictionary(DescriptorParam.properties, null);
         boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
-        Service srv = dm.createResourceAdapterService(filter, null, serviceClass.getName(), properties, impl, propagate);  
+        Service srv = dm.createResourceAdapterService(filter, null, service, properties, impl, propagate);  
         setCommonServiceParams(srv, parser);
         return srv;
     }
