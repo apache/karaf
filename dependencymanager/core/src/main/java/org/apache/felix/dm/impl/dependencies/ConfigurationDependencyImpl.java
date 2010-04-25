@@ -353,7 +353,7 @@ public class ConfigurationDependencyImpl extends DependencyBase implements Confi
     
     private synchronized void createMetaTypeImpl() {
         if (m_metaType == null) {
-            m_metaType = new MetaTypeProviderImpl(this);
+            m_metaType = new MetaTypeProviderImpl(getName(), getBundleContext(), getLogger(), this, null);
         }
     }
 }
