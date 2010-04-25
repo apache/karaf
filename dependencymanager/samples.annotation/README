@@ -1,0 +1,45 @@
+This sample illustrates the usage of the new DependencyManager annotations.
+
+Sample description:
+
+  This sample shows a basic "SpellChecker" application which provides a Felix "spellcheck" shell
+  command. The SpellChecker class is a Felix Shell command (it provides the "Command" service),
+  which accepts a string as parameter. So, when you type a string, the command just says if the
+  specified string has been found from one of its injected dictionaries. The SpellChecker class has a
+  required/multiple dependency over any available DictionaryService. Currently, there is one
+  "EnglishDictionary" which implements the DictionaryService. The EnglishDictionary service uses
+  MetaType, allowing to configure english words through ConfigAdmin and WebConsole. 
+  So, before testing, you first have to go to webconsole Configuration panel, and specify some
+  english words in the configuration for the "English Dictionary" PID. Then, go to the felix shell,
+  and you will then see the "spellcheck" command (when typing "help").
+  Notice that in the sample, you will also find an Aspect Service (DictionaryAspect.java), which
+  decorates the EnglishDictionary service, by adding an "aspect" word in the dictionary.
+
+How to test:
+
+  1) Install the following bundles:
+
+     org.apache.felix.configadmin
+     org.apache.felix.metatype
+     org.apache.felix.http.jetty
+     org.apache.felix.webconsole
+
+     org.apache.felix.dependencymanager
+     org.apache.felix.dependencymanager.shell
+     org.apache.felix.dependencymanager.runtime
+     org.apache.felix.dependencymanager.samples.annotation
+
+  2) Start felix
+  3) Go to web console, in the Configuration pannel
+  4) Edit the "English Dictionary" Configuration, add some words, then click on "save".
+     At this point, the "EnglishDictionary" service will be enabled and the SpellCheck component
+     will be injected with it. Then you should see the "spellcheck" command, when typing "help" on the shell.
+
+  5) Just type "spellcheck hello", and the command should reply a fantastic message, like "word hello is correct".
+
+
+
+
+
+  
+     
