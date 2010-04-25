@@ -34,10 +34,11 @@ import java.util.TreeSet;
 
 import org.apache.felix.dm.dependencies.PropertyMetaData;
 import org.apache.felix.dm.impl.Logger;
-import org.apache.felix.dm.impl.dependencies.ConfigurationDependencyImpl;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeProvider;
 import org.osgi.service.metatype.ObjectClassDefinition;
@@ -47,25 +48,31 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * a specific ManagedService which also implements the MetaTypeProvider interface. This interface
  * allows the MetaTypeService to retrieve our properties metadata, which will then be handled by webconsole.
  */
-public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService
+public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService, ManagedServiceFactory
 {
-    private ConfigurationDependencyImpl m_configDependency;
+    private ManagedService m_managedServiceDelegate;
+    private ManagedServiceFactory m_managedServiceFactoryDelegate;
     private List m_propertiesMetaData = new ArrayList();
     private String m_description;
     private String m_heading;
     private String m_localization;
     private Map m_localesProperties = new HashMap();
     private Logger m_logger;
+    private BundleContext m_bctx;
+    private String m_pid;
 
-    public MetaTypeProviderImpl(ConfigurationDependencyImpl configurationDependency)
+    public MetaTypeProviderImpl(String pid, BundleContext ctx, Logger logger, ManagedService msDelegate, ManagedServiceFactory msfDelegate)
     {
-        m_configDependency = configurationDependency;
-        m_logger = configurationDependency.getLogger();
+        m_pid = pid;
+        m_bctx = ctx;
+        m_logger = logger;
+        m_managedServiceDelegate = msDelegate;
+        m_managedServiceFactoryDelegate = msfDelegate;
         // Set the default localization file base name (see core specification, in section Localization on page 68).
         // By default, this file can be stored in OSGI-INF/l10n/bundle.properties (and corresponding localized version
         // in OSGI-INF/l10n/bundle_en_GB_welsh.properties,  OSGI-INF/l10n/bundle_en_GB.properties, etc ...
         // This default localization property file name can be overriden using the PropertyMetaData.setLocalization method.
-        m_localization = (String) m_configDependency.getBundleContext().getBundle().getHeaders().get(
+        m_localization = (String) m_bctx.getBundle().getHeaders().get(
             Constants.BUNDLE_LOCALIZATION);
         if (m_localization == null)
         {
@@ -131,7 +138,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService
         int lastSlash = m_localization.lastIndexOf("/");
         String path = (lastSlash == -1) ? "/" : ("/" + m_localization.substring(0, lastSlash - 1));
         String base = (lastSlash == -1) ? m_localization : m_localization.substring(lastSlash + 1);
-        Enumeration e = m_configDependency.getBundleContext().getBundle().findEntries(path,
+        Enumeration e = m_bctx.getBundle().findEntries(path,
             base + "*.properties", false);
         if (e == null) {
             return null;
@@ -168,21 +175,20 @@ public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService
         try
         {
             // Check if the id matches our PID
-            if (!id.equals(m_configDependency.getName()))
+            if (!id.equals(m_pid))
             {
-                m_configDependency.getLogger().log(LogService.LOG_ERROR,
-                    "id " + id + " does not match pid " + m_configDependency.getName());
+                m_logger.log(LogService.LOG_ERROR, "id " + id + " does not match pid " + m_pid);
                 return null;
             }
 
             Properties localeProperties = getLocaleProperties(locale);
-            return new ObjectClassDefinitionImpl(m_configDependency.getName(), m_heading,
+            return new ObjectClassDefinitionImpl(m_pid, m_heading,
                 m_description, m_propertiesMetaData, new Resource(localeProperties));
         }
 
         catch (Throwable t)
         {
-            m_configDependency.getLogger().log(
+            m_logger.log(
                 Logger.LOG_ERROR,
                 "Unexpected exception while geting ObjectClassDefinition for " + id + " (locale="
                     + locale + ")", t);
@@ -196,7 +202,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService
      */
     public void updated(Dictionary properties) throws ConfigurationException
     {
-        m_configDependency.updated(properties);
+        m_managedServiceDelegate.updated(properties);
     }
 
     /**
@@ -212,7 +218,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService
         if (properties == null)
         {
             properties = new Properties();
-            URL url = m_configDependency.getBundleContext().getBundle().getEntry(
+            URL url = m_bctx.getBundle().getEntry(
                 m_localization + ".properties");
             if (url != null)
             {
@@ -224,7 +230,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService
             while (tok.hasMoreTokens())
             {
                 path += "_" + tok.nextToken();
-                url = m_configDependency.getBundleContext().getBundle().getEntry(path + ".properties");
+                url = m_bctx.getBundle().getEntry(path + ".properties");
                 if (url != null)
                 {
                     properties = new Properties(properties);
@@ -265,5 +271,22 @@ public class MetaTypeProviderImpl implements MetaTypeProvider, ManagedService
                 }
             }
         }
+    }
+
+    // ManagedServiceFactory implementation
+    
+    public void deleted(String pid)
+    {
+        m_managedServiceFactoryDelegate.deleted(pid);
+    }
+
+    public String getName()
+    {
+        return m_pid;
+    }
+
+    public void updated(String pid, Dictionary properties) throws ConfigurationException
+    {
+        m_managedServiceFactoryDelegate.updated(pid, properties);
     }
 }
