@@ -29,11 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
+import org.apache.felix.framework.util.StringComparator;
 
 public class CapabilitySet
 {
     private final Map<String, Map<Object, Set<Capability>>> m_indices =
-        new HashMap<String, Map<Object, Set<Capability>>>();
+        new TreeMap<String, Map<Object, Set<Capability>>>(new StringComparator(false));
     private final Set<Capability> m_capList = new HashSet<Capability>();
 
     public CapabilitySet(List<String> indexProps)
