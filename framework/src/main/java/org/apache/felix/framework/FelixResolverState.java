@@ -229,54 +229,61 @@ public class FelixResolverState implements Resolver.ResolverState
     private void addFragment(Module fragment)
     {
 // TODO: FRAGMENT - This should check to make sure that the host allows fragments.
-        Module bestFragment = indexModule(m_fragmentMap, fragment);
+        indexModule(m_fragmentMap, fragment);
 
-        // If the newly added fragment is the highest version for
-        // its given symbolic name, then try to merge it to any
-        // matching unresolved hosts and remove the previous highest
-        // version of the fragment.
-        if (bestFragment == fragment)
+        // Loop through all matching hosts seeing if we should attach the
+        // new fragment. We should attach the new fragment if the existing
+        // unresolved host doesn't currently have a fragment of the same
+        // symbolic name attached to it or if the currently attached fragment
+        // is a lower version.
+        Set<Capability> hostCaps = getMatchingHostCapabilities(fragment);
+        for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
         {
+            Module host = it.next().getModule();
 
-            // If we have any matching hosts, then merge the new fragment while
-            // removing any older version of the new fragment. Also remove host's
-            // existing capabilities from the package index and reindex its new
-            // ones after attaching the fragment.
-            List matchingHosts = getMatchingHosts(fragment);
-            for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
+            // Get the fragments currently attached to the host so we
+            // can remove the older version of the current fragment, if any.
+            List<Module> fragments = ((ModuleImpl) host).getFragments();
+            Module attachedFragment = null;
+            for (int fragIdx = 0;
+                (fragments != null) && (attachedFragment == null) && (fragIdx < fragments.size());
+                fragIdx++)
             {
-                Module host = ((Capability) matchingHosts.get(hostIdx)).getModule();
-
-                // Get the fragments currently attached to the host so we
-                // can remove the older version of the current fragment, if any.
-                List<Module> fragments = ((ModuleImpl) host).getFragments();
-                List<Module> fragmentList = new ArrayList();
-                for (int fragIdx = 0;
-                    (fragments != null) && (fragIdx < fragments.size());
-                    fragIdx++)
+                if (!fragments.get(fragIdx).getSymbolicName()
+                    .equals(fragment.getSymbolicName()))
                 {
-                    if (!fragments.get(fragIdx).getSymbolicName().equals(
-                        bestFragment.getSymbolicName()))
-                    {
-                        fragmentList.add(fragments.get(fragIdx));
-                    }
+                    attachedFragment = fragments.get(fragIdx);
+                }
+            }
+
+            if ((attachedFragment == null)
+                || (attachedFragment.getVersion().compareTo(fragment.getVersion()) < 0))
+            {
+                // Create a copy of the fragment list and remove the attached
+                // fragment, if necessary.
+                List<Module> newFragments = (fragments == null)
+                    ? new ArrayList()
+                    : new ArrayList(fragments);
+                if (attachedFragment != null)
+                {
+                    newFragments.remove(attachedFragment);
                 }
 
                 // Now add the new fragment in bundle ID order.
                 int index = -1;
                 for (int listIdx = 0;
-                    (index < 0) && (listIdx < fragmentList.size());
+                    (index < 0) && (listIdx < newFragments.size());
                     listIdx++)
                 {
-                    Module f = fragmentList.get(listIdx);
-                    if (bestFragment.getBundle().getBundleId()
+                    Module f = newFragments.get(listIdx);
+                    if (fragment.getBundle().getBundleId()
                         < f.getBundle().getBundleId())
                     {
                         index = listIdx;
                     }
                 }
-                fragmentList.add(
-                    (index < 0) ? fragmentList.size() : index, bestFragment);
+                newFragments.add(
+                    (index < 0) ? newFragments.size() : index, fragment);
 
                 // Remove host's existing exported packages from index.
                 List<Capability> caps = host.getCapabilities();
@@ -292,8 +299,8 @@ public class FelixResolverState implements Resolver.ResolverState
                     }
                 }
 
-                // Attach the fragments to the host.
-                fragments = (fragmentList.size() == 0) ? null : fragmentList;
+                // Attach the new fragments to the host.
+                fragments = (newFragments.size() == 0) ? null : newFragments;
                 try
                 {
                     ((ModuleImpl) host).attachFragments(fragments);
@@ -346,10 +353,10 @@ public class FelixResolverState implements Resolver.ResolverState
             // removing any older version of the new fragment. Also remove host's
             // existing capabilities from the package index and reindex its new
             // ones after attaching the fragment.
-            List matchingHosts = getMatchingHosts(fragment);
-            for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
+            Set<Capability> hostCaps = getMatchingHostCapabilities(fragment);
+            for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
             {
-                Module host = ((Capability) matchingHosts.get(hostIdx)).getModule();
+                Module host = it.next().getModule();
 
                 // Check to see if the removed fragment was actually merged with
                 // the host, since it might not be if it wasn't the highest version.
@@ -420,51 +427,49 @@ public class FelixResolverState implements Resolver.ResolverState
         removeFragment(fragment);
     }
 
-    private List getMatchingHosts(Module fragment)
+    private Set<Capability> getMatchingHostCapabilities(Module fragment)
     {
         // Find the fragment's host requirement.
         Requirement hostReq = getFragmentHostRequirement(fragment);
 
         // Create a list of all matching hosts for this fragment.
-        List matchingHosts = new ArrayList();
         SecurityManager sm = System.getSecurityManager();
         if (sm != null)
         {
-            if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(new BundlePermission(
-                fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
+            if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(
+                new BundlePermission(fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
             {
-                return matchingHosts;
+                return new HashSet();
             }
         }
 
         Set<Capability> hostCaps = m_hostCapSet.match(hostReq.getFilter(), true);
 
-        for (Capability hostCap : hostCaps)
+        for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
         {
+            Capability hostCap = it.next();
+
             // Only look at unresolved hosts, since we don't support
             // dynamic attachment of fragments.
             if (hostCap.getModule().isResolved()
                 || ((BundleImpl) hostCap.getModule().getBundle()).isStale()
                 || ((BundleImpl) hostCap.getModule().getBundle()).isRemovalPending())
             {
-                continue;
+                it.remove();
             }
-
-            if (sm != null)
+            else if (sm != null)
             {
                 if (!((BundleProtectionDomain) hostCap.getModule()
-                        .getSecurityContext()).impliesDirect(
-                            new BundlePermission(hostCap.getModule().getSymbolicName(),
+                    .getSecurityContext()).impliesDirect(
+                        new BundlePermission(hostCap.getModule().getSymbolicName(),
                             BundlePermission.HOST)))
                 {
-                    continue;
+                    it.remove();
                 }
             }
-
-            matchingHosts.add(hostCap);
         }
 
-        return matchingHosts;
+        return hostCaps;
     }
 
     private void addHost(Module host)
@@ -645,11 +650,11 @@ public class FelixResolverState implements Resolver.ResolverState
         Module newRootModule = rootModule;
         if (Util.isFragment(rootModule))
         {
-            List matchingHosts = getMatchingHosts(rootModule);
+            Set<Capability> hostCaps = getMatchingHostCapabilities(rootModule);
             Module currentBestHost = null;
-            for (int hostIdx = 0; hostIdx < matchingHosts.size(); hostIdx++)
+            for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
             {
-                Module host = ((Capability) matchingHosts.get(hostIdx)).getModule();
+                Module host = it.next().getModule();
                 if (currentBestHost == null)
                 {
                     currentBestHost = host;
