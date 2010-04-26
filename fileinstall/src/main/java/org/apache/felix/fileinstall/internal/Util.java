@@ -375,7 +375,9 @@ public class Util
             File f = dirList[i];
             if (f.isDirectory())
             {
-                zipDir(f, zos, path + f.getName() + "/", exclusions);
+                String prefix = path + f.getName() + "/";
+                zos.putNextEntry(new ZipEntry(prefix));
+                zipDir(f, zos, prefix, exclusions);
                 continue;
             }
             String entry = path + f.getName();
