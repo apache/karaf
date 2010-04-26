@@ -20,6 +20,7 @@ package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,7 +108,7 @@ public class Scanner {
         Set/*<File>*/ removed = new HashSet/*<File>*/(storedChecksums.keySet());
         for (int i = 0; i < list.length; i++)
         {
-            File file  = list[i];
+            File file  = canon(list[i]);
             long lastChecksum = lastChecksums.get(file) != null ? ((Long) lastChecksums.get(file)).longValue() : 0;
             long storedChecksum = storedChecksums.get(file) != null ? ((Long) storedChecksums.get(file)).longValue() : 0;
             long newChecksum = checksum(file);
@@ -130,6 +131,18 @@ public class Scanner {
             storedChecksums.remove(file);
         }
         return files;
+    }
+
+    private static File canon(File file)
+    {
+        try
+        {
+            return file.getCanonicalFile();
+        }
+        catch (IOException e)
+        {
+            return file;
+        }
     }
 
     /**
