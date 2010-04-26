@@ -97,7 +97,7 @@ public final class ObrIndex extends AbstractMojo {
             log.info("URL template: " + urlTemplate);
 
             List<File> files = new ArrayList<File>();
-            findAllJars( new File(mavenRepository), files );
+            findAllJars( new File(repo), files );
 
             DataModelHelperImpl dmh = new DataModelHelperImpl();
             RepositoryImpl repository;
