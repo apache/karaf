@@ -250,6 +250,14 @@ public class ResolverImpl implements Resolver
             return null;
         }
 
+        // If the module doesn't have dynamic imports, then just return
+        // immediately.
+        List<Requirement> dynamics = module.getDynamicRequirements();
+        if ((dynamics == null) || (dynamics.size() == 0))
+        {
+            return null;
+        }
+
         // If any of the module exports this package, then we cannot
         // attempt to dynamically import it.
         List<Capability> caps = module.getCapabilities();
@@ -281,7 +289,6 @@ public class ResolverImpl implements Resolver
         Requirement req = new RequirementImpl(
             module, Capability.PACKAGE_NAMESPACE, dirs, attrs);
         Set<Capability> candidates = state.getCandidates(module, req, false);
-        List<Requirement> dynamics = module.getDynamicRequirements();
 
         // First find a dynamic requirement that matches the capabilities.
         Requirement dynReq = null;
