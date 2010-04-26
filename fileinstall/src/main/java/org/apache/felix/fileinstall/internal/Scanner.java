@@ -20,11 +20,13 @@ package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.CRC32;
 
 /**
@@ -101,7 +103,7 @@ public class Scanner {
         {
             return null;
         }
-        Set/*<File>*/ files = new HashSet/*<File>*/();
+        Set/*<File>*/ files = new TreeSet/*<File>*/(new FileModificationTimeComparator());
         Set/*<File>*/ removed = new HashSet/*<File>*/(storedChecksums.keySet());
         for (int i = 0; i < list.length; i++)
         {
@@ -183,6 +185,20 @@ public class Scanner {
         {
             crc.update((int) (l & 0x000000ff));
             l >>= 8;
+        }
+    }
+
+    /**
+     * {@link Comparator} that sorts {@link File}s in increasing order of modification time
+     * ("oldest first").
+     */
+    private final static class FileModificationTimeComparator implements Comparator
+    {
+        public int compare(Object arg0, Object arg1)
+        {
+            File lhs = (File) arg0;
+            File rhs = (File) arg1;
+            return (int) (lhs.lastModified() - rhs.lastModified());
         }
     }
 
