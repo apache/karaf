@@ -139,7 +139,7 @@ public class XmlWriter
 
     private static String encode(Object o) {
         String s = o != null ? o.toString() : "";
-        return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("'", "&apos;");
     }
 
 }
