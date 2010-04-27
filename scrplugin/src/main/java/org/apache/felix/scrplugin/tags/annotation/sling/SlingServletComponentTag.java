@@ -32,9 +32,6 @@ import com.thoughtworks.qdox.model.Annotation;
  */
 public class SlingServletComponentTag extends AbstractTag {
 
-    private static final Map<String, String> IMMEDIATE_MAP =
-            Collections.singletonMap(Constants.COMPONENT_IMMEDIATE, String.valueOf(true));
-
     /**
      * @param desc Description
      */
@@ -49,7 +46,7 @@ public class SlingServletComponentTag extends AbstractTag {
 
     @Override
     public Map<String, String> createNamedParameterMap() {
-        return IMMEDIATE_MAP;
+        return Collections.emptyMap();
     }
 
 }

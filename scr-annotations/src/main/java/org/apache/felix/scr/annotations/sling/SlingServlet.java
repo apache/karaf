@@ -30,7 +30,7 @@ import java.lang.annotation.*;
 public @interface SlingServlet {
 
     /**
-     * Whether to generate a default SCR component tag with "immediate=true". If
+     * Whether to generate a default SCR component tag. If
      * set to false, a {@link org.apache.felix.scr.annotations.Component}
      * annotation can be added manually with defined whatever configuration
      * needed.
