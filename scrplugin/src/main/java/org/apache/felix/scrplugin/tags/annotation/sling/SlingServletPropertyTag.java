@@ -18,9 +18,7 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.sling;
 
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.helper.StringUtils;
@@ -30,12 +28,14 @@ import org.apache.felix.scrplugin.tags.annotation.defaulttag.AbstractTag;
 import com.thoughtworks.qdox.model.Annotation;
 
 /**
- * Description of a java tag for components.
+ * A property tag.
  */
 public class SlingServletPropertyTag extends AbstractTag {
 
     protected final String name;
     protected final String[] values;
+    protected final String type;
+    protected final Boolean isPrivate;
 
     /**
      * @param name Property name
@@ -46,6 +46,26 @@ public class SlingServletPropertyTag extends AbstractTag {
         super(annotation, desc, null);
         this.name = name;
         this.values = values;
+        this.type = null;
+        this.isPrivate = null;
+    }
+
+    /**
+     * @param name Property name
+     * @param value Property value
+     * @param desc Description
+     */
+    public SlingServletPropertyTag(final Annotation annotation,
+            final String name,
+            final String value,
+            final JavaClassDescription desc,
+            final String type,
+            final boolean isPrivate) {
+        super(annotation, desc, null);
+        this.name = name;
+        this.values = new String[] {value};
+        this.type = type;
+        this.isPrivate = isPrivate;
     }
 
     @Override
@@ -69,6 +89,13 @@ public class SlingServletPropertyTag extends AbstractTag {
                 String index = StringUtils.leftPad(Integer.toString(i), 10, "0");
                 map.put(Constants.PROPERTY_MULTIVALUE_PREFIX + '.' + index, this.values[i]);
             }
+        }
+
+        if ( this.type != null ) {
+            map.put(Constants.PROPERTY_TYPE, type);
+        }
+        if ( this.isPrivate != null ) {
+            map.put(Constants.PROPERTY_PRIVATE, String.valueOf(this.isPrivate));
         }
 
         return map;

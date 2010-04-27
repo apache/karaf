@@ -18,7 +18,7 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.sling;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.felix.scrplugin.Constants;
@@ -31,6 +31,9 @@ import com.thoughtworks.qdox.model.Annotation;
  * Description of a java tag for components.
  */
 public class SlingServletComponentTag extends AbstractTag {
+
+    private static final Map<String, String> IMMEDIATE_MAP =
+            Collections.singletonMap(Constants.COMPONENT_IMMEDIATE, String.valueOf(true));
 
     /**
      * @param desc Description
@@ -46,11 +49,7 @@ public class SlingServletComponentTag extends AbstractTag {
 
     @Override
     public Map<String, String> createNamedParameterMap() {
-        final Map<String, String> map = new HashMap<String, String>();
-
-        map.put(Constants.COMPONENT_IMMEDIATE, String.valueOf(true));
-
-        return map;
+        return IMMEDIATE_MAP;
     }
 
 }

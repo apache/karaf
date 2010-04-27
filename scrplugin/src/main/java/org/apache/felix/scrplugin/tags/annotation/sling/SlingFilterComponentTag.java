@@ -18,10 +18,8 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.sling;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.Servlet;
 
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
@@ -32,26 +30,48 @@ import com.thoughtworks.qdox.model.Annotation;
 /**
  * Description of a java tag for components.
  */
-public class SlingServletServiceTag extends AbstractTag {
+public class SlingFilterComponentTag extends AbstractTag {
 
-    private static final Map<String, String> INTERFACE_MAP =
-        Collections.singletonMap(Constants.SERVICE_INTERFACE, Servlet.class.getName());
+    private final boolean createMetatype;
+    private final String name;
+    private final String label;
+    private final String description;
 
     /**
      * @param desc Description
      */
-    public SlingServletServiceTag(Annotation annotation, JavaClassDescription desc) {
+    public SlingFilterComponentTag(final Annotation annotation,
+            final JavaClassDescription desc,
+            final boolean createMetatype,
+            final String name,
+            final String label,
+            final String description) {
         super(annotation, desc, null);
+        this.createMetatype = createMetatype;
+        this.name = name;
+        this.label = label;
+        this.description = description;
     }
 
     @Override
     public String getName() {
-        return Constants.SERVICE;
+        return Constants.COMPONENT;
     }
 
     @Override
     public Map<String, String> createNamedParameterMap() {
-        return INTERFACE_MAP;
+        final Map<String, String> params = new HashMap<String, String>();
+        if ( this.name != null ) {
+            params.put(Constants.COMPONENT_NAME, this.name);
+        }
+        if ( this.label != null ) {
+            params.put(Constants.COMPONENT_LABEL, this.label);
+        }
+        if ( this.description != null ) {
+            params.put(Constants.COMPONENT_DESCRIPTION, this.description);
+        }
+        params.put(Constants.COMPONENT_METATYPE, String.valueOf(this.createMetatype));
+        return params;
     }
 
 }
