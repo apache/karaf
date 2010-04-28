@@ -44,6 +44,7 @@ import org.osgi.service.log.LogService;
 
 public class Util
 {
+    private static final char   ESCAPE_CHAR = '\\';
     private static final String DELIM_START = "${";
     private static final String DELIM_STOP = "}";
 
@@ -106,6 +107,10 @@ public class Util
         // will correspond to the first deepest nested variable
         // placeholder.
         int stopDelim = val.indexOf(DELIM_STOP);
+        while (stopDelim > 0 && val.charAt(stopDelim - 1) == ESCAPE_CHAR)
+        {
+            stopDelim = val.indexOf(DELIM_STOP, stopDelim + 1);
+        }
 
         // Find the matching starting "${" variable delimiter
         // by looping until we find a start delimiter that is
@@ -165,6 +170,18 @@ public class Util
         // Now perform substitution again, since there could still
         // be substitutions to make.
         val = substVars(val, currentKey, cycleMap, configProps);
+
+        // Remove escape characters preceding {, } and \
+        int escape = val.indexOf(ESCAPE_CHAR);
+        while (escape >= 0 && escape < val.length() - 1)
+        {
+            char c = val.charAt(escape + 1);
+            if (c == '{' || c == '}' || c == ESCAPE_CHAR)
+            {
+                val = val.substring(0, escape) + val.substring(escape + 1);
+            }
+            escape = val.indexOf(ESCAPE_CHAR, escape + 1);
+        }
 
         // Return the value.
         return val;
