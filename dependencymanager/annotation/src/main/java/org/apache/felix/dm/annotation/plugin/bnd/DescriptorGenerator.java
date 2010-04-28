@@ -120,7 +120,7 @@ public class DescriptorGenerator extends Processor
             }
             sb.append(": ");
             sb.append(parse(err));
-            error(sb.toString(), err.getCause());
+            error(sb.toString());
             return false;
         }
 
