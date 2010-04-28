@@ -108,7 +108,10 @@ public enum DescriptorParam
     stateMask,
     
     /* The ranking of an aspect (the parsed value is an int) */
-    ranking;
+    ranking,
+    
+    /* The factory pid of an FactoryConfigurationAdapterService annotation (the parsed value is a string) */
+    factoryPid;
     
     /**
      * Indicates if a given attribute is a Service attribute.

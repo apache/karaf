@@ -85,6 +85,14 @@ public class AnnotationBase extends Base implements Sequencer
     // ----------------------- Sequencer interface ------------------------------------------
 
     /**
+     * Goes to the next step.
+     */
+    public void step()
+    {
+        m_ensure.step();
+    }
+    
+    /**
      * Crosses a given step number.
      */
     public void step(int step)

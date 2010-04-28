@@ -16,23 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dm.runtime;
+package org.apache.felix.dm.test.bundle.annotation.factoryconfadapter;
 
-/**
- * Type of each DependendencyManager component descriptor entry.
- * @see DescriptorParser for more informations about the descriptor syntax.
- */
-public enum DescriptorEntry
+public interface ServiceInterface
 {
-    Service,
-    AspectService,
-    AdapterService,
-    BundleAdapterService,
-    ResourceAdapterService,
-    FactoryConfigurationAdapterService,
-    ServiceDependency,
-    TemporalServiceDependency,
-    ConfigurationDependency,
-    BundleDependency,
-    ResourceDependency
+    public void doService();
 }

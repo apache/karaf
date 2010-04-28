@@ -168,6 +168,10 @@ public class ComponentManager implements SynchronousBundleListener
                     case ResourceAdapterService:
                         service = createResourceAdapterService(b, dm, parser);
                         break;
+                        
+                    case FactoryConfigurationAdapterService:
+                        service = createFactoryConfigurationAdapterService(b, dm, parser);
+                        break;
 
                     case ServiceDependency:
                         checkServiceParsed(service);
@@ -414,6 +418,28 @@ public class ComponentManager implements SynchronousBundleListener
         setCommonServiceParams(srv, parser);
         return srv;
     }
+
+    /**
+     * Creates a Factory Configuration Adapter Service
+     * @param b
+     * @param dm
+     * @param parser
+     * @return
+     */
+    private Service createFactoryConfigurationAdapterService(Bundle b, DependencyManager dm, DescriptorParser parser)
+        throws ClassNotFoundException
+    {
+        Class<?> impl = b.loadClass(parser.getString(DescriptorParam.impl));
+        String factoryPid = parser.getString(DescriptorParam.factoryPid);
+        String updated = parser.getString(DescriptorParam.updated);
+        String[] services = parser.getStrings(DescriptorParam.service, null);
+        Dictionary<String, String> properties = parser.getDictionary(DescriptorParam.properties, null);
+        boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
+        Service srv = dm.createFactoryConfigurationAdapterService(factoryPid, updated, impl, services, properties, propagate);
+        setCommonServiceParams(srv, parser);
+        return srv;
+    }
+
 
     /**
      * Creates a ServiceDependency that we parsed from a component descriptor "ServiceDependency" entry.

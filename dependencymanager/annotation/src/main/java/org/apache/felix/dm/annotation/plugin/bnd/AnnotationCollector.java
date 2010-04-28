@@ -36,6 +36,7 @@ import org.apache.felix.dm.annotation.api.BundleDependency;
 import org.apache.felix.dm.annotation.api.Composition;
 import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Destroy;
+import org.apache.felix.dm.annotation.api.FactoryConfigurationAdapterService;
 import org.apache.felix.dm.annotation.api.Init;
 import org.apache.felix.dm.annotation.api.ResourceAdapterService;
 import org.apache.felix.dm.annotation.api.ResourceDependency;
@@ -83,6 +84,8 @@ public class AnnotationCollector extends ClassDataCollector
         + BundleAdapterService.class.getName().replace('.', '/') + ";";
     private final static String A_RESOURCE_ADAPTER_SERVICE = "L"
         + ResourceAdapterService.class.getName().replace('.', '/') + ";";
+    private final static String A_FACTORYCONFIG_ADAPTER_SERVICE = "L"
+        + FactoryConfigurationAdapterService.class.getName().replace('.', '/') + ";";
 
     private Reporter m_reporter;
     private String m_className;
@@ -124,7 +127,8 @@ public class AnnotationCollector extends ClassDataCollector
         TemporalServiceDependency, 
         ConfigurationDependency,
         BundleDependency,
-        ResourceDependency
+        ResourceDependency,
+        FactoryConfigurationAdapterService
     };
 
     // List of component descriptor parameters
@@ -149,6 +153,7 @@ public class AnnotationCollector extends ClassDataCollector
         removed,
         autoConfig, 
         pid, 
+        factoryPid,
         propagate, 
         updated, 
         timeout,
@@ -384,6 +389,10 @@ public class AnnotationCollector extends ClassDataCollector
         {
             parseResourceAdapterService(annotation);
         }
+        else if (annotation.getName().equals(A_FACTORYCONFIG_ADAPTER_SERVICE))
+        {
+            parseFactoryConfigurationAdapterService(annotation);
+        }
         else if (annotation.getName().equals(A_INIT))
         {
             checkMethod(m_voidMethodPattern);
@@ -566,45 +575,8 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.propagate, null);
 
         // Property Meta Types
-        if (annotation.get("metadata") != null)
-        {
-            String propertiesPid = get(annotation, "pid", m_className);
-            String propertiesHeading = annotation.get("heading");
-            String propertiesDesc = annotation.get("description");
-
-            MetaType.OCD ocd = new MetaType.OCD(propertiesPid, propertiesHeading, propertiesDesc);
-            for (Object p : (Object[]) annotation.get("metadata"))
-            {
-                Annotation property = (Annotation) p;
-                String heading = property.get("heading");
-                String id = property.get("id");
-                String type = (String) property.get("type");
-                type = (type != null) ? parseClass(type, m_classPattern, 1) : null;
-                Object[] defaults = (Object[]) property.get("defaults");
-                String description = property.get("description");
-                Integer cardinality = property.get("cardinality");
-                Boolean required = property.get("required");
-
-                MetaType.AD ad = new MetaType.AD(id, type, defaults, heading, description,
-                    cardinality, required);
-                Object[] options = property.get("options");
-                if (options != null)
-                {
-                    for (Object o : (Object[]) property.get("options"))
-                    {
-                        Annotation option = (Annotation) o;
-                        ad.add(new MetaType.Option((String) option.get("name"),
-                            (String) option.get("value")));
-                    }
-                }
-                ocd.add(ad);
-            }
-
-            m_metaType.add(ocd);
-            MetaType.Designate designate = new MetaType.Designate(propertiesPid);
-            m_metaType.add(designate);
-            m_reporter.warning("Parsed MetaType Properties from class " + m_className);
-        }
+        String pid = get(annotation, Params.pid.toString(), m_className);
+        parseMetaTypes(annotation, pid, false);
     }
 
     /**
@@ -765,6 +737,42 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.propagate, Boolean.FALSE);
     }
 
+    /**
+     * Parses a Factory Configuration Adapter annotation.
+     * @param annotation
+     */
+    private void parseFactoryConfigurationAdapterService(Annotation annotation)
+    {
+        Info info = new Info(EntryTypes.FactoryConfigurationAdapterService);
+        m_infos.add(info);
+        
+        // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
+        addCommonServiceParams(info);
+
+        // Generate Adapter Implementation
+        info.addParam(Params.impl, m_className);
+
+        // Parse factory Pid
+        info.addParam(annotation, Params.factoryPid, m_className);
+        
+        // Parse updated callback
+        info.addParam(annotation, Params.updated, "updated");
+        
+        // propagate attribute
+        info.addParam(annotation, Params.propagate, Boolean.FALSE);
+        
+        // Parse the optional adapter service (use directly implemented interface by default).
+        info.addClassParam(annotation, Params.service, m_interfaces);
+
+        // Parse Adapter properties.
+        parseParameters(annotation, Params.properties, info);
+
+        // Parse optional meta types for configuration description.
+        String factoryPid = get(annotation, Params.factoryPid.toString(), m_className);
+        parseMetaTypes(annotation, factoryPid, true);        
+    }
+
+
     private void parseBundleDependencyAnnotation(Annotation annotation)
     {
         Info info = new Info(EntryTypes.BundleDependency);
@@ -802,6 +810,52 @@ public class AnnotationCollector extends ClassDataCollector
         info.addParam(annotation, Params.removed, null); // TODO check if "removed" callback exists
         info.addParam(annotation, Params.required, null);
         info.addParam(annotation, Params.propagate, null);        
+    }
+
+    /**
+     * Parse optional meta types annotation attributes
+     * @param annotation
+     */
+    private void parseMetaTypes(Annotation annotation, String pid, boolean factory)
+    {
+        if (annotation.get("metadata") != null)
+        {
+            String propertiesHeading = annotation.get("heading");
+            String propertiesDesc = annotation.get("description");
+
+            MetaType.OCD ocd = new MetaType.OCD(pid, propertiesHeading, propertiesDesc);
+            for (Object p : (Object[]) annotation.get("metadata"))
+            {
+                Annotation property = (Annotation) p;
+                String heading = property.get("heading");
+                String id = property.get("id");
+                String type = (String) property.get("type");
+                type = (type != null) ? parseClass(type, m_classPattern, 1) : null;
+                Object[] defaults = (Object[]) property.get("defaults");
+                String description = property.get("description");
+                Integer cardinality = property.get("cardinality");
+                Boolean required = property.get("required");
+
+                MetaType.AD ad = new MetaType.AD(id, type, defaults, heading, description,
+                    cardinality, required);
+                Object[] options = property.get("options");
+                if (options != null)
+                {
+                    for (Object o : (Object[]) property.get("options"))
+                    {
+                        Annotation option = (Annotation) o;
+                        ad.add(new MetaType.Option((String) option.get("name"),
+                            (String) option.get("value")));
+                    }
+                }
+                ocd.add(ad);
+            }
+
+            m_metaType.add(ocd);
+            MetaType.Designate designate = new MetaType.Designate(pid, factory);
+            m_metaType.add(designate);
+            m_reporter.warning("Parsed MetaType Properties from class " + m_className);
+        }          
     }
 
     /**
@@ -915,7 +969,7 @@ public class AnnotationCollector extends ClassDataCollector
 
         // We must have at least a Service or an AspectService annotation.
         checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService, EntryTypes.AdapterService, EntryTypes.BundleAdapterService,
-            EntryTypes.ResourceAdapterService);
+            EntryTypes.ResourceAdapterService, EntryTypes.FactoryConfigurationAdapterService);
 
         StringBuilder sb = new StringBuilder();
         sb.append("Parsed annotation for class ");

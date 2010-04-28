@@ -24,6 +24,11 @@ package org.apache.felix.dm.test.bundle.annotation.sequencer;
 public interface Sequencer
 {
     /**
+     * Proceed with the next step.
+     */
+    void step();
+    
+    /**
      * Crosses a given step.
      * @param step the step we are crossing
      */

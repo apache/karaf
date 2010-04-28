@@ -278,11 +278,13 @@ public class MetaType
     public static class Designate
     {
         String m_pid;
+        boolean m_factory;
         OBject m_object;
 
-        public Designate(String pid)
+        public Designate(String pid, boolean factory)
         {
             this.m_pid = pid;
+            this.m_factory = factory;
             this.m_object = new OBject(pid);
         }
 
@@ -290,6 +292,10 @@ public class MetaType
         {
             pw.print("   <Designate");
             writeAttribute("pid", m_pid, pw);
+            if (m_factory) 
+            {
+                writeAttribute("factoryPid", m_pid, pw);
+            }
             pw.println(">");
             m_object.writeTo(pw);
             pw.println("   </Designate>");
