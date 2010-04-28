@@ -69,7 +69,7 @@ public class Scanner {
      */
     public Scanner(File directory, FilenameFilter filter)
     {
-        this.directory = directory;
+        this.directory = canon(directory);
         this.filter = filter;
     }
 
@@ -107,7 +107,7 @@ public class Scanner {
         Set/*<File>*/ removed = new HashSet/*<File>*/(storedChecksums.keySet());
         for (int i = 0; i < list.length; i++)
         {
-            File file  = canon(list[i]);
+            File file  = list[i];
             long lastChecksum = lastChecksums.get(file) != null ? ((Long) lastChecksums.get(file)).longValue() : 0;
             long storedChecksum = storedChecksums.get(file) != null ? ((Long) storedChecksums.get(file)).longValue() : 0;
             long newChecksum = checksum(file);
