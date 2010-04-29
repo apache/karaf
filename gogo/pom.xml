@@ -30,7 +30,7 @@
     <description>Apache Felix Gogo Shell</description>
     <groupId>org.apache.felix.gogo</groupId>
     <artifactId>gogo</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.4.0</version>
 
     <modules>
         <module>runtime</module>
@@ -195,4 +195,10 @@
             </build>
         </profile>
     </profiles>
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/gogo-0.4.0</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/gogo-0.4.0</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/gogo-0.4.0</url>
+  </scm>
 </project>
