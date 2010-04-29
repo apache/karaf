@@ -21,7 +21,7 @@
  <parent>
    <artifactId>felix-parent</artifactId>
    <groupId>org.apache.felix</groupId>
-   <version>1.2.0</version>
+   <version>1.2.1</version>
    <relativePath>../pom/pom.xml</relativePath>
  </parent>
 
@@ -66,7 +66,7 @@
   <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.bundlerepository</artifactId>
-      <version>1.6.1-SNAPSHOT</version>
+      <version>1.6.2</version>
   </dependency>
   <dependency>
     <groupId>org.apache.felix</groupId>
