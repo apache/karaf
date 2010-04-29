@@ -65,7 +65,6 @@ public class CompositeTest {
         Option[] opt =  options(
                 felix(),
                 equinox(),
-                knopflerfish(),
                 provision(
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.composite").version(asInProject()),

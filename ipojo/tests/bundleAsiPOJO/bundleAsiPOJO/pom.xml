@@ -13,7 +13,7 @@
     <groupId>org.apache.felix</groupId>
     <version>1.2.1</version>
   </parent>
-  
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-      <version>1.4.0</version>
+      <version>1.6.0</version>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
@@ -51,7 +51,7 @@
     </plugins>
   </build>
 
-<repositories>	
+<repositories>
   <repository>
     <id>aQute</id>
     <url>http://www.aQute.biz/repo</url>

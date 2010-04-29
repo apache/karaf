@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -231,7 +231,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @param pojo : pojo instance on which calling the bind method.
      */
     protected void onObjectCreation(Object pojo) {
-                
+
         ServiceReference[] refs;
         synchronized (this) {
             if (!m_isStarted) { return; }
@@ -333,6 +333,31 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         }
     }
 
+    private Object createNullableObject() {
+    	 // To load the proxy we use the POJO class loader. Indeed, this classloader imports iPOJO (so can access to Nullable) and has
+        // access to the service specification.
+    	try {
+            ClassLoader cl = new NullableClassLoader(
+                    getHandler().getInstanceManager().getClazz().getClassLoader(),
+                    getSpecification().getClassLoader());
+
+            m_nullable =
+                Proxy.newProxyInstance(cl, new Class[] {
+                        getSpecification(), Nullable.class }, new NullableObject()); // NOPMD
+
+        } catch (NoClassDefFoundError e) {
+            // A NoClassDefFoundError is thrown if the specification uses a class not accessible by the actual instance.
+            // It generally comes from a missing import.
+            throw new IllegalStateException("Cannot create the Nullable object, a referenced class cannot be loaded: " + e.getMessage());
+        } catch (Throwable e) { // Catch any other exception that can occurs
+            throw new IllegalStateException(
+                    "Cannot create the Nullable object, an unexpected error occurs: "
+                            + e.getMessage());
+        }
+
+        return m_nullable;
+    }
+
     /**
      * Start the dependency.
      */
@@ -342,26 +367,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             if (m_di == null) {
                 // If nullable are supported, create the nullable object.
                 if (m_supportNullable) {
-                    // To load the proxy we use the POJO class loader. Indeed, this classloader imports iPOJO (so can access to Nullable) and has
-                    // access to the service specification.
-                    try {
-                        ClassLoader cl = new NullableClassLoader(
-                                getHandler().getInstanceManager().getClazz().getClassLoader(), 
-                                getSpecification().getClassLoader());
-                        
-                        m_nullable =
-                            Proxy.newProxyInstance(cl, new Class[] {
-                                    getSpecification(), Nullable.class }, new NullableObject()); // NOPMD
-                        
-                    } catch (NoClassDefFoundError e) {
-                        // A NoClassDefFoundError is thrown if the specification uses a class not accessible by the actual instance.
-                        // It generally comes from a missing import.
-                        throw new IllegalStateException("Cannot create the Nullable object, a referenced class cannot be loaded: " + e.getMessage());
-                    } catch (Throwable e) { // Catch any other exception that can occurs
-                        throw new IllegalStateException(
-                                "Cannot create the Nullable object, an unexpected error occurs: "
-                                        + e.getMessage());
-                    }
+                	createNullableObject();
                 }
             } else {
                 // Create the default-implementation object.
@@ -617,6 +623,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             if (refs == null) {
                 if (m_nullable == null && m_supportNullable) {
                     m_handler.warn("[" + m_handler.getInstanceManager().getInstanceName() + "] The dependency is not optional, however no service object can be injected in " + m_field + " -> " + getSpecification().getName());
+                    createNullableObject();
                 }
                 usage.m_object = m_nullable; // Add null if the Nullable pattern is disable.
             } else {
@@ -783,21 +790,21 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         setAggregate(true);
         m_type = type;
     }
-    
+
     /**
      * Classloader for nullable objects.
      */
     private class NullableClassLoader extends ClassLoader {
        /**
-        * Component classloader. 
+        * Component classloader.
         */
         private ClassLoader m_component;
-       
+
        /**
-        * Specification classloader. 
+        * Specification classloader.
         */
         private ClassLoader m_specification;
-       
+
         /**
          * Creates a NullableClassLoader.
          * @param cmp the component class loader.
@@ -807,7 +814,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             m_component = cmp;
             m_specification = spec;
         }
-        
+
         /**
          * Loads the given class.
          * This method uses the classloader of the component class
@@ -824,8 +831,8 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                 return m_specification.loadClass(name);
             }
         }
-        
-       
+
+
     }
 
     /**
@@ -904,17 +911,17 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
          * HashCode method.
          */
         private Method m_hashCodeMethod;
-        
+
         /**
          * Equals method.
          */
         private Method m_equalsMethod;
-        
+
         /**
-         * toStirng method. 
+         * toStirng method.
          */
         private Method m_toStringMethod;
-        
+
         /**
          * Creates a DynamicProxyFactory.
          */
@@ -928,7 +935,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                 throw new NoSuchMethodError(e.getMessage());
             }
         }
-        
+
         /**
          * Creates a proxy object for the given specification. The proxy
          * uses the given dependency to get the service object.
@@ -967,7 +974,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                             "Unexpected Object method dispatched: " + method);
                 }
             }
-            
+
             return method.invoke(svc, args);
         }
 

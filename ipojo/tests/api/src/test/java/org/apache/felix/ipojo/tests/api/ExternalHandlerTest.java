@@ -54,7 +54,6 @@ public class ExternalHandlerTest {
         Option[] opt =  options(
                 felix(),
                 equinox(),
-                knopflerfish(),
                 provision(
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.api").version(asInProject()),

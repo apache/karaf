@@ -5,16 +5,16 @@
   <artifactId>org.apache.felix.ipojo.integration-tests</artifactId>
   <name>iPOJO Integration Tests</name>
   <version>1.5.0-SNAPSHOT</version>
-  
+
   <properties>
      <ipojo.version>1.5.0-SNAPSHOT</ipojo.version>
     </properties>
-  
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>
-        <artifactId>maven-junit4osgi-plugin 
+        <artifactId>maven-junit4osgi-plugin
         </artifactId>
         <version>1.1.0-SNAPSHOT</version>
         <executions>
@@ -38,7 +38,7 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin 
+        <artifactId>maven-surefire-report-plugin
         </artifactId>
         <version>2.4.3</version>
         <configuration>
@@ -54,12 +54,12 @@
       </plugin>
     </plugins>
   </reporting>
-  
+
   <dependencies>
    <!-- Manipulation -->
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.manipulation.metadata 
+      <artifactId>tests.manipulation.metadata
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
@@ -72,26 +72,26 @@
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.manipulation.primitives 
+      <artifactId>tests.manipulation.primitives
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.manipulation.creation 
+      <artifactId>tests.manipulation.creation
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.manipulation.java5 
+      <artifactId>tests.manipulation.java5
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <!--  Core -->
     <dependency>
       <groupId>ipojo.tests</groupId>
@@ -101,21 +101,21 @@
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.bad.configurations 
+      <artifactId>tests.core.bad.configurations
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.configuration 
+      <artifactId>tests.core.configuration
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.external.handlers 
+      <artifactId>tests.core.external.handlers
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
@@ -128,14 +128,14 @@
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.lifecycle.callback 
+      <artifactId>tests.core.lifecycle.callback
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.lifecycle.controller 
+      <artifactId>tests.core.lifecycle.controller
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
@@ -148,47 +148,47 @@
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.lifecycle.controller 
+      <artifactId>tests.core.lifecycle.controller
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.service.dependency 
+      <artifactId>tests.core.service.dependency
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.service.dependency.bindingpolicy 
+      <artifactId>tests.core.service.dependency.bindingpolicy
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.service.dependency.comparator 
+      <artifactId>tests.core.service.dependency.comparator
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.core.service.dependency.filter 
+      <artifactId>tests.core.service.dependency.filter
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
-    </dependency> 
+    </dependency>
     <dependency>
       <artifactId>tests.core.ps.strategy</artifactId>
       <groupId>ipojo.tests</groupId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
-    
-    
+
+
        <!-- Composite -->
     <dependency>
       <groupId>ipojo.tests</groupId>
@@ -198,31 +198,31 @@
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.composite.service.import-export 
+      <artifactId>tests.composite.service.import-export
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.composite.service.instance 
+      <artifactId>tests.composite.service.instance
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.composite.service.providing 
+      <artifactId>tests.composite.service.providing
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
     </dependency>
 
   <!--  External handlers -->
-  
+
     <dependency>
       <groupId>ipojo.tests</groupId>
-      <artifactId>tests.eventadmin.handler 
+      <artifactId>tests.eventadmin.handler
       </artifactId>
       <version>${ipojo.version}</version>
       <scope>test</scope>
@@ -240,7 +240,7 @@
       <scope>test</scope>
     </dependency>
   <!--  Utility bundles -->
-   
+
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.handler.whiteboard</artifactId>
@@ -268,11 +268,11 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.composite</artifactId>
-      <version>${ipojo.version}</version>
+      <version>1.6.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <profiles>
     <profile>
     <id>configadmin</id>

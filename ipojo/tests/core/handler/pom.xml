@@ -35,7 +35,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>${pom.version}</version>
+      <version>1.7.0-SNAPSHOT</version>
     </dependency>
 
   <!-- Pax Exam API: -->
@@ -103,7 +103,7 @@
       <version>1.7</version>
       <scope>test</scope>
     </dependency>
-  
+
   <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.tinybundles.bundleAsiPOJO

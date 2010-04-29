@@ -45,7 +45,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>${pom.version}</version>
+      <version>1.7.0-SNAPSHOT</version>
     </dependency>
 
   <!--
@@ -101,7 +101,7 @@
       <artifactId>org.apache.felix.ipojo.test.helpers</artifactId>
       <version>${pom.version}</version>
     </dependency>
-    
+
    <dependency>
     <groupId>org.ops4j.base</groupId>
     <artifactId>ops4j-base-io</artifactId>

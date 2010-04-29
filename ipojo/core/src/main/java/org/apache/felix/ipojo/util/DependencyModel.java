@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -38,7 +38,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Abstract dependency model.
- * This class is the parent class of every service dependency. It manages the most 
+ * This class is the parent class of every service dependency. It manages the most
  * part of dependency management. This class creates an interface between the service
  * tracker and the concrete dependency.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -60,29 +60,29 @@ public abstract class DependencyModel implements TrackerCustomizer {
     public static final int UNRESOLVED = 0;
 
     /**
-     * Dependency state : RESOLVED. 
+     * Dependency state : RESOLVED.
      * A dependency is resolved if the dependency is optional or at least one
      * provider is available.
      */
     public static final int RESOLVED = 1;
 
     /**
-     * Binding policy : Dynamic. 
+     * Binding policy : Dynamic.
      * In this policy, services can appears and departs without special treatment.
      */
     public static final int DYNAMIC_BINDING_POLICY = 0;
 
     /**
-     * Binding policy : Static. 
+     * Binding policy : Static.
      * Once a service is used, if this service disappears the dependency becomes
      * {@link DependencyModel#BROKEN}. The instance needs to be recreated.
      */
     public static final int STATIC_BINDING_POLICY = 1;
 
     /**
-     * Binding policy : Dynamic-Priority. 
+     * Binding policy : Dynamic-Priority.
      * In this policy, services can appears and departs. However, once a service
-     * with a highest ranking (according to the used comparator) appears, this 
+     * with a highest ranking (according to the used comparator) appears, this
      * new service is re-injected.
      */
     public static final int DYNAMIC_PRIORITY_BINDING_POLICY = 2;
@@ -109,7 +109,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     private Comparator m_comparator;
 
     /**
-     * The LDAP filter object selecting service references 
+     * The LDAP filter object selecting service references
      * from the set of providers providing the required specification.
      */
     private Filter m_filter;
@@ -121,7 +121,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     private BundleContext m_context;
 
     /**
-     * Listener object on which invoking the {@link DependencyStateListener#validate(DependencyModel)} 
+     * Listener object on which invoking the {@link DependencyStateListener#validate(DependencyModel)}
      * and {@link DependencyStateListener#invalidate(DependencyModel)} methods.
      */
     private final DependencyStateListener m_listener;
@@ -143,12 +143,12 @@ public abstract class DependencyModel implements TrackerCustomizer {
     private Tracker m_tracker;
 
     /**
-     * The list of matching service references. This list is a 
-     * subset of tracked references. This set is computed according 
+     * The list of matching service references. This list is a
+     * subset of tracked references. This set is computed according
      * to the filter and the {@link DependencyModel#match(ServiceReference)} method.
      */
     private final List m_matchingRefs = new ArrayList();
-    
+
     /**
      * The instance requiring the service.
      */
@@ -165,7 +165,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * Creates a DependencyModel.
      * If the dependency has no comparator and follows the
      * {@link DependencyModel#DYNAMIC_PRIORITY_BINDING_POLICY} policy
-     * the OSGi Service Reference Comparator is used. 
+     * the OSGi Service Reference Comparator is used.
      * @param specification the required specification
      * @param aggregate is the dependency aggregate ?
      * @param optional is the dependency optional ?
@@ -221,7 +221,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
         ungetAllServices();
         m_state = UNRESOLVED;
     }
-    
+
     /**
      * Ungets all 'get' service references.
      * This also clears the service object map.
@@ -244,19 +244,19 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Is the reference set frozen (cannot change anymore)? 
+     * Is the reference set frozen (cannot change anymore)?
      * This method must be override by concrete dependency to support
      * the static binding policy. In fact, this method allows optimizing
      * the static dependencies to become frozen only when needed.
-     * This method returns <code>false</code> by default. 
+     * This method returns <code>false</code> by default.
      * The method must always return <code>false</code> for non-static dependencies.
      * @return <code>true</code> if the reference set is frozen.
      */
     public boolean isFrozen() {
         return false;
     }
-    
-    
+
+
     /**
      * Unfreezes the dependency.
      * This method must be overide by concrete dependency to support
@@ -269,7 +269,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     /**
      * Does the service reference match ? This method must be override by
      * concrete dependencies if they need advanced testing on service reference
-     * (that cannot be expressed in the LDAP filter). By default this method 
+     * (that cannot be expressed in the LDAP filter). By default this method
      * returns <code>true</code>.
      * @param ref the tested reference.
      * @return <code>true</code> if the service reference matches.
@@ -313,7 +313,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Service tracker adding service callback. 
+     * Service tracker adding service callback.
      * It accepts the service only if the dependency isn't broken or frozen.
      * @param ref the arriving service reference.
      * @return <code>true</code> if the reference must be tracked.
@@ -324,7 +324,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Service Tracker added service callback. 
+     * Service Tracker added service callback.
      * If the service matches (against the filter and the {@link DependencyModel#match(ServiceReference)},
      * manages the provider arrival.
      * @param ref : new references.
@@ -336,10 +336,10 @@ public abstract class DependencyModel implements TrackerCustomizer {
         }
         // Do not store the service if it doesn't match.
     }
-    
+
     /**
      * Checks if the given service reference match the current filter.
-     * This method aims to avoid calling {@link Filter#match(ServiceReference)} 
+     * This method aims to avoid calling {@link Filter#match(ServiceReference)}
      * method when manipulating a composite reference. In fact, this method thrown
      * a {@link ClassCastException} on Equinox.
      * @param ref the service reference to check.
@@ -359,7 +359,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Manages the arrival of a new service reference. 
+     * Manages the arrival of a new service reference.
      * The reference is valid and matches the filter and the {@link DependencyModel#match(ServiceReference)}
      * method. This method has different behavior according to the binding policy.
      * @param ref the new reference
@@ -412,8 +412,8 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Service tracker removed service callback. 
-     * A service provider goes away. The depart needs to be managed only if the 
+     * Service tracker removed service callback.
+     * A service provider goes away. The depart needs to be managed only if the
      * reference was used.
      * @param ref the leaving service reference
      * @param arg1 the service object if the service was already get
@@ -433,7 +433,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     private void manageDeparture(ServiceReference ref, Object obj) {
         // Unget the service reference
         ungetService(ref);
-        
+
         // If we already get this service and the binding policy is static, the dependency becomes broken
         if (isFrozen() && obj != null) {
             if (m_state != BROKEN) {
@@ -478,10 +478,10 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Service tracker modified service callback. 
-     * This method must handle if the modified service should be considered as 
+     * Service tracker modified service callback.
+     * This method must handle if the modified service should be considered as
      * a depart or an arrival.
-     * According to the dependency filter, a service can now match or can no match 
+     * According to the dependency filter, a service can now match or can no match
      * anymore.
      * @param ref the modified reference
      * @param arg1 the service object if already get.
@@ -507,7 +507,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
 
     /**
      * Gets the next matching service reference.
-     * @return <code>null</code> if no more provider is available, 
+     * @return <code>null</code> if no more provider is available,
      * else returns the first reference from the matching set.
      */
     public ServiceReference getServiceReference() {
@@ -522,7 +522,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
 
     /**
      * Gets matching service references.
-     * @return the sorted (if a comparator is used) array of matching service 
+     * @return the sorted (if a comparator is used) array of matching service
      * references, <code>null</code> if no references are available.
      */
     public ServiceReference[] getServiceReferences() {
@@ -572,22 +572,22 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Concrete dependency callback. 
-     * This method is called when a new service needs to be 
+     * Concrete dependency callback.
+     * This method is called when a new service needs to be
      * re-injected in the underlying concrete dependency.
      * @param ref the service reference to inject.
      */
     public abstract void onServiceArrival(ServiceReference ref);
 
     /**
-     * Concrete dependency callback. 
+     * Concrete dependency callback.
      * This method is called when a used service (already injected) is leaving.
      * @param ref the leaving service reference.
      */
     public abstract void onServiceDeparture(ServiceReference ref);
-    
+
     /**
-     * Concrete dependency callback. 
+     * Concrete dependency callback.
      * This method is called when a used service (already injected) is modified.
      * @param ref the modified service reference.
      */
@@ -609,7 +609,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
                 onServiceDeparture((ServiceReference) m_matchingRefs.get(1));
                 onServiceArrival(ref);
             }
-            
+
         } else {
             // It's a modification...
             onServiceModification(ref);
@@ -617,7 +617,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Concrete dependency callback. 
+     * Concrete dependency callback.
      * This method is called when the dependency is reconfigured and when this
      * reconfiguration implies changes on the matching service set ( and by the
      * way on the injected service).
@@ -627,7 +627,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     public abstract void onDependencyReconfiguration(ServiceReference[] departs, ServiceReference[] arrivals);
 
     /**
-     * Calls the listener callback to notify the new state of the current 
+     * Calls the listener callback to notify the new state of the current
      * dependency.
      */
     private void invalidate() {
@@ -635,7 +635,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Calls the listener callback to notify the new state of the current 
+     * Calls the listener callback to notify the new state of the current
      * dependency.
      */
     private void validate() {
@@ -659,7 +659,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Sets the required specification of this service dependency. 
+     * Sets the required specification of this service dependency.
      * This operation is not supported if the dependency tracking has already begun.
      * @param specification the required specification.
      */
@@ -791,7 +791,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
 
     /**
      * Returns the dependency filter (String form).
-     * @return the String form of the LDAP filter used by this dependency, 
+     * @return the String form of the LDAP filter used by this dependency,
      * <code>null</code> if not set.
      */
     public String getFilter() {
@@ -803,7 +803,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Sets the aggregate attribute of the current dependency. 
+     * Sets the aggregate attribute of the current dependency.
      * If the tracking is opened, it will call arrival and departure callbacks.
      * @param isAggregate the new aggregate attribute value.
      */
@@ -863,7 +863,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Sets the binding policy. 
+     * Sets the binding policy.
      * Not yet supported.
      */
     public void setBindingPolicy() {
@@ -875,7 +875,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
         m_comparator = cmp;
         // NOTE: the array will be sorted at the next get.
     }
-    
+
     /**
      * Gets the used comparator name.
      * <code>Null</code> if no comparator (i.e. the OSGi one is used).
@@ -911,31 +911,30 @@ public abstract class DependencyModel implements TrackerCustomizer {
         Object svc =  m_tracker.getService(ref);
         if (svc instanceof IPOJOServiceFactory) {
             Object obj =  ((IPOJOServiceFactory) svc).getService(m_instance);
-            m_serviceObjects.put(ref, obj);
+            m_serviceObjects.put(ref, svc); // We store the factory !
             return obj;
         } else {
             m_serviceObjects.put(ref, svc);
             return svc;
         }
     }
-    
+
     /**
      * Ungets a used service reference.
      * @param ref the reference to unget.
      */
     public void ungetService(ServiceReference ref) {
-        Object svc = m_tracker.getService(ref); // Get the service object
         m_tracker.ungetService(ref);
         Object obj = m_serviceObjects.remove(ref);  // Remove the service object
-        if (svc instanceof IPOJOServiceFactory) {
-            ((IPOJOServiceFactory) svc).ungetService(m_instance, obj);
+        if (obj != null  && obj instanceof IPOJOServiceFactory) {
+            ((IPOJOServiceFactory) obj).ungetService(m_instance, obj);
         }
     }
 
     /**
      * Helper method parsing the comparator attribute and returning the
      * comparator object. If the 'comparator' attribute is not set, this method
-     * returns null. If the 'comparator' attribute is set to 'osgi', this method 
+     * returns null. If the 'comparator' attribute is set to 'osgi', this method
      * returns the normal OSGi comparator. In other case, it tries to create
      * an instance of the declared comparator class.
      * @param dep the Element describing the dependency
@@ -984,9 +983,9 @@ public abstract class DependencyModel implements TrackerCustomizer {
     }
 
     /**
-     * Helper method parsing the binding policy. 
-     * If the 'policy' attribute is not set in the dependency, the method returns 
-     * the 'DYNAMIC BINDING POLICY'. Accepted policy values are : dynamic, 
+     * Helper method parsing the binding policy.
+     * If the 'policy' attribute is not set in the dependency, the method returns
+     * the 'DYNAMIC BINDING POLICY'. Accepted policy values are : dynamic,
      * dynamic-priority and static.
      * @param dep the Element describing the dependency
      * @return the policy attached to this dependency

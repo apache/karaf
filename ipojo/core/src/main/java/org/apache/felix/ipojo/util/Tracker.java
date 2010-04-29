@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -64,31 +64,31 @@ public class Tracker implements TrackerCustomizer {
     protected String m_listenerFilter;
 
     /**
-     * The class name to be tracked. If this field is set, then we are 
+     * The class name to be tracked. If this field is set, then we are
      * tracking by class name.
      */
     private String m_trackClass;
 
     /**
-     * The reference to be tracked. If this field is set, then we are 
+     * The reference to be tracked. If this field is set, then we are
      * tracking a single ServiceReference.
      */
     private ServiceReference m_trackReference;
 
     /**
-     * The tracked services: ServiceReference object -> customized. 
+     * The tracked services: ServiceReference object -> customized.
      *Object and ServiceListener object
      */
     private Tracked m_tracked;
 
     /**
-     * The cached ServiceReference for getServiceReference. 
+     * The cached ServiceReference for getServiceReference.
      * This field is volatile since it is accessed by multiple threads.
      */
     private volatile ServiceReference m_cachedReference;
 
     /**
-     * The cached service object for getService. This field is volatile 
+     * The cached service object for getService. This field is volatile
      * since it is accessed by multiple threads.
      */
     private volatile Object m_cachedService;
@@ -124,7 +124,7 @@ public class Tracker implements TrackerCustomizer {
      * @param context the BundleContext object against which the tracking is done.
      * @param clazz the Class name of the services to be tracked.
      * @param customizer the customizer object to call when services are added, modified, or removed in this Tracker object. If customizer is null, then this Tracker object will be used as
-     *            the TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.    
+     *            the TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.
      */
     public Tracker(BundleContext context, String clazz, TrackerCustomizer customizer) {
         // Security Check
@@ -132,7 +132,7 @@ public class Tracker implements TrackerCustomizer {
             throw new SecurityException("The bundle " + context.getBundle().getBundleId()
                     + " does not have the permission to get the service " + clazz);
         }
-        
+
         this.m_context = context;
         this.m_trackReference = null;
         this.m_trackClass = clazz;
@@ -158,7 +158,7 @@ public class Tracker implements TrackerCustomizer {
      * @param context the BundleContext object against which the tracking is done.
      * @param filter the Filter object to select the services to be tracked.
      * @param customizer The customizer object to call when services are added, modified, or removed in this Tracker object. If customizer is null, then this Tracker object will be used as the
-     *            TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.   
+     *            TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.
      */
     public Tracker(BundleContext context, Filter filter, TrackerCustomizer customizer) {
         this.m_context = context;
@@ -263,7 +263,7 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Default implementation of the TrackerCustomizer.addedService method.  
+     * Default implementation of the TrackerCustomizer.addedService method.
      * @param reference the added reference.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
      */
@@ -341,7 +341,7 @@ public class Tracker implements TrackerCustomizer {
             Iterator keys = tracked.keySet().iterator();
             for (int i = 0; i < length; i++) {
                 references[i] = (ServiceReference) keys.next();
-            }            
+            }
             return references;
         }
     }
@@ -367,7 +367,7 @@ public class Tracker implements TrackerCustomizer {
             return references;
         }
     }
-    
+
     /**
      * Returns the list of references used by the tracker.
      * A reference becomes used when the dependency has already
@@ -418,17 +418,17 @@ public class Tracker implements TrackerCustomizer {
     /**
      * Returns the service object for the specified ServiceReference object if the referenced service is being tracked by this Tracker object.
      * @param reference the Reference to the desired service.
-     * @return the Service object or <code>null</code> if the service referenced by the specified ServiceReference object is not being tracked.
+     * @return the Service object. Try to get the service if not yet tracked.
      */
     public Object getService(ServiceReference reference) {
         // Security Check
-        if (! SecurityHelper.hasPermissionToGetServices((String[]) reference.getProperty(Constants.OBJECTCLASS), 
+        if (! SecurityHelper.hasPermissionToGetServices((String[]) reference.getProperty(Constants.OBJECTCLASS),
                 m_context)) {
             throw new SecurityException("The bundle " + m_context.getBundle().getBundleId() + " does not have"
-                    + " the permission to get the services " 
+                    + " the permission to get the services "
                     + Arrays.asList((String[]) reference.getProperty(Constants.OBJECTCLASS)));
         }
-        
+
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
         if (tracked == null) { /* if Tracker is not open */
             return null;
@@ -445,8 +445,8 @@ public class Tracker implements TrackerCustomizer {
             } else { // The object was already get.
                 return object;
             }
-            // Not already tracked.
-            return m_context.getService(reference);
+
+            return  m_context.getService(reference);
         }
     }
 
@@ -687,7 +687,7 @@ public class Tracker implements TrackerCustomizer {
         }
 
         /**
-         * Common logic to add a service to the tracker used by track and trackInitialServices. 
+         * Common logic to add a service to the tracker used by track and trackInitialServices.
          * The specified reference must have been placed in the adding list before calling this method.
          * @param reference the Reference to a service to be tracked.
          */
@@ -703,7 +703,7 @@ public class Tracker implements TrackerCustomizer {
                     if (m_adding.remove(reference)) { // if the service was not untracked during the customizer callback
                         if (mustBeTracked) {
                             this.put(reference, null);
-                            modified(); 
+                            modified();
                             mustCallAdded = true;
                             notifyAll(); // notify any waiters in waitForService
                         }
@@ -742,7 +742,7 @@ public class Tracker implements TrackerCustomizer {
                     return; // in case the service is untracked while in the process of adding
                 }
 
-                boolean isTraked = this.containsKey(reference); // Check if we was tracking the reference 
+                boolean isTraked = this.containsKey(reference); // Check if we was tracking the reference
                 object = this.remove(reference); // must remove from tracker before calling customizer callback
 
                 if (!isTraked) { return; }
