@@ -163,12 +163,14 @@ public class InstanceImpl implements Instance {
         String command = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                 + " " + javaOpts
                 + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
+                + " -Djava.endorsed.dirs=\"" + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
+                + " -Djava.ext.dirs=\"" + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""
                 + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
                 + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dkaraf.startLocalConsole=false"
                 + " -Dkaraf.startRemoteShell=true"
                 + " -classpath " + classpath.toString()
-                + " org.apache.felix.karaf.main.Bootstrap";
+                + " org.apache.felix.karaf.main.Main";
         LOG.debug("Starting instance " + name + " with command: " + command);
         this.process = ProcessBuilderFactory.newInstance().newBuilder()
                         .directory(new File(location))

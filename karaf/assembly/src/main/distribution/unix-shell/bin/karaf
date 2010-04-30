@@ -144,6 +144,24 @@ setupNativePath() {
     export LD_LIBRARY_PATH
 }
 
+pathCanonicalSimple() {
+	local dst="${1}"
+	cd -P -- "$(dirname -- "${dst}")" &> /dev/null && echo "$(pwd -P)/$(basename -- "${dst}")"
+}
+
+pathCanonical() {
+	local dst=`pathCanonicalSimple "${1}"`
+	while [[ -h "${dst}" ]]; do
+		local linkDst="$(ls -l "${dst}" | sed -e 's/^.*[[:space:]]*->[[:space:]]*\(.*\)[[:space:]]*$/\1/g')"
+		if [[ -z "$(echo "${linkDst}" | grep -E '^/')" ]]; then
+			# relative link destination
+			linkDst="$(dirname "${dst}")/${linkDst}"
+		fi
+		dst=`pathCanonicalSimple "${linkDst}"`
+	done
+	echo "${dst}"
+}
+
 locateJava() {
     # Setup the Java Virtual Machine
     if $cygwin ; then
@@ -151,10 +169,10 @@ locateJava() {
         [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
     fi
 
+	if [ "x$JAVA_HOME" = "x" ] && [ "$darwin" = "true" ]; then
+		JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
+	fi
     if [ "x$JAVA" = "x" ]; then
-        if [ "x$JAVA_HOME" = "x" ] && [ "$darwin" = "true" ]; then
-            JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
-        fi
         if [ "x$JAVA_HOME" != "x" ]; then
             if [ ! -d "$JAVA_HOME" ]; then
                 die "JAVA_HOME is not valid: $JAVA_HOME"
@@ -162,8 +180,14 @@ locateJava() {
             JAVA="$JAVA_HOME/bin/java"
         else
             warn "JAVA_HOME not set; results may vary"
-            JAVA="java"
+            JAVA=`which java`
+            if [ "x$JAVA" = "x" ]; then
+                die "java command not found"
+            fi
         fi
+    fi
+    if [ "x$JAVA_HOME" = "x" ]; then
+        JAVA_HOME=$(dirname $(pathCanonical "$JAVA"))
     fi
 }
 
@@ -291,7 +315,7 @@ run() {
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
     cd $KARAF_BASE
-    exec $JAVA $JAVA_OPTS -Djava.endorsed.dirs="${KARAF_HOME}/lib/endorsed" -Dstorage.location="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties $OPTS -classpath "$CLASSPATH" $MAIN "$@"
+    exec $JAVA $JAVA_OPTS -Djava.endorsed.dirs="${JAVA_HOME}/lib/endorsed:${KARAF_HOME}/lib/endorsed" -Djava.ext.dirs="${JAVA_HOME}/lib/ext:${KARAF_HOME}/lib/ext" -Dstorage.location="${KARAF_HOME}/instances" -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties $OPTS -classpath "$CLASSPATH" $MAIN "$@"
 }
 
 main() {

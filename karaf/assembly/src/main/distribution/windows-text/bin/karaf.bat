@@ -16,9 +16,9 @@ rem    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem    See the License for the specific language governing permissions and
 rem    limitations under the License.
 rem
-rem 
+rem
 rem $Id: karaf.bat 979 2005-11-30 22:50:55Z bsnyder $
-rem 
+rem
 
 if not "%ECHO%" == "" echo %ECHO%
 
@@ -79,13 +79,81 @@ set PATH=%PATH%;%KARAF_BASE%\lib;%KARAF_HOME%\lib
 
 rem Setup the Java Virtual Machine
 if not "%JAVA%" == "" goto :Check_JAVA_END
-    set JAVA=java
-    if "%JAVA_HOME%" == "" call :warn JAVA_HOME not set; results may vary
-    if not "%JAVA_HOME%" == "" set JAVA=%JAVA_HOME%\bin\java
+    if not "%JAVA_HOME%" == "" goto :TryJDKEnd
+        call :warn JAVA_HOME not set; results may vary
+:TryJRE
+    start /w regedit /e __reg1.txt "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment"
+    if not exist __reg1.txt goto :TryJDK
+    type __reg1.txt | find "CurrentVersion" > __reg2.txt
+    if errorlevel 1 goto :TryJDK
+    for /f "tokens=2 delims==" %%x in (__reg2.txt) do set JavaTemp=%%~x
+    if errorlevel 1 goto :TryJDK
+    set JavaTemp=%JavaTemp%##
+    set JavaTemp=%JavaTemp:                ##=##%
+    set JavaTemp=%JavaTemp:        ##=##%
+    set JavaTemp=%JavaTemp:    ##=##%
+    set JavaTemp=%JavaTemp:  ##=##%
+    set JavaTemp=%JavaTemp: ##=##%
+    set JavaTemp=%JavaTemp:##=%
+    del __reg1.txt
+    del __reg2.txt
+    start /w regedit /e __reg1.txt "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\%JavaTemp%"
+    if not exist __reg1.txt goto :TryJDK
+    type __reg1.txt | find "JavaHome" > __reg2.txt
+    if errorlevel 1 goto :TryJDK
+    for /f "tokens=2 delims==" %%x in (__reg2.txt) do set JAVA_HOME=%%~x
+    if errorlevel 1 goto :TryJDK
+    del __reg1.txt
+    del __reg2.txt
+    goto TryJDKEnd
+:TryJDK
+    start /w regedit /e __reg1.txt "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Development Kit"
+    if not exist __reg1.txt (
+        call :warn Unable to retrieve JAVA_HOME
+        goto END
+    )
+    type __reg1.txt | find "CurrentVersion" > __reg2.txt
+    if errorlevel 1 (
+        call :warn Unable to retrieve JAVA_HOME
+        goto END
+    )
+    for /f "tokens=2 delims==" %%x in (__reg2.txt) do set JavaTemp=%%~x
+    if errorlevel 1 (
+        call :warn Unable to retrieve JAVA_HOME
+        goto END
+    )
+    set JavaTemp=%JavaTemp%##
+    set JavaTemp=%JavaTemp:                ##=##%
+    set JavaTemp=%JavaTemp:        ##=##%
+    set JavaTemp=%JavaTemp:    ##=##%
+    set JavaTemp=%JavaTemp:  ##=##%
+    set JavaTemp=%JavaTemp: ##=##%
+    set JavaTemp=%JavaTemp:##=%
+    del __reg1.txt
+    del __reg2.txt
+    start /w regedit /e __reg1.txt "HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Development Kit\%JavaTemp%"
+    if not exist __reg1.txt (
+        call :warn Unable to retrieve JAVA_HOME from JDK
+        goto END
+    )
+    type __reg1.txt | find "JavaHome" > __reg2.txt
+    if errorlevel 1 (
+        call :warn Unable to retrieve JAVA_HOME
+        goto END
+    )
+    for /f "tokens=2 delims==" %%x in (__reg2.txt) do set JAVA_HOME=%%~x
+    if errorlevel 1 (
+        call :warn Unable to retrieve JAVA_HOME
+        goto END
+    )
+    del __reg1.txt
+    del __reg2.txt
+:TryJDKEnd
     if not exist "%JAVA_HOME%" (
         call :warn JAVA_HOME is not valid: "%JAVA_HOME%"
         goto END
     )
+    set JAVA=%JAVA_HOME%\bin\java
 :Check_JAVA_END
 
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
@@ -93,14 +161,14 @@ if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
 if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
     rem Use the defaults if JAVA_DEBUG_OPTS was not set
     if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
-    
+
     set "JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
     call :warn Enabling Java debug options: %JAVA_DEBUG_OPTS%
 :KARAF_DEBUG_END
 
 if "%KARAF_PROFILER%" == "" goto :KARAF_PROFILER_END
     set KARAF_PROFILER_SCRIPT=%KARAF_HOME%\conf\profiler\%KARAF_PROFILER%.cmd
-    
+
     if exist "%KARAF_PROFILER_SCRIPT%" goto :KARAF_PROFILER_END
     call :warn Missing configuration for profiler '%KARAF_PROFILER%': %KARAF_PROFILER_SCRIPT%
     goto END
@@ -143,7 +211,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :EXECUTE_CONSOLE
     SET SHIFT=true
-    goto :EXECUTE    
+    goto :EXECUTE
 
 :EXECUTE_SERVER
     SET OPTS=-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true
@@ -157,10 +225,10 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :EXECUTE
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
-    if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8    
+    if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8
     rem Execute the Java Virtual Machine
-    cd %KARAF_BASE% 
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dstorage.location="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" %MAIN% %ARGS%
+    cd %KARAF_BASE%
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Djava.endorsed.dirs="%JAVA_HOME%\lib\endorsed;%KARAF_HOME%\lib\endorsed" -Djava.ext.dirs="%JAVA_HOME%\lib\ext;%KARAF_HOME%\lib\ext" -Dstorage.location="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" %MAIN% %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
