@@ -53,6 +53,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.felix.karaf</groupId>
+            <artifactId>org.apache.felix.karaf.exception</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix.karaf</groupId>
             <artifactId>org.apache.felix.karaf.client</artifactId>
         </dependency>
         <dependency>
