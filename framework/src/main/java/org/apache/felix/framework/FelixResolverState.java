@@ -249,7 +249,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 (fragments != null) && (attachedFragment == null) && (fragIdx < fragments.size());
                 fragIdx++)
             {
-                if (!fragments.get(fragIdx).getSymbolicName()
+                if (fragments.get(fragIdx).getSymbolicName()
                     .equals(fragment.getSymbolicName()))
                 {
                     attachedFragment = fragments.get(fragIdx);
