@@ -196,7 +196,23 @@ public class OracleJDBCLock implements Lock {
             LOG.severe("Lost lock!");
             return false; 
         }
-        return true;
+        PreparedStatement statement = null;
+        try {
+            String up = "SELECT * FROM " + table;
+            statement = lockConnection.prepareStatement(up);
+            return statement.execute();
+        } catch (Exception e) {
+            LOG.warning("Failed to access database. " + e.getMessage());
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    LOG.severe("Failed to close statement" + e);
+                }
+            }
+        }
+        return false;
     }
 
     /**
