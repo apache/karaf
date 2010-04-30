@@ -1084,7 +1084,6 @@ public class Main {
                             LOG.info("Lost the lock, stopping this instance ...");
                             setStartLevel(lockStartLevel);
                         }
-                        break;
                     } else if (!lockLogged) {
                         LOG.info("Waiting for the lock ...");
                         lockLogged = true;
