@@ -813,7 +813,7 @@ public class Main {
             throw new FileNotFoundException(bundleFile.getAbsolutePath());
         }
 
-        URLClassLoader classLoader = (URLClassLoader) Bootstrap.class.getClassLoader();
+        URLClassLoader classLoader = (URLClassLoader) Main.class.getClassLoader();
         Method mth = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
         mth.setAccessible(true);
         mth.invoke(classLoader, bundleFile.toURL());

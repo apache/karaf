@@ -128,7 +128,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :RUN
     SET OPTS=-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=true
-    SET MAIN=org.apache.felix.karaf.main.Bootstrap
+    SET MAIN=org.apache.felix.karaf.main.Main
     SET SHIFT=false
     if "%1" == "stop" goto :EXECUTE_STOP
     if "%1" == "console" goto :EXECUTE_CONSOLE
@@ -160,7 +160,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8    
     rem Execute the Java Virtual Machine
     cd %KARAF_BASE% 
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dstorage.location="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" org.apache.felix.karaf.main.Bootstrap %ARGS%
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dstorage.location="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" %MAIN% %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
