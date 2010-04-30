@@ -32,6 +32,7 @@
     <cm:property-placeholder persistent-id="org.apache.felix.karaf.shell">
         <cm:default-properties>
             <cm:property name="sshPort" value="8101"/>
+            <cm:property name="sshHost" value="0.0.0.0"/>
             <cm:property name="sshRealm" value="karaf"/>
             <cm:property name="hostKey" value="${karaf.base}/etc/host.key"/>
         </cm:default-properties>
@@ -59,6 +60,7 @@
 
     <bean id="sshServer" class="org.apache.sshd.SshServer" factory-method="setUpDefaultServer" scope="prototype">
         <property name="port" value="${sshPort}"/>
+        <property name="host" value="${sshHost}"/>
         <property name="shellFactory">
             <bean class="org.apache.felix.karaf.shell.ssh.ShellFactoryImpl">
                 <property name="completers">
