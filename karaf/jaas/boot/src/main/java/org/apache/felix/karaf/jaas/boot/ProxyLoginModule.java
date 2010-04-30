@@ -73,7 +73,7 @@ public class ProxyLoginModule implements LoginModule {
         } catch (Exception e) {
             throw new IllegalStateException("Can not load or create login module " + module + " for bundle " + bundleId, e);
         }
-        target.initialize(subject, callbackHandler, sharedState, options);
+        target.initialize(subject, callbackHandler, sharedState, newOptions);
     }
 
     /* (non-Javadoc)
