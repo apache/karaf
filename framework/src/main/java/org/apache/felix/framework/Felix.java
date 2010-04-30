@@ -1466,7 +1466,34 @@ ex.printStackTrace();
         {
             throw new IllegalStateException("The bundle is uninstalled.");
         }
-        return bundle.getCurrentModule().getEntry(name);
+
+        URL url = bundle.getCurrentModule().getEntry(name);
+
+        // Some JAR files do not contain directory entries, so if
+        // the entry wasn't found and is a directory, scan the entries
+        // to see if we should synthesize an entry for it.
+        if ((url == null) && name.endsWith("/") && !name.equals("/"))
+        {
+            // Use the entry filter enumeration to search the bundle content
+            // recursively for matching entries and return URLs to them.
+            Enumeration enumeration =
+                new EntryFilterEnumeration(bundle, false, name, "*", true, true);
+            // If the enumeration has elements, then that means we need
+            // to synthesize the directory entry.
+            if (enumeration.hasMoreElements())
+            {
+                URL entryURL = (URL) enumeration.nextElement();
+                try
+                {
+                    url = new URL(entryURL, ((name.charAt(0) == '/') ? name : "/" + name));
+                }
+                catch (MalformedURLException ex)
+                {
+                    url = null;
+                }
+            }
+        }
+        return url;
     }
 
     /**
@@ -1481,14 +1508,15 @@ ex.printStackTrace();
 
         // Get the entry enumeration from the module content and
         // create a wrapper enumeration to filter it.
-        Enumeration enumeration = new GetEntryPathsEnumeration(bundle, path);
+        Enumeration enumeration =
+            new EntryFilterEnumeration(bundle, false, path, "*", false, false);
 
         // Return the enumeration if it has elements.
         return (!enumeration.hasMoreElements()) ? null : enumeration;
     }
 
     /**
-     * Implementation for findEntries().
+     * Implementation for Bundle.findEntries().
     **/
     Enumeration findBundleEntries(
         BundleImpl bundle, String path, String filePattern, boolean recurse)
@@ -1499,7 +1527,7 @@ ex.printStackTrace();
         // Get the entry enumeration from the module content and
         // create a wrapper enumeration to filter it.
         Enumeration enumeration =
-            new FindEntriesEnumeration(bundle, path, filePattern, recurse);
+            new EntryFilterEnumeration(bundle, true, path, filePattern, recurse, true);
 
         // Return the enumeration if it has elements.
         return (!enumeration.hasMoreElements()) ? null : enumeration;
