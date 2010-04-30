@@ -26,114 +26,145 @@
  *
  * See also http://felix.apache.org/site/branding-the-web-console.html
  */
-
 #main {
-    font-family: Verdana, Arial, Helvetica, sans-serif;
-    font-size: 10px;
-    color: black;
-    background-color: white;
-    border-collapse: collapse;
-    padding: 0px;
-    margin: 30px;
-    position: absolute;
-    text-align: left;
-    border-color: black;
+	width: 90% !important;
+	margin-left: 5%;
 }
+#main img { border: none }
 
+
+/* LOGO & BRANDING */
 #lead {
-    color: #00678C;
-    /* color: #ffffff; */
-    margin: 0px 0px 26px 0px;
-    padding: 0px;
-    height: 100px;
+	padding-top: 10px;
+	margin: 0;
+	height: 73px; /* must be the same as logo (#lead p) height */
+}
+#lead h1 { /* This contains the page title */
+	font-size: 26px;
+	font-weight: bold;
+	float: left;
+}
+#lead p { /* This contains the logo */
+	float: right;
+	height: 73px; /* must be the same as #lead height */
 }
 
-/* This contains the page title */
-#lead h1 {
-    margin: 0px;
-    padding: 5px 0 0 8px;
-    font-size: 300%;
-    font-weight: bold;
-    line-height: 120%;
-    /* account for 5px top padding to get a total of 100px */
-    height: 95px;
-    float: left;
-}
 
-#lead br {
-    line-height: 20px;
-}
-
-/* This contains the logo */
-#lead p {
-    margin: 0px;
-    padding: 0px;
-    height: 100px;
-    position:absolute;
-    right: 0px;
-}
-
-/* This contains the top navigation */
+/* TOP NAVIGATION */
 #technav {
-    border-bottom: 1px solid #6181A9;
-    border-top: 1px solid #6181A9;
-    color: black;
-    font-size: 10px;
-    font-weight: bold;
-    line-height: 21px;
-    padding: 0;
-    margin: 0;
+	font-size: 10px;
+	line-height: 21px;
+	padding: 0;
+	margin: 0;
 }
-
-#technav a {
-    text-decoration: none;
-    padding: 3px 10px 3px 10px;
-    color: #6181A9;
-    text-decoration: none;
+#technav div {
+	display: inline;
+	padding: .2em 1em;
+	white-space: nowrap;
 }
-
-#technav a:hover {
-    background-color: black;
-}
-
-/* Special rendering of the "button" for the current page */
-#technav .technavat {
-    text-decoration: none;
-    padding: 3px 10px 3px 10px;
-    background-color: #B6CAE4;
-    color: black;
-}
-
-#technav .technavitem {
-    display: inline;
-    white-space: nowrap;
-}
-
 
 /* CENTRAL CONTENT AREA STYLING */
 #content {
-    position: relative;
+	font-size: 8pt;
 }
 
-#content A:link {
-    color: #336600;
-    text-decoration: underline;
+/* used in some plugins - showing ID (long) element in tables */
+.col_Id {
+	width: 5em;
 }
 
-#content A:visited {
-    color: #666666;
-    text-decoration: underline;
+/* styling button groups like in the bundles & log plugins */
+.buttonGroup {
+	text-align: right;
+	padding: .5em 1em .5em 0;
+	vertical-align: middle;
+}
+.buttonGroup select {
+	display: inline;
+	float: none;
+	margin: 0;
 }
 
-#content A:hover {
-    color: #ffffff;
-    background-color: #336600;
-    text-decoration: none;
+/* The following styles are not complete. They usually apply only padding,
+ * margin... mostly *WHERE* the elements are visualised. Visual styling like
+ * colors and fonts are applied automatically by a JavaScript that borrows
+ * the visual element styles from the JQuery UI theme
+ */
+
+/* input box, checkbox & buttons styling */
+.inputText, input.text, input.password, input.file, textarea, select {
+	color: #184054;
+	background-color: #f0f0f0;
+}
+.inputText, input.text, input.password, textarea {
+	border: 1px solid #999999;
+	border-bottom: 1px solid #cccccc;
+	border-right: 1px solid #cccccc;
 }
 
-#content A:active {
-    color: #ffffff;
-    background-color: #000000;
-    text-decoration: none;
+/* tables styling - must be in synch with tablesorter CSS */
+td, th { vertical-align: top }
+table.nicetable {
+	width: 100%;
+	text-align: left;
+}
+table.nicetable th, table.nicetable td {
+	border-bottom: 1px solid #cccccc;
+	text-align: left;
+	padding: .2em;
+	padding-left: .8em;
 }
 
+/* tablesorter styling */
+tr .header {
+	background-image: url(../lib/bg.gif);
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+tr .headerSortUp {
+	background-image: url(../lib/asc.gif);
+}
+tr .headerSortDown {
+	background-image: url(../lib/desc.gif);
+}
+
+/* status line */
+.statline {
+	margin-top: .5em !important;
+	margin-bottom: .5em !important;
+	padding: .2em;
+}
+
+/* zebra tables */
+.even {
+	/* default background unmodified from JQuery UI Theme */
+}
+
+.odd {
+	/* overwrite background from JQuery UI Theme */
+	background: none !important;
+}
+
+/*
+ * Common UI style to define button icons like in bundles plugin. The HTML markup is:
+ * <ul class="icons ui-widget">
+ *   <li class="dynhover" title="tooltip comes here"><span class="ui-icon ui-icon-refresh">&nbsp;</span></li>
+ * </ul>
+ */
+ul.icons {
+	margin: 0;
+	padding: 0
+}
+ul.icons span.ui-icon {
+	float: left;
+	margin: 0 1px
+}
+ul.icons li {
+	margin: 1px;
+	position: relative;
+	padding: 1px 0;
+	cursor: pointer;
+	float: left;
+	list-style: none
+}
