@@ -45,6 +45,7 @@
         <module>management</module>
         <module>webconsole</module>
         <module>manual</module>
+        <module>exception</module>
         <module>assembly</module>
         <module>demos</module>
         <module>itests</module>
@@ -91,11 +92,11 @@
         <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
         <junit.version>4.7_1</junit.version>
         <jline.version>0.9.95.20100209</jline.version>
-        <log4j.version>1.2.14</log4j.version>
+        <log4j.version>1.2.16</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.0-RC1</mina.version>
         <pax.exam.version>1.1.0</pax.exam.version>
-        <pax.logging.version>1.4</pax.logging.version>
+        <pax.logging.version>1.4.1-SNAPSHOT</pax.logging.version>
         <pax.runner.version>1.2.1</pax.runner.version>
         <pax.url.version>1.1.2</pax.url.version>
         <pax.web.version>0.7.2</pax.web.version>
@@ -164,6 +165,11 @@
             <dependency>
                 <groupId>org.apache.felix.karaf</groupId>
                 <artifactId>org.apache.felix.karaf.main</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf</groupId>
+                <artifactId>org.apache.felix.karaf.exception</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>

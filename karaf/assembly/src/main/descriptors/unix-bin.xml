@@ -128,6 +128,14 @@
     </files>
 
     <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib/endorsed</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>org.apache.felix.karaf:org.apache.felix.karaf.exception</include>
+            </includes>
+        </dependencySet>
 
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
