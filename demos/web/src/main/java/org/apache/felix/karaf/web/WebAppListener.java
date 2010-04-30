@@ -22,7 +22,6 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.apache.felix.karaf.main.Main;
-import org.apache.felix.karaf.main.Bootstrap;
 
 public class WebAppListener implements ServletContextListener {
 	
@@ -37,7 +36,8 @@ public class WebAppListener implements ServletContextListener {
 			System.setProperty("karaf.base", root);
 			System.setProperty("karaf.startLocalConsole", "false");
 			System.setProperty("karaf.startRemoteShell", "true");
-			main = Bootstrap.launch(new String[0]);
+			main = new Main(new String[0]);
+            main.launch();
 		} catch (Exception e) {
 			main = null;
 			e.printStackTrace();
