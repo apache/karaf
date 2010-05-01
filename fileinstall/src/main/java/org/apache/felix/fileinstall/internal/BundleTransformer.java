@@ -49,8 +49,7 @@ public class BundleTransformer implements ArtifactUrlTransformer
             }
             jar = new JarFile(artifact);
             Manifest m = jar.getManifest();
-            if (m.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null
-                && m.getMainAttributes().getValue(new Attributes.Name("Bundle-Version")) != null)
+            if (m.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null)
             {
                 return true;
             }
