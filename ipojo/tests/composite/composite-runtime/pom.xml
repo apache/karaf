@@ -77,7 +77,7 @@
               org.apache.felix.ipojo.test.composite.service, org.apache.felix.ipojo.test.composite.component, org.apache.felix.ipojo.test.composite.util
             </Export-Package>
             <Bundle-SymbolicName>
-              ${pom.artifactId}
+              ${project.artifactId}
             </Bundle-SymbolicName>
             <Private-Package>
               org.apache.felix.ipojo.test.composite.*

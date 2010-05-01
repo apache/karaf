@@ -15,7 +15,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Private-Package>YOUR_PRIVATE_PACKAGES</Private-Package>
             <Import-Package>*</Import-Package> <!-- YOUR_IMPORTED_PACKAGES -->
             <Export-Package>*</Export-Package> <!-- YOUR_EXPORTED_PACKAGES -->

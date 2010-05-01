@@ -31,7 +31,7 @@
   <version>1.1.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>org.apache.felix.ipojo.junit4osgi</artifactId>
       <version>1.1.0-SNAPSHOT</version>
     </dependency>
@@ -65,7 +65,7 @@
           <instructions>
             <Bundle-Name> Apache Felix iPOJO OSGi Junit Runner - Felix Command
             </Bundle-Name>
-            <Bundle-SymbolicName> ${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName> ${project.artifactId}</Bundle-SymbolicName>
             <Private-Package> org.apache.felix.ipojo.junit4osgi.command
             </Private-Package>
             <Include-Resource> META-INF/LICENSE=LICENSE,

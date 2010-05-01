@@ -62,7 +62,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>iPOJO Manipulator</Bundle-Name>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
             <Bundle-Description> iPOJO Manipulator </Bundle-Description>
             <Export-Package> org.apache.felix.ipojo.manipulator

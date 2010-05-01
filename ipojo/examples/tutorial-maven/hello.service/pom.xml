@@ -50,7 +50,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>
-              ${pom.artifactId}
+              ${project.artifactId}
             </Bundle-SymbolicName>
             <Export-Package>
               ipojo.example.hello

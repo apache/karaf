@@ -70,7 +70,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>
-              ${pom.artifactId}
+              ${project.artifactId}
             </Bundle-SymbolicName>
             <Private-Package>
               ipojo.example.hello.impl

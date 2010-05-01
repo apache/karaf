@@ -65,7 +65,7 @@
               Apache Felix iPOJO OSGi Junit Runner
             </Bundle-Name>
             <Bundle-SymbolicName>
-              ${pom.artifactId}
+              ${project.artifactId}
             </Bundle-SymbolicName>
             <Private-Package>
               org.apache.felix.ipojo.junit4osgi.impl,

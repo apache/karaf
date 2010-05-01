@@ -52,7 +52,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}
+            <Bundle-SymbolicName>${project.artifactId}
             </Bundle-SymbolicName>
              <Bundle-DocURL>
               http://felix.apache.org/site/ipojo-webconsole-plugin.html

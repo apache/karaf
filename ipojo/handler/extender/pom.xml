@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -63,8 +63,8 @@
             </Bundle-DocURL>
             <Private-Package> org.apache.felix.ipojo.handler.extender
             </Private-Package>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Bundle-Name>${pom.name}</Bundle-Name>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Name>${project.name}</Bundle-Name>
             <Include-Resource> META-INF/LICENSE=LICENSE,
               META-INF/NOTICE=NOTICE </Include-Resource>
           </instructions>
@@ -73,7 +73,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-ipojo-plugin</artifactId>
-        <version>${pom.version}</version>
+        <version>${project.version}</version>
         <executions>
           <execution>
             <goals>

@@ -37,7 +37,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -55,7 +55,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>Apache Felix iPOJO Arch Command</Bundle-Name>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
             <Bundle-Description> iPOJO Arch command for Felix
             </Bundle-Description>
@@ -71,7 +71,7 @@
   <plugin>
     <groupId>org.apache.felix</groupId>
     <artifactId>maven-ipojo-plugin</artifactId>
-    <version>${pom.version}</version>
+    <version>${project.version}</version>
     <executions>
       <execution>
         <goals>

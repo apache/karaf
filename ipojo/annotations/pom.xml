@@ -56,7 +56,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>Apache Felix iPOJO Annotations</Bundle-Name>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
             <Bundle-Description> iPOJO Annotations </Bundle-Description>
             <Bundle-DocURL>http://felix.apache.org/site/how-to-use-ipojo-annotations.html</Bundle-DocURL>

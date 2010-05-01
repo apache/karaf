@@ -61,7 +61,7 @@
 		<dependency>
 			<groupId>ipojo.tests</groupId>
 			<artifactId>tests.core.service.dependency</artifactId>
-			<version>${pom.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -73,7 +73,7 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>
-							${pom.artifactId}
+							${project.artifactId}
 						</Bundle-SymbolicName>
 						<Private-Package>
 							org.apache.felix.ipojo.test.scenarios.service.dependency.dynamic.priority, org.apache.felix.ipojo.test.scenarios.service.dependency.policies, org.apache.felix.ipojo.test.scenarios.service.dependency.statics, org.apache.felix.ipojo.test.scenarios.util

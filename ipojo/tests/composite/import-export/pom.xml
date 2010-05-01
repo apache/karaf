@@ -67,7 +67,7 @@
     <dependency>
       <groupId>ipojo.tests</groupId>
       <artifactId>tests.composite</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>
@@ -79,7 +79,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>
-              ${pom.artifactId}
+              ${project.artifactId}
             </Bundle-SymbolicName>
             <Private-Package>
               org.apache.felix.ipojo.test.composite.exporter, org.apache.felix.ipojo.test.composite.importer

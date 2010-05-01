@@ -46,7 +46,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>
@@ -69,7 +69,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>iPOJO Ant Task</Bundle-Name>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
             <Bundle-Description> iPOJO Ant Task </Bundle-Description>
             <Bundle-DocURL>http://felix.apache.org/site/ipojo-ant-task.html</Bundle-DocURL>

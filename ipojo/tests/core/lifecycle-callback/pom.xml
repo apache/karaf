@@ -72,7 +72,7 @@
 							org.apache.felix.ipojo.test.scenarios.lifecycle.callback.service
 						</Export-Package>
 						<Bundle-SymbolicName>
-							${pom.artifactId}
+							${project.artifactId}
 						</Bundle-SymbolicName>
 						<Private-Package>
 							org.apache.felix.ipojo.test*
