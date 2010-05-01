@@ -1,8 +1,8 @@
 package org.apache.felix.ipojo.tests.core;
 
 import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.osgi.framework.ServiceReference;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 public class Tools {
 

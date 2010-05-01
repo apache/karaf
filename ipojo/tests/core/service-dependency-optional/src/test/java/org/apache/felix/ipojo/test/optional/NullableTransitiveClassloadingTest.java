@@ -7,6 +7,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
 
 import java.io.File;
 
@@ -16,9 +17,6 @@ import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.MissingHandlerException;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.optional.MyComponent;
-import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
-import org.apache.felix.ipojo.tinybundles.BundleAsiPOJO;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +27,8 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.BundleContext;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 import aQute.lib.osgi.Constants;
 
@@ -73,15 +73,15 @@ public class NullableTransitiveClassloadingTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject())
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject()
                         ),
                 provision(
                         TinyBundles.newBundle()
                             .add(MyComponent.class)
                             .set(Constants.IMPORT_PACKAGE, "*")
-                            .build(BundleAsiPOJO.asiPOJOBundle(new File("src/main/resources/metadata.xml"))
+                            .build(withiPOJO(new File("src/main/resources/metadata.xml"))
                             )
-                            
+
                 ));
 
         return opt;
@@ -91,7 +91,7 @@ public class NullableTransitiveClassloadingTest {
     public void testCreation() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
         Factory factory = ipojo.getFactory("optional-log-cons");
         ComponentInstance ci = factory.createComponentInstance(null);
-        
+
         ci.dispose();
     }
 

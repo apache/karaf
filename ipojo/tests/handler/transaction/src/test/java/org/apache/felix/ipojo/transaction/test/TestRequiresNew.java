@@ -18,9 +18,6 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
 import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
-import org.apache.felix.ipojo.tinybundles.BundleAsiPOJO;
 import org.apache.felix.ipojo.transaction.test.component.FooDelegator;
 import org.apache.felix.ipojo.transaction.test.component.FooImpl;
 import org.apache.felix.ipojo.transaction.test.service.CheckService;
@@ -39,6 +36,9 @@ import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
 
 @RunWith( JUnit4TestRunner.class )
 public class TestRequiresNew {
@@ -70,7 +70,7 @@ public class TestRequiresNew {
     public static Option[] configure() {
         ROOT.mkdirs();
 
-       
+
         InputStream service = TinyBundles.newBundle()
         .add(CheckService.class)
         .add(Foo.class)
@@ -82,21 +82,21 @@ public class TestRequiresNew {
         .add(FooImpl.class)
         .set(Constants.BUNDLE_SYMBOLICNAME,"Foo Provider")
         .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
-        .build( BundleAsiPOJO.asiPOJOBundle(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  );
-    
+        .build( withiPOJO(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  );
+
         InputStream test = TinyBundles.newBundle()
         .add(FooDelegator.class)
         .set(Constants.BUNDLE_SYMBOLICNAME,"RequiresNewTransactionPropagation")
         .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service, javax.transaction")
-        .build( BundleAsiPOJO.asiPOJOBundle(new File(ROOT, "requiresnew.jar"), new File(TEST, "requiresnew.xml"))  );
-    
+        .build( withiPOJO(new File(ROOT, "requiresnew.jar"), new File(TEST, "requiresnew.xml"))  );
+
         Option[] opt =  options(
                 provision(
                         mavenBundle().groupId("org.ops4j.pax.logging").artifactId("pax-logging-api").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.handler.transaction").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.transaction").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject())
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject()
                 ),
                 provision(
                         service,
@@ -113,8 +113,8 @@ public class TestRequiresNew {
                            .build();
                     }
                 });
-        
-        
+
+
         return opt;
     }
 

@@ -1,6 +1,5 @@
 package org.apache.felix.ipojo.tests.core;
 
-import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
@@ -10,6 +9,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,6 +32,8 @@ import org.osgi.framework.Constants;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 @RunWith( JUnit4TestRunner.class )
 public class SystemLoggerInfoTest {
@@ -44,17 +46,17 @@ public class SystemLoggerInfoTest {
     private IPOJOHelper ipojo;
 
     private LogReaderService log;
-    
+
     @Before
     public void init() {
         osgi = new OSGiHelper(context);
         ipojo = new IPOJOHelper(context);
-        
+
         log = (LogReaderService) osgi.getServiceObject(LogReaderService.class.getName(), null);
         if (log == null) {
             throw new RuntimeException("No Log Service !");
         }
-        
+
         LogService logs = (LogService) osgi.getServiceObject(LogService.class.getName(), null);
         logs.log(LogService.LOG_WARNING, "Ready");
     }
@@ -77,7 +79,7 @@ public class SystemLoggerInfoTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject()),
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject(),
                         mavenBundle().groupId( "org.apache.felix" ).artifactId( "org.apache.felix.log" ).version(asInProject())
                         ),
                 provision(
@@ -93,13 +95,13 @@ public class SystemLoggerInfoTest {
                             .add(MyComponent.class)
                             .set(Constants.BUNDLE_SYMBOLICNAME,"MyComponent")
                             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                            .build( asiPOJOBundle(new File(tmp, "provider.jar"), new File("component.xml")))
+                            .build( withiPOJO(new File(tmp, "provider.jar"), new File("component.xml")))
                             ),
                 systemProperty( "ipojo.log.level" ).value( "info" )
                 );
         return opt;
     }
-    
+
     @Test
     public void testMessages() throws InterruptedException {
         List<String> messages = getMessages(log.getLog());

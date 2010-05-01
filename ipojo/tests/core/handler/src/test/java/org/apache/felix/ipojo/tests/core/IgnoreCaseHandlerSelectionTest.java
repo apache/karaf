@@ -1,6 +1,5 @@
 package org.apache.felix.ipojo.tests.core;
 
-import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
@@ -9,6 +8,8 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
+
 
 import java.io.File;
 
@@ -17,8 +18,6 @@ import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
-import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.apache.felix.ipojo.tests.core.component.MyComponent;
 import org.apache.felix.ipojo.tests.core.handler.EmptyHandler;
 import org.apache.felix.ipojo.tests.core.service.MyService;
@@ -36,6 +35,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 /**
  * Check that the handler selection ignore case.
@@ -73,7 +74,7 @@ public class IgnoreCaseHandlerSelectionTest {
         File tmp = new File("target/tmp");
         tmp.mkdirs();
 
-        
+
         Option[] opt =  options(
                 felix(),
                 equinox(),
@@ -81,14 +82,14 @@ public class IgnoreCaseHandlerSelectionTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").versionAsInProject()
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject()
                         ),
                 provision(
                         newBundle()
                             .add( MyService.class )
                             .set( Constants.BUNDLE_SYMBOLICNAME, "ServiceInterface" )
                             .set( Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service" )
-                            .build( TinyBundles.withBnd() ) 
+                            .build( TinyBundles.withBnd() )
                     ),
                provision(
                        // Components and the handler
@@ -96,11 +97,11 @@ public class IgnoreCaseHandlerSelectionTest {
                             .add(MyComponent.class) // Component Implementation
                             .add(EmptyHandler.class) // Handler.
                             .set(Constants.BUNDLE_SYMBOLICNAME,"IgnoreCase")
-                            .set(Constants.IMPORT_PACKAGE, 
+                            .set(Constants.IMPORT_PACKAGE,
                                     "org.apache.felix.ipojo.tests.core.service, " +
                                     "org.apache.felix.ipojo, " +
                                     "org.apache.felix.ipojo.metadata")
-                            .build(asiPOJOBundle(new File(tmp, "ignorecase.jar"), new File("src/test/resources/ignorecase.xml")))));
+                            .build(withiPOJO(new File(tmp, "ignorecase.jar"), new File("src/test/resources/ignorecase.xml")))));
         return opt;
     }
 
@@ -149,7 +150,7 @@ public class IgnoreCaseHandlerSelectionTest {
 
           HandlerDescription desc = arch.getInstanceDescription()
               .getHandlerDescription("orG.apAche.feliX.iPOJO.tests.CORE.hAnDlEr:EmPtY");  // Check with the declared name.
-                
+
           Assert.assertNotNull(desc);
           Assert.assertTrue(desc.isValid());
     }

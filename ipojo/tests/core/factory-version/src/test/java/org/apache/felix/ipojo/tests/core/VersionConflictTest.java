@@ -1,6 +1,5 @@
 package org.apache.felix.ipojo.tests.core;
 
-import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
@@ -11,6 +10,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,8 +23,6 @@ import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.handlers.dependency.Dependency;
 import org.apache.felix.ipojo.handlers.dependency.DependencyDescription;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandlerDescription;
-import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.apache.felix.ipojo.tests.core.component.MyComponent;
 import org.apache.felix.ipojo.tests.core.component.MyCons;
 import org.apache.felix.ipojo.tests.core.service.MyService;
@@ -47,6 +45,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 @RunWith( JUnit4TestRunner.class )
 public class VersionConflictTest {
@@ -87,7 +87,7 @@ public class VersionConflictTest {
                .build( withBnd()),
                 new FileOutputStream(f1),
                 true);
-        
+
         File f2 = new File(tmp, "service-interface-v2.jar");
         StreamUtils.copyStream(
                 newBundle()
@@ -98,14 +98,14 @@ public class VersionConflictTest {
                 .build( withBnd()),
                 new FileOutputStream(f2),
                 true);
-        
+
         File c1 = new File(tmp, "component-v1.jar");
         StreamUtils.copyStream(
                 newBundle()
                .add(MyComponent.class)
                .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1")
                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[1.0.0, 1.0.0]\"")
-               .build( asiPOJOBundle(new File("vprovider-v1.xml"))),
+               .build( withiPOJO(new File("vprovider-v1.xml"))),
                new FileOutputStream(c1),
                true);
 
@@ -115,7 +115,7 @@ public class VersionConflictTest {
                .add(MyComponent.class)
                .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV2")
                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[2.0.0, 2.0.0]\"")
-               .build( asiPOJOBundle(new File("vprovider-v2.xml"))),
+               .build( withiPOJO(new File("vprovider-v2.xml"))),
                new FileOutputStream(c2),
                true);
 
@@ -126,10 +126,10 @@ public class VersionConflictTest {
                .set(Constants.BUNDLE_SYMBOLICNAME,"MyCons")
                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[2.0.0, 2.0.0]\"")
                .set(Constants.BUNDLE_VERSION, "2.0")
-               .build(asiPOJOBundle(new File("cons.xml"))),
+               .build(withiPOJO(new File("cons.xml"))),
                new FileOutputStream(cons),
                true);
-        
+
         File consV1 = new File(tmp, "cons-v1.jar");
         StreamUtils.copyStream(
                 newBundle()
@@ -137,10 +137,10 @@ public class VersionConflictTest {
                .set(Constants.BUNDLE_SYMBOLICNAME,"MyCons")
                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service; version=\"[1.0.0, 1.0.0]\"")
                .set(Constants.BUNDLE_VERSION, "1.0")
-               .build(asiPOJOBundle(new File("cons.xml"))),
+               .build(withiPOJO(new File("cons.xml"))),
                new FileOutputStream(consV1),
                true);
-        
+
         Option[] opt =  options(
                 felix(),
                 equinox(),
@@ -148,8 +148,7 @@ public class VersionConflictTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject()),
-                        mavenBundle().groupId("org.ops4j.base").artifactId("ops4j-base-lang").versionAsInProject()
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject(),                        mavenBundle().groupId("org.ops4j.base").artifactId("ops4j-base-lang").versionAsInProject()
 //                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
                         ),
                         systemProperty( "url1" ).value( f1.toURI().toURL().toExternalForm() ),

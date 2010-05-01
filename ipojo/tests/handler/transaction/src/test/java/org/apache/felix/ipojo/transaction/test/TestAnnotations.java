@@ -4,14 +4,12 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
 
 import java.io.File;
 import java.io.InputStream;
 
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
-import org.apache.felix.ipojo.tinybundles.BundleAsiPOJO;
 import org.apache.felix.ipojo.transaction.test.component.ComponentUsingAnnotations;
 import org.apache.felix.ipojo.transaction.test.component.FooImpl;
 import org.apache.felix.ipojo.transaction.test.service.CheckService;
@@ -29,6 +27,8 @@ import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 @RunWith( JUnit4TestRunner.class )
 public class TestAnnotations {
@@ -71,13 +71,13 @@ public class TestAnnotations {
             .add(FooImpl.class)
             .set(Constants.BUNDLE_SYMBOLICNAME,"Foo Provider")
             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
-            .build( BundleAsiPOJO.asiPOJOBundle(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  );
+            .build( withiPOJO(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  );
 
         InputStream test = TinyBundles.newBundle()
             .add(ComponentUsingAnnotations.class)
             .set(Constants.BUNDLE_SYMBOLICNAME,"TransactionAnnotationTest")
             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service, javax.transaction")
-            .build( BundleAsiPOJO.asiPOJOBundle(new File(ROOT, "annotations.jar"), new File(TEST, "annotation.xml"))  );
+            .build( withiPOJO(new File(ROOT, "annotations.jar"), new File(TEST, "annotation.xml"))  );
 
 
         Option[] opt =  options(
@@ -87,7 +87,7 @@ public class TestAnnotations {
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.handler.transaction").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.transaction").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject())
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject()
                 ),
                 provision(
                         service,

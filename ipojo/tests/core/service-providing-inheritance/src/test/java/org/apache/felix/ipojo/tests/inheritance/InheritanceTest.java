@@ -1,15 +1,14 @@
 package org.apache.felix.ipojo.tests.inheritance;
 
-import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
-import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
+import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
-
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
 
 import java.io.File;
 
@@ -34,6 +33,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 @RunWith( JUnit4TestRunner.class )
 public class InheritanceTest {
@@ -68,7 +69,8 @@ public class InheritanceTest {
                 equinox(),
                 provision(
                         // Runtime.
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject())
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject()
                         ),
                 // Bundle A
                 provision(
@@ -95,14 +97,14 @@ public class InheritanceTest {
                             .set(Constants.BUNDLE_SYMBOLICNAME,"C")
                             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.b," +
                                         "org.apache.felix.ipojo.tests.inheritance.a")
-                           .build( asiPOJOBundle(new File(tmp, "provider.jar"), new File("src/test/resources/provider.xml"))),
+                           .build( withiPOJO(new File(tmp, "provider.jar"), new File("src/test/resources/provider.xml"))),
                      // Component D
                         newBundle()
                             .add(D.class)
                             .set(Constants.BUNDLE_SYMBOLICNAME,"D")
                             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.inheritance.b," +
                                     "org.apache.felix.ipojo.tests.inheritance.a")
-                            .build( asiPOJOBundle(new File(tmp, "cons.jar"), new File("src/test/resources/cons.xml"))))
+                            .build( withiPOJO(new File(tmp, "cons.jar"), new File("src/test/resources/cons.xml"))))
                 );
         return opt;
     }
@@ -125,27 +127,27 @@ public class InheritanceTest {
             }
         }
     }
-    
+
     @Test
     public void testArchitecture() {
         osgi.waitForService(Architecture.class.getName(), "(architecture.instance=d)", 2000);
         ServiceReference ref = ipojo.getServiceReferenceByName(Architecture.class.getName(), "d");
         Assert.assertNotNull(ref);
-        
+
         Architecture arch = (Architecture) osgi.getServiceObject(ref);
-        
+
         System.out.println(arch.getInstanceDescription().getDescription());
-        
+
         Assert.assertEquals(ComponentInstance.VALID, arch.getInstanceDescription().getState());
         DependencyDescription dd = getDependency(arch, "org.apache.felix.ipojo.tests.inheritance.b.IB");
-        
+
         Assert.assertTrue(! dd.getServiceReferences().isEmpty());
-        
+
         ServiceReference dref = (ServiceReference) dd.getServiceReferences().get(0);
         Assert.assertEquals(dref.getBundle().getSymbolicName(), "C");
-        
+
     }
-    
+
     private DependencyDescription getDependency(Architecture arch, String id) {
         DependencyHandlerDescription hd = (DependencyHandlerDescription) arch.getInstanceDescription().getHandlerDescription("org.apache.felix.ipojo:requires");
         Assert.assertNotNull(hd);

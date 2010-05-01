@@ -1,12 +1,13 @@
 package org.apache.felix.ipojo.tests.core;
 
-import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
+
 
 import java.io.File;
 import java.util.HashMap;
@@ -19,7 +20,6 @@ import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.MissingHandlerException;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.apache.felix.ipojo.tests.core.component.DummyImpl;
 import org.apache.felix.ipojo.tests.core.handler.DummyHandler;
 import org.apache.felix.ipojo.tests.core.service.Dummy;
@@ -38,6 +38,7 @@ import org.ops4j.pax.exam.junit.JUnitOptions;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.useradmin.User;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 import aQute.lib.osgi.Constants;
 
@@ -51,7 +52,7 @@ public class DummyHandlerTest {
      */
     private static final int NB_MOCK = 10;
 
-  
+
     @Inject
     private BundleContext context;
 
@@ -71,19 +72,19 @@ public class DummyHandlerTest {
     public static Option[] configure() {
         Option[] platform = options(CoreOptions.felix());
 
-        Option[] bundles = 
+        Option[] bundles =
             options(
                     provision(
                          newBundle()
-                             .add(DummyHandler.class) 
-                             .build(asiPOJOBundle(new File("src/test/resources/dummy-handler.xml")))
+                             .add(DummyHandler.class)
+                             .build(withiPOJO(new File("src/test/resources/dummy-handler.xml")))
                          ),
                      provision(
                          newBundle()
                              .add(Dummy.class)
                              .add(DummyImpl.class)
                              .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.handler.dummy.test")
-                             .build(asiPOJOBundle(new File("src/test/resources/dummy-component.xml")))
+                             .build(withiPOJO(new File("src/test/resources/dummy-component.xml")))
                          ),
                     provision(
                         mavenBundle().groupId("org.apache.felix").artifactId("org.osgi.compendium").version("1.4.0")
@@ -100,8 +101,8 @@ public class DummyHandlerTest {
     @Configuration
     public static Option[] configAdminBundle() {
         return options(
-                mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").versionAsInProject(), 
-                mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").versionAsInProject());
+                mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").versionAsInProject(),
+                mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject());
     }
 
     /**
@@ -173,24 +174,24 @@ public class DummyHandlerTest {
             ServiceRegistration sr = context.registerService(User.class.getName(), service, null);
             registrations.put(service, sr);
         }
-        
+
         //verify that the bind method of the handler has been called
         for (User user : registrations.keySet()) {
                 verify(user).getName();
         }
-        
+
         //verify that the unbind has been called
         for (User user : registrations.keySet()) {
             registrations.get(user).unregister();
             verify(user).getType();
         }
-        
+
         //verify no more interaction
         for (User user : registrations.keySet()) {
                 Mockito.verifyNoMoreInteractions(user);
         }
     }
-    
+
 
     /**
      * Test if the bind and unbind methods when the bind services are registered before the instance creation
@@ -198,7 +199,7 @@ public class DummyHandlerTest {
     @Test
     public void testDummyTestBindBeforeStart() {
         ComponentInstance instance = null;
-        
+
         Map<User, ServiceRegistration> registrations = new HashMap<User, ServiceRegistration>();
 
         for (int i = 0; i < NB_MOCK; i++) {
@@ -217,18 +218,18 @@ public class DummyHandlerTest {
         } catch (MissingHandlerException e) {
         } catch (ConfigurationException e) {
         }
-        
+
         //verify that the bind method of the handler has been called
         for (User user : registrations.keySet()) {
                 verify(user).getName();
         }
-        
+
         //verify that the unbind has been called
         for (User user : registrations.keySet()) {
             registrations.get(user).unregister();
             verify(user).getType();
         }
-        
+
         //verify no more interaction
         for (User user : registrations.keySet()) {
                 Mockito.verifyNoMoreInteractions(user);

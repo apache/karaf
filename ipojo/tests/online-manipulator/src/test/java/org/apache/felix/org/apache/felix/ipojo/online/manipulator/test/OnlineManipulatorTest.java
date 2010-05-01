@@ -3,20 +3,18 @@ package org.apache.felix.org.apache.felix.ipojo.online.manipulator.test;
 
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
-import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
 import static org.ops4j.pax.exam.CoreOptions.frameworks;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asFile;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.architecture.Architecture;
@@ -29,10 +27,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.io.StreamUtils;
+import org.ops4j.pax.exam.Customizer;
 import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -79,11 +80,6 @@ public class OnlineManipulatorTest {
                       //  knopflerfish() KF does not export an XML parser.
                     ),
             provision(
-                mavenBundle()
-                    .groupId( "org.ops4j.pax.swissbox" )
-                    .artifactId( "pax-swissbox-tinybundles" )
-                    .version(asInProject())),
-            provision(
                     mavenBundle()
                     .groupId("org.apache.felix")
                     .artifactId("org.apache.felix.ipojo")
@@ -98,17 +94,27 @@ public class OnlineManipulatorTest {
                     ),
             provision(
                             newBundle()
-                                .addClass( Hello.class )
-                                .prepare()
+                                .add( Hello.class )
                                .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
                                .set(Constants.EXPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
-                                .build( asURL() ).toExternalForm()
+                               .build()
                         ),
            systemProperty( "providerWithMetadata" ).value( providerWithMetadata ),
            systemProperty( "providerWithMetadataInMetaInf" ).value( providerWithMetadataInMetaInf ),
            systemProperty( "providerWithoutMetadata" ).value( providerWithoutMetadata ),
            systemProperty( "consumerWithMetadata").value(consumerWithMetadata),
-           systemProperty( "consumerWithoutMetadata").value(consumerWithoutMetadata)
+           systemProperty( "consumerWithoutMetadata").value(consumerWithoutMetadata),
+
+           new Customizer() {
+                	 @Override
+                     public InputStream customizeTestProbe( InputStream testProbe )
+                     {
+                         return TinyBundles.modifyBundle(testProbe).set(Constants.IMPORT_PACKAGE,
+                        		 "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+                        		 .build();
+                     }
+
+                }
            );
 
 
@@ -141,12 +147,16 @@ public class OnlineManipulatorTest {
     }
 
     @Test
-    public void installProviderWithMetadata1() throws BundleException, InvalidSyntaxException, IOException {
+    public void installProviderWithMetadata1() throws BundleException, InvalidSyntaxException, Exception {
         String url = context.getProperty("providerWithMetadata");
         Assert.assertNotNull(url);
-        context.installBundle("ipojo:"+url).start();
+        Bundle bundle = context.installBundle("ipojo:"+url);
+        bundle.start();
 
         assertBundle("Provider");
+
+        Assert.assertNotNull(context.getAllServiceReferences(Hello.class.getName(), null));
+
         helper.waitForService(Hello.class.getName(), null, 5000);
         assertValidity();
         Assert.assertNotNull(context.getServiceReference(Hello.class.getName()));
@@ -226,15 +236,16 @@ public class OnlineManipulatorTest {
      * @throws IOException
      */
     public static String providerWithMetadata() throws IOException {
-        return newBundle()
-        .addResource("metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml"))
-        .addClass(MyProvider.class)
-        .prepare(
-            with()
-                .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
-                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
-            )
-              .build( asFile(getTemporaryFile("providerWithMetadata")) ).toURL().toExternalForm();
+        InputStream is = newBundle()
+        .add("metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml"))
+        .add(MyProvider.class)
+        .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
+        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+        .build();
+
+        File out = getTemporaryFile("providerWithMetadata");
+        StreamUtils.copyStream(is, new FileOutputStream(out), true);
+        return out.toURI().toURL().toExternalForm();
     }
 
     /**
@@ -243,15 +254,16 @@ public class OnlineManipulatorTest {
      * @throws IOException
      */
     public static String providerWithMetadataInMetaInf() throws IOException {
-        return newBundle()
-        .addResource("META-INF/metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml"))
-        .addClass(MyProvider.class)
-        .prepare(
-            with()
-                .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
-                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
-            )
-              .build( asFile(getTemporaryFile("providerWithMetadataInMetaInf")) ).toURL().toExternalForm();
+        InputStream is = newBundle()
+        .add("META-INF/metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml"))
+        .add(MyProvider.class)
+        .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
+        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+        .build();
+
+        File out = getTemporaryFile("providerWithMetadataInMetaInf");
+        StreamUtils.copyStream(is, new FileOutputStream(out), true);
+        return out.toURI().toURL().toExternalForm();
     }
 
     /**
@@ -260,15 +272,16 @@ public class OnlineManipulatorTest {
      * @throws IOException
      */
     public static String providerWithoutMetadata() throws IOException {
-        String url = newBundle()
+    	InputStream is = newBundle()
         //.addResource("metadata.xml", this.getClass().getClassLoader().getResource("provider.xml"))
-        .addClass(MyProvider.class)
-        .prepare(
-            with()
-                .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
-                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
-            )
-              .build( asFile(getTemporaryFile("providerWithoutMetadata")) ).toURL().toExternalForm();
+        .add(MyProvider.class)
+        .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
+        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+        .build();
+
+    	File out = getTemporaryFile("providerWithoutMetadata");
+        StreamUtils.copyStream(is, new FileOutputStream(out), true);
+        String url = out.toURI().toURL().toExternalForm();
 
         return url + "!" +OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml");
     }
@@ -280,17 +293,16 @@ public class OnlineManipulatorTest {
      * @throws IOException
      */
     public static String consumerWithMetadata() throws IOException {
-        return newBundle()
-            .addResource("metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("consumer.xml"))
-            .addClass(Consumer.class)
+        InputStream is = newBundle()
+            .add("metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("consumer.xml"))
+            .add(Consumer.class)
+            .set(Constants.BUNDLE_SYMBOLICNAME, "Consumer")
+            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+            .build();
 
-        .prepare(
-                with()
-                        .set(Constants.BUNDLE_SYMBOLICNAME, "Consumer")
-                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
-                )
-                .build( asFile(getTemporaryFile("consumerWithMetadata")) ).toURL().toExternalForm();
-
+        File out = getTemporaryFile("consumerWithMetadata");
+        StreamUtils.copyStream(is, new FileOutputStream(out), true);
+        return out.toURI().toURL().toExternalForm();
     }
 
     /**
@@ -300,14 +312,15 @@ public class OnlineManipulatorTest {
      * @throws IOException
      */
     public static String consumerWithoutMetadata() throws IOException {
-        String url = newBundle()
-        .addClass(Consumer.class)
-        .prepare(
-                with()
-                        .set(Constants.BUNDLE_SYMBOLICNAME, "Consumer")
-                .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
-                )
-                .build( asFile(getTemporaryFile("consumerWithoutMetadata")) ).toURL().toExternalForm();
+        InputStream is = newBundle()
+        .add(Consumer.class)
+        .set(Constants.BUNDLE_SYMBOLICNAME, "Consumer")
+        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+        .build();
+
+        File out = getTemporaryFile("consumerWithoutMetadata");
+        StreamUtils.copyStream(is, new FileOutputStream(out), true);
+        String url = out.toURI().toURL().toExternalForm();
 
         return url + "!" + OnlineManipulatorTest.class.getClassLoader().getResource("consumer.xml");
     }

@@ -1,6 +1,5 @@
 package org.apache.felix.ipojo.tests.core;
 
-import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
@@ -10,12 +9,11 @@ import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
 
 import java.io.File;
 
 import org.apache.felix.ipojo.architecture.Architecture;
-import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
 import org.apache.felix.ipojo.tests.core.component.MyComponent;
 import org.apache.felix.ipojo.tests.core.service.MyService;
 import org.junit.After;
@@ -32,6 +30,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 @RunWith( JUnit4TestRunner.class )
 public class FactoryVersionTest {
@@ -68,7 +68,7 @@ public class FactoryVersionTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject())
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject()
                         // mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
                         ),
                 provision(
@@ -84,18 +84,18 @@ public class FactoryVersionTest {
                             .add(MyComponent.class)
                             .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1")
                             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
-                            .build( asiPOJOBundle(new File(tmp, "provider-v1.jar"), new File("provider-v1.xml"))),
+                            .build( withiPOJO(new File(tmp, "provider-v1.jar"), new File("provider-v1.xml"))),
                      // Component V1.1 (Bundle Version)
                         newBundle()
                             .add(MyComponent.class)
                             .set(Constants.BUNDLE_SYMBOLICNAME,"ProviderV1.1")
                             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.tests.core.service")
                             .set(Constants.BUNDLE_VERSION, "1.1")
-                            .build( asiPOJOBundle(new File(tmp, "provider-v1.1.jar"), new File("provider-v1.1.xml"))),
+                            .build( withiPOJO(new File(tmp, "provider-v1.1.jar"), new File("provider-v1.1.xml"))),
                 // Instance declaration
                 newBundle()
                     .set(Constants.BUNDLE_SYMBOLICNAME,"Instances")
-                    .build( asiPOJOBundle(new File(tmp, "instances.jar"), new File("instances.xml")))
+                    .build( withiPOJO(new File(tmp, "instances.jar"), new File("instances.xml")))
                     )
                 );
         return opt;
@@ -147,7 +147,7 @@ public class FactoryVersionTest {
 
     @Test
     public void testServiceProperty() throws InvalidSyntaxException {
-          
+
           // Version 1.0
           //ServiceReference refv1 = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-v1");
           ServiceReference[] refv1 = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=instance-v1)");
@@ -156,7 +156,7 @@ public class FactoryVersionTest {
           Assert.assertEquals("1.0", version);
 
           // Version 1.1
-          ServiceReference[] refv11 = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=instance-v1.1)");          
+          ServiceReference[] refv11 = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=instance-v1.1)");
           //ServiceReference refv11 = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-v1.1");
           Assert.assertNotNull(refv11);
           String version11 = (String) refv11[0].getProperty("factory.version");
@@ -164,7 +164,7 @@ public class FactoryVersionTest {
           Assert.assertEquals("1.1", version11);
 
           // No Version
-          ServiceReference[] refany = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=instance-any)");          
+          ServiceReference[] refany = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=instance-any)");
 
           // ServiceReference refany = ipojo.getServiceReferenceByName(MyService.class.getName(), "instance-any");
           Assert.assertNotNull(refany);
@@ -172,7 +172,7 @@ public class FactoryVersionTest {
           Assert.assertNotNull(any);
 
           // No version set in the factory, so no version.
-          ServiceReference[] refmci = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=MyComponentInstance)");          
+          ServiceReference[] refmci = context.getAllServiceReferences(MyService.class.getName(), "(instance.name=MyComponentInstance)");
           //ServiceReference refmci = ipojo.getServiceReferenceByName(MyService.class.getName(), "MyComponentInstance");
           Assert.assertNotNull(refmci);
           String mci = (String) refmci[0].getProperty("factory.version");

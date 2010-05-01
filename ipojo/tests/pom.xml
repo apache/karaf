@@ -16,14 +16,89 @@
  specific language governing permissions and limitations
  under the License.
 -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ipojo.tests</groupId>
   <artifactId>ipojo.tests</artifactId>
   <version>1.5.0-SNAPSHOT</version>
   <name>Apache Felix iPOJO Tests</name>
   <packaging>pom</packaging>
-  
+
+  <repositories>
+  	<repository>
+  		<releases>
+  			<enabled>false</enabled>
+  		</releases>
+  		<id>ow2.snapshots</id>
+  		<name>OW2 Snapshot Repository</name>
+  		<url>http://maven.ow2.org/maven2-snapshot/</url>
+  	</repository>
+  </repositories>
+
+  <dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.annotations</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.api</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.composite</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.handler.whiteboard</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+      		<groupId>org.apache.felix</groupId>
+      		<artifactId>org.apache.felix.ipojo.metadata</artifactId>
+      		<version>1.4.0</version>
+   		</dependency>
+
+		<dependency>
+			<groupId>org.ow2.chameleon.testing</groupId>
+			<artifactId>tinybundles-ipojo</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.chameleon.testing</groupId>
+			<artifactId>osgi-helpers</artifactId>
+			<version>0.2.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+  </dependencyManagement>
+
   <modules>
   <module>manipulator/manipulation</module>
   <module>manipulator/metadata</module>
@@ -58,6 +133,22 @@
   <module>online-manipulator</module>
   </modules>
 
+  <build>
+  	<pluginManagement>
+  		<plugins>
+  			<plugin>
+  				<groupId>org.apache.felix</groupId>
+  				<artifactId>maven-ipojo-plugin</artifactId>
+  				<version>1.6.0</version>
+  			</plugin>
+  			<plugin>
+  				<groupId>org.apache.felix</groupId>
+  				<artifactId>maven-bundle-plugin</artifactId>
+  				<version>2.0.1</version>
+  			</plugin>
+  		</plugins>
+  	</pluginManagement>
+  </build>
   <profiles>
     <profile>
       <id>java5</id>
@@ -92,7 +183,6 @@
         <module>integration-tests</module>
       </modules>
     </profile>
-
   </profiles>
-  
+
 </project>

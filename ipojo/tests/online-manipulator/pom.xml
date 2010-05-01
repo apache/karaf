@@ -1,6 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+  	<groupId>ipojo.tests</groupId>
+  	<artifactId>ipojo.tests</artifactId>
+  	<version>1.5.0-SNAPSHOT</version>
+  </parent>
+
   <groupId>org.apache.felix</groupId>
   <artifactId>org.apache.felix.ipojo.online.manipulator.test</artifactId>
   <version>1.5.0-SNAPSHOT</version>
@@ -19,6 +26,7 @@
       <plugin>
         <groupId>org.apache.servicemix.tooling</groupId>
         <artifactId>depends-maven-plugin</artifactId>
+        <version>1.2</version>
         <executions>
           <execution>
             <id>generate-depends-file</id>
@@ -28,33 +36,13 @@
           </execution>
         </executions>
       </plugin>
-
-      <!--
-      <plugin>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>maven-paxexam-plugin</artifactId>
-        <executions>
-          <execution>
-          <id>generate-paxexam-config</id>
-          <goals>
-            <goal>generate-paxexam-config</goal>
-          </goals>
-          </execution>
-        </executions>
-        <configuration>
-        <settings>
-          <platform>felix</platform>
-        </settings>
-        </configuration>
-      </plugin> -->
     </plugins>
   </build>
 
   <dependencies>
-  <dependency>
-      <groupId>org.apache.felix</groupId>
+  	<dependency>
+      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>1.2.0</version>
     </dependency>
 
   <!--
@@ -63,7 +51,7 @@
   <dependency>
     <groupId>org.ops4j.pax.exam</groupId>
     <artifactId>pax-exam</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
   </dependency>
   <!--
     During runtime Pax Exam will discover the OSGi container to use by
@@ -75,57 +63,49 @@
     <groupId>org.ops4j.pax.exam</groupId>
     <artifactId>pax-exam-container-default
     </artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
   </dependency>
   <!--
     If your test code is based on JUnit you will have to have the Junit
     support artifact:
   -->
-  <dependency>
-    <groupId>org.ops4j.pax.exam</groupId>
-    <artifactId>pax-exam-junit</artifactId>
-    <version>1.1.0</version>
-  </dependency>
-  <dependency>
-    <groupId>junit</groupId>
-    <artifactId>junit</artifactId>
-    <version>4.5</version>
-    <type>jar</type>
-    <scope>test</scope>
-  </dependency>
+	<dependency>
+		<groupId>org.ops4j.pax.exam</groupId>
+		<artifactId>pax-exam-junit</artifactId>
+		<version>1.2.0</version>
+	</dependency>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.5</version>
+		<type>jar</type>
+		<scope>test</scope>
+	</dependency>
 
-
-  <!-- TinyBundle -->
-  <dependency>
-    <groupId>org.ops4j.pax.swissbox</groupId>
-    <artifactId>pax-swissbox-tinybundles</artifactId>
-    <version>1.0.0</version>
-  </dependency>
-  <dependency>
-    <groupId>org.apache.felix</groupId>
-    <artifactId>org.apache.felix.ipojo.tinybundles.bundleAsiPOJO</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
-  </dependency>
-    <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xercesImpl</artifactId>
-      <version>2.4.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.ipojo.annotations</artifactId>
-      <version>1.6.0</version>
-    </dependency>
-     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>1.7.0-SNAPSHOT</version>
-    </dependency>
-     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.ipojo.online.manipulator</artifactId>
-      <version>1.7.0-SNAPSHOT</version>
-    </dependency>
+	<dependency>
+		<groupId>org.ops4j.pax.swissbox</groupId>
+		<artifactId>pax-swissbox-tinybundles</artifactId>
+		<version>1.2.0</version>
+	</dependency>
+	<dependency>
+		<groupId>xerces</groupId>
+		<artifactId>xercesImpl</artifactId>
+		<version>2.4.0</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>org.apache.felix.ipojo.annotations</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>org.apache.felix.ipojo</artifactId>
+		<version>1.7.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>org.apache.felix.ipojo.online.manipulator</artifactId>
+		<version>1.7.0-SNAPSHOT</version>
+	</dependency>
 
   </dependencies>
 </project>

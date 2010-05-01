@@ -4,6 +4,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
+import static org.ow2.chameleon.testing.tinybundles.ipojo.IPOJOBuilder.withiPOJO;
 
 import java.io.File;
 import java.io.InputStream;
@@ -17,9 +18,6 @@ import javax.transaction.TransactionManager;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.HandlerFactory;
-import org.apache.felix.ipojo.test.helpers.IPOJOHelper;
-import org.apache.felix.ipojo.test.helpers.OSGiHelper;
-import org.apache.felix.ipojo.tinybundles.BundleAsiPOJO;
 import org.apache.felix.ipojo.transaction.test.component.FooDelegator;
 import org.apache.felix.ipojo.transaction.test.component.FooImpl;
 import org.apache.felix.ipojo.transaction.test.service.CheckService;
@@ -40,6 +38,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.ow2.chameleon.testing.helpers.IPOJOHelper;
+import org.ow2.chameleon.testing.helpers.OSGiHelper;
 
 @RunWith( JUnit4TestRunner.class )
 public class TestInstallation {
@@ -77,7 +77,7 @@ public class TestInstallation {
             .set(Constants.BUNDLE_SYMBOLICNAME,"Service")
             .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
             .build();
-        
+
 //        try {
 //            StreamUtils.copy(service, new FileOutputStream(new File(ROOT, "service.jar")));
 //        } catch (Exception e) {
@@ -88,13 +88,13 @@ public class TestInstallation {
             .add(FooImpl.class)
             .set(Constants.BUNDLE_SYMBOLICNAME,"Foo Provider")
             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
-            .build( BundleAsiPOJO.asiPOJOBundle(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  );
+            .build( withiPOJO(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  );
 
         InputStream test = TinyBundles.newBundle()
             .add(FooDelegator.class)
             .set(Constants.BUNDLE_SYMBOLICNAME,"RequiredTransactionPropagation")
             .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service, javax.transaction")
-            .build( BundleAsiPOJO.asiPOJOBundle(new File(ROOT, "requires.jar"), new File(TEST, "requires.xml"))  );
+            .build( withiPOJO(new File(ROOT, "requires.jar"), new File(TEST, "requires.xml"))  );
 
 
         Option[] opt =  options(
@@ -103,7 +103,7 @@ public class TestInstallation {
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.handler.transaction").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.transaction").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.test.helpers").version(asInProject())
+                        mavenBundle().groupId("org.ow2.chameleon.testing").artifactId("osgi-helpers").versionAsInProject()
                 ),
                 provision(
                         service,
@@ -120,7 +120,7 @@ public class TestInstallation {
                            .build();
                     }
                 });
-                
+
         return opt;
     }
 
@@ -154,7 +154,7 @@ public class TestInstallation {
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
 
         ServiceReference[] refs = context.getAllServiceReferences(CheckService.class.getName(), "(instance.name=" + under.getInstanceName() +")");
-        
+
 //        ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(refs);
 

@@ -1,6 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+  	<groupId>ipojo.tests</groupId>
+  	<artifactId>ipojo.tests</artifactId>
+  	<version>1.5.0-SNAPSHOT</version>
+  </parent>
+
   <groupId>ipojo.tests</groupId>
   <artifactId>org.apache.felix.ipojo.tests.api</artifactId>
   <packaging>jar</packaging>
@@ -20,6 +27,7 @@
       <plugin>
         <groupId>org.apache.servicemix.tooling</groupId>
         <artifactId>depends-maven-plugin</artifactId>
+        <version>1.2</version>
         <executions>
           <execution>
             <id>generate-depends-file</id>
@@ -29,24 +37,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!--  <plugin>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>maven-paxexam-plugin</artifactId>
-        <executions>
-          <execution>
-          <id>generate-paxexam-config</id>
-          <goals>
-            <goal>generate-paxexam-config</goal>
-          </goals>
-          </execution>
-        </executions>
-        <configuration>
-        <settings>
-          <platform>felix</platform>
-        </settings>
-        </configuration>
-      </plugin> -->
     </plugins>
   </build>
 
@@ -54,7 +44,6 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>4.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -69,19 +58,16 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.composite</artifactId>
-      <version>1.6.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-      <version>1.6.0</version>
     </dependency>
 
     <!-- For external handler management -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.handler.whiteboard</artifactId>
-      <version>1.4.0</version>
     </dependency>
 
   <!--
