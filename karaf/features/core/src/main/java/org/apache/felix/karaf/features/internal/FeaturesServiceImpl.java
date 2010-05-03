@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -657,7 +658,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             new Thread() {
                 public void run() {
                     String[] list = boot.split(",");
-                    Set<Feature> features = new HashSet<Feature>();
+                    Set<Feature> features = new LinkedHashSet<Feature>();
                     for (String f : list) {
                         if (f.length() > 0) {
                             try {
