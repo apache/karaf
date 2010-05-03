@@ -29,6 +29,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -138,7 +139,9 @@ public class Console implements Runnable
         thread = Thread.currentThread();
         running = true;
         pipe.start();
-        welcome();
+        Properties props = loadBrandingProperties();
+        welcome(props);
+        setSessionProperties(props);
         String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
         if (scriptFileName != null) {
             Reader r = null;
@@ -229,14 +232,27 @@ public class Console implements Runnable
         return Boolean.parseBoolean(s.toString());
     }
 
-    protected void welcome() {
-        Properties props = new Properties();
-        loadProps(props, "org/apache/felix/karaf/shell/console/branding.properties");
-        loadProps(props, "org/apache/felix/karaf/branding/branding.properties");
+    protected void welcome(Properties props) {
         String welcome = props.getProperty("welcome");
         if (welcome != null && welcome.length() > 0) {
             session.getConsole().println(welcome);
         }
+    }
+
+    private void setSessionProperties(Properties props) {
+        for (Map.Entry<Object, Object> entry : props.entrySet()) {
+            String key = (String) entry.getKey();
+            if (key.startsWith("session.")) {
+                session.put(key.substring("session.".length()), entry.getValue());
+            }
+        }
+    }
+
+    private Properties loadBrandingProperties() {
+        Properties props = new Properties();
+        loadProps(props, "org/apache/felix/karaf/shell/console/branding.properties");
+        loadProps(props, "org/apache/felix/karaf/branding/branding.properties");
+        return props;
     }
 
     private void loadProps(Properties props, String resource) {
