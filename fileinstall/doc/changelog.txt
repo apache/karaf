@@ -1,3 +1,17 @@
+Version 3.0.0
+-------------
+** Bug
+    * [FELIX-1776] - FileInstall starts already installed bundles twice
+    * [FELIX-2069] - FileInstall creates ./load by default
+    * [FELIX-2248] - fileinstall does not restart bundles when the underlying file is modified
+    * [FELIX-2302] - Fileinstall should add entries for directories when creating JARs
+    * [FELIX-2313] - fileinstall does not recognize jars if it does not have Bundle-SymbolicName and Bundle-Version
+
+** Improvement
+    * [FELIX-2249] - fileinstall should log installation/uninstallation/updation/activation details at INFO level
+    * [FELIX-2307] - There is no way to bypass / escape property substitution
+
+
 Version 2.0.8
 -------------
 ** Bug
