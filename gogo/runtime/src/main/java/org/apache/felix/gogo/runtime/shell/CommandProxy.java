@@ -27,7 +27,6 @@ import org.osgi.framework.BundleContext;
 
 public class CommandProxy extends Reflective implements Function
 {
-
     BundleContext context;
     ServiceReference reference;
     String function;

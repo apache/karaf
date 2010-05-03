@@ -34,9 +34,7 @@ public class CommandSessionImpl implements CommandSession, Converter
 {
     public static final String VARIABLES = ".variables";
     public static final String COMMANDS = ".commands";
-
     private static final String COLUMN = "%-20s %s\n";
-
     InputStream in;
     PrintStream out;
     PrintStream err;
@@ -226,13 +224,13 @@ public class CommandSessionImpl implements CommandSession, Converter
                 {
                     StringBuilder sb = new StringBuilder();
                     Collection<?> c = (Collection<?>) target;
-					sb.append("[");
+                    sb.append("[");
                     for (Object o : c)
                     {
-						if (sb.length() > 1) 
-						{
-							sb.append(", ");
-						}
+                        if (sb.length() > 1)
+                        {
+                            sb.append(", ");
+                        }
                         sb.append(format(o, level + 1, this));
                     }
                     sb.append("]");
@@ -275,13 +273,13 @@ public class CommandSessionImpl implements CommandSession, Converter
                 {
                     StringBuilder sb = new StringBuilder();
                     Map<?, ?> c = (Map<?, ?>) target;
-					sb.append("[");
+                    sb.append("[");
                     for (Map.Entry<?, ?> entry : c.entrySet())
                     {
-						if (sb.length() > 1) 
-						{
-							sb.append(", ");
-						}
+                        if (sb.length() > 1)
+                        {
+                            sb.append(", ");
+                        }
                         sb.append(format(entry, level + 1, this));
                     }
                     sb.append("]");
@@ -355,5 +353,4 @@ public class CommandSessionImpl implements CommandSession, Converter
             return "<can not format " + result + ":" + e;
         }
     }
-
 }

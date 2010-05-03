@@ -487,7 +487,9 @@ public class Closure extends Reflective implements Function
             {
                 int i = name.charAt(0) - '0';
                 if (i > 0)
+                {
                     return parms.get(i - 1);
+                }
             }
         }
         return session.get(name);

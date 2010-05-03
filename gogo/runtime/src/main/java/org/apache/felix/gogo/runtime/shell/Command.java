@@ -40,5 +40,4 @@ public class Command extends Reflective implements Function
     {
         return method(session, target, function, arguments);
     }
-
 }

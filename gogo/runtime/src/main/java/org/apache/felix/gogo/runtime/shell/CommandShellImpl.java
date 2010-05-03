@@ -47,7 +47,6 @@ public class CommandShellImpl implements CommandProcessor
 
     public CommandSession createSession(InputStream in, PrintStream out, PrintStream err)
     {
-
         return new CommandSessionImpl(this, in, out, err);
     }
 
@@ -220,5 +219,4 @@ public class CommandShellImpl implements CommandProcessor
         }
         return null;
     }
-
 }

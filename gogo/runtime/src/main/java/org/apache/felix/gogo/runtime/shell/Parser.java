@@ -122,8 +122,8 @@ public class Parser
                     current += 4;
                     break;
                 default:
-                    // We just take the next character literally
-                    // but have the escaped flag set, important for {},[] etc
+                // We just take the next character literally
+                // but have the escaped flag set, important for {},[] etc
             }
         }
         if (!increment)
@@ -422,7 +422,7 @@ public class Parser
         }
         throw new IllegalArgumentException(
             "Reference to variable does not match syntax of a variable: "
-                + context(start));
+            + context(start));
     }
 
     public String toString()
