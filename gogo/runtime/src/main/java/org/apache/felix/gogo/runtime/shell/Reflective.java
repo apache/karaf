@@ -172,26 +172,27 @@ public class Reflective {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	private int coerce(CommandSession session, Object target, Method m,
+    private int coerce(CommandSession session, Object target, Method m,
 			Class<?> types[], Object out[], List<Object> in) throws Exception {
 		Annotation[][] pas = m.getParameterAnnotations();
 
+        int start = 0;
 		for (int argIndex = 0; argIndex < pas.length; argIndex++) {
 			Annotation as[] = pas[argIndex];
 			for (int a = 0; a < as.length; a++) {
-				if (as[a].getClass() == Option.class) {
+                if (as[a] instanceof Option) {
 					Option o = (Option) as[a];
 					out[argIndex] = coerce(session, target, types[argIndex], o
 							.dflt());
-				} else if (as[a].getClass() == Flag.class) {
-					Flag o = (Flag) as[a];
+                    start = argIndex + 1;
+                } else if (as[a] instanceof Flag) {
 					out[argIndex] = coerce(session, target, types[argIndex],
 							false);
+                    start = argIndex + 1;
 				}
 			}
 		}
 
-		
 		in = new ArrayList(in);
 		for (Iterator<Object> i = in.iterator(); i.hasNext();) {
 			Object item = i.next();
@@ -201,7 +202,7 @@ public class Reflective {
 					for (int argIndex = 0; argIndex < pas.length; argIndex++) {
 						Annotation as[] = pas[argIndex];
 						for (int a = 0; a < as.length; a++) {
-							if (as[a].getClass() == Option.class) {
+                            if (as[a] instanceof Option) {
 								Option o = (Option) as[a];
 								if (o.name().equals(option)) {
 									i.remove();
@@ -211,7 +212,7 @@ public class Reflective {
 									out[argIndex] = coerce(session, target,
 											types[argIndex], value);
 								}
-							} else if (as[a].getClass() == Flag.class) {
+                            } else if (as[a] instanceof Flag) {
 								Flag o = (Flag) as[a];
 								if (o.name().equals(option)) {
 									i.remove();
@@ -224,49 +225,50 @@ public class Reflective {
 				}
 			}
 		}
-		int start = 0;
-		while (start < out.length) {
-			out[start] = null;
+
+		int i = start;
+		while (i < out.length) {
+			out[i] = null;
 			try {
 				// Try to convert one argument
 				// derek: add empty array as extra argument
 				// out[i] = coerce(session, target, types[i], in.get(i));
-				if (start == in.size()) {
-					out[start] = NO_MATCH;
+				if (in.size() == 0) {
+					out[i] = NO_MATCH;
 				} else {
-					out[start] = coerce(session, target, types[start], in.get(start));
+					out[i] = coerce(session, target, types[i], in.get(0));
+                    if (out[i] != NO_MATCH) {
+                        in.remove(0);
+                    }
 				}
 
-				if (out[start] == NO_MATCH) {
+				if (out[i] == NO_MATCH) {
 					// Failed
 					// No match, check for varargs
-					if (types[start].isArray() && start == types.length - 1) {
+					if (types[i].isArray() && i == types.length - 1) {
 						// Try to parse the remaining arguments in an array
-						Class<?> component = types[start].getComponentType();
-						Object components = Array.newInstance(component, in
-								.size()
-								- start);
-						int n = start;
-						while (start < in.size()) {
-							Object t = coerce(session, target, component, in
-									.get(start));
+						Class<?> component = types[i].getComponentType();
+						Object components = Array.newInstance(component, in.size());
+						int n = i;
+						while (in.size() > 0) {
+							Object t = coerce(session, target, component, in.remove(0));
 							if (t == NO_MATCH) {
 								return -1;
 							}
-							Array.set(components, start - n, t);
-							start++;
+							Array.set(components, i - n, t);
+							i++;
 						}
 						out[n] = components;
 						// Is last element, so we will quite hereafter
 						// return n;
-						if (start == in.size()) {
-							++start;
+						if (in.size() == 0) {
+							++i;
 						}
-						return start; // derek - return number of args converted
+						return i; // derek - return number of args converted
 					}
 					return -1;
 				}
-				start++;
+				i++;
 			} catch (Exception e) {
 				System.err.println("Reflective:" + e);
 				e.printStackTrace();
@@ -277,7 +279,7 @@ public class Reflective {
 				return -1;
 			}
 		}
-		return start;
+		return i;
 	}
 
 	Object coerce(CommandSession session, Object target, Class<?> type,
