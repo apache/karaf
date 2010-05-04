@@ -76,6 +76,7 @@
     <feature name="ssh" version="${version}">
         <config name="org.apache.felix.karaf.shell.ssh">
             sshPort=8101
+            sshHost=0.0.0.0
             sshRealm=karaf
         </config>
         <bundle>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
