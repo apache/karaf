@@ -409,6 +409,18 @@
           specifying the qualified name of the class extending CreationPolicy</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="post-registration" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>Defines a callback called after the service registration. The callback takes a ServiceReference
+        as parameter</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="post-unregistration" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>Defines a callback called after the service unregistration. The callback takes a ServiceReference
+        as parameter</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ServiceControllerType">
     <xs:annotation>

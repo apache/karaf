@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,56 +23,56 @@ import java.lang.annotation.Target;
 import java.util.Comparator;
 
 /**
- * This annotation declares an modify method.
+ * This annotation declares a modify method.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 @Target(ElementType.METHOD)
 public @interface Modified {
-    
+
     /**
      * Set the dependency filter.
      * Default : no filter
      */
     String filter() default "";
-    
+
     /**
      * Set if the dependency is an aggregate dependency.
      * Default : false
      */
     boolean aggregate() default false;
-    
-    
+
+
     /**
      * Set if the dependency is optional.
      * Default : false
      */
     boolean optional() default false;
-    
+
     /**
      * Set the required specification.
      * Default : empty (try to discover).
      */
     String specification() default "";
-    
+
     /**
      * Set the dependency id.
      * Default : empty.
      */
     String id() default "";
-    
+
     /**
      * Set the binding policy.
      * Acceptable policy are dynamic, static and dynamic-priority.
      * Default: dynamic.
      */
     String policy() default "dynamic";
-    
+
     /**
      * Set the comparator.
      * The indicated class must implement {@link Comparator}
      */
     Class comparator() default Comparator.class;
-    
+
     /**
      * Set the from attribute.
      */

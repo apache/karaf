@@ -1,6 +1,6 @@
 <ipojo>
-<component classname="org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.impl.MyProvider">
+<component classname="org.apache.felix.ipojo.online.manipulator.test.impl.MyProvider">
 	<provides/>
 </component>
-<instance component="org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.impl.MyProvider"/>
+<instance component="org.apache.felix.ipojo.online.manipulator.test.impl.MyProvider"/>
 </ipojo>

@@ -1,4 +1,4 @@
-package org.apache.felix.org.apache.felix.ipojo.online.manipulator.test;
+package org.apache.felix.ipojo.online.manipulator.test;
 
 import static org.junit.Assert.fail;
 

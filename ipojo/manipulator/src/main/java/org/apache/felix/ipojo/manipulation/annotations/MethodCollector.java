@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -25,7 +25,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
- * This class collects method annotations, and give them to the metadata collector. 
+ * This class collects method annotations, and give them to the metadata collector.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MethodCollector extends EmptyVisitor {
@@ -34,9 +34,9 @@ public class MethodCollector extends EmptyVisitor {
      * Parent collector.
      */
     private MetadataCollector m_collector;
-    
+
     /**
-     * Method name. 
+     * Method name.
      */
     private String m_name;
 
@@ -79,13 +79,19 @@ public class MethodCollector extends EmptyVisitor {
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Unbind;")) {
             return processBind("unbind");
         }
-        
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/PostRegistration;")) {
+            return processPostRegistration();
+        }
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/PostUnregistration;")) {
+            return processPostUnregistration();
+        }
+
         if (CustomAnnotationVisitor.isCustomAnnotation(arg0)) {
             Element elem = CustomAnnotationVisitor.buildElement(arg0);
             elem.addAttribute(new Attribute("method", m_name));
             return new CustomAnnotationVisitor(elem, m_collector, true, false);
         }
-        
+
         return null;
     }
 
@@ -102,9 +108,41 @@ public class MethodCollector extends EmptyVisitor {
         } else {
             parent = (Element) m_collector.getIds().get("properties");
         }
-        
+
         parent.addAttribute(new Attribute("updated", m_name));
-        
+
+        return null;
+    }
+
+    /**
+     * Process @PostRegistration annotation.
+     * @return null.
+     */
+    private AnnotationVisitor processPostRegistration() {
+        Element parent = null;
+        if (m_collector.getIds().containsKey("provides")) {
+            parent = (Element) m_collector.getIds().get("provides");
+            parent.addAttribute(new Attribute("post-registration", m_name));
+        } else {
+            // Ignore annotation...
+        }
+
+        return null;
+    }
+
+    /**
+     * Process @PostRegistration annotation.
+     * @return null.
+     */
+    private AnnotationVisitor processPostUnregistration() {
+        Element parent = null;
+        if (m_collector.getIds().containsKey("provides")) {
+            parent = (Element) m_collector.getIds().get("provides");
+            parent.addAttribute(new Attribute("post-unregistration", m_name));
+        } else {
+            // Ignore annotation...
+        }
+
         return null;
     }
 
@@ -183,7 +221,7 @@ public class MethodCollector extends EmptyVisitor {
         private String m_aggregate;
 
         /**
-         * Required specification. 
+         * Required specification.
          */
         private String m_specification;
 
@@ -196,22 +234,22 @@ public class MethodCollector extends EmptyVisitor {
          * Bind, Modify or Unbind method?
          */
         private String m_type;
-        
+
         /**
          * Binding policy.
          */
         private String m_policy;
-        
+
         /**
          * Comparator.
          */
         private String m_comparator;
-        
+
         /**
          * From attribute.
          */
         private String m_from;
-        
+
         /**
          * Constructor.
          * @param bind : method name.
@@ -262,7 +300,7 @@ public class MethodCollector extends EmptyVisitor {
                 m_from = arg1.toString();
                 return;
             }
-            
+
         }
 
         /**
@@ -326,7 +364,7 @@ public class MethodCollector extends EmptyVisitor {
                         return;
                     }
                 }
-                
+
                 if (m_optional != null) {
                     if (optional == null) {
                         req.addAttribute(new Attribute("optional", m_optional));
@@ -335,7 +373,7 @@ public class MethodCollector extends EmptyVisitor {
                         return;
                     }
                 }
-                
+
                 if (m_aggregate != null) {
                     if (aggregate == null) {
                         req.addAttribute(new Attribute("aggregate", m_aggregate));
@@ -344,7 +382,7 @@ public class MethodCollector extends EmptyVisitor {
                         return;
                     }
                 }
-                
+
                 if (m_filter != null) {
                     if (filter == null) {
                         req.addAttribute(new Attribute("filter", m_filter));
@@ -353,7 +391,7 @@ public class MethodCollector extends EmptyVisitor {
                         return;
                     }
                 }
-                
+
                 if (m_policy != null) {
                     if (policy == null) {
                         req.addAttribute(new Attribute("policy", m_policy));
@@ -362,7 +400,7 @@ public class MethodCollector extends EmptyVisitor {
                         return;
                     }
                 }
-                
+
                 if (m_comparator != null) {
                     if (comparator == null) {
                         req.addAttribute(new Attribute("comparator", m_comparator));
@@ -371,7 +409,7 @@ public class MethodCollector extends EmptyVisitor {
                         return;
                     }
                 }
-                
+
                 if (m_from != null) {
                     if (from == null) {
                         req.addAttribute(new Attribute("from", m_from));
@@ -380,7 +418,7 @@ public class MethodCollector extends EmptyVisitor {
                         return;
                     }
                 }
-                
+
             }
             Element method = new Element("callback", "");
             method.addAttribute(new Attribute("method", m_name));
@@ -398,22 +436,22 @@ public class MethodCollector extends EmptyVisitor {
          * Parent element.
          */
         private Element m_parent;
-        
+
         /**
          * Attached method.
          */
         private String m_method;
-        
+
         /**
-         * Property name. 
+         * Property name.
          */
         private String m_name;
-        
+
         /**
-         * Property value. 
+         * Property value.
          */
         private String m_value;
-        
+
         /**
          * Property mandatory aspect.
          */

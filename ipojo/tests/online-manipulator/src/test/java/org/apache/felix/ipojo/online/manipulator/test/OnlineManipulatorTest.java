@@ -1,4 +1,4 @@
-package org.apache.felix.org.apache.felix.ipojo.online.manipulator.test;
+package org.apache.felix.ipojo.online.manipulator.test;
 
 
 import static org.ops4j.pax.exam.CoreOptions.equinox;
@@ -19,9 +19,9 @@ import java.io.InputStream;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
-import org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.impl.Consumer;
-import org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.impl.MyProvider;
-import org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service.Hello;
+import org.apache.felix.ipojo.online.manipulator.test.impl.Consumer;
+import org.apache.felix.ipojo.online.manipulator.test.impl.MyProvider;
+import org.apache.felix.ipojo.online.manipulator.test.service.Hello;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -96,7 +96,7 @@ public class OnlineManipulatorTest {
                             newBundle()
                                 .add( Hello.class )
                                .set(Constants.BUNDLE_SYMBOLICNAME,"ServiceInterface")
-                               .set(Constants.EXPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+                               .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.online.manipulator.test.service")
                                .build()
                         ),
            systemProperty( "providerWithMetadata" ).value( providerWithMetadata ),
@@ -110,7 +110,7 @@ public class OnlineManipulatorTest {
                      public InputStream customizeTestProbe( InputStream testProbe )
                      {
                          return TinyBundles.modifyBundle(testProbe).set(Constants.IMPORT_PACKAGE,
-                        		 "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+                        		 "org.apache.felix.ipojo.online.manipulator.test.service")
                         		 .build();
                      }
 
@@ -154,8 +154,6 @@ public class OnlineManipulatorTest {
         bundle.start();
 
         assertBundle("Provider");
-
-        Assert.assertNotNull(context.getAllServiceReferences(Hello.class.getName(), null));
 
         helper.waitForService(Hello.class.getName(), null, 5000);
         assertValidity();
@@ -240,7 +238,7 @@ public class OnlineManipulatorTest {
         .add("metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml"))
         .add(MyProvider.class)
         .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
-        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.online.manipulator.test.service")
         .build();
 
         File out = getTemporaryFile("providerWithMetadata");
@@ -258,7 +256,7 @@ public class OnlineManipulatorTest {
         .add("META-INF/metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml"))
         .add(MyProvider.class)
         .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
-        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.online.manipulator.test.service")
         .build();
 
         File out = getTemporaryFile("providerWithMetadataInMetaInf");
@@ -276,7 +274,7 @@ public class OnlineManipulatorTest {
         //.addResource("metadata.xml", this.getClass().getClassLoader().getResource("provider.xml"))
         .add(MyProvider.class)
         .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
-        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.online.manipulator.test.service")
         .build();
 
     	File out = getTemporaryFile("providerWithoutMetadata");
@@ -297,7 +295,7 @@ public class OnlineManipulatorTest {
             .add("metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("consumer.xml"))
             .add(Consumer.class)
             .set(Constants.BUNDLE_SYMBOLICNAME, "Consumer")
-            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+            .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.online.manipulator.test.service")
             .build();
 
         File out = getTemporaryFile("consumerWithMetadata");
@@ -315,7 +313,7 @@ public class OnlineManipulatorTest {
         InputStream is = newBundle()
         .add(Consumer.class)
         .set(Constants.BUNDLE_SYMBOLICNAME, "Consumer")
-        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
+        .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.online.manipulator.test.service")
         .build();
 
         File out = getTemporaryFile("consumerWithoutMetadata");

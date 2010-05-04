@@ -431,7 +431,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @param obj the service object if the service was get
      */
     private void manageDeparture(ServiceReference ref, Object obj) {
-        // Unget the service reference
+    	// Unget the service reference
         ungetService(ref);
 
         // If we already get this service and the binding policy is static, the dependency becomes broken

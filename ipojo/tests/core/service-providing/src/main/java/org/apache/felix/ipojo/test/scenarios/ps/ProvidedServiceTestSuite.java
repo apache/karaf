@@ -41,6 +41,7 @@ public class ProvidedServiceTestSuite extends TestSuite {
         ots.addTestSuite(NullCheck.class);
         ots.addTestSuite(ServiceControllerTest.class);
         ots.addTestSuite(PropertiesInAnonymousClassTest.class);
+        ots.addTestSuite(CallbacksTest.class);
         return ots;
     }
 

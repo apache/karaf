@@ -1,8 +1,8 @@
-package org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.impl;
+package org.apache.felix.ipojo.online.manipulator.test.impl;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Requires;
-import org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service.Hello;
+import org.apache.felix.ipojo.online.manipulator.test.service.Hello;
 
 @Component
 public class Consumer {

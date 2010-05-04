@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -42,9 +42,11 @@ import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.parser.PojoMetadata;
+import org.apache.felix.ipojo.util.Callback;
 import org.apache.felix.ipojo.util.Logger;
 import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Composite Provided Service Handler.
@@ -57,7 +59,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * The list of the provided service.
      */
     private ProvidedService[] m_providedServices = new ProvidedService[0];
-    
+
     /**
      * The handler description.
      */
@@ -65,7 +67,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
 
     /**
      * Add a provided service to the list .
-     * 
+     *
      * @param svc : the provided service to add
      */
     private void addProvidedService(ProvidedService svc) {
@@ -133,12 +135,27 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                         throw new ConfigurationException("The custom creation policy class " + strategy + " cannot be loaded " + e.getMessage());
 
                     }
-                    
+
                 }
             }
-            
+
+
             // Then create the provided service
             ProvidedService svc = new ProvidedService(this, serviceSpecifications, factory, custom, configuration);
+
+            // Post-Registration callback
+            String post = providedServices[i].getAttribute("post-registration");
+            if (post != null) {
+            	Callback cb = new Callback(post, new Class[] {ServiceReference.class}, false, getInstanceManager());
+            	svc.setPostRegistrationCallback(cb);
+            }
+
+            post = providedServices[i].getAttribute("post-unregistration");
+            if (post != null) {
+            	// TODO Can we really send the service reference here ?
+            	Callback cb = new Callback(post, new Class[] {ServiceReference.class}, false, getInstanceManager());
+            	svc.setPostUnregistrationCallback(cb);
+            }
 
             Element[] props = providedServices[i].getElements("Property");
             if (props != null) {
@@ -153,15 +170,15 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     Property prop = new Property(name, field, null, value, type, getInstanceManager(), this);
                     properties[j] = prop;
 
-                    // Check if the instance configuration has a value for this property                    
+                    // Check if the instance configuration has a value for this property
                     Object object = configuration.get(prop.getName());
                     if (object != null) {
                         prop.setValue(object);
                     }
-                    
+
                     if (field != null) {
                         getInstanceManager().register(new FieldMetadata(field, type), this);
-                        // Cannot register the property as the interception is necessary 
+                        // Cannot register the property as the interception is necessary
                         // to deal with registration update.
                     }
                 }
@@ -169,22 +186,22 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 // Attach to properties to the provided service
                 svc.setProperties(properties);
             }
-            
+
             Element[] controllers = providedServices[i].getElements("Controller");
             if (controllers != null) {
                 if (controllers.length > 1) {
                     throw new ConfigurationException("Cannot have several controller per 'provides' element");
                 }
-                
+
                 String field = controllers[0].getAttribute("field");
                 if (field == null) {
                     throw new ConfigurationException("The field attribute of a controller is mandatory");
                 }
-                
+
                 String v = controllers[0].getAttribute("value");
                 boolean value = ! (v != null  && v.equalsIgnoreCase("false"));
                 svc.setController(field, value);
-                
+
                 getInstanceManager().register(new FieldMetadata(field, "boolean"), this);
             }
 
@@ -196,15 +213,15 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     itfs.append(' ');
                     itfs.append(serviceSpecifications[j]);
                 }
-                throw new ConfigurationException("The provided service" + itfs + " is not valid");                
+                throw new ConfigurationException("The provided service" + itfs + " is not valid");
             }
-            
+
             // Initialize the description.
             m_description = new ProvidedServiceHandlerDescription(this, m_providedServices);
 
         }
     }
-    
+
     /**
      * Collect interfaces implemented by the POJO.
      * @param specs : implemented interfaces.
@@ -231,7 +248,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
 
         return result;
     }
-    
+
     /**
      * Look for inherited interfaces.
      * @param clazz : interface name to explore (class object)
@@ -246,7 +263,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             collectInterfaces(clazzes[i], acc, bundle);
         }
     }
-    
+
     /**
      * Collect interfaces for the given class.
      * This method explores super class to.
@@ -274,10 +291,10 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * @return true if the provided service is correct
      * @throws ConfigurationException : the checked provided service is not correct.
      */
-    private boolean checkProvidedService(ProvidedService svc) throws ConfigurationException {        
+    private boolean checkProvidedService(ProvidedService svc) throws ConfigurationException {
         for (int i = 0; i < svc.getServiceSpecifications().length; i++) {
             String specName = svc.getServiceSpecifications()[i];
-            
+
             // Check service level dependencies
             try {
                 Class spec = getInstanceManager().getFactory().loadClass(specName);
@@ -370,7 +387,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
 
     /**
      * Stop the provided service handler.
-     * 
+     *
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {
@@ -379,7 +396,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
 
     /**
      * Start the provided service handler.
-     * 
+     *
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
@@ -439,7 +456,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 Property prop = svc.getProperties()[j];
                 if (fieldName.equals(prop.getField())) {
                     // Manage the No Value case.
-                    return prop.onGet(pojo, fieldName, value); 
+                    return prop.onGet(pojo, fieldName, value);
                 }
             }
             if (svc.getController() != null  && svc.getController().getField().equals(fieldName)) {
@@ -453,7 +470,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
     /**
      * Register the services if the new state is VALID. Unregister the services
      * if the new state is UNRESOLVED.
-     * 
+     *
      * @param state : the new instance state.
      * @see org.apache.felix.ipojo.Handler#stateChanged(int)
      */
@@ -488,7 +505,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
 
     /**
      * Remove properties form all provided services.
-     * 
+     *
      * @param dict : dictionary of properties to delete.
      */
     public void removeProperties(Dictionary dict) {
@@ -551,7 +568,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException("An interface cannot be loaded : " + e.getMessage());
             }
-            
+
             String serviceSpecificationStr = provides[i].getAttribute("specifications");
             if (serviceSpecificationStr == null) {
                 serviceSpecificationStr = provides[i].getAttribute("interface");
@@ -565,14 +582,14 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 for (int j = 0; j < itfs.size(); j++) {
                     if (! all.contains(itfs.get(j))) {
                         if (parent == null || (parent != null && ! parent.equals((String) itfs.get(j)))) {
-                            desc.getFactory().getLogger().log(Logger.WARNING, "The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname") 
+                            desc.getFactory().getLogger().log(Logger.WARNING, "The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname")
                                     + " it might be a superclass or the class itself.");
                         }
                     }
                 }
                 all = new HashSet(itfs);
             }
-            
+
             if (all.isEmpty()) {
                 throw new ConfigurationException("Service Providing: Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)");
             }
@@ -580,7 +597,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             StringBuffer specs = null;
             Set set = new HashSet(all);
             set.remove(Pojo.class.getName()); // Remove POJO.
-            Iterator iterator = set.iterator(); 
+            Iterator iterator = set.iterator();
             while (iterator.hasNext()) {
                 String spec = (String) iterator.next();
                 desc.addProvidedServiceSpecification(spec);
@@ -592,7 +609,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     specs.append(spec);
                 }
             }
-            
+
             specs.append('}');
             provides[i].addAttribute(new Attribute("specifications", specs.toString())); // Add interface attribute to avoid checking in the configure method
 
@@ -602,7 +619,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 String value = props[j].getAttribute("value");
                 String type = props[j].getAttribute("type");
                 String field = props[j].getAttribute("field");
-                
+
 
                 // Get property name :
                 if (field != null && name == null) {
@@ -621,17 +638,17 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     type = fieldMeta.getFieldType();
                     props[j].addAttribute(new Attribute("type", type));
                 }
-                
+
                 // Is the property set to immutable
                 boolean immutable = false;
                 String imm = props[j].getAttribute("immutable");
                 if (imm != null && imm.equalsIgnoreCase("true")) {
                     immutable = true;
                 }
-                
+
                 PropertyDescription pd = new PropertyDescription(name, type, value, immutable);
                 desc.addProperty(pd);
-                
+
                 String man = props[j].getAttribute("mandatory");
                 if (man != null && man.equalsIgnoreCase("true")) {
                     pd.setMandatory();

@@ -1,7 +1,0 @@
-<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/SNAPSHOT/core.xsd"
-	xmlns="org.apache.felix.ipojo">
-	<instance
-		component="org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.impl.Consumer"
-		name="cons"/>
-</ipojo>

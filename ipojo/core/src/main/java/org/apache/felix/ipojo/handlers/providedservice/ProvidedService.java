@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -35,6 +35,7 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.IPOJOServiceFactory;
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.util.Callback;
 import org.apache.felix.ipojo.util.Property;
 import org.apache.felix.ipojo.util.SecurityHelper;
 import org.osgi.framework.Bundle;
@@ -107,16 +108,26 @@ public class ProvidedService implements ServiceFactory {
      * Service Object creation policy.
      */
     private CreationStrategy m_strategy;
-    
+
     /**
      * Were the properties updated during the processing.
      */
     private volatile boolean m_wasUpdated;
-    
+
     /**
      * Service Controller.
      */
     private ServiceController m_controller;
+
+    /**
+     * Post-Registration callback.
+     */
+    private Callback m_postRegistration;
+
+    /**
+     * Post-Unregistration callback.
+     */
+    private Callback m_postUnregistration;
 
     /**
      * Creates a provided service object.
@@ -136,7 +147,7 @@ public class ProvidedService implements ServiceFactory {
         try {
             addProperty(new Property("instance.name", null, null, handler.getInstanceManager().getInstanceName(), String.class.getName(), handler.getInstanceManager(), handler));
             addProperty(new Property("factory.name", null, null, handler.getInstanceManager().getFactory().getFactoryName(), String.class.getName(), handler.getInstanceManager(), handler));
-         
+
             if (handler.getInstanceManager().getFactory().getVersion() != null) {
                 addProperty(new Property("factory.version", null, null, handler.getInstanceManager().getFactory().getVersion(), String.class.getName(), handler.getInstanceManager(), handler));
             }
@@ -146,7 +157,7 @@ public class ProvidedService implements ServiceFactory {
                 addProperty(new Property(Constants.SERVICE_PID, null, null, (String) conf.get(Constants.SERVICE_PID), String.class.getName(), handler.getInstanceManager(), handler));
             }
             if (conf.get(Constants.SERVICE_RANKING) != null) {
-                addProperty(new Property(Constants.SERVICE_RANKING, null, null, (String) conf.get(Constants.SERVICE_RANKING), "int", handler.getInstanceManager(), handler));                
+                addProperty(new Property(Constants.SERVICE_RANKING, null, null, (String) conf.get(Constants.SERVICE_RANKING), "int", handler.getInstanceManager(), handler));
             }
             if (conf.get(Constants.SERVICE_VENDOR) != null) {
                 addProperty(new Property(Constants.SERVICE_VENDOR, null, null, (String) conf.get(Constants.SERVICE_VENDOR), String.class.getName(), handler.getInstanceManager(), handler));
@@ -316,10 +327,10 @@ public class ProvidedService implements ServiceFactory {
      * This method also notifies the creation strategy of the publication.
      */
     protected synchronized void registerService() {
-        if (m_handler.getInstanceManager().getState() == ComponentInstance.VALID 
+        if (m_handler.getInstanceManager().getState() == ComponentInstance.VALID
                 && m_serviceRegistration == null  && (m_controller == null || m_controller.getValue())) {
             // Build the service properties list
-            
+
             BundleContext bc = m_handler.getInstanceManager().getContext();
             // Security check
             if (SecurityHelper.hasPermissionToRegisterServices(m_serviceSpecifications, bc)) {
@@ -331,10 +342,21 @@ public class ProvidedService implements ServiceFactory {
                     m_serviceRegistration.setProperties(getServiceProperties());
                     m_wasUpdated = false;
                 }
+
+                // Call the post-registration callback in the same thread holding the monitor lock.
+                // This allows to be sure that the callback is called once per registration.
+                // But the callback must take care to not create a deadlock
+                if (m_postRegistration != null) {
+	                try {
+						m_postRegistration.call(new Object[] { m_serviceRegistration.getReference() });
+					} catch (Exception e) {
+						m_handler.error("Cannot invoke the post-registration callback " + m_postRegistration.getMethod(), e);
+					}
+                }
             } else {
                 throw new SecurityException("The bundle " + bc.getBundle().getBundleId() + " does not have the"
                         + " permission to register the services " + Arrays.asList(m_serviceSpecifications));
-            }      
+            }
         }
     }
 
@@ -342,12 +364,28 @@ public class ProvidedService implements ServiceFactory {
      * Unregisters the service.
      */
     protected synchronized void unregisterService() {
+    	// Create a copy of the service reference in the case we need
+    	// to inject it to the post-unregistration callback.
+
+    	ServiceReference ref = null;
         if (m_serviceRegistration != null) {
+    		ref = m_serviceRegistration.getReference();
             m_serviceRegistration.unregister();
             m_serviceRegistration = null;
         }
 
         m_strategy.onUnpublication();
+
+        // Call the post-unregistration callback in the same thread holding the monitor lock.
+        // This allows to be sure that the callback is called once per unregistration.
+        // But the callback must take care to not create a deadlock
+        if (m_postUnregistration != null   && ref != null) {
+            try {
+            	m_postUnregistration.call(new Object[] { ref });
+			} catch (Exception e) {
+				m_handler.error("Cannot invoke the post-unregistration callback " + m_postUnregistration.getMethod(), e);
+			}
+        }
 
     }
 
@@ -463,12 +501,20 @@ public class ProvidedService implements ServiceFactory {
     public void setController(String field, boolean value) {
         m_controller = new ServiceController(field, value);
     }
-    
+
     public ServiceController getController() {
         return m_controller;
     }
 
-    /**
+    public void setPostRegistrationCallback(Callback cb) {
+		m_postRegistration = cb;
+	}
+
+    public void setPostUnregistrationCallback(Callback cb) {
+		m_postUnregistration = cb;
+	}
+
+	/**
      * Service Controller.
      */
     class ServiceController {
@@ -480,7 +526,7 @@ public class ProvidedService implements ServiceFactory {
          * The field attached to this controller.
          */
         private final String m_field;
-        
+
         /**
          * Creates a ServiceController.
          * @param field the field
@@ -494,7 +540,7 @@ public class ProvidedService implements ServiceFactory {
         public String getField() {
             return m_field;
         }
-        
+
         /**
          * Gets the value.
          * @return the value
@@ -521,7 +567,7 @@ public class ProvidedService implements ServiceFactory {
                 }
             }
         }
-        
+
     }
 
     /**

@@ -748,8 +748,10 @@ public class Tracker implements TrackerCustomizer {
                 if (!isTraked) { return; }
                 modified();
             }
-            // Call customizer outside of synchronized region
-            m_customizer.removedService(reference, object);
+            // Call customizer outside of synchronized region and only if we are not closed
+            if (! m_closed) {
+            	m_customizer.removedService(reference, object);
+            }
             // If the customizer throws an unchecked exception, it is safe to let it propagate
         }
 
