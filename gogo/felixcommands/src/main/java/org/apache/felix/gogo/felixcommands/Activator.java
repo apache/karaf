@@ -31,7 +31,7 @@ public class Activator implements BundleActivator
         props.put("osgi.command.function", new String[] {
             "bundlelevel", "frameworklevel", "headers", "help",
             "install", "lb", "refresh", "resolve", "start",
-            "stop", "uninstall", "update" });
+            "stop", "uninstall", "update", "which" });
         bc.registerService(
             Basic.class.getName(), new Basic(bc), props);
 

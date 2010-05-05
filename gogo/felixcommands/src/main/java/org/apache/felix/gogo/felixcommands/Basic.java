@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleReference;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -213,11 +214,11 @@ public class Basic
                 Descriptor d = m.getAnnotation(Descriptor.class);
                 if (d == null)
                 {
-                    System.out.println(m.getName());
+                    System.out.println("\n" + m.getName());
                 }
                 else
                 {
-                    System.out.println(m.getName() + " - " + d.description());
+                    System.out.println("\n" + m.getName() + " - " + d.description());
                 }
 
                 // Get flags and options.
@@ -288,7 +289,6 @@ public class Basic
                         System.out.println("      " + it.next() + "   " + it.next());
                     }
                 }
-                System.out.println("");
             }
         }
     }
@@ -731,6 +731,40 @@ public class Basic
         else
         {
             System.err.println("Must specify a location.");
+        }
+    }
+
+    @Descriptor(description="determines from where a bundle loads a class")
+    public void which(
+        @Descriptor(description="target bundle identifier") Long id,
+        @Descriptor(description="target class name") String className)
+    {
+        Bundle bundle = getBundle(m_bc, id);
+        if (bundle == null)
+        {
+            return;
+        }
+        Class clazz = null;
+        try
+        {
+            clazz = bundle.loadClass(className);
+        }
+        catch (ClassNotFoundException ex)
+        {
+            System.out.println("Class not found");
+        }
+        if (clazz.getClassLoader() == null)
+        {
+            System.out.println("Loaded from: boot class loader");
+        }
+        else if (clazz.getClassLoader() instanceof BundleReference)
+        {
+            Bundle p = ((BundleReference) clazz.getClassLoader()).getBundle();
+            System.out.println("Loaded from: " + p);
+        }
+        else
+        {
+            System.out.println("Loaded from: " + clazz.getClassLoader());
         }
     }
 
