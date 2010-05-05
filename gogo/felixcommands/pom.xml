@@ -20,9 +20,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache.felix</groupId>
-    <artifactId>felix-parent</artifactId>
-    <version>1.2.0</version>
+    <groupId>org.apache.felix.gogo</groupId>
+    <artifactId>gogo</artifactId>
+    <version>0.5.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.apache.felix.gogo.felixcommands</artifactId>
