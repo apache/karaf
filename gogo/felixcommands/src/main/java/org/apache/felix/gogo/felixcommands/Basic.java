@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,6 +21,7 @@ package org.apache.felix.gogo.felixcommands;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,10 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -39,6 +40,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.command.Flag;
+import org.osgi.service.command.Option;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -180,6 +182,77 @@ public class Basic
 
     public void help()
     {
+        Map<String, List<Method>> commands = getCommands();
+        for (String name : commands.keySet())
+        {
+            System.out.println(name);
+        }
+    }
+
+    public void help(String name)
+    {
+        Map<String, List<Method>> commands = getCommands();
+        List<Method> methods = commands.get(name);
+        if ((methods != null) && (methods.size() > 0))
+        {
+            for (Method m : methods)
+            {
+                String s = m.toString();
+                int parenIdx = s.indexOf('(');
+                int idx = 0;
+                for (int dotIdx = s.indexOf('.');
+                    (dotIdx >= 0) && (dotIdx < parenIdx);
+                    dotIdx = s.indexOf('.', idx + 1))
+                {
+                    idx = dotIdx + 1;
+                }
+
+                System.out.println(s.substring(idx));
+
+                // Get flags and options.
+                Map<String, Flag> flags = new TreeMap();
+                Map<String, Option> options = new TreeMap();
+                Annotation[][] anns = m.getParameterAnnotations();
+                for (int paramIdx = 0; paramIdx < anns.length; paramIdx++)
+                {
+                    for (int annIdx = 0; annIdx < anns[paramIdx].length; annIdx++)
+                    {
+                        Annotation ann = anns[paramIdx][annIdx];
+                        if (ann instanceof Flag)
+                        {
+                            flags.put(((Flag) ann).name(), (Flag) ann);
+                        }
+                        else if (ann instanceof Option)
+                        {
+                            options.put(((Option) ann).name(), (Option) ann);
+                        }
+                    }
+                }
+
+                // Print flags and options.
+                if (flags.size() > 0)
+                {
+                    System.out.println("   flags:");
+                    for (Entry<String, Flag> entry : flags.entrySet())
+                    {
+                        System.out.println("      " + entry.getValue().name());
+                    }
+                }
+                if (options.size() > 0)
+                {
+                    System.out.println("   options:");
+                    for (Entry<String, Option> entry : options.entrySet())
+                    {
+                        System.out.println("      " + entry.getValue().name()
+                            + ((entry.getValue().dflt() == null) ? "" : " [optional]"));
+                    }
+                }
+            }
+        }
+    }
+
+    private Map<String, List<Method>> getCommands()
+    {
         ServiceReference[] refs = null;
         try
         {
@@ -190,6 +263,8 @@ public class Basic
             // This should never happen.
         }
 
+        Map<String, List<Method>> commands = new TreeMap();
+
         for (ServiceReference ref : refs)
         {
             Object svc = m_bc.getService(ref);
@@ -197,7 +272,6 @@ public class Basic
             {
                 String[] funcs = (String[]) ref.getProperty("osgi.command.function");
 
-                Map<String, List<Method>> commands = new HashMap();
                 for (String func : funcs)
                 {
                     commands.put(func, new ArrayList());
@@ -214,18 +288,11 @@ public class Basic
                             commandMethods.add(method);
                         }
                     }
-
-                    for (Entry<String, List<Method>> entry : commands.entrySet())
-                    {
-                        System.out.println(entry.getKey());
-                        for (Method m : entry.getValue())
-                        {
-                            System.out.println("--> " + m);
-                        }
-                    }
                 }
             }
         }
+
+        return commands;
     }
 
     public void install(String[] urls)
@@ -442,7 +509,7 @@ public class Basic
         }
     }
 
-    public void stop(Long[] ids) throws BundleException
+    public void stop(Long[] ids)
     {
         List<Bundle> bundles = getBundles(m_bc, ids);
 
@@ -452,14 +519,33 @@ public class Basic
         }
         else
         {
-            for (Bundle bundle : bundles)
+            try
             {
-                bundle.stop();
+                for (Bundle bundle : bundles)
+                {
+                    bundle.stop();
+                }
+            }
+            catch (BundleException ex)
+            {
+                if (ex.getNestedException() != null)
+                {
+                    ex.printStackTrace();
+                    System.err.println(ex.getNestedException().toString());
+                }
+                else
+                {
+                    System.err.println(ex.toString());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.err.println(ex.toString());
             }
         }
     }
 
-    public void uninstall(Long[] ids) throws BundleException
+    public void uninstall(Long[] ids)
     {
         List<Bundle> bundles = getBundles(m_bc, ids);
 
@@ -469,9 +555,28 @@ public class Basic
         }
         else
         {
-            for (Bundle bundle : bundles)
+            try
             {
-                bundle.uninstall();
+                for (Bundle bundle : bundles)
+                {
+                    bundle.uninstall();
+                }
+            }
+            catch (BundleException ex)
+            {
+                if (ex.getNestedException() != null)
+                {
+                    ex.printStackTrace();
+                    System.err.println(ex.getNestedException().toString());
+                }
+                else
+                {
+                    System.err.println(ex.toString());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.err.println(ex.toString());
             }
         }
     }
