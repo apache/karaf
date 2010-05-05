@@ -199,7 +199,7 @@ public class OSGiCommands implements Converter
     {
         return i;
     }
-
+/*
     public String[] ls(CommandSession session, File f) throws Exception
     {
         File cwd = (File) session.get("_cwd");
@@ -232,7 +232,7 @@ public class OSGiCommands implements Converter
 
         return null;
     }
-
+*/
     public Object cat(CommandSession session, File f) throws Exception
     {
         File cwd = (File) session.get("_cwd");

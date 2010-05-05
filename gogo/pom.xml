@@ -37,6 +37,7 @@
         <module>launcher</module>
         <module>console</module>
         <module>commands</module>
+        <module>felixcommands</module>
     </modules>
 
     <dependencyManagement>
