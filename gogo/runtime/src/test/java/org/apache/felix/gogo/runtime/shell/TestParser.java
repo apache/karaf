@@ -126,14 +126,14 @@ public class TestParser extends TestCase
         Context c = new Context();
         c.addCommand("echo", this);
         c.addCommand("grep", this);
-        assertEquals("a", c.execute("a = a; echo $$a"));
+        assertEquals("a", c.execute("a = a; echo ${$a}"));
 
         assertEquals("hello", c.execute("echo hello"));
         assertEquals("hello", c.execute("a = (echo hello)"));
-        assertEquals("a", c.execute("a = a; echo $(echo a)"));
+      //assertEquals("a", c.execute("a = a; echo $(echo a)")); // #p2 - no eval in var expansion
         assertEquals("3", c.execute("a=3; echo $a"));
         assertEquals("3", c.execute("a = 3; echo $a"));
-        assertEquals("a", c.execute("a = a; echo $$a"));
+        assertEquals("a", c.execute("a = a; echo ${$a}"));
     }
 
     public void testComment() throws Exception
@@ -149,12 +149,6 @@ public class TestParser extends TestCase
         c.addCommand("echo", this);
         c.addCommand("capture", this);
 
-        assertEquals("http://www.aqute.biz?com=2&biz=1",
-            c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0"));
-        assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
-        assertEquals("3", c.execute("[a=2 b=3] get b"));
-        assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
-        assertEquals(5, c.execute("[1 2 [3 4] 5 6] size"));
         assertEquals("a", c.execute("e = { echo $1 } ; e a   b"));
         assertEquals("b", c.execute("e = { echo $2 } ; e a   b"));
         assertEquals("b", c.execute("e = { $args } ; e echo  b"));
@@ -166,6 +160,7 @@ public class TestParser extends TestCase
     public void testArray() throws Exception
     {
         Context c = new Context();
+        c.set("echo", true);
         assertEquals("http://www.aqute.biz?com=2&biz=1",
             c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0"));
         assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
@@ -174,24 +169,15 @@ public class TestParser extends TestCase
         assertEquals(5, c.execute("[1 2 [3 4] 5 6] size"));
     }
 
-    public void testEscape()
-    {
-        Parser parser = new Parser("'a|b;c'");
-        CharSequence cs = parser.messy();
-        assertEquals("'a|b;c'", cs.toString());
-        assertEquals("'a|b;c'", new Parser(cs).unescape());
-        assertEquals("$a", new Parser("\\$a").unescape());
-    }
-
     public void testParentheses()
     {
         Parser parser = new Parser("(a|b)|(d|f)");
-        List<List<List<CharSequence>>> p = parser.program();
-        assertEquals("(a|b)", p.get(0).get(0).get(0));
+        List<List<List<Token>>> p = parser.program();
+        assertEquals("a|b", p.get(0).get(0).get(0).toString());
 
         parser = new Parser("grep (d.*)|grep (d|f)");
         p = parser.program();
-        assertEquals("(d.*)", p.get(0).get(0).get(1));
+        assertEquals("d.*", p.get(0).get(0).get(1).toString());
     }
 
     public void testEcho() throws Exception
@@ -322,41 +308,42 @@ public class TestParser extends TestCase
 
     public void testProgram()
     {
-        List<List<List<CharSequence>>> x = new Parser("abc def|ghi jkl;mno pqr|stu vwx").program();
-        assertEquals("abc", x.get(0).get(0).get(0));
-        assertEquals("def", x.get(0).get(0).get(1));
-        assertEquals("ghi", x.get(0).get(1).get(0));
-        assertEquals("jkl", x.get(0).get(1).get(1));
-        assertEquals("mno", x.get(1).get(0).get(0));
-        assertEquals("pqr", x.get(1).get(0).get(1));
-        assertEquals("stu", x.get(1).get(1).get(0));
-        assertEquals("vwx", x.get(1).get(1).get(1));
+        List<List<List<Token>>> x = new Parser("abc def|ghi jkl;mno pqr|stu vwx").program();
+        assertEquals("abc", x.get(0).get(0).get(0).toString());
+        assertEquals("def", x.get(0).get(0).get(1).toString());
+        assertEquals("ghi", x.get(0).get(1).get(0).toString());
+        assertEquals("jkl", x.get(0).get(1).get(1).toString());
+        assertEquals("mno", x.get(1).get(0).get(0).toString());
+        assertEquals("pqr", x.get(1).get(0).get(1).toString());
+        assertEquals("stu", x.get(1).get(1).get(0).toString());
+        assertEquals("vwx", x.get(1).get(1).get(1).toString());
     }
 
     public void testStatements()
     {
-        List<List<CharSequence>> x = new Parser("abc def|ghi jkl|mno pqr").pipeline();
-        assertEquals("abc", x.get(0).get(0));
-        assertEquals("def", x.get(0).get(1));
-        assertEquals("ghi", x.get(1).get(0));
-        assertEquals("jkl", x.get(1).get(1));
-        assertEquals("mno", x.get(2).get(0));
-        assertEquals("pqr", x.get(2).get(1));
+        List<List<Token>> x = new Parser("abc def|ghi jkl|mno pqr").program().get(0);
+        assertEquals("abc", x.get(0).get(0).toString());
+        assertEquals("def", x.get(0).get(1).toString());
+        assertEquals("ghi", x.get(1).get(0).toString());
+        assertEquals("jkl", x.get(1).get(1).toString());
+        assertEquals("mno", x.get(2).get(0).toString());
+        assertEquals("pqr", x.get(2).get(1).toString());
     }
 
     public void testSimpleValue()
     {
-        List<CharSequence> x = new Parser(
-            "abc def.ghi http://www.osgi.org?abc=&x=1 [1,2,3] {{{{{{{xyz}}}}}}} (immediate) {'{{{{{'} {\\}} 'abc{}'").statement();
-        assertEquals("abc", x.get(0));
-        assertEquals("def.ghi", x.get(1));
-        assertEquals("http://www.osgi.org?abc=&x=1", x.get(2));
-        assertEquals("[1,2,3]", x.get(3));
-        assertEquals("{{{{{{{xyz}}}}}}}", x.get(4));
-        assertEquals("(immediate)", x.get(5));
-        assertEquals("{'{{{{{'}", x.get(6));
-        assertEquals("{\\}}", x.get(7));
-        assertEquals("'abc{}'", x.get(8));
+        List<Token> x = new Parser(
+            "abc def.ghi http://www.osgi.org?abc=&x=1 [1,2,3] {{{{{{{xyz}}}}}}} (immediate) {'{{{{{'} {\\{} 'abc{}'")
+            .program().get(0).get(0);
+        assertEquals("abc", x.get(0).toString());
+        assertEquals("def.ghi", x.get(1).toString());
+        assertEquals("http://www.osgi.org?abc=&x=1", x.get(2).toString());
+        assertEquals("1,2,3", x.get(3).toString());
+        assertEquals("{{{{{{xyz}}}}}}", x.get(4).toString());
+        assertEquals("immediate", x.get(5).toString());
+        assertEquals("'{{{{{'", x.get(6).toString());
+        assertEquals("\\{", x.get(7).toString());
+        assertEquals("'abc{}'", x.get(8).toString());
     }
 
     void each(CommandSession session, Collection<Object> list, Function closure)

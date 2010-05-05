@@ -35,14 +35,14 @@ public class CommandSessionImpl implements CommandSession, Converter
     public static final String VARIABLES = ".variables";
     public static final String COMMANDS = ".commands";
     private static final String COLUMN = "%-20s %s\n";
-    InputStream in;
-    PrintStream out;
+    protected InputStream in;
+    protected PrintStream out;
     PrintStream err;
     CommandShellImpl service;
-    final Map<Object, Object> variables = new HashMap<Object, Object>();
-    private boolean closed; // derek
+    protected final Map<String, Object> variables = new HashMap<String, Object>();
+    private boolean closed;
 
-    CommandSessionImpl(CommandShellImpl service, InputStream in, PrintStream out, PrintStream err)
+    protected CommandSessionImpl(CommandShellImpl service, InputStream in, PrintStream out, PrintStream err)
     {
         this.service = service;
         this.in = in;
@@ -52,7 +52,7 @@ public class CommandSessionImpl implements CommandSession, Converter
 
     public void close()
     {
-        this.closed = true; // derek
+        this.closed = true;
     }
 
     public Object execute(CharSequence commandline) throws Exception
@@ -62,7 +62,7 @@ public class CommandSessionImpl implements CommandSession, Converter
 
         if (closed)
         {
-            throw new IllegalStateException("session is closed"); // derek
+            throw new IllegalStateException("session is closed");
         }
 
         Closure impl = new Closure(this, null, commandline);
@@ -77,7 +77,6 @@ public class CommandSessionImpl implements CommandSession, Converter
 
     public Object get(String name)
     {
-        // XXX: derek.baum@paremus.com
         // there is no API to list all variables, so overload name == null
         if (name == null || VARIABLES.equals(name))
         {
@@ -93,7 +92,7 @@ public class CommandSessionImpl implements CommandSession, Converter
             return variables.get(name);
         }
 
-        // XXX: derek: add SCOPE support
+        // add SCOPE support
         if (name.startsWith("*:"))
         {
             String path = variables.containsKey("SCOPE") ? variables.get("SCOPE").toString()

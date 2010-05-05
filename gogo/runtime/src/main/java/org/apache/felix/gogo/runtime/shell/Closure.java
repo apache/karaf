@@ -18,42 +18,143 @@
  */
 package org.apache.felix.gogo.runtime.shell;
 
+import java.io.EOFException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.felix.gogo.runtime.shell.Tokenizer.Type;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
 
-public class Closure extends Reflective implements Function
+public class Closure extends Reflective implements Function, Evaluate
 {
-    private static final long serialVersionUID = 1L;
-    final CharSequence source;
-    final Closure parent;
-    CommandSessionImpl session;
-    List<Object> parms;
+    public static final String LOCATION = ".location";
 
-    Closure(CommandSessionImpl session, Closure parent, CharSequence source)
+    private static final long serialVersionUID = 1L;
+    private static final ThreadLocal<String> location = new ThreadLocal<String>();
+
+    private final CommandSessionImpl session;
+    private final Closure parent;
+    private final CharSequence source;
+    private final List<List<List<Token>>> program;
+    private final Object script;
+
+    private Token errTok;
+    private List<Object> parms = null;
+    private List<Object> parmv = null;
+
+    public Closure(CommandSessionImpl session, Closure parent, CharSequence source) throws Exception
     {
         this.session = session;
         this.parent = parent;
         this.source = source;
+        script = session.get("0"); // by convention, $0 is script name
+
+        try
+        {
+            program = new Parser(source).program();
+        }
+        catch (Exception e)
+        {
+            throw setLocation(e);
+        }
+    }
+    
+    public CommandSessionImpl session()
+    {
+        return session;
     }
 
+    private Exception setLocation(Exception e)
+    {
+        String loc = location.get();
+        if (null == loc)
+        {
+            loc = (null == script ? "" : script + ":");
+
+            if (e instanceof SyntaxError)
+            {
+                SyntaxError se = (SyntaxError) e;
+                loc += se.line() + "." + se.column();
+
+                if (e instanceof EOFError)
+                { // map to public exception, so interactive clients can provide more input
+                    EOFException eofe = new EOFException(e.getMessage());
+                    eofe.initCause(e);
+                    e = eofe;
+                }
+            }
+            else if (null != errTok)
+            {
+                loc += errTok.line + "." + errTok.column;
+            }
+
+            location.set(loc);
+        }
+        else if (null != script && !loc.contains(":"))
+        {
+            location.set(script + ":" + loc);
+        }
+
+        session.put(LOCATION, location.get());
+
+        return e;
+    }
+
+    // implements Function interface
+    // XXX: session arg x not used?
     public Object execute(CommandSession x, List<Object> values) throws Exception
     {
-        parms = values;
-        Parser parser = new Parser(source);
-        List<List<List<CharSequence>>> program = parser.program();
-        Pipe last = null;
+        try
+        {
+            location.remove();
+            session.variables.remove(LOCATION);
+            return execute(values);
+        }
+        catch (Exception e)
+        {
+            throw setLocation(e);
+        }
+    }
 
-        for (List<List<CharSequence>> pipeline : program)
+    @SuppressWarnings("unchecked")
+    private Object execute(List<Object> values) throws Exception
+    {
+        if (null != values)
+        {
+            parmv = values;
+            parms = new ArgList(parmv);
+        }
+        else if (null != parent)
+        {
+            // inherit parent closure parameters
+            parms = parent.parms;
+            parmv = parent.parmv;
+        }
+        else
+        {
+            // inherit session parameters
+            Object args = session.get("args");
+            if (null != args && args instanceof List<?>)
+            {
+                parmv = (List<Object>) args;
+                parms = new ArgList(parmv);
+            }
+        }
+
+        Pipe last = null;
+        Object[] mark = Pipe.mark();
+
+        for (List<List<Token>> pipeline : program)
         {
             ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
-            for (List<CharSequence> statement : pipeline)
+            for (List<Token> statement : pipeline)
             {
                 Pipe current = new Pipe(this, statement);
 
@@ -97,19 +198,22 @@ public class Closure extends Reflective implements Function
                 if (pipe.exception != null)
                 {
                     // can't throw exception, as result is defined by last pipe
-                    session.err.println("pipe: " + pipe.exception);
+                    Object oloc = session.get(LOCATION);
+                    String loc = (String.valueOf(oloc).contains(":") ? oloc + ": "
+                        : "pipe: ");
+                    session.err.println(loc + pipe.exception);
                     session.put("pipe-exception", pipe.exception);
                 }
             }
 
             if (last.exception != null)
             {
-                Pipe.reset();
+                Pipe.reset(mark);
                 throw last.exception;
             }
         }
 
-        Pipe.reset(); // reset IO in case sshd uses same thread for new client
+        Pipe.reset(mark); // reset IO in case same thread used for new client
 
         if (last == null)
         {
@@ -120,110 +224,180 @@ public class Closure extends Reflective implements Function
         {
             return Arrays.asList((Object[]) last.result);
         }
+
         return last.result;
     }
 
-    Object executeStatement(List<CharSequence> statement) throws Exception
+    public Object eval(final Token t) throws Exception
+    {
+        Object v = null;
+
+        switch (t.type)
+        {
+            case WORD:
+                v = Tokenizer.expand(t, this);
+                if (t == v)
+                {
+                    String s = t.toString();
+                    if ("null".equals(s))
+                        v = null;
+                    else if ("false".equals(s))
+                        v = false;
+                    else if ("true".equals(s))
+                        v = true;
+                    else
+                        v = s;
+                }
+                break;
+
+            case CLOSURE:
+                v = new Closure(session, this, t);
+                break;
+
+            case EXECUTION:
+                v = new Closure(session, this, t).execute(session, parms);
+                break;
+
+            case ARRAY:
+                v = array(t);
+                break;
+
+            case ASSIGN:
+                v = t.type;
+                break;
+
+            default:
+                throw new SyntaxError(t.line, t.column, "unexpected token: " + t.type);
+        }
+
+        return v;
+    }
+
+    public Object executeStatement(List<Token> statement) throws Exception
     {
         // add set -x facility if echo is set
         if (Boolean.TRUE.equals(session.get("echo")))
         {
             StringBuilder buf = new StringBuilder("+");
-            for (CharSequence token : statement)
+            for (Token token : statement)
             {
                 buf.append(' ');
-                buf.append(token);
+                buf.append(token.source());
             }
             session.err.println(buf);
         }
 
-        if (statement.size() == 1 && statement.get(0).charAt(0) == '(')
-        {
-            return eval(statement.get(0));
-        }
-
-        Object result;
         List<Object> values = new ArrayList<Object>();
-        for (CharSequence token : statement)
+        errTok = statement.get(0);
+
+        for (Token t : statement)
         {
-            Object v = eval(token);
-            if (v != null && v == parms)
+            Object v = eval(t);
+
+            if ((Type.EXECUTION == t.type) && (statement.size() == 1))
             {
-                for (Object p : parms)
-                {
-                    values.add(p);
-                }
+                return v;
+            }
+
+            if (parms == v && parms != null)
+            {
+                values.addAll(parms); // explode $args array
             }
             else
             {
                 values.add(v);
             }
         }
-        result = execute(values.remove(0), values);
-        return result;
-    }
 
-    private Object execute(Object cmd, List<Object> values) throws Exception
-    {
+        Object cmd = values.remove(0);
         if (cmd == null)
         {
             if (values.isEmpty())
             {
                 return null;
             }
-            else
-            {
-                throw new IllegalArgumentException("Command name evaluates to null");
-            }
+
+            throw new RuntimeException("Command name evaluates to null: " + errTok);
         }
 
+        return execute(cmd, values);
+    }
+
+    private Object execute(Object cmd, List<Object> values) throws Exception
+    {
         // Now there are the following cases
         // <string> '=' statement // complex assignment
         // <string> statement // cmd call
         // <object> // value of <object>
         // <object> statement // method call
 
-        if (cmd instanceof CharSequence)
+        boolean dot = values.size() > 1 && ".".equals(String.valueOf(values.get(0)));
+
+        if (cmd instanceof CharSequence && !dot)
         {
             String scmd = cmd.toString();
 
-            if (values.size() > 0 && "=".equals(values.get(0)))
+            if (values.size() > 0 && Type.ASSIGN.equals(values.get(0)))
             {
+                Object value;
+
                 if (values.size() == 1)
                 {
                     return session.variables.remove(scmd);
                 }
-                else if (values.size() == 2)
+
+                if (values.size() == 2)
                 {
-                    Object value = values.get(1);
-                    if (value instanceof CharSequence)
-                    {
-                        value = eval((CharSequence) value);
-                    }
-                    return assignment(scmd, value);
+                    value = values.get(1);
                 }
                 else
                 {
-                    Object value = execute(values.get(1),
-                        values.subList(2, values.size()));
-                    return assignment(scmd, value);
+                    value = execute(values.get(1), values.subList(2, values.size()));
                 }
+
+                return assignment(scmd, value);
             }
             else
             {
                 String scopedFunction = scmd;
                 Object x = get(scmd);
+
                 if (!(x instanceof Function))
                 {
                     if (scmd.indexOf(':') < 0)
                     {
                         scopedFunction = "*:" + scmd;
                     }
+
                     x = get(scopedFunction);
+
                     if (x == null || !(x instanceof Function))
                     {
-                        throw new IllegalArgumentException("Command not found:  "
-                            + scopedFunction);
+                        // try default command handler
+                        if (session.get(".default.lock") == null)
+                        {
+                            x = get("default");
+                            if (x == null)
+                            {
+                                x = get("*:default");
+                            }
+
+                            if (x instanceof Function)
+                            {
+                                try
+                                {
+                                    session.put(".default.lock", "active");
+                                    values.add(0, scmd);
+                                    return ((Function) x).execute(session, values);
+                                }
+                                finally
+                                {
+                                    session.variables.remove(".default.lock");
+                                }
+                            }
+                        }
+
+                        throw new IllegalArgumentException("Command not found: " + scmd);
                     }
                 }
                 return ((Function) x).execute(session, values);
@@ -234,6 +408,33 @@ public class Closure extends Reflective implements Function
             if (values.isEmpty())
             {
                 return cmd;
+            }
+            else if (dot)
+            {
+                // FELIX-1473 - allow methods calls on String objects
+                Object target = cmd;
+                ArrayList<Object> args = new ArrayList<Object>();
+                values.remove(0);
+
+                for (Object arg : values)
+                {
+                    if (".".equals(arg))
+                    {
+                        target = method(session, target, args.remove(0).toString(), args);
+                        args.clear();
+                    }
+                    else
+                    {
+                        args.add(arg);
+                    }
+                }
+
+                if (args.size() == 0)
+                {
+                    return target;
+                }
+
+                return method(session, target, args.remove(0).toString(), args);
             }
             else
             {
@@ -248,239 +449,56 @@ public class Closure extends Reflective implements Function
         return value;
     }
 
-    private Object eval(CharSequence seq) throws Exception
+    private Object array(Token array) throws Exception
     {
-        Object res = null;
-        StringBuilder sb = null;
-        Parser p = new Parser(seq);
-        int start = p.current;
-        while (!p.eof())
-        {
-            char c = p.peek();
-            if (!p.escaped)
-            {
-                if (c == '$' || c == '(' || c == '\'' || c == '"' || c == '[' || c == '{')
-                {
-                    if (start != p.current || res != null)
-                    {
-                        if (sb == null)
-                        {
-                            sb = new StringBuilder();
-                        }
-                        if (res != null)
-                        {
-                            if (res == parms)
-                            {
-                                for (int i = 0; i < parms.size(); i++)
-                                {
-                                    if (i > 0)
-                                    {
-                                        sb.append(' ');
-                                    }
-                                    sb.append(parms.get(i));
-                                }
-                            }
-                            else
-                            {
-                                sb.append(res);
-                            }
-                            res = null;
-                        }
-                        if (start != p.current)
-                        {
-                            sb.append(new Parser(p.text.subSequence(start, p.current)).unescape());
-                            start = p.current;
-                            continue;
-                        }
-                    }
-                    switch (c)
-                    {
-                        case '\'':
-                            p.next();
-                            p.quote(c);
-                            res = new Parser(p.text.subSequence(start + 1, p.current - 1)).unescape();
-                            start = p.current;
-                            continue;
-                        case '\"':
-                            p.next();
-                            p.quote(c);
-                            res = eval(p.text.subSequence(start + 1, p.current - 1));
-                            start = p.current;
-                            continue;
-                        case '[':
-                            p.next();
-                            res = array(seq.subSequence(start + 1, p.find(']', '[') - 1));
-                            start = p.current;
-                            continue;
-                        case '(':
-                            p.next();
-                            Closure cl = new Closure(session, this, p.text.subSequence(
-                                start + 1, p.find(')', '(') - 1));
-                            res = cl.execute(session, parms);
-                            start = p.current;
-                            continue;
-                        case '{':
-                            p.next();
-                            res = new Closure(session, this, p.text.subSequence(
-                                start + 1, p.find('}', '{') - 1));
-                            start = p.current;
-                            continue;
-                        case '$':
-                            p.next();
-                            res = var(p.findVar());
-                            start = p.current;
-                            continue;
-                    }
-                }
-            }
-            p.next();
-        }
-        if (start != p.current)
-        {
-            if (sb == null)
-            {
-                sb = new StringBuilder();
-            }
-            if (res != null)
-            {
-                if (res == parms)
-                {
-                    for (Object v : parms)
-                    {
-                        sb.append(v);
-                    }
-                }
-                else
-                {
-                    sb.append(res);
-                }
-                res = null;
-            }
-            sb.append(new Parser(p.text.subSequence(start, p.current)).unescape());
-        }
-        if (sb != null)
-        {
-            if (res != null)
-            {
-                if (res == parms)
-                {
-                    for (int i = 0; i < parms.size(); i++)
-                    {
-                        if (i > 0)
-                        {
-                            sb.append(' ');
-                        }
-                        sb.append(parms.get(i));
-                    }
-                }
-                else
-                {
-                    sb.append(res);
-                }
-            }
-            res = sb;
-        }
-        if (res instanceof CharSequence)
-        {
-            String r = res.toString();
-            if ("null".equals(r))
-            {
-                return null;
-            }
-            else if ("false".equals(r))
-            {
-                return false;
-            }
-            else if ("true".equals(r))
-            {
-                return true;
-            }
-            return r;
-        }
+        List<Token> list = new ArrayList<Token>();
+        Map<Token, Token> map = new LinkedHashMap<Token, Token>();
+        (new Parser(array)).array(list, map);
 
-        return res;
-    }
-
-    private Object array(CharSequence array) throws Exception
-    {
-        List<Object> list = new ArrayList<Object>();
-        Map<Object, Object> map = new LinkedHashMap<Object, Object>();
-        Parser p = new Parser(array);
-
-        while (!p.eof())
+        if (map.isEmpty())
         {
-            CharSequence token = p.value();
-
-            p.ws();
-            if (p.peek() == '=')
+            List<Object> olist = new ArrayList<Object>();
+            for (Token t : list)
             {
-                p.next();
-                p.ws();
-                if (!p.eof())
-                {
-                    CharSequence value = p.messy();
-                    map.put(eval(token), eval(value));
-                }
+                olist.add(eval(t));
             }
-            else
-            {
-                list.add(eval(token));
-            }
-
-            if (p.peek() == ',')
-            {
-                p.next();
-            }
-            p.ws();
-        }
-        p.ws();
-        if (!p.eof())
-        {
-            throw new IllegalArgumentException("Invalid array syntax: " + array);
-        }
-
-        if (map.size() != 0 && list.size() != 0)
-        {
-            throw new IllegalArgumentException("You can not mix maps and arrays: "
-                + array);
-        }
-
-        if (map.size() > 0)
-        {
-            return map;
+            return olist;
         }
         else
         {
-            return list;
+            Map<Object, Object> omap = new LinkedHashMap<Object, Object>();
+            for (Entry<Token, Token> e : map.entrySet())
+            {
+                Token key = e.getKey();
+                Object k = eval(key);
+                if (!(k instanceof String))
+                {
+                    throw new SyntaxError(key.line, key.column,
+                        "map key null or not String: " + key);
+                }
+                omap.put(k, eval(e.getValue()));
+            }
+            return omap;
         }
     }
 
-    private Object var(CharSequence var) throws Exception
-    {
-        if (var.charAt(0) == '{')
-        {
-            var = var.subSequence(1, var.length() - 1);
-        }
-        Object v = eval(var);
-        String name = v.toString();
-        return get(name);
-    }
-
-    /**
-     * @param name
-     * @return
-     */
-    private Object get(String name)
+    public Object get(String name)
     {
         if (parms != null)
         {
-            if ("it".equals(name))
-            {
-                return parms.get(0);
-            }
             if ("args".equals(name))
             {
                 return parms;
+            }
+
+            if ("argv".equals(name))
+            {
+                return parmv;
+            }
+
+            if ("it".equals(name))
+            {
+                return parms.get(0);
             }
 
             if (name.length() == 1 && Character.isDigit(name.charAt(0)))
@@ -492,6 +510,67 @@ public class Closure extends Reflective implements Function
                 }
             }
         }
+
         return session.get(name);
     }
+
+    public Object put(String key, Object value)
+    {
+        return session.variables.put(key, value);
+    }
+
+    @Override
+    public String toString()
+    {
+        return source.toString().trim().replaceAll("\n+", "\n").replaceAll(
+            "([^\\\\{(\\[])\n", "\\1;").replaceAll("[ \\\\\t\n]+", " ");
+    }
+
+    /**
+     * List that overrides toString() for implicit $args expansion.
+     * Also checks for index out of bounds, so that $1 evaluates to null
+     * rather than throwing IndexOutOfBoundsException.
+     * e.g. x = { a$args }; x 1 2 => a1 2 and not a[1, 2]
+     */
+    class ArgList extends AbstractList<Object>
+    {
+        private List<Object> list;
+
+        public ArgList(List<Object> args)
+        {
+            this.list = args;
+        }
+
+        @Override
+        public String toString()
+        {
+            StringBuilder buf = new StringBuilder();
+            for (Object o : list)
+            {
+                if (buf.length() > 0)
+                    buf.append(' ');
+                buf.append(o);
+            }
+            return buf.toString();
+        }
+
+        @Override
+        public Object get(int index)
+        {
+            return index < list.size() ? list.get(index) : null;
+        }
+
+        @Override
+        public Object remove(int index)
+        {
+            return list.remove(index);
+        }
+
+        @Override
+        public int size()
+        {
+            return list.size();
+        }
+    }
+
 }

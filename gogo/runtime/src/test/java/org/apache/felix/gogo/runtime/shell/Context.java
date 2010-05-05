@@ -41,7 +41,16 @@ public class Context extends CommandShellImpl
 
     public Object execute(CharSequence source) throws Exception
     {
-        return session.execute(source);
+        Object result = new Exception();
+        try
+        {
+            return result = session.execute(source);
+        }
+        finally
+        {
+            System.err.println("execute<" + source + "> = ("
+                + (null == result ? "Null" : result.getClass().getSimpleName()) + ")(" + result + ")\n");
+        }
     }
 
     public void addCommand(String name, Object target)

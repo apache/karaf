@@ -37,7 +37,7 @@ public class CommandShellImpl implements CommandProcessor
     Set<Converter> converters = new HashSet<Converter>();
     protected ThreadIO threadIO;
     public final static Object NO_SUCH_COMMAND = new Object();
-    Map<String, Object> commands = new LinkedHashMap<String, Object>();
+    protected Map<String, Object> commands = new LinkedHashMap<String, Object>();
 
     public CommandShellImpl()
     {
