@@ -45,9 +45,24 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>org.apache.felix.shell</artifactId>
-      <version>${shell.version}</version>
+      <groupId>${pom.groupId}.gogo</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>${gogo.runtime.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.osgi</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.osgi</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}.gogo</groupId>
+      <artifactId>org.apache.felix.gogo.console</artifactId>
+      <version>${gogo.console.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.osgi</groupId>
@@ -61,8 +76,8 @@
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
-      <artifactId>org.apache.felix.shell.tui</artifactId>
-      <version>${shell.tui.version}</version>
+      <artifactId>org.apache.felix.gogo.felixcommands</artifactId>
+      <version>${felix.commands.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.osgi</groupId>
@@ -110,8 +125,9 @@
     <log.level>4</log.level>
     <dollar>$</dollar>
     <framework.version>2.1.0-SNAPSHOT</framework.version>
-    <shell.version>1.4.2</shell.version>
-    <shell.tui.version>1.4.1</shell.tui.version>
+    <gogo.runtime.version>0.5.0-SNAPSHOT</gogo.runtime.version>
+    <gogo.console.version>0.5.0-SNAPSHOT</gogo.console.version>
+    <felix.commands.version>0.9.0-SNAPSHOT</felix.commands.version>
     <obr.version>1.4.3</obr.version>
   </properties>
   <profiles>
@@ -191,17 +207,25 @@
             <configuration>
                 <artifactItems>
                   <artifactItem>
-                     <groupId>${pom.groupId}</groupId>
-                     <artifactId>org.apache.felix.shell</artifactId>
-                     <version>${shell.version}</version>
+                     <groupId>${pom.groupId}.gogo</groupId>
+                     <artifactId>org.apache.felix.gogo.runtime</artifactId>
+                     <version>${gogo.runtime.version}</version>
+                     <type>jar</type>
+                     <overWrite>true</overWrite>
+                     <outputDirectory>${project.basedir}/bundle</outputDirectory>
+                   </artifactItem>
+                   <artifactItem>
+                     <groupId>${pom.groupId}.gogo</groupId>
+                     <artifactId>org.apache.felix.gogo.console</artifactId>
+                     <version>${gogo.console.version}</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.basedir}/bundle</outputDirectory>
                    </artifactItem>
                    <artifactItem>
                      <groupId>${pom.groupId}</groupId>
-                     <artifactId>org.apache.felix.shell.tui</artifactId>
-                     <version>${shell.tui.version}</version>
+                     <artifactId>org.apache.felix.gogo.felixcommands</artifactId>
+                     <version>${felix.commands.version}</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.basedir}/bundle</outputDirectory>
