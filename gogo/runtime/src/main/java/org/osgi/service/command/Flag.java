@@ -28,4 +28,5 @@ import java.lang.annotation.Target;
 public @interface Flag
 {
     String name();
+    String description() default "";
 }
