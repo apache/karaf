@@ -23,6 +23,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.command.Descriptor;
 
 public class Files
 {
@@ -33,7 +34,9 @@ public class Files
         m_bc = bc;
     }
 
-    public File[] ls(String pattern)
+    @Descriptor(description="display file system contents")
+    public File[] ls(
+        @Descriptor(description="path with wildcarded file name") String pattern)
     {
         int idx = pattern.lastIndexOf(File.separatorChar);
         boolean isWildcarded = (pattern.indexOf('*', idx) >= 0);

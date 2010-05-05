@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +40,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.command.Descriptor;
 import org.osgi.service.command.Flag;
 import org.osgi.service.command.Option;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -54,7 +56,9 @@ public class Basic
         m_bc = bc;
     }
 
-    public void bundlelevel(Long id)
+    @Descriptor(description="query bundle start level")
+    public void bundlelevel(
+        @Descriptor(description="bundle identifier to query") Long id)
     {
         // Get start level service.
         ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
@@ -76,11 +80,12 @@ public class Basic
         ungetServices();
     }
 
+    @Descriptor(description="set bundle start level or initial bundle start level")
     public void bundlelevel(
-        @Flag(name="-s") boolean set,
-        @Flag(name="-i") boolean initial,
-        int level,
-        Long[] ids)
+        @Flag(name="-s", description="set the specified bundle's start level") boolean set,
+        @Flag(name="-i", description="set the initial bundle start level") boolean initial,
+        @Descriptor(description="target level") int level,
+        @Descriptor(description="target bundle identifiers") Long[] ids)
     {
         // Get start level service.
         ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
@@ -134,6 +139,7 @@ public class Basic
         ungetServices();
     }
 
+    @Descriptor(description="query framework active start level")
     public void frameworklevel()
     {
         // Get start level service.
@@ -147,7 +153,9 @@ public class Basic
         ungetServices();
     }
 
-    public void frameworklevel(int level)
+    @Descriptor(description="set framework active start level")
+    public void frameworklevel(
+        @Descriptor(description="target start level") int level)
     {
         // Get start level service.
         ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
@@ -160,7 +168,9 @@ public class Basic
         ungetServices();
     }
 
-    public void headers(Long[] ids)
+    @Descriptor(description="display bundle headers")
+    public void headers(
+        @Descriptor(description="target bundle identifiers") Long[] ids)
     {
         List<Bundle> bundles = getBundles(m_bc, ids);
         bundles = (bundles == null) ? Arrays.asList(m_bc.getBundles()) : bundles;
@@ -180,6 +190,7 @@ public class Basic
         }
     }
 
+    @Descriptor(description="displays available commands")
     public void help()
     {
         Map<String, List<Method>> commands = getCommands();
@@ -189,7 +200,9 @@ public class Basic
         }
     }
 
-    public void help(String name)
+    @Descriptor(description="displays information about a specific command")
+    public void help(
+        @Descriptor(description="target command") String name)
     {
         Map<String, List<Method>> commands = getCommands();
         List<Method> methods = commands.get(name);
@@ -197,35 +210,49 @@ public class Basic
         {
             for (Method m : methods)
             {
-                String s = m.toString();
-                int parenIdx = s.indexOf('(');
-                int idx = 0;
-                for (int dotIdx = s.indexOf('.');
-                    (dotIdx >= 0) && (dotIdx < parenIdx);
-                    dotIdx = s.indexOf('.', idx + 1))
+                Descriptor d = m.getAnnotation(Descriptor.class);
+                if (d == null)
                 {
-                    idx = dotIdx + 1;
+                    System.out.println(m.getName());
+                }
+                else
+                {
+                    System.out.println(m.getName() + " - " + d.description());
                 }
 
-                System.out.println(s.substring(idx));
-
                 // Get flags and options.
+                Class[] paramTypes = m.getParameterTypes();
                 Map<String, Flag> flags = new TreeMap();
                 Map<String, Option> options = new TreeMap();
+                List<String> params = new ArrayList();
                 Annotation[][] anns = m.getParameterAnnotations();
                 for (int paramIdx = 0; paramIdx < anns.length; paramIdx++)
                 {
-                    for (int annIdx = 0; annIdx < anns[paramIdx].length; annIdx++)
+                    boolean found = false;
+                    for (int annIdx = 0; !found && (annIdx < anns[paramIdx].length); annIdx++)
                     {
                         Annotation ann = anns[paramIdx][annIdx];
                         if (ann instanceof Flag)
                         {
                             flags.put(((Flag) ann).name(), (Flag) ann);
+                            found = true;
                         }
                         else if (ann instanceof Option)
                         {
                             options.put(((Option) ann).name(), (Option) ann);
+                            found = true;
                         }
+                        else if (ann instanceof Descriptor)
+                        {
+                            params.add(paramTypes[paramIdx].getSimpleName());
+                            params.add(((Descriptor) ann).description());
+                            found = true;
+                        }
+                    }
+                    if (!found)
+                    {
+                        params.add(paramTypes[paramIdx].getSimpleName());
+                        params.add("");
                     }
                 }
 
@@ -235,7 +262,10 @@ public class Basic
                     System.out.println("   flags:");
                     for (Entry<String, Flag> entry : flags.entrySet())
                     {
-                        System.out.println("      " + entry.getValue().name());
+                        System.out.println("      "
+                            + entry.getValue().name()
+                            + "   "
+                            + entry.getValue().description());
                     }
                 }
                 if (options.size() > 0)
@@ -243,10 +273,22 @@ public class Basic
                     System.out.println("   options:");
                     for (Entry<String, Option> entry : options.entrySet())
                     {
-                        System.out.println("      " + entry.getValue().name()
+                        System.out.println("      "
+                            + entry.getValue().name()
+                            + "   "
+                            + entry.getValue().description()
                             + ((entry.getValue().dflt() == null) ? "" : " [optional]"));
                     }
                 }
+                if (params.size() > 0)
+                {
+                    System.out.println("   parameters:");
+                    for (Iterator<String> it = params.iterator(); it.hasNext(); )
+                    {
+                        System.out.println("      " + it.next() + "   " + it.next());
+                    }
+                }
+                System.out.println("");
             }
         }
     }
@@ -289,13 +331,25 @@ public class Basic
                         }
                     }
                 }
+
+                // Remove any missing commands.
+                Iterator<Entry<String, List<Method>>> it = commands.entrySet().iterator();
+                while (it.hasNext())
+                {
+                    if (it.next().getValue().size() == 0)
+                    {
+                        it.remove();
+                    }
+                }
             }
         }
 
         return commands;
     }
 
-    public void install(String[] urls)
+    @Descriptor(description="install bundle using URLs")
+    public void install(
+        @Descriptor(description="target URLs") String[] urls)
     {
         StringBuffer sb = new StringBuffer();
 
@@ -345,10 +399,11 @@ public class Basic
         }
     }
 
+    @Descriptor(description="list installed bundles")
     public void lb(
-        @Flag(name="-l") boolean showLoc,
-        @Flag(name="-s") boolean showSymbolic,
-        @Flag(name="-u") boolean showUpdate)
+        @Flag(name="-l", description="show location") boolean showLoc,
+        @Flag(name="-s", description="show symbolic name") boolean showSymbolic,
+        @Flag(name="-u", description="show update location") boolean showUpdate)
     {
         // Get start level service.
         ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
@@ -371,12 +426,15 @@ public class Basic
         ungetServices();
     }
 
+    @Descriptor(description="refresh any updated or uninstalled bundles")
     public void refresh()
     {
         refresh((List) null);
     }
 
-    public void refresh(Long[] ids)
+    @Descriptor(description="refresh specific bundles")
+    public void refresh(
+        @Descriptor(description="target bundle identifiers") Long[] ids)
     {
         List<Bundle> bundles = getBundles(m_bc, ids);
         if ((bundles != null) && !bundles.isEmpty())
@@ -385,7 +443,7 @@ public class Basic
         }
     }
 
-    public void refresh(List<Bundle> bundles)
+    private void refresh(List<Bundle> bundles)
     {
         // Get package admin service.
         ServiceReference ref = m_bc.getServiceReference(PackageAdmin.class.getName());
@@ -401,12 +459,15 @@ public class Basic
         ungetServices();
     }
 
+    @Descriptor(description="resolve all bundles")
     public void resolve()
     {
         resolve((List) null);
     }
 
-    public void resolve(Long[] ids)
+    @Descriptor(description="resolve specific bundles")
+    public void resolve(
+        @Descriptor(description="target bundle identifiers") Long[] ids)
     {
         List<Bundle> bundles = getBundles(m_bc, ids);
         if ((bundles != null) && !bundles.isEmpty())
@@ -415,7 +476,7 @@ public class Basic
         }
     }
 
-    public void resolve(List<Bundle> bundles)
+    private void resolve(List<Bundle> bundles)
     {
         // Get package admin service.
         ServiceReference ref = m_bc.getServiceReference(PackageAdmin.class.getName());
@@ -431,10 +492,11 @@ public class Basic
         ungetServices();
     }
 
+    @Descriptor(description="start bundles")
     public void start(
-        @Flag(name="-t") boolean trans,
-        @Flag(name="-p") boolean policy,
-        String[] ss)
+        @Flag(name="-t", description="transient") boolean trans,
+        @Flag(name="-p", description="use declared activation policy") boolean policy,
+        @Descriptor(description="target bundle identifiers or URLs") String[] ss)
     {
         int options = 0;
 
@@ -509,28 +571,36 @@ public class Basic
         }
     }
 
-    public void stop(Long[] ids)
+    @Descriptor(description="stop bundles")
+    public void stop(
+        @Flag(name="-t", description="transient") boolean trans,
+        @Descriptor(description="target bundle identifiers") Long[] ids)
     {
         List<Bundle> bundles = getBundles(m_bc, ids);
 
-        if (bundles == null)
+        if ((bundles == null) || (bundles.size() == 0))
         {
             System.out.println("Please specify the bundles to start.");
         }
-        else
+
+        int options = 0;
+
+        // Check for "transient" switch.
+        if (trans)
+        {
+            options |= Bundle.STOP_TRANSIENT;
+        }
+
+        for (Bundle bundle : bundles)
         {
             try
             {
-                for (Bundle bundle : bundles)
-                {
-                    bundle.stop();
-                }
+                bundle.stop(options);
             }
             catch (BundleException ex)
             {
                 if (ex.getNestedException() != null)
                 {
-                    ex.printStackTrace();
                     System.err.println(ex.getNestedException().toString());
                 }
                 else
@@ -545,7 +615,9 @@ public class Basic
         }
     }
 
-    public void uninstall(Long[] ids)
+    @Descriptor(description="uninstall bundles")
+    public void uninstall(
+        @Descriptor(description="target bundle identifiers") Long[] ids)
     {
         List<Bundle> bundles = getBundles(m_bc, ids);
 
@@ -581,7 +653,9 @@ public class Basic
         }
     }
 
-    public void update(Long id)
+    @Descriptor(description="update bundle")
+    public void update(
+        @Descriptor(description="target bundle identifier") Long id)
     {
         try
         {
@@ -609,7 +683,10 @@ public class Basic
         }
     }
 
-    public void update(Long id, String location)
+    @Descriptor(description="update bundle from URL")
+    public void update(
+        @Descriptor(description="target bundle identifier") Long id,
+        @Descriptor(description="URL from where to retrieve bundle") String location)
     {
         if (location != null)
         {
