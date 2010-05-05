@@ -16,8 +16,12 @@
  */
 package org.apache.felix.karaf.shell.obr;
 
+import java.io.PrintStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.Repository;
@@ -32,32 +36,96 @@ import org.osgi.framework.Version;
 @Command(scope = "obr", name = "find", description = "Find OBR bundles for a given filter")
 public class FindCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "requirement", description = "Requirement", required = true, multiValued = false)
-    String requirement;
+    @Argument(index = 0, name = "requirements", description = "Requirement", required = true, multiValued = true)
+    List<String> requirements;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
         List<Resource> matching = new ArrayList<Resource>();
-        Repository[] repos = admin.listRepositories();
-        Requirement req = parseRequirement(admin, requirement);
-        for (int repoIdx = 0; (repos != null) && (repoIdx < repos.length); repoIdx++) {
-            Resource[] resources = repos[repoIdx].getResources();
-            for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++) {
-                Capability[] caps = resources[resIdx].getCapabilities();
-                for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++) {
-                    if (req.isSatisfied(caps[capIdx])) {
-                        matching.add(resources[resIdx]);
-                        break;
+        Resource[] resources = admin.discoverResources(parseRequirements(admin, requirements));
+        if (resources == null)
+        {
+            System.err.println("No matching resources.");
+        }
+        else
+        {
+            for (int resIdx = 0; resIdx < resources.length; resIdx++)
+            {
+                if (resIdx > 0)
+                {
+                    System.out.println("");
+                }
+                printResource(System.out, resources[resIdx]);
+            }
+        }
+    }
+
+    private void printResource(PrintStream out, Resource resource)
+    {
+        String name = resource.getPresentationName();
+        if (name == null) {
+            name = resource.getSymbolicName();
+        }
+
+        printUnderline(out, name.length());
+        out.println(name);
+        printUnderline(out, name    .length());
+
+        Map map = resource.getProperties();
+        for (Iterator iter = map.entrySet().iterator(); iter.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+            if (entry.getValue().getClass().isArray())
+            {
+                out.println(entry.getKey() + ":");
+                for (int j = 0; j < Array.getLength(entry.getValue()); j++)
+                {
+                    out.println("   " + Array.get(entry.getValue(), j));
+                }
+            }
+            else
+            {
+                out.println(entry.getKey() + ": " + entry.getValue());
+            }
+        }
+
+        Requirement[] reqs = resource.getRequirements();
+        if ((reqs != null) && (reqs.length > 0))
+        {
+            boolean hdr = false;
+            for (int i = 0; i < reqs.length; i++)
+            {
+                if (!reqs[i].isOptional())
+                {
+                    if (!hdr)
+                    {
+                        hdr = true;
+                        out.println("Requirements:");
                     }
+                    out.println("   " + reqs[i].getName() + ":" + reqs[i].getFilter());
+                }
+            }
+            hdr = false;
+            for (int i = 0; i < reqs.length; i++)
+            {
+                if (reqs[i].isOptional())
+                {
+                    if (!hdr)
+                    {
+                        hdr = true;
+                        out.println("Optional Requirements:");
+                    }
+                    out.println("   " + reqs[i].getName() + ":" + reqs[i].getFilter());
                 }
             }
         }
-        if (matching.isEmpty()) {
-            System.out.println("No matching resources.");
-        } else {
-            for (Resource resource : matching) {
-                String name = resource.getPresentationName();
-                Version version = resource.getVersion();
-                System.out.println(version != null ? name + " (" + version + ")" : name);
+
+        Capability[] caps = resource.getCapabilities();
+        if ((caps != null) && (caps.length > 0))
+        {
+            out.println("Capabilities:");
+            for (int i = 0; i < caps.length; i++)
+            {
+                out.println("   " + caps[i].getName() + ":" + caps[i].getPropertiesAsMap());
             }
         }
     }
