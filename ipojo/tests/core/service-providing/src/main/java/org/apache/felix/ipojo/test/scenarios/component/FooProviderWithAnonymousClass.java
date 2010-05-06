@@ -20,6 +20,8 @@ package org.apache.felix.ipojo.test.scenarios.component;
 
 import java.util.Properties;
 
+import javax.swing.SwingUtilities;
+
 import org.apache.felix.ipojo.test.scenarios.ps.service.FooService;
 
 public class FooProviderWithAnonymousClass implements FooService {
@@ -62,7 +64,26 @@ public class FooProviderWithAnonymousClass implements FooService {
 		return p;
 	}
 
-	public boolean getBoolean() { return true; }
+	public boolean getBoolean() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				intProp = 3;
+				boolProp = true;
+				if(strProp.equals("foo")) { strProp = "bar"; }
+				else { strProp = "foo"; }
+				strAProp = new String[] {"foo", "bar", "baz"};
+				intAProp = new int[] {3, 2, 1};
+			}
+		});
+
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		return true;
+	}
 
 	public double getDouble() { return 1.0; }
 
