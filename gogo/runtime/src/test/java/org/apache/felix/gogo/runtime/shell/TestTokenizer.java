@@ -23,8 +23,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.naming.OperationNotSupportedException;
-
 import org.apache.felix.gogo.runtime.shell.Tokenizer.Type;
 
 import junit.framework.TestCase;
@@ -40,7 +38,7 @@ public class TestTokenizer extends TestCase
         {
             public Object eval(Token t) throws Exception
             {
-                throw new OperationNotSupportedException();
+                throw new UnsupportedOperationException("eval not implemented.");
             }
 
             public Object get(String key)
