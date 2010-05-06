@@ -75,7 +75,7 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>${pom.groupId}.gogo</groupId>
       <artifactId>org.apache.felix.gogo.felixcommands</artifactId>
       <version>${felix.commands.version}</version>
       <exclusions>
@@ -223,7 +223,7 @@
                      <outputDirectory>${project.basedir}/bundle</outputDirectory>
                    </artifactItem>
                    <artifactItem>
-                     <groupId>${pom.groupId}</groupId>
+                     <groupId>${pom.groupId}.gogo</groupId>
                      <artifactId>org.apache.felix.gogo.felixcommands</artifactId>
                      <version>${felix.commands.version}</version>
                      <type>jar</type>
