@@ -381,7 +381,19 @@ public class ComponentMetadata
      */
     public String getName()
     {
-        return m_name;
+        // FELIX-2325: Be lenient here and return the name if set or
+        // the implementation class name. This allows for the
+        // BundleComponentActivator.loadComponents method to access the
+        // name before validating the component, which then makes sure
+        // that the name may only be unset for DS 1.1 and newer components
+
+        if ( m_name != null )
+        {
+            return m_name;
+        }
+
+        // return the implementation class name if the name is not set
+        return getImplementationClassName();
     }
 
 
