@@ -18,12 +18,15 @@
  */
 package org.apache.felix.gogo.runtime;
 
-import org.apache.felix.gogo.runtime.lang.Support;
-import org.apache.felix.gogo.runtime.osgi.OSGiShell;
+import org.apache.felix.gogo.runtime.osgi.OSGiCommands;
+import org.apache.felix.gogo.runtime.osgi.OSGiConverters;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.gogo.runtime.shell.CommandProxy;
+import org.apache.felix.gogo.runtime.shell.CommandProcessorImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.command.CommandProcessor;
@@ -33,65 +36,96 @@ import org.osgi.service.threadio.ThreadIO;
 import org.osgi.util.tracker.ServiceTracker;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Activator implements BundleActivator
 {
-
-    private OSGiShell shell;
+    private CommandProcessorImpl processor;
     private ThreadIOImpl threadio;
-    private ServiceRegistration shellRegistration;
-    private ServiceRegistration threadioRegistration;
-    private ServiceTracker converterTracker;
     private ServiceTracker commandTracker;
+    private ServiceTracker converterTracker;
     private ServiceTracker felixTracker;
-    private Map<ServiceReference, ServiceRegistration> regs = new HashMap<ServiceReference, ServiceRegistration>();
+    private ServiceRegistration processorRegistration;
+    private ServiceRegistration threadioRegistration;
+    private Map<ServiceReference, ServiceRegistration> felixRegistrations;
+    private OSGiCommands commands;
+    private OSGiConverters converters;
+    private ServiceRegistration convertersRegistration;
 
     public void start(final BundleContext context) throws Exception
     {
-        Hashtable props = new Hashtable();
-        props.put("osgi.command.scope", "log");
-        props.put("osgi.command.function", "display");
-
         threadio = new ThreadIOImpl();
         threadio.start();
-        shell = new OSGiShell();
-        shell.setBundle(context.getBundle());
-        shell.setThreadio(threadio);
-        shell.setConverter(new Support());
-        shell.start();
+        threadioRegistration = context.registerService(ThreadIO.class.getName(),
+            threadio, null);
+
+        processor = new CommandProcessorImpl(threadio);
+        processorRegistration = context.registerService(CommandProcessor.class.getName(),
+            processor, null);
+        
+        commandTracker = trackOSGiCommands(context);
+        commandTracker.open();
+
+        felixRegistrations = new HashMap<ServiceReference, ServiceRegistration>();
+        felixTracker = trackFelixCommands(context);
+        felixTracker.open();
+
         converterTracker = new ServiceTracker(context, Converter.class.getName(), null)
         {
             @Override
             public Object addingService(ServiceReference reference)
             {
                 Converter converter = (Converter) super.addingService(reference);
-                shell.setConverter(converter);
+                processor.addConverter(converter);
                 return converter;
             }
 
             @Override
             public void removedService(ServiceReference reference, Object service)
             {
-                shell.unsetConverter((Converter) service);
+                processor.removeConverter((Converter) service);
                 super.removedService(reference, service);
             }
         };
         converterTracker.open();
 
-        commandTracker = new ServiceTracker(context,
-            context.createFilter("(&(osgi.command.scope=*)(osgi.command.function=*))"),
-            null)
+        // FIXME: optional?
+        commands = new OSGiCommands(context);
+        commands.registerCommands(processor, context.getBundle());
+        converters = new OSGiConverters(context);
+        convertersRegistration = context.registerService(Converter.class.getCanonicalName(), converters, null);
+    }
+
+    public void stop(BundleContext context) throws Exception
+    {
+        convertersRegistration.unregister();
+        processorRegistration.unregister();
+        threadioRegistration.unregister();
+        
+        commandTracker.close();
+        converterTracker.close();
+        felixTracker.close();
+
+        threadio.stop();
+    }
+
+    private ServiceTracker trackOSGiCommands(final BundleContext context)
+        throws InvalidSyntaxException
+    {
+        Filter filter = context.createFilter(String.format("(&(%s=*)(%s=*))",
+            CommandProcessor.COMMAND_SCOPE, CommandProcessor.COMMAND_FUNCTION));
+
+        return new ServiceTracker(context, filter, null)
         {
             @Override
             public Object addingService(ServiceReference reference)
             {
-                Object scope = reference.getProperty("osgi.command.scope");
-                Object function = reference.getProperty("osgi.command.function");
+                Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
+                Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
                 List<Object> commands = new ArrayList<Object>();
+
                 if (scope != null && function != null)
                 {
                     if (function.getClass().isArray())
@@ -100,7 +134,7 @@ public class Activator implements BundleActivator
                         {
                             Function target = new CommandProxy(context, reference,
                                 f.toString());
-                            shell.addCommand(scope.toString(), target, f.toString());
+                            processor.addCommand(scope.toString(), target, f.toString());
                             commands.add(target);
                         }
                     }
@@ -108,7 +142,7 @@ public class Activator implements BundleActivator
                     {
                         Function target = new CommandProxy(context, reference,
                             function.toString());
-                        shell.addCommand(scope.toString(), target, function.toString());
+                        processor.addCommand(scope.toString(), target, function.toString());
                         commands.add(target);
                     }
                     return commands;
@@ -119,18 +153,32 @@ public class Activator implements BundleActivator
             @Override
             public void removedService(ServiceReference reference, Object service)
             {
-                List<Object> commands = (List<Object>) service;
-                for (Object cmd : commands)
+                Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
+                Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
+
+                if (scope != null && function != null)
                 {
-                    shell.removeCommand(cmd);
+                    if (!function.getClass().isArray())
+                    {
+                        processor.removeCommand(scope.toString(), function.toString());
+                    }
+                    else
+                    {
+                        for (Object func : (Object[]) function)
+                        {
+                            processor.removeCommand(scope.toString(), func.toString());
+                        }
+                    }
                 }
+
                 super.removedService(reference, service);
             }
         };
-        commandTracker.open();
+    }
 
-        felixTracker = new ServiceTracker(context, FelixCommandAdaptor.FELIX_COMMAND,
-            null)
+    private ServiceTracker trackFelixCommands(final BundleContext context)
+    {
+        return new ServiceTracker(context, FelixCommandAdaptor.FELIX_COMMAND, null)
         {
             @Override
             public Object addingService(ServiceReference ref)
@@ -139,7 +187,7 @@ public class Activator implements BundleActivator
                 try
                 {
                     FelixCommandAdaptor adaptor = new FelixCommandAdaptor(felixCommand);
-                    regs.put(ref, context.registerService(
+                    felixRegistrations.put(ref, context.registerService(
                         FelixCommandAdaptor.class.getName(), adaptor,
                         adaptor.getAttributes()));
                     return felixCommand;
@@ -154,37 +202,13 @@ public class Activator implements BundleActivator
             @Override
             public void removedService(ServiceReference reference, Object service)
             {
-                ServiceRegistration reg = regs.remove(reference);
+                ServiceRegistration reg = felixRegistrations.remove(reference);
                 if (reg != null)
+                {
                     reg.unregister();
+                }
                 super.removedService(reference, service);
             }
         };
-        felixTracker.open();
-
-        threadioRegistration = context.registerService(ThreadIO.class.getName(),
-            threadio, new Hashtable());
-        shellRegistration = context.registerService(CommandProcessor.class.getName(),
-            shell, new Hashtable());
-    }
-
-    private String getProperty(BundleContext context, String name, String def)
-    {
-        String v = context.getProperty(name);
-        if (v == null)
-        {
-            v = def;
-        }
-        return v;
-    }
-
-    public void stop(BundleContext context) throws Exception
-    {
-        shellRegistration.unregister();
-        threadioRegistration.unregister();
-        threadio.stop();
-        converterTracker.close();
-        commandTracker.close();
-        felixTracker.close();
     }
 }

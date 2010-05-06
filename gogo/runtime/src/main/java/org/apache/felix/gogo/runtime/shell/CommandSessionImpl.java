@@ -23,6 +23,7 @@ package org.apache.felix.gogo.runtime.shell;
 
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Converter;
+import org.osgi.service.threadio.ThreadIO;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -35,19 +36,26 @@ public class CommandSessionImpl implements CommandSession, Converter
     public static final String VARIABLES = ".variables";
     public static final String COMMANDS = ".commands";
     private static final String COLUMN = "%-20s %s\n";
+    
     protected InputStream in;
     protected PrintStream out;
     PrintStream err;
-    CommandShellImpl service;
+    
+    private final CommandProcessorImpl processor;
     protected final Map<String, Object> variables = new HashMap<String, Object>();
     private boolean closed;
 
-    protected CommandSessionImpl(CommandShellImpl service, InputStream in, PrintStream out, PrintStream err)
+    protected CommandSessionImpl(CommandProcessorImpl shell, InputStream in, PrintStream out, PrintStream err)
     {
-        this.service = service;
+        this.processor = shell;
         this.in = in;
         this.out = out;
         this.err = err;
+    }
+    
+    ThreadIO threadIO()
+    {
+        return processor.threadIO;
     }
 
     public void close()
@@ -57,8 +65,8 @@ public class CommandSessionImpl implements CommandSession, Converter
 
     public Object execute(CharSequence commandline) throws Exception
     {
-        assert service != null;
-        assert service.threadIO != null;
+        assert processor != null;
+        assert processor.threadIO != null;
 
         if (closed)
         {
@@ -82,9 +90,10 @@ public class CommandSessionImpl implements CommandSession, Converter
         {
             return variables.keySet();
         }
+        
         if (COMMANDS.equals(name))
         {
-            return service.get(null);
+            return processor.getCommands();
         }
 
         if (variables.containsKey(name))
@@ -95,12 +104,13 @@ public class CommandSessionImpl implements CommandSession, Converter
         // add SCOPE support
         if (name.startsWith("*:"))
         {
+            String func = name.substring(2);
             String path = variables.containsKey("SCOPE") ? variables.get("SCOPE").toString()
                 : "osgi:*";
-            String func = name.substring(2);
+            
             for (String scope : path.split(":"))
             {
-                Object result = service.get(scope + ":" + func);
+                Object result = processor.getCommand(scope + ":" + func);
                 if (result != null)
                 {
                     return result;
@@ -108,7 +118,8 @@ public class CommandSessionImpl implements CommandSession, Converter
             }
             return null;
         }
-        return service.get(name);
+
+        return processor.getCommand(name);
     }
 
     public void put(String name, Object value)
@@ -135,7 +146,7 @@ public class CommandSessionImpl implements CommandSession, Converter
             return (CharSequence) target;
         }
 
-        for (Converter c : service.converters)
+        for (Converter c : processor.converters)
         {
             CharSequence s = c.format(target, level, this);
             if (s != null)
@@ -338,7 +349,7 @@ public class CommandSessionImpl implements CommandSession, Converter
 
     public Object convert(Class<?> desiredType, Object in)
     {
-        return service.convert(desiredType, in);
+        return processor.convert(desiredType, in);
     }
 
     public CharSequence format(Object result, int inspect)

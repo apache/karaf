@@ -18,7 +18,7 @@
  */
 package org.apache.felix.gogo.launcher;
 
-import org.apache.felix.gogo.runtime.osgi.OSGiShell;
+import org.apache.felix.gogo.runtime.shell.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.gogo.console.stdio.Console;
 import org.osgi.framework.Bundle;
@@ -109,10 +109,7 @@ public class Launcher
         ThreadIOImpl threadio = new ThreadIOImpl();
         threadio.start();
 
-        OSGiShell shell = new OSGiShell();
-        shell.setThreadio(threadio);
-        shell.setBundle(framework);
-        shell.start();
+        CommandProcessorImpl shell = new CommandProcessorImpl(threadio);
 
         CommandSession session = shell.createSession(in, out, System.err);
         session.put("shell", shell);

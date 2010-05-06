@@ -100,7 +100,7 @@ public class Pipe extends Thread
         tIn.set(in);
         tOut.set(out);
         tErr.set(err);
-        closure.session().service.threadIO.setStreams(in, out, err);
+        closure.session().threadIO().setStreams(in, out, err);
         
         try
         {
@@ -120,7 +120,7 @@ public class Pipe extends Thread
         finally
         {
             out.flush();
-            closure.session().service.threadIO.close();
+            closure.session().threadIO().close();
 
             try
             {

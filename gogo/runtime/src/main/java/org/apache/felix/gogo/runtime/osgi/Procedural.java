@@ -16,7 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.runtime.cpeg;
+package org.apache.felix.gogo.runtime.osgi;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.command.CommandSession;
@@ -24,6 +32,30 @@ import org.osgi.service.command.Function;
 
 public class Procedural
 {
+    public String tac() throws IOException
+    {
+        StringWriter sw = new StringWriter();
+        BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
+        String s = rdr.readLine();
+        while (s != null)
+        {
+            sw.write(s);
+            s = rdr.readLine();
+        }
+        return sw.toString();
+    }
+    
+    public void each(CommandSession session, Collection<Object> list, Function closure)
+        throws Exception
+    {
+        List<Object> args = new ArrayList<Object>();
+        args.add(null);
+        for (Object x : list)
+        {
+            args.set(0, x);
+            closure.execute(session, args);
+        }
+    }
 
     public Object _if(CommandSession session, Function condition, Function ifTrue,
         Function ifFalse) throws Exception

@@ -16,10 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// DWB11: add removeCommand: https://www.osgi.org/bugzilla/show_bug.cgi?id=49
-// DWB12: there is no API to list commands: https://www.osgi.org/bugzilla/show_bug.cgi?id=49
-// DWB13: addCommand() fails to add static methods (if target is Class)
 package org.apache.felix.gogo.runtime.shell;
+
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
@@ -27,22 +34,17 @@ import org.osgi.service.command.Converter;
 import org.osgi.service.command.Function;
 import org.osgi.service.threadio.ThreadIO;
 
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Method;
-import java.util.*;
-
-public class CommandShellImpl implements CommandProcessor
+public class CommandProcessorImpl implements CommandProcessor
 {
-    Set<Converter> converters = new HashSet<Converter>();
-    protected ThreadIO threadIO;
-    public final static Object NO_SUCH_COMMAND = new Object();
-    protected Map<String, Object> commands = new LinkedHashMap<String, Object>();
+    protected final Set<Converter> converters = new HashSet<Converter>();
+    protected final Map<String, Object> commands = new LinkedHashMap<String, Object>();
+    protected final ThreadIO threadIO;
 
-    public CommandShellImpl()
+    public CommandProcessorImpl(ThreadIO tio)
     {
+        threadIO = tio;
         addCommand("shell", this, "addCommand");
-        addCommand("shell", this, "removeCommand"); // derek
+        addCommand("shell", this, "removeCommand");
     }
 
     public CommandSession createSession(InputStream in, PrintStream out, PrintStream err)
@@ -50,85 +52,59 @@ public class CommandShellImpl implements CommandProcessor
         return new CommandSessionImpl(this, in, out, err);
     }
 
-    public void setThreadio(ThreadIO threadIO)
-    {
-        this.threadIO = threadIO;
-    }
-
-    public void setConverter(Converter c)
+    public void addConverter(Converter c)
     {
         converters.add(c);
     }
 
-    public void unsetConverter(Converter c)
+    public void removeConverter(Converter c)
     {
         converters.remove(c);
     }
-
-    public Object get(String name)
+    
+    public Map<String, Object> getCommands()
     {
-        if (name == null)
-        {
-            return commands.keySet();
-        }
+        return commands;
+    }
+
+    public Function getCommand(String name)
+    {
         name = name.toLowerCase();
         int n = name.indexOf(':');
+
         if (n < 0)
         {
             return null;
         }
-
-        String function = name.substring(n);
-
-        Object cmd = null;
-
-        if (commands.containsKey(name))
+        
+        String scope = name.substring(0, n);
+        String function = name.substring(n + 1);
+        Object cmd = commands.get(name);
+        
+        if (null == cmd && scope.equals("*"))
         {
-            cmd = commands.get(name);
-        }
-        else
-        {
-            String scope = name.substring(0, n);
-            if (scope.equals("*"))
+            for (String key : commands.keySet())
             {
-                for (Map.Entry<String, Object> entry : commands.entrySet())
+                if (key.endsWith(":" + function))
                 {
-                    if (entry.getKey().endsWith(function))
-                    {
-                        cmd = entry.getValue();
-                        break;
-                    }
+                    cmd = commands.get(key);
+                    break;
                 }
             }
-
-            // XXX: derek.baum@paremus.com
-            // there is no API to list commands
-            // so override otherwise illegal name ":"
-            if (cmd == null && name.equals(":"))
-            {
-                return Collections.unmodifiableSet(commands.keySet());
-            }
         }
 
-        if (cmd == null)
+        if ((null == cmd) || (cmd instanceof Function))
         {
-            return null;
+            return (Function) cmd;
         }
 
-        if (cmd instanceof Function)
-        {
-            return cmd;
-        }
-        else
-        {
-            return new Command(cmd, function.substring(1));
-        }
+        return new CommandProxy(cmd, function);
     }
 
     public void addCommand(String scope, Object target)
     {
-        // derek - fix target class
-        Class<?> tc = (target instanceof Class) ? (Class<?>) target : target.getClass();
+        Class<?> tc = (target instanceof Class<?>) ? (Class<?>) target
+            : target.getClass();
         addCommand(scope, target, tc);
     }
 
@@ -151,7 +127,6 @@ public class CommandShellImpl implements CommandProcessor
         commands.put((scope + ":" + function).toLowerCase(), target);
     }
 
-    // derek.baum@paremus.com: need removeCommand, so stopped bundles can clean up.
     public void removeCommand(String scope, String function)
     {
         String func = (scope + ":" + function).toLowerCase();
@@ -176,7 +151,7 @@ public class CommandShellImpl implements CommandProcessor
         Method methods[] = target.getMethods();
         for (Method m : methods)
         {
-            if (m.getDeclaringClass().equals(Object.class)) // derek
+            if (m.getDeclaringClass().equals(Object.class))
             {
                 continue;
             }

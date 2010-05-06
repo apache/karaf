@@ -19,24 +19,25 @@
 package org.apache.felix.gogo.runtime.shell;
 
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.osgi.service.command.CommandSession;
 
-public class Context extends CommandShellImpl
+public class Context extends CommandProcessorImpl
 {
     public static final String EMPTY = "";
-    CommandSessionImpl session = (CommandSessionImpl) createSession(System.in,
-        System.out, System.err);
-    static ThreadIOImpl threadio;
+    
+    private static final ThreadIOImpl threadio;
+    private final CommandSession session;
 
     static
     {
         threadio = new ThreadIOImpl();
         threadio.start();
-
     }
 
     public Context()
     {
-        setThreadio(threadio);
+        super(threadio);
+        session = (CommandSessionImpl) createSession(System.in, System.out, System.err);
     }
 
     public Object execute(CharSequence source) throws Exception
@@ -49,13 +50,14 @@ public class Context extends CommandShellImpl
         finally
         {
             System.err.println("execute<" + source + "> = ("
-                + (null == result ? "Null" : result.getClass().getSimpleName()) + ")(" + result + ")\n");
+                + (null == result ? "Null" : result.getClass().getSimpleName()) + ")("
+                + result + ")\n");
         }
     }
 
-    public void addCommand(String name, Object target)
+    public void addCommand(String function, Object target)
     {
-        put("test:" + name, target);
+        addCommand("test", target, function);
     }
 
     public void set(String name, Object value)

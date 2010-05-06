@@ -24,14 +24,15 @@ public class FelixCommandAdaptor
         Class<?>[] parms = { String.class, PrintStream.class, PrintStream.class };
         execute = c.getMethod("execute", parms);
 
-        Method name = c.getMethod("getName", (Class[]) null);
-        this.name = (String) name.invoke(felixCommand, (Object[]) null);
+        Method m;
+        m = c.getMethod("getName", (Class[]) null);
+        name = (String) m.invoke(felixCommand, (Object[]) null);
 
-        Method help = c.getMethod("getShortDescription", (Class[]) null);
-        this.help = (String) help.invoke(felixCommand, (Object[]) null);
+        m = c.getMethod("getShortDescription", (Class[]) null);
+        help = (String) m.invoke(felixCommand, (Object[]) null);
 
-        Method usage = c.getMethod("getUsage", (Class[]) null);
-        this.usage = (String) usage.invoke(felixCommand, (Object[]) null);
+        m = c.getMethod("getUsage", (Class[]) null);
+        usage = (String) m.invoke(felixCommand, (Object[]) null);
     }
 
     public void _main(String[] argv) throws Exception

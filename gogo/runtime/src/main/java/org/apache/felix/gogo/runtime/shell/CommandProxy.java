@@ -27,9 +27,10 @@ import org.osgi.framework.BundleContext;
 
 public class CommandProxy extends Reflective implements Function
 {
-    BundleContext context;
-    ServiceReference reference;
-    String function;
+    private BundleContext context;
+    private ServiceReference reference;
+    private String function;
+    private Object target;
 
     public CommandProxy(BundleContext context, ServiceReference reference, String function)
     {
@@ -37,25 +38,35 @@ public class CommandProxy extends Reflective implements Function
         this.reference = reference;
         this.function = function;
     }
+    
+    public CommandProxy(Object target, String function)
+    {
+        this.function = function;
+        this.target = target;
+    }
 
     public Object execute(CommandSession session, List<Object> arguments)
         throws Exception
     {
-        Object target = context.getService(reference);
+        Object tgt = (context != null ? context.getService(reference) : target);
+        
         try
         {
-            if (target instanceof Function)
+            if (tgt instanceof Function)
             {
-                return ((Function) target).execute(session, arguments);
+                return ((Function) tgt).execute(session, arguments);
             }
             else
             {
-                return method(session, target, function, arguments);
+                return method(session, tgt, function, arguments);
             }
         }
         finally
         {
-            context.ungetService(reference);
+            if (context != null)
+            {
+                context.ungetService(reference);
+            }
         }
     }
 }

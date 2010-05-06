@@ -19,10 +19,10 @@
 package org.apache.felix.gogo.commands;
 
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
-import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
+import org.apache.felix.gogo.runtime.shell.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
 
-public class Context extends CommandShellImpl
+public class Context extends CommandProcessorImpl
 {
     public static final String EMPTY = "";
     CommandSessionImpl session = (CommandSessionImpl) createSession(System.in, System.out, System.err);
@@ -37,7 +37,7 @@ public class Context extends CommandShellImpl
 
     public Context()
     {
-        setThreadio(threadio);
+        super(threadio);
     }
 
     public Object execute(CharSequence source) throws Exception

@@ -16,152 +16,98 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// DWB1: osgi:each too verbose (formats reults to System.out)
-// DWB2: ClassNotFoundException should be caught in convert() method
 package org.apache.felix.gogo.runtime.osgi;
 
-import org.osgi.framework.*;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Converter;
-import org.osgi.service.command.Function;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Formatter;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
-public class OSGiCommands implements Converter
+import org.apache.felix.gogo.runtime.shell.CommandProcessorImpl;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.packageadmin.PackageAdmin;
+
+public class OSGiCommands
 {
-    Bundle bundle;
-    String COLUMN = "%40s %s\n";
+    final BundleContext context;
 
-    protected OSGiCommands(Bundle bundle)
+    public OSGiCommands(BundleContext context)
     {
-        this.bundle = bundle;
+        this.context = context;
     }
 
-    //	Bundle[] getBundles() {
-    //		return getContext().getBundles();
-    //	}
-
-    public BundleContext getContext()
+    private Object service(String clazz, String filter) throws InvalidSyntaxException
     {
-        if (bundle.getState() != Bundle.ACTIVE && bundle.getState() != Bundle.STARTING
-            && bundle.getState() != Bundle.STOPPING)
+        ServiceReference ref[] = context.getServiceReferences(clazz, filter);
+        if (ref != null)
         {
-            throw new IllegalStateException("Framework is not started yet");
-        }
-        return bundle.getBundleContext();
-    }
-
-    CharSequence print(Bundle bundle)
-    {
-        String version = (String) bundle.getHeaders().get("Bundle-Version");
-        if (version == null)
-        {
-            version = "0.0.0";
-        }
-        return String.format("%06d %s %s-%s", bundle.getBundleId(), getState(bundle),
-            bundle.getSymbolicName(), version);
-    }
-
-    CharSequence print(ServiceReference ref)
-    {
-        StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb);
-
-        String spid = "";
-        Object pid = ref.getProperty("service.pid");
-        if (pid != null)
-        {
-            spid = pid.toString();
+            return context.getService(ref[0]);
         }
 
-        f.format("%06d %3s %-40s %s", ref.getProperty("service.id"),
-            ref.getBundle().getBundleId(),
-            getShortNames((String[]) ref.getProperty("objectclass")), spid);
-        return sb;
-    }
-
-    CharSequence getShortNames(String[] list)
-    {
-        StringBuilder sb = new StringBuilder();
-        String del = "";
-        for (String s : list)
-        {
-            sb.append(del + getShortName(s));
-            del = " | ";
-        }
-        return sb;
-    }
-
-    CharSequence getShortName(String name)
-    {
-        int n = name.lastIndexOf('.');
-        if (n < 0)
-        {
-            n = 0;
-        }
-        else
-        {
-            n++;
-        }
-        return name.subSequence(n, name.length());
-    }
-
-    private String getState(Bundle bundle)
-    {
-        switch (bundle.getState())
-        {
-            case Bundle.ACTIVE:
-                return "ACT";
-
-            case Bundle.INSTALLED:
-                return "INS";
-
-            case Bundle.RESOLVED:
-                return "RES";
-
-            case Bundle.STARTING:
-                return "STA";
-
-            case Bundle.STOPPING:
-                return "STO";
-
-            case Bundle.UNINSTALLED:
-                return "UNI ";
-        }
         return null;
     }
 
-    public void grep(String match) throws IOException
+    public void registerCommands(CommandProcessorImpl processor, Bundle bundle)
     {
-        Pattern p = Pattern.compile(match);
-        BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
-        String s = rdr.readLine();
-        while (s != null)
+        processor.addCommand("osgi", this);
+        processor.addCommand("osgi", new Procedural());
+        processor.addCommand("osgi", bundle);
+        processor.addCommand("osgi", context, BundleContext.class);
+
+        try
         {
-            if (p.matcher(s).find())
+            processor.addCommand("osgi",
+                this.service(PackageAdmin.class.getName(), null), PackageAdmin.class);
+
+            try
             {
-                System.out.println(s);
+                // dynamically load StartLevel to avoid import dependency
+                String sl = "org.osgi.service.startlevel.StartLevel";
+                Class<?> slClass = bundle.loadClass(sl);
+                processor.addCommand("osgi", this.service(sl, null), slClass);
             }
-            s = rdr.readLine();
+            catch (ClassNotFoundException e)
+            {
+            }
+
+            try
+            {
+                // dynamically load PermissionAdmin to avoid import dependency
+                String pa = "org.osgi.service.permissionadmin.PermissionAdmin";
+                Class<?> paClass = bundle.loadClass(pa);
+                processor.addCommand("osgi", this.service(pa, null), paClass);
+            }
+            catch (ClassNotFoundException e)
+            {
+            }
+        }
+        catch (InvalidSyntaxException e)
+        {
+            // can't happen with null filter
         }
     }
 
-    public String tac() throws IOException
+    public Bundle bundle(Bundle i)
     {
-        StringWriter sw = new StringWriter();
-        BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
-        String s = rdr.readLine();
-        while (s != null)
-        {
-            sw.write(s);
-            s = rdr.readLine();
-        }
-        return sw.toString();
+        return i;
+    }
+
+    public void start(Bundle b) throws BundleException
+    {
+        b.start();
+    }
+
+    public void stop(Bundle b) throws BundleException
+    {
+        b.stop();
     }
 
     public CharSequence echo(CommandSession session, Object args[])
@@ -180,59 +126,6 @@ public class OSGiCommands implements Converter
         return sb;
     }
 
-    public void each(CommandSession session, Collection<Object> list, Function closure)
-        throws Exception
-    {
-        List<Object> args = new ArrayList<Object>();
-        args.add(null);
-        for (Object x : list)
-        {
-            args.set(0, x);
-            //Object result = closure.execute(session, args);
-            // System.out.println(session.format(result,Converter.INSPECT));
-            // derek: this is way too noisy
-            closure.execute(session, args);
-        }
-    }
-
-    public Bundle bundle(Bundle i)
-    {
-        return i;
-    }
-/*
-    public String[] ls(CommandSession session, File f) throws Exception
-    {
-        File cwd = (File) session.get("_cwd");
-        if (cwd == null)
-        {
-            cwd = new File("").getAbsoluteFile();
-        }
-
-        if (f == null)
-        {
-            f = cwd;
-        }
-        else
-        {
-            if (!f.isAbsolute())
-            {
-                f = new File(cwd, f.getPath());
-            }
-        }
-
-        if (f.isDirectory())
-        {
-            return f.list();
-        }
-
-        if (f.isFile())
-        {
-            cat(session, f);
-        }
-
-        return null;
-    }
-*/
     public Object cat(CommandSession session, File f) throws Exception
     {
         File cwd = (File) session.get("_cwd");
@@ -258,167 +151,19 @@ public class OSGiCommands implements Converter
         return new String(bout.toByteArray());
     }
 
-    public Object convert(Class<?> desiredType, Object in) throws Exception
+    public void grep(String match) throws IOException
     {
-        if (desiredType == Bundle.class)
+        Pattern p = Pattern.compile(match);
+        BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
+        String s = rdr.readLine();
+        while (s != null)
         {
-            return convertBundle(in);
-        }
-        else
-        {
-            if (desiredType == ServiceReference.class)
+            if (p.matcher(s).find())
             {
-                return convertServiceReference(in);
+                System.out.println(s);
             }
-            else
-            {
-                if (desiredType == Class.class)
-                {
-                    // derek.baum@paremus.com - added try/catch
-                    try
-                    {
-                        return Class.forName(in.toString());
-                    }
-                    catch (ClassNotFoundException e)
-                    {
-                        return null;
-                    }
-                }
-                else
-                {
-                    if (desiredType.isAssignableFrom(String.class)
-                        && in instanceof InputStream)
-                    {
-                        return read(((InputStream) in));
-                    }
-                }
-            }
+            s = rdr.readLine();
         }
-
-        return null;
-    }
-
-    private Object convertServiceReference(Object in) throws InvalidSyntaxException
-    {
-        String s = in.toString();
-        if (s.startsWith("(") && s.endsWith(")"))
-        {
-            ServiceReference refs[] = getContext().getServiceReferences(null,
-                String.format("(|(service.id=%s)(service.pid=%s))", in, in));
-            if (refs != null && refs.length > 0)
-            {
-                return refs[0];
-            }
-        }
-
-        ServiceReference refs[] = getContext().getServiceReferences(null,
-            String.format("(|(service.id=%s)(service.pid=%s))", in, in));
-        if (refs != null && refs.length > 0)
-        {
-            return refs[0];
-        }
-        return null;
-    }
-
-    private Object convertBundle(Object in)
-    {
-        String s = in.toString();
-        try
-        {
-            long id = Long.parseLong(s);
-            return getContext().getBundle(id);
-        }
-        catch (NumberFormatException nfe)
-        {
-            // Ignore
-        }
-
-        Bundle bundles[] = getContext().getBundles();
-        for (Bundle b : bundles)
-        {
-            if (b.getLocation().equals(s))
-            {
-                return b;
-            }
-
-            if (b.getSymbolicName().equals(s))
-            {
-                return b;
-            }
-        }
-
-        return null;
-    }
-
-    public CharSequence format(Object target, int level, Converter converter)
-        throws IOException
-    {
-        if (level == INSPECT && target instanceof InputStream)
-        {
-            return read(((InputStream) target));
-        }
-        if (level == LINE && target instanceof Bundle)
-        {
-            return print((Bundle) target);
-        }
-        if (level == LINE && target instanceof ServiceReference)
-        {
-            return print((ServiceReference) target);
-        }
-        if (level == PART && target instanceof Bundle)
-        {
-            return ((Bundle) target).getSymbolicName();
-        }
-        if (level == PART && target instanceof ServiceReference)
-        {
-            return getShortNames((String[]) ((ServiceReference) target).getProperty("objectclass"));
-        }
-        return null;
-    }
-
-    public CharSequence read(InputStream in) throws IOException
-    {
-        int c;
-        StringBuffer sb = new StringBuffer();
-        while ((c = in.read()) > 0)
-        {
-            if (c >= 32 && c <= 0x7F || c == '\n' || c == '\r')
-            {
-                sb.append((char) c);
-            }
-            else
-            {
-                String s = Integer.toHexString(c).toUpperCase();
-                sb.append("\\");
-                if (s.length() < 1)
-                {
-                    sb.append(0);
-                }
-                sb.append(s);
-            }
-        }
-        return sb;
-    }
-
-    public void start(Bundle b) throws BundleException
-    {
-        b.start();
-    }
-
-    public void stop(Bundle b) throws BundleException
-    {
-        b.stop();
-    }
-
-    public Object service(String clazz, String filter) throws InvalidSyntaxException
-    {
-        ServiceReference ref[] = getContext().getServiceReferences(clazz, filter);
-        if (ref == null)
-        {
-            return null;
-        }
-
-        return getContext().getService(ref[0]);
     }
 
 }
