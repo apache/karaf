@@ -64,7 +64,7 @@ public class Closure extends Reflective implements Function, Evaluate
             throw setLocation(e);
         }
     }
-    
+
     public CommandSessionImpl session()
     {
         return session;
@@ -81,13 +81,6 @@ public class Closure extends Reflective implements Function, Evaluate
             {
                 SyntaxError se = (SyntaxError) e;
                 loc += se.line() + "." + se.column();
-
-                if (e instanceof EOFError)
-                { // map to public exception, so interactive clients can provide more input
-                    EOFException eofe = new EOFException(e.getMessage());
-                    eofe.initCause(e);
-                    e = eofe;
-                }
             }
             else if (null != errTok)
             {
@@ -102,6 +95,13 @@ public class Closure extends Reflective implements Function, Evaluate
         }
 
         session.put(LOCATION, location.get());
+        
+        if (e instanceof EOFError)
+        { // map to public exception, so interactive clients can provide more input
+            EOFException eofe = new EOFException(e.getMessage());
+            eofe.initCause(e);
+            return eofe;
+        }
 
         return e;
     }
