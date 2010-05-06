@@ -41,6 +41,11 @@
       <version>4.2.0</version>
     </dependency>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>4.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.felix.gogo</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
       <version>0.5.0-SNAPSHOT</version>
@@ -65,6 +70,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Export-Package>org.osgi.service.log</Export-Package>
             <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
             <Private-Package>${pom.artifactId}</Private-Package>
             <Bundle-Activator>${artifactId}.Activator</Bundle-Activator>

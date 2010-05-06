@@ -18,8 +18,11 @@
  */
 package org.apache.felix.gogo.felixcommands;
 
+import java.util.List;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 
 public class Util
 {
@@ -103,6 +106,30 @@ public class Util
             {
                 return obj.toString();
             }
+        }
+    }
+
+    public static <T> T getService(
+        BundleContext bc, Class<T> clazz, List<ServiceReference> refs)
+    {
+        ServiceReference ref = bc.getServiceReference(clazz.getName());
+        if (ref == null)
+        {
+            return null;
+        }
+        T t = (T) bc.getService(ref);
+        if (t != null)
+        {
+            refs.add(ref);
+        }
+        return t;
+    }
+
+    public static void ungetServices(BundleContext bc, List<ServiceReference> refs)
+    {
+        while (refs.size() > 0)
+        {
+            bc.ungetService(refs.remove(0));
         }
     }
 }

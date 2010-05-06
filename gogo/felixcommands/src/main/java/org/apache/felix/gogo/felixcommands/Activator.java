@@ -29,9 +29,10 @@ public class Activator implements BundleActivator
         Hashtable props = new Hashtable();
         props.put("osgi.command.scope", "basic");
         props.put("osgi.command.function", new String[] {
-            "bundlelevel", "frameworklevel", "headers", "help",
-            "install", "lb", "refresh", "resolve", "start",
-            "stop", "uninstall", "update", "which" });
+            "bundlelevel", "frameworklevel", "headers",
+            "help", "install", "inspect", "lb", "log", "refresh",
+            "resolve", "start", "stop", "uninstall", "update",
+            "which" });
         bc.registerService(
             Basic.class.getName(), new Basic(bc), props);
 

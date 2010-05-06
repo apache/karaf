@@ -21,12 +21,16 @@ package org.apache.felix.gogo.felixcommands;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -44,13 +48,15 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.command.Descriptor;
 import org.osgi.service.command.Flag;
 import org.osgi.service.command.Option;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogReaderService;
+import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
 public class Basic
 {
     private final BundleContext m_bc;
-    private final List<ServiceReference> m_usedRefs = new ArrayList(0);
 
     public Basic(BundleContext bc)
     {
@@ -59,11 +65,13 @@ public class Basic
 
     @Descriptor(description="query bundle start level")
     public void bundlelevel(
-        @Descriptor(description="bundle identifier to query") Long id)
+        @Descriptor(description="bundle to query") Bundle bundle)
     {
+        // Keep track of service references.
+        List<ServiceReference> refs = new ArrayList();
+
         // Get start level service.
-        ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
-        StartLevel sl = getService(StartLevel.class, ref);
+        StartLevel sl = Util.getService(m_bc, StartLevel.class, refs);
         if (sl == null)
         {
             System.out.println("Start Level service is unavailable.");
@@ -71,14 +79,13 @@ public class Basic
         // Get the bundle start level.
         else
         {
-            Bundle bundle = getBundle(m_bc, id);
             if (bundle != null)
             {
                 System.out.println(bundle + " is level " + sl.getBundleStartLevel(bundle));
             }
         }
 
-        ungetServices();
+        Util.ungetServices(m_bc, refs);
     }
 
     @Descriptor(description="set bundle start level or initial bundle start level")
@@ -86,11 +93,13 @@ public class Basic
         @Flag(name="-s", description="set the specified bundle's start level") boolean set,
         @Flag(name="-i", description="set the initial bundle start level") boolean initial,
         @Descriptor(description="target level") int level,
-        @Descriptor(description="target bundle identifiers") Long[] ids)
+        @Descriptor(description="target identifiers") Bundle[] bundles)
     {
+        // Keep track of service references.
+        List<ServiceReference> refs = new ArrayList();
+
         // Get start level service.
-        ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
-        StartLevel sl = getService(StartLevel.class, ref);
+        StartLevel sl = Util.getService(m_bc, StartLevel.class, refs);
         if (sl == null)
         {
             System.out.println("Start Level service is unavailable.");
@@ -110,7 +119,7 @@ public class Basic
         // Set the initial bundle start level.
         else if (initial)
         {
-            if ((ids != null) && (ids.length == 0))
+            if ((bundles != null) && (bundles.length == 0))
             {
                 sl.setInitialBundleStartLevel(level);
             }
@@ -123,8 +132,7 @@ public class Basic
         // Set the bundle start level.
         else if (set)
         {
-            List<Bundle> bundles = getBundles(m_bc, ids);
-            if (bundles != null)
+            if ((bundles != null) && (bundles.length == 0))
             {
                 for (Bundle bundle: bundles)
                 {
@@ -137,36 +145,40 @@ public class Basic
             }
         }
 
-        ungetServices();
+        Util.ungetServices(m_bc, refs);
     }
 
     @Descriptor(description="query framework active start level")
     public void frameworklevel()
     {
+        // Keep track of service references.
+        List<ServiceReference> refs = new ArrayList();
+
         // Get start level service.
-        ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
-        StartLevel sl = getService(StartLevel.class, ref);
+        StartLevel sl = Util.getService(m_bc, StartLevel.class, refs);
         if (sl == null)
         {
             System.out.println("Start Level service is unavailable.");
         }
         System.out.println("Level is " + sl.getStartLevel());
-        ungetServices();
+        Util.ungetServices(m_bc, refs);
     }
 
     @Descriptor(description="set framework active start level")
     public void frameworklevel(
         @Descriptor(description="target start level") int level)
     {
+        // Keep track of service references.
+        List<ServiceReference> refs = new ArrayList();
+
         // Get start level service.
-        ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
-        StartLevel sl = getService(StartLevel.class, ref);
+        StartLevel sl = Util.getService(m_bc, StartLevel.class, refs);
         if (sl == null)
         {
             System.out.println("Start Level service is unavailable.");
         }
         sl.setStartLevel(level);
-        ungetServices();
+        Util.ungetServices(m_bc, refs);
     }
 
     @Descriptor(description="display bundle headers")
@@ -347,6 +359,15 @@ public class Basic
         return commands;
     }
 
+    @Descriptor(description="inspects bundle dependency information")
+    public void inspect(
+        @Descriptor(description="(package | bundle | fragment | service)") String type,
+        @Descriptor(description="(capability | requirement)") String direction,
+        @Descriptor(description="target bundles") Bundle[] bundles)
+    {
+        Inspect.inspect(m_bc, type, direction, bundles);
+    }
+
     @Descriptor(description="install bundle using URLs")
     public void install(
         @Descriptor(description="target URLs") String[] urls)
@@ -399,31 +420,174 @@ public class Basic
         }
     }
 
-    @Descriptor(description="list installed bundles")
+    @Descriptor(description="list all installed bundles")
     public void lb(
         @Flag(name="-l", description="show location") boolean showLoc,
         @Flag(name="-s", description="show symbolic name") boolean showSymbolic,
         @Flag(name="-u", description="show update location") boolean showUpdate)
     {
+        lb(showLoc, showSymbolic, showUpdate, null);
+    }
+
+    @Descriptor(description="list installed bundles matching a pattern")
+    public void lb(
+        @Flag(name="-l", description="show location") boolean showLoc,
+        @Flag(name="-s", description="show symbolic name") boolean showSymbolic,
+        @Flag(name="-u", description="show update location") boolean showUpdate,
+        String pattern)
+    {
+        // Keep track of service references.
+        List<ServiceReference> refs = new ArrayList();
+
         // Get start level service.
-        ServiceReference ref = m_bc.getServiceReference(StartLevel.class.getName());
-        StartLevel sl = getService(StartLevel.class, ref);
+        StartLevel sl = Util.getService(m_bc, StartLevel.class, refs);
         if (sl == null)
         {
             System.out.println("Start Level service is unavailable.");
         }
 
-        Bundle[] bundles = m_bc.getBundles();
-        if (bundles != null)
+        List<Bundle> found = new ArrayList();
+
+        if (pattern == null)
         {
-            printBundleList(bundles, sl, System.out, showLoc, showSymbolic, showUpdate);
+            found.addAll(Arrays.asList(m_bc.getBundles()));
         }
         else
         {
-            System.out.println("There are no installed bundles.");
+            Bundle[] bundles = m_bc.getBundles();
+
+            for (int i = 0; i < bundles.length; i++)
+            {
+                Bundle bundle = bundles[i];
+                String name = (String) bundle.getHeaders().get(Constants.BUNDLE_NAME);
+                if (matchBundleName(bundle.getSymbolicName(), pattern)
+                    || matchBundleName(name, pattern))
+                {
+                    found.add(bundle);
+                }
+            }
         }
 
-        ungetServices();
+        if (found.size() > 0)
+        {
+            printBundleList(
+                (Bundle[]) found.toArray(new Bundle[found.size()]), sl,
+                showLoc, showSymbolic, showUpdate);
+        }
+        else
+        {
+            System.out.println("No matching bundles found");
+        }
+
+        Util.ungetServices(m_bc, refs);
+    }
+
+    private boolean matchBundleName(String name, String pattern)
+    {
+        return (name != null) && name.toLowerCase().contains(pattern.toLowerCase());
+    }
+
+    @Descriptor(description="display all matching log entries")
+    public void log(
+        @Descriptor(description="minimum log level [ debug | info | warn | error ]")
+            String logLevel)
+    {
+        log(-1, logLevel);
+    }
+
+    @Descriptor(description="display some matching log entries")
+    public void log(
+        @Descriptor(description="maximum number of entries") int maxEntries,
+        @Descriptor(description="minimum log level [ debug | info | warn | error ]")
+            String logLevel)
+    {
+        // Keep track of service references.
+        List<ServiceReference> refs = new ArrayList();
+
+        // Get start level service.
+        LogReaderService lrs = Util.getService(m_bc, LogReaderService.class, refs);
+        if (lrs == null)
+        {
+            System.out.println("Log reader service is unavailable.");
+        }
+        else
+        {
+            Enumeration entries = lrs.getLog();
+
+            int minLevel = logLevelAsInt(logLevel);
+
+            int index = 0;
+            while (entries.hasMoreElements()
+                && (maxEntries < 0 || index < maxEntries))
+            {
+                LogEntry entry = (LogEntry) entries.nextElement();
+                if (entry.getLevel() <= minLevel)
+                {
+                    display(entry);
+                    index++;
+                }
+            }
+
+            Util.ungetServices(m_bc, refs);
+        }
+    }
+
+    private void display(LogEntry entry)
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(sdf.format(new Date(entry.getTime()))).append(" ");
+        buffer.append(logLevelAsString(entry.getLevel())).append(" - ");
+        buffer.append("Bundle: ").append(entry.getBundle().getSymbolicName());
+        if (entry.getServiceReference() != null)
+        {
+            buffer.append(" - ");
+            buffer.append(entry.getServiceReference().toString());
+        }
+        buffer.append(" - ").append(entry.getMessage());
+        if (entry.getException() != null)
+        {
+            buffer.append(" - ");
+            StringWriter writer = new StringWriter();
+            PrintWriter  pw = new PrintWriter(writer);
+            entry.getException().printStackTrace(pw);
+            buffer.append(writer.toString());
+        }
+
+        System.out.println(buffer.toString());
+    }
+
+    private static int logLevelAsInt(String logLevel)
+    {
+        if ("error".equalsIgnoreCase(logLevel))
+        {
+            return LogService.LOG_ERROR;
+        }
+        else if ("warn".equalsIgnoreCase(logLevel))
+        {
+            return LogService.LOG_WARNING;
+        }
+        else if ("info".equalsIgnoreCase(logLevel))
+        {
+            return LogService.LOG_INFO;
+        }
+        return LogService.LOG_DEBUG;
+    }
+
+    private static String logLevelAsString(int level)
+    {
+        switch (level)
+        {
+            case LogService.LOG_ERROR:
+                return "ERROR";
+            case LogService.LOG_WARNING:
+                return "WARNING";
+            case LogService.LOG_INFO:
+                return "INFO";
+            default:
+                return "DEBUG";
+        }
     }
 
     @Descriptor(description="refresh any updated or uninstalled bundles")
@@ -445,9 +609,11 @@ public class Basic
 
     private void refresh(List<Bundle> bundles)
     {
+        // Keep track of service references.
+        List<ServiceReference> refs = new ArrayList();
+
         // Get package admin service.
-        ServiceReference ref = m_bc.getServiceReference(PackageAdmin.class.getName());
-        PackageAdmin pa = getService(PackageAdmin.class, ref);
+        PackageAdmin pa = Util.getService(m_bc, PackageAdmin.class, refs);
         if (pa == null)
         {
             System.out.println("Package Admin service is unavailable.");
@@ -456,7 +622,7 @@ public class Basic
             ? null
             : (Bundle[]) bundles.toArray(new Bundle[bundles.size()]));
 
-        ungetServices();
+        Util.ungetServices(m_bc, refs);
     }
 
     @Descriptor(description="resolve all bundles")
@@ -478,9 +644,11 @@ public class Basic
 
     private void resolve(List<Bundle> bundles)
     {
+        // Keep track of service references.
+        List<ServiceReference> refs = new ArrayList();
+
         // Get package admin service.
-        ServiceReference ref = m_bc.getServiceReference(PackageAdmin.class.getName());
-        PackageAdmin pa = getService(PackageAdmin.class, ref);
+        PackageAdmin pa = Util.getService(m_bc, PackageAdmin.class, refs);
         if (pa == null)
         {
             System.out.println("Package Admin service is unavailable.");
@@ -489,7 +657,7 @@ public class Basic
             ? null
             : (Bundle[]) bundles.toArray(new Bundle[bundles.size()]));
 
-        ungetServices();
+        Util.ungetServices(m_bc, refs);
     }
 
     @Descriptor(description="start bundles")
@@ -769,13 +937,13 @@ public class Basic
     }
 
     private static void printBundleList(
-        Bundle[] bundles, StartLevel startLevel, PrintStream out, boolean showLoc,
+        Bundle[] bundles, StartLevel startLevel, boolean showLoc,
         boolean showSymbolic, boolean showUpdate)
     {
         // Display active start level.
         if (startLevel != null)
         {
-            out.println("START LEVEL " + startLevel.getStartLevel());
+            System.out.println("START LEVEL " + startLevel.getStartLevel());
         }
 
         // Print column headers.
@@ -793,7 +961,7 @@ public class Basic
            msg = " Update location";
         }
         String level = (startLevel == null) ? "" : "  Level ";
-        out.println("   ID " + "  State       " + level + msg);
+        System.out.println("   ID " + "  State       " + level + msg);
         for (int i = 0; i < bundles.length; i++)
         {
             // Get the bundle name or location.
@@ -846,31 +1014,9 @@ public class Basic
             {
                 id = " " + id;
             }
-            out.println("[" + id + "] ["
+            System.out.println("[" + id + "] ["
                 + getStateString(bundles[i])
                 + "] [" + level + "] " + name);
-        }
-    }
-
-    private <T> T getService(Class<T> clazz, ServiceReference ref)
-    {
-        if (ref == null)
-        {
-            return null;
-        }
-        T t = (T) m_bc.getService(ref);
-        if (t != null)
-        {
-            m_usedRefs.add(ref);
-        }
-        return t;
-    }
-
-    private void ungetServices()
-    {
-        while (m_usedRefs.size() > 0)
-        {
-            m_bc.ungetService(m_usedRefs.remove(0));
         }
     }
 
