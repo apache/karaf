@@ -59,7 +59,7 @@ public class OSGiCommands
     {
         processor.addCommand("osgi", this);
         processor.addCommand("osgi", new Procedural());
-        processor.addCommand("osgi", bundle);
+//        processor.addCommand("osgi", bundle);
         processor.addCommand("osgi", context, BundleContext.class);
 
         try
