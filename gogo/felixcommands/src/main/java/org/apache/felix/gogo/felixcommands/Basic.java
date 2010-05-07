@@ -30,6 +30,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -191,7 +192,7 @@ public class Basic
         {
             String title = Util.getBundleName(bundle);
             System.out.println("\n" + title);
-            System.out.println(Util.getUnderlineString(title));
+            System.out.println(Util.getUnderlineString(title.length()));
             Dictionary dict = bundle.getHeaders();
             Enumeration keys = dict.keys();
             while (keys.hasMoreElements())
@@ -218,7 +219,30 @@ public class Basic
         @Descriptor(description="target command") String name)
     {
         Map<String, List<Method>> commands = getCommands();
-        List<Method> methods = commands.get(name);
+
+        List<Method> methods = null;
+
+        // If the specified command doesn't have a scope, then
+        // search for matching methods by ignoring the scope.
+        int scopeIdx = name.indexOf(':');
+        if (scopeIdx < 0)
+        {
+            for (Entry<String, List<Method>> entry : commands.entrySet())
+            {
+                String k = entry.getKey().substring(entry.getKey().indexOf(':') + 1);
+                if (name.equals(k))
+                {
+                    methods = entry.getValue();
+                    break;
+                }
+            }
+        }
+        // Otherwise directly look up matching methods.
+        else
+        {
+            methods = commands.get(name);
+        }
+
         if ((methods != null) && (methods.size() > 0))
         {
             for (Method m : methods)
@@ -324,11 +348,12 @@ public class Basic
             Object svc = m_bc.getService(ref);
             if (svc != null)
             {
+                String scope = (String) ref.getProperty("osgi.command.scope");
                 String[] funcs = (String[]) ref.getProperty("osgi.command.function");
 
                 for (String func : funcs)
                 {
-                    commands.put(func, new ArrayList());
+                    commands.put(scope + ":" + func, new ArrayList());
                 }
 
                 if (!commands.isEmpty())
@@ -336,7 +361,7 @@ public class Basic
                     Method[] methods = svc.getClass().getMethods();
                     for (Method method : methods)
                     {
-                        List<Method> commandMethods = commands.get(method.getName());
+                        List<Method> commandMethods = commands.get(scope + ":" + method.getName());
                         if (commandMethods != null)
                         {
                             commandMethods.add(method);

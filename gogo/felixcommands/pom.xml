@@ -50,6 +50,11 @@
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
       <version>0.5.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.bundlerepository</artifactId>
+      <version>1.6.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -74,6 +79,8 @@
             <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
             <Private-Package>${pom.artifactId}</Private-Package>
             <Bundle-Activator>${artifactId}.Activator</Bundle-Activator>
+            <Import-Package>!org.apache.felix.bundlerepository.*, *</Import-Package>
+            <DynamicImport-Package>org.apache.felix.bundlerepository, org.apache.felix.bundlerepository.*</DynamicImport-Package>
           </instructions>
         </configuration>
       </plugin>

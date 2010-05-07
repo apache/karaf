@@ -137,7 +137,7 @@ public class Inspect
                         }
                         String title = bundles[bundleIdx] + " exports packages:";
                         System.out.println(title);
-                        System.out.println(Util.getUnderlineString(title));
+                        System.out.println(Util.getUnderlineString(title.length()));
                         if ((exports != null) && (exports.length > 0))
                         {
                             for (int expIdx = 0; expIdx < exports.length; expIdx++)
@@ -220,7 +220,7 @@ public class Inspect
             ExportedPackage[] exports = pa.getExportedPackages((Bundle) null);
             String title = bundle + " imports packages:";
             System.out.println(title);
-            System.out.println(Util.getUnderlineString(title));
+            System.out.println(Util.getUnderlineString(title.length()));
             boolean found = false;
             for (int expIdx = 0; expIdx < exports.length; expIdx++)
             {
@@ -281,7 +281,7 @@ public class Inspect
                                 }
                                 String title = bundles[bundleIdx] + " is required by:";
                                 System.out.println(title);
-                                System.out.println(Util.getUnderlineString(title));
+                                System.out.println(Util.getUnderlineString(title.length()));
                                 if ((rbs[rbIdx].getRequiringBundles() != null)
                                     && (rbs[rbIdx].getRequiringBundles().length > 0))
                                 {
@@ -356,7 +356,7 @@ public class Inspect
             RequiredBundle[] rbs = pa.getRequiredBundles(null);
             String title = bundle + " requires bundles:";
             System.out.println(title);
-            System.out.println(Util.getUnderlineString(title));
+            System.out.println(Util.getUnderlineString(title.length()));
             boolean found = false;
             for (int rbIdx = 0; rbIdx < rbs.length; rbIdx++)
             {
@@ -410,7 +410,7 @@ public class Inspect
                     {
                         String title = bundles[bundleIdx] + " is attached to:";
                         System.out.println(title);
-                        System.out.println(Util.getUnderlineString(title));
+                        System.out.println(Util.getUnderlineString(title.length()));
                         Bundle[] hosts = pa.getHosts(bundles[bundleIdx]);
                         for (int hostIdx = 0;
                             (hosts != null) && (hostIdx < hosts.length);
@@ -469,7 +469,7 @@ public class Inspect
                     {
                         String title = bundles[bundleIdx] + " hosts:";
                         System.out.println(title);
-                        System.out.println(Util.getUnderlineString(title));
+                        System.out.println(Util.getUnderlineString(title.length()));
                         Bundle[] fragments = pa.getFragments(bundles[bundleIdx]);
                         for (int fragIdx = 0;
                             (fragments != null) && (fragIdx < fragments.length);
@@ -520,7 +520,7 @@ public class Inspect
                     // Print header if we have not already done so.
                     String title = Util.getBundleName(bundles[bundleIdx]) + " provides services:";
                     System.out.println(title);
-                    System.out.println(Util.getUnderlineString(title));
+                    System.out.println(Util.getUnderlineString(title.length()));
 
                     if ((refs == null) || (refs.length == 0))
                     {
@@ -582,7 +582,7 @@ public class Inspect
                     // Print header if we have not already done so.
                     String title = Util.getBundleName(bundles[bundleIdx]) + " requires services:";
                     System.out.println(title);
-                    System.out.println(Util.getUnderlineString(title));
+                    System.out.println(Util.getUnderlineString(title.length()));
 
                     if ((refs == null) || (refs.length == 0))
                     {

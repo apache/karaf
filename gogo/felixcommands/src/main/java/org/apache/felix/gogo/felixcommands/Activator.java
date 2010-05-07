@@ -21,9 +21,12 @@ package org.apache.felix.gogo.felixcommands;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator
 {
+    private volatile ServiceTracker m_tracker = null;
+
     public void start(BundleContext bc) throws Exception
     {
         Hashtable props = new Hashtable();
@@ -40,9 +43,19 @@ public class Activator implements BundleActivator
         props.put("osgi.command.function", new String[] { "ls" });
         bc.registerService(
             Files.class.getName(), new Files(bc), props);
+
+        m_tracker = new ServiceTracker(
+            bc, "org.apache.felix.bundlerepository.RepositoryAdmin", null);
+        m_tracker.open();
+        props.put("osgi.command.scope", "obr");
+        props.put("osgi.command.function", new String[] {
+            "deploy", "info", "javadoc", "list", "repos", "source" });
+        bc.registerService(
+            OBR.class.getName(), new OBR(bc, m_tracker), props);
     }
 
     public void stop(BundleContext bc) throws Exception
     {
+        m_tracker.close();
     }
 }
