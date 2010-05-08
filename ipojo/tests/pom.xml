@@ -26,77 +26,77 @@
   <packaging>pom</packaging>
 
   <repositories>
-  	<repository>
-  		<releases>
-  			<enabled>false</enabled>
-  		</releases>
-  		<id>ow2.snapshots</id>
-  		<name>OW2 Snapshot Repository</name>
-  		<url>http://maven.ow2.org/maven2-snapshot/</url>
-  	</repository>
+      <repository>
+          <releases>
+              <enabled>false</enabled>
+          </releases>
+          <id>ow2.snapshots</id>
+          <name>OW2 Snapshot Repository</name>
+          <url>http://maven.ow2.org/maven2-snapshot/</url>
+      </repository>
   </repositories>
 
   <dependencyManagement>
-	<dependencies>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>4.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo.annotations</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo.api</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo.composite</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo.handler.whiteboard</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-      		<groupId>org.apache.felix</groupId>
-      		<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-      		<version>1.4.0</version>
-   		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <version>4.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo.annotations</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo.api</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo.composite</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo.handler.whiteboard</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
+              <groupId>org.apache.felix</groupId>
+              <artifactId>org.apache.felix.ipojo.metadata</artifactId>
+              <version>1.4.0</version>
+           </dependency>
 
-		<dependency>
-			<groupId>org.ow2.chameleon.testing</groupId>
-			<artifactId>tinybundles-ipojo</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ow2.chameleon.testing</groupId>
-			<artifactId>osgi-helpers</artifactId>
-			<version>0.2.0</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.ow2.chameleon.testing</groupId>
+            <artifactId>tinybundles-ipojo</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.chameleon.testing</groupId>
+            <artifactId>osgi-helpers</artifactId>
+            <version>0.2.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
   </dependencyManagement>
 
   <modules>
@@ -134,20 +134,20 @@
   </modules>
 
   <build>
-  	<pluginManagement>
-  		<plugins>
-  			<plugin>
-  				<groupId>org.apache.felix</groupId>
-  				<artifactId>maven-ipojo-plugin</artifactId>
-  				<version>1.6.0</version>
-  			</plugin>
-  			<plugin>
-  				<groupId>org.apache.felix</groupId>
-  				<artifactId>maven-bundle-plugin</artifactId>
-  				<version>2.0.1</version>
-  			</plugin>
-  		</plugins>
-  	</pluginManagement>
+      <pluginManagement>
+          <plugins>
+              <plugin>
+                  <groupId>org.apache.felix</groupId>
+                  <artifactId>maven-ipojo-plugin</artifactId>
+                  <version>1.6.0</version>
+              </plugin>
+              <plugin>
+                  <groupId>org.apache.felix</groupId>
+                  <artifactId>maven-bundle-plugin</artifactId>
+                  <version>2.0.1</version>
+              </plugin>
+          </plugins>
+      </pluginManagement>
   </build>
   <profiles>
     <profile>
@@ -156,7 +156,10 @@
         <jdk>1.5</jdk>
       </activation>
       <modules>
+        <!--
+        Remove bundleAsiPOJO - Deprecated
         <module>bundleAsiPOJO</module>
+        -->
         <module>core/annotations</module>
         <module>manipulator/manipulator-java5
         </module>
@@ -169,7 +172,10 @@
         <jdk>1.6</jdk>
       </activation>
       <modules>
+        <!--
+        Remove bundleAsiPOJO - Deprecated
         <module>bundleAsiPOJO</module>
+        -->
         <module>core/annotations</module>
         <module>manipulator/manipulator-java5
         </module>

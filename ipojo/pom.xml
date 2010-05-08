@@ -58,6 +58,7 @@
     </activation>
     <modules>
       <module>annotations</module>
+      <module>arch-gogo</module>
       <module>handler/jmx</module>
       <module>webconsole-plugin</module>
       <module>handler/transaction</module>
@@ -70,9 +71,9 @@
     </activation>
     <modules>
       <module>annotations</module>
+      <module>arch-gogo</module>
       <module>handler/jmx</module>
       <module>webconsole-plugin</module>
-      <!--<module>handler/transaction</module>-->
     </modules>
   </profile>
   <profile>
