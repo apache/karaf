@@ -1,3 +1,21 @@
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.felix.ipojo.arch.gogo;
 
 import java.io.PrintStream;
@@ -14,15 +32,26 @@ import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.osgi.service.command.Descriptor;
 
-@Component(public_factory=false, immediate=true)
+/**
+ * iPOJO Arch command giving information about the current
+ * system architecture. This is a Gogo command.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
+@Component(public_factory = false, immediate = true)
 @Instantiate
-@Provides(specifications=Arch.class)
+@Provides(specifications = Arch.class)
 public class Arch {
     
-    @ServiceProperty(name="osgi.command.scope")
+    /**
+     * Defines the command scope (ipojo).
+     */
+    @ServiceProperty(name = "osgi.command.scope")
     String m_scope = "ipojo";
     
-    @ServiceProperty(name="osgi.command.function")
+    /**
+     * Defines the functions (commands). 
+     */
+    @ServiceProperty(name = "osgi.command.function")
     String[] m_function = new String[] {
         "instances",
         "instance",
@@ -31,16 +60,28 @@ public class Arch {
         "handlers"
     };
     
-    @Requires(optional=true)
+    /**
+     * Instance architecture services.
+     */
+    @Requires(optional = true)
     private Architecture[] m_archs;
     
-    @Requires(optional=true)
+    /**
+     * Factory services.
+     */
+    @Requires(optional = true)
     private Factory[] m_factories;
     
-    @Requires(optional=true)
+    /**
+     * Handler Factory services.
+     */
+    @Requires(optional = true)
     private HandlerFactory[] m_handlers;
     
-    @Descriptor(description="Display iPOJO instances")
+    /**
+     * Displays iPOJO instances.
+     */
+    @Descriptor(description = "Display iPOJO instances")
     public void instances() {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < m_archs.length; i++) {
@@ -63,8 +104,12 @@ public class Arch {
         System.out.println(buffer.toString());   
     }
     
-    @Descriptor(description="Display the architecture of a specific instance")
-    public void instance(@Descriptor(description="target instance name") String instance) {
+    /**
+     * Displays the architecture of a specific instance.
+     * @param instance the instance name
+     */
+    @Descriptor(description = "Display the architecture of a specific instance")
+    public void instance(@Descriptor(description = "target instance name") String instance) {
         for (int i = 0; i < m_archs.length; i++) {
             InstanceDescription id = m_archs[i].getInstanceDescription();
             if (id.getName().equalsIgnoreCase(instance)) {
@@ -75,8 +120,14 @@ public class Arch {
         System.err.println("Instance " + instance + " not found");
     }
     
-    @Descriptor(description="Display the information about a specific factory")
-    public void factory(@Descriptor(description="target factory") String factory) {
+    /**
+     * Displays the information about a specific factory.
+     * Note that factory name are not unique, so all matching
+     * factories are displayed.
+     * @param factory the factory name
+     */
+    @Descriptor(description = "Display the information about a specific factory")
+    public void factory(@Descriptor(description = "target factory") String factory) {
         boolean found = false;
         PrintStream out = System.out;
         
@@ -96,7 +147,10 @@ public class Arch {
         }
     }
     
-    @Descriptor(description="Display iPOJO factories")
+    /**
+     * Displays the list of public iPOJO factories.
+     */
+    @Descriptor(description = "Display iPOJO factories")
     public void factories() {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < m_factories.length; i++) {
@@ -114,7 +168,10 @@ public class Arch {
         System.out.println(buffer.toString());
     }
     
-    @Descriptor(description="Display iPOJO handlers")
+    /**
+     * Displays the list of available handlers.
+     */
+    @Descriptor(description = "Display iPOJO handlers")
     public void handlers() {
         PrintStream out = System.out;
         for (int i = 0; i < m_handlers.length; i++) {
