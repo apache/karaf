@@ -52,9 +52,7 @@ import java.lang.annotation.Target;
  * class X implements Z {
  *     &#64;ConfigurationDependency(pid="MyPid")
  *     void configure(Dictionary conf) {
- *          // Configure or reconfigure our service. The conf is provided by the Configuration Admin Service,
- *          // and all public properties (which don't start with a dot) are propagated with the
- *          // Service properties specified in the properties's Service attribute.
+ *          // Configure or reconfigure our service.
  *     }
  *   
  *     &#64;Start
