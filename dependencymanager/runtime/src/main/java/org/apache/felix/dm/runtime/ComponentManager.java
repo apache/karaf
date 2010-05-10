@@ -148,6 +148,7 @@ public class ComponentManager implements SynchronousBundleListener
             DependencyManager dm = new DependencyManager(b.getBundleContext());
             Service service = null;
             String line;
+            m_serviceFactory = null;
 
             while ((line = in.readLine()) != null)
             {
