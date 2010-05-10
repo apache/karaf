@@ -84,6 +84,7 @@ public class Files
     @Descriptor(description="get current directory contents")
     public File[] ls(
         @Descriptor(description="automatically supplied shell session") CommandSession session)
+        throws IOException
     {
         return ls(session, null);
     }
@@ -92,59 +93,27 @@ public class Files
     public File[] ls(
         @Descriptor(description="automatically supplied shell session") CommandSession session,
         @Descriptor(description="path with optionally wildcarded file name") String pattern)
+        throws IOException
     {
         pattern = ((pattern == null) || (pattern.length() == 0)) ? "." : pattern;
         pattern = ((pattern.charAt(0) != File.separatorChar) && (pattern.charAt(0) != '.'))
             ? "./" + pattern : pattern;
         int idx = pattern.lastIndexOf(File.separatorChar);
-        String parent, target;
-        if (pattern.startsWith("./"))
-        {
-            parent = ".";
-            target = pattern.substring(2);
-        }
-        else if (pattern.equals("."))
-        {
-            parent = pattern;
-            target = "";
-        }
-        else
-        {
-            if (idx < 0)
-            {
-                parent = ".";
-            }
-            else if (idx == 0)
-            {
-                parent = "/";
-            }
-            else
-            {
-                parent = pattern.substring(0, idx);
-            }
-            target = pattern.substring(idx + 1);
-        }
-        File actualParent;
-        if (parent.charAt(0) == File.separatorChar)
-        {
-            actualParent = new File(parent);
-        }
-        else if (parent.equals("."))
-        {
-            actualParent = cd(session);
-        }
-        else if (parent.startsWith("./"))
-        {
-            actualParent = cd(session);
-        }
-        else
-        {
-            actualParent = new File(cd(session), parent);
-        }
-        boolean isWildcarded = (target.indexOf('*') >= 0);
+        String parent = (idx < 0) ? "." : pattern.substring(0, idx + 1);
+        String target = (idx < 0) ? pattern : pattern.substring(idx + 1);
+
+        File actualParent = (parent.charAt(0) == File.separatorChar)
+            ? new File(parent) : new File(cd(session), parent);
+
+        idx = target.indexOf(File.separatorChar, idx);
+        boolean isWildcarded = (target.indexOf('*', idx) >= 0);
         File[] files;
         if (isWildcarded)
         {
+            if (!actualParent.exists())
+            {
+                throw new IOException("File does not exist");
+            }
             final List<String> pieces = parseSubstring(target);
             files = actualParent.listFiles(new FileFilter() {
                 public boolean accept(File pathname)
@@ -155,14 +124,18 @@ public class Files
         }
         else
         {
-            File file = new File(actualParent, target);
-            if (file.isDirectory())
+            File actualTarget = new File(actualParent, target).getCanonicalFile();
+            if (!actualTarget.exists())
             {
-                files = file.listFiles();
+                throw new IOException("File does not exist");
+            }
+            if (actualTarget.isDirectory())
+            {
+                files = actualTarget.listFiles();
             }
             else
             {
-                files = new File[] { file };
+                files = new File[] { actualTarget };
             }
         }
         return files;
