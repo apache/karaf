@@ -102,8 +102,8 @@ public class Files
         String parent = (idx < 0) ? "." : pattern.substring(0, idx + 1);
         String target = (idx < 0) ? pattern : pattern.substring(idx + 1);
 
-        File actualParent = (parent.charAt(0) == File.separatorChar)
-            ? new File(parent) : new File(cd(session), parent);
+        File actualParent = ((parent.charAt(0) == File.separatorChar)
+            ? new File(parent) : new File(cd(session), parent)).getCanonicalFile();
 
         idx = target.indexOf(File.separatorChar, idx);
         boolean isWildcarded = (target.indexOf('*', idx) >= 0);
