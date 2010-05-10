@@ -19,7 +19,7 @@
 package org.apache.felix.dm.samples.annotation;
 
 import org.apache.felix.dm.annotation.api.AspectService;
-import org.apache.felix.dm.annotation.api.ServiceDependency;
+import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
 import org.osgi.service.log.LogService;
 
 /**

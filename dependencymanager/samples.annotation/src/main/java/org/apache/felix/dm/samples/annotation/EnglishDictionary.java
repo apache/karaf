@@ -21,7 +21,7 @@ package org.apache.felix.dm.samples.annotation;
 import java.util.Dictionary;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.felix.dm.annotation.api.ConfigurationDependency;
+import org.apache.felix.dm.annotation.api.dependency.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Property;
 import org.apache.felix.dm.annotation.api.PropertyMetaData;
 import org.apache.felix.dm.annotation.api.Service;
