@@ -18,10 +18,10 @@
 */
 package org.apache.felix.dm.test.bundle.annotation.bundledependency;
 
-import org.apache.felix.dm.annotation.api.BundleAdapterService;
 import org.apache.felix.dm.annotation.api.Property;
-import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
+import org.apache.felix.dm.annotation.api.adapter.BundleAdapterService;
+import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 import org.osgi.framework.Bundle;
 

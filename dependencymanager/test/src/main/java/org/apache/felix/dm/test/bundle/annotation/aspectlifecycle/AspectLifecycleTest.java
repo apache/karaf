@@ -19,7 +19,7 @@
 package org.apache.felix.dm.test.bundle.annotation.aspectlifecycle;
 
 import org.apache.felix.dm.annotation.api.Service;
-import org.apache.felix.dm.annotation.api.ServiceDependency;
+import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
 
 /**
  * Tests an aspect service, and ensure that its lifecycle methods are properly invoked (init/start/stop/destroy)

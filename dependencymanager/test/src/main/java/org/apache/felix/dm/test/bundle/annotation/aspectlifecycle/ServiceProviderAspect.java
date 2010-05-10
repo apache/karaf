@@ -21,12 +21,12 @@ package org.apache.felix.dm.test.bundle.annotation.aspectlifecycle;
 import org.apache.felix.dm.annotation.api.AspectService;
 import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Init;
-import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
+import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
-@AspectService(ranking = 10, factory=ServiceProviderAspectFactory.class, factoryMethod="createAspect")
+@AspectService(ranking = 10)
 public class ServiceProviderAspect implements ServiceInterface
 {
     protected boolean m_initCalled;

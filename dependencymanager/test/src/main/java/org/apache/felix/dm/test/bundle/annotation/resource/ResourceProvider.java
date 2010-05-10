@@ -28,7 +28,7 @@ import junit.framework.Assert;
 
 import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Service;
-import org.apache.felix.dm.annotation.api.ServiceDependency;
+import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.resources.ResourceHandler;
 import org.osgi.framework.BundleContext;

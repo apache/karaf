@@ -20,11 +20,11 @@ package org.apache.felix.dm.test.bundle.annotation.factoryconfadapter;
 
 import java.util.Dictionary;
 
-import org.apache.felix.dm.annotation.api.FactoryConfigurationAdapterService;
 import org.apache.felix.dm.annotation.api.Property;
-import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
+import org.apache.felix.dm.annotation.api.adapter.FactoryConfigurationAdapterService;
+import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
 /**
