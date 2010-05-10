@@ -25,10 +25,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.apache.felix.dm.DependencyManager;
-import org.apache.felix.dm.dependencies.PropertyMetaData;
-import org.apache.felix.dm.impl.metatype.MetaTypeProviderImpl;
 import org.apache.felix.dm.service.Service;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
