@@ -16,46 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dm.annotation.api;
+package org.apache.felix.dm.annotation.api.adapter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apache.felix.dm.annotation.api.Property;
+
 /**
- * Annotates an Adapater Service. The adapter will be applied to any service that
- * matches the implemented interface and filter. For each matching service
+ * Annotates a class as a Resource Adapter Service. The adapter will be applied to any resource 
+ * that matches the specified filter condition. For each matching resource
  * an adapter will be created based on the adapter implementation class.
  * The adapter will be registered with the specified interface and existing properties
- * from the original service plus any extra properties you supply here.
+ * from the original resource plus any extra properties you supply here.
  * It will also inherit all dependencies, and if you declare the original
  * service as a member it will be injected.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
-public @interface AdapterService
+public @interface ResourceAdapterService
 {
     /**
-     * Returns the adapter service interface(s). By default, the directly implemented interface(s) is (are) used.
-     * @return The service interface(s) provided by this adapter.
+     * The filter condition to use with the resource.
      */
-    Class<?>[] adapterService() default {};
+    String filter();
 
     /**
-     * The adapter service properites. They will be added to the adapted service properties.
-     * @return additional properties to use with the adapter service registration
+     * The interface(s) to use when registering adapters
      */
-    Property[] adapterProperties() default {};
+    Class<?>[] service() default {};
 
     /**
-     * The adapted service interface
+     * Additional properties to use with the adapter service registration
      */
-    Class<?> adapteeService();
-    
+    Property[] properties() default {};
+
     /**
-     * the filter condition to use with the adapted service interface.
-     * @return the filter condition to use with the adapted ervice interface
+     * <code>true</code> if properties from the resource should be propagated to the service.
      */
-    String adapteeFilter() default "";
+    boolean propagate() default false;
 }

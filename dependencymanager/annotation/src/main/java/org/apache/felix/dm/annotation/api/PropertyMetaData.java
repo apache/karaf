@@ -23,8 +23,21 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apache.felix.dm.annotation.api.adapter.FactoryConfigurationAdapterService;
+import org.apache.felix.dm.annotation.api.dependency.ConfigurationDependency;
+
 /**
  * This annotation describes the data types of a configuration Property.
+ * It can be used by other annotations which require meta type support.
+ * For now, the following annotations are using <code>PropertyMeteData</code:
+ * <ul>
+ *   <li>{@link ConfigurationDependency}: This dependency allows to define a 
+ *   dependency over a <code>Configuration Admin</code> configuration dictionaries, whose 
+ *   metadata can be described using <code>PropertyMetaData</code> annotation.
+ *   <li>{@link FactoryConfigurationAdapterService}: This service adapter allows 
+ *   to dynamically create Services on behalf of <code>Factory Configuration Admin</code> 
+ *   configuration dictionaries, whose metadata can be described using this <code>PropertyMetaData</code> annotation.
+ * </ul>
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.ANNOTATION_TYPE)

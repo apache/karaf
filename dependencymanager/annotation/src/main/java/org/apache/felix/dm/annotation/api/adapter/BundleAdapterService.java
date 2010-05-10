@@ -16,43 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dm.annotation.api;
+package org.apache.felix.dm.annotation.api.adapter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apache.felix.dm.annotation.api.Property;
+import org.osgi.framework.Bundle;
+
 /**
- * Annotates a class as a Resource Adapter Service. The adapter will be applied to any resource 
- * that matches the specified filter condition. For each matching resource
- * an adapter will be created based on the adapter implementation class.
- * The adapter will be registered with the specified interface and existing properties
+ * Annotates a Bundle Adapter Service class. The adapter will be applied to any bundle that
+ * matches the specified bundle state mask and filter condition. For each matching
+ * bundle an adapter will be created based on the adapter implementation class.
+ * The adapter will be registered with the specified interface and existing properties 
  * from the original resource plus any extra properties you supply here.
  * It will also inherit all dependencies, and if you declare the original
- * service as a member it will be injected.
+ * bundle as a member it will be injected.
  */
-@Retention(RetentionPolicy.CLASS)
+public @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
-public @interface ResourceAdapterService
+@interface BundleAdapterService
 {
     /**
-     * The filter condition to use with the resource.
+     * The filter used to match a given bundle.
      */
     String filter();
-
+    
     /**
-     * The interface(s) to use when registering adapters
+     * the bundle state mask to apply
+     */
+    int stateMask() default Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE;
+    
+    /**
+     * The interface(s) to use when registering adapters. By default, the interface(s) directly implemented
+     * by the annotated class is (are) used.
      */
     Class<?>[] service() default {};
-
+    
     /**
-     * Additional properties to use with the adapter service registration
+     * Additional properties to use with the service registration
      */
     Property[] properties() default {};
-
+    
     /**
-     * <code>true</code> if properties from the resource should be propagated to the service.
+     * Specifies if properties from the bundle should be propagated to the service.
      */
-    boolean propagate() default false;
+    boolean propagate() default true;
 }

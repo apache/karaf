@@ -47,12 +47,6 @@ public enum DescriptorParam
     /* Service attribute for the provided service properties (the parsed value is a Hashtable) */
     properties,
 
-    /* Service attribute for the factory class name (the parsed value is a String) */
-    factory,
-
-    /* Service attribute for the factory method name (the parsed value is a String) */
-    factoryMethod,
-
     /* Service attribute for the composition method name (the parsed value is a String) */
     composition,
 
@@ -111,56 +105,11 @@ public enum DescriptorParam
     ranking,
     
     /* The factory pid of an FactoryConfigurationAdapterService annotation (the parsed value is a string) */
-    factoryPid;
+    factoryPid,    
     
-    /**
-     * Indicates if a given attribute is a Service attribute.
-     * @param attr a Descriptor attribute
-     * @return true if the descriptor is a Service attribute, false if not
-     */
-    public static boolean isServiceAttribute(DescriptorParam attr) {
-        return serviceAttribute.contains(attr);
-    }
+    /* the factory attribute for the Service annotation (the parsed value is a string) */
+    factory,
     
-    /**
-     * Indicates if a given attribute is a ServiceDependency attribute.
-     * @param attr a Descriptor attribute
-     * @return true if the descriptor is a Service attribute, false if not
-     */
-    public static boolean isServiceDepependencyAttribute(DescriptorParam attr) {
-        return serviceDependencyAttribute.contains(attr);
-    }
-
-    /**
-     * Indicates if a given attribute is a TemporalServiceDependency attribute.
-     * @param attr a Descriptor attribute
-     * @return true if the descriptor is a Temporal Service attribute, false if not
-     */
-    public static boolean isTemporalServiceDepependencyAttribute(DescriptorParam attr) {
-        return serviceDependencyAttribute.contains(attr) || attr == timeout;
-    }
-
-    /**
-     * Indicates if a given attribute is a ServiceDependency attribute.
-     * @param attr a Descriptor attribute
-     * @return true if the descriptor is a Service attribute, false if not
-     */
-    public static boolean isConfigurationDepependencyAttribute(DescriptorParam attr) {
-        return configurationDependencyAttribute.contains(attr);
-    }
-
-    /**
-     * List of Service attributes
-     */
-    private final static EnumSet serviceAttribute = EnumSet.range(init, factoryMethod);
-
-    /**
-     * List of ServiceDependency attributes
-     */
-    private final static EnumSet serviceDependencyAttribute = EnumSet.range(service, autoConfig);
-
-    /**
-     * List of ConfigurationDependency attributes
-     */
-    private final static EnumSet configurationDependencyAttribute = EnumSet.range(pid, updated);
+    /* the factoryConfigure attribute for the Service annotation (the parsed value is a string) */
+    factoryConfigure
 }

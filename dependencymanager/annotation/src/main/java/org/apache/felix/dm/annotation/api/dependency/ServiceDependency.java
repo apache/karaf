@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dm.annotation.api;
+package org.apache.felix.dm.annotation.api.dependency;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

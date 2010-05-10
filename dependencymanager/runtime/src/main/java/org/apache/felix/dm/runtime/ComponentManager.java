@@ -25,7 +25,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.dependencies.BundleDependency;
@@ -51,6 +53,7 @@ public class ComponentManager implements SynchronousBundleListener
     private HashMap<Bundle, List<Service>> m_services = new HashMap<Bundle, List<Service>>();
     private LogService m_logService; // Injected
     private BundleContext m_bctx; // Injected
+    private ServiceFactory m_serviceFactory;
 
     /**
      * Starts our Service (at this point, we have been injected with our bundle context, as well
@@ -131,6 +134,7 @@ public class ComponentManager implements SynchronousBundleListener
      * @param b
      * @param descriptorURL
      */
+    @SuppressWarnings("null")
     private void loadDescriptor(Bundle b, URL descriptorURL)
     {
         m_logService.log(LogService.LOG_DEBUG, "Parsing descriptor " + descriptorURL
@@ -147,6 +151,7 @@ public class ComponentManager implements SynchronousBundleListener
 
             while ((line = in.readLine()) != null)
             {
+                Dependency dp = null;
                 switch (parser.parse(line))
                 {
                     case Service:
@@ -174,32 +179,45 @@ public class ComponentManager implements SynchronousBundleListener
                         break;
 
                     case ServiceDependency:
-                        checkServiceParsed(service);
-                        service.add(createServiceDependency(b, dm, parser, false));
+                        dp = createServiceDependency(b, dm, parser, false);
                         break;
 
                     case TemporalServiceDependency:
-                        checkServiceParsed(service);
-                        service.add(createServiceDependency(b, dm, parser, true));
+                        dp = createServiceDependency(b, dm, parser, true);
                         break;
 
                     case ConfigurationDependency:
-                        checkServiceParsed(service);
-                        service.add(createConfigurationDependency(b, dm, parser));
+                        dp = createConfigurationDependency(b, dm, parser);
                         break;
                         
                     case BundleDependency:
-                        checkServiceParsed(service);
-                        service.add(createBundleDependency(b, dm, parser));
+                        dp = createBundleDependency(b, dm, parser);
                         break;
                         
                     case ResourceDependency:
-                        checkServiceParsed(service);
-                        service.add(createResourceDependency(b, dm, parser));
+                        dp = createResourceDependency(b, dm, parser);
                         break;
                 }
+                
+                // If we parsed a dependency: add it in the current parsed service, unless the service is a factory service.
+                // In this case, the dependency is just buffered in the service factory, which will register it at 
+                // each instantiation time.
+                
+                if (dp != null)
+                {
+                    checkServiceParsed(service);
+                    if (m_serviceFactory != null)
+                    {
+                        // The dependency is buffered and will be used once this factory fires a service instantiation.
+                        m_serviceFactory.addDependency(dp);
+                    }
+                    else
+                    {
+                        service.add(dp);
+                    }
+                }
             }
-
+            
             List<Service> services = m_services.get(b);
             if (services == null)
             {
@@ -273,33 +291,39 @@ public class ComponentManager implements SynchronousBundleListener
         throws ClassNotFoundException
     {
         Service service = dm.createService();
-        // Get factory parameters.
         String factory = parser.getString(DescriptorParam.factory, null);
-        String factoryMethod = parser.getString(DescriptorParam.factoryMethod, "create");
+        String factoryConfigure = parser.getString(DescriptorParam.factoryConfigure, null);
+        String impl = parser.getString(DescriptorParam.impl);
+        String init = parser.getString(DescriptorParam.init, null);
+        String start = parser.getString(DescriptorParam.start, null);
+        String stop = parser.getString(DescriptorParam.stop, null);
+        String destroy = parser.getString(DescriptorParam.destroy, null);
+        String composition = parser.getString(DescriptorParam.composition, null);
+        Dictionary<String, String> serviceProperties = parser.getDictionary(DescriptorParam.properties, null);
+        String[] provide = parser.getStrings(DescriptorParam.provide, null);
 
         if (factory == null)
         {
-            // Set service impl
-            String impl = parser.getString(DescriptorParam.impl);
             service.setImplementation(b.loadClass(impl));
+            service.setCallbacks(init, start, stop, destroy);
+            if (composition != null)
+            {
+                service.setComposition(composition);
+            }
+            if (provide != null)
+            {
+                service.setInterface(provide, serviceProperties);
+            }
         }
         else
         {
-            // Set service factory
-            Class<?> factoryClass = b.loadClass(factory);
-            service.setFactory(factoryClass, factoryMethod);
-        }
-
-        // Set service callbacks
-        setCommonServiceParams(service, parser);
-        
-        // Set service interface with associated service properties
-        Dictionary<String, String> serviceProperties = parser.getDictionary(
-            DescriptorParam.properties, null);
-        String[] provides = parser.getStrings(DescriptorParam.provide, null);
-        if (provides != null)
-        {
-            service.setInterface(provides, serviceProperties);
+            m_serviceFactory = new ServiceFactory(b.loadClass(impl), init, start, stop, destroy,
+                                                  composition, serviceProperties, provide, factoryConfigure);
+            service.setImplementation(m_serviceFactory);
+            service.setCallbacks(null, "start", "stop", null);
+            Hashtable<String, String> props = new Hashtable<String, String>();
+            props.put("dm.factory.name", factory);
+            service.setInterface(Set.class.getName(), props);
         }
 
         return service;
@@ -340,19 +364,9 @@ public class ComponentManager implements SynchronousBundleListener
         String serviceFilter = parser.getString(DescriptorParam.filter, null);
         Dictionary<String, String> aspectProperties = parser.getDictionary(DescriptorParam.properties, null);
         int ranking = parser.getInt(DescriptorParam.ranking, 1);          
-        String factory = parser.getString(DescriptorParam.factory, null);
-        if (factory == null)
-        {
-            String implClass = parser.getString(DescriptorParam.impl);
-            Object impl = b.loadClass(implClass);
-            service = dm.createAspectService(serviceInterface, serviceFilter, ranking, impl, aspectProperties);
-        }
-        else
-        {
-            String factoryMethod = parser.getString(DescriptorParam.factoryMethod, "create");
-            Class<?> factoryClass = b.loadClass(factory);
-            service = dm.createAspectService(serviceInterface, serviceFilter, ranking, factoryClass, factoryMethod, aspectProperties);
-        }               
+        String implClass = parser.getString(DescriptorParam.impl);
+        Object impl = b.loadClass(implClass);
+        service = dm.createAspectService(serviceInterface, serviceFilter, ranking, impl, aspectProperties);
         setCommonServiceParams(service, parser);
         return service;
     }
@@ -371,8 +385,7 @@ public class ComponentManager implements SynchronousBundleListener
         String[] adapterService = parser.getStrings(DescriptorParam.adapterService, null);
         Dictionary<String, String> adapterProperties = parser.getDictionary(DescriptorParam.adapterProperties, null);
         Class<?> adapteeService = b.loadClass(parser.getString(DescriptorParam.adapteeService));
-        String adapteeFilter = parser.getString(DescriptorParam.adapteeFilter, null);
-     
+        String adapteeFilter = parser.getString(DescriptorParam.adapteeFilter, null);     
         Service service = dm.createAdapterService(adapteeService, adapteeFilter, adapterService, adapterImpl, adapterProperties);
         setCommonServiceParams(service, parser);
         return service;
@@ -443,62 +456,56 @@ public class ComponentManager implements SynchronousBundleListener
 
     /**
      * Creates a ServiceDependency that we parsed from a component descriptor "ServiceDependency" entry.
-     * @param b
-     * @param dm
-     * @param parser
-     * @param temporal true if this dependency is a temporal one, false if not.
-     * @return
-     * @throws ClassNotFoundException
      */
-    private ServiceDependency createServiceDependency(Bundle b, DependencyManager dm,
-        DescriptorParser parser, boolean temporal) throws ClassNotFoundException
+    private Dependency createServiceDependency(Bundle b, DependencyManager dm, DescriptorParser parser, boolean temporal) 
+        throws ClassNotFoundException
     {
-        ServiceDependency sd = temporal ? dm.createTemporalServiceDependency()
-            : dm.createServiceDependency();
-
-        // Set service with eventual service filter
         String service = parser.getString(DescriptorParam.service);
-        Class serviceClass = b.loadClass(service);
+        Class<?> serviceClass = b.loadClass(service);
         String serviceFilter = parser.getString(DescriptorParam.filter, null);
-        sd.setService(serviceClass, serviceFilter);
-
-        // Set default service impl
         String defaultServiceImpl = parser.getString(DescriptorParam.defaultImpl, null);
-        if (defaultServiceImpl != null)
-        {
-            Class defaultServiceImplClass = b.loadClass(defaultServiceImpl);
-            sd.setDefaultImplementation(defaultServiceImplClass);
-        }
-
-        // Set bind/unbind/rebind
+        Class<?> defaultServiceImplClass = (defaultServiceImpl != null) ? b.loadClass(defaultServiceImpl) : null;
         String added = parser.getString(DescriptorParam.added, null);
         String changed = temporal ? null : parser.getString(DescriptorParam.changed, null);
         String removed = temporal ? null : parser.getString(DescriptorParam.removed, null);
-        sd.setCallbacks(added, changed, removed);
-
-        // Set AutoConfig
         String autoConfigField = parser.getString(DescriptorParam.autoConfig, null);
+        boolean required = "true".equals(parser.getString(DescriptorParam.required, "true"));
+        String timeout = parser.getString(DescriptorParam.timeout, null);
+
+        Dependency dp = createServiceDependency(dm, temporal, serviceClass, serviceFilter,
+                                                defaultServiceImplClass, added, changed, removed,
+                                                autoConfigField, timeout, required);
+        return dp;
+    }
+    
+    private Dependency createServiceDependency(DependencyManager dm, boolean temporal, Class<?> serviceClass,
+        String serviceFilter, Class<?> defaultServiceImplClass, String added, String changed, String removed,
+        String autoConfigField, String timeout, boolean required) 
+    {
+        ServiceDependency sd = temporal ? dm.createTemporalServiceDependency()
+            : dm.createServiceDependency();
+        sd.setService(serviceClass, serviceFilter);
+        if (defaultServiceImplClass != null)
+        {
+            sd.setDefaultImplementation(defaultServiceImplClass);
+        }
+        sd.setCallbacks(added, changed, removed);
         if (autoConfigField != null)
         {
             sd.setAutoConfig(autoConfigField);
         }
-
-        // Do specific parsing for temporal service dependency
         if (temporal)
         {
             // Set the timeout value for a temporal service dependency
-            String timeout = parser.getString(DescriptorParam.timeout, null);
             if (timeout != null)
             {
                 ((TemporalServiceDependency) sd).setTimeout(Long.parseLong(timeout));
             }
-            
             // Set required flag (always true for a temporal dependency)
             sd.setRequired(true);
         } else {
             // for ServiceDependency, get required flag.
-            String required = parser.getString(DescriptorParam.required, "true");
-            sd.setRequired("true".equals(required));
+            sd.setRequired(required);
         }
         return sd;
     }
@@ -513,20 +520,23 @@ public class ComponentManager implements SynchronousBundleListener
     private Dependency createConfigurationDependency(Bundle b, DependencyManager dm,
         DescriptorParser parser)
     {
-        ConfigurationDependency cd = dm.createConfigurationDependency();
         String pid = parser.getString(DescriptorParam.pid);
+        boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
+        String callback = parser.getString(DescriptorParam.updated, "updated");
+        Dependency dp = createConfigurationDependency(dm, pid, callback, propagate);
+        return dp;
+    }
+    
+    private Dependency createConfigurationDependency(DependencyManager dm, String pid, String callback, boolean propagate) {
         if (pid == null)
         {
             throw new IllegalArgumentException(
                 "pid attribute not provided in ConfigurationDependency declaration");
         }
+        ConfigurationDependency cd = dm.createConfigurationDependency();
         cd.setPid(pid);
-
-        String propagate = parser.getString(DescriptorParam.propagate, "false");
-        cd.setPropagate("true".equals(propagate));
-
-        String callback = parser.getString(DescriptorParam.updated, "updated");
         cd.setCallback(callback);
+        cd.setPropagate(propagate);
         return cd;
     }
     
@@ -540,59 +550,60 @@ public class ComponentManager implements SynchronousBundleListener
     private Dependency createBundleDependency(Bundle b, DependencyManager dm,
         DescriptorParser parser)
     {
-        BundleDependency bd = dm.createBundleDependency();
-
-        // Set add/changed/removed
         String added = parser.getString(DescriptorParam.added, null);
         String changed = parser.getString(DescriptorParam.changed, null);
         String removed = parser.getString(DescriptorParam.removed, null);
-        bd.setCallbacks(added, changed, removed);
-
-        // required
-        bd.setRequired("true".equals(parser.getString(DescriptorParam.required, "true")));
-        
-        // filter
+        boolean required = "true".equals(parser.getString(DescriptorParam.required, "true"));
         String filter = parser.getString(DescriptorParam.filter, null);
+        int stateMask = parser.getInt(DescriptorParam.stateMask, -1);
+        boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
+        
+        Dependency dp = createBundleDependency(dm, added, changed, removed, required, propagate, filter, stateMask);
+        return dp;
+    }
+    
+    private Dependency createBundleDependency(DependencyManager dm, String added, String changed, String removed, 
+        boolean required, boolean propagate, String filter, int stateMask)
+    {
+        BundleDependency bd = dm.createBundleDependency();
+        bd.setCallbacks(added, changed, removed);
+        bd.setRequired(required);
+        bd.setPropagate(propagate);
         if (filter != null) 
         {
             bd.setFilter(filter);
         }
-        
-        // stateMask
-        int stateMask = parser.getInt(DescriptorParam.stateMask, -1);
         if (stateMask != -1) 
         {
             bd.setStateMask(stateMask);
         }
-
-        // propagate
-        bd.setPropagate("true".equals(parser.getString(DescriptorParam.propagate, "false")));
-        return bd;
+        return bd;        
     }
 
-    private Dependency createResourceDependency(Bundle b, DependencyManager dm,
+    private Dependency createResourceDependency(@SuppressWarnings("unused") Bundle b, DependencyManager dm,
         DescriptorParser parser)
     {
-        ResourceDependency rd = dm.createResourceDependency();
-
-        // Set add/changed/removed
         String added = parser.getString(DescriptorParam.added, null);
         String changed = parser.getString(DescriptorParam.changed, null);
         String removed = parser.getString(DescriptorParam.removed, null);
-        rd.setCallbacks(added, changed, removed);
-
-        // required
-        rd.setRequired("true".equals(parser.getString(DescriptorParam.required, "true")));
-        
-        // filter
         String filter = parser.getString(DescriptorParam.filter, null);
+        boolean required = "true".equals(parser.getString(DescriptorParam.required, "true"));
+        boolean propagate = "true".equals(parser.getString(DescriptorParam.propagate, "false"));
+
+        Dependency dp = createResourceDependency(dm, added, changed, removed, required, filter, propagate);
+        return dp;
+    }
+    
+    private Dependency createResourceDependency(DependencyManager dm, String added, String changed, String removed, boolean required, String filter, boolean propagate)
+    {
+        ResourceDependency rd = dm.createResourceDependency();
+        rd.setCallbacks(added, changed, removed);
+        rd.setRequired(required);
         if (filter != null) 
         {
             rd.setFilter(filter);
         }
-        
-        // propagate
-        rd.setPropagate("true".equals(parser.getString(DescriptorParam.propagate, "false")));
+        rd.setPropagate(propagate);
         return rd;
     }
 }

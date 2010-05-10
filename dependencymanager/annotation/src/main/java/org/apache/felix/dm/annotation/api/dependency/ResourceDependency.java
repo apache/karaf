@@ -16,24 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dm.annotation.api;
+package org.apache.felix.dm.annotation.api.dependency;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.osgi.framework.Bundle;
-
 /**
- * Annotates a method for a bundle dependency.
+ * Annotates a method of field as a Resource Dependency.
  */
 @Retention(RetentionPolicy.CLASS)
-@Target(ElementType.METHOD)
-public @interface BundleDependency
+@Target({ElementType.METHOD, ElementType.FIELD})
+public @interface ResourceDependency
 {
     /**
-     * Returns the callback method to be invoked when the service have changed.
+     * Returns the callback method to be invoked when the service is available. This attribute is only meaningful when 
+     * the annotation is applied on a class field.
+     */
+    String added() default "";
+
+    /**
+     * Returns the callback method to be invoked when the service properties have changed.
      */
     String changed() default "";
 
@@ -41,24 +45,23 @@ public @interface BundleDependency
      * Returns the callback method to invoke when the service is lost.
      */
     String removed() default "";
-    
+
     /**
-     * Returns whether the dependency is required or not.
+     * Returns whether the Service dependency is required or not.
+     * @return true if the dependency is required, false if not.
      */
     boolean required() default true;
     
     /**
-     * Returns the filter dependency
+     * Returns the Service dependency OSGi filter.
+     * @return The Service dependency filter.
      */
     String filter() default "";
-     
-    /**
-     * Returns the bundle state mask
-     */
-    int stateMask() default Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE;
 
     /**
-     * @TODO
+     * TODO add comments for this method.
+     * @param propagate
+     * @return
      */
     boolean propagate() default false;
 }

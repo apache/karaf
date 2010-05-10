@@ -29,22 +29,22 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.felix.dm.annotation.api.AdapterService;
 import org.apache.felix.dm.annotation.api.AspectService;
-import org.apache.felix.dm.annotation.api.BundleAdapterService;
-import org.apache.felix.dm.annotation.api.BundleDependency;
 import org.apache.felix.dm.annotation.api.Composition;
-import org.apache.felix.dm.annotation.api.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.Destroy;
-import org.apache.felix.dm.annotation.api.FactoryConfigurationAdapterService;
 import org.apache.felix.dm.annotation.api.Init;
-import org.apache.felix.dm.annotation.api.ResourceAdapterService;
-import org.apache.felix.dm.annotation.api.ResourceDependency;
 import org.apache.felix.dm.annotation.api.Service;
-import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
-import org.apache.felix.dm.annotation.api.TemporalServiceDependency;
+import org.apache.felix.dm.annotation.api.adapter.AdapterService;
+import org.apache.felix.dm.annotation.api.adapter.BundleAdapterService;
+import org.apache.felix.dm.annotation.api.adapter.FactoryConfigurationAdapterService;
+import org.apache.felix.dm.annotation.api.adapter.ResourceAdapterService;
+import org.apache.felix.dm.annotation.api.dependency.BundleDependency;
+import org.apache.felix.dm.annotation.api.dependency.ConfigurationDependency;
+import org.apache.felix.dm.annotation.api.dependency.ResourceDependency;
+import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
+import org.apache.felix.dm.annotation.api.dependency.TemporalServiceDependency;
 import org.osgi.framework.Bundle;
 
 import aQute.lib.osgi.Annotation;
@@ -123,12 +123,12 @@ public class AnnotationCollector extends ClassDataCollector
         AdapterService,
         BundleAdapterService,
         ResourceAdapterService,
+        FactoryConfigurationAdapterService,
         ServiceDependency, 
         TemporalServiceDependency, 
         ConfigurationDependency,
         BundleDependency,
         ResourceDependency,
-        FactoryConfigurationAdapterService
     };
 
     // List of component descriptor parameters
@@ -141,8 +141,6 @@ public class AnnotationCollector extends ClassDataCollector
         impl, 
         provide, 
         properties, 
-        factory, 
-        factoryMethod, 
         composition, 
         service, 
         filter, 
@@ -162,7 +160,9 @@ public class AnnotationCollector extends ClassDataCollector
         adapteeService,
         adapteeFilter,
         stateMask,
-        ranking
+        ranking,
+        factory,
+        factoryConfigure,
     };
 
     /**
@@ -460,12 +460,12 @@ public class AnnotationCollector extends ClassDataCollector
 
         // provide attribute
         info.addClassParam(annotation, Params.provide, m_interfaces);
-
+        
         // factory attribute
-        info.addClassParam(annotation, Params.factory, null);
-
-        // factoryMethod attribute
-        info.addParam(annotation, Params.factoryMethod, null);
+        info.addParam(annotation, Params.factory, null);
+        
+        // factoryPropertiesCallback attribute
+        info.addParam(annotation, Params.factoryConfigure, null);
     }
 
     private void addCommonServiceParams(Info info)
@@ -590,13 +590,7 @@ public class AnnotationCollector extends ClassDataCollector
 
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
         addCommonServiceParams(info);
-        
-        // factory attribute
-        info.addClassParam(annotation, Params.factory, null);
-
-        // factoryMethod attribute
-        info.addParam(annotation, Params.factoryMethod, null);
-        
+                
         // Parse service filter
         String filter = annotation.get(Params.filter.toString());
         if (filter != null) {
