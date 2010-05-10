@@ -81,13 +81,13 @@ public class FactoryConfigurationAdapterAnnotationTest extends AnnotationBase
             cf.update(new Hashtable() {{ put("foo", "bar"); }});
             // Wait for the ServiceProvider activation.
             m_ensure.waitForStep(2, 10000);
-            // Avoid bug in CM, which may miss some updates
+            // Avoid bug in CM (FELIX-1545), which may miss some updates
             sleep(1); 
             // Update conf
             cf.update(new Hashtable() {{ put("foo", "bar2"); }});            
             // Wait for effective update
             m_ensure.waitForStep(4, 10000);
-            // Avoid bug in CM, which may miss some updates
+            // Avoid bug in CM (FELIX-1545), which may miss some updates
             sleep(1);
             // Remove configuration.
             cf.delete();
