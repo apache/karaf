@@ -20,13 +20,17 @@ package org.apache.felix.gogo.felixcommands;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Descriptor;
 
 public class Files
 {
+    private static final String CWD = "_cwd";
+
     private final BundleContext m_bc;
 
     public Files(BundleContext bc)
@@ -34,18 +38,115 @@ public class Files
         m_bc = bc;
     }
 
-    @Descriptor(description="display file system contents")
-    public File[] ls(
-        @Descriptor(description="path with wildcarded file name") String pattern)
+    @Descriptor(description="get current directory")
+    public File cd(
+        @Descriptor(description="automatically supplied shell session") CommandSession session)
     {
+        try
+        {
+            return cd(session, null);
+        }
+        catch (IOException ex)
+        {
+            throw new RuntimeException("Unable to get current directory");
+        }
+    }
+
+    @Descriptor(description="change current directory")
+    public File cd(
+        @Descriptor(description="automatically supplied shell session") CommandSession session,
+        @Descriptor(description="target directory") String dir)
+        throws IOException
+    {
+        File cwd = (File) session.get(CWD);
+        if (cwd == null)
+        {
+            cwd = new File(".").getCanonicalFile();
+            session.put(CWD, cwd);
+        }
+        if ((dir == null) || (dir.length() == 0))
+        {
+            return cwd;
+        }
+        cwd = new File(cwd, dir);
+        if (!cwd.exists())
+        {
+            throw new IOException("Directory does not exist");
+        }
+        else if (!cwd.isDirectory())
+        {
+            throw new IOException("Target is not a directory");
+        }
+        session.put(CWD, cwd.getCanonicalFile());
+        return cwd;
+    }
+
+    @Descriptor(description="get current directory contents")
+    public File[] ls(
+        @Descriptor(description="automatically supplied shell session") CommandSession session)
+    {
+        return ls(session, null);
+    }
+
+    @Descriptor(description="get specified path contents")
+    public File[] ls(
+        @Descriptor(description="automatically supplied shell session") CommandSession session,
+        @Descriptor(description="path with optionally wildcarded file name") String pattern)
+    {
+        pattern = ((pattern == null) || (pattern.length() == 0)) ? "." : pattern;
+        pattern = ((pattern.charAt(0) != File.separatorChar) && (pattern.charAt(0) != '.'))
+            ? "./" + pattern : pattern;
         int idx = pattern.lastIndexOf(File.separatorChar);
-        boolean isWildcarded = (pattern.indexOf('*', idx) >= 0);
+        String parent, target;
+        if (pattern.startsWith("./"))
+        {
+            parent = ".";
+            target = pattern.substring(2);
+        }
+        else if (pattern.equals("."))
+        {
+            parent = pattern;
+            target = "";
+        }
+        else
+        {
+            if (idx < 0)
+            {
+                parent = ".";
+            }
+            else if (idx == 0)
+            {
+                parent = "/";
+            }
+            else
+            {
+                parent = pattern.substring(0, idx);
+            }
+            target = pattern.substring(idx + 1);
+        }
+        File actualParent;
+        if (parent.charAt(0) == File.separatorChar)
+        {
+            actualParent = new File(parent);
+        }
+        else if (parent.equals("."))
+        {
+            actualParent = cd(session);
+        }
+        else if (parent.startsWith("./"))
+        {
+            actualParent = cd(session);
+        }
+        else
+        {
+            actualParent = new File(cd(session), parent);
+        }
+        boolean isWildcarded = (target.indexOf('*') >= 0);
         File[] files;
         if (isWildcarded)
         {
-            final List<String> pieces = parseSubstring(pattern.substring(idx + 1));
-            File dir = new File(pattern.substring(0, idx + 1));
-            files = dir.listFiles(new FileFilter() {
+            final List<String> pieces = parseSubstring(target);
+            files = actualParent.listFiles(new FileFilter() {
                 public boolean accept(File pathname)
                 {
                     return compareSubstring(pieces, pathname.getName());
@@ -54,14 +155,14 @@ public class Files
         }
         else
         {
-            File file = new File(pattern);
+            File file = new File(actualParent, target);
             if (file.isDirectory())
             {
                 files = file.listFiles();
             }
             else
             {
-                files = new File[] { new File(pattern) };
+                files = new File[] { file };
             }
         }
         return files;

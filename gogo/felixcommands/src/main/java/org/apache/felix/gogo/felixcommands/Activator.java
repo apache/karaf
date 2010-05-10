@@ -40,7 +40,8 @@ public class Activator implements BundleActivator
             Basic.class.getName(), new Basic(bc), props);
 
         props.put("osgi.command.scope", "files");
-        props.put("osgi.command.function", new String[] { "ls" });
+        props.put("osgi.command.function", new String[] {
+            "cd", "ls" });
         bc.registerService(
             Files.class.getName(), new Files(bc), props);
 
