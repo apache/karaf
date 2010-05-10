@@ -145,10 +145,15 @@ public class FactoryConfigurationAdapterTest extends Base
             Properties props = new Properties();
             props.put(key, val);
             try {
+                // Avoid bug from FELIX-1545
+                Thread.sleep(500);
                 m_conf.update(props);
             }
             catch (IOException e) {
                 Assert.fail("Could not update configuration: " + e.getMessage());
+            }
+            catch (InterruptedException e)
+            {
             }
         }
         
