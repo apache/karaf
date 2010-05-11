@@ -3786,7 +3786,7 @@ ex.printStackTrace();
             sb.setCharAt(sb.toString().indexOf("-"), '.');
         }
         String toRet = sb.toString();
-        if (toRet.contains("${pom"))
+        if (toRet.indexOf("${pom") >= 0)
         {
             return "0.0.0";
         }
