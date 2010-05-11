@@ -67,27 +67,44 @@ public class CommandProcessorImpl implements CommandProcessor
         return commands.keySet();
     }
 
-    public Function getCommand(String name)
+    public Function getCommand(String name, final Object path)
     {
-        name = name.toLowerCase();
-        int n = name.indexOf(':');
+        int colon = name.indexOf(':');
 
-        if (n < 0)
+        if (colon < 0)
         {
             return null;
         }
         
-        String scope = name.substring(0, n);
-        String function = name.substring(n + 1);
+        name = name.toLowerCase();
         Object cmd = commands.get(name);
+        String cfunction = name.substring(colon);
+        boolean anyScope = (colon == 1 && name.charAt(0) == '*');
         
-        if (null == cmd && scope.equals("*"))
+        if (null == cmd && anyScope)
         {
-            for (String key : commands.keySet())
+            String scopePath = (null == path ? "*" : path.toString());
+            
+            for (String scope : scopePath.split(":"))
             {
-                if (key.endsWith(":" + function))
+                if (scope.equals("*"))
                 {
-                    cmd = commands.get(key);
+                    for (String key : commands.keySet())
+                    {
+                        if (key.endsWith(cfunction))
+                        {
+                            cmd = commands.get(key);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    cmd = commands.get(scope + cfunction);
+                }
+                
+                if (cmd != null)
+                {
                     break;
                 }
             }
@@ -98,7 +115,7 @@ public class CommandProcessorImpl implements CommandProcessor
             return (Function) cmd;
         }
 
-        return new CommandProxy(cmd, function);
+        return new CommandProxy(cmd, cfunction.substring(1));
     }
 
     public void addCommand(String scope, Object target)

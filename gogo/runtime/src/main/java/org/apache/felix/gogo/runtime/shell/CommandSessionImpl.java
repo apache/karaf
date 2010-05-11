@@ -101,25 +101,7 @@ public class CommandSessionImpl implements CommandSession, Converter
             return variables.get(name);
         }
 
-        // add SCOPE support
-        if (name.startsWith("*:"))
-        {
-            String func = name.substring(2);
-            String path = variables.containsKey("SCOPE") ? variables.get("SCOPE").toString()
-                : "osgi:*";
-            
-            for (String scope : path.split(":"))
-            {
-                Object result = processor.getCommand(scope + ":" + func);
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-            return null;
-        }
-
-        return processor.getCommand(name);
+        return processor.getCommand(name, variables.get("SCOPE"));
     }
 
     public void put(String name, Object value)
