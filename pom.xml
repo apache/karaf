@@ -81,7 +81,7 @@
         <felix.framework.version>2.0.4</felix.framework.version>
         <felix.gogo.version>0.2.2</felix.gogo.version>
         <felix.osgi.version>1.4.0</felix.osgi.version>
-        <felix.plugin.version>2.1.0-SNAPSHOT</felix.plugin.version>
+        <felix.plugin.version>2.1.0</felix.plugin.version>
         <felix.prefs.version>1.0.4</felix.prefs.version>
         <felix.webconsole.version>3.0.0</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
