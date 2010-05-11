@@ -53,7 +53,7 @@ public class Ensure {
         step++;
         Assert.assertEquals(nr, step);
         if (DEBUG) {
-            STREAM.println("[Ensure " + INSTANCE + "] step " + step);
+            STREAM.println("[Ensure " + INSTANCE + "] step " + step + " [" + currentThread() + "]");
         }
         notifyAll();
     }
@@ -64,7 +64,7 @@ public class Ensure {
     public synchronized void step() {
         step++;
         if (DEBUG) {
-            STREAM.println("[Ensure " + INSTANCE + "] next step " + step);
+            STREAM.println("[Ensure " + INSTANCE + "] next step " + step + " [" + currentThread() + "]");
         }
         notifyAll();
     }
@@ -81,7 +81,7 @@ public class Ensure {
     public synchronized void waitForStep(int nr, int timeout) {
         final int initialTimeout = timeout;
         if (DEBUG) {
-            STREAM.println("[Ensure " + INSTANCE + "] waiting for step " + nr);
+            STREAM.println("[Ensure " + INSTANCE + "] waiting for step " + nr + " [" + currentThread() + "]");
         }
         while (step < nr && timeout > 0) {
             try {
@@ -94,8 +94,13 @@ public class Ensure {
             throw new IllegalStateException("Timed out waiting for " + initialTimeout + " ms for step " + nr + ", we are still at step " + step);
         }
         if (DEBUG) {
-            STREAM.println("[Ensure " + INSTANCE + "] arrived at step " + nr);
+            STREAM.println("[Ensure " + INSTANCE + "] arrived at step " + nr + " [" + currentThread() + "]");
         }
+    }
+    
+    private String currentThread() {
+        Thread thread = Thread.currentThread();
+        return thread.getId() + " " + thread.getName();
     }
     
     public static Runnable createRunnableStep(final Ensure ensure, final int nr) {
