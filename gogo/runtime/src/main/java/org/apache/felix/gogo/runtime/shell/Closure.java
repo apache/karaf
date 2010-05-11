@@ -45,6 +45,7 @@ public class Closure extends Reflective implements Function, Evaluate
     private final Object script;
 
     private Token errTok;
+    private Token errTok2;
     private List<Object> parms = null;
     private List<Object> parmv = null;
 
@@ -289,6 +290,11 @@ public class Closure extends Reflective implements Function, Evaluate
 
         List<Object> values = new ArrayList<Object>();
         errTok = statement.get(0);
+        
+        if ((statement.size() > 3) && Type.ASSIGN.equals(statement.get(1).type))
+        {
+            errTok2 = statement.get(2);
+        }
 
         for (Token t : statement)
         {
@@ -352,7 +358,12 @@ public class Closure extends Reflective implements Function, Evaluate
                 }
                 else
                 {
-                    value = execute(values.get(1), values.subList(2, values.size()));
+                    cmd = values.get(1);
+                    if (null == cmd)
+                    {
+                        throw new RuntimeException("Command name evaluates to null: " + errTok2);
+                    }
+                    value = execute(cmd, values.subList(2, values.size()));
                 }
 
                 return assignment(scmd, value);

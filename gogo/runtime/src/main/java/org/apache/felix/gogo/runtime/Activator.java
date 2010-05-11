@@ -53,6 +53,11 @@ public class Activator implements BundleActivator
     private OSGiCommands commands;
     private OSGiConverters converters;
     private ServiceRegistration convertersRegistration;
+    
+    protected CommandProcessorImpl newProcessor(ThreadIO tio)
+    {
+        return new CommandProcessorImpl(threadio);
+    }
 
     public void start(final BundleContext context) throws Exception
     {
@@ -61,7 +66,7 @@ public class Activator implements BundleActivator
         threadioRegistration = context.registerService(ThreadIO.class.getName(),
             threadio, null);
 
-        processor = new CommandProcessorImpl(threadio);
+        processor = newProcessor(threadio);
         processorRegistration = context.registerService(CommandProcessor.class.getName(),
             processor, null);
         

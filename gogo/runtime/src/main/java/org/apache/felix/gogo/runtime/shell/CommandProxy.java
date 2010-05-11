@@ -44,11 +44,16 @@ public class CommandProxy extends Reflective implements Function
         this.function = function;
         this.target = target;
     }
+    
+    public Object getTarget()
+    {
+        return (context != null ? context.getService(reference) : target);
+    }
 
     public Object execute(CommandSession session, List<Object> arguments)
         throws Exception
     {
-        Object tgt = (context != null ? context.getService(reference) : target);
+        Object tgt = getTarget();
         
         try
         {

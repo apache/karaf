@@ -62,9 +62,9 @@ public class CommandProcessorImpl implements CommandProcessor
         converters.remove(c);
     }
     
-    public Map<String, Object> getCommands()
+    public Set<String> getCommands()
     {
-        return commands;
+        return commands.keySet();
     }
 
     public Function getCommand(String name)
