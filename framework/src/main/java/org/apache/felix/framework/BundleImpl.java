@@ -1144,7 +1144,9 @@ class BundleImpl implements Bundle
                         ((BundleImpl) bundles[i]).getCurrentModule()).getVersion();
                     if ((symName != null) && (sym != null) && symName.equals(sym) && bundleVersion.equals(ver))
                     {
-                        throw new BundleException("Bundle symbolic name and version are not unique: " + sym + ':' + ver);
+                        throw new BundleException(
+                            "Bundle symbolic name and version are not unique: "
+                            + sym + ':' + ver, BundleException.DUPLICATE_BUNDLE_ERROR);
                     }
                 }
             }

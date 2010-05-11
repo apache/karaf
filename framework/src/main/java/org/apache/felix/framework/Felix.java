@@ -2083,9 +2083,14 @@ ex.printStackTrace();
                 {
                     throw (AccessControlException) rethrow;
                 }
+                else if (rethrow instanceof BundleException)
+                {
+                    throw (BundleException) rethrow;
+                }
                 else
                 {
-                    throw new BundleException("Update of bundle " + bundle + " failed.", rethrow);
+                    throw new BundleException(
+                        "Update of bundle " + bundle + " failed.", rethrow);
                 }
             }
         }
