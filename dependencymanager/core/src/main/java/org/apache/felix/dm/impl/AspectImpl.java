@@ -63,7 +63,7 @@ public class AspectImpl extends AbstractDecorator {
         Object service = properties[1];
         Properties props = new Properties();
         // first add our aspect property
-        props.put(DependencyManager.ASPECT, "true");
+        props.put(DependencyManager.ASPECT, ref.getProperty(Constants.SERVICE_ID));
         // and the ranking
         props.put(Constants.SERVICE_RANKING, Integer.valueOf(m_ranking));
         String[] keys = ref.getPropertyKeys();

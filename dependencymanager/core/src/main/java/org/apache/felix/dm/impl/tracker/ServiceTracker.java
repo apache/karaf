@@ -17,7 +17,11 @@ package org.apache.felix.dm.impl.tracker;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.util.ServiceUtil;
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -806,6 +810,86 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * @ThreadSafe
 	 */
 	class Tracked extends AbstractTracked implements ServiceListener {
+	    /** A list of services that are currently hidden because there is an aspect available with a higher ranking. */
+	    private final List m_hidden = new ArrayList();
+
+	    /**
+	     * Returns the highest hidden aspect for the specified service ID.
+	     * 
+	     * @param serviceId the service ID
+	     * @return a service reference, or <code>null</code> if there was no such service
+	     */
+	    private ServiceReference highestHidden(long serviceId) {
+	        ServiceReference result = null;
+	        int max = Integer.MIN_VALUE;
+	        for (int i = 0; i < m_hidden.size(); i++) {
+	            ServiceReference ref = (ServiceReference) m_hidden.get(i);
+	            Long sid = (Long) ref.getProperty(Constants.SERVICE_ID);
+	            Long aid = (Long) ref.getProperty(DependencyManager.ASPECT);
+	            if ((aid != null && aid.longValue() == serviceId) 
+	                || (aid == null && sid != null && sid.longValue() == serviceId)) {
+	                Integer ranking = (Integer) ref.getProperty(Constants.SERVICE_RANKING);
+	                int r = 0;
+	                if (ranking != null) {
+	                    r = ranking.intValue();
+	                }
+	                if (r > max) {
+	                    max = r;
+	                    result = ref;
+	                }
+	            }
+	        }
+	        return result;
+	    }
+	    
+        /**
+         * Returns the highest tracked service for the specified service ID.
+         * 
+         * @param serviceId the service ID
+         * @return a service reference, or <code>null</code> if there was no such service
+         */
+        private ServiceReference highestTracked(long serviceId) {
+            ServiceReference result = null;
+            int max = Integer.MIN_VALUE;
+            Object[] trackedServices = getTracked(new Object[] {});
+            for (int i = 0; i < trackedServices.length; i++) {
+                ServiceReference ref = (ServiceReference) trackedServices[i];
+                Long sid = (Long) ref.getProperty(Constants.SERVICE_ID);
+                Long aid = (Long) ref.getProperty(DependencyManager.ASPECT);
+                if ((aid != null && aid.longValue() == serviceId) 
+                    || (aid == null && sid != null && sid.longValue() == serviceId)) {
+                    Integer ranking = (Integer) ref.getProperty(Constants.SERVICE_RANKING);
+                    int r = 0;
+                    if (ranking != null) {
+                        r = ranking.intValue();
+                    }
+                    if (r > max) {
+                        max = r;
+                        result = ref;
+                    }
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Hide a service reference, placing it in the list of hidden services.
+         * 
+         * @param ref the service reference to add to the hidden list
+         */
+        private void hide(ServiceReference ref) {
+            m_hidden.add(ref);
+        }
+        
+        /**
+         * Unhide a service reference, removing it from the list of hidden services.
+         * 
+         * @param ref the service reference to remove from the hidden list
+         */
+        private void unhide(ServiceReference ref) {
+            m_hidden.remove(ref);
+        }
+	    
 		/**
 		 * Tracked constructor.
 		 */
@@ -838,9 +922,51 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 			switch (event.getType()) {
 				case ServiceEvent.REGISTERED :
 				case ServiceEvent.MODIFIED :
-					if (listenerFilter != null) { // service listener added with
-						// filter
-						track(reference, event);
+				    ServiceReference higher = null;
+				    ServiceReference lower = null;
+				    boolean isAspect = ServiceUtil.isAspect(reference);
+				    if (isAspect) {
+    				    long sid = ServiceUtil.getServiceId(reference);
+    				    ServiceReference sr = highestTracked(sid);
+    				    if (sr != null) {
+    				        int ranking = ServiceUtil.getRanking(reference);
+    				        int trackedRanking = ServiceUtil.getRanking(sr);
+    				        if (ranking > trackedRanking) {
+    				            // found a higher ranked one!
+    				            if (DEBUG) {
+    				                System.out.println("ServiceTracker.Tracked.serviceChanged[" + event.getType() + "]: Found a higher ranked aspect: " + ServiceUtil.toString(reference) + " vs " + ServiceUtil.toString(sr));
+    				            }
+    				            higher = sr;
+    				        }
+    				        else {
+    				            // found lower ranked one!
+                                if (DEBUG) {
+                                    System.out.println("ServiceTracker.Tracked.serviceChanged[" + event.getType() + "]: Found a lower ranked aspect: " + ServiceUtil.toString(reference) + " vs " + ServiceUtil.toString(sr));
+                                }
+    				            lower = sr;
+    				        }
+    				    }
+				    }
+				    
+					if (listenerFilter != null) { // service listener added with filter
+					    if (lower != null) {
+					        hide(reference);
+					    }
+					    else {
+					        try {
+					            track(reference, event);
+					        }
+					        finally {
+    					        if (higher != null) {
+    					            try {
+    					                untrack(higher, null);
+    					            }
+    					            finally {
+    					                hide(higher);
+    					            }
+    					        }
+					        }
+					    }
 						/*
 						 * If the customizer throws an unchecked exception, it
 						 * is safe to let it propagate
@@ -848,14 +974,51 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 					}
 					else { // service listener added without filter
 						if (filter.match(reference)) {
-							track(reference, event);
+	                        if (lower != null) {
+	                            hide(reference);
+	                        }
+	                        else {
+	                            try {
+	                                track(reference, event);
+	                            }
+	                            finally {
+    	                            if (higher != null) {
+    	                                try {
+    	                                    untrack(higher, null);
+    	                                }
+    	                                finally {
+    	                                    hide(higher);
+    	                                }
+    	                            }
+	                            }
+	                        }
 							/*
 							 * If the customizer throws an unchecked exception,
 							 * it is safe to let it propagate
 							 */
 						}
 						else {
-							untrack(reference, event);
+		                    higher = null;
+		                    isAspect = ServiceUtil.isAspect(reference);
+		                    if (isAspect) {
+		                        long sid = ServiceUtil.getServiceId(reference);
+		                        ServiceReference sr = highestHidden(sid);
+		                        if (sr != null) {
+	                                if (DEBUG) {
+	                                    System.out.println("ServiceTracker.Tracked.serviceChanged[" + event.getType() + "]: Found a hidden aspect: " + ServiceUtil.toString(reference));
+	                                }
+		                            higher = sr;
+		                        }
+		                    }
+		                    try {
+    		                    if (higher != null) {
+    		                        unhide(higher);
+    		                        track(higher, null);
+    		                    }
+		                    }
+		                    finally {
+		                        untrack(reference, event);
+		                    }
 							/*
 							 * If the customizer throws an unchecked exception,
 							 * it is safe to let it propagate
@@ -865,7 +1028,27 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 					break;
                 case 8 /* ServiceEvent.MODIFIED_ENDMATCH */ :
 				case ServiceEvent.UNREGISTERING :
-					untrack(reference, event);
+                    higher = null;
+                    isAspect = ServiceUtil.isAspect(reference);
+                    if (isAspect) {
+                        long sid = ServiceUtil.getServiceId(reference);
+                        ServiceReference sr = highestHidden(sid);
+                        if (sr != null) {
+                            if (DEBUG) {
+                                System.out.println("ServiceTracker.Tracked.serviceChanged[" + event.getType() + "]: Found a hidden aspect: " + ServiceUtil.toString(reference));
+                            }
+                            higher = sr;
+                        }
+                    }
+                    try {
+                        if (higher != null) {
+                            unhide(higher);
+                            track(higher, null);
+                        }
+                    }
+                    finally {
+                        untrack(reference, event);
+                    }
 					/*
 					 * If the customizer throws an unchecked exception, it is
 					 * safe to let it propagate
