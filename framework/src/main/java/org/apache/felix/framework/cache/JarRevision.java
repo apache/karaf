@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.Manifest;
 
@@ -103,8 +104,10 @@ class JarRevision extends BundleRevision
     {
         // Get the embedded resource.
         Manifest mf = m_jarFile.getManifest();
+        // Use an empty map if there is no manifest.
+        Map headers = (mf == null) ? new HashMap() : mf.getMainAttributes();
         // Create a case insensitive map of manifest attributes.
-        return new StringMap(mf.getMainAttributes(), false);
+        return new StringMap(headers, false);
     }
 
     public synchronized Content getContent() throws Exception
