@@ -33,16 +33,6 @@
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
       <version>${framework.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.osgi</groupId>
-          <artifactId>org.osgi.core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.osgi</groupId>
-          <artifactId>org.osgi.compendium</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
   <properties>
@@ -105,23 +95,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
-          <execution>
-            <id>unpack</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-               <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>${pom.groupId}</groupId>
-                  <artifactId>org.apache.felix.framework</artifactId>
-                  <version>${framework.version}</version>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
           <execution>
             <id>copy</id>
             <phase>package</phase>
