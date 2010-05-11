@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
-import javax.crypto.spec.IvParameterSpec;
 import org.apache.felix.framework.capabilityset.Attribute;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.CapabilitySet;
@@ -87,10 +86,10 @@ public class FilterImpl implements Filter
 
         public DictionaryCapability(Dictionary dict, boolean caseSensitive)
         {
+            m_dict = dict;
             if (!caseSensitive)
             {
-                m_dict = null;
-                m_map = new StringMap(caseSensitive);
+                m_map = new StringMap(false);
                 if (dict != null)
                 {
                     Enumeration keys = dict.keys();
@@ -99,7 +98,7 @@ public class FilterImpl implements Filter
                         Object key = keys.nextElement();
                         if (m_map.get(key) == null)
                         {
-                            m_map.put(key, new Attribute((String) key, dict.get(key), false));
+                            m_map.put(key, key);
                         }
                         else
                         {
@@ -112,7 +111,6 @@ public class FilterImpl implements Filter
             else
             {
                 m_map = null;
-                m_dict = dict;
             }
         }
 
@@ -138,13 +136,17 @@ public class FilterImpl implements Filter
 
         public Attribute getAttribute(String name)
         {
-            if (m_map != null)
+            String key = name;
+            Object value = null;
+            if (m_dict != null)
             {
-                return (Attribute) m_map.get(name);
+                if (m_map != null)
+                {
+                    key = (String) m_map.get(name);
+                }
+                value = m_dict.get(key);
             }
-
-            Object value = m_dict.get(name);
-            return (value == null) ? null : new Attribute(name, value, false);
+            return (value == null) ? null : new Attribute(key, value, false);
         }
 
         public List<Attribute> getAttributes()
