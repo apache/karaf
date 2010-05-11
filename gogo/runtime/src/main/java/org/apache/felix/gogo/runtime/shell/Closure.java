@@ -34,6 +34,7 @@ import org.osgi.service.command.Function;
 public class Closure extends Reflective implements Function, Evaluate
 {
     public static final String LOCATION = ".location";
+    private static final String DEFAULT_LOCK = ".defaultLock";
 
     private static final long serialVersionUID = 1L;
     private static final ThreadLocal<String> location = new ThreadLocal<String>();
@@ -73,30 +74,33 @@ public class Closure extends Reflective implements Function, Evaluate
 
     private Exception setLocation(Exception e)
     {
-        String loc = location.get();
-        if (null == loc)
+        if (session.get(DEFAULT_LOCK) == null)
         {
-            loc = (null == script ? "" : script + ":");
-
-            if (e instanceof SyntaxError)
+            String loc = location.get();
+            if (null == loc)
             {
-                SyntaxError se = (SyntaxError) e;
-                loc += se.line() + "." + se.column();
+                loc = (null == script ? "" : script + ":");
+
+                if (e instanceof SyntaxError)
+                {
+                    SyntaxError se = (SyntaxError) e;
+                    loc += se.line() + "." + se.column();
+                }
+                else if (null != errTok)
+                {
+                    loc += errTok.line + "." + errTok.column;
+                }
+
+                location.set(loc);
             }
-            else if (null != errTok)
+            else if (null != script && !loc.contains(":"))
             {
-                loc += errTok.line + "." + errTok.column;
+                location.set(script + ":" + loc);
             }
 
-            location.set(loc);
-        }
-        else if (null != script && !loc.contains(":"))
-        {
-            location.set(script + ":" + loc);
+            session.put(LOCATION, location.get());
         }
 
-        session.put(LOCATION, location.get());
-        
         if (e instanceof EOFError)
         { // map to public exception, so interactive clients can provide more input
             EOFException eofe = new EOFException(e.getMessage());
@@ -290,7 +294,7 @@ public class Closure extends Reflective implements Function, Evaluate
 
         List<Object> values = new ArrayList<Object>();
         errTok = statement.get(0);
-        
+
         if ((statement.size() > 3) && Type.ASSIGN.equals(statement.get(1).type))
         {
             errTok2 = statement.get(2);
@@ -361,7 +365,8 @@ public class Closure extends Reflective implements Function, Evaluate
                     cmd = values.get(1);
                     if (null == cmd)
                     {
-                        throw new RuntimeException("Command name evaluates to null: " + errTok2);
+                        throw new RuntimeException("Command name evaluates to null: "
+                            + errTok2);
                     }
                     value = execute(cmd, values.subList(2, values.size()));
                 }
@@ -385,7 +390,7 @@ public class Closure extends Reflective implements Function, Evaluate
                     if (x == null || !(x instanceof Function))
                     {
                         // try default command handler
-                        if (session.get(".default.lock") == null)
+                        if (session.get(DEFAULT_LOCK) == null)
                         {
                             x = get("default");
                             if (x == null)
@@ -397,13 +402,13 @@ public class Closure extends Reflective implements Function, Evaluate
                             {
                                 try
                                 {
-                                    session.put(".default.lock", "active");
+                                    session.put(DEFAULT_LOCK, true);
                                     values.add(0, scmd);
                                     return ((Function) x).execute(session, values);
                                 }
                                 finally
                                 {
-                                    session.variables.remove(".default.lock");
+                                    session.variables.remove(DEFAULT_LOCK);
                                 }
                             }
                         }
