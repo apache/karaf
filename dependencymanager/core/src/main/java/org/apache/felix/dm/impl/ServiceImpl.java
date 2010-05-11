@@ -837,16 +837,19 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 		        while (serviceClazz != null) {
 		            Field[] fields = serviceClazz.getDeclaredFields();
 		            for (int j = 0; j < fields.length; j++) {
-		                if (fields[j].getType().equals(clazz) && (instanceName == null || fields[j].getName().equals(instanceName))) {
+		                Field field = fields[j];
+                        Class type = field.getType();
+                        if ((instanceName == null && type.equals(clazz)) 
+		                    || (instanceName != null && field.getName().equals(instanceName) && type.isAssignableFrom(clazz))) {
 		                    try {
-		                    	fields[j].setAccessible(true);
+		                    	field.setAccessible(true);
 		                        // synchronized makes sure the field is actually written to immediately
 		                        synchronized (SYNC) {
-		                            fields[j].set(serviceInstance, instance);
+		                            field.set(serviceInstance, instance);
 		                        }
 		                    }
 		                    catch (Exception e) {
-		                        m_logger.log(Logger.LOG_ERROR, "Could not set field " + fields[j], e);
+		                        m_logger.log(Logger.LOG_ERROR, "Could not set field " + field, e);
 		                        return;
 		                    }
 		                }
