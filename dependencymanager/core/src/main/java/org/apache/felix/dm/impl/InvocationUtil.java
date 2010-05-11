@@ -21,6 +21,12 @@ public class InvocationUtil {
     }
 
     public static void invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) throws NoSuchMethodException, InvocationTargetException, IllegalArgumentException, IllegalAccessException {
+        if (object == null) {
+            throw new IllegalArgumentException("Instance cannot be null");
+        }
+        if (clazz == null) {
+            throw new IllegalArgumentException("Class cannot be null");
+        }
         Method m = null;
         for (int i = 0; i < signatures.length; i++) {
             Class[] signature = signatures[i];
