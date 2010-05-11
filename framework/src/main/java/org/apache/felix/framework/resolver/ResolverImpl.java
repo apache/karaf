@@ -35,6 +35,7 @@ import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.CapabilitySet;
 import org.apache.felix.framework.capabilityset.Directive;
 import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.RequirementImpl;
 import org.osgi.framework.Constants;
 
@@ -47,7 +48,7 @@ public class ResolverImpl implements Resolver
     private static boolean m_isInvokeCount = false;
 
     // Reusable empty array.
-    private static final List<Wire> m_emptyWires = Collections.emptyList();
+    private static final List<Wire> m_emptyWires = Util.m_emptyList;
 
     // Holds candidate permutations based on permutating "uses" chains.
     // These permutations are given higher priority.
@@ -1317,7 +1318,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             return sources;
         }
 
-        return Collections.emptyList();
+        return Util.m_emptyList;
     }
 
     private static List<Capability> getPackageSourcesInternal(

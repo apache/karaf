@@ -412,7 +412,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
         public List<Directive> getDirectives()
         {
-            return Collections.emptyList();
+            return Util.m_emptyList;
         }
 
         public Attribute getAttribute(String name)
@@ -423,12 +423,12 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
         public List<Attribute> getAttributes()
         {
-            return Collections.emptyList();
+            return Util.m_emptyList;
         }
 
         public List<String> getUses()
         {
-            return Collections.emptyList();
+            return Util.m_emptyList;
         }
 
         public Object getProperty(String s)

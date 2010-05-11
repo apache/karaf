@@ -21,6 +21,7 @@ package org.apache.felix.framework.util;
 import java.io.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,8 @@ import org.osgi.framework.ServiceReference;
 
 public class Util
 {
+    public static final List m_emptyList = Collections.unmodifiableList(new ArrayList());
+
     /**
      * Converts a module identifier to a bundle identifier. Module IDs
      * are typically <tt>&lt;bundle-id&gt;.&lt;revision&gt;</tt>; this
