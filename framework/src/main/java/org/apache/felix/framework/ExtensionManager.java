@@ -123,6 +123,7 @@ class ExtensionManager extends URLStreamHandler implements Content
     private Set m_exportNames = null;
     private Object m_securityContext = null;
     private final List m_extensions;
+    private volatile Bundle[] m_extensionsCache;
     private final Set m_names;
     private final Map m_sourceToExtensions;
 
@@ -133,6 +134,7 @@ class ExtensionManager extends URLStreamHandler implements Content
         m_logger = null;
         m_systemBundleModule = null;
         m_extensions = new ArrayList();
+        m_extensionsCache = new Bundle[0];
         m_names = new HashSet();
         m_sourceToExtensions = new HashMap();
     }
@@ -152,6 +154,7 @@ class ExtensionManager extends URLStreamHandler implements Content
     {
         m_systemBundleModule = new ExtensionManagerModule(felix);
         m_extensions = null;
+        m_extensionsCache = null;
         m_names = null;
         m_sourceToExtensions = null;
         m_logger = logger;
@@ -459,7 +462,7 @@ class ExtensionManager extends URLStreamHandler implements Content
      * See whether any registered extension provides the class requested. If not
      * throw an IOException.
      */
-    public synchronized URLConnection openConnection(URL url) throws IOException
+    public URLConnection openConnection(URL url) throws IOException
     {
         String path = url.getPath();
 
@@ -468,10 +471,18 @@ class ExtensionManager extends URLStreamHandler implements Content
             return new URLHandlersBundleURLConnection(url);
         }
 
-        for (Iterator iter = m_extensions.iterator(); iter.hasNext();)
+        Bundle[] extensions = m_extensionsCache;
+        URL result = null;
+        for (Bundle extBundle : extensions)
         {
-            URL result = ((BundleImpl) iter.next()).getCurrentModule().getEntry(path);
-
+            try
+            {
+                result = ((BundleImpl) extBundle).getCurrentModule().getEntry(path);
+            }
+            catch (Exception ex)
+            {
+                // Maybe the bundle went away, so ignore this exception.
+            }
             if (result != null)
             {
                 return result.openConnection();
@@ -510,6 +521,7 @@ class ExtensionManager extends URLStreamHandler implements Content
         }
 
         m_extensions.clear();
+        m_extensionsCache = new Bundle[0];
         m_names.clear();
 
         for (Iterator iter = m_sourceToExtensions.values().iterator(); iter.hasNext();)
@@ -529,6 +541,8 @@ class ExtensionManager extends URLStreamHandler implements Content
         {
             m_names.add(name);
             m_extensions.add(extension);
+            m_extensionsCache = (Bundle[])
+                m_extensions.toArray(new Bundle[m_extensions.size()]);
         }
     }
 
