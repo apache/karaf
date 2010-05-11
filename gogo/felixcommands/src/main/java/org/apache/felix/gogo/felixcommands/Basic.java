@@ -184,10 +184,10 @@ public class Basic
 
     @Descriptor(description="display bundle headers")
     public void headers(
-        @Descriptor(description="target bundle identifiers") Long[] ids)
+        @Descriptor(description="target bundles") Bundle[] bundles)
     {
-        List<Bundle> bundles = getBundles(m_bc, ids);
-        bundles = (bundles == null) ? Arrays.asList(m_bc.getBundles()) : bundles;
+        bundles = ((bundles == null) || (bundles.length == 0))
+            ? m_bc.getBundles() : bundles;
         for (Bundle bundle : bundles)
         {
             String title = Util.getBundleName(bundle);
@@ -615,25 +615,15 @@ public class Basic
         }
     }
 
-    @Descriptor(description="refresh any updated or uninstalled bundles")
-    public void refresh()
-    {
-        refresh((List) null);
-    }
-
-    @Descriptor(description="refresh specific bundles")
+    @Descriptor(description="refresh bundles")
     public void refresh(
-        @Descriptor(description="target bundle identifiers") Long[] ids)
+        @Descriptor(description="target bundles (can be null or empty)") Bundle[] bundles)
     {
-        List<Bundle> bundles = getBundles(m_bc, ids);
-        if ((bundles != null) && !bundles.isEmpty())
+        if ((bundles != null) && (bundles.length != 0))
         {
-            refresh(bundles);
+            bundles = null;
         }
-    }
 
-    private void refresh(List<Bundle> bundles)
-    {
         // Keep track of service references.
         List<ServiceReference> refs = new ArrayList();
 
@@ -643,32 +633,21 @@ public class Basic
         {
             System.out.println("Package Admin service is unavailable.");
         }
-        pa.refreshPackages((bundles == null)
-            ? null
-            : (Bundle[]) bundles.toArray(new Bundle[bundles.size()]));
+
+        pa.refreshPackages((bundles == null) ? null : bundles);
 
         Util.ungetServices(m_bc, refs);
     }
 
-    @Descriptor(description="resolve all bundles")
-    public void resolve()
-    {
-        resolve((List) null);
-    }
-
-    @Descriptor(description="resolve specific bundles")
+    @Descriptor(description="resolve bundles")
     public void resolve(
-        @Descriptor(description="target bundle identifiers") Long[] ids)
+        @Descriptor(description="target bundles (can be null or empty)") Bundle[] bundles)
     {
-        List<Bundle> bundles = getBundles(m_bc, ids);
-        if ((bundles != null) && !bundles.isEmpty())
+        if ((bundles != null) && (bundles.length != 0))
         {
-            resolve(bundles);
+            bundles = null;
         }
-    }
 
-    private void resolve(List<Bundle> bundles)
-    {
         // Keep track of service references.
         List<ServiceReference> refs = new ArrayList();
 
@@ -678,9 +657,8 @@ public class Basic
         {
             System.out.println("Package Admin service is unavailable.");
         }
-        pa.resolveBundles((bundles == null)
-            ? null
-            : (Bundle[]) bundles.toArray(new Bundle[bundles.size()]));
+
+        pa.resolveBundles((bundles == null) ? null : bundles);
 
         Util.ungetServices(m_bc, refs);
     }
@@ -767,11 +745,9 @@ public class Basic
     @Descriptor(description="stop bundles")
     public void stop(
         @Flag(name="-t", description="transient") boolean trans,
-        @Descriptor(description="target bundle identifiers") Long[] ids)
+        @Descriptor(description="target bundles") Bundle[] bundles)
     {
-        List<Bundle> bundles = getBundles(m_bc, ids);
-
-        if ((bundles == null) || (bundles.size() == 0))
+        if ((bundles == null) || (bundles.length == 0))
         {
             System.out.println("Please specify the bundles to start.");
         }
@@ -810,11 +786,9 @@ public class Basic
 
     @Descriptor(description="uninstall bundles")
     public void uninstall(
-        @Descriptor(description="target bundle identifiers") Long[] ids)
+        @Descriptor(description="target bundles") Bundle[] bundles)
     {
-        List<Bundle> bundles = getBundles(m_bc, ids);
-
-        if (bundles == null)
+        if ((bundles == null) || (bundles.length == 0))
         {
             System.out.println("Please specify the bundles to uninstall.");
         }
@@ -848,12 +822,11 @@ public class Basic
 
     @Descriptor(description="update bundle")
     public void update(
-        @Descriptor(description="target bundle identifier") Long id)
+        @Descriptor(description="target bundle") Bundle bundle)
     {
         try
         {
             // Get the bundle.
-            Bundle bundle = getBundle(m_bc, id);
             if (bundle != null)
             {
                 bundle.update();
@@ -878,7 +851,7 @@ public class Basic
 
     @Descriptor(description="update bundle from URL")
     public void update(
-        @Descriptor(description="target bundle identifier") Long id,
+        @Descriptor(description="target bundle") Bundle bundle,
         @Descriptor(description="URL from where to retrieve bundle") String location)
     {
         if (location != null)
@@ -886,7 +859,6 @@ public class Basic
             try
             {
                 // Get the bundle.
-                Bundle bundle = getBundle(m_bc, id);
                 if (bundle != null)
                 {
                     InputStream is = new URL(location).openStream();
@@ -894,12 +866,12 @@ public class Basic
                 }
                 else
                 {
-                    System.err.println("Bundle ID " + id + " is invalid.");
+                    System.err.println("Please specify a bundle to update");
                 }
             }
             catch (MalformedURLException ex)
             {
-                System.err.println("Unable to parse URL.");
+                System.err.println("Unable to parse URL");
             }
             catch (IOException ex)
             {
@@ -929,35 +901,37 @@ public class Basic
 
     @Descriptor(description="determines from where a bundle loads a class")
     public void which(
-        @Descriptor(description="target bundle identifier") Long id,
+        @Descriptor(description="target bundle") Bundle bundle,
         @Descriptor(description="target class name") String className)
     {
-        Bundle bundle = getBundle(m_bc, id);
         if (bundle == null)
         {
-            return;
-        }
-        Class clazz = null;
-        try
-        {
-            clazz = bundle.loadClass(className);
-        }
-        catch (ClassNotFoundException ex)
-        {
-            System.out.println("Class not found");
-        }
-        if (clazz.getClassLoader() == null)
-        {
-            System.out.println("Loaded from: boot class loader");
-        }
-        else if (clazz.getClassLoader() instanceof BundleReference)
-        {
-            Bundle p = ((BundleReference) clazz.getClassLoader()).getBundle();
-            System.out.println("Loaded from: " + p);
+            System.err.println("Please specify a bundle");
         }
         else
         {
-            System.out.println("Loaded from: " + clazz.getClassLoader());
+            Class clazz = null;
+            try
+            {
+                clazz = bundle.loadClass(className);
+                if (clazz.getClassLoader() == null)
+                {
+                    System.out.println("Loaded from: boot class loader");
+                }
+                else if (clazz.getClassLoader() instanceof BundleReference)
+                {
+                    Bundle p = ((BundleReference) clazz.getClassLoader()).getBundle();
+                    System.out.println("Loaded from: " + p);
+                }
+                else
+                {
+                    System.out.println("Loaded from: " + clazz.getClassLoader());
+                }
+            }
+            catch (ClassNotFoundException ex)
+            {
+                System.out.println("Class not found");
+            }
         }
     }
 
