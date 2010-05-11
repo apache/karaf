@@ -67,6 +67,7 @@ public class ServiceDependencyImpl extends DependencyBase implements ServiceDepe
     private Object m_defaultImplementation;
     private Object m_defaultImplementationInstance;
     private boolean m_isAvailable;
+    private ServiceReference[] m_references;
     
     private static final Comparator COMPARATOR = new Comparator() {
         public int getRank(ServiceReference ref) {
@@ -752,16 +753,27 @@ public class ServiceDependencyImpl extends DependencyBase implements ServiceDepe
     }
 
     public void invokeAdded(DependencyService service) {
-        // we remember these for future reference, needed for required service callbacks
-        m_reference = lookupServiceReference();
-        m_serviceInstance = lookupService();
-        invokeAdded(service, m_reference, m_serviceInstance);
+        ServiceReference[] refs = m_tracker.getServiceReferences();
+        if (refs != null) {
+            for (int i = 0; i < refs.length; i++) {
+                ServiceReference sr = refs[i];
+                Object svc = m_context.getService(sr);
+                invokeAdded(service, sr, svc);
+            }
+        }
+        m_references = refs;
     }
-
+    
     public void invokeRemoved(DependencyService service) {
-        invokeRemoved(service, m_reference, m_serviceInstance);
-        m_reference = null;
-        m_serviceInstance = null;
+        ServiceReference[] refs = m_references;
+        if (refs != null) {
+            for (int i = 0; i < refs.length; i++) {
+                ServiceReference sr = refs[i];
+                Object svc = m_context.getService(sr);
+                invokeRemoved(service, sr, svc);
+            }
+        }
+        m_references = null;
     }
 
     public Dictionary getProperties() {
