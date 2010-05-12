@@ -1,3 +1,8 @@
+Changes from the 1.6.0 to 1.6.2
+-------------------------------
+** Improvement
+    * [FELIX-2296] - Access to ServiceReference in iPOJO service.
+
 Changes from the 1.4.0 to 1.6.0
 -------------------------------
 ** Bug

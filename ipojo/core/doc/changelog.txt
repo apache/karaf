@@ -1,7 +1,17 @@
+Changes from the 1.6.0 to 1.6.2
+-------------------------------
+** Bug
+    * [FELIX-2308] - getService is called during the unregistration of a service.
+    * [FELIX-2309] - Potential NPE when a service has abruptly in the smart proxies.
+    * [FELIX-2323] - Unbind method should not be called during the invalidation process if the invalidation does not come from a service departure.
+
+** Improvement
+    * [FELIX-2296] - Access to ServiceReference in iPOJO service.
+
 Changes from the 1.4.0 to 1.6.0
 -------------------------------
 ** Bug
-  * [FELIX-1533] - Potential deadlock when stopping the underlying OSGi framework
+    * [FELIX-1533] - Potential deadlock when stopping the underlying OSGi framework
     * [FELIX-1965] - iPojo component is made available regardless of exception during validate
     * [FELIX-2014] - Potential ClassCastException when a service property does not receive a value and is used in the constructor
     * [FELIX-2019] - The Property value is 'null' in the Architecture description, while the value is well assigned to the component's field.
