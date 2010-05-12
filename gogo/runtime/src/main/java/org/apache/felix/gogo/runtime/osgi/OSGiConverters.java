@@ -32,6 +32,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.command.Converter;
 import org.osgi.service.command.Function;
+import org.osgi.service.startlevel.StartLevel;
 
 public class OSGiConverters implements Converter
 {
@@ -43,13 +44,25 @@ public class OSGiConverters implements Converter
 
     private CharSequence print(Bundle bundle)
     {
-        String version = (String) bundle.getHeaders().get("Bundle-Version");
-        if (version == null)
+        // [ ID ] [STATE      ] [ SL ] symname
+        StartLevel sl = null;
+        ServiceReference ref = context.getServiceReference(StartLevel.class.getName());
+        if (ref != null)
         {
-            version = "0.0.0";
+            sl = (StartLevel) context.getService(ref);
         }
-        return String.format("%06d %s %s-%s", bundle.getBundleId(), getState(bundle),
-            bundle.getSymbolicName(), version);
+
+        if (sl == null)
+        {
+            return String.format("%5d|%-11s|%s (%s)", bundle.getBundleId(),
+                getState(bundle), bundle.getSymbolicName(), bundle.getVersion());
+        }
+
+        int level = sl.getBundleStartLevel(bundle);
+        context.ungetService(ref);
+
+        return String.format("%5d|%-11s|%5d|%s (%s)", bundle.getBundleId(),
+            getState(bundle), level, bundle.getSymbolicName(), bundle.getVersion());
     }
 
     private CharSequence print(ServiceReference ref)
@@ -101,22 +114,22 @@ public class OSGiConverters implements Converter
         switch (bundle.getState())
         {
             case Bundle.ACTIVE:
-                return "ACT";
+                return "Active";
 
             case Bundle.INSTALLED:
-                return "INS";
+                return "Installed";
 
             case Bundle.RESOLVED:
-                return "RES";
+                return "Resolved";
 
             case Bundle.STARTING:
-                return "STA";
+                return "Starting";
 
             case Bundle.STOPPING:
-                return "STO";
+                return "Stopping";
 
             case Bundle.UNINSTALLED:
-                return "UNI ";
+                return "Uninstalled ";
         }
         return null;
     }
