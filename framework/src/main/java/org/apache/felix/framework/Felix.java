@@ -329,6 +329,25 @@ public class Felix extends BundleImpl implements Framework
         // Initialize framework properties.
         initializeFrameworkProperties();
 
+        // Read the boot delegation property and parse it.
+        String s = (m_configMap == null)
+            ? null
+            : (String) m_configMap.get(Constants.FRAMEWORK_BOOTDELEGATION);
+        s = (s == null) ? "java.*" : s + ",java.*";
+        StringTokenizer st = new StringTokenizer(s, " ,");
+        m_bootPkgs = new String[st.countTokens()];
+        m_bootPkgWildcards = new boolean[m_bootPkgs.length];
+        for (int i = 0; i < m_bootPkgs.length; i++)
+        {
+            s = st.nextToken();
+            if (s.equals("*") || s.endsWith(".*"))
+            {
+                m_bootPkgWildcards[i] = true;
+                s = s.substring(0, s.length() - 1);
+            }
+            m_bootPkgs[i] = s;
+        }
+
         // Create default bundle stream handler.
         m_bundleStreamHandler = new URLHandlersBundleStreamHandler(this);
 
@@ -350,25 +369,6 @@ public class Felix extends BundleImpl implements Framework
             // This should not throw an exception, but if so, lets convert it to
             // a runtime exception.
             throw new RuntimeException(ex.getMessage());
-        }
-
-        // Read the boot delegation property and parse it.
-        String s = (m_configMap == null)
-            ? null
-            : (String) m_configMap.get(Constants.FRAMEWORK_BOOTDELEGATION);
-        s = (s == null) ? "java.*" : s + ",java.*";
-        StringTokenizer st = new StringTokenizer(s, " ,");
-        m_bootPkgs = new String[st.countTokens()];
-        m_bootPkgWildcards = new boolean[m_bootPkgs.length];
-        for (int i = 0; i < m_bootPkgs.length; i++)
-        {
-            s = st.nextToken();
-            if (s.equals("*") || s.endsWith(".*"))
-            {
-                m_bootPkgWildcards[i] = true;
-                s = s.substring(0, s.length() - 1);
-            }
-            m_bootPkgs[i] = s;
         }
     }
 

@@ -163,11 +163,11 @@ public class ModuleImpl implements Module
      * @throws org.osgi.framework.BundleException
      */
     public ModuleImpl(
-        Logger logger, Bundle bundle, String id,
+        Logger logger, Map configMap, Bundle bundle, String id,
         String[] bootPkgs, boolean[] bootPkgWildcards)
     {
         m_logger = logger;
-        m_configMap = null;
+        m_configMap = configMap;
         m_resolver = null;
         m_bundle = bundle;
         m_id = id;
@@ -680,12 +680,10 @@ public class ModuleImpl implements Module
                     try
                     {
                         // Get the appropriate class loader for delegation.
-                        ClassLoader parent = (m_classLoader == null)
-                            ? determineParentClassLoader() : m_classLoader.getParent();
-                        parent = (parent == null) ? m_bootClassLoader : parent;
+                        ClassLoader bdcl = getBootDelegationClassLoader();
                         result = (isClass)
-                            ? (Object) parent.loadClass(name)
-                            : (Object) parent.getResource(name);
+                            ? (Object) bdcl.loadClass(name)
+                            : (Object) bdcl.getResource(name);
                         // If this is a java.* package, then always terminate the
                         // search; otherwise, continue to look locally if not found.
                         if (pkgName.startsWith("java.") || (result != null))
@@ -865,10 +863,8 @@ public class ModuleImpl implements Module
             try
             {
                 // Get the appropriate class loader for delegation.
-                ClassLoader parent = (m_classLoader == null)
-                    ? determineParentClassLoader() : m_classLoader.getParent();
-                parent = (parent == null) ? m_bootClassLoader : parent;
-                urls = parent.getResources(name);
+                ClassLoader bdcl = getBootDelegationClassLoader();
+                urls = bdcl.getResources(name);
             }
             catch (IOException ex)
             {
@@ -1511,7 +1507,7 @@ public class ModuleImpl implements Module
         return clazz;
     }
 
-    private boolean shouldBootDelegate(String pkgName)
+    boolean shouldBootDelegate(String pkgName)
     {
         // Always boot delegate if the bundle has a configured
         // boot class loader.
@@ -1546,6 +1542,14 @@ public class ModuleImpl implements Module
         }
 
         return result;
+    }
+
+    ClassLoader getBootDelegationClassLoader()
+    {
+        // Get the appropriate class loader for delegation.
+        ClassLoader parent = (m_classLoader == null)
+            ? determineParentClassLoader() : m_classLoader.getParent();
+        return (parent == null) ? m_bootClassLoader : parent;
     }
 
     private static final Constructor m_dexFileClassConstructor;

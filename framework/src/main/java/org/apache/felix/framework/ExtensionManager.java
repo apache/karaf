@@ -652,7 +652,7 @@ class ExtensionManager extends URLStreamHandler implements Content
         private final Version m_version;
         ExtensionManagerModule(Felix felix)
         {
-            super(m_logger, felix, "0",
+            super(m_logger, felix.getConfig(), felix, "0",
                 felix.getBootPackages(), felix.getBootPackageWildcards());
             m_version = new Version((String)
                 felix.getConfig().get(FelixConstants.FELIX_VERSION_PROPERTY));
@@ -686,15 +686,45 @@ class ExtensionManager extends URLStreamHandler implements Content
 
         public Class getClassByDelegation(String name) throws ClassNotFoundException
         {
-            synchronized (ExtensionManager.this)
+            Class clazz = null;
+            String pkgName = Util.getClassPackage(name);
+            if (shouldBootDelegate(pkgName))
             {
-                if (!m_exportNames.contains(Util.getClassPackage(name)))
+                try
                 {
-                    throw new ClassNotFoundException(name);
+                    // Get the appropriate class loader for delegation.
+                    ClassLoader bdcl = getBootDelegationClassLoader();
+                    clazz = bdcl.loadClass(name);
+                    // If this is a java.* package, then always terminate the
+                    // search; otherwise, continue to look locally if not found.
+                    if (pkgName.startsWith("java.") || (clazz != null))
+                    {
+                        return clazz;
+                    }
+                }
+                catch (ClassNotFoundException ex)
+                {
+                    // If this is a java.* package, then always terminate the
+                    // search; otherwise, continue to look locally if not found.
+                    if (pkgName.startsWith("java."))
+                    {
+                        throw ex;
+                    }
                 }
             }
+            if (clazz == null)
+            {
+                synchronized (ExtensionManager.this)
+                {
+                    if (!m_exportNames.contains(Util.getClassPackage(name)))
+                    {
+                        throw new ClassNotFoundException(name);
+                    }
+                }
 
-            return getClass().getClassLoader().loadClass(name);
+                clazz = getClass().getClassLoader().loadClass(name);
+            }
+            return clazz;
         }
 
         public URL getResourceByDelegation(String name)
