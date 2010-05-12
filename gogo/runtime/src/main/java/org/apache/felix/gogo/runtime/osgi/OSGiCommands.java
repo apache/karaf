@@ -62,6 +62,7 @@ public class OSGiCommands
 //        processor.addCommand("osgi", bundle);
         processor.addCommand("osgi", context, BundleContext.class);
 
+	if (false) {
         try
         {
             processor.addCommand("osgi",
@@ -93,6 +94,7 @@ public class OSGiCommands
         {
             // can't happen with null filter
         }
+	}
     }
 
     public Bundle bundle(Bundle i)
