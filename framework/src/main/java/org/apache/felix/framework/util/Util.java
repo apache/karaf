@@ -48,8 +48,10 @@ public class Util
     **/
     private static final String DEFAULT_PROPERTIES_FILE = "default.properties";
 
-    public static String getDefaultProperty(Logger logger, String prop)
+    public static String getDefaultProperty(Logger logger, String name)
     {
+        String value = null;
+
         URL propURL = Util.class.getClassLoader().getResource(DEFAULT_PROPERTIES_FILE);
         if (propURL != null)
         {
@@ -61,15 +63,11 @@ public class Util
                 Properties props = new Properties();
                 props.load(is);
                 is.close();
-                // Perform variable substitution for system properties.
-                for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
-                {
-                    String name = (String) e.nextElement();
-                    props.setProperty(name,
-                        Util.substVars(props.getProperty(name), name, null, props));
-                }
-                // Return system packages property.
-                return props.getProperty(prop);
+                // Perform variable substitution for property.
+                value = props.getProperty(name);
+                value = (value != null)
+                    ? Util.substVars(value, name, null, props)
+                    : null;
             }
             catch (Exception ex)
             {
@@ -87,7 +85,7 @@ public class Util
                     Logger.LOG_ERROR, "Unable to load any configuration properties.", ex);
             }
         }
-        return "";
+        return value;
     }
 
     /**
@@ -491,40 +489,42 @@ public class Util
         // Find the first ending '}' variable delimiter, which
         // will correspond to the first deepest nested variable
         // placeholder.
-        int stopDelim = val.indexOf(DELIM_STOP);
+        int stopDelim = -1;
+        int startDelim = -1;
 
-        // Find the matching starting "${" variable delimiter
-        // by looping until we find a start delimiter that is
-        // greater than the stop delimiter we have found.
-        int startDelim = val.indexOf(DELIM_START);
-        while (stopDelim >= 0)
+        do
         {
-            int idx = val.indexOf(DELIM_START, startDelim + DELIM_START.length());
-            if ((idx < 0) || (idx > stopDelim))
+            stopDelim = val.indexOf(DELIM_STOP, stopDelim + 1);
+            // If there is no stopping delimiter, then just return
+            // the value since there is no variable declared.
+            if (stopDelim < 0)
             {
-                break;
+                return val;
             }
-            else if (idx < stopDelim)
+            // Try to find the matching start delimiter by
+            // looping until we find a start delimiter that is
+            // greater than the stop delimiter we have found.
+            startDelim = val.indexOf(DELIM_START);
+            // If there is no starting delimiter, then just return
+            // the value since there is no variable declared.
+            if (startDelim < 0)
             {
-                startDelim = idx;
+                return val;
+            }
+            while (stopDelim >= 0)
+            {
+                int idx = val.indexOf(DELIM_START, startDelim + DELIM_START.length());
+                if ((idx < 0) || (idx > stopDelim))
+                {
+                    break;
+                }
+                else if (idx < stopDelim)
+                {
+                    startDelim = idx;
+                }
             }
         }
-
-        // If we do not have a start or stop delimiter, then just
-        // return the existing value.
-        if ((startDelim < 0) && (stopDelim < 0))
-        {
-            return val;
-        }
-        // At this point, we found a stop delimiter without a start,
-        // so throw an exception.
-        else if (((startDelim < 0) || (startDelim > stopDelim))
-            && (stopDelim >= 0))
-        {
-            throw new IllegalArgumentException(
-                "stop delimiter with no start delimiter: "
-                + val);
-        }
+        while ((startDelim > stopDelim) && (stopDelim >= 0));
 
         // At this point, we have found a variable placeholder so
         // we must perform a variable substitution on it.
