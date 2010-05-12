@@ -963,13 +963,13 @@ public class Basic
         {
             System.out.println(
                 String.format(
-                "%5s %-11s %5s %s", "ID", "State", "Level", lastColumn));
+                "%5s|%-11s|%5s|%s", "ID", "State", "Level", lastColumn));
         }
         else
         {
             System.out.println(
                 String.format(
-                "%5s %-11s %s", "ID", "State", lastColumn));
+                "%5s|%-11s|%s", "ID", "State", lastColumn));
         }
         for (Bundle bundle : bundles)
         {
