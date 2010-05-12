@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.framework.Felix.FelixResolver;
@@ -180,7 +179,10 @@ class ExtensionManager extends URLStreamHandler implements Content
         // packages should be exported by the system bundle.
         String syspkgs = (String) felix.getConfig().get(FelixConstants.FRAMEWORK_SYSTEMPACKAGES);
         // If no system packages were specified, load our default value.
-        syspkgs = (syspkgs == null) ? loadDefaultSystemPackages(m_logger) : syspkgs;
+        syspkgs = (syspkgs == null)
+            ? Util.getDefaultProperty(logger, Constants.FRAMEWORK_SYSTEMPACKAGES)
+            : syspkgs;
+        syspkgs = (syspkgs == null) ? "" : syspkgs;
         // If any extra packages are specified, then append them.
         String extra = (String) felix.getConfig().get(FelixConstants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
         syspkgs = (extra == null) ? syspkgs : syspkgs + "," + extra;
@@ -596,56 +598,6 @@ class ExtensionManager extends URLStreamHandler implements Content
     //
     // Utility methods.
     //
-
-    /**
-     * The default name used for the default configuration properties file.
-    **/
-    public static final String DEFAULT_PROPERTIES_FILE_VALUE = "default.properties";
-
-    static String loadDefaultSystemPackages(Logger logger)
-    {
-        // If we cannot get configuration properties for any reason, then just
-        // attempt to load resource default.properties instead.
-        URL propURL = ExtensionManager.class.getClassLoader()
-            .getResource(DEFAULT_PROPERTIES_FILE_VALUE);
-        if (propURL != null)
-        {
-            InputStream is = null;
-            try
-            {
-                // Load properties from URL.
-                is = propURL.openConnection().getInputStream();
-                Properties props = new Properties();
-                props.load(is);
-                is.close();
-                // Perform variable substitution for system properties.
-                for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
-                {
-                    String name = (String) e.nextElement();
-                    props.setProperty(name,
-                        Util.substVars(props.getProperty(name), name, null, props));
-                }
-                // Return system packages property.
-                return props.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
-            }
-            catch (Exception ex)
-            {
-                // Try to close input stream if we have one.
-                try
-                {
-                    if (is != null) is.close();
-                }
-                catch (IOException ex2)
-                {
-                    // Nothing we can do.
-                }
-
-                logger.log(
-                    Logger.LOG_ERROR, "Unable to load any configuration properties.", ex);
-            }
-        }
-        return "";
-    }
 
     class ExtensionManagerModule extends ModuleImpl
     {

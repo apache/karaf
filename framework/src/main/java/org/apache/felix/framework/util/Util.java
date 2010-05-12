@@ -19,13 +19,16 @@
 package org.apache.felix.framework.util;
 
 import java.io.*;
+import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.CapabilitySet;
 import org.apache.felix.framework.resolver.Module;
@@ -39,6 +42,53 @@ import org.osgi.framework.ServiceReference;
 public class Util
 {
     public static final List m_emptyList = Collections.unmodifiableList(new ArrayList());
+
+    /**
+     * The default name used for the default configuration properties file.
+    **/
+    private static final String DEFAULT_PROPERTIES_FILE = "default.properties";
+
+    public static String getDefaultProperty(Logger logger, String prop)
+    {
+        URL propURL = Util.class.getClassLoader().getResource(DEFAULT_PROPERTIES_FILE);
+        if (propURL != null)
+        {
+            InputStream is = null;
+            try
+            {
+                // Load properties from URL.
+                is = propURL.openConnection().getInputStream();
+                Properties props = new Properties();
+                props.load(is);
+                is.close();
+                // Perform variable substitution for system properties.
+                for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
+                {
+                    String name = (String) e.nextElement();
+                    props.setProperty(name,
+                        Util.substVars(props.getProperty(name), name, null, props));
+                }
+                // Return system packages property.
+                return props.getProperty(prop);
+            }
+            catch (Exception ex)
+            {
+                // Try to close input stream if we have one.
+                try
+                {
+                    if (is != null) is.close();
+                }
+                catch (IOException ex2)
+                {
+                    // Nothing we can do.
+                }
+
+                logger.log(
+                    Logger.LOG_ERROR, "Unable to load any configuration properties.", ex);
+            }
+        }
+        return "";
+    }
 
     /**
      * Converts a module identifier to a bundle identifier. Module IDs

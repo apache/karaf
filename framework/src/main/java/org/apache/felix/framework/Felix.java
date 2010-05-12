@@ -3752,6 +3752,19 @@ ex.printStackTrace();
         m_configMutableMap.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
         m_configMutableMap.put(
             FelixConstants.FELIX_VERSION_PROPERTY, getFrameworkVersion());
+
+        // Set supported execution environments to default value,
+        // if not explicitly configured.
+        if (!getConfig().containsKey(Constants.FRAMEWORK_EXECUTIONENVIRONMENT))
+        {
+            s = Util.getDefaultProperty(
+                m_logger, Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+            if (s != null)
+            {
+                m_configMutableMap.put(
+                    Constants.FRAMEWORK_EXECUTIONENVIRONMENT, s);
+            }
+        }
     }
 
     /**
