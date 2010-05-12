@@ -20,7 +20,6 @@ package org.apache.felix.gogo.felixcommands;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
@@ -30,7 +29,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -945,77 +943,89 @@ public class Basic
             System.out.println("START LEVEL " + startLevel.getStartLevel());
         }
 
-        // Print column headers.
-        String msg = " Name";
+        // Determine last column.
+        String lastColumn = "Name";
         if (showLoc)
         {
-           msg = " Location";
+           lastColumn = "Location";
         }
         else if (showSymbolic)
         {
-           msg = " Symbolic name";
+           lastColumn = "Symbolic name";
         }
         else if (showUpdate)
         {
-           msg = " Update location";
+           lastColumn = "Update location";
         }
-        String level = (startLevel == null) ? "" : "  Level ";
-        System.out.println("   ID " + "  State       " + level + msg);
-        for (int i = 0; i < bundles.length; i++)
+
+        // Print column headers.
+        if (startLevel != null)
+        {
+            System.out.println(
+                String.format(
+                "%5s %-11s %5s %s", "ID", "State", "Level", lastColumn));
+        }
+        else
+        {
+            System.out.println(
+                String.format(
+                "%5s %-11s %s", "ID", "State", lastColumn));
+        }
+        for (Bundle bundle : bundles)
         {
             // Get the bundle name or location.
             String name = (String)
-                bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
+                bundle.getHeaders().get(Constants.BUNDLE_NAME);
             // If there is no name, then default to symbolic name.
-            name = (name == null) ? bundles[i].getSymbolicName() : name;
+            name = (name == null) ? bundle.getSymbolicName() : name;
             // If there is no symbolic name, resort to location.
-            name = (name == null) ? bundles[i].getLocation() : name;
+            name = (name == null) ? bundle.getLocation() : name;
 
             // Overwrite the default value is the user specifically
             // requested to display one or the other.
             if (showLoc)
             {
-                name = bundles[i].getLocation();
+                name = bundle.getLocation();
             }
             else if (showSymbolic)
             {
-                name = bundles[i].getSymbolicName();
+                name = bundle.getSymbolicName();
                 name = (name == null)
                     ? "<no symbolic name>" : name;
             }
             else if (showUpdate)
             {
                 name = (String)
-                    bundles[i].getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
+                    bundle.getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
                 name = (name == null)
-                    ? bundles[i].getLocation() : name;
+                    ? bundle.getLocation() : name;
             }
+
             // Show bundle version if not showing location.
-            String version = (String)
-                bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
-            name = (!showLoc && !showUpdate && (version != null))
-                ? name + " (" + version + ")" : name;
-            long l = bundles[i].getBundleId();
-            String id = String.valueOf(l);
-            if (startLevel == null)
+            name = (!showLoc && !showUpdate)
+                ? name + " (" + bundle.getVersion() + ")" : name;
+
+            // Get the bundle's start level.
+            int level = (startLevel == null)
+                ? -1
+                : startLevel.getBundleStartLevel(bundle);
+
+            if (level < 0)
             {
-                level = "1";
+                System.out.println(
+                    String.format(
+                        "%5d|%-11s|%s",
+                        bundle.getBundleId(), getStateString(bundle),
+                        name, bundle.getVersion()));
             }
             else
             {
-                level = String.valueOf(startLevel.getBundleStartLevel(bundles[i]));
+                System.out.println(
+                    String.format(
+                        "%5d|%-11s|%5d|%s",
+                        bundle.getBundleId(), getStateString(bundle),
+                        level, name, bundle.getVersion()));
             }
-            while (level.length() < 5)
-            {
-                level = " " + level;
-            }
-            while (id.length() < 4)
-            {
-                id = " " + id;
-            }
-            System.out.println("[" + id + "] ["
-                + getStateString(bundles[i])
-                + "] [" + level + "] " + name);
         }
     }
 
