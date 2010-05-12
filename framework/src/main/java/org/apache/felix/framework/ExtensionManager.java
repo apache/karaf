@@ -511,6 +511,8 @@ class ExtensionManager extends URLStreamHandler implements Content
         sourceExtensions.add(extension);
 
         _add(extension.getSymbolicName(), extension);
+        m_extensionsCache = (Bundle[])
+                m_extensions.toArray(new Bundle[m_extensions.size()]);
     }
 
     private synchronized void _removeExtensions(Object source)
@@ -532,6 +534,8 @@ class ExtensionManager extends URLStreamHandler implements Content
                 Bundle bundle = (Bundle) extIter.next();
                 _add(bundle.getSymbolicName(), bundle);
             }
+            m_extensionsCache = (Bundle[])
+                m_extensions.toArray(new Bundle[m_extensions.size()]);            
         }
     }
 
@@ -541,8 +545,6 @@ class ExtensionManager extends URLStreamHandler implements Content
         {
             m_names.add(name);
             m_extensions.add(extension);
-            m_extensionsCache = (Bundle[])
-                m_extensions.toArray(new Bundle[m_extensions.size()]);
         }
     }
 
