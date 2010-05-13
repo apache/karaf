@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
@@ -89,11 +90,11 @@ public class CommandProcessorImpl implements CommandProcessor
             {
                 if (scope.equals("*"))
                 {
-                    for (String key : commands.keySet())
+                    for (Entry<String, Object> entry : commands.entrySet())
                     {
-                        if (key.endsWith(cfunction))
+                        if (entry.getKey().endsWith(cfunction))
                         {
-                            cmd = commands.get(key);
+                            cmd = entry.getValue();
                             break;
                         }
                     }
