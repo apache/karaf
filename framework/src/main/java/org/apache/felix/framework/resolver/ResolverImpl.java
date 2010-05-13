@@ -41,10 +41,10 @@ import org.osgi.framework.Constants;
 
 public class ResolverImpl implements Resolver
 {
-// TODO: FELIX3 - Add logging messages.
     private final Logger m_logger;
 
     private static final Map<String, Long> m_invokeCounts = new HashMap<String, Long>();
+// TODO: FELIX3 - REMOVE INVOKE COUNTS
     private static boolean m_isInvokeCount = false;
 
     // Reusable empty array.
@@ -169,7 +169,7 @@ public class ResolverImpl implements Resolver
         // 4. The package in question is not exported by the bundle.
         // 5. The package in question matches a dynamic import of the bundle.
         // The following call checks all of these conditions and returns
-        // a matching dynamic requirement if possible.
+        // the associated dynamic import and matching capabilities.
         Map<Requirement, Set<Capability>> candidateMap =
             getDynamicImportCandidates(state, module, pkgName);
         if (candidateMap != null)
@@ -337,7 +337,7 @@ public class ResolverImpl implements Resolver
     }
 
 // TODO: FELIX3 - Modify to not be recursive.
-    private static void populateCandidates(
+    private void populateCandidates(
         ResolverState state, Module module,
         Map<Requirement, Set<Capability>> candidateMap,
         Map<Module, Object> resultCache)
@@ -449,7 +449,6 @@ public class ResolverImpl implements Resolver
                     }
                     catch (ResolveException ex)
                     {
-System.out.println("RE: Candidate not resolveable: " + ex);
                         // Remove the candidate since we weren't able to
                         // populate its candidates.
                         itCandCap.remove();
@@ -466,6 +465,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                     new ResolveException("Unable to resolve " + module
                         + ": missing requirement " + req, module, req);
                 resultCache.put(module, ex);
+                m_logger.log(Logger.LOG_DEBUG, ex.getMessage(), ex);
                 throw ex;
             }
             // If we actually have candidates for the requirement, then
@@ -495,7 +495,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         }
     }
 
-    private static void populateDynamicCandidates(
+    private void populateDynamicCandidates(
         ResolverState state, Module module,
         Map<Requirement, Set<Capability>> candidateMap)
     {
@@ -525,7 +525,6 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                 }
                 catch (ResolveException ex)
                 {
-System.out.println("RE: Candidate not resolveable: " + ex);
                     itCandCap.remove();
                 }
             }
@@ -756,7 +755,6 @@ System.out.println("RE: Candidate not resolveable: " + ex);
 //       then it should be listed as an export for requiring bundles.
         if (candCap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
-//System.out.println("+++ MERGING " + candBlame.m_cap + " INTO " + current);
             String pkgName = (String)
                 candCap.getAttribute(Capability.PACKAGE_ATTR).getValue();
 
@@ -858,7 +856,6 @@ System.out.println("RE: Candidate not resolveable: " + ex);
         list.add(current);
         cycleMap.put(mergeCap, list);
 
-//System.out.println("+++ MERGING USES " + current + " FOR " + candBlame);
         for (Capability candSourceCap : getPackageSources(mergeCap, modulePkgMap))
         {
             for (String usedPkgName : candSourceCap.getUses())
@@ -930,7 +927,6 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             return;
         }
 
-//System.out.println("+++ checkPackageSpaceConsistency(" + module + ")");
         Packages pkgs = modulePkgMap.get(module);
 
         ResolveException rethrow = null;
@@ -979,12 +975,13 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                             it.remove();
                             m_importPermutations.add(importPerm);
                         }
-                        throw new ResolveException(
+                        ResolveException ex = new ResolveException(
                             "Constraint violation for package '"
                             + entry.getKey() + "' when resolving module "
                             + module + " between an imported constraint "
                             + sourceBlame + " and an additional imported constraint "
                             + blame, module, blame.m_reqs.get(0));
+                        m_logger.log(Logger.LOG_DEBUG, ex.getMessage(), ex);
                     }
                 }
             }
@@ -1035,6 +1032,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
             if (rethrow != null)
             {
                 m_usesPermutations.add(copyConflict);
+                m_logger.log(Logger.LOG_DEBUG, rethrow.getMessage(), rethrow);
                 throw rethrow;
             }
         }
@@ -1132,6 +1130,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                         m_usesPermutations.add(copyConflict);
                     }
 
+                    m_logger.log(Logger.LOG_DEBUG, rethrow.getMessage(), rethrow);
                     throw rethrow;
                 }
             }
@@ -1287,7 +1286,7 @@ System.out.println("RE: Candidate not resolveable: " + ex);
                 getPackageSources(
                     candCap,
                     modulePkgMap);
-//System.out.println("+++ currentSources " + currentSources + " - candSources " + candSources);
+
             return currentSources.containsAll(candSources) || candSources.containsAll(currentSources);
         }
         return true;
