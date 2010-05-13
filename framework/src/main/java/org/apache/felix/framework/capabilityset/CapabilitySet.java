@@ -1,20 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
- * 
- *    http://www.apache.org/licenses/LICENSE-2.0
- * 
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.framework.capabilityset;
 
@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import org.apache.felix.framework.util.SecureAction;
 import org.apache.felix.framework.util.StringComparator;
 
 public class CapabilitySet
@@ -37,6 +38,7 @@ public class CapabilitySet
     private final Map<String, Map<Object, Set<Capability>>> m_indices =
         new TreeMap<String, Map<Object, Set<Capability>>>(new StringComparator(false));
     private final Set<Capability> m_capList = new HashSet<Capability>();
+    private final static SecureAction m_secureAction = new SecureAction();
 
     public CapabilitySet(List<String> indexProps)
     {
@@ -78,8 +80,6 @@ public class CapabilitySet
                 }
             }
         }
-
-//        System.out.println("+++ INDICES " + m_indices);
     }
 
     private void indexCapability(
@@ -125,8 +125,6 @@ public class CapabilitySet
                     }
                 }
             }
-
-//            System.out.println("+++ INDICES " + m_indices);
         }
     }
 
@@ -154,7 +152,6 @@ public class CapabilitySet
 
     private Set<Capability> match(Set<Capability> caps, SimpleFilter sf)
     {
-//System.out.println("+++ SF " + sf);
         Set<Capability> matches = new HashSet<Capability>();
 
         if (sf.getOperation() == SimpleFilter.AND)
@@ -166,9 +163,7 @@ public class CapabilitySet
             List<SimpleFilter> sfs = (List<SimpleFilter>) sf.getValue();
             for (int i = 0; (caps.size() > 0) && (i < sfs.size()); i++)
             {
-//System.out.println("+++ REMAINING " + caps);
                 matches = match(caps, sfs.get(i));
-//System.out.println("+++ CURRENT " + matches);
                 caps = matches;
             }
         }
@@ -202,13 +197,11 @@ public class CapabilitySet
                 if (existingCaps != null)
                 {
                     matches.addAll(existingCaps);
-//System.out.println("NARROWED " + caps.size() + " TO " + existingCaps.size());
                     matches.retainAll(caps);
                 }
             }
             else
             {
-//                System.out.println("+++ SEARCHING " + caps.size() + " CAPABILITIES");
                 for (Iterator<Capability> it = caps.iterator(); it.hasNext(); )
                 {
                     Capability cap = it.next();
@@ -505,9 +498,8 @@ public class CapabilitySet
             }
             else
             {
-// TODO: FELIX3 - Use SecureAction.
-                Constructor ctor = lhs.getClass().getConstructor(STRING_CLASS);
-                ctor.setAccessible(true);
+                Constructor ctor = m_secureAction.getConstructor(lhs.getClass(), STRING_CLASS);
+                m_secureAction.setAccesssible(ctor);
                 rhs = ctor.newInstance(new Object[] { rhsString });
             }
         }
