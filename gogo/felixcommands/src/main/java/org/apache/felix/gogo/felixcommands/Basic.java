@@ -452,12 +452,12 @@ public class Basic
         lb(showLoc, showSymbolic, showUpdate, null);
     }
 
-    @Descriptor(description="list installed bundles matching a pattern")
+    @Descriptor(description="list installed bundles matching a substring")
     public void lb(
         @Flag(name="-l", description="show location") boolean showLoc,
         @Flag(name="-s", description="show symbolic name") boolean showSymbolic,
         @Flag(name="-u", description="show update location") boolean showUpdate,
-        String pattern)
+        @Descriptor(description="subtring matched against name or symbolic name") String pattern)
     {
         // Keep track of service references.
         List<ServiceReference> refs = new ArrayList();
