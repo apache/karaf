@@ -35,6 +35,7 @@ public class CommandSessionImpl implements CommandSession, Converter
 {
     public static final String VARIABLES = ".variables";
     public static final String COMMANDS = ".commands";
+    public static final String CONTEXT = ".context";
     private static final String COLUMN = "%-20s %s\n";
     
     protected InputStream in;
@@ -90,10 +91,15 @@ public class CommandSessionImpl implements CommandSession, Converter
         {
             return variables.keySet();
         }
-        
+
         if (COMMANDS.equals(name))
         {
             return processor.getCommands();
+        }
+
+        if (CONTEXT.equals(name))
+        {
+            return processor.getContext();
         }
 
         if (variables.containsKey(name))

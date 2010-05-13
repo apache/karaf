@@ -36,7 +36,7 @@ public class Context extends CommandProcessorImpl
 
     public Context()
     {
-        super(threadio);
+        super(threadio, null);
         session = (CommandSessionImpl) createSession(System.in, System.out, System.err);
     }
 

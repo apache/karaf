@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.runtime.osgi;
+package org.apache.felix.gogo.shell;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,10 +34,10 @@ import org.osgi.service.command.Converter;
 import org.osgi.service.command.Function;
 import org.osgi.service.startlevel.StartLevel;
 
-public class OSGiConverters implements Converter
+public class Converters implements Converter
 {
     private final BundleContext context;
-    public OSGiConverters(BundleContext context)
+    public Converters(BundleContext context)
     {
         this.context = context;
     }

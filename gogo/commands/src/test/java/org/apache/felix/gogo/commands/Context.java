@@ -37,7 +37,7 @@ public class Context extends CommandProcessorImpl
 
     public Context()
     {
-        super(threadio);
+        super(threadio, null);
     }
 
     public Object execute(CharSequence source) throws Exception

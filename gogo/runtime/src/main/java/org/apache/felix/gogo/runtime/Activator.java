@@ -18,11 +18,14 @@
  */
 package org.apache.felix.gogo.runtime;
 
-import org.apache.felix.gogo.runtime.osgi.OSGiCommands;
-import org.apache.felix.gogo.runtime.osgi.OSGiConverters;
-import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
-import org.apache.felix.gogo.runtime.shell.CommandProxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.felix.gogo.runtime.shell.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.shell.CommandProxy;
+import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -35,11 +38,6 @@ import org.osgi.service.command.Function;
 import org.osgi.service.threadio.ThreadIO;
 import org.osgi.util.tracker.ServiceTracker;
 
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 public class Activator implements BundleActivator
 {
     private CommandProcessorImpl processor;
@@ -50,13 +48,10 @@ public class Activator implements BundleActivator
     private ServiceRegistration processorRegistration;
     private ServiceRegistration threadioRegistration;
     private Map<ServiceReference, ServiceRegistration> felixRegistrations;
-    private OSGiCommands commands;
-    private OSGiConverters converters;
-    private ServiceRegistration convertersRegistration;
     
-    protected CommandProcessorImpl newProcessor(ThreadIO tio)
+    protected CommandProcessorImpl newProcessor(ThreadIO tio, BundleContext context)
     {
-        return new CommandProcessorImpl(threadio);
+        return new CommandProcessorImpl(tio, context);
     }
 
     public void start(final BundleContext context) throws Exception
@@ -66,7 +61,7 @@ public class Activator implements BundleActivator
         threadioRegistration = context.registerService(ThreadIO.class.getName(),
             threadio, null);
 
-        processor = newProcessor(threadio);
+        processor = newProcessor(threadio, context);
         processorRegistration = context.registerService(CommandProcessor.class.getName(),
             processor, null);
         
@@ -95,17 +90,10 @@ public class Activator implements BundleActivator
             }
         };
         converterTracker.open();
-
-        // FIXME: optional?
-        commands = new OSGiCommands(context);
-        commands.registerCommands(processor, context.getBundle());
-        converters = new OSGiConverters(context);
-        convertersRegistration = context.registerService(Converter.class.getCanonicalName(), converters, null);
     }
 
     public void stop(BundleContext context) throws Exception
     {
-        convertersRegistration.unregister();
         processorRegistration.unregister();
         threadioRegistration.unregister();
         

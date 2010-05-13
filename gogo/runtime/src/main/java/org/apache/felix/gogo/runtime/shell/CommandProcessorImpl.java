@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Converter;
@@ -39,13 +40,15 @@ public class CommandProcessorImpl implements CommandProcessor
 {
     protected final Set<Converter> converters = new HashSet<Converter>();
     protected final Map<String, Object> commands = new LinkedHashMap<String, Object>();
+    protected final BundleContext context;
     protected final ThreadIO threadIO;
 
-    public CommandProcessorImpl(ThreadIO tio)
+    public CommandProcessorImpl(ThreadIO tio, BundleContext context)
     {
         threadIO = tio;
-        addCommand("shell", this, "addCommand");
-        addCommand("shell", this, "removeCommand");
+        this.context = context;
+        addCommand("osgi", this, "addCommand");
+        addCommand("osgi", this, "removeCommand");
     }
 
     public CommandSession createSession(InputStream in, PrintStream out, PrintStream err)
@@ -63,12 +66,17 @@ public class CommandProcessorImpl implements CommandProcessor
         converters.remove(c);
     }
     
-    public Set<String> getCommands()
+    Set<String> getCommands()
     {
         return commands.keySet();
     }
+    
+    BundleContext getContext()
+    {
+        return context;
+    }
 
-    public Function getCommand(String name, final Object path)
+    Function getCommand(String name, final Object path)
     {
         int colon = name.indexOf(':');
 

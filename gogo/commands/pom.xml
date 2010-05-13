@@ -24,7 +24,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
-    <name>Apache Felix Gogo Shell Commands</name>
+    <name>Apache Felix Gogo Commands</name>
     <artifactId>org.apache.felix.gogo.commands</artifactId>
     <version>0.5.0-SNAPSHOT</version>
     <dependencies>
