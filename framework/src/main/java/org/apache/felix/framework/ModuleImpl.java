@@ -1277,9 +1277,11 @@ public class ModuleImpl implements Module
                 try
                 {
                     Constructor ctor = (Constructor) m_secureAction.getConstructor(
-                        ModuleClassLoader.class, new Class[] { ModuleImpl.class, ClassLoader.class });
+                        ModuleClassLoader.class,
+                        new Class[] { ModuleImpl.class, ClassLoader.class });
                     m_classLoader = (ModuleClassLoader)
-                        m_secureAction.invoke(ctor, new Object[] { this, determineParentClassLoader() });
+                        m_secureAction.invoke(ctor,
+                        new Object[] { this, determineParentClassLoader() });
                 }
                 catch (Exception ex)
                 {
