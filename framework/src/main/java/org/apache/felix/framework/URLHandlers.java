@@ -563,7 +563,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
              }
              catch (Exception e)
              {
-                 // TODO: this should not happen
+                 // This should not happen
                  e.printStackTrace();
              }
         }
