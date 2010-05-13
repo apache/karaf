@@ -34,7 +34,7 @@
 
     <modules>
         <module>runtime</module>
-        <module>console</module>
+        <module>shell</module>
         <module>commands</module>
         <module>felixcommands</module>
     </modules>
