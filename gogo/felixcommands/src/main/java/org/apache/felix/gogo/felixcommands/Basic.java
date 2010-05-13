@@ -747,7 +747,7 @@ public class Basic
     {
         if ((bundles == null) || (bundles.length == 0))
         {
-            System.out.println("Please specify the bundles to start.");
+            System.out.println("Please specify the bundles to stop.");
         }
 
         int options = 0;
