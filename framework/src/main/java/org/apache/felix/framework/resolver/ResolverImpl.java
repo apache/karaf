@@ -706,6 +706,8 @@ public class ResolverImpl implements Resolver
 
             // We have to merge all exported packages from the candidate,
             // since the current module requires it.
+// TODO: FELIX3 - If a module imports its exports, then imported exports should
+//       should be reexported to requiring bundle.
             for (Entry<String, Blame> entry : candPkgs.m_exportedPkgs.entrySet())
             {
                 mergeCandidatePackage(
@@ -751,8 +753,6 @@ public class ResolverImpl implements Resolver
             m_invokeCounts.put(methodName, count);
         }
 
-// TODO: FELIX3 - Check for merging where module imports from itself,
-//       then it should be listed as an export for requiring bundles.
         if (candCap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
             String pkgName = (String)
@@ -818,8 +818,6 @@ public class ResolverImpl implements Resolver
         reqs.add(req);
     }
 
-// TODO: FELIX3 - We end up with duplicates in uses constraints,
-//       see scenario 2 for an example.
     private void mergeUses(
         Module current, Packages currentPkgs,
         Capability mergeCap, List<Requirement> blameReqs, Map<Module, Packages> modulePkgMap,
