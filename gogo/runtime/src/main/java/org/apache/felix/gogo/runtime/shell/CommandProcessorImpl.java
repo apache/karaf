@@ -66,7 +66,7 @@ public class CommandProcessorImpl implements CommandProcessor
         converters.remove(c);
     }
     
-    Set<String> getCommands()
+    public Set<String> getCommands()
     {
         return commands.keySet();
     }
