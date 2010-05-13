@@ -2791,15 +2791,7 @@ ex.printStackTrace();
         // Acquire bundle lock.
         try
         {
-            if (bundle.isExtension())
-            {
-// TODO: EXTENSIONMANAGER - Verify this.
-                acquireBundleLock(bundle, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
-            }
-            else
-            {
-                acquireBundleLock(bundle, Bundle.STARTING | Bundle.ACTIVE);
-            }
+            acquireBundleLock(bundle, Bundle.STARTING | Bundle.ACTIVE);
         }
         catch (IllegalStateException ex)
         {

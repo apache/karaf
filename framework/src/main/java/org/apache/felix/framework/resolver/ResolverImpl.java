@@ -232,7 +232,8 @@ public class ResolverImpl implements Resolver
         return null;
     }
 
-// TODO: FELIX3 - It would be nice to make this private.
+// TODO: FELIX3 - It would be nice to make this private. We will likely have
+//       to duplicate some of its code if we put the resolve in a separate module.
     public static Map<Requirement, Set<Capability>> getDynamicImportCandidates(
         ResolverState state, Module module, String pkgName)
     {
@@ -530,9 +531,6 @@ public class ResolverImpl implements Resolver
             }
         }
 
-// TODO: FELIX3 - Since we reuse the same dynamic requirement, is it possible
-//       that some sort of cycle could cause us to try to match another set
-//       of candidates to the same requirement?
         if (candidates.size() == 0)
         {
             candidateMap.remove(dynReq);
@@ -707,7 +705,7 @@ public class ResolverImpl implements Resolver
             // We have to merge all exported packages from the candidate,
             // since the current module requires it.
 // TODO: FELIX3 - If a module imports its exports, then imported exports should
-//       should be reexported to requiring bundle.
+//       be reexported to requiring bundles.
             for (Entry<String, Blame> entry : candPkgs.m_exportedPkgs.entrySet())
             {
                 mergeCandidatePackage(
@@ -1010,8 +1008,7 @@ public class ResolverImpl implements Resolver
                     mutated = (mutated != null)
                         ? mutated
                         : new HashSet();
-// TODO: FELIX3 - I think we need to walk up this chain too.
-// TODO: FELIX3 - What about uses and import permutations?
+// TODO: FELIX3 - I think we need to walk up the uses chain too.
                     Requirement req = blame.m_reqs.get(blame.m_reqs.size() - 1);
                     if (!mutated.contains(req))
                     {

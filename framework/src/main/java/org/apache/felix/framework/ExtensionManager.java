@@ -312,9 +312,6 @@ class ExtensionManager extends URLStreamHandler implements Content
 
         try
         {
-// TODO: EXTENSIONMANAGER - Should we be setting this?
-//            bundle.setExtension(true);
-
             // Merge the exported packages with the exported packages of the systembundle.
             List<Capability> exports = null;
             try
@@ -355,8 +352,6 @@ class ExtensionManager extends URLStreamHandler implements Content
         }
         catch (Exception ex)
         {
-// TODO: EXTENSIONMANAGER - Should we be setting this?
-//            bundle.setExtension(false);
             throw ex;
         }
 
@@ -380,11 +375,12 @@ class ExtensionManager extends URLStreamHandler implements Content
         {
             try
             {
+// TODO: SECURITY - Should this consider security?
                 BundleActivator activator = (BundleActivator)
                     felix.getClass().getClassLoader().loadClass(
                         activatorClass.trim()).newInstance();
 
-// TODO: KARL - This is kind of hacky, can we improve it?
+// TODO: EXTENSIONMANAGER - This is kind of hacky, can we improve it?
                 felix.m_activatorList.add(activator);
 
                 BundleContext context = felix._getBundleContext();

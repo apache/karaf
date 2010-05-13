@@ -43,7 +43,7 @@ public class CandidateComparator implements Comparator
             c = 1;
         }
 
-        // Next compare version numbers.
+        // Compare module capabilities.
         if ((c == 0) && cap1.getNamespace().equals(Capability.MODULE_NAMESPACE))
         {
             c = ((Comparable) cap1.getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE)
@@ -62,10 +62,8 @@ public class CandidateComparator implements Comparator
                 c = v2.compareTo(v1);
             }
         }
-// TODO: FELIX3 - Need to change this to handle arbitrary capabilities
-//       that may not have a natural ordering.
-        // Assume everything else is a package capability.
-        else if (c == 0)
+        // Compare package capabilities.
+        else if ((c == 0) && cap1.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
             c = ((Comparable) cap1.getAttribute(Capability.PACKAGE_ATTR).getValue())
                 .compareTo(cap2.getAttribute(Capability.PACKAGE_ATTR).getValue());

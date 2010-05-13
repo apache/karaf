@@ -94,7 +94,6 @@ public class WireImpl implements Wire
             // to the exporting module, rather than its content, so it can
             // it can follow any internal wires it may have (e.g., if the
             // package has multiple sources).
-// TODO: FELIX3 - Should isIncluded() be part of Capability?
             if (((CapabilityImpl) m_cap).isIncluded(name))
             {
                 clazz = m_exporter.getClassByDelegation(name);
