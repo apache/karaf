@@ -4135,9 +4135,9 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + wires.get(wires.size() - 1));
             BundleImpl bundle = (BundleImpl) module.getBundle();
 
             // Lock the bundle first.
+            boolean fire = false;
             try
             {
-// TODO: RESOLVER - Seems like we should release the lock before we fire the event.
                 // Acquire bundle lock.
                 try
                 {
@@ -4158,13 +4158,19 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + wires.get(wires.size() - 1));
                     else
                     {
                         setBundleStateAndNotify(bundle, Bundle.RESOLVED);
-                        fireBundleEvent(BundleEvent.RESOLVED, bundle);
+                        fire = true;
                     }
                 }
             }
             finally
             {
                 releaseBundleLock(bundle);
+            }
+
+            // Fire event while not holding the bundle lock.
+            if (fire)
+            {
+                fireBundleEvent(BundleEvent.RESOLVED, bundle);
             }
         }
     }
