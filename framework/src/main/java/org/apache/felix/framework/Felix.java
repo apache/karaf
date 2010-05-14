@@ -4068,10 +4068,63 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + wires.get(wires.size() - 1));
             return m_resolverState.getCandidates(reqModule, req, obeyMandatory);
         }
 
+        // This method duplicates a lot of logic from:
+        // ResolverImpl.getDynamicImportCandidates()
         public boolean isAllowedDynamicImport(Module module, String pkgName)
         {
-            return ResolverImpl.getDynamicImportCandidates(
-                m_resolverState, module, pkgName) != null;
+            // Unresolved modules cannot dynamically import, nor can the default
+            // package be dynamically imported.
+            if (!module.isResolved() || pkgName.length() == 0)
+            {
+                return false;
+            }
+
+            // If the module doesn't have dynamic imports, then just return
+            // immediately.
+            List<Requirement> dynamics = module.getDynamicRequirements();
+            if ((dynamics == null) || (dynamics.size() == 0))
+            {
+                return false;
+            }
+
+            // If any of the module exports this package, then we cannot
+            // attempt to dynamically import it.
+            List<Capability> caps = module.getCapabilities();
+            for (int i = 0; (caps != null) && (i < caps.size()); i++)
+            {
+                if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE)
+                    && caps.get(i).getAttribute(Capability.PACKAGE_ATTR).getValue().equals(pkgName))
+                {
+                    return false;
+                }
+            }
+            // If any of our wires have this package, then we cannot
+            // attempt to dynamically import it.
+            List<Wire> wires = module.getWires();
+            for (int i = 0; (wires != null) && (i < wires.size()); i++)
+            {
+                if (wires.get(i).hasPackage(pkgName))
+                {
+                    return false;
+                }
+            }
+
+            // Loop through the importer's dynamic requirements to determine if
+            // there is a matching one for the package from which we want to
+            // load a class.
+            List<Directive> dirs = Collections.EMPTY_LIST;
+            List<Attribute> attrs = new ArrayList(1);
+            attrs.add(new Attribute(Capability.PACKAGE_ATTR, pkgName, false));
+            Requirement req = new RequirementImpl(
+                module, Capability.PACKAGE_NAMESPACE, dirs, attrs);
+            Set<Capability> candidates = m_resolverState.getCandidates(module, req, false);
+
+            if (candidates.size() == 0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void markResolvedModules(Map<Module, List<Wire>> wireMap)

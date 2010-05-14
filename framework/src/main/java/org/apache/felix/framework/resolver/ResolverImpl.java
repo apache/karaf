@@ -85,62 +85,68 @@ public class ResolverImpl implements Resolver
 
         if (!module.isResolved())
         {
-// TODO: FELIX3 - Should we clear these in a finally block?
-            m_usesPermutations.clear();
-            m_importPermutations.clear();
-
-            Map<Requirement, Set<Capability>> candidateMap =
-                new HashMap<Requirement, Set<Capability>>();
-
-            populateCandidates(state, module, candidateMap, new HashMap<Module, Object>());
-            m_usesPermutations.add(candidateMap);
-
-            ResolveException rethrow = null;
-
-            Map<Capability, Set<Requirement>> capDepSet = new HashMap();
-
-            do
+            try
             {
-                rethrow = null;
+                Map<Requirement, Set<Capability>> candidateMap =
+                    new HashMap<Requirement, Set<Capability>>();
 
-                modulePkgMap.clear();
-                capDepSet.clear();
-                m_packageSourcesCache.clear();
+                populateCandidates(
+                    state, module, candidateMap, new HashMap<Module, Object>());
+                m_usesPermutations.add(candidateMap);
 
-                candidateMap = (m_usesPermutations.size() > 0)
-                    ? m_usesPermutations.remove(0)
-                    : m_importPermutations.remove(0);
+                ResolveException rethrow = null;
+
+                Map<Capability, Set<Requirement>> capDepSet = new HashMap();
+
+                do
+                {
+                    rethrow = null;
+
+                    modulePkgMap.clear();
+                    capDepSet.clear();
+                    m_packageSourcesCache.clear();
+
+                    candidateMap = (m_usesPermutations.size() > 0)
+                        ? m_usesPermutations.remove(0)
+                        : m_importPermutations.remove(0);
 //dumpCandidateMap(state, candidateMap);
 
-                calculatePackageSpaces(
-                    module, candidateMap, modulePkgMap,
-                    capDepSet, new HashMap(), new HashSet());
+                    calculatePackageSpaces(
+                        module, candidateMap, modulePkgMap,
+                        capDepSet, new HashMap(), new HashSet());
 //System.out.println("+++ PACKAGE SPACES START +++");
 //dumpModulePkgMap(modulePkgMap);
 //System.out.println("+++ PACKAGE SPACES END +++");
 
-                try
-                {
-                    checkPackageSpaceConsistency(
-                        module, candidateMap, modulePkgMap, capDepSet, new HashMap());
+                    try
+                    {
+                        checkPackageSpaceConsistency(
+                            module, candidateMap, modulePkgMap, capDepSet, new HashMap());
+                    }
+                    catch (ResolveException ex)
+                    {
+                        rethrow = ex;
+                        System.out.println("RE: " + ex);
+                    }
                 }
-                catch (ResolveException ex)
-                {
-                    rethrow = ex;
-                    System.out.println("RE: " + ex);
-                }
-            }
-            while ((rethrow != null)
-                && ((m_usesPermutations.size() > 0) || (m_importPermutations.size() > 0)));
+                while ((rethrow != null)
+                    && ((m_usesPermutations.size() > 0) || (m_importPermutations.size() > 0)));
 
-            if (rethrow != null)
+                if (rethrow != null)
+                {
+                    throw rethrow;
+                }
+
+                wireMap =
+                    populateWireMap(module, modulePkgMap, wireMap,
+                    candidateMap);
+            }
+            finally
             {
-                throw rethrow;
+                // Always clear the state.
+                m_usesPermutations.clear();
+                m_importPermutations.clear();
             }
-
-            wireMap =
-                populateWireMap(module, modulePkgMap, wireMap,
-                candidateMap);
         }
 
         if (m_isInvokeCount)
@@ -174,67 +180,72 @@ public class ResolverImpl implements Resolver
             getDynamicImportCandidates(state, module, pkgName);
         if (candidateMap != null)
         {
-// TODO: FELIX3 - Should we clear these in a finally block?
-            m_usesPermutations.clear();
-            m_importPermutations.clear();
-
-            Map<Module, List<Wire>> wireMap = new HashMap();
-            Map<Module, Packages> modulePkgMap = new HashMap();
-
-            populateDynamicCandidates(state, module, candidateMap);
-            m_usesPermutations.add(candidateMap);
-
-            ResolveException rethrow = null;
-
-            Map<Capability, Set<Requirement>> capDepSet = new HashMap();
-
-            do
+            try
             {
-                rethrow = null;
+                Map<Module, List<Wire>> wireMap = new HashMap();
+                Map<Module, Packages> modulePkgMap = new HashMap();
 
-                modulePkgMap.clear();
-                capDepSet.clear();
+                populateDynamicCandidates(state, module, candidateMap);
+                m_usesPermutations.add(candidateMap);
 
-                candidateMap = (m_usesPermutations.size() > 0)
-                    ? m_usesPermutations.remove(0)
-                    : m_importPermutations.remove(0);
+                ResolveException rethrow = null;
 
-                calculatePackageSpaces(
-                    module, candidateMap, modulePkgMap,
-                    capDepSet, new HashMap(), new HashSet());
+                Map<Capability, Set<Requirement>> capDepSet = new HashMap();
 
-                try
+                do
                 {
-                    checkPackageSpaceConsistency(
-                        module, candidateMap, modulePkgMap, capDepSet, new HashMap());
-                }
-                catch (ResolveException ex)
-                {
-                    rethrow = ex;
-                    System.out.println("RE: " + ex);
-                }
-            }
-            while ((rethrow != null)
-                && ((m_usesPermutations.size() > 0) || (m_importPermutations.size() > 0)));
+                    rethrow = null;
 
-            if (rethrow != null)
-            {
-                throw rethrow;
-            }
+                    modulePkgMap.clear();
+                    capDepSet.clear();
+
+                    candidateMap = (m_usesPermutations.size() > 0)
+                        ? m_usesPermutations.remove(0)
+                        : m_importPermutations.remove(0);
+
+                    calculatePackageSpaces(
+                        module, candidateMap, modulePkgMap,
+                        capDepSet, new HashMap(), new HashSet());
+
+                    try
+                    {
+                        checkPackageSpaceConsistency(
+                            module, candidateMap, modulePkgMap,
+                            capDepSet, new HashMap());
+                    }
+                    catch (ResolveException ex)
+                    {
+                        rethrow = ex;
+                        System.out.println("RE: " + ex);
+                    }
+                }
+                while ((rethrow != null)
+                    && ((m_usesPermutations.size() > 0)
+                        || (m_importPermutations.size() > 0)));
+
+                if (rethrow != null)
+                {
+                    throw rethrow;
+                }
 
 //dumpModulePkgMap(modulePkgMap);
-            wireMap = populateDynamicWireMap(
-                module, pkgName, modulePkgMap, wireMap, candidateMap);
+                wireMap = populateDynamicWireMap(
+                    module, pkgName, modulePkgMap, wireMap, candidateMap);
 
-            return wireMap;
+                return wireMap;
+            }
+            finally
+            {
+                // Always clear the state.
+                m_usesPermutations.clear();
+                m_importPermutations.clear();
+            }
         }
 
         return null;
     }
 
-// TODO: FELIX3 - It would be nice to make this private. We will likely have
-//       to duplicate some of its code if we put the resolve in a separate module.
-    public static Map<Requirement, Set<Capability>> getDynamicImportCandidates(
+    private static Map<Requirement, Set<Capability>> getDynamicImportCandidates(
         ResolverState state, Module module, String pkgName)
     {
         if (m_isInvokeCount)
@@ -466,7 +477,7 @@ public class ResolverImpl implements Resolver
                     new ResolveException("Unable to resolve " + module
                         + ": missing requirement " + req, module, req);
                 resultCache.put(module, ex);
-                m_logger.log(Logger.LOG_DEBUG, ex.getMessage(), ex);
+                m_logger.log(Logger.LOG_DEBUG, "No viable candidates", ex);
                 throw ex;
             }
             // If we actually have candidates for the requirement, then
@@ -977,7 +988,7 @@ public class ResolverImpl implements Resolver
                             + module + " between an imported constraint "
                             + sourceBlame + " and an additional imported constraint "
                             + blame, module, blame.m_reqs.get(0));
-                        m_logger.log(Logger.LOG_DEBUG, ex.getMessage(), ex);
+                        m_logger.log(Logger.LOG_DEBUG, "Conflicting fragment import", ex);
                     }
                 }
             }
@@ -1027,7 +1038,7 @@ public class ResolverImpl implements Resolver
             if (rethrow != null)
             {
                 m_usesPermutations.add(copyConflict);
-                m_logger.log(Logger.LOG_DEBUG, rethrow.getMessage(), rethrow);
+                m_logger.log(Logger.LOG_DEBUG, "Conflict between an export and import", rethrow);
                 throw rethrow;
             }
         }
@@ -1125,7 +1136,7 @@ public class ResolverImpl implements Resolver
                         m_usesPermutations.add(copyConflict);
                     }
 
-                    m_logger.log(Logger.LOG_DEBUG, rethrow.getMessage(), rethrow);
+                    m_logger.log(Logger.LOG_DEBUG, "Conflict between imports", rethrow);
                     throw rethrow;
                 }
             }
