@@ -998,14 +998,17 @@ public class ResolverImpl implements Resolver
         for (Entry<String, Blame> entry : pkgs.m_exportedPkgs.entrySet())
         {
             String pkgName = entry.getKey();
+            Blame exportBlame = entry.getValue();
             if (!pkgs.m_usedPkgs.containsKey(pkgName))
             {
                 continue;
             }
-            for (Blame blame : pkgs.m_usedPkgs.get(pkgName))
+            for (Blame usedBlame : pkgs.m_usedPkgs.get(pkgName))
             {
-                if (!isCompatible(entry.getValue().m_cap, blame.m_cap, modulePkgMap))
+                if (!isCompatible(exportBlame.m_cap, usedBlame.m_cap, modulePkgMap))
                 {
+                    // Create a candidate permutation that eliminates any candidates
+                    // that conflict with existing selected candidates.
                     copyConflict = (copyConflict != null)
                         ? copyConflict
                         : copyCandidateMap(candidateMap);
@@ -1015,30 +1018,48 @@ public class ResolverImpl implements Resolver
                             "Constraint violation for package '"
                             + pkgName + "' when resolving module "
                             + module + " between existing export "
-                            + entry.getValue() + " and uses constraint "
-                            + blame, null, null);
+                            + exportBlame + " and uses constraint "
+                            + usedBlame, null, null);
+
                     mutated = (mutated != null)
                         ? mutated
                         : new HashSet();
-// TODO: FELIX3 - I think we need to walk up the uses chain too.
-                    Requirement req = blame.m_reqs.get(blame.m_reqs.size() - 1);
-                    if (!mutated.contains(req))
+
+                    for (int reqIdx = usedBlame.m_reqs.size() - 1; reqIdx >= 0; reqIdx--)
                     {
-                        mutated.add(req);
-                        Set<Capability> caps = copyConflict.get(req);
-                        Iterator it = caps.iterator();
-                        it.next();
-                        it.remove();
-                        if (caps.size() == 0)
+                        Requirement req = usedBlame.m_reqs.get(reqIdx);
+
+                        // If we've already permutated this requirement in another
+                        // uses constraint, don't permutate it again just continue
+                        // with the next uses constraint.
+                        if (mutated.contains(req))
                         {
-                            removeInvalidateCandidate(req.getModule(), capDepSet, copyConflict);
+                            break;
+                        }
+
+                        // See if we can permutate the candidates for blamed
+                        // requirement; there may be no candidates if the module
+                        // associated with the requirement is already resolved.
+                        Set<Capability> candidates = copyConflict.get(req);
+                        if ((candidates != null) && (candidates.size() > 1))
+                        {
+                            mutated.add(req);
+                            Iterator it = candidates.iterator();
+                            it.next();
+                            it.remove();
+                            // Continue with the next uses constraint.
+                            break;
                         }
                     }
                 }
             }
+
             if (rethrow != null)
             {
-                m_usesPermutations.add(copyConflict);
+                if (mutated.size() > 0)
+                {
+                    m_usesPermutations.add(copyConflict);
+                }
                 m_logger.log(Logger.LOG_DEBUG, "Conflict between an export and import", rethrow);
                 throw rethrow;
             }
@@ -1150,59 +1171,6 @@ public class ResolverImpl implements Resolver
         for (Module m : checkModules)
         {
             checkPackageSpaceConsistency(m, candidateMap, modulePkgMap, capDepSet, resultCache);
-        }
-    }
-
-    private void removeInvalidateCandidate(
-        Module invalid, Map<Capability, Set<Requirement>> capDepSet,
-        Map<Requirement, Set<Capability>> candidateMap)
-    {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
-        Set<Module> invalidated = new HashSet();
-
-        for (Requirement req : invalid.getRequirements())
-        {
-            candidateMap.remove(req);
-        }
-
-        boolean wasRequired = false;
-
-        for (Capability cap : invalid.getCapabilities())
-        {
-            Set<Requirement> reqs = capDepSet.remove(cap);
-            if (reqs == null)
-            {
-                continue;
-            }
-            wasRequired = true;
-            for (Requirement req : reqs)
-            {
-                Set<Capability> candidates = candidateMap.get(req);
-                candidates.remove(cap);
-                if (candidates.size() == 0)
-                {
-                    candidateMap.remove(req);
-                    invalidated.add(req.getModule());
-                }
-            }
-        }
-
-        if (!wasRequired)
-        {
-            throw new ResolveException(
-                "Unable to resolve module", invalid, null);
-        }
-
-        for (Module m : invalidated)
-        {
-            removeInvalidateCandidate(m, capDepSet, candidateMap);
         }
     }
 
