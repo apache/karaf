@@ -85,8 +85,8 @@
         <felix.prefs.version>1.0.4</felix.prefs.version>
         <felix.webconsole.version>3.0.0</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
-        <aries.blueprint.version>0.1-incubating-SNAPSHOT</aries.blueprint.version>
-        <aries.jmx.version>0.1-incubating-SNAPSHOT</aries.jmx.version>
+        <aries.blueprint.version>0.1-incubating</aries.blueprint.version>
+        <aries.jmx.version>0.1-incubating</aries.jmx.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <jansi.version>1.2</jansi.version>
         <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
@@ -103,7 +103,7 @@
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring.version>2.5.6.SEC01</spring.version>
-        <sshd.version>0.4.0-SNAPSHOT</sshd.version>
+        <sshd.version>0.4.0</sshd.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
