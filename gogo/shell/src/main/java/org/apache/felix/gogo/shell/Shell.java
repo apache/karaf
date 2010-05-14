@@ -38,7 +38,7 @@ import org.osgi.service.command.CommandSession;
 
 public class Shell
 {
-    static final String[] functions = { "gosh", "sh", "shutdown", "source", "telnetd" };
+    static final String[] functions = { "gosh", "sh", "source", "telnetd" };
 
     private final static URI CWD = new File(".").toURI();
 
@@ -167,6 +167,7 @@ public class Shell
 
         if (login && !opt.isSet("noshutdown"))
         {
+            System.out.println("gosh: stopping framework");
             shutdown();
         }
 
@@ -178,7 +179,7 @@ public class Shell
         return gosh(session, argv);
     }
 
-    public void shutdown() throws BundleException
+    private void shutdown() throws BundleException
     {
         context.getBundle(0).stop();
     }
