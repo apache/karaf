@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.runtime;
+package org.apache.felix.gogo.runtime.activator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.gogo.runtime.shell.CommandProcessorImpl;
-import org.apache.felix.gogo.runtime.shell.CommandProxy;
+import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

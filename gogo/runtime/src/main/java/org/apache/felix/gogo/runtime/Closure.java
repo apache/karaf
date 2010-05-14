@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
 import java.io.EOFException;
 import java.util.AbstractList;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.felix.gogo.runtime.shell.Tokenizer.Type;
+import org.apache.felix.gogo.runtime.Tokenizer.Type;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
 

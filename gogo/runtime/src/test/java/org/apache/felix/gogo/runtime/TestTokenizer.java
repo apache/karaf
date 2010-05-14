@@ -16,14 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
 import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.gogo.runtime.shell.Tokenizer.Type;
+import org.apache.felix.gogo.runtime.Evaluate;
+import org.apache.felix.gogo.runtime.Parser;
+import org.apache.felix.gogo.runtime.SyntaxError;
+import org.apache.felix.gogo.runtime.Token;
+import org.apache.felix.gogo.runtime.Tokenizer;
+import org.apache.felix.gogo.runtime.Tokenizer.Type;
 
 import junit.framework.TestCase;
 

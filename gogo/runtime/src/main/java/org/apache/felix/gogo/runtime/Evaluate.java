@@ -17,14 +17,13 @@
  * under the License.
  */
 
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
-public class EOFError extends SyntaxError
+public interface Evaluate
 {
-    private static final long serialVersionUID = 1L;
+    Object eval(Token t) throws Exception;
     
-    public EOFError(int line, int column, String message)
-    {
-        super(line, column, message);
-    }
+    Object get(String key);
+    
+    Object put(String key, Object value);
 }

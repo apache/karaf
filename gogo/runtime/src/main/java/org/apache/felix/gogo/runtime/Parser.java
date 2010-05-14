@@ -18,13 +18,13 @@
  */
 // DWB14: parser loops if // comment at start of program
 // DWB15: allow program to have trailing ';'
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.gogo.runtime.shell.Tokenizer.Type;
+import org.apache.felix.gogo.runtime.Tokenizer.Type;
 
 public class Parser
 {

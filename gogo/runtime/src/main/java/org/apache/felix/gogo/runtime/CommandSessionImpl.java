@@ -19,7 +19,7 @@
 // DWB8: throw IllegatlStateException if session used after closed (as per rfc132)
 // DWB9: there is no API to list all variables: https://www.osgi.org/bugzilla/show_bug.cgi?id=49
 // DWB10: add SCOPE support: https://www.osgi.org/bugzilla/show_bug.cgi?id=51
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Converter;

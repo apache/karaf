@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
 import junit.framework.TestCase;
+
+import org.apache.felix.gogo.runtime.Parser;
+import org.apache.felix.gogo.runtime.Token;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
 

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
-import org.apache.felix.gogo.runtime.shell.Tokenizer.Type;
+import org.apache.felix.gogo.runtime.Tokenizer.Type;
 
 public class Token implements CharSequence
 {

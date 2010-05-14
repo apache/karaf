@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
+import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.osgi.service.command.CommandSession;
 

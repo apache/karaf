@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.runtime;
 
 
 /**

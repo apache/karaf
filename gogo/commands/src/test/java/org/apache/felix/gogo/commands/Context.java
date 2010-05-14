@@ -18,9 +18,9 @@
  */
 package org.apache.felix.gogo.commands;
 
+import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
-import org.apache.felix.gogo.runtime.shell.CommandProcessorImpl;
-import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
 
 public class Context extends CommandProcessorImpl
 {
