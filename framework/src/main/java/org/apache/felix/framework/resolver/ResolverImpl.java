@@ -985,10 +985,11 @@ public class ResolverImpl implements Resolver
                         ResolveException ex = new ResolveException(
                             "Constraint violation for package '"
                             + entry.getKey() + "' when resolving module "
-                            + module + " between an imported constraint "
-                            + sourceBlame + " and an additional imported constraint "
+                            + module + " between an import "
+                            + sourceBlame + " and a fragment import "
                             + blame, module, blame.m_reqs.get(0));
                         m_logger.log(Logger.LOG_DEBUG, "Conflicting fragment import", ex);
+                        throw ex;
                     }
                 }
             }
@@ -1013,7 +1014,7 @@ public class ResolverImpl implements Resolver
                         : new ResolveException(
                             "Constraint violation for package '"
                             + pkgName + "' when resolving module "
-                            + module + " between existing exported constraint "
+                            + module + " between existing export "
                             + entry.getValue() + " and uses constraint "
                             + blame, null, null);
                     mutated = (mutated != null)
@@ -1072,7 +1073,7 @@ public class ResolverImpl implements Resolver
                             : new ResolveException(
                                 "Constraint violation for package '"
                                 + pkgName + "' when resolving module "
-                                + module + " between existing imported constraint "
+                                + module + " between existing import "
                                 + importBlame + " and uses constraint "
                                 + usedBlame, null, null);
 
