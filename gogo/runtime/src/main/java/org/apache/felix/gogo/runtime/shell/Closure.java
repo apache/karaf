@@ -241,17 +241,30 @@ public class Closure extends Reflective implements Function, Evaluate
         {
             case WORD:
                 v = Tokenizer.expand(t, this);
+                
                 if (t == v)
                 {
-                    String s = t.toString();
+                    String s = v.toString();
                     if ("null".equals(s))
+                    {
                         v = null;
+                    }
                     else if ("false".equals(s))
+                    {
                         v = false;
+                    }
                     else if ("true".equals(s))
+                    {
                         v = true;
+                    }
                     else
+                    {
                         v = s;
+                    }
+                }
+                else if (v instanceof CharSequence)
+                {
+                    v = v.toString();
                 }
                 break;
 
