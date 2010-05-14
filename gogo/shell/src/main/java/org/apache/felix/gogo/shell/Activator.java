@@ -43,8 +43,6 @@ public class Activator implements BundleActivator, Runnable
 
     public void start(final BundleContext context) throws Exception
     {
-        shell = new Shell(context);
-        registerCommands(context);
         commandProcessorTracker = processorTracker(context);
     }
 
@@ -91,25 +89,16 @@ public class Activator implements BundleActivator, Runnable
         }
     }
 
-    private void startShell(CommandProcessor processor)
+    private void startShell(BundleContext context, CommandProcessor processor)
     {
-        session = processor.createSession(System.in, System.out, System.err);
-        shell.setProcessor(processor);
-        thread = new Thread(this, "Gogo shell");
-        thread.start();
-    }
-
-    private void registerCommands(BundleContext context)
-    {
-        // default converters
-        regs.add(context.registerService(Converter.class.getName(), new Converters(context), null));
-        
         Dictionary<String, Object> dict = new Hashtable<String, Object>();
         dict.put(CommandProcessor.COMMAND_SCOPE, "gogo");
 
-        dict.put(CommandProcessor.COMMAND_FUNCTION, Shell.functions);
-        regs.add(context.registerService(Shell.class.getName(), shell, dict));
-
+        // register converters
+        regs.add(context.registerService(Converter.class.getName(), new Converters(context), null));
+        
+        // register commands
+        
         dict.put(CommandProcessor.COMMAND_FUNCTION, Builtin.functions);
         regs.add(context.registerService(Builtin.class.getName(), new Builtin(), dict));
 
@@ -118,6 +107,18 @@ public class Activator implements BundleActivator, Runnable
 
         dict.put(CommandProcessor.COMMAND_FUNCTION, Posix.functions);
         regs.add(context.registerService(Posix.class.getName(), new Posix(), dict));
+
+        dict.put(CommandProcessor.COMMAND_FUNCTION, Telnet.functions);
+        regs.add(context.registerService(Telnet.class.getName(), new Telnet(processor), dict));
+        
+        shell = new Shell(context, processor);
+        dict.put(CommandProcessor.COMMAND_FUNCTION, Shell.functions);
+        regs.add(context.registerService(Shell.class.getName(), shell, dict));
+        
+        // start shell
+        session = processor.createSession(System.in, System.out, System.err);
+        thread = new Thread(this, "Gogo shell");
+        thread.start();
     }
 
     private ServiceTracker processorTracker(BundleContext context)
@@ -129,7 +130,7 @@ public class Activator implements BundleActivator, Runnable
             public Object addingService(ServiceReference reference)
             {
                 CommandProcessor processor = (CommandProcessor) super.addingService(reference);
-                startShell(processor);
+                startShell(context, processor);
                 return processor;
             }
 

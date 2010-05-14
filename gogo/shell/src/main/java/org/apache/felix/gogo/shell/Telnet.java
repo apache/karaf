@@ -35,6 +35,8 @@ import org.osgi.service.command.CommandSession;
  */
 public class Telnet implements Runnable
 {
+    static final String[] functions = { "telnetd" };
+    
     private static final int defaultPort = 2019;
     private final CommandProcessor processor;
     private ServerSocket server;

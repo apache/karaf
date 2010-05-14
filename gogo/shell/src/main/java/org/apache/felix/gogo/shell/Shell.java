@@ -19,7 +19,6 @@
 package org.apache.felix.gogo.shell;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -38,26 +37,20 @@ import org.osgi.service.command.CommandSession;
 
 public class Shell
 {
-    static final String[] functions = { "gosh", "sh", "source", "telnetd" };
+    static final String[] functions = { "gosh", "sh", "source" };
 
     private final static URI CWD = new File(".").toURI();
 
     private final URI baseURI;
     private final BundleContext context;
+    private final CommandProcessor processor;
 
-    private CommandProcessor processor;
-    private Telnet telnet;
-
-    public Shell(BundleContext context)
+    public Shell(BundleContext context, CommandProcessor processor)
     {
         this.context = context;
+        this.processor = processor;
         String baseDir = System.getProperty("gosh.home", System.getProperty("user.dir"));
         baseURI = new File(baseDir).toURI();
-    }
-
-    public void setProcessor(CommandProcessor processor)
-    {
-        this.processor = processor;
     }
 
     public Object gosh(final CommandSession session, String[] argv) throws Exception
@@ -196,15 +189,6 @@ public class Shell
         {
             session.put("0", null); // API doesn't support remove
         }
-    }
-
-    public void telnetd(String[] argv) throws IOException
-    {
-        if (telnet == null)
-        {
-            telnet = new Telnet(processor);
-        }
-        telnet.telnetd(argv);
     }
 
     private Object console(CommandSession session)
