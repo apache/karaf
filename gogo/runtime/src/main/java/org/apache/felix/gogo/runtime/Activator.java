@@ -19,9 +19,7 @@
 package org.apache.felix.gogo.runtime;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.felix.gogo.runtime.shell.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.shell.CommandProxy;
@@ -44,10 +42,8 @@ public class Activator implements BundleActivator
     private ThreadIOImpl threadio;
     private ServiceTracker commandTracker;
     private ServiceTracker converterTracker;
-    private ServiceTracker felixTracker;
     private ServiceRegistration processorRegistration;
     private ServiceRegistration threadioRegistration;
-    private Map<ServiceReference, ServiceRegistration> felixRegistrations;
     
     protected CommandProcessorImpl newProcessor(ThreadIO tio, BundleContext context)
     {
@@ -67,10 +63,6 @@ public class Activator implements BundleActivator
         
         commandTracker = trackOSGiCommands(context);
         commandTracker.open();
-
-        felixRegistrations = new HashMap<ServiceReference, ServiceRegistration>();
-        felixTracker = trackFelixCommands(context);
-        felixTracker.open();
 
         converterTracker = new ServiceTracker(context, Converter.class.getName(), null)
         {
@@ -96,11 +88,8 @@ public class Activator implements BundleActivator
     {
         processorRegistration.unregister();
         threadioRegistration.unregister();
-        
         commandTracker.close();
         converterTracker.close();
-        felixTracker.close();
-
         threadio.stop();
     }
 
@@ -169,39 +158,4 @@ public class Activator implements BundleActivator
         };
     }
 
-    private ServiceTracker trackFelixCommands(final BundleContext context)
-    {
-        return new ServiceTracker(context, FelixCommandAdaptor.FELIX_COMMAND, null)
-        {
-            @Override
-            public Object addingService(ServiceReference ref)
-            {
-                Object felixCommand = super.addingService(ref);
-                try
-                {
-                    FelixCommandAdaptor adaptor = new FelixCommandAdaptor(felixCommand);
-                    felixRegistrations.put(ref, context.registerService(
-                        FelixCommandAdaptor.class.getName(), adaptor,
-                        adaptor.getAttributes()));
-                    return felixCommand;
-                }
-                catch (Exception e)
-                {
-                    System.err.println("felixcmd: " + e);
-                    return null;
-                }
-            }
-
-            @Override
-            public void removedService(ServiceReference reference, Object service)
-            {
-                ServiceRegistration reg = felixRegistrations.remove(reference);
-                if (reg != null)
-                {
-                    reg.unregister();
-                }
-                super.removedService(reference, service);
-            }
-        };
-    }
 }
