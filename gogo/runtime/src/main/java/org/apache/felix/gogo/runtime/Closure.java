@@ -31,7 +31,7 @@ import org.apache.felix.gogo.runtime.Tokenizer.Type;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
 
-public class Closure extends Reflective implements Function, Evaluate
+public class Closure implements Function, Evaluate
 {
     public static final String LOCATION = ".location";
     private static final String DEFAULT_LOCK = ".defaultLock";
@@ -449,7 +449,7 @@ public class Closure extends Reflective implements Function, Evaluate
                 {
                     if (".".equals(arg))
                     {
-                        target = method(session, target, args.remove(0).toString(), args);
+                        target = Reflective.method(session, target, args.remove(0).toString(), args);
                         args.clear();
                     }
                     else
@@ -463,11 +463,11 @@ public class Closure extends Reflective implements Function, Evaluate
                     return target;
                 }
 
-                return method(session, target, args.remove(0).toString(), args);
+                return Reflective.method(session, target, args.remove(0).toString(), args);
             }
             else
             {
-                return method(session, cmd, values.remove(0).toString(), values);
+                return Reflective.method(session, cmd, values.remove(0).toString(), values);
             }
         }
     }

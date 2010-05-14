@@ -25,7 +25,7 @@ import org.osgi.service.command.CommandSession;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.BundleContext;
 
-public class CommandProxy extends Reflective implements Function
+public class CommandProxy implements Function
 {
     private BundleContext context;
     private ServiceReference reference;
@@ -63,7 +63,7 @@ public class CommandProxy extends Reflective implements Function
             }
             else
             {
-                return method(session, tgt, function, arguments);
+                return Reflective.method(session, tgt, function, arguments);
             }
         }
         finally

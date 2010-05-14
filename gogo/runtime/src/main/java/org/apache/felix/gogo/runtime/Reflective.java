@@ -18,34 +18,38 @@
  */
 package org.apache.felix.gogo.runtime;
 
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import org.osgi.service.command.*;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Flag;
+import org.osgi.service.command.Option;
 
-public class Reflective
+public final class Reflective
 {
     public final static Object NO_MATCH = new Object();
-    public final static Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[]
-        {
-            "abstract", "continue", "for", "new",
-            "switch", "assert", "default", "goto", "package",
-            "synchronized", "boolean", "do", "if", "private", "this",
-            "break", "double", "implements", "protected", "throw",
-            "byte", "else", "import", "public", "throws", "case",
-            "enum", "instanceof", "return", "transient", "catch",
-            "extends", "int", "short", "try", "char", "final",
-            "interface", "static", "void", "class", "finally", "long",
-            "strictfp", "volatile", "const", "float", "native",
-            "super", "while"
-        }));
     public final static String MAIN = "_main";
+    public final static Set<String> KEYWORDS = new HashSet<String>(
+        Arrays.asList(new String[] { "abstract", "continue", "for", "new", "switch",
+                "assert", "default", "goto", "package", "synchronized", "boolean", "do",
+                "if", "private", "this", "break", "double", "implements", "protected",
+                "throw", "byte", "else", "import", "public", "throws", "case", "enum",
+                "instanceof", "return", "transient", "catch", "extends", "int", "short",
+                "try", "char", "final", "interface", "static", "void", "class",
+                "finally", "long", "strictfp", "volatile", "const", "float", "native",
+                "super", "while" }));
 
-    public Object method(
-        CommandSession session, Object target, String name, List<Object> args)
-        throws IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException, Exception
+    public static Object method(CommandSession session, Object target, String name,
+        List<Object> args) throws IllegalArgumentException, IllegalAccessException,
+        InvocationTargetException, Exception
     {
         Method[] methods = target.getClass().getMethods();
         name = name.toLowerCase();
@@ -59,17 +63,14 @@ public class Reflective
             name = "_" + name;
         }
 
-        if (target instanceof Class)
+        if (target instanceof Class<?>)
         {
             Method[] staticMethods = ((Class<?>) target).getMethods();
             for (Method m : staticMethods)
             {
                 String mname = m.getName().toLowerCase();
-                if (mname.equals(name)
-                    || mname.equals(get)
-                    || mname.equals(set)
-                    || mname.equals(is)
-                    || mname.equals(MAIN))
+                if (mname.equals(name) || mname.equals(get) || mname.equals(set)
+                    || mname.equals(is) || mname.equals(MAIN))
                 {
                     methods = staticMethods;
                     break;
@@ -85,11 +86,8 @@ public class Reflective
         for (Method m : methods)
         {
             String mname = m.getName().toLowerCase();
-            if (mname.equals(name)
-                || mname.equals(get)
-                || mname.equals(set)
-                || mname.equals(is)
-                || mname.equals(MAIN))
+            if (mname.equals(name) || mname.equals(get) || mname.equals(set)
+                || mname.equals(is) || mname.equals(MAIN))
             {
                 Class<?>[] types = m.getParameterTypes();
                 ArrayList<Object> xargs = new ArrayList<Object>(args);
@@ -102,8 +100,7 @@ public class Reflective
                 }
 
                 // Check if the command takes a session
-                if ((types.length > 0)
-                    && CommandSession.class.isAssignableFrom(types[0]))
+                if ((types.length > 0) && CommandSession.class.isAssignableFrom(types[0]))
                 {
                     xargs.add(0, session);
                 }
@@ -183,8 +180,8 @@ public class Reflective
                 list.add(buf.toString());
             }
 
-            throw new IllegalArgumentException(
-                String.format("Cannot coerce %s%s to any of %s", name, args, list));
+            throw new IllegalArgumentException(String.format(
+                "Cannot coerce %s%s to any of %s", name, args, list));
             // } derek
         }
     }
@@ -205,10 +202,8 @@ public class Reflective
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    private int coerce(
-        CommandSession session, Object target, Method m,
-        Class<?> types[], Object out[], List<Object> in)
-        throws Exception
+    private static int coerce(CommandSession session, Object target, Method m,
+        Class<?> types[], Object out[], List<Object> in) throws Exception
     {
         Annotation[][] pas = m.getParameterAnnotations();
 
@@ -226,8 +221,7 @@ public class Reflective
                 }
                 else if (as[a] instanceof Flag)
                 {
-                    out[argIndex] = coerce(session, target, types[argIndex],
-                        false);
+                    out[argIndex] = coerce(session, target, types[argIndex], false);
                     start = argIndex + 1;
                 }
             }
@@ -345,7 +339,7 @@ public class Reflective
         return i;
     }
 
-    Object coerce(CommandSession session, Object target, Class<?> type,
+    private static Object coerce(CommandSession session, Object target, Class<?> type,
         Object arg) throws Exception
     {
         if (arg == null)
@@ -456,16 +450,4 @@ public class Reflective
         return NO_MATCH;
     }
 
-    public static boolean hasCommand(Object target, String function)
-    {
-        Method[] methods = target.getClass().getMethods();
-        for (Method m : methods)
-        {
-            if (m.getName().equals(function))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
 }
