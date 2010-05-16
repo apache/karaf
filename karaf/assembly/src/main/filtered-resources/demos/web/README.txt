@@ -80,8 +80,8 @@ try executing the "features:list" command as follows:
 In this case, you should see output similar to the following:
 
 State         Version       Name       Repository
-[uninstalled] [2.5.6.SEC01] spring     karaf-${version}
-[uninstalled] [1.2.0      ] spring-dm  karaf-${version}
+[uninstalled] [2.5.6.SEC01] spring     karaf-${project.version}
+[uninstalled] [1.2.0      ] spring-dm  karaf-${project.version}
 [uninstalled] [${pom.version}] wrapper    karaf-${pom.version}
 [uninstalled] [${pom.version}] obr        karaf-${pom.version}
 [uninstalled] [${pom.version}] http       karaf-${pom.version}
@@ -102,7 +102,7 @@ container, by completing the following steps:
 
      mvn package
      
-Maven builds the web application, web-${version}.war, and 
+Maven builds the web application, web-${project.version}.war, and
 saves it in the target directory of this example. Deploy this
 WAR file to your favorite web container. Once the application
 is running, you can test it using the Apache Felix Karaf client

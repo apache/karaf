@@ -112,8 +112,8 @@
         </file>
         <file>
             <source>${basedir}/target/classes/features.xml</source>
-            <outputDirectory>/system/org/apache/felix/karaf/apache-felix-karaf/${version}</outputDirectory>
-            <destName>apache-felix-karaf-${version}-features.xml</destName>
+            <outputDirectory>/system/org/apache/felix/karaf/apache-felix-karaf/${project.version}</outputDirectory>
+            <destName>apache-felix-karaf-${project.version}-features.xml</destName>
             <fileMode>0644</fileMode>
             <lineEnding>dos</lineEnding>
         </file>
