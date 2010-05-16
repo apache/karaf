@@ -89,8 +89,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Import-Package>!${pom.artifactId}*,*</Import-Package>
-            <Export-Package>${pom.artifactId}*;version=${pom.version}</Export-Package>
+            <Import-Package>!${project.artifactId}*,*</Import-Package>
+            <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
             <Embed-Dependency>
                <!-- Required for JSON data transfer -->
                <!-- TODO: this needs to be put in a common place for reuse. -->

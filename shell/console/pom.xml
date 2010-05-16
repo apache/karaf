@@ -76,13 +76,13 @@
     <build>
         <resources>
             <resource>
-                <directory>${pom.basedir}/src/main/resources</directory>
+                <directory>${project.basedir}/src/main/resources</directory>
                 <includes>
                     <include>**/*</include>
                 </includes>
             </resource>
             <resource>
-                <directory>${pom.basedir}/src/main/filtered-resources</directory>
+                <directory>${project.basedir}/src/main/filtered-resources</directory>
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*</include>
@@ -115,7 +115,7 @@
                         </Import-Package>
                         <Export-Package>
                             org.apache.felix.gogo.commands*;version=${felix.gogo.version},
-                            org.apache.felix.karaf.shell.console*;version=${pom.version},
+                            org.apache.felix.karaf.shell.console*;version=${project.version},
                             org.fusesource.jansi;version=${jansi.version},
                             jline;version=${jline.version}
                         </Export-Package>

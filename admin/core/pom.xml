@@ -89,7 +89,7 @@
     <build>
         <resources>
             <resource>
-                <directory>${pom.basedir}/src/main/resources</directory>
+                <directory>${project.basedir}/src/main/resources</directory>
                 <includes>
                     <include>**/*</include>
                 </includes>
@@ -153,10 +153,10 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
-                            org.apache.felix.karaf.admin;version=${pom.version},
-                            org.apache.felix.karaf.jpm;version=${pom.version}
+                            org.apache.felix.karaf.admin;version=${project.version},
+                            org.apache.felix.karaf.jpm;version=${project.version}
                         </Export-Package>
                         <Import-Package>
                             !org.apache.felix.karaf.admin,

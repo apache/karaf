@@ -67,10 +67,10 @@
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>
-                            ${pom.artifactId}*;version=${project.version}
+                            ${project.artifactId}*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !${pom.artifactId}*,
+                            !${project.artifactId}*,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.felix.karaf.shell.console,

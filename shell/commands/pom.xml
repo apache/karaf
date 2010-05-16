@@ -59,7 +59,7 @@
     <build>
         <resources>
             <resource>
-                <directory>${pom.basedir}/src/main/resources</directory>
+                <directory>${project.basedir}/src/main/resources</directory>
                 <includes>
                     <include>**/*</include>
                 </includes>
@@ -72,9 +72,9 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
+                        <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
-                            !${pom.artifactId}*,
+                            !${project.artifactId}*,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.felix.karaf.shell.console,
