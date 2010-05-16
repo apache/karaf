@@ -146,7 +146,7 @@
                   <configuration>
                       <tasks>
                           <move todir="${project.build.directory}/karaf/WEB-INF/karaf">
-                              <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-felix-karaf-${pom.version}" />
+                              <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-felix-karaf-${project.version}" />
                           </move>
                       </tasks>
                   </configuration>

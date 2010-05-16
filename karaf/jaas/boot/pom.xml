@@ -55,9 +55,9 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${pom.artifactId}*;version=${pom.version}</Export-Package>
-                        <Import-Package>!${pom.artifactId}*,*</Import-Package>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
+                        <Import-Package>!${project.artifactId}*,*</Import-Package>
                         <Private-Package>!*</Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

@@ -98,12 +98,12 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
-                            ${pom.artifactId}*;version=${pom.version}
+                            ${project.artifactId}*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !${pom.artifactId}*,
+                            !${project.artifactId}*,
                             javax.management,
                             javax.management.loading,
                             org.osgi.service.command,

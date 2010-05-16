@@ -64,8 +64,8 @@
                         <Main-Class>org.apache.felix.karaf.main.Main</Main-Class>
                         <Bundle-Name>Apache Felix Karaf</Bundle-Name>
                         <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.felix.karaf.main.spi.*;version=${pom.version}</Export-Package>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>org.apache.felix.karaf.main.spi.*;version=${project.version}</Export-Package>
                         <!--
                         <Private-Package>
                             org.apache.felix.*;-split-package:=merge-first,

@@ -28,7 +28,7 @@
                 <style type="text/css">
                     @page :left {
                       @top-left {
-                        content: "Apache Felix Karaf ${pom.version} User's Manual";
+                        content: "Apache Felix Karaf ${project.version} User's Manual";
                       }
                     }
                 </style>

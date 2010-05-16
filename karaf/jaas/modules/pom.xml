@@ -82,9 +82,9 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
+                        <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
-                            !${pom.artifactId}*,
+                            !${project.artifactId}*,
                             org.apache.felix.karaf.jaas.config,
                             org.apache.aries.blueprint.ext,
                             *

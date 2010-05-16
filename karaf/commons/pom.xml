@@ -54,10 +54,10 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
             <Import-Package>
-                !${pom.artifactId}*,
+                !${project.artifactId}*,
                 *
             </Import-Package>
             <_versionpolicy>${bnd.version.policy}</_versionpolicy>
