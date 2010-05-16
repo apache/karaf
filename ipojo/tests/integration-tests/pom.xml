@@ -250,13 +250,13 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.handler.temporal</artifactId>
-      <version>${ipojo.version}</version>
+      <version>1.7.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.handler.eventadmin</artifactId>
-      <version>${ipojo.version}</version>
+      <version>1.7.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
