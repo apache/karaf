@@ -33,20 +33,17 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.net.URI;
-import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.w3c.dom.*;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.artifact.handler.DefaultArtifactHandler;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.ops4j.pax.url.mvn.Handler;
 import org.xml.sax.SAXException;
 
 /**
@@ -92,7 +89,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             for (String feature : transitiveFeatures) {
                 bundles.addAll(featuresMap.get(feature).getBundles());
             }
-            System.out.println("Base repo: " + localRepo.getUrl());
+            getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
                 if (bundle.startsWith("wrap:")) {
                     bundle = bundle.substring(5);
@@ -118,12 +115,24 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 }
                 String dir = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/";
                 String name = artifactId + "-" + version + (classifier != null ? "-" + classifier : "") + "." + type;
-                System.out.println("Copy:      " + bundle);
-                copy(new URL(null, bundle, new Handler()).openStream(),
-                     repository,
-                     name,
-                     dir,
-                     new byte[8192]);
+
+                Artifact artifact;
+                try {
+                    artifact = this.factory.createArtifact(groupId, artifactId, version,
+                            (classifier != null ? classifier : ""), type);
+                    getLog().info("Copying bundle: " + bundle);
+                    resolver.resolve(artifact, this.remoteRepos, this.localRepo);
+                    copy(new FileInputStream(artifact.getFile()),
+                         repository,
+                         name,
+                         dir,
+                         new byte[8192]);
+                } catch (ArtifactResolutionException e) {
+                    getLog().error("Can't resolve bundle " + bundle, e);
+                } catch (ArtifactNotFoundException e) {
+                    getLog().error("Can't resolve bundle " + bundle, e);
+                }
+
 
             }
         } catch (MojoExecutionException e) {
