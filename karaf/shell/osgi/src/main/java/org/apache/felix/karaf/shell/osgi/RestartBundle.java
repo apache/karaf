@@ -27,6 +27,8 @@ public class RestartBundle extends BundlesCommand {
     protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {
             bundle.stop();
+        }
+        for (Bundle bundle : bundles) {
             bundle.start();
         }
     }

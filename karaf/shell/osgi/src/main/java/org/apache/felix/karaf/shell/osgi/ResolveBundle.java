@@ -16,15 +16,17 @@
  */
 package org.apache.felix.karaf.shell.osgi;
 
+import java.util.List;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "osgi", name = "resolve", description = "Resolve bundle(s)")
-public class ResolveBundle extends BundleCommand {
+public class ResolveBundle extends BundlesCommandOptional {
 
-    protected void doExecute(Bundle bundle) throws Exception {
+    protected void doExecute(List<Bundle> bundles) throws Exception {
         // Get package admin service.
         ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
@@ -37,7 +39,11 @@ public class ResolveBundle extends BundleCommand {
                 System.out.println("PackageAdmin service is unavailable.");
                 return;
             }
-            pa.resolveBundles(new Bundle[] { bundle });
+            if (bundles.isEmpty()) {
+                pa.resolveBundles(null);
+            } else {
+                pa.resolveBundles(bundles.toArray(new Bundle[bundles.size()]));
+            }
         }
         finally {
             getBundleContext().ungetService(ref);
