@@ -16,6 +16,8 @@
  */
 package org.apache.felix.karaf.shell.osgi;
 
+import java.util.List;
+
 import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
@@ -24,39 +26,30 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 @Command(scope = "osgi", name = "refresh", description = "Refresh a bundle")
-public class RefreshBundle extends OsgiCommandSupport {
+public class RefreshBundle extends BundlesCommandOptional {
 
-    @Argument(index = 0, name = "id", description = "The ID of the bundle to refresh", required = false, multiValued = false)
-    Long id;
-
-    protected Object doExecute() throws Exception {
+    protected void doExecute(List<Bundle> bundles) throws Exception {
         // Get package admin service.
         ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
             System.out.println("PackageAdmin service is unavailable.");
-            return null;
+            return;
         }
         try {
             PackageAdmin pa = (PackageAdmin) getBundleContext().getService(ref);
             if (pa == null) {
                 System.out.println("PackageAdmin service is unavailable.");
-                return null;
+                return;
             }
-            if (id == null) {
+            if (bundles.isEmpty()) {
                 pa.refreshPackages(null);
             }
             else {
-                Bundle bundle = getBundleContext().getBundle(id);
-                if (bundle == null) {
-                    System.out.println("Bundle " + id + " not found");
-                    return null;
-                }
-                pa.refreshPackages(new Bundle[] { bundle });
+                pa.refreshPackages(bundles.toArray(new Bundle[bundles.size()]));
             }
         }
         finally {
             getBundleContext().ungetService(ref);
         }
-        return null;
     }
 }

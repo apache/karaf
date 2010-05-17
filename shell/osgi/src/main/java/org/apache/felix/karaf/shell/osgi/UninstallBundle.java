@@ -16,14 +16,18 @@
  */
 package org.apache.felix.karaf.shell.osgi;
 
+import java.util.List;
+
 import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "osgi", name = "uninstall", description = "Uninstall bundle")
-public class UninstallBundle extends BundleCommand {
+@Command(scope = "osgi", name = "uninstall", description = "Uninstall bundle(s)")
+public class UninstallBundle extends BundlesCommand {
 
-    protected void doExecute(Bundle bundle) throws Exception {
-        bundle.uninstall();
+    protected void doExecute(List<Bundle> bundles) throws Exception {
+        for (Bundle bundle : bundles) {
+            bundle.uninstall();
+        }
     }
 
 }
