@@ -74,6 +74,11 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
      */
     private File repository;
 
+    /**
+     * @parameter
+     */
+    private boolean skipNonMavenProtocols = true;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
@@ -91,11 +96,31 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             }
             getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
-                if (bundle.startsWith("wrap:")) {
-                    bundle = bundle.substring(5);
-                }
-                if (!bundle.startsWith("mvn:")) {
+                final int index = bundle.indexOf("mvn:");
+                if (index < 0) {
+                    if (skipNonMavenProtocols) {
+                        continue;
+                    }
                     throw new MojoExecutionException("Bundle url is not a maven url: " + bundle);
+                }
+                else {
+                    bundle = bundle.substring(index);
+                }
+                // Truncate the URL when a '#' or a '?' is encountered
+                final int index1 = bundle.indexOf('?');
+                final int index2 = bundle.indexOf('#');
+                int endIndex = -1;
+                if (index1 > 0) {
+                     if (index2 > 0) {
+                         endIndex = Math.min(index1, index2);
+                     } else {
+                         endIndex = index1;
+                     }
+                } else if (index2 > 0) {
+                    endIndex = index2;
+                }
+                if (endIndex >= 0) {
+                    bundle = bundle.substring(0, endIndex);
                 }
                               
                 String[] parts = bundle.substring("mvn:".length()).split("/");
