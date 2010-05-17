@@ -38,7 +38,7 @@ public class ConsoleFactory {
     private BundleContext bundleContext;
     private CommandProcessor commandProcessor;
     private List<Completer> completers;
-    private Terminal terminal;
+    private TerminalFactory terminalFactory;
     private Console console;
     private boolean start;
 
@@ -60,8 +60,8 @@ public class ConsoleFactory {
         this.completers = completers;
     }
 
-    public void setTerminal(Terminal terminal) {
-        this.terminal = terminal;
+    public void setTerminalFactory(TerminalFactory terminalFactory) {
+        this.terminalFactory = terminalFactory;
     }
 
     public void setStart(boolean start) {
@@ -82,6 +82,7 @@ public class ConsoleFactory {
                     }
                 }
             };
+            Terminal terminal = terminalFactory.getTerminal();
             this.console = new Console(commandProcessor,
                                        in,
                                        wrap(out),
