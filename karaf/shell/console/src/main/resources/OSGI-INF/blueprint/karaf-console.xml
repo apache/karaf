@@ -47,15 +47,10 @@
                 <ref component-id="commandCompleter"/>
             </list>
         </property>
-        <property name="terminal" ref="terminal"/>
+        <property name="terminalFactory" ref="terminalFactory"/>
     </bean>
 
-    <bean id="terminal"
-          factory-ref="terminalFactory"
-          factory-method="getTerminal"/>
-
     <bean id="terminalFactory" class="org.apache.felix.karaf.shell.console.jline.TerminalFactory"
-          init-method="init"
           destroy-method="destroy"/>
 
 

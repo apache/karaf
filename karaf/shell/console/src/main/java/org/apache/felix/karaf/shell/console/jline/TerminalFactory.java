@@ -27,14 +27,19 @@ public class TerminalFactory {
 
     private Terminal term;
 
-    public Terminal getTerminal() throws Exception {
+    public synchronized Terminal getTerminal() throws Exception {
         if (term == null) {
             init();
         }
         return term;
     }
 
-    public synchronized void init() throws Exception {
+    public void init() throws Exception {
+        if ("jline.UnsupportedTerminal".equals(System.getProperty("jline.terminal"))) {
+            term = new UnsupportedTerminal();
+            return;
+        }
+        
         boolean windows = System.getProperty("os.name").toLowerCase().contains("windows");
         try {
             if (windows) {
@@ -54,8 +59,10 @@ public class TerminalFactory {
     }
 
     public synchronized void destroy() throws Exception {
-        term.restoreTerminal();
-        term = null;
+        if (term != null) {
+            term.restoreTerminal();
+            term = null;
+        }
     }
 
 }
