@@ -93,13 +93,19 @@ public class PropertiesLoginModule implements LoginModule {
             tmpPassword = new char[0];
         }
 
-        String userInfos = (String) users.get(user);
+        String userInfos = null;
+
+        try {
+            userInfos = (String) users.get(user);
+        } catch (NullPointerException e) {
+            //error handled in the next statement
+        }
         if (userInfos == null) {
-            throw new FailedLoginException("User does not exist");
+            throw new FailedLoginException("User " + user + " does not exist");
         }
         String[] infos = userInfos.split(",");
         if (!new String(tmpPassword).equals(infos[0])) {
-            throw new FailedLoginException("Password does not match");
+            throw new FailedLoginException("Password for " + user + " does not match");
         }
 
         principals = new HashSet<Principal>();
@@ -111,7 +117,7 @@ public class PropertiesLoginModule implements LoginModule {
         users.clear();
 
         if (debug) {
-            LOG.debug("login " + user);
+            LOG.debug("Successfully logged in " + user);
         }
         return true;
     }
