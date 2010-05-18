@@ -899,9 +899,9 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    public Set<Feature> getFeaturesContainingBundle (Bundle bundle) {
+    public Set<Feature> getFeaturesContainingBundle (Bundle bundle) throws Exception {
         Set<Feature> features = new HashSet<Feature>();
-        for (Map<String, Feature> featureMap : this.features.values()) {
+        for (Map<String, Feature> featureMap : this.getFeatures().values()) {
             for (Feature f : featureMap.values()) {
                 if (f.getBundles().contains(bundle.getLocation())) {
                     features.add(f);
@@ -911,7 +911,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         return features;
     }
 
-    private String getFeaturesContainingBundleList(Bundle bundle) {
+    private String getFeaturesContainingBundleList(Bundle bundle) throws Exception {
         Set<Feature> features = getFeaturesContainingBundle(bundle);
         StringBuilder buffer = new StringBuilder();
         Iterator<Feature> iter = features.iterator();
