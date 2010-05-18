@@ -29,7 +29,6 @@ import junit.framework.Assert;
 import org.apache.felix.dm.annotation.api.Destroy;
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
-import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.resources.ResourceHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -72,17 +71,19 @@ public class ResourceProvider
      */
     @ServiceDependency(removed = "remove", required=false)
     public void add(Map serviceProperties, ResourceHandler handler)
-    {
+    {        
         String filterString = (String) serviceProperties.get("filter");
-        Filter filter;
-        try
-        {
-            filter = m_context.createFilter(filterString);
-        }
-        catch (InvalidSyntaxException e)
-        {
-            Assert.fail("Could not create filter for resource handler: " + e);
-            return;
+        Filter filter = null;
+        if (filterString != null) {
+            try
+            {
+                filter = m_context.createFilter(filterString);
+            }
+            catch (InvalidSyntaxException e)
+            {
+                Assert.fail("Could not create filter for resource handler: " + e);
+                return;
+            }
         }
         synchronized (m_handlers)
         {
@@ -90,7 +91,7 @@ public class ResourceProvider
         }
         for (int i = 0; i < m_resources.length; i++)
         {
-            if (filter.match(m_resources[i].getProperties()))
+            if (filter == null || filter.match(m_resources[i].getProperties()))
             {
                 handler.added(m_resources[i]);
             }
@@ -115,7 +116,7 @@ public class ResourceProvider
     {
         for (int i = 0; i < m_resources.length; i++)
         {
-            if (filter.match(m_resources[i].getProperties()))
+            if (filter == null || filter.match(m_resources[i].getProperties()))
             {
                 handler.removed(m_resources[i]);
             }

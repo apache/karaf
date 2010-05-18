@@ -40,17 +40,19 @@ public class BundleResourceRepository {
 	public synchronized void addHandler(ServiceReference ref, ResourceHandler handler) {
 		String filter = (String) ref.getProperty("filter"); // "(&(repository=a)(path=b)(name=*.xml))"
 		Filter filterObject = null;
-		try {
-			filterObject = FrameworkUtil.createFilter(filter);
-		} 
-		catch (InvalidSyntaxException e) {
-			e.printStackTrace();
-			return;
+		if (filter != null) {
+    		try {
+    			filterObject = FrameworkUtil.createFilter(filter);
+    		} 
+    		catch (InvalidSyntaxException e) {
+    			e.printStackTrace();
+    			return;
+    		}
 		}
 		Enumeration entries = m_bundle.findEntries("/", null, true);
 		while (entries.hasMoreElements()) {
 			EntryResource resource = new EntryResource(m_bundle, (URL) entries.nextElement());
-			if (filterObject.match(resource)) {
+			if (filterObject == null || filterObject.match(resource)) {
                 handler.added(resource);
 			}
 		}
@@ -59,17 +61,19 @@ public class BundleResourceRepository {
 	public synchronized void removeHandler(ServiceReference ref, ResourceHandler handler) {
 		String filter = (String) ref.getProperty("filter"); // "(&(repository=a)(path=b)(name=*.xml))"
 		Filter filterObject = null;
-		try {
-			filterObject = FrameworkUtil.createFilter(filter);
-		}
-		catch (InvalidSyntaxException e) {
-			e.printStackTrace();
-			return;
+		if (filter != null) {
+    		try {
+    			filterObject = FrameworkUtil.createFilter(filter);
+    		}
+    		catch (InvalidSyntaxException e) {
+    			e.printStackTrace();
+    			return;
+    		}
 		}
 		Enumeration entries = m_bundle.findEntries("/", null, true);
         while (entries.hasMoreElements()) {
             EntryResource resource = new EntryResource(m_bundle, (URL) entries.nextElement());
-            if (filterObject.match(resource)) {
+            if (filterObject == null || filterObject.match(resource)) {
                 handler.removed(resource);
             }
         }

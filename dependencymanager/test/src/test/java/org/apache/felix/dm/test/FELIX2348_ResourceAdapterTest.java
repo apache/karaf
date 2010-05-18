@@ -120,23 +120,25 @@ public class FELIX2348_ResourceAdapterTest extends Base {
         
         public void add(ServiceReference ref, ResourceHandler handler) {
             String filterString = (String) ref.getProperty("filter");
-            Filter filter;
-            try {
-                filter = m_context.createFilter(filterString);
-            }
-            catch (InvalidSyntaxException e) {
-                Assert.fail("Could not create filter for resource handler: " + e);
-                return;
+            Filter filter = null;
+            if (filterString != null) {
+                try {
+                    filter = m_context.createFilter(filterString);
+                }
+                catch (InvalidSyntaxException e) {
+                    Assert.fail("Could not create filter for resource handler: " + e);
+                    return;
+                }
             }
             synchronized (m_handlers) {
                 m_handlers.put(handler, filter);
             }
-                for (int i = 0; i < m_resources.length; i++) {
-                    if (filter.match(m_resources[i].getProperties())) {
-                        handler.added(m_resources[i]);
-                    }
+            for (int i = 0; i < m_resources.length; i++) {
+                if (filter == null || filter.match(m_resources[i].getProperties())) {
+                    handler.added(m_resources[i]);
                 }
             }
+        }
 
         public void remove(ServiceReference ref, ResourceHandler handler) {
             Filter filter;
@@ -148,7 +150,7 @@ public class FELIX2348_ResourceAdapterTest extends Base {
 
         private void removeResources(ResourceHandler handler, Filter filter) {
                 for (int i = 0; i < m_resources.length; i++) {
-                    if (filter.match(m_resources[i].getProperties())) {
+                    if (filter == null || filter.match(m_resources[i].getProperties())) {
                         handler.removed(m_resources[i]);
                     }
                 }
