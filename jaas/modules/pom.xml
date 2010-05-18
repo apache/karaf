@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.felix.karaf.jaas</groupId>
         <artifactId>jaas</artifactId>
-        <version>1.6.0</version>
+        <version>1.7.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.felix.karaf.jaas</groupId>
     <artifactId>org.apache.felix.karaf.jaas.modules</artifactId>
     <packaging>bundle</packaging>
-    <version>1.6.0</version>
+    <version>1.7.0-SNAPSHOT</version>
     <name>Apache Felix Karaf :: JAAS Modules</name>
 
     <description>
