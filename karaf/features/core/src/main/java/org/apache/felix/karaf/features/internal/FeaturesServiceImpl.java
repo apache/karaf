@@ -375,13 +375,16 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (String config : feature.getConfigurations().keySet()) {
             Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
             String[] pid = parsePid(config);
-            String key = (pid[1] == null ? pid[0] : pid[0] + "-" + pid[1]);
-            props.put(CONFIG_KEY, key);
-            Configuration cfg = getConfiguration(configAdmin, pid[0], pid[1]);
-            if (cfg.getBundleLocation() != null) {
-                cfg.setBundleLocation(null);
+            Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
+            if (cfg == null) {
+                cfg = createConfiguration(configAdmin, pid[0], pid[1]);
+                String key = (pid[1] == null ? pid[0] : pid[0] + "-" + pid[1]);
+                props.put(CONFIG_KEY, key);
+                if (cfg.getBundleLocation() != null) {
+                    cfg.setBundleLocation(null);
+                }
+                cfg.update(props);
             }
-            cfg.update(props);
         }
         Set<Long> bundles = new HashSet<Long>();
         for (String bundleLocation : feature.getBundles()) {
@@ -703,24 +706,24 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
 
-    protected Configuration getConfiguration(ConfigurationAdmin configurationAdmin,
-                                             String pid, String factoryPid) throws IOException, InvalidSyntaxException {
-        Configuration oldConfiguration = findExistingConfiguration(configurationAdmin, pid, factoryPid);
-        if (oldConfiguration != null) {
-            return oldConfiguration;
+    protected Configuration createConfiguration(ConfigurationAdmin configurationAdmin,
+                                                String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+        if (factoryPid != null) {
+            return configurationAdmin.createFactoryConfiguration(pid, null);
         } else {
-            if (factoryPid != null) {
-                return configurationAdmin.createFactoryConfiguration(pid, null);
-            } else {
-                return configurationAdmin.getConfiguration(pid, null);
-            }
+            return configurationAdmin.getConfiguration(pid, null);
         }
     }
 
     protected Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin,
                                                       String pid, String factoryPid) throws IOException, InvalidSyntaxException {
         String key = (factoryPid == null ? pid : pid + "-" + factoryPid);
-        String filter = "(" + CONFIG_KEY + "=" + key + ")";
+        String filter;
+        if (factoryPid == null) {
+            filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+        } else {
+            filter = "(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + factoryPid + ")";
+        }
         Configuration[] configurations = configurationAdmin.listConfigurations(filter);
         if (configurations != null && configurations.length > 0)
         {
