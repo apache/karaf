@@ -18,15 +18,9 @@
  */
 package org.apache.felix.scrplugin.helper;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.SCRDescriptorException;
-import org.apache.felix.scrplugin.SCRDescriptorGenerator;
+import org.apache.felix.scrplugin.*;
 import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.om.Property;
 import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
@@ -70,7 +64,13 @@ public class PropertyHandler {
     throws SCRDescriptorException {
         final Property prop = new Property(tag);
         prop.setName(name);
-        prop.setType(tag.getNamedParameter(Constants.PROPERTY_TYPE));
+        // special handling for service.ranking - FELIX-2333
+        if (name.equals(org.osgi.framework.Constants.SERVICE_RANKING)) {
+            prop.setType(Constants.PROPERTY_TYPE_INTEGER);
+        }
+        if ( tag.getNamedParameter(Constants.PROPERTY_TYPE) != null ) {
+            prop.setType(tag.getNamedParameter(Constants.PROPERTY_TYPE));
+        }
         // let's first check for a value attribute
         final String value = tag.getNamedParameter(Constants.PROPERTY_VALUE);
         if ( value != null ) {
@@ -182,21 +182,20 @@ public class PropertyHandler {
 
         component.addProperty(prop);
     }
-    
+
     private boolean isPrivate(String name, JavaTag tag) {
         if (name.equals(org.osgi.framework.Constants.SERVICE_RANKING)) {
             return SCRDescriptorGenerator.getBoolean(tag,
                 Constants.PROPERTY_PRIVATE, true);
-        } else {
-            return SCRDescriptorGenerator.getBoolean(tag,
-                Constants.PROPERTY_PRIVATE, false)
-                || name.equals(org.osgi.framework.Constants.SERVICE_PID)
-                || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
-                || name.equals(org.osgi.framework.Constants.SERVICE_ID)
-                || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
-                || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
-                || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
         }
+        return SCRDescriptorGenerator.getBoolean(tag,
+            Constants.PROPERTY_PRIVATE, false)
+            || name.equals(org.osgi.framework.Constants.SERVICE_PID)
+            || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
+            || name.equals(org.osgi.framework.Constants.SERVICE_ID)
+            || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
+            || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
+            || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
     }
 
     /**
