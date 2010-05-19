@@ -20,7 +20,7 @@ public class InvocationUtil {
         throw new NoSuchMethodException(methodName);
     }
 
-    public static void invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) throws NoSuchMethodException, InvocationTargetException, IllegalArgumentException, IllegalAccessException {
+    public static Object invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) throws NoSuchMethodException, InvocationTargetException, IllegalArgumentException, IllegalAccessException {
         if (object == null) {
             throw new IllegalArgumentException("Instance cannot be null");
         }
@@ -34,8 +34,7 @@ public class InvocationUtil {
                 m = clazz.getDeclaredMethod(name, signature);
                 if (!(isSuper && Modifier.isPrivate(m.getModifiers()))) {
                     m.setAccessible(true);
-                    m.invoke(object, parameters[i]);
-                    return;
+                    return m.invoke(object, parameters[i]);
                 }
             }
             catch (NoSuchMethodException e) {

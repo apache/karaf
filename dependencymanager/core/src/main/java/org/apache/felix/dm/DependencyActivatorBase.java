@@ -163,6 +163,9 @@ public abstract class DependencyActivatorBase implements BundleActivator {
     public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, Dictionary properties) {
         return m_manager.createAspectService(serviceInterface, serviceFilter, ranking, factory, factoryCreateMethod, properties);
     }
+    public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, String attributeName, Dictionary properties) {
+        return m_manager.createAspectService(serviceInterface, serviceFilter, ranking, factory, factoryCreateMethod, attributeName, properties);
+    }
     
     public Service createAdapterService(Class serviceInterface, String serviceFilter, String adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
         return m_manager.createAdapterService(serviceInterface, serviceFilter, adapterInterface, adapterImplementation, adapterProperties);

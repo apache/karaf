@@ -684,8 +684,10 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 		        	}
 		        	else {
     		        	try {
-    						Method m = factory.getClass().getDeclaredMethod(m_instanceFactoryCreateMethod, null);
-    						m_serviceInstance = m.invoke(factory, null);
+//    						Method m = factory.getClass().getDeclaredMethod(m_instanceFactoryCreateMethod, null);
+//    						m_serviceInstance = m.invoke(factory, null);
+//    						
+    						m_serviceInstance = InvocationUtil.invokeMethod(factory, factory.getClass(), m_instanceFactoryCreateMethod, new Class[][] {{}}, new Object[][] {{}}, false);
     					}
     		        	catch (Exception e) {
     	                    m_logger.log(Logger.LOG_ERROR, "Could not create service instance using factory " + factory + " method " + m_instanceFactoryCreateMethod + ".", e);

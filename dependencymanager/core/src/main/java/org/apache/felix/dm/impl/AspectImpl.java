@@ -37,6 +37,7 @@ public class AspectImpl extends AbstractDecorator {
     private final Object m_factory;
     private final String m_factoryCreateMethod;
     private final int m_ranking;
+    private final String m_attributeName;
 	
 	public AspectImpl(Class serviceInterface, String serviceFilter, int ranking, Object aspectImplementation, Dictionary properties) {
 		m_serviceInterface = serviceInterface;
@@ -46,6 +47,7 @@ public class AspectImpl extends AbstractDecorator {
 		m_factory = null;
 		m_factoryCreateMethod = null;
 		m_ranking = ranking;
+        m_attributeName = null;
 	}
 	
     public AspectImpl(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, Dictionary properties) {
@@ -53,6 +55,18 @@ public class AspectImpl extends AbstractDecorator {
         m_serviceFilter = serviceFilter;
         m_factory = factory;
         m_factoryCreateMethod = factoryCreateMethod;
+        m_aspectProperties = properties;
+        m_aspectImplementation = null;
+        m_ranking = ranking;
+        m_attributeName = null;
+    }
+    
+    public AspectImpl(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, String attributeName, Dictionary properties) {
+        m_serviceInterface = serviceInterface;
+        m_serviceFilter = serviceFilter;
+        m_factory = factory;
+        m_factoryCreateMethod = factoryCreateMethod;
+        m_attributeName = attributeName;
         m_aspectProperties = properties;
         m_aspectImplementation = null;
         m_ranking = ranking;
@@ -80,13 +94,25 @@ public class AspectImpl extends AbstractDecorator {
         List dependencies = m_service.getDependencies();
         dependencies.remove(0);
         if (m_aspectImplementation == null) {
-            return m_manager.createService()
-            .setInterface(m_serviceInterface.getName(), props)
-            .setFactory(m_factory, m_factoryCreateMethod)
-            .add(dependencies)
-            .add(m_manager.createServiceDependency()
-                .setService(m_serviceInterface, createAspectFilter(m_serviceFilter))
-                .setRequired(true));
+            if (m_attributeName == null) {
+                return m_manager.createService()
+                .setInterface(m_serviceInterface.getName(), props)
+                .setFactory(m_factory, m_factoryCreateMethod)
+                .add(dependencies)
+                .add(m_manager.createServiceDependency()
+                    .setService(m_serviceInterface, createAspectFilter(m_serviceFilter))
+                    .setRequired(true));
+            }
+            else {
+                return m_manager.createService()
+                .setInterface(m_serviceInterface.getName(), props)
+                .setFactory(m_factory, m_factoryCreateMethod)
+                .add(dependencies)
+                .add(m_manager.createServiceDependency()
+                    .setService(m_serviceInterface, createAspectFilter(m_serviceFilter))
+                    .setAutoConfig(m_attributeName)
+                    .setRequired(true));
+            }
         }
         else {
             return m_manager.createService()

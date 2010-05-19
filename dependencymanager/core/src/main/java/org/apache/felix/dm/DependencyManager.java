@@ -33,9 +33,9 @@ import org.apache.felix.dm.dependencies.TemporalServiceDependency;
 import org.apache.felix.dm.impl.AdapterImpl;
 import org.apache.felix.dm.impl.AspectImpl;
 import org.apache.felix.dm.impl.BundleAdapterImpl;
+import org.apache.felix.dm.impl.FactoryConfigurationAdapterImpl;
 import org.apache.felix.dm.impl.FactoryConfigurationAdapterMetaTypeImpl;
 import org.apache.felix.dm.impl.Logger;
-import org.apache.felix.dm.impl.FactoryConfigurationAdapterImpl;
 import org.apache.felix.dm.impl.ResourceAdapterImpl;
 import org.apache.felix.dm.impl.ServiceImpl;
 import org.apache.felix.dm.impl.dependencies.BundleDependencyImpl;
@@ -195,6 +195,15 @@ public class DependencyManager {
     public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, Dictionary aspectProperties) {
         return createService()
             .setImplementation(new AspectImpl(serviceInterface, serviceFilter, ranking, factory, factoryCreateMethod, aspectProperties))
+            .add(createServiceDependency()
+                .setService(serviceInterface, createAspectFilter(serviceFilter))
+                .setAutoConfig(false)
+                .setCallbacks("added", "removed")
+            );
+    }
+    public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, String attributeName, Dictionary aspectProperties) {
+        return createService()
+            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, ranking, factory, factoryCreateMethod, attributeName, aspectProperties))
             .add(createServiceDependency()
                 .setService(serviceInterface, createAspectFilter(serviceFilter))
                 .setAutoConfig(false)
