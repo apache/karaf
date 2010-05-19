@@ -57,7 +57,7 @@
                         <mkdir dir="${manual.dir}" />
                         <trycatch property="error">
                             <try>
-                                <get src="http://cwiki.apache.org/confluence/display/FELIX/Karaf+Users%27+Guide+in+one+page" dest="${manual}.temp" />
+                                <get src="https://cwiki.apache.org/confluence/display/FELIX/Karaf+Users'+Guide+in+one+page" dest="${manual}.temp" />
                                 <for list="1,2,3,4,5,6,7,8,9,10" param="letter">
                                     <sequential>
                                         <replaceregexp file="${manual}.temp" flags="g" match="&quot;/confluence/display/FELIX/([^&quot;]*)\+([^&quot;+]*)&quot;" replace="&quot;/confluence/display/FELIX/\1\2&quot;" />
