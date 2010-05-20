@@ -18,29 +18,26 @@
  */
 package org.apache.felix.karaf.main;
 
-public interface Lock {
+import java.sql.Connection;
+import java.util.Properties;
 
-    /**
-     * A KeepAlive function to maintain the lock. 
-     * Indicates whether or not the lock could be aquired.
-     * 
-     * @return true if connection lock retained, false otherwise.
-     * @throws Exception
-     */
-    boolean lock() throws Exception;
+/**
+ * Represents an exclusive lock on a database,
+ * used to avoid multiple Karaf instances attempting
+ * to become master.
+ * 
+ * @version $Revision: $
+ */
+public class DerbyJDBCLock extends DefaultJDBCLock {
 
-    /**
-     * Terminate the lock connection safely.
-     * 
-     * @throws Exception
-     */
-    void release() throws Exception;
+    public DerbyJDBCLock(Properties props) {
+        super(props);
+    }
 
-    /**
-     * Indicates whether or not the lock still exists.
-     * 
-     * @return true, if the lock still exists, otherwise false.
-     * @throws Exception
-     */
-    boolean isAlive() throws Exception;
+    @Override
+    Connection createConnection(String driver, String url, String username, String password) throws Exception {
+        url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
+        
+        return super.createConnection(driver, url, username, password);
+    }
 }

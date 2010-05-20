@@ -21,7 +21,9 @@ package org.apache.felix.karaf.main;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -34,7 +36,8 @@ import java.util.logging.Logger;
  */
 public class DefaultJDBCLock implements Lock {
 
-    private static final Logger LOG = Logger.getLogger(DefaultJDBCLock.class.getName());
+    final Logger LOG = Logger.getLogger(this.getClass().getName());
+    
     private static final String PROPERTY_LOCK_URL               = "karaf.lock.jdbc.url";
     private static final String PROPERTY_LOCK_JDBC_DRIVER       = "karaf.lock.jdbc.driver";
     private static final String PROPERTY_LOCK_JDBC_USER         = "karaf.lock.jdbc.user";
@@ -42,175 +45,259 @@ public class DefaultJDBCLock implements Lock {
     private static final String PROPERTY_LOCK_JDBC_TABLE        = "karaf.lock.jdbc.table";
     private static final String PROPERTY_LOCK_JDBC_CLUSTERNAME  = "karaf.lock.jdbc.clustername";
     private static final String PROPERTY_LOCK_JDBC_TIMEOUT      = "karaf.lock.jdbc.timeout";
+    
+    private static final String DEFAULT_PASSWORD = "";
+    private static final String DEFAULT_USER = "";
+    private static final String DEFAULT_TABLE = "KARAF_LOCK";
+    private static final String DEFAULT_CLUSTERNAME = "karaf";
+    private static final String DEFAULT_TIMEOUT = "10"; // in seconds
 
-    private final Statements statements;
-    private Connection lockConnection;
-    private String url;
-    private String driver;
-    private String user; 
-    private String password;
-    private String table;
-    private String clusterName;
-    private int timeout;
+    final Statements statements;
+    Connection lockConnection;
+    String url;
+    String driver;
+    String user; 
+    String password;
+    String table;
+    String clusterName;
+    int timeout;
 
     public DefaultJDBCLock(Properties props) {
         LOG.addHandler(BootstrapLogManager.getDefaultHandler());
+        
         this.url = props.getProperty(PROPERTY_LOCK_URL);
         this.driver = props.getProperty(PROPERTY_LOCK_JDBC_DRIVER);
-        this.user = props.getProperty(PROPERTY_LOCK_JDBC_USER);
-        this.password = props.getProperty(PROPERTY_LOCK_JDBC_PASSWORD);
-        this.table = props.getProperty(PROPERTY_LOCK_JDBC_TABLE);
-        this.clusterName = props.getProperty(PROPERTY_LOCK_JDBC_CLUSTERNAME);
-        String time = props.getProperty(PROPERTY_LOCK_JDBC_TIMEOUT);
-        this.lockConnection = null;
-        if (table == null) { table = "KARAF_LOCK"; }
-        if ( clusterName == null) { clusterName = "karaf"; }
-        this.statements = new Statements(table, clusterName);
-        if (time != null) { 
-            this.timeout = Integer.parseInt(time) * 1000; 
-        } else {
-            this.timeout = 10000; // 10 seconds
-        }
-        if (user == null) { user = ""; }
-        if (password == null) { password = ""; }
+        this.user = props.getProperty(PROPERTY_LOCK_JDBC_USER, DEFAULT_USER);
+        this.password = props.getProperty(PROPERTY_LOCK_JDBC_PASSWORD, DEFAULT_PASSWORD);
+        this.table = props.getProperty(PROPERTY_LOCK_JDBC_TABLE, DEFAULT_TABLE);
+        this.clusterName = props.getProperty(PROPERTY_LOCK_JDBC_CLUSTERNAME, DEFAULT_CLUSTERNAME);
+        this.timeout = Integer.parseInt(props.getProperty(PROPERTY_LOCK_JDBC_TIMEOUT, DEFAULT_TIMEOUT));
+        
+        this.statements = createStatements();
+        
+        init();
     }
-
-    /**
-     * setUpdateCursor - Send Update directive to data base server.
-     *
-     * @throws Exception
-     */
-    private boolean setUpdateCursor() throws Exception {
-        PreparedStatement statement = null;
-        boolean result = false;
-        try { 
-            if ((lockConnection == null) || (lockConnection.isClosed())) { 
-                lockConnection = getConnection(driver, url, user, password);
-                lockConnection.setAutoCommit(false);
-                statements.init(lockConnection);
-            }
-            //statements.init(lockConnection);
-            String sql = statements.setUpdateCursor();
-            statement = lockConnection.prepareStatement(sql);
-            result = statement.execute();
+    
+    Statements createStatements() {
+        Statements statements = new Statements();
+        statements.setTableName(table);
+        statements.setNodeName(clusterName);
+        return statements;
+    }
+    
+    void init() {
+        try {
+            createDatabase();
+            createSchema();
         } catch (Exception e) {
-            LOG.warning("Could not obtain connection: " + e.getMessage());
-        } finally {
-            if (null != statement) {
-                try {
-                    LOG.severe("Cleaning up DB connection.");
-                    statement.close();
-                } catch (SQLException e1) {
-                    LOG.severe("Caught while closing statement: " + e1.getMessage());
-                }
-                statement = null;
-            }
+            LOG.severe("Error occured while attempting to obtain connection: " + e);
         }
-        LOG.info("Connected to data source: " + url);
-        return result;
+    }
+    
+    void createDatabase() {
+        // do nothing in the default implementation
     }
 
-    /**
-     * lock - a KeepAlive function to maintain lock. 
-     *
-     * @return true if connection lock retained, false otherwise.
+    void createSchema() {
+        if (schemaExists()) {
+            return;
+        }
+        
+        String[] createStatments = this.statements.getLockCreateSchemaStatements(getCurrentTimeMillis());
+        Statement statement = null;
+        
+        try {
+            statement = getConnection().createStatement();
+            
+            for (String stmt : createStatments) {
+                statement.execute(stmt);
+            }
+            
+            getConnection().commit();
+        } catch (Exception e) {
+            LOG.severe("Could not create schema: " + e );
+        } finally {
+            closeSafely(statement);
+        }
+    }
+
+    boolean schemaExists() {
+        ResultSet rs = null;
+        boolean schemaExists = false;
+        
+        try {
+            rs = getConnection().getMetaData().getTables(null, null, statements.getFullLockTableName(), new String[] {"TABLE"});
+            schemaExists = rs.next();
+        } catch (Exception ignore) {
+            LOG.severe("Error testing for db table: " + ignore);
+        } finally {
+            closeSafely(rs);
+        }
+        
+        return schemaExists;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.felix.karaf.main.Lock#lock()
      */
     public boolean lock() {
-        PreparedStatement statement = null;
-        boolean result = false;
+        boolean result = aquireLock();
+        
+        if (result) {
+            result = updateLock();
+        }
+        
+        return result;
+    }
+    
+    boolean aquireLock() {
+        String lockCreateStatement = statements.getLockCreateStatement();
+        PreparedStatement preparedStatement = null;
+        boolean lockAquired = false;
+        
         try {
-            if (!setUpdateCursor()) {
-                LOG.severe("Could not set DB update cursor");
-                return result;
-            }
-            long time = System.currentTimeMillis();
-            statement = lockConnection.prepareStatement(statements.getLockUpdateStatement(time));
-            int rows = statement.executeUpdate();
-            if (rows >= 1) {
-                result=true;
-            }
+            preparedStatement = getConnection().prepareStatement(lockCreateStatement);
+            preparedStatement.setQueryTimeout(timeout);
+            lockAquired = preparedStatement.execute();
         } catch (Exception e) {
-            LOG.warning("Failed to acquire database lock: " + e.getMessage());
+            LOG.warning("Failed to acquire database lock: " + e);
         }finally {
-            if (statement != null) {
+            closeSafely(preparedStatement);
+        }
+        
+        return lockAquired;
+    }
+
+    boolean updateLock() {
+        String lockUpdateStatement = statements.getLockUpdateStatement(getCurrentTimeMillis());
+        PreparedStatement preparedStatement = null;
+        boolean lockUpdated = false;
+        
+        try {
+            preparedStatement = getConnection().prepareStatement(lockUpdateStatement);
+            preparedStatement.setQueryTimeout(timeout);
+            int rows = preparedStatement.executeUpdate();
+            lockUpdated = (rows == 1);
+        } catch (Exception e) {
+            LOG.warning("Failed to update database lock: " + e);
+        }finally {
+            closeSafely(preparedStatement);
+        }
+        
+        return lockUpdated;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.apache.felix.karaf.main.Lock#release()
+     */
+    public void release() throws Exception {
+        if (isConnected()) {
+            try {
+                getConnection().rollback();
+            } catch (SQLException e) {
+                LOG.severe("Exception while rollbacking the connection on release: " + e);
+            } finally {
                 try {
-                    statement.close();
-                } catch (SQLException e) {
-                    LOG.severe("Failed to close statement" + e);
+                    getConnection().close();
+                } catch (SQLException ignored) {
+                    LOG.fine("Exception while closing connection on release: " + ignored);
                 }
             }
         }
-        return result;
+        
+        lockConnection = null;
     }
 
-    /**
-     * release - terminate the lock connection safely.
-     */
-    public void release() throws Exception {
-        if (lockConnection != null && !lockConnection.isClosed()) {
-            lockConnection.rollback();
-            lockConnection.close();
-            lockConnection = null;
-        }
-    }
-
-    /**
-     * isAlive - test if lock still exists.
+    /*
+     * (non-Javadoc)
+     * @see org.apache.felix.karaf.main.Lock#isAlive()
      */
     public boolean isAlive() throws Exception {
-        if ((lockConnection == null) || (lockConnection.isClosed())) { 
+        if (!isConnected()) { 
             LOG.severe("Lost lock!");
             return false; 
         }
-        PreparedStatement statement = null;
-        boolean result = true;
-        try { 
-            long time = System.currentTimeMillis();
-            statement = lockConnection.prepareStatement(statements.getLockUpdateStatement(time));
-            int rows = statement.executeUpdate();
-            if (rows < 1) {
-                result = false;
-            }
-        } catch (Exception ex) {
-            LOG.severe("Error occured while testing lock: " + ex + " " + ex.getMessage());
-            return false;
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (Exception ex1) {
-                    LOG.severe("Error occured after testing lock: " + ex1.getMessage());
-                }
+
+        return updateLock();
+    }
+    
+    boolean isConnected() throws SQLException {
+        return lockConnection != null && !lockConnection.isClosed();
+    }
+    
+    void closeSafely(Statement preparedStatement) {
+        if (preparedStatement != null) {
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                LOG.severe("Failed to close statement: " + e);
             }
         }
-        return result;
+    }
+    
+    void closeSafely(ResultSet rs) {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                LOG.severe("Error occured while releasing ResultSet: " + e);
+            }
+        }
+    }
+    
+    Connection getConnection() throws Exception {
+        if (!isConnected()) {
+            lockConnection = createConnection(driver, url, user, password);
+            lockConnection.setAutoCommit(false);
+        }
+        
+        return lockConnection;
     }
 
     /**
-     * getConnection - Obtain connection to database via jdbc driver.
-     *
-     * @throws Exception
-     * @param driver, the JDBC driver class.
-     * @param url, url to data source.
-     * @param username, user to access data source.
-     * @param password, password for specified user.
-     * @return connection, null returned if conenction fails.
+     * Create a new jdbc connection.
+     * 
+     * @param driver
+     * @param url
+     * @param username
+     * @param password
+     * @return a new jdbc connection
+     * @throws Exception 
      */
-    private Connection getConnection(String driver, String url, 
-                                     String username, String password) throws Exception {
-        Connection conn = null;
+    Connection createConnection(String driver, String url, String username, String password) throws Exception {
+        if (url.toLowerCase().startsWith("jdbc:derby")) {
+            url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
+        }
+        
         try {
-            Class.forName(driver);
-            if (url.startsWith("jdbc:derby:")) {
-                conn = DriverManager.getConnection(url + ";create=true", username, password);
-            } else {
-                conn = DriverManager.getConnection(url, username, password);
-            }
+            return doCreateConnection(driver, url, username, password);
         } catch (Exception e) {
             LOG.severe("Error occured while setting up JDBC connection: " + e);
             throw e; 
         }
-        return conn;
     }
 
+    /**
+     * This method could be used to inject a mock jdbc connection for testing purposes.
+     * 
+     * @param driver
+     * @param url
+     * @param username
+     * @param password
+     * @return
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    Connection doCreateConnection(String driver, String url, String username, String password) throws ClassNotFoundException, SQLException {
+        Class.forName(driver);
+        // results in a closed connection in Derby if the update lock table request timed out
+        // DriverManager.setLoginTimeout(timeout);
+        return DriverManager.getConnection(url, username, password);
+    }
+    
+    long getCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
 }
