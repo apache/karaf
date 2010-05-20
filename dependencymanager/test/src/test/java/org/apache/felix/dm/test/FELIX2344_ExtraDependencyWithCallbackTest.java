@@ -33,7 +33,7 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleContext;
 
 @RunWith(JUnit4TestRunner.class)
-public class FELIX2344_ExtraDependencyWithCallback extends Base {
+public class FELIX2344_ExtraDependencyWithCallbackTest extends Base {
     @Configuration
     public static Option[] configuration() {
         return options(
