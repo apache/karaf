@@ -521,7 +521,6 @@ class ExtensionManager extends URLStreamHandler implements Content
         }
 
         m_extensions.clear();
-        m_extensionsCache = new Bundle[0];
         m_names.clear();
 
         for (Iterator iter = m_sourceToExtensions.values().iterator(); iter.hasNext();)
