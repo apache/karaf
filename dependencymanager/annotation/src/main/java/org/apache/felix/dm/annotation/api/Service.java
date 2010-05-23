@@ -102,7 +102,7 @@ import java.lang.annotation.Target;
  *    *&#47;
  *  &#64;Service 
  *  class Y {
- *      &#64;ServiceDependency(filter="(dm.factory.name=MyServiceFactory))
+ *      &#64;ServiceDependency(filter="(dm.factory.name=MyServiceFactory)")
  *      Set&lt;Dictionary&gt; _XFactory; // This Set acts as a Factory API for creating X Service instances.
  *    
  *      &#64;Start

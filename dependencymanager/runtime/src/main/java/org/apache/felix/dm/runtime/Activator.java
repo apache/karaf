@@ -31,6 +31,9 @@ import org.osgi.service.log.LogService;
  */
 public class Activator extends DependencyActivatorBase
 {
+    /**
+     * Our bundle is starting: initialize our DependencyManager Runtime service.
+     */
     @Override
     public void init(BundleContext context, DependencyManager dm) throws Exception
     {
@@ -42,15 +45,19 @@ public class Activator extends DependencyActivatorBase
 
         boolean logActive = "true".equals(context.getProperty("dm.log"));
         dm.add(createService()
-               .setImplementation(ComponentManager.class)
+               .setImplementation(DependencyManagerRuntime.class)
                .add(createServiceDependency()
                    .setService(LogService.class)
                    .setRequired(logActive)
-                   .setAutoConfig(true)));
+                   .setAutoConfig("m_log")
+                   .setCallbacks("bind", null)));
     }
 
+    /**
+     * Our bundle is stopping: shutdown our Dependency Manager Runtime service.
+     */
     @Override
     public void destroy(BundleContext context, DependencyManager dm) throws Exception
     {
-    }
+    }    
 }

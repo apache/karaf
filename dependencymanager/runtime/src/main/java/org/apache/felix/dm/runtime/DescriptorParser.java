@@ -18,323 +18,58 @@
  */
 package org.apache.felix.dm.runtime;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.apache.felix.dm.DependencyManager;
+import org.json.JSONObject;
+import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
 
 /**
  * This class parses files generated in OSGI-INF/*.dm by the DependencyManager bnd plugin.
- * Each descriptor contains the definition of a Service, along with its corresponding service dependency or configuration dependencies.
- * Here is an example of a typical descriptor syntax:
- *   
- *    Service: start=start; stop=stop; impl=org.apache.felix.dm.test.annotation.ServiceConsumer; 
- *    ServiceDependency: service=org.apache.felix.dm.test.annotation.ServiceInterface; autoConfig=m_service; 
- *    ServiceDependency: added=bind; service=org.apache.felix.dm.test.annotation.ServiceInterface; 
- * 
- * Notice that the descriptor must start with a "Service" definition. (Dependencies must be declared after the "Service" entry).
- * <p>
- * 
- * Now, here is the formal BNF definition of the descriptor syntax:
- *
- *    line := <type> ':' <params>
- *    
- *    type := service|aspectservice|serviceDependency|configurationDependency|temporalServiceDependency
- *    service := 'Service'
- *    aspectservice := 'AspectService'
- *    serviceDependency := 'ServiceDependency'
- *    configurationDependency := 'ConfigurationDependency'
- *    temporalServiceDependency := 'TemporalServiceDependency'
- *    
- *    params := paramName '=' paramValue ( ';' paramName '=' paramValue )*
- *    
- *    paramName := init | start | stop | destroy | impl | provide | properties | factory | factoryMethod | composition | service | filter | 
- *                 defaultImpl | required | added | changed | removed | autoConfig | pid | propagate | updated | timeout |
- *                 adapterService | adapterProperties | adapteeService | adapteeFilter
- *    init := 'init'
- *    start := 'start'
- *    stop := 'stop'
- *    destroy := 'destroy'
- *    impl := 'impl'
- *    provide := 'provide'
- *    properties := 'properties'
- *    factory := 'factory'
- *    factoryMethod := 'factoryMethod'
- *    composition := 'composition'
- *    service := 'service'
- *    filter := 'filter'
- *    defaultImpl := 'defaultImpl'
- *    required := 'required'
- *    added := 'added'
- *    changed := 'changed'
- *    removed := 'removed'
- *    autoConfig := 'autoConfig'
- *    pid := 'pid'
- *    propagate := 'propagate'
- *    updated := 'updated'
- *    timeout := 'timeout'
- *    adapterService := 'adapterService'
- *    adapterProperties := 'adapterProperties'
- *    adapteeService := 'adapteeService'
- *    adapteeFilter := 'adapteeFilter'
- *     
- *    paramValue := strings | attributes
- *    strings := string ( ',' string )*
- *    attributes := string ':' string ( ',' string : string )*
- *    string := [alphanum string]
+ * Each descriptor contains a JSON definition of a Service, along with its corresponding service dependency or configuration dependencies.
  */
 public class DescriptorParser
 {
-    private LogService m_logService;
-    private Map<DescriptorParam, Object> m_params = new HashMap<DescriptorParam, Object>();
+    private Map<String, ServiceComponentBuilder> m_builders = new HashMap<String, ServiceComponentBuilder>();
 
-    private final static Pattern linePattern = Pattern.compile("(\\w+):\\s*(.*)", Pattern.COMMENTS);
-    private final static Pattern paramPattern = Pattern.compile("([^=]+)=([^;]+);?");
-    private final static Pattern stringsPattern = Pattern.compile("([^,]+)");
-    private final static Pattern attributesPattern = Pattern.compile("([^:]+):([^,]+),?");
-
-    public DescriptorParser(LogService service)
+    public void addBuilder(ServiceComponentBuilder sb)
     {
-        m_logService = service;
+        m_builders.put(sb.getType(), sb);
     }
 
-    /*
-     * Parses a DependencyManager component descriptor entry (either a Service, a ServiceDependency, or a ConfigurationDependency entry).
-     * @return DescriptorEntry.Service, DescriptorEntry.ServiceDependency, or DescriptorEntry.ConfigurationDependency 
-     */
-    public DescriptorEntry parse(String line)
+    public void parse(BufferedReader reader, Bundle b, DependencyManager dm) throws Exception
     {
-        m_params.clear();
-        Matcher lineMatcher = linePattern.matcher(line);
-        if (lineMatcher.matches())
-        {
-            DescriptorEntry entry = DescriptorEntry.valueOf(lineMatcher.group(1).trim());
-            Matcher paramMatcher = paramPattern.matcher(lineMatcher.group(2).trim());
-            while (paramMatcher.find())
-            {
-                DescriptorParam paramName = DescriptorParam.valueOf(paramMatcher.group(1).trim());
-                String paramValue = paramMatcher.group(2).trim();
-                Matcher attributesMatcher = attributesPattern.matcher(paramValue);
-                boolean matched = false;
+        String line;
 
-                Hashtable<String, String> attributes = new Hashtable<String, String>();
-                while (attributesMatcher.find())
-                {
-                    matched = true;
-                    attributes.put(attributesMatcher.group(1).trim(),
-                        attributesMatcher.group(2).trim());
-                }
-                m_params.put(paramName, attributes);
+        // The first line is a Service Component (a Service, an Aspect Service, etc ...)
+        line = reader.readLine();
+        Log.instance().log(LogService.LOG_DEBUG, "Parsing destriptor entry line: " + line);
+        JSONObject json = new JSONObject(line);
+        JSONMetaData serviceMetaData = new JSONMetaData(json);
 
-                if (!matched)
-                {
-                    Matcher stringsMatcher = stringsPattern.matcher(paramValue);
-                    if (stringsMatcher.groupCount() > 0)
-                    {
-                        List<String> strings = new ArrayList<String>();
-                        while (stringsMatcher.find())
-                        {
-                            strings.add(stringsMatcher.group(1).trim());
-                        }
-                        m_params.put(paramName, strings.toArray(new String[strings.size()]));
-                    }
-                }
-            }
+        String type = (String) json.get("type");
+        ServiceComponentBuilder builder = m_builders.get(type);
+        if (builder == null)
+        {
+            throw new IllegalArgumentException("Invalid descriptor"
+                + ": no \"type\" parameter found in first line");
+        }
 
-            m_logService.log(LogService.LOG_DEBUG, "Parsed " + entry + ": " + toString());
-            return entry;
-        }
-        else
+        // Parse the rest of the lines (dependencies)
+        List<MetaData> serviceDependencies = new ArrayList<MetaData>();
+        while ((line = reader.readLine()) != null)
         {
-            throw new IllegalArgumentException("Invalid descriptor entry: " + line);
+            Log.instance().log(LogService.LOG_DEBUG, "Parsing destriptor entry line: " + line);
+            JSONObject dep = new JSONObject(line);
+            serviceDependencies.add(new JSONMetaData(dep));
         }
-    }
 
-    /**
-     * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
-     * @param param
-     * @return
-     */
-    public String getString(DescriptorParam param)
-    {
-        Object value = m_params.get(param);
-        if (value == null)
-        {
-            throw new IllegalArgumentException("Parameter " + param + " not found");
-        }
-        if (!(value instanceof String[]))
-        {
-            throw new IllegalArgumentException("Parameter " + param + " not a String array");
-        }
-        String[] array = (String[]) value;
-        if (array.length < 1)
-        {
-            throw new IllegalArgumentException("Parameter " + param + " not found");
-        }
-        return (array[0]);
-    }
-
-    /**
-     * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
-     *
-     * @param param
-     * @param def
-     * @return
-     */
-    public String getString(DescriptorParam param, String def)
-    {
-        try
-        {
-            return getString(param);
-        }
-        catch (IllegalArgumentException e)
-        {
-            return def;
-        }
-    }
-
-    /**
-     * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
-     *
-     * @param param
-     * @param def
-     * @return
-     */
-    public int getInt(DescriptorParam param)
-    {
-        String value = getString(param, null);
-        if (value != null)
-        {
-            try
-            {
-                return Integer.parseInt(value);
-            }
-            catch (NumberFormatException e)
-            {
-                throw new IllegalArgumentException("parameter " + param + " is not an int value: "
-                    + value);
-            }
-        }
-        else
-        {
-            throw new IllegalArgumentException("missing " + param + " parameter from annotation");
-        }
-    }
-
-    /**
-     * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
-     *
-     * @param param
-     * @param def
-     * @return
-     */
-    public int getInt(DescriptorParam param, int def)
-    {
-        String value = getString(param, null);
-        if (value != null)
-        {
-            try
-            {
-                return Integer.parseInt(value);
-            }
-            catch (NumberFormatException e)
-            {
-                throw new IllegalArgumentException("parameter " + param + " is not an int value: "
-                    + value);
-            }
-        }
-        else
-        {
-            return def;
-        }
-    }
-
-    /**
-     * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
-     * @param param
-     * @return
-     */
-    public String[] getStrings(DescriptorParam param)
-    {
-        Object value = m_params.get(param);
-        if (value == null)
-        {
-            throw new IllegalArgumentException("Parameter " + param + " not found");
-        }
-        if (!(value instanceof String[]))
-        {
-            throw new IllegalArgumentException("Parameter " + param + " not a String array");
-        }
-        return (String[]) value;
-    }
-
-    /**
-     * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
-     * @param param
-     * @return
-     */
-    public String[] getStrings(DescriptorParam param, String[] def)
-    {
-        try
-        {
-            return getStrings(param);
-        }
-        catch (IllegalArgumentException e)
-        {
-            return def;
-        }
-    }
-
-    /**
-     * Once a component descriptor entry line is parsed, you can retrieve entry attributes using this method.
-     * @param param
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public Dictionary<String, String> getDictionary(DescriptorParam param, Dictionary<String, String> def)
-    {
-        Object value = m_params.get(param);
-        if (value == null)
-        {
-            return def;
-        }
-        if (!(value instanceof Dictionary))
-        {
-            throw new IllegalArgumentException("Parameter " + param + " not Dictionary");
-        }
-        return (Dictionary<String, String>) value;
-    }
-
-    @Override
-    public String toString()
-    {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<DescriptorParam, Object> entry : m_params.entrySet())
-        {
-            sb.append(entry.getKey());
-            sb.append("=");
-            Object val = entry.getValue();
-            if (val instanceof String || val instanceof Dictionary<?, ?>)
-            {
-                sb.append(val.toString());
-            }
-            else if (val instanceof String[])
-            {
-                sb.append(Arrays.toString((String[]) val));
-            }
-            else
-            {
-                sb.append(val.toString());
-            }
-            sb.append(";");
-        }
-        return sb.toString();
+        // and Invoke the builder
+        builder.buildService(serviceMetaData, serviceDependencies, b, dm);
     }
 }

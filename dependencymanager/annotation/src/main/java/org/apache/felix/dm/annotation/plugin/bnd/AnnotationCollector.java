@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.felix.dm.annotation.api.AspectService;
 import org.apache.felix.dm.annotation.api.Composition;
@@ -95,7 +93,7 @@ public class AnnotationCollector extends ClassDataCollector
     private String m_method;
     private String m_descriptor;
     private Set<String> m_methods = new HashSet<String>();
-    private List<Info> m_infos = new ArrayList<Info>(); // Last elem is either Service or AspectService
+    private List<EntryWriter> m_writers = new ArrayList<EntryWriter>(); // Last elem is either Service or AspectService
     private MetaType m_metaType;
     private String m_startMethod;
     private String m_stopMethod;
@@ -103,193 +101,10 @@ public class AnnotationCollector extends ClassDataCollector
     private String m_destroyMethod;
     private String m_compositionMethod;
 
-    // Pattern used to parse the class parameter from the bind methods ("bind(Type)" or "bind(Map, Type)" or "bind(BundleContext, Type)"
-    private final static Pattern m_bindClassPattern = Pattern.compile("\\((L[^;]+;)?L([^;]+);\\)V");
-
-    // Pattern used to parse classes from class descriptors;
-    private final static Pattern m_classPattern = Pattern.compile("L([^;]+);");
-
-    // Pattern used to check if a method is void and does not take any params
-    private final static Pattern m_voidMethodPattern = Pattern.compile("\\(\\)V");
-
-    // Pattern used to check if a method returns an array of Objects
-    private final static Pattern m_methodCompoPattern = Pattern.compile("\\(\\)\\[Ljava/lang/Object;");
-
-    // List of component descriptor entry types
-    enum EntryTypes
-    {
-        Service, 
-        AspectService,
-        AdapterService,
-        BundleAdapterService,
-        ResourceAdapterService,
-        FactoryConfigurationAdapterService,
-        ServiceDependency, 
-        TemporalServiceDependency, 
-        ConfigurationDependency,
-        BundleDependency,
-        ResourceDependency,
-    };
-
-    // List of component descriptor parameters
-    enum Params
-    {
-        init, 
-        start, 
-        stop, 
-        destroy, 
-        impl, 
-        provide, 
-        properties, 
-        composition, 
-        service, 
-        filter, 
-        defaultImpl, 
-        required, 
-        added, 
-        changed,
-        removed,
-        autoConfig, 
-        pid, 
-        factoryPid,
-        propagate, 
-        updated, 
-        timeout,
-        adapterService,
-        adapterProperties,
-        adapteeService,
-        adapteeFilter,
-        stateMask,
-        ranking,
-        factory,
-        factoryConfigure,
-    };
-
     /**
-     * This class represents a parsed DependencyManager component descriptor entry.
-     * (either a Service, a ServiceDependency, or a ConfigurationDependency descriptor entry).
+     * This class represents a DependencyManager component descriptor entry.
+     * (Service, a ServiceDependency ... see EntryType enum).
      */
-    private class Info
-    {
-        /** The component descriptor entry type: either Service, (Temporal)ServiceDependency, or ConfigurationDependency */
-        EntryTypes m_entry;
-
-        /** The component descriptor entry parameters (init/start/stop ...) */
-        Map<Params, Object> m_params = new HashMap<Params, Object>();
-
-        /**
-         * Makes a new component descriptor entry.
-         * @param entry the component descriptor entry type (either Service, ServiceDependency, or ConfigurationDependency)
-         */
-        Info(EntryTypes entry)
-        {
-            m_entry = entry;
-        }
-
-        /**
-         * Returns a string representation for the given component descriptor line entry.
-         */
-        @Override
-        public String toString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.append(m_entry);
-            sb.append(":").append(" ");
-            for (Map.Entry<Params, Object> e : m_params.entrySet())
-            {
-                sb.append(e.getKey());
-                sb.append("=");
-                sb.append(e.getValue());
-                sb.append("; ");
-            }
-            return sb.toString();
-        }
-
-        /**
-         * Adds a parameter to this component descriptor entry.
-         * @param param the param name
-         * @param value the param value
-         */
-        void addParam(Params param, String value)
-        {
-            String old = (String) m_params.get(param);
-            if (old != null)
-            {
-                value = old + "," + value;
-            }
-            m_params.put(param, value);
-        }
-
-        /**
-         * Adds an annotation parameter to this component descriptor entry.
-         * @param annotation the annotation where the parameter has been parsed
-         * @param param the param name
-         * @param def the default value to add, if the param is not present in the parsed annotation.
-         */
-        void addParam(Annotation annotation, Params param, Object def)
-        {
-            Object value = annotation.get(param.toString());
-            if (value == null && def != null)
-            {
-                value = def;
-            }
-            if (value != null)
-            {
-                if (value instanceof Object[])
-                {
-                    for (Object v : ((Object[]) value))
-                    {
-                        addParam(param, v.toString());
-                    }
-                }
-                else
-                {
-                    addParam(param, value.toString());
-                }
-            }
-        }
-
-        /**
-         * Adds a annotation parameter of type 'class' to this component descriptor entry.
-         * The parsed class parameter has the format "Lfull.package.ClassName;"
-         * @param annotation the annotation where the class parameter has been parsed
-         * @param param the annotation class param name
-         * @param def the default class name to add if the param is not present in the parsed annotation.
-         */
-        void addClassParam(Annotation annotation, Params param, Object def)
-        {
-            Pattern pattern = m_classPattern;
-            Object value = annotation.get(param.toString());
-            if (value == null && def != null)
-            {
-                value = def;
-                pattern = null;
-            }
-            if (value != null)
-            {
-                if (value instanceof Object[])
-                {
-                    for (Object v : ((Object[]) value))
-                    {
-                        if (pattern != null)
-                        {
-                            v = parseClass(v.toString(), pattern, 1);
-                        }
-                        addParam(param, v.toString());
-                    }
-                }
-                else
-                {
-                    if (pattern != null)
-                    {
-                        value = parseClass(value.toString(), pattern, 1);
-                    }
-                    addParam(param, value.toString());
-                }
-            }
-
-        }
-    }
 
     /**
      * Makes a new Collector for parsing a given class.
@@ -368,11 +183,11 @@ public class AnnotationCollector extends ClassDataCollector
     public void annotation(Annotation annotation)
     {
         m_reporter.trace("Parsed annotation: %s", annotation);
-        
+
         if (annotation.getName().equals(A_SERVICE))
         {
             parseServiceAnnotation(annotation);
-        } 
+        }
         else if (annotation.getName().equals(A_ASPECT_SERVICE))
         {
             parseAspectService(annotation);
@@ -395,27 +210,31 @@ public class AnnotationCollector extends ClassDataCollector
         }
         else if (annotation.getName().equals(A_INIT))
         {
-            checkMethod(m_voidMethodPattern);
+            //Patterns.parseMethod(m_method, m_descriptor, Patterns.VOID);
+            // TODO check if method takes optional params like Service, DependencyManager, etc ...
             m_initMethod = m_method;
         }
         else if (annotation.getName().equals(A_START))
         {
-            checkMethod(m_voidMethodPattern);
+            //Patterns.parseMethod(m_method, m_descriptor, Patterns.VOID);
+            // TODO check if method takes optional params like Service, DependencyManager, etc ...
             m_startMethod = m_method;
         }
         else if (annotation.getName().equals(A_STOP))
         {
-            checkMethod(m_voidMethodPattern);
+            //Patterns.parseMethod(m_method, m_descriptor, Patterns.VOID);
+            // TODO check if method takes optional params like Service, DependencyManager, etc ...
             m_stopMethod = m_method;
         }
         else if (annotation.getName().equals(A_DESTROY))
         {
-            checkMethod(m_voidMethodPattern);
+            //Patterns.parseMethod(m_method, m_descriptor, Patterns.VOID);
+            // TODO check if method takes optional params like Service, DependencyManager, etc ...
             m_destroyMethod = m_method;
         }
         else if (annotation.getName().equals(A_COMPOSITION))
         {
-            checkMethod(m_methodCompoPattern);
+            Patterns.parseMethod(m_method, m_descriptor, Patterns.COMPOSITION);
             m_compositionMethod = m_method;
         }
         else if (annotation.getName().equals(A_SERVICE_DEP))
@@ -429,12 +248,12 @@ public class AnnotationCollector extends ClassDataCollector
         else if (annotation.getName().equals(A_TEMPORAL_SERVICE_DEPENDENCY))
         {
             parseServiceDependencyAnnotation(annotation, true);
-        } 
-        else if (annotation.getName().equals(A_BUNDLE_DEPENDENCY)) 
+        }
+        else if (annotation.getName().equals(A_BUNDLE_DEPENDENCY))
         {
             parseBundleDependencyAnnotation(annotation);
         }
-        else if (annotation.getName().equals(A_RESOURCE_DEPENDENCY)) 
+        else if (annotation.getName().equals(A_RESOURCE_DEPENDENCY))
         {
             parseRersourceDependencyAnnotation(annotation);
         }
@@ -446,50 +265,55 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseServiceAnnotation(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.Service);
-        m_infos.add(info);
+        EntryWriter writer = new EntryWriter(EntryType.Service);
+        m_writers.add(writer);
 
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addCommonServiceParams(info);
-        
+        addCommonServiceParams(writer);
+
         // impl attribute
-        info.addParam(Params.impl, m_className);
+        writer.put(EntryParam.impl, m_className);
 
         // properties attribute
-        parseParameters(annotation, Params.properties, info);
+        parseProperties(annotation, EntryParam.properties, writer);
 
         // provide attribute
-        info.addClassParam(annotation, Params.provide, m_interfaces);
-        
+        writer.putClassArray(annotation, EntryParam.provide, m_interfaces);
+
         // factory attribute
-        info.addParam(annotation, Params.factory, null);
-        
+        writer.putString(annotation, EntryParam.factory, null);
+
         // factoryPropertiesCallback attribute
-        info.addParam(annotation, Params.factoryConfigure, null);
+        writer.putString(annotation, EntryParam.factoryConfigure, null);
     }
 
-    private void addCommonServiceParams(Info info)
+    private void addCommonServiceParams(EntryWriter writer)
     {
-        if (m_initMethod != null) {
-            info.addParam(Params.init, m_initMethod);
+        if (m_initMethod != null)
+        {
+            writer.put(EntryParam.init, m_initMethod);
         }
-        
-        if (m_startMethod != null) {
-            info.addParam(Params.start, m_startMethod);
+
+        if (m_startMethod != null)
+        {
+            writer.put(EntryParam.start, m_startMethod);
         }
-        
-        if (m_stopMethod != null) {
-            info.addParam(Params.stop, m_stopMethod);
+
+        if (m_stopMethod != null)
+        {
+            writer.put(EntryParam.stop, m_stopMethod);
         }
-        
-        if (m_destroyMethod != null) {
-            info.addParam(Params.destroy, m_destroyMethod);
+
+        if (m_destroyMethod != null)
+        {
+            writer.put(EntryParam.destroy, m_destroyMethod);
         }
-        
+
         // Register Composition method
-        if (m_compositionMethod != null) {
-            info.addParam(Params.composition, m_compositionMethod);
-        }        
+        if (m_compositionMethod != null)
+        {
+            writer.put(EntryParam.composition, m_compositionMethod);
+        }
     }
 
     /**
@@ -498,65 +322,68 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseServiceDependencyAnnotation(Annotation annotation, boolean temporal)
     {
-        Info info = new Info(temporal ? EntryTypes.TemporalServiceDependency
-            : EntryTypes.ServiceDependency);
-        m_infos.add(info);
+        EntryWriter writer = new EntryWriter(temporal ? EntryType.TemporalServiceDependency
+            : EntryType.ServiceDependency);
+        m_writers.add(writer);
 
         // service attribute
-        String service = annotation.get(Params.service.toString());
+        String service = annotation.get(EntryParam.service.toString());
         if (service != null)
         {
-            service = parseClass(service, m_classPattern, 1);
+            service = Patterns.parseClass(service, Patterns.CLASS, 1);
         }
         else
         {
             if (m_isField)
             {
-                service = parseClass(m_descriptor, m_classPattern, 1);
+                service = Patterns.parseClass(m_descriptor, Patterns.CLASS, 1);
             }
             else
             {
-                service = parseClass(m_descriptor, m_bindClassPattern, 2);
+                service = Patterns.parseClass(m_descriptor, Patterns.BIND_CLASS, 2);
             }
         }
-        info.addParam(Params.service, service);
+        writer.put(EntryParam.service, service);
 
         // autoConfig attribute
         if (m_isField)
         {
-            info.addParam(Params.autoConfig, m_field);
+            writer.put(EntryParam.autoConfig, m_field);
         }
 
         // filter attribute
-        String filter = annotation.get(Params.filter.toString());
+        String filter = annotation.get(EntryParam.filter.toString());
         if (filter != null)
         {
             Verifier.verifyFilter(filter, 0);
-            info.addParam(Params.filter, filter);
+            writer.put(EntryParam.filter, filter);
         }
 
         // defaultImpl attribute
-        info.addClassParam(annotation, Params.defaultImpl, null);
+        writer.putClass(annotation, EntryParam.defaultImpl, null);
 
         // added callback
-        info.addParam(annotation, Params.added, (!m_isField) ? m_method : null);
+        writer.putString(annotation, EntryParam.added, (!m_isField) ? m_method : null);
 
         if (temporal)
         {
             // timeout attribute (only valid if parsing a temporal service dependency)
-            info.addParam(annotation, Params.timeout, null);
+            writer.putString(annotation, EntryParam.timeout, null);
         }
         else
         {
             // required attribute (not valid if parsing a temporal service dependency)
-            info.addParam(annotation, Params.required, null);
+            writer.putString(annotation, EntryParam.required, null);
 
             // changed callback
-            info.addParam(annotation, Params.changed, null);
+            writer.putString(annotation, EntryParam.changed, null);
 
             // removed callback
-            info.addParam(annotation, Params.removed, null);
+            writer.putString(annotation, EntryParam.removed, null);
         }
+        
+        // id attribute
+        writer.putString(annotation, EntryParam.name, null);
     }
 
     /**
@@ -565,17 +392,17 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseConfigurationDependencyAnnotation(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.ConfigurationDependency);
-        m_infos.add(info);
+        EntryWriter writer = new EntryWriter(EntryType.ConfigurationDependency);
+        m_writers.add(writer);
 
         // pid attribute
-        info.addParam(annotation, Params.pid, m_className);
+        writer.putString(annotation, EntryParam.pid, m_className);
 
         // propagate attribute
-        info.addParam(annotation, Params.propagate, null);
+        writer.putString(annotation, EntryParam.propagate, null);
 
         // Property Meta Types
-        String pid = get(annotation, Params.pid.toString(), m_className);
+        String pid = get(annotation, EntryParam.pid.toString(), m_className);
         parseMetaTypes(annotation, pid, false);
     }
 
@@ -585,47 +412,52 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseAspectService(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.AspectService);
-        m_infos.add(info);        
+        EntryWriter writer = new EntryWriter(EntryType.AspectService);
+        m_writers.add(writer);
 
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addCommonServiceParams(info);
-                
+        addCommonServiceParams(writer);
+
         // Parse service filter
-        String filter = annotation.get(Params.filter.toString());
-        if (filter != null) {
+        String filter = annotation.get(EntryParam.filter.toString());
+        if (filter != null)
+        {
             Verifier.verifyFilter(filter, 0);
-            info.addParam(Params.filter, filter);
+            writer.put(EntryParam.filter, filter);
         }
-        
+
         // Parse service aspect ranking
-        Integer ranking = annotation.get(Params.ranking.toString());
-        info.addParam(Params.ranking, ranking.toString());
-                
+        Integer ranking = annotation.get(EntryParam.ranking.toString());
+        writer.put(EntryParam.ranking, ranking.toString());
+
         // Generate Aspect Implementation
-        info.addParam(Params.impl, m_className);
-        
+        writer.put(EntryParam.impl, m_className);
+
         // Parse Aspect properties.
-        parseParameters(annotation, Params.properties, info);
-        
+        parseProperties(annotation, EntryParam.properties, writer);
+
         // Parse service interface this aspect is applying to
-        Object service = annotation.get(Params.service.toString());
-        if (service == null) {
+        Object service = annotation.get(EntryParam.service.toString());
+        if (service == null)
+        {
             if (m_interfaces == null)
             {
                 throw new IllegalStateException("Invalid AspectService annotation: " +
-                    "the service attribute has not been set and the class " + m_className + " does not implement any interfaces");
+                    "the service attribute has not been set and the class " + m_className
+                    + " does not implement any interfaces");
             }
-            if (m_interfaces.length != 1) 
+            if (m_interfaces.length != 1)
             {
                 throw new IllegalStateException("Invalid AspectService annotation: " +
-                    "the service attribute has not been set and the class " + m_className + " implements more than one interface");
+                    "the service attribute has not been set and the class " + m_className
+                    + " implements more than one interface");
             }
-            
-            info.addParam(Params.service, m_interfaces[0]);
-        } else
+
+            writer.put(EntryParam.service, m_interfaces[0]);
+        }
+        else
         {
-            info.addClassParam(annotation, Params.service, null);
+            writer.putClassArray(annotation, EntryParam.service, null);
         }
     }
 
@@ -633,33 +465,33 @@ public class AnnotationCollector extends ClassDataCollector
      * Parses an AspectService annotation.
      * @param annotation
      */
-    private void parseAdapterService(Annotation annotation) 
+    private void parseAdapterService(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.AdapterService);
-        m_infos.add(info);
-        
+        EntryWriter writer = new EntryWriter(EntryType.AdapterService);
+        m_writers.add(writer);
+
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addCommonServiceParams(info);
-        
+        addCommonServiceParams(writer);
+
         // Generate Adapter Implementation
-        info.addParam(Params.impl, m_className);
-      
+        writer.put(EntryParam.impl, m_className);
+
         // Parse adaptee filter
-        String adapteeFilter = annotation.get(Params.adapteeFilter.toString());
+        String adapteeFilter = annotation.get(EntryParam.adapteeFilter.toString());
         if (adapteeFilter != null)
         {
             Verifier.verifyFilter(adapteeFilter, 0);
-            info.addParam(Params.adapteeFilter, adapteeFilter);
+            writer.put(EntryParam.adapteeFilter, adapteeFilter);
         }
-        
+
         // Parse the mandatory adapted service interface.
-        info.addClassParam(annotation, Params.adapteeService, null);
-        
+        writer.putClass(annotation, EntryParam.adapteeService, null);
+
         // Parse Adapter properties.
-        parseParameters(annotation, Params.adapterProperties, info);
+        parseProperties(annotation, EntryParam.adapterProperties, writer);
 
         // Parse the optional adapter service (use directly implemented interface by default).
-        info.addClassParam(annotation, Params.adapterService, m_interfaces);
+        writer.putClassArray(annotation, EntryParam.adapterService, m_interfaces);
     }
 
     /**
@@ -668,34 +500,35 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseBundleAdapterService(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.BundleAdapterService);
-        m_infos.add(info);
-        
+        EntryWriter writer = new EntryWriter(EntryType.BundleAdapterService);
+        m_writers.add(writer);
+
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addCommonServiceParams(info);
-        
+        addCommonServiceParams(writer);
+
         // Generate Adapter Implementation
-        info.addParam(Params.impl, m_className);
-      
+        writer.put(EntryParam.impl, m_className);
+
         // Parse bundle filter
-        String filter = annotation.get(Params.filter.toString());
+        String filter = annotation.get(EntryParam.filter.toString());
         if (filter != null)
         {
             Verifier.verifyFilter(filter, 0);
-            info.addParam(Params.filter, filter);
+            writer.put(EntryParam.filter, filter);
         }
-        
+
         // Parse stateMask attribute
-        info.addParam(annotation, Params.stateMask, Integer.valueOf(Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE));
-        
+        writer.putString(annotation, EntryParam.stateMask, Integer.valueOf(
+            Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE).toString());
+
         // Parse Adapter properties.
-        parseParameters(annotation, Params.properties, info);
+        parseProperties(annotation, EntryParam.properties, writer);
 
         // Parse the optional adapter service (use directly implemented interface by default).
-        info.addClassParam(annotation, Params.service, m_interfaces);
-        
+        writer.putClassArray(annotation, EntryParam.service, m_interfaces);
+
         // Parse propagate attribute
-        info.addParam(annotation, Params.propagate, Boolean.FALSE);
+        writer.putString(annotation, EntryParam.propagate, Boolean.FALSE.toString());
     }
 
     /**
@@ -704,31 +537,31 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseResourceAdapterService(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.ResourceAdapterService);
-        m_infos.add(info);
-        
+        EntryWriter writer = new EntryWriter(EntryType.ResourceAdapterService);
+        m_writers.add(writer);
+
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addCommonServiceParams(info);
-        
+        addCommonServiceParams(writer);
+
         // Generate Adapter Implementation
-        info.addParam(Params.impl, m_className);
-      
+        writer.put(EntryParam.impl, m_className);
+
         // Parse resource filter
-        String filter = annotation.get(Params.filter.toString());
+        String filter = annotation.get(EntryParam.filter.toString());
         if (filter != null)
         {
             Verifier.verifyFilter(filter, 0);
-            info.addParam(Params.filter, filter);
+            writer.put(EntryParam.filter, filter);
         }
-                
+
         // Parse Adapter properties.
-        parseParameters(annotation, Params.properties, info);
+        parseProperties(annotation, EntryParam.properties, writer);
 
         // Parse the optional adapter service (use directly implemented interface by default).
-        info.addClassParam(annotation, Params.service, m_interfaces);
-        
+        writer.putClassArray(annotation, EntryParam.service, m_interfaces);
+
         // Parse propagate attribute
-        info.addParam(annotation, Params.propagate, Boolean.FALSE);
+        writer.putString(annotation, EntryParam.propagate, Boolean.FALSE.toString());
     }
 
     /**
@@ -737,79 +570,79 @@ public class AnnotationCollector extends ClassDataCollector
      */
     private void parseFactoryConfigurationAdapterService(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.FactoryConfigurationAdapterService);
-        m_infos.add(info);
-        
+        EntryWriter writer = new EntryWriter(EntryType.FactoryConfigurationAdapterService);
+        m_writers.add(writer);
+
         // Register previously parsed Init/Start/Stop/Destroy/Composition annotations
-        addCommonServiceParams(info);
+        addCommonServiceParams(writer);
 
         // Generate Adapter Implementation
-        info.addParam(Params.impl, m_className);
+        writer.put(EntryParam.impl, m_className);
 
         // Parse factory Pid
-        info.addParam(annotation, Params.factoryPid, m_className);
-        
+        writer.putString(annotation, EntryParam.factoryPid, m_className);
+
         // Parse updated callback
-        info.addParam(annotation, Params.updated, "updated");
-        
+        writer.putString(annotation, EntryParam.updated, "updated");
+
         // propagate attribute
-        info.addParam(annotation, Params.propagate, Boolean.FALSE);
-        
+        writer.putString(annotation, EntryParam.propagate, Boolean.FALSE.toString());
+
         // Parse the optional adapter service (use directly implemented interface by default).
-        info.addClassParam(annotation, Params.service, m_interfaces);
+        writer.putClassArray(annotation, EntryParam.service, m_interfaces);
 
         // Parse Adapter properties.
-        parseParameters(annotation, Params.properties, info);
+        parseProperties(annotation, EntryParam.properties, writer);
 
         // Parse optional meta types for configuration description.
-        String factoryPid = get(annotation, Params.factoryPid.toString(), m_className);
-        parseMetaTypes(annotation, factoryPid, true);        
+        String factoryPid = get(annotation, EntryParam.factoryPid.toString(), m_className);
+        parseMetaTypes(annotation, factoryPid, true);
     }
-
 
     private void parseBundleDependencyAnnotation(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.BundleDependency);
-        m_infos.add(info);
+        EntryWriter writer = new EntryWriter(EntryType.BundleDependency);
+        m_writers.add(writer);
 
-        String filter = annotation.get(Params.filter.toString());
+        String filter = annotation.get(EntryParam.filter.toString());
         if (filter != null)
         {
             Verifier.verifyFilter(filter, 0);
-            info.addParam(Params.filter, filter);
+            writer.put(EntryParam.filter, filter);
         }
 
-        info.addParam(annotation, Params.added, m_method);
-        info.addParam(annotation, Params.changed, null); // TODO check if "changed" callback exists
-        info.addParam(annotation, Params.removed, null); // TODO check if "removed" callback exists
-        info.addParam(annotation, Params.required, null);
-        info.addParam(annotation, Params.stateMask, null);
-        info.addParam(annotation, Params.propagate, null);
+        writer.putString(annotation, EntryParam.added, m_method);
+        writer.putString(annotation, EntryParam.changed, null);
+        writer.putString(annotation, EntryParam.removed, null);
+        writer.putString(annotation, EntryParam.required, null);
+        writer.putString(annotation, EntryParam.stateMask, null);
+        writer.putString(annotation, EntryParam.propagate, null);
     }
-    
+
     private void parseRersourceDependencyAnnotation(Annotation annotation)
     {
-        Info info = new Info(EntryTypes.ResourceDependency);
-        m_infos.add(info);
+        EntryWriter writer = new EntryWriter(EntryType.ResourceDependency);
+        m_writers.add(writer);
 
-        String filter = annotation.get(Params.filter.toString());
+        String filter = annotation.get(EntryParam.filter.toString());
         if (filter != null)
         {
             Verifier.verifyFilter(filter, 0);
-            info.addParam(Params.filter, filter);
+            writer.put(EntryParam.filter, filter);
         }
 
-        info.addParam(annotation, Params.added, m_method);
-        info.addParam(annotation, Params.changed, null); // TODO check if "changed" callback exists
-        info.addParam(annotation, Params.removed, null); // TODO check if "removed" callback exists
-        info.addParam(annotation, Params.required, null);
-        info.addParam(annotation, Params.propagate, null);        
+        writer.putString(annotation, EntryParam.added, m_method);
+        writer.putString(annotation, EntryParam.changed, null);
+        writer.putString(annotation, EntryParam.removed, null);
+        writer.putString(annotation, EntryParam.required, null);
+        writer.putString(annotation, EntryParam.propagate, null);
     }
 
     /**
      * Parse optional meta types annotation attributes
      * @param annotation
      */
+    @SuppressWarnings("null")
     private void parseMetaTypes(Annotation annotation, String pid, boolean factory)
     {
         if (annotation.get("metadata") != null)
@@ -818,13 +651,13 @@ public class AnnotationCollector extends ClassDataCollector
             String propertiesDesc = annotation.get("description");
 
             MetaType.OCD ocd = new MetaType.OCD(pid, propertiesHeading, propertiesDesc);
-            for (Object p : (Object[]) annotation.get("metadata"))
+            for (Object p: (Object[]) annotation.get("metadata"))
             {
                 Annotation property = (Annotation) p;
                 String heading = property.get("heading");
                 String id = property.get("id");
                 String type = (String) property.get("type");
-                type = (type != null) ? parseClass(type, m_classPattern, 1) : null;
+                type = (type != null) ? Patterns.parseClass(type, Patterns.CLASS, 1) : null;
                 Object[] defaults = (Object[]) property.get("defaults");
                 String description = property.get("description");
                 Integer cardinality = property.get("cardinality");
@@ -832,16 +665,31 @@ public class AnnotationCollector extends ClassDataCollector
 
                 MetaType.AD ad = new MetaType.AD(id, type, defaults, heading, description,
                     cardinality, required);
-                Object[] options = property.get("options");
-                if (options != null)
+
+                Object[] optionLabels = property.get("optionLabels");
+                Object[] optionValues = property.get("optionValues");
+
+                if (optionLabels == null
+                    && optionValues != null
+                    ||
+                    optionLabels != null
+                    && optionValues == null
+                    ||
+                    (optionLabels != null && optionValues != null && optionLabels.length != optionValues.length))
                 {
-                    for (Object o : (Object[]) property.get("options"))
+                    throw new IllegalArgumentException("invalid option labels/values specified for property "
+                        + id +
+                        " in PropertyMetadata annotation from class " + m_className);
+                }
+
+                if (optionValues != null)
+                {
+                    for (int i = 0; i < optionValues.length; i++)
                     {
-                        Annotation option = (Annotation) o;
-                        ad.add(new MetaType.Option((String) option.get("name"),
-                            (String) option.get("value")));
+                        ad.add(new MetaType.Option(optionValues[i].toString(), optionLabels[i].toString()));
                     }
                 }
+
                 ocd.add(ad);
             }
 
@@ -849,78 +697,63 @@ public class AnnotationCollector extends ClassDataCollector
             MetaType.Designate designate = new MetaType.Designate(pid, factory);
             m_metaType.add(designate);
             m_reporter.warning("Parsed MetaType Properties from class " + m_className);
-        }          
+        }
     }
 
     /**
-     * Parses a Param annotation (which represents a list of key-value pari).
+     * Parses a Property annotation (which represents a list of key-value pair).
      * @param annotation the annotation where the Param annotation is defined
      * @param attribute the attribute name which is of Param type
-     * @param info the Info object where the parsed attributes are written
+     * @param writer the object where the parsed attributes are written
      */
-    private void parseParameters(Annotation annotation, Params attribute, Info info) {
+    private void parseProperties(Annotation annotation, EntryParam attribute, EntryWriter writer)
+    {
         Object[] parameters = annotation.get(attribute.toString());
+        Map<String, Object> properties = new HashMap<String, Object>();
         if (parameters != null)
         {
-            for (Object p : parameters)
+            for (Object p: parameters)
             {
-                Annotation a = (Annotation) p; 
-                String prop = a.get("name") + ":" + a.get("value");
-                info.addParam(attribute, prop);
+                Annotation a = (Annotation) p;
+                String name = (String) a.get("name");
+                String value = (String) a.get("value");
+                if (value != null)
+                {
+                    properties.put(name, value);
+                }
+                else
+                {
+                    Object[] values = a.get("values");
+                    if (values != null)
+                    {
+                        // the values is an Object array of actual strings, and we must convert it into a String array.
+                        properties.put(name, Arrays.asList(values).toArray(new String[values.length]));
+                    }
+                    else
+                    {
+                        throw new IllegalArgumentException("Invalid Property attribyte \"" + attribute
+                            + " from annotation " + annotation + " in class " + m_className);
+                    }
+                }
             }
-        }
-    }
-    
-    /**
-     * Parses a class.
-     * @param clazz the class to be parsed (the package is "/" separated).
-     * @param pattern the pattern used to match the class.
-     * @param group the pattern group index where the class can be retrieved.
-     * @return the parsed class.
-     */
-    private String parseClass(String clazz, Pattern pattern, int group)
-    {
-        Matcher matcher = pattern.matcher(clazz);
-        if (matcher.matches())
-        {
-            return matcher.group(group).replace("/", ".");
-        }
-        else
-        {
-            m_reporter.warning("Invalid class descriptor: %s", clazz);
-            throw new IllegalArgumentException("Invalid class descriptor: " + clazz);
+            writer.putProperties(attribute, properties);
         }
     }
 
     /**
-     * Checks if a method descriptor matches a given pattern. 
-     * @param pattern the pattern used to check the method signature descriptor
-     * @throws IllegalArgumentException if the method signature descriptor does not match the given pattern.
-     */
-    private void checkMethod(Pattern pattern)
-    {
-        Matcher matcher = pattern.matcher(m_descriptor);
-        if (!matcher.matches())
-        {
-            m_reporter.warning("Invalid method %s : wrong signature: %s", m_method, m_descriptor);
-            throw new IllegalArgumentException("Invalid method " + m_method + ", wrong signature: "
-                + m_descriptor);
-        }
-    }
-    
-    /**
      * Checks if the class is annotated with some given annotations. Notice that the Service
-     * is always parsed at end of parsing, so, we have to check the last element of our m_infos
+     * is always parsed at end of parsing, so, we have to check the last element of our m_writers
      * List.
      * @return true if one of the provided annotations has been found from the parsed class.
      */
-    private void checkServiceDeclared(EntryTypes ... types) {
+    private void checkServiceDeclared(EntryType... types)
+    {
         boolean ok = false;
-        if (m_infos.size() > 0)
+        if (m_writers.size() > 0)
         {
-            for (EntryTypes type : types)
+            for (EntryType type: types)
             {
-                if (m_infos.get(m_infos.size() - 1).m_entry == type)
+                if (m_writers.get(m_writers.size() - 1).getEntryType() == type)
                 {
                     ok = true;
                     break;
@@ -944,6 +777,7 @@ public class AnnotationCollector extends ClassDataCollector
      * @param defaultValue the default value to return if the attribute is not found in the annotation
      * @return the annotation attribute value, or the defaultValue if not found
      */
+    @SuppressWarnings("unchecked")
     private <T> T get(Annotation properties, String name, T defaultValue)
     {
         T value = (T) properties.get(name);
@@ -956,21 +790,22 @@ public class AnnotationCollector extends ClassDataCollector
      */
     public boolean finish()
     {
-        if (m_infos.size() == 0)
+        if (m_writers.size() == 0)
         {
             return false;
         }
 
         // We must have at least a Service or an AspectService annotation.
-        checkServiceDeclared(EntryTypes.Service, EntryTypes.AspectService, EntryTypes.AdapterService, EntryTypes.BundleAdapterService,
-            EntryTypes.ResourceAdapterService, EntryTypes.FactoryConfigurationAdapterService);
+        checkServiceDeclared(EntryType.Service, EntryType.AspectService, EntryType.AdapterService,
+            EntryType.BundleAdapterService,
+            EntryType.ResourceAdapterService, EntryType.FactoryConfigurationAdapterService);
 
         StringBuilder sb = new StringBuilder();
         sb.append("Parsed annotation for class ");
         sb.append(m_className);
-        for (int i = m_infos.size() - 1; i >= 0; i--)
+        for (int i = m_writers.size() - 1; i >= 0; i--)
         {
-            sb.append("\n\t").append(m_infos.get(i).toString());
+            sb.append("\n\t").append(m_writers.get(i).toString());
         }
         m_reporter.warning(sb.toString());
         return true;
@@ -983,10 +818,10 @@ public class AnnotationCollector extends ClassDataCollector
      */
     public void writeTo(PrintWriter pw)
     {
-        // The last element our our m_infos list contains either the Service, or the AspectService descriptor.
-        for (int i = m_infos.size() - 1; i >= 0; i--)
+        // The last element our our m_writers list contains either the Service, or the AspectService descriptor.
+        for (int i = m_writers.size() - 1; i >= 0; i--)
         {
-            pw.println(m_infos.get(i).toString());
+            pw.println(m_writers.get(i).toString());
         }
     }
 }

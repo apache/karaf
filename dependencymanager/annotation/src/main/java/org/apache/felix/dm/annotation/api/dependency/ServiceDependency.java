@@ -32,42 +32,38 @@ import java.lang.annotation.Target;
 public @interface ServiceDependency
 {
     /**
-     * Returns the Service dependency type (by default, the type is method parameter type).
-     * @return the Service dependency type.
+     * The type if the service this dependency is applying on. By default, the type is method parameter or the class field type.
      */
     Class<?> service() default Object.class;
 
     /**
-     * Returns the Service dependency OSGi filter.
-     * @return The Service dependency filter.
+     * The Service dependency OSGi filter.
      */
     String filter() default "";
 
     /**
-     * Returns the class for the default implementation, if the dependency is not available.
-     * @return The default class used when the dependency is not available.
+     * The class for the default implementation, if the dependency is not available.
      */
     Class<?> defaultImpl() default Object.class;
 
     /**
-     * Returns whether the Service dependency is required or not.
-     * @return true if the dependency is required, false if not.
+     * Whether the Service dependency is required or not.
      */
     boolean required() default true;
 
     /**
-     * Returns the callback method to be invoked when the service is available. This attribute is only meaningful when 
+     * The callback method to be invoked when the service is available. This attribute is only meaningful when 
      * the annotation is applied on a class field.
      */
     String added() default "";
 
     /**
-     * Returns the callback method to be invoked when the service properties have changed.
+     * The callback method to be invoked when the service properties have changed.
      */
     String changed() default "";
 
     /**
-     * Returns the callback method to invoke when the service is lost.
+     * The callback method to invoke when the service is lost.
      */
     String removed() default "";
 }

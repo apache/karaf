@@ -106,10 +106,16 @@ public @interface PropertyMetaData
     boolean required() default true;
 
     /**
-     * Return a list of valid options for this property.
-     * The Options are defined using the {@link Property} annotation, where the {@link Property#name()} attribute is used to
-     * reference the option label, and the {@link Property#value()} attribute is used to reference the option value.
-     * @return the list of valid options for this property.
+     * Return a list of valid option labels for this property. The purpose of this method is to allow menus with localized labels.
+     * It is associated with the {@link #optionValues()} attribute. The labels returned here are ordered in the same way as the 
+     * {@link #optionValues()} attribute values. 
+     * @return the list of valid option labels for this property.
      */
-    Property[] options() default {};
+    String[] optionLabels() default {};
+    
+    /**
+     * Return a list of option values that this property can take. This list must be in the same sequence as the {@link #optionLabels()} 
+     * attribute.
+     */
+   String[] optionValues() default {};
 }

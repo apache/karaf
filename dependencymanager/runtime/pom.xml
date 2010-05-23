@@ -52,6 +52,12 @@
       <artifactId>org.apache.felix.dependencymanager</artifactId>
       <version>3.0.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20070829</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -77,7 +83,8 @@
             <Bundle-Description>A bundle that loads components descriptors from started bundles</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Private-Package>org.apache.felix.dm.runtime.*</Private-Package>
-            <Import-Package>org.apache.felix.dm;org.apache.felix.dm.dependencies;org.apache.felix.dm.service;version="[3.0.0,4.0.0)", *</Import-Package>
+            <Import-Package>org.apache.felix.dm;org.apache.felix.dm.dependencies;org.apache.felix.dm.service;version="[3.0.0,4.0.0)",*</Import-Package>
+	    <Embed-Dependency>json</Embed-Dependency>
             <Bundle-Activator>org.apache.felix.dm.runtime.Activator</Bundle-Activator>
           </instructions>
         </configuration>

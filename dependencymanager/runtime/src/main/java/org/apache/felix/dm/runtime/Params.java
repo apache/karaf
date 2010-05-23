@@ -19,20 +19,39 @@
 package org.apache.felix.dm.runtime;
 
 /**
- * Type of each DependendencyManager component descriptor entry.
- * @see DescriptorParser for more informations about the descriptor syntax.
+ * List of descriptor parameters.
  */
-public enum DescriptorEntry
+public enum Params
 {
-    Service,
-    AspectService,
-    AdapterService,
-    BundleAdapterService,
-    ResourceAdapterService,
-    FactoryConfigurationAdapterService,
-    ServiceDependency,
-    TemporalServiceDependency,
-    ConfigurationDependency,
-    BundleDependency,
-    ResourceDependency
+    type,
+    init,
+    start,
+    stop,
+    destroy,
+    impl,
+    provide,
+    properties,
+    composition,
+    service,
+    filter,
+    defaultImpl,
+    required,
+    added,
+    changed,
+    removed,
+    autoConfig,
+    pid,
+    propagate,
+    updated,
+    timeout,
+    adapterService,
+    adapterProperties,
+    adapteeService,
+    adapteeFilter,
+    stateMask,
+    ranking,
+    factoryPid,    
+    factory,
+    factoryConfigure,
+    name
 }

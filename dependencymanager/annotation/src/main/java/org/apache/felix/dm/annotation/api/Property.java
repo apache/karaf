@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation used to describe a property key-value pair. It is used when
- * declaring {@link Service#properties()} attribute, as well as {@link PropertyMetaData#options()} attribute.
+ * declaring {@link Service#properties()} attribute.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target( { ElementType.ANNOTATION_TYPE })
@@ -41,5 +41,11 @@ public @interface Property
      * Returns the property value
      * @return this property value
      */
-    String value();
+    String value() default "";
+    
+    /**
+     * Returns the property values as a String array).
+     * @return this property value as a String array
+     */
+    String[] values() default {};
 }
