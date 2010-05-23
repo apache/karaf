@@ -64,11 +64,8 @@ public class FELIX2348_ResourceAdapterTest extends Base {
         DependencyManager m = new DependencyManager(context);
         // helper class that ensures certain steps get executed in sequence
         Ensure e = new Ensure();
-        m.add(m.createResourceAdapterService("(&(path=/test)(name=*.txt)(repository=TestRepository))", 
-                                            null, 
-                                            (String) null, null,
-                                            new ResourceAdapter(e), 
-                                            false));
+        m.add(m.createResourceAdapterService("(&(path=/test)(name=*.txt)(repository=TestRepository))", false)
+              .setImplementation(new ResourceAdapter(e)));
         m.add(m.createService().setImplementation(new ResourceProvider(e)).add(m.createServiceDependency().setService(ResourceHandler.class).setCallbacks("add", "remove")));
         e.waitForStep(3, 5000);
      }

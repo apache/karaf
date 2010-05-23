@@ -46,7 +46,9 @@ public class ResourceAdapterServiceBuilder extends ServiceComponentBuilder
         String[] service = serviceMetaData.getStrings(Params.service, null);
         Dictionary<String, Object> properties = serviceMetaData.getDictionary(Params.properties, null);
         boolean propagate = "true".equals(serviceMetaData.getString(Params.propagate, "false"));
-        Service srv = dm.createResourceAdapterService(filter, null, service, properties, impl, propagate);  
+        Service srv = dm.createResourceAdapterService(filter, propagate)
+                        .setInterface(service, properties)
+                        .setImplementation(impl);
         setCommonServiceParams(srv, serviceMetaData);
         for (MetaData dependencyMetaData: serviceDependencies)
         {

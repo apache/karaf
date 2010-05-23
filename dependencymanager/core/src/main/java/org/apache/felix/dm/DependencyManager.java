@@ -36,7 +36,7 @@ import org.apache.felix.dm.impl.BundleAdapterImpl;
 import org.apache.felix.dm.impl.FactoryConfigurationAdapterImpl;
 import org.apache.felix.dm.impl.FactoryConfigurationAdapterMetaTypeImpl;
 import org.apache.felix.dm.impl.Logger;
-import org.apache.felix.dm.impl.ResourceAdapterImpl;
+import org.apache.felix.dm.impl.ResourceAdapterServiceImpl;
 import org.apache.felix.dm.impl.ServiceImpl;
 import org.apache.felix.dm.impl.dependencies.BundleDependencyImpl;
 import org.apache.felix.dm.impl.dependencies.ConfigurationDependencyImpl;
@@ -213,7 +213,7 @@ public class DependencyManager {
      * 
      * <blockquote>
      *  manager.createAdapterService(AdapteeService.class, "(foo=bar)")
-     *         // The the interface to use when registering adapters
+     *         // The interface to use when registering adapter
      *         .setInterface(AdapterService.class, new Hashtable() {{ put("additional", "properties"); }})
      *         // the implementation of the adapter
      *         .setImplementation(AdapterImpl.class);
@@ -237,35 +237,29 @@ public class DependencyManager {
      * It will also inherit all dependencies, and if you declare the original
      * service as a member it will be injected.
      * 
+     * <h3>Usage Example</h3>
+     * 
+     * <blockquote>
+     *  manager.createResourceAdapterService("(&(path=/test)(repository=TestRepository))", true)
+     *         // The interface to use when registering adapter
+     *         .setInterface(AdapterService.class, new Hashtable() {{ put("foo", "bar"); }})
+     *         // the implementation of the adapter
+     *         .setImplementation(AdapterServiceImpl.class)
+     *         // The callback invoked on adapter lifecycle events
+     *         .setCallbacks(new Handler(), "init", "start", "stop", "destroy");
+     * <pre>
+     * </pre>
+     * </blockquote>
+     *
      * @param resourceFilter the filter condition to use with the resource
-     * @param adapterHandler a handler to invoke life cycle methods on for the adapter instance, or <code>null</code>
-     *     if you want to invoke these methods on the instance
-     * @param adapterInterface the interface to use when registering adapters
-     * @param adapterProperties additional properties to use with the adapter service registration
-     * @param adapterImplementation the implementation of the adapter
      * @param propagate <code>true</code> if properties from the resource should be propagated to the service
      * @return a service that acts as a factory for generating resource adapters
      * @see Resource
      */
-    public Service createResourceAdapterService(String resourceFilter, Object adapterHandler, String adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
-        return createService()
-            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterHandler, adapterImplementation, adapterInterface, adapterProperties, propagate))
-            .add(createResourceDependency()
-                .setFilter(resourceFilter)
-                .setAutoConfig(false)
-                .setCallbacks("added", "removed")
-            );
+    public Service createResourceAdapterService(String resourceFilter, boolean propagate) {
+        return new ResourceAdapterServiceImpl(this, resourceFilter, propagate);
     }
-    public Service createResourceAdapterService(String resourceFilter, Object adapterHandler, String[] adapterInterface, Dictionary adapterProperties, Object adapterImplementation, boolean propagate) {
-        return createService()
-            .setImplementation(new ResourceAdapterImpl(resourceFilter, adapterHandler, adapterImplementation, adapterInterface, adapterProperties, propagate))
-            .add(createResourceDependency()
-                .setFilter(resourceFilter)
-                .setAutoConfig(false)
-                .setCallbacks("added", "removed")
-            );
-    }
-
+    
     /**
      * Creates a new bundle adapter. The adapter will be applied to any bundle that
      * matches the specified bundle state mask and filter condition. For each matching
