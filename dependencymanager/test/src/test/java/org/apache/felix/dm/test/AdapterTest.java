@@ -52,7 +52,7 @@ public class AdapterTest extends Base {
         Service sp = m.createService().setImplementation(new ServiceProvider(e)).setInterface(ServiceInterface.class.getName(), null);
         Service sp2 = m.createService().setImplementation(new ServiceProvider2(e)).setInterface(ServiceInterface2.class.getName(), null);
         Service sc = m.createService().setImplementation(new ServiceConsumer()).add(m.createServiceDependency().setService(ServiceInterface3.class).setRequired(true));
-        Service sa = m.createAdapterService(ServiceInterface.class, null, ServiceInterface3.class.getName(), new ServiceAdapter(e), null);
+        Service sa = m.createAdapterService(ServiceInterface.class, null).setInterface(ServiceInterface3.class.getName(), null).setImplementation(new ServiceAdapter(e));
         m.add(sc);
         m.add(sp);
         m.add(sp2);
