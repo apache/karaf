@@ -21,11 +21,14 @@ package org.apache.felix.dm.impl;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
+import org.apache.felix.dm.service.ServiceStateListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
@@ -43,6 +46,90 @@ public abstract class AbstractDecorator  {
      */
     public void updateService(Object[] properties) {
         throw new NoSuchMethodError("Method updateService not implemented");
+    }
+    
+    /**
+     * Set some service properties to all already instantiated services.
+     */
+    public void setServiceProperties(Dictionary serviceProperties) {
+        Map services = new HashMap();
+        synchronized (this) {
+            services.putAll(m_services);
+        }
+        Iterator i = services.values().iterator();
+        while (i.hasNext()) {
+            ((Service) i.next()).setServiceProperties(serviceProperties);
+        }
+    }
+    
+    /**
+     * Remove a StateListener from all already instantiated services.
+     */
+    public void addStateListener(ServiceStateListener listener) {
+        Map services = new HashMap();
+        synchronized (this) {
+            services.putAll(m_services);
+        }
+        Iterator i = services.values().iterator();
+        while (i.hasNext()) {
+            ((Service) i.next()).addStateListener(listener);
+        } 
+    }
+
+    /**
+     * Remove a StateListener from all already instantiated services.
+     */
+    public void removeStateListener(ServiceStateListener listener) {
+        Map services = new HashMap();
+        synchronized (this) {
+            services.putAll(m_services);
+        }
+        Iterator i = services.values().iterator();
+        while (i.hasNext()) {
+            ((Service) i.next()).removeStateListener(listener);
+        } 
+    }
+    
+    /**
+     * Add a Dependency to all already instantiated services.
+     */
+    public void addDependency(Dependency d) {
+        Map services = new HashMap();
+        synchronized (this) {
+            services.putAll(m_services);
+        }
+        Iterator i = services.values().iterator();
+        while (i.hasNext()) {
+            ((Service) i.next()).add(d);
+        } 
+    }
+    
+    /**
+     * Add a Dependency to all already instantiated services.
+     */
+    public void addDependencies(List dependencies) {
+        Map services = new HashMap();
+        synchronized (this) {
+            services.putAll(m_services);
+        }
+        Iterator i = services.values().iterator();
+        while (i.hasNext()) {
+            ((Service) i.next()).add(dependencies);
+        } 
+    }
+
+    /**
+     * Remove a Dependency from all instantiated services.
+     */
+    public void removeDependency(Dependency d) {
+        Map services = new HashMap();
+        synchronized (this) {
+            services.putAll(m_services);
+        }
+        Iterator i = services.values().iterator();
+        while (i.hasNext()) {
+            ((Service) i.next()).remove(d);
+        } 
     }
     
     // callbacks for FactoryConfigurationAdapterImpl
@@ -74,8 +161,7 @@ public abstract class AbstractDecorator  {
         }
     }
 
-    public synchronized void deleted(String pid)
-    {
+    public void deleted(String pid) {
         Service service = null;
         synchronized (this) {
             service = (Service) m_services.remove(pid);

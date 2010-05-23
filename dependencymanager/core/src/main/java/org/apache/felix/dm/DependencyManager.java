@@ -31,7 +31,7 @@ import org.apache.felix.dm.dependencies.ResourceDependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.dependencies.TemporalServiceDependency;
 import org.apache.felix.dm.impl.AdapterImpl;
-import org.apache.felix.dm.impl.AspectImpl;
+import org.apache.felix.dm.impl.AspectServiceImpl;
 import org.apache.felix.dm.impl.BundleAdapterImpl;
 import org.apache.felix.dm.impl.FactoryConfigurationAdapterImpl;
 import org.apache.felix.dm.impl.FactoryConfigurationAdapterMetaTypeImpl;
@@ -177,49 +177,29 @@ public class DependencyManager {
      * It will also inherit all dependencies, and if you declare the original
      * service as a member it will be injected.
      * 
+     * <h3>Usage Example</h3>
+     * 
+     * <blockquote>
+     *  manager.createAspectService(ExistingService.class, "(foo=bar)", 10, "m_aspect")
+     *         .setImplementation(ExistingServiceAspect.class)
+     *         .setServiceProperties(new Hashtable() {{ put("additional", "properties"); }})
+     *         .setComposition("getComposition")
+     *         .setCallbacks(new Handler(), null, "mystart", "mystop", null);
+     * <pre>
+     * </pre>
+     * </blockquote>
+     * 
      * @param serviceInterface the service interface to apply the aspect to
      * @param serviceFilter the filter condition to use with the service interface
-     * @param aspectImplementation the implementation of the aspect
-     * @param aspectProperties additional properties to use with the aspect service registration
+     * @param ranking the level used to organize the aspect chain ordering
+     * @param attributeName, the aspect implementation field name where to inject original service. 
+     *                  If null, any field matching the original service will be injected.
      * @return a service that acts as a factory for generating aspects
      */
-    public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object aspectImplementation, Dictionary aspectProperties) {
-        return createService()
-            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, ranking, aspectImplementation, aspectProperties))
-            .add(createServiceDependency()
-                .setService(serviceInterface, createAspectFilter(serviceFilter))
-                .setAutoConfig(false)
-                .setCallbacks("added", "removed")
-            );
+    public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, String attributeName) {
+        return new AspectServiceImpl(this, serviceInterface, serviceFilter, ranking, attributeName);
     }
-    public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, Dictionary aspectProperties) {
-        return createService()
-            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, ranking, factory, factoryCreateMethod, aspectProperties))
-            .add(createServiceDependency()
-                .setService(serviceInterface, createAspectFilter(serviceFilter))
-                .setAutoConfig(false)
-                .setCallbacks("added", "removed")
-            );
-    }
-    public Service createAspectService(Class serviceInterface, String serviceFilter, int ranking, Object factory, String factoryCreateMethod, String attributeName, Dictionary aspectProperties) {
-        return createService()
-            .setImplementation(new AspectImpl(serviceInterface, serviceFilter, ranking, factory, factoryCreateMethod, attributeName, aspectProperties))
-            .add(createServiceDependency()
-                .setService(serviceInterface, createAspectFilter(serviceFilter))
-                .setAutoConfig(false)
-                .setCallbacks("added", "removed")
-            );
-    }
-    private String createAspectFilter(String filter) {
-        // we only want to match services which are not themselves aspects
-        if (filter == null || filter.length() == 0) {
-            return "(!(" + ASPECT + "=*))";
-        }
-        else {
-            return "(&(!(" + ASPECT + "=*))" + filter + ")";
-        }        
-    }
-    
+
     /**
      * Creates a new adapter. The adapter will be applied to any service that
      * matches the specified interface and filter. For each matching service

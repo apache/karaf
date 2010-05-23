@@ -52,7 +52,7 @@ public class AspectTest extends Base {
         Service sp = m.createService().setImplementation(new ServiceProvider(e)).setInterface(ServiceInterface.class.getName(), null);
         Service sp2 = m.createService().setImplementation(new ServiceProvider2(e)).setInterface(ServiceInterface2.class.getName(), null);
         Service sc = m.createService().setImplementation(new ServiceConsumer(e)).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(true));
-        Service sa = m.createAspectService(ServiceInterface.class, null, 1, new ServiceAspect(e), null);
+        Service sa = m.createAspectService(ServiceInterface.class, null, 1, null).setImplementation(new ServiceAspect(e));
         m.add(sc);
         m.add(sp);
         e.waitForStep(3, 15000);

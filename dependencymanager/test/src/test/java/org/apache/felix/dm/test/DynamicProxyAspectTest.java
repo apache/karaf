@@ -60,8 +60,10 @@ public class DynamicProxyAspectTest extends Base {
         Service sp2 = m.createService().setImplementation(new ServiceProvider2(e)).setInterface(ServiceInterface2.class.getName(), null);
         
         // create a dynamic proxy based aspect and hook it up to both services
-        Service a1 = m.createAspectService(ServiceInterface.class, null, 10, new Factory(e, ServiceInterface.class, "ServiceInterfaceProxy"), "create", "m_service", null);
-        Service a2 = m.createAspectService(ServiceInterface2.class, null, 10, new Factory(e, ServiceInterface2.class, "ServiceInterfaceProxy2"), "create", "m_service", null);
+        Service a1 = m.createAspectService(ServiceInterface.class, null, 10, "m_service")
+            .setFactory(new Factory(e, ServiceInterface.class, "ServiceInterfaceProxy"), "create");
+        Service a2 = m.createAspectService(ServiceInterface2.class, null, 10, "m_service")
+            .setFactory(new Factory(e, ServiceInterface2.class, "ServiceInterfaceProxy2"), "create");
 
         // create a client that invokes a method on boths services, validate that it goes
         // through the proxy twice

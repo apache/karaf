@@ -422,11 +422,12 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
 	    return null;
 	}
 
-	public synchronized void setServiceProperties(Dictionary serviceProperties) {
+	public synchronized Service setServiceProperties(Dictionary serviceProperties) {
 	    m_serviceProperties = serviceProperties;
 	    if ((m_registration != null) && (m_serviceName != null)) {
 	        m_registration.setProperties(calculateServiceProperties());
 	    }
+	    return this;
 	}
 
 	// service state listener methods
@@ -991,7 +992,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         }
     }
 
-    private void ensureNotActive() {
+    protected void ensureNotActive() {
     	State state;
     	synchronized (m_dependencies) {
     		state = m_state;

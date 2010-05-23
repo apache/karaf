@@ -61,8 +61,8 @@ public class AspectWhiteboardTest extends Base {
         Service sp2 = m.createService().setImplementation(new ServiceProvider(e)).setInterface(ServiceInterface.class.getName(), null);
         ServiceConsumer sci = new ServiceConsumer(e);
         Service sc = m.createService().setImplementation(sci).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(false).setCallbacks("add", "remove"));
-        Service sa2 = m.createAspectService(ServiceInterface.class, null, 20, new ServiceAspect(e, 3), null);
-        Service sa1 = m.createAspectService(ServiceInterface.class, null, 10, new ServiceAspect(e, 4), null);
+        Service sa2 = m.createAspectService(ServiceInterface.class, null, 20, null).setImplementation(new ServiceAspect(e, 3));
+        Service sa1 = m.createAspectService(ServiceInterface.class, null, 10, null).setImplementation(new ServiceAspect(e, 4));
         
         // start with a service consumer
         System.out.println("Adding consumer");

@@ -51,9 +51,9 @@ public class AspectChainTest extends Base {
         // create a service provider and consumer
         Service sp = m.createService().setImplementation(new ServiceProvider(e)).setInterface(ServiceInterface.class.getName(), null);
         Service sc = m.createService().setImplementation(new ServiceConsumer(e)).add(m.createServiceDependency().setService(ServiceInterface.class).setRequired(true));
-        Service sa2 = m.createAspectService(ServiceInterface.class, null, 20, new ServiceAspect(e, 3), null);
-        Service sa3 = m.createAspectService(ServiceInterface.class, null, 30, new ServiceAspect(e, 2), null);
-        Service sa1 = m.createAspectService(ServiceInterface.class, null, 10, new ServiceAspect(e, 4), null);
+        Service sa2 = m.createAspectService(ServiceInterface.class, null, 20, null).setImplementation(new ServiceAspect(e, 3));
+        Service sa3 = m.createAspectService(ServiceInterface.class, null, 30, null).setImplementation(new ServiceAspect(e, 2));
+        Service sa1 = m.createAspectService(ServiceInterface.class, null, 10, null).setImplementation(new ServiceAspect(e, 4));
         m.add(sc);
 
         m.add(sp);

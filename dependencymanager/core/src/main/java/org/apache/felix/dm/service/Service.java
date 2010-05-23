@@ -136,7 +136,7 @@ public interface Service {
      * 
      * @param serviceProperties the properties
      */
-    public void setServiceProperties(Dictionary serviceProperties);
+    public Service setServiceProperties(Dictionary serviceProperties);
     
     /**
      * Sets the names of the methods used as callbacks. These methods, when found, are
