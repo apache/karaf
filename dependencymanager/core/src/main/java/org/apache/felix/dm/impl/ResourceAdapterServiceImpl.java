@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
+import org.apache.felix.dm.service.ServiceStateListener;
 
 /**
  * Resource adapter service implementation. This class extends the FilterService in order to catch
@@ -68,19 +69,23 @@ public class ResourceAdapterServiceImpl extends FilterService
             // the first dependency is always the dependency on the resource, which
             // will be replaced with a more specific dependency below
             dependencies.remove(0);
-            return m_manager.createService()
-                            .setInterface(m_serviceInterfaces, props)
-                            .setImplementation(m_serviceImpl)
-                            .setFactory(m_factory, m_factoryCreateMethod) // if not set, no effect
-                            .setComposition(m_compositionInstance, m_compositionMethod) // if not set, no effect
-                            .setCallbacks(m_callbackObject, m_init, m_start, m_stop, m_destroy) // if not set, no effect
-                            .add(dependencies)
-                            .add(m_manager.createResourceDependency()
-                                 .setResource(resource)
-                                 .setPropagate(m_propagate)
-                                 .setCallbacks(null, "changed", null)
-                                 .setAutoConfig(true)
-                                 .setRequired(true));            
+            Service service = m_manager.createService()
+                .setInterface(m_serviceInterfaces, props)
+                .setImplementation(m_serviceImpl)
+                .setFactory(m_factory, m_factoryCreateMethod) // if not set, no effect
+                .setComposition(m_compositionInstance, m_compositionMethod) // if not set, no effect
+                .setCallbacks(m_callbackObject, m_init, m_start, m_stop, m_destroy) // if not set, no effect
+                .add(dependencies)
+                .add(m_manager.createResourceDependency()
+                     .setResource(resource)
+                     .setPropagate(m_propagate)
+                     .setCallbacks(null, "changed", null)
+                     .setAutoConfig(true)
+                     .setRequired(true));         
+            for (int i = 0; i < m_stateListeners.size(); i ++) {
+                service.addStateListener((ServiceStateListener) m_stateListeners.get(i));
+            }
+            return service;
         }
     }
 }
