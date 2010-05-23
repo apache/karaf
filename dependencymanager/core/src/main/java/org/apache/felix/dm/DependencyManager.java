@@ -30,7 +30,7 @@ import org.apache.felix.dm.dependencies.PropertyMetaData;
 import org.apache.felix.dm.dependencies.ResourceDependency;
 import org.apache.felix.dm.dependencies.ServiceDependency;
 import org.apache.felix.dm.dependencies.TemporalServiceDependency;
-import org.apache.felix.dm.impl.AdapterImpl;
+import org.apache.felix.dm.impl.AdapterServiceImpl;
 import org.apache.felix.dm.impl.AspectServiceImpl;
 import org.apache.felix.dm.impl.BundleAdapterImpl;
 import org.apache.felix.dm.impl.FactoryConfigurationAdapterImpl;
@@ -209,33 +209,25 @@ public class DependencyManager {
      * It will also inherit all dependencies, and if you declare the original
      * service as a member it will be injected.
      * 
+     * <h3>Usage Example</h3>
+     * 
+     * <blockquote>
+     *  manager.createAdapterService(AdapteeService.class, "(foo=bar)")
+     *         // The the interface to use when registering adapters
+     *         .setInterface(AdapterService.class, new Hashtable() {{ put("additional", "properties"); }})
+     *         // the implementation of the adapter
+     *         .setImplementation(AdapterImpl.class);
+     * <pre>
+     * </pre>
+     * </blockquote>
      * @param serviceInterface the service interface to apply the adapter to
      * @param serviceFilter the filter condition to use with the service interface
-     * @param adapterInterface the interface to use when registering adapters
-     * @param adapterImplementation the implementation of the adapter
-     * @param adapterProperties additional properties to use with the adapter service registration
      * @return a service that acts as a factory for generating adapters
      */
-    public Service createAdapterService(Class serviceInterface, String serviceFilter, String adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
-        return createService()
-            .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, adapterImplementation, adapterInterface, adapterProperties))
-            .add(createServiceDependency()
-                .setService(serviceInterface)
-                .setAutoConfig(false)
-                .setCallbacks("added", "removed")
-            );
+    public Service createAdapterService(Class serviceInterface, String serviceFilter) {
+        return new AdapterServiceImpl(this, serviceInterface, serviceFilter);
     }
-    
-    public Service createAdapterService(Class serviceInterface, String serviceFilter, String[] adapterInterface, Object adapterImplementation, Dictionary adapterProperties) {
-        return createService()
-            .setImplementation(new AdapterImpl(serviceInterface, serviceFilter, adapterImplementation, adapterInterface, adapterProperties))
-            .add(createServiceDependency()
-                .setService(serviceInterface)
-                .setAutoConfig(false)
-                .setCallbacks("added", "removed")
-            );
-    }
-    
+        
     /**
      * Creates a new resource adapter. The adapter will be applied to any resource that
      * matches the specified filter condition. For each matching resource
