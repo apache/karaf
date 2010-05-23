@@ -47,7 +47,9 @@ public class BundleAdapterServiceBuilder extends ServiceComponentBuilder
         String[] service = serviceMetaData.getStrings(Params.service, null);
         Dictionary<String, Object> properties = serviceMetaData.getDictionary(Params.properties, null);
         boolean propagate = "true".equals(serviceMetaData.getString(Params.propagate, "false"));
-        Service srv = dm.createBundleAdapterService(stateMask, filter, adapterImpl, service, properties, propagate);  
+        Service srv = dm.createBundleAdapterService(stateMask, filter, propagate)
+                        .setInterface(service, properties)
+                        .setImplementation(adapterImpl);
         setCommonServiceParams(srv, serviceMetaData);
         for (MetaData dependencyMetaData: serviceDependencies)
         {

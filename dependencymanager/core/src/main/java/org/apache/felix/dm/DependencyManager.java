@@ -33,6 +33,7 @@ import org.apache.felix.dm.dependencies.TemporalServiceDependency;
 import org.apache.felix.dm.impl.AdapterServiceImpl;
 import org.apache.felix.dm.impl.AspectServiceImpl;
 import org.apache.felix.dm.impl.BundleAdapterImpl;
+import org.apache.felix.dm.impl.BundleAdapterServiceImpl;
 import org.apache.felix.dm.impl.FactoryConfigurationAdapterImpl;
 import org.apache.felix.dm.impl.FactoryConfigurationAdapterMetaTypeImpl;
 import org.apache.felix.dm.impl.Logger;
@@ -46,6 +47,7 @@ import org.apache.felix.dm.impl.dependencies.TemporalServiceDependencyImpl;
 import org.apache.felix.dm.impl.metatype.PropertyMetaDataImpl;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.service.Service;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -270,31 +272,29 @@ public class DependencyManager {
      * It will also inherit all dependencies, and if you declare the original
      * service as a member it will be injected.
      * 
+     * <h3>Usage Example</h3>
+     * 
+     * <blockquote>
+     *  manager.createBundleAdapterService(Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE, 
+     *                                     "(Bundle-SymbolicName=org.apache.felix.dependencymanager)",
+     *                                     true)
+     *         // The interface to use when registering adapter
+     *         .setInterface(AdapterService.class, new Hashtable() {{ put("foo", "bar"); }})
+     *         // the implementation of the adapter
+     *         .setImplementation(AdapterServiceImpl.class)
+     *         // The callback invoked on adapter lifecycle events
+     *         .setCallbacks(new Handler(), "init", "start", "stop", "destroy");
+     * <pre>
+     * </pre>
+     * </blockquote>
+     * 
      * @param bundleStateMask the bundle state mask to apply
      * @param bundleFilter the filter to apply to the bundle manifest
-     * @param adapterImplementation the implementation of the adapter
-     * @param adapterInterface the interface to use when registering adapters
-     * @param adapterProperties additional properties to use with the service registration
      * @param propagate <code>true</code> if properties from the bundle should be propagated to the service
      * @return a service that acts as a factory for generating bundle adapters
      */
-    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String adapterInterface, Dictionary adapterProperties, boolean propagate) {
-        return createService()
-            .setImplementation(new BundleAdapterImpl(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
-            .add(createBundleDependency()
-                .setFilter(bundleFilter)
-                .setStateMask(bundleStateMask)
-                .setCallbacks("added", "removed")
-            );
-    }
-    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, Object adapterImplementation, String[] adapterInterface, Dictionary adapterProperties, boolean propagate) {
-        return createService()
-            .setImplementation(new BundleAdapterImpl(bundleStateMask, bundleFilter, adapterImplementation, adapterInterface, adapterProperties, propagate))
-            .add(createBundleDependency()
-                .setFilter(bundleFilter)
-                .setStateMask(bundleStateMask)
-                .setCallbacks("added", "removed")
-            );
+    public Service createBundleAdapterService(int bundleStateMask, String bundleFilter, boolean propagate) {
+        return new BundleAdapterServiceImpl(this, bundleStateMask, bundleFilter, propagate);
     }
 
     /**
