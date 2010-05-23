@@ -50,7 +50,9 @@ public class AdapterServiceBuilder extends ServiceComponentBuilder
         Dictionary<String, Object> adapterProperties = serviceMetaData.getDictionary(Params.adapterProperties, null);
         Class<?> adapteeService = b.loadClass(serviceMetaData.getString(Params.adapteeService));
         String adapteeFilter = serviceMetaData.getString(Params.adapteeFilter, null);     
-        Service service = dm.createAdapterService(adapteeService, adapteeFilter, adapterService, adapterImpl, adapterProperties);
+        Service service = dm.createAdapterService(adapteeService, adapteeFilter)
+                            .setInterface(adapterService, adapterProperties)
+                            .setImplementation(adapterImpl);
         setCommonServiceParams(service, serviceMetaData);
         for (MetaData dependencyMetaData: serviceDependencies)
         {
