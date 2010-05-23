@@ -24,7 +24,7 @@ import org.osgi.service.log.LogService;
 public class Log implements LogService
 {
     /** The log service */
-    private static LogService m_logService;
+    private LogService m_logService;
     
     /** Our sole instance */
     private static Log m_instance = new Log();
