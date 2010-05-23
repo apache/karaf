@@ -62,4 +62,10 @@ public @interface AspectService
      * @return the ranking of this aspect
      */
     int ranking();
+    
+    /**
+     * Specifies the field name where to inject the original service. By default, the original service is injected
+     * in any attributes in the aspect implementation that are of the same type as the aspect interface.
+     */
+    String field() default "";
 }

@@ -381,9 +381,6 @@ public class AnnotationCollector extends ClassDataCollector
             // removed callback
             writer.putString(annotation, EntryParam.removed, null);
         }
-        
-        // id attribute
-        writer.putString(annotation, EntryParam.name, null);
     }
 
     /**
@@ -435,6 +432,9 @@ public class AnnotationCollector extends ClassDataCollector
 
         // Parse Aspect properties.
         parseProperties(annotation, EntryParam.properties, writer);
+        
+        // Parse aspect impl field where to inject the original service.
+        writer.putString(annotation, EntryParam.field, null);
 
         // Parse service interface this aspect is applying to
         Object service = annotation.get(EntryParam.service.toString());
