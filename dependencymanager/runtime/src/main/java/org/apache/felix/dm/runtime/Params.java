@@ -53,5 +53,6 @@ public enum Params
     factoryPid,    
     factory,
     factoryConfigure,
-    name
+    name,
+    field
 }

@@ -47,13 +47,12 @@ public class AspectServiceBuilder extends ServiceComponentBuilder
 
         Class<?> serviceInterface = b.loadClass(serviceMetaData.getString(Params.service));
         String serviceFilter = serviceMetaData.getString(Params.filter, null);
-        Dictionary<String, Object> aspectProperties = serviceMetaData.getDictionary(Params.properties,
-            null);
+        Dictionary<String, Object> aspectProperties = serviceMetaData.getDictionary(Params.properties, null);
         int ranking = serviceMetaData.getInt(Params.ranking, 1);
         String implClass = serviceMetaData.getString(Params.impl);
-        Object impl = b.loadClass(implClass);
-        // TODO add attribute name
-        Service service = dm.createAspectService(serviceInterface, serviceFilter, ranking, null)
+        Object impl = b.loadClass(implClass);        
+        String field = serviceMetaData.getString(Params.field, null);        
+        Service service = dm.createAspectService(serviceInterface, serviceFilter, ranking, field)
                             .setImplementation(impl)
                             .setServiceProperties(aspectProperties);
         setCommonServiceParams(service, serviceMetaData);
