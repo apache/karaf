@@ -44,6 +44,16 @@ public interface MetaData extends Cloneable
      * Returns a String descriptor entry parameter value.
      */
     int getInt(Params key, int def);
+    
+    /**
+     * Returns a String descriptor entry parameter value.
+     */
+    long getLong(Params key);
+
+    /**
+     * Returns a String descriptor entry parameter value.
+     */
+    long getLong(Params key, long def);
 
     /**
      * Returns a String array descriptor entry parameter value.

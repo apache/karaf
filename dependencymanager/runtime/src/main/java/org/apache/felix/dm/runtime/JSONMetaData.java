@@ -171,6 +171,51 @@ public class JSONMetaData implements MetaData, Cloneable
         }
     }
 
+    public long getLong(Params key)
+    {
+        String value = getString(key, null);
+        if (value != null)
+        {
+            try
+            {
+                return Long.parseLong(value);
+            }
+            catch (NumberFormatException e)
+            {
+                throw new IllegalArgumentException("parameter " + key
+                    + " is not a long value: "
+                    + value);
+            }
+        }
+        else
+        {
+            throw new IllegalArgumentException("missing " + key
+                + " parameter from annotation");
+        }
+    }
+
+    public long getLong(Params key, long def)
+    {
+        String value = getString(key, null);
+        if (value != null)
+        {
+            try
+            {
+                return Long.parseLong(value);
+            }
+            catch (NumberFormatException e)
+            {
+                throw new IllegalArgumentException("parameter " + key
+                    + " is not a long value: "
+                    + value);
+            }
+        }
+        else
+        {
+            return def;
+        }
+    }
+
     public String[] getStrings(Params key)
     {
         Object array = m_metadata.get(key.toString());

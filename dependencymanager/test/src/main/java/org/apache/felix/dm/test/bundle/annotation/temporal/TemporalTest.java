@@ -22,7 +22,6 @@ import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
 import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
-import org.apache.felix.dm.annotation.api.dependency.TemporalServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
 /**
@@ -36,7 +35,7 @@ public class TemporalTest implements Runnable
     @ServiceDependency
     Sequencer m_sequencer;
 
-    @TemporalServiceDependency(timeout = 1000L, filter = "(test=temporal)")
+    @ServiceDependency(timeout = 1000L, filter = "(test=temporal)")
     Runnable m_service;
 
     @Start

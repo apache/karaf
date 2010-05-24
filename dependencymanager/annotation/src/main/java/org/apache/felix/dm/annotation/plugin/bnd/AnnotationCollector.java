@@ -42,7 +42,6 @@ import org.apache.felix.dm.annotation.api.dependency.BundleDependency;
 import org.apache.felix.dm.annotation.api.dependency.ConfigurationDependency;
 import org.apache.felix.dm.annotation.api.dependency.ResourceDependency;
 import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
-import org.apache.felix.dm.annotation.api.dependency.TemporalServiceDependency;
 import org.osgi.framework.Bundle;
 
 import aQute.lib.osgi.Annotation;
@@ -68,8 +67,6 @@ public class AnnotationCollector extends ClassDataCollector
         + ServiceDependency.class.getName().replace('.', '/') + ";";
     private final static String A_CONFIGURATION_DEPENDENCY = "L"
         + ConfigurationDependency.class.getName().replace('.', '/') + ";";
-    private final static String A_TEMPORAL_SERVICE_DEPENDENCY = "L"
-        + TemporalServiceDependency.class.getName().replace('.', '/') + ";";
     private final static String A_BUNDLE_DEPENDENCY = "L"
         + BundleDependency.class.getName().replace('.', '/') + ";";
     private final static String A_RESOURCE_DEPENDENCY = "L"
@@ -239,15 +236,11 @@ public class AnnotationCollector extends ClassDataCollector
         }
         else if (annotation.getName().equals(A_SERVICE_DEP))
         {
-            parseServiceDependencyAnnotation(annotation, false);
+            parseServiceDependencyAnnotation(annotation);
         }
         else if (annotation.getName().equals(A_CONFIGURATION_DEPENDENCY))
         {
             parseConfigurationDependencyAnnotation(annotation);
-        }
-        else if (annotation.getName().equals(A_TEMPORAL_SERVICE_DEPENDENCY))
-        {
-            parseServiceDependencyAnnotation(annotation, true);
         }
         else if (annotation.getName().equals(A_BUNDLE_DEPENDENCY))
         {
@@ -317,13 +310,12 @@ public class AnnotationCollector extends ClassDataCollector
     }
 
     /**
-     * Parses a ServiceDependency or a TemporalServiceDependency Annotation.
+     * Parses a ServiceDependency Annotation.
      * @param annotation the ServiceDependency Annotation.
      */
-    private void parseServiceDependencyAnnotation(Annotation annotation, boolean temporal)
+    private void parseServiceDependencyAnnotation(Annotation annotation)
     {
-        EntryWriter writer = new EntryWriter(temporal ? EntryType.TemporalServiceDependency
-            : EntryType.ServiceDependency);
+        EntryWriter writer = new EntryWriter(EntryType.ServiceDependency);
         m_writers.add(writer);
 
         // service attribute
@@ -365,22 +357,22 @@ public class AnnotationCollector extends ClassDataCollector
         // added callback
         writer.putString(annotation, EntryParam.added, (!m_isField) ? m_method : null);
 
-        if (temporal)
+        // timeout parameter
+        writer.putString(annotation, EntryParam.timeout, null);
+        Long t = (Long) annotation.get(EntryParam.timeout.toString());
+        if (t != null && t.longValue() < -1)
         {
-            // timeout attribute (only valid if parsing a temporal service dependency)
-            writer.putString(annotation, EntryParam.timeout, null);
+            throw new IllegalArgumentException("Invalid timeout value " + t + " in ServiceDependency annotation in class " + m_className);
         }
-        else
-        {
-            // required attribute (not valid if parsing a temporal service dependency)
-            writer.putString(annotation, EntryParam.required, null);
+        
+        // required attribute (not valid if parsing a temporal service dependency)
+        writer.putString(annotation, EntryParam.required, null);
 
-            // changed callback
-            writer.putString(annotation, EntryParam.changed, null);
+        // changed callback
+        writer.putString(annotation, EntryParam.changed, null);
 
-            // removed callback
-            writer.putString(annotation, EntryParam.removed, null);
-        }
+        // removed callback
+        writer.putString(annotation, EntryParam.removed, null);       
     }
 
     /**

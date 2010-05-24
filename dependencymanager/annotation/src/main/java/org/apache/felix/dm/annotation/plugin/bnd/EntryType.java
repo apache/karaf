@@ -12,7 +12,6 @@ public enum EntryType
     ResourceAdapterService,
     FactoryConfigurationAdapterService,
     ServiceDependency, 
-    TemporalServiceDependency, 
     ConfigurationDependency,
     BundleDependency,
     ResourceDependency,

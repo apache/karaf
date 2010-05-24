@@ -72,11 +72,7 @@ public class DependencyBuilder
         switch (type)
         {
             case ServiceDependency:
-                dp = createServiceDependency(b, dm, false, instanceBound);
-                break;
-
-            case TemporalServiceDependency:
-                dp = createServiceDependency(b, dm, true, instanceBound);
+                dp = createServiceDependency(b, dm, instanceBound);
                 break;
 
             case ConfigurationDependency:
@@ -94,8 +90,7 @@ public class DependencyBuilder
         return dp;
     }
 
-    private Dependency createServiceDependency(Bundle b, DependencyManager dm, boolean temporal,
-        boolean instanceBound)
+    private Dependency createServiceDependency(Bundle b, DependencyManager dm, boolean instanceBound)
         throws ClassNotFoundException
     {
         String service = m_metaData.getString(Params.service);
@@ -105,24 +100,24 @@ public class DependencyBuilder
         Class<?> defaultServiceImplClass =
             (defaultServiceImpl != null) ? b.loadClass(defaultServiceImpl) : null;
         String added = m_metaData.getString(Params.added, null);
-        String changed = temporal ? null : m_metaData.getString(Params.changed, null);
-        String removed = temporal ? null : m_metaData.getString(Params.removed, null);
+        long timeout = m_metaData.getLong(Params.timeout, -1L);
+        String changed = timeout != -1 ? null : m_metaData.getString(Params.changed, null);
+        String removed = timeout != -1 ? null : m_metaData.getString(Params.removed, null);
         String autoConfigField = m_metaData.getString(Params.autoConfig, null);
         boolean required = "true".equals(m_metaData.getString(Params.required, "true"));
-        String timeout = m_metaData.getString(Params.timeout, null);
 
-        Dependency dp = createServiceDependency(dm, temporal, serviceClass,
+        Dependency dp = createServiceDependency(dm, serviceClass,
             serviceFilter, defaultServiceImplClass, added, changed,
             removed, autoConfigField, timeout, required, instanceBound);
         return dp;
     }
 
-    private Dependency createServiceDependency(DependencyManager dm, boolean temporal,
-        Class<?> serviceClass, String serviceFilter, Class<?> defaultServiceImplClass, String added,
-        String changed, String removed, String autoConfigField, String timeout, boolean required,
+    private Dependency createServiceDependency(DependencyManager dm, Class<?> serviceClass, 
+        String serviceFilter, Class<?> defaultServiceImplClass, String added,
+        String changed, String removed, String autoConfigField, long timeout, boolean required,
         boolean instanceBound)
     {
-        ServiceDependency sd = temporal ? dm.createTemporalServiceDependency()
+        ServiceDependency sd = timeout != -1 ? dm.createTemporalServiceDependency()
             : dm.createServiceDependency();
         sd.setService(serviceClass, serviceFilter);
         if (defaultServiceImplClass != null)
@@ -134,13 +129,9 @@ public class DependencyBuilder
         {
             sd.setAutoConfig(autoConfigField);
         }
-        if (temporal)
+        if (timeout != -1)
         {
-            // Set the timeout value for a temporal service dependency
-            if (timeout != null)
-            {
-                ((TemporalServiceDependency) sd).setTimeout(Long.parseLong(timeout));
-            }
+            ((TemporalServiceDependency) sd).setTimeout(timeout);
             // Set required flag (always true for a temporal dependency)
             sd.setRequired(true);
         }
