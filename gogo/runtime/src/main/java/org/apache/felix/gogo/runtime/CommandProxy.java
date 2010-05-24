@@ -38,23 +38,39 @@ public class CommandProxy implements Function
         this.reference = reference;
         this.function = function;
     }
-    
+
     public CommandProxy(Object target, String function)
     {
         this.function = function;
         this.target = target;
     }
-    
+
     public Object getTarget()
     {
         return (context != null ? context.getService(reference) : target);
+    }
+
+    public void ungetTarget()
+    {
+        if (context != null)
+        {
+            try
+            {
+                context.ungetService(reference);
+            }
+            catch (IllegalStateException e)
+            {
+                // ignore - probably due to shutdown
+                // java.lang.IllegalStateException: BundleContext is no longer valid
+            }
+        }
     }
 
     public Object execute(CommandSession session, List<Object> arguments)
         throws Exception
     {
         Object tgt = getTarget();
-        
+
         try
         {
             if (tgt instanceof Function)
@@ -68,10 +84,7 @@ public class CommandProxy implements Function
         }
         finally
         {
-            if (context != null)
-            {
-                context.ungetService(reference);
-            }
+            ungetTarget();
         }
     }
 }
