@@ -22,9 +22,9 @@ import java.io.PrintStream;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.dm.annotation.api.Service;
-import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
+import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
 import org.apache.felix.shell.Command;
 import org.osgi.service.log.LogService;
 

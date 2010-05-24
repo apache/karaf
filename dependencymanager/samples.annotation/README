@@ -3,17 +3,25 @@ This sample illustrates the usage of the new DependencyManager annotations.
 Sample description:
 
   This sample shows a basic "SpellChecker" application which provides a Felix "spellcheck" shell
-  command. The SpellChecker class is a Felix Shell command (it provides the "Command" service),
+  command. The SpellChecker class is a Felix Shell command (it provides a "Command" service),
   which accepts a string as parameter. So, when you type a string, the command just says if the
   specified string has been found from one of its injected dictionaries. The SpellChecker class has a
-  required/multiple dependency over any available DictionaryService. Currently, there is one
-  "EnglishDictionary" which implements the DictionaryService. The EnglishDictionary service uses
-  MetaType, allowing to configure english words through ConfigAdmin and WebConsole. 
+  required/multiple (1..N) dependency over any available DictionaryService.
+  
+  A DictionaryService is defined using a FactoryConfigurationAdapterService annotation, allowing to
+  instantiate many DictionaryService service instances from webconsole. This annotation actually registers
+  a ManagedServiceFactory into the Registry, and you can specify the meta type informations regarding
+  the properties metadata.
+   
   So, before testing, you first have to go to webconsole Configuration panel, and specify some
-  english words in the configuration for the "English Dictionary" PID. Then, go to the felix shell,
-  and you will then see the "spellcheck" command (when typing "help").
-  Notice that in the sample, you will also find an Aspect Service (DictionaryAspect.java), which
-  decorates the EnglishDictionary service, by adding an "aspect" word in the dictionary.
+  dictionaries (see the DictionaryService Factory PID). 
+  Then, go to the felix shell, and you will then see the "spellcheck" command (when typing "help").
+  
+  Notice that in the sample, you will also find a DictionaryAspect Service (DictionaryAspect.java), which
+  decorates the EnglishDictionary service, by adding some additional words to *all* provided 
+  DictionaryService services. The DictionaryAspect also show how to use a ConfigurationDependency annotation, 
+  allowing to configure the words from webconsole. A ConfigurationDependency actually registers a ManagedService object
+  in the Registry, which also implements a MetaTypeProvider service for metatype support.
 
 How to test:
 
@@ -31,15 +39,16 @@ How to test:
 
   2) Start felix
   3) Go to web console, in the Configuration pannel
-  4) Edit the "English Dictionary" Configuration, add some words, then click on "save".
-     At this point, the "EnglishDictionary" service will be enabled and the SpellCheck component
-     will be injected with it. Then you should see the "spellcheck" command, when typing "help" on the shell.
+  4) Edit the "Dictionary Services" Configuration, add some dictionaries. By default, an English dictionary is 
+     displayed. Just click on "save", then click on your refresh web browser: you will see a new dictionary service
+     instance. At this point, a DictionaryService service will be enabled (with the service property "lang=en"), 
+     and the SpellCheck component will be injected with it. Then you should see the "spellcheck" command, when typing 
+     "help" on the shell.
 
   5) Just type "spellcheck hello", and the command should reply a fantastic message, like "word hello is correct".
-
-
-
-
-
   
-     
+  6) You can also click on the "Aspect Dictionary" button, in order to decorate *all* Dictionaries using some custom words.
+     By default, the "aspect" word is pre configured, but you can click on the "+" button in order to add more words. 
+     Then click on Save. At this point, all DictionaryService instances will be decorated with the aspect service.
+     So, now, if you type "spellcheck aspect", then the message: "word aspect is correct" should be displayed. 
+
