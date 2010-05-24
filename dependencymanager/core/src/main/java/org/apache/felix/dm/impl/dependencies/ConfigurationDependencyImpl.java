@@ -227,6 +227,9 @@ public class ConfigurationDependencyImpl extends DependencyBase implements Confi
                     throw new ConfigurationException(null, "Service " + ds + " with " + this.toString() + " could not be updated", e.getTargetException());
                 }
             }
+            catch (NoSuchMethodException e) {
+                // if the method does not exist, ignore it
+            }
             catch (Throwable t) {
                 // wrap any other exception as a ConfigurationException.
                 throw new ConfigurationException(null, "Service " + ds + " with " + this.toString() + " could not be updated", t);
