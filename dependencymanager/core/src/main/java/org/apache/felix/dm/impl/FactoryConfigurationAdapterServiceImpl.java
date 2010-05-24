@@ -58,12 +58,8 @@ public class FactoryConfigurationAdapterServiceImpl extends FilterService
         super(dm.createService()); // This service will be filtered by our super class, allowing us to take control.
         Hashtable props = new Hashtable();
         props.put(Constants.SERVICE_PID, factoryPid);
-        String[] interfaces = new String[] {
-            ManagedServiceFactory.class.getName(),
-            MetaTypeProvider.class.getName()                                
-        };
         m_service
-            .setInterface(interfaces, props)
+            .setInterface(ManagedServiceFactory.class.getName(), props)
             .setImplementation(new MetaTypeAdapterImpl(factoryPid, update, propagate,
                                                        bctx, logger, heading, description,
                                                        localization, properyMetaData));
