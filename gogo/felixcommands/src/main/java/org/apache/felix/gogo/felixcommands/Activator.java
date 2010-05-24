@@ -30,7 +30,7 @@ public class Activator implements BundleActivator
     public void start(BundleContext bc) throws Exception
     {
         Hashtable props = new Hashtable();
-        props.put("osgi.command.scope", "basic");
+        props.put("osgi.command.scope", "felix");
         props.put("osgi.command.function", new String[] {
             "bundlelevel", "frameworklevel", "headers",
             "help", "install", "inspect", "lb", "log", "refresh",
@@ -39,7 +39,7 @@ public class Activator implements BundleActivator
         bc.registerService(
             Basic.class.getName(), new Basic(bc), props);
 
-        props.put("osgi.command.scope", "files");
+        props.put("osgi.command.scope", "felix");
         props.put("osgi.command.function", new String[] {
             "cd", "ls" });
         bc.registerService(

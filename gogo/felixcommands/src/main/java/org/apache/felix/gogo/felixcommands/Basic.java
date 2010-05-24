@@ -230,6 +230,7 @@ public class Basic
                 String k = entry.getKey().substring(entry.getKey().indexOf(':') + 1);
                 if (name.equals(k))
                 {
+                    name = entry.getKey();
                     methods = entry.getValue();
                     break;
                 }
@@ -254,6 +255,8 @@ public class Basic
                 {
                     System.out.println("\n" + m.getName() + " - " + d.description());
                 }
+
+                System.out.println("   scope: " + name.substring(0, name.indexOf(':')));
 
                 // Get flags and options.
                 Class[] paramTypes = m.getParameterTypes();
