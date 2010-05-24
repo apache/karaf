@@ -62,7 +62,7 @@ public class WireImpl implements Wire
 
     public String toString()
     {
-        return m_req + " (" + m_importer + ") -> " + m_cap + " (" + m_exporter + ")";
+        return m_req + " -> " + "[" + m_exporter + "]";
     }
 
     /* (non-Javadoc)

@@ -28,18 +28,18 @@ import org.apache.felix.framework.util.Util;
 public class WireModuleImpl implements Wire
 {
     private final Module m_importer;
-    private final Requirement m_requirement;
+    private final Requirement m_req;
     private final Module m_exporter;
-    private final Capability m_capability;
+    private final Capability m_cap;
     private final List<String> m_packages;
 
     public WireModuleImpl(Module importer, Requirement requirement,
         Module exporter, Capability capability, List<String> packages)
     {
         m_importer = importer;
-        m_requirement = requirement;
+        m_req = requirement;
         m_exporter = exporter;
-        m_capability = capability;
+        m_cap = capability;
         m_packages = packages;
     }
 
@@ -56,7 +56,7 @@ public class WireModuleImpl implements Wire
      */
     public Requirement getRequirement()
     {
-        return m_requirement;
+        return m_req;
     }
 
     /* (non-Javadoc)
@@ -72,7 +72,7 @@ public class WireModuleImpl implements Wire
      */
     public Capability getCapability()
     {
-        return m_capability;
+        return m_cap;
     }
 
     /* (non-Javadoc)
@@ -159,6 +159,6 @@ public class WireModuleImpl implements Wire
 
     public String toString()
     {
-        return m_importer + " -> " + m_capability + " -> " + m_exporter;
+        return m_req + " -> " + "[" + m_exporter + "]";
     }
 }
