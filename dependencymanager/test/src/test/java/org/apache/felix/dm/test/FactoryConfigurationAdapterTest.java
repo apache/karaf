@@ -71,12 +71,10 @@ public class FactoryConfigurationAdapterTest extends Base
 
         // Create an Adapter that will be instantiated, once the configuration is created.
         // This Adapter provides an AdapterService, and depends on an AdapterExtraDependency service.
-        Service s2 = m.createFactoryConfigurationAdapterService("MyFactoryPid", 
-                                                                 "updated", 
-                                                                 Adapter.class, 
-                                                                 AdapterService.class.getName(), 
-                                                                 new Properties() {{ put("foo", "bar"); }},
-                                                                 true /* propagate CM settings */);
+        Service s2 = m.createFactoryConfigurationAdapterService("MyFactoryPid", "updated", true /* propagate CM settings */)
+                      .setInterface(AdapterService.class.getName(), new Properties() {{ put("foo", "bar"); }})
+                      .setImplementation(Adapter.class);
+
         s2.add(m.createServiceDependency()
             .setService(AdapterExtraDependency.class)
             .setRequired(true)

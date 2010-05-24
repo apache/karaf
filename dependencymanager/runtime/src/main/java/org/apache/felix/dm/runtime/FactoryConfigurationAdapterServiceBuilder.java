@@ -47,7 +47,9 @@ public class FactoryConfigurationAdapterServiceBuilder extends ServiceComponentB
         String[] services = serviceMetaData.getStrings(Params.service, null);
         Dictionary<String, Object> properties = serviceMetaData.getDictionary(Params.properties, null);
         boolean propagate = "true".equals(serviceMetaData.getString(Params.propagate, "false"));
-        Service srv = dm.createFactoryConfigurationAdapterService(factoryPid, updated, impl, services, properties, propagate);
+        Service srv = dm.createFactoryConfigurationAdapterService(factoryPid, updated, propagate)
+                        .setInterface(services, properties)
+                        .setImplementation(impl);
         setCommonServiceParams(srv, serviceMetaData);
         for (MetaData dependencyMetaData: serviceDependencies)
         {
