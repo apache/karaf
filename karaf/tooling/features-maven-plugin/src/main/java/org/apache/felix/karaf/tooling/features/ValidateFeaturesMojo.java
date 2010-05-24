@@ -160,12 +160,14 @@ public class ValidateFeaturesMojo extends MojoSupport {
         features.add(repository.getFeatures());
         
         // add the repositories from the plugin configuration
-	for (String uri : repositories) {
-	    getLog().info(String.format(" - adding repository from %s", uri));
-            Repository dependency = new RepositoryImpl(URI.create(translateFromMaven(uri)));
-            features.add(dependency.getFeatures());
-            validateBundlesAvailable(dependency);
-            analyzeExports(dependency);
+        if (repositories != null) {
+        	for (String uri : repositories) {
+        		getLog().info(String.format(" - adding repository from %s", uri));
+        		Repository dependency = new RepositoryImpl(URI.create(translateFromMaven(uri)));
+        		features.add(dependency.getFeatures());
+        		validateBundlesAvailable(dependency);
+        		analyzeExports(dependency);
+        	}
         }
 
         for (URI uri : repository.getRepositories()) {
