@@ -121,8 +121,7 @@ public class DependencyManager {
     /**
      * Creates a new temporal service dependency.
      * 
-     * @param timeout the max number of milliseconds to wait for a service availability.
-     * @return the service dependency
+     * @return a new temporal service dependency
      */
     public TemporalServiceDependency createTemporalServiceDependency() {
         return new TemporalServiceDependencyImpl(m_context, m_logger);
@@ -148,7 +147,7 @@ public class DependencyManager {
     /**
      * Creates a new bundle dependency.
      * 
-     * @return
+     * @return a new BundleDependency instance.
      */
     public BundleDependency createBundleDependency() {
         return new BundleDependencyImpl(m_context, m_logger);
@@ -174,20 +173,16 @@ public class DependencyManager {
      * 
      * <h3>Usage Example</h3>
      * 
-     * <blockquote>
+     * <blockquote><pre>
      *  manager.createAspectService(ExistingService.class, "(foo=bar)", 10, "m_aspect")
      *         .setImplementation(ExistingServiceAspect.class)
-     *         .setServiceProperties(new Hashtable() {{ put("additional", "properties"); }})
-     *         .setComposition("getComposition")
-     *         .setCallbacks(new Handler(), null, "mystart", "mystop", null);
-     * <pre>
-     * </pre>
-     * </blockquote>
+     *         .setServiceProperties(new Hashtable() {{ put("additional", "properties"); }});
+     * </pre></blockquote>
      * 
      * @param serviceInterface the service interface to apply the aspect to
      * @param serviceFilter the filter condition to use with the service interface
      * @param ranking the level used to organize the aspect chain ordering
-     * @param attributeName, the aspect implementation field name where to inject original service. 
+     * @param attributeName the aspect implementation field name where to inject original service. 
      *                  If null, any field matching the original service will be injected.
      * @return a service that acts as a factory for generating aspects
      */
@@ -206,15 +201,13 @@ public class DependencyManager {
      * 
      * <h3>Usage Example</h3>
      * 
-     * <blockquote>
+     * <blockquote><pre>
      *  manager.createAdapterService(AdapteeService.class, "(foo=bar)")
      *         // The interface to use when registering adapter
      *         .setInterface(AdapterService.class, new Hashtable() {{ put("additional", "properties"); }})
      *         // the implementation of the adapter
      *         .setImplementation(AdapterImpl.class);
-     * <pre>
-     * </pre>
-     * </blockquote>
+     * </pre></blockquote>
      * @param serviceInterface the service interface to apply the adapter to
      * @param serviceFilter the filter condition to use with the service interface
      * @return a service that acts as a factory for generating adapters
@@ -234,17 +227,13 @@ public class DependencyManager {
      * 
      * <h3>Usage Example</h3>
      * 
-     * <blockquote>
+     * <blockquote><pre>
      *  manager.createResourceAdapterService("(&(path=/test)(repository=TestRepository))", true)
      *         // The interface to use when registering adapter
-     *         .setInterface(AdapterService.class, new Hashtable() {{ put("foo", "bar"); }})
+     *         .setInterface(AdapterService.class.getName(), new Hashtable() {{ put("foo", "bar"); }})
      *         // the implementation of the adapter
-     *         .setImplementation(AdapterServiceImpl.class)
-     *         // The callback invoked on adapter lifecycle events
-     *         .setCallbacks(new Handler(), "init", "start", "stop", "destroy");
-     * <pre>
-     * </pre>
-     * </blockquote>
+     *         .setImplementation(AdapterServiceImpl.class);
+     * </pre></blockquote>
      *
      * @param resourceFilter the filter condition to use with the resource
      * @param propagate <code>true</code> if properties from the resource should be propagated to the service
@@ -267,19 +256,15 @@ public class DependencyManager {
      * 
      * <h3>Usage Example</h3>
      * 
-     * <blockquote>
+     * <blockquote><pre>
      *  manager.createBundleAdapterService(Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE, 
      *                                     "(Bundle-SymbolicName=org.apache.felix.dependencymanager)",
      *                                     true)
      *         // The interface to use when registering adapter
-     *         .setInterface(AdapterService.class, new Hashtable() {{ put("foo", "bar"); }})
+     *         .setInterface(AdapterService.class.getName(), new Hashtable() {{ put("foo", "bar"); }})
      *         // the implementation of the adapter
-     *         .setImplementation(AdapterServiceImpl.class)
-     *         // The callback invoked on adapter lifecycle events
-     *         .setCallbacks(new Handler(), "init", "start", "stop", "destroy");
-     * <pre>
-     * </pre>
-     * </blockquote>
+     *         .setImplementation(AdapterServiceImpl.class);
+     * </pre></blockquote>
      * 
      * @param bundleStateMask the bundle state mask to apply
      * @param bundleFilter the filter to apply to the bundle manifest
@@ -300,15 +285,14 @@ public class DependencyManager {
      * 
      * <h3>Usage Example</h3>
      * 
-     * <blockquote>
+     * <blockquote><pre>
      *  manager.createFactoryConfigurationAdapterService("MyFactoryPid",  "update", true)
      *         // The interface to use when registering adapter
-     *         .setInterface(AdapterService.class, new Hashtable() {{ put("foo", "bar"); }})
+     *         .setInterface(AdapterService.class.getName(), new Hashtable() {{ put("foo", "bar"); }})
      *         // the implementation of the adapter
      *         .setImplementation(AdapterServiceImpl.class);
-     * <pre>
-     * </pre>
-     * </blockquote>
+     * </pre></blockquote>
+     * 
      * @param factoryPid the pid matching the factory configuration
      * @param update the adapter method name that will be notified when the factory configuration is created/updated.
      * @param propagate true if public factory configuration should be propagated to the adapter service properties
@@ -325,6 +309,29 @@ public class DependencyManager {
      * properties. Depending on the <code>propagate</code> parameter, every public factory configuration properties 
      * (which don't start with ".") will be propagated along with the adapter service properties. 
      * It will also inherit all dependencies.
+     * 
+     * <h3>Usage Example</h3>
+     * 
+     * <blockquote><pre>
+     *       PropertyMetaData[] propertiesMetaData = new PropertyMetaData[] {
+     *            manager.createPropertyMetaData()
+     *               .setCardinality(Integer.MAX_VALUE)
+     *               .setType(String.class)
+     *               .setHeading("English words")
+     *               .setDescription("Declare here some valid english words")
+     *               .setDefaults(new String[] {"hello", "world"})
+     *               .setId("words")
+     *       };
+     * 
+     *       manager.add(createFactoryConfigurationAdapterService("FactoryPid", 
+     *                                                            "updated",
+     *                                                            true, // propagate CM settings
+     *                                                            "EnglishDictionary",
+     *                                                            "English dictionary configuration properties",
+     *                                                            null,
+     *                                                            propertiesMetaData)
+     *               .setImplementation(Adapter.class));
+     * </pre></blockquote>
      * 
      * @param factoryPid the pid matching the factory configuration
      * @param update the adapter method name that will be notified when the factory configuration is created/updated.
