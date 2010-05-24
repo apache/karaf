@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.felixcommands;
+package org.apache.felix.gogo.command;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -31,8 +31,6 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-import org.apache.felix.bundlerepository.impl.Base64Encoder;
-import org.apache.felix.bundlerepository.impl.FileUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.felixcommands;
+package org.apache.felix.gogo.command;
 
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;

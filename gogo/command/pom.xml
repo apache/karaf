@@ -20,15 +20,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache.felix.gogo</groupId>
-    <artifactId>gogo</artifactId>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>gogo-parent</artifactId>
     <version>0.5.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.apache.felix.gogo.felixcommands</artifactId>
+  <artifactId>org.apache.felix.gogo.command</artifactId>
   <packaging>bundle</packaging>
   <version>0.9.0-SNAPSHOT</version>
-  <name>Apache Felix Gogo Basic Commands</name>
+  <name>Apache Felix Gogo Command</name>
 
   <description>
     Provides basic shell commands for Gogo.
@@ -46,7 +46,7 @@
       <version>4.0.0</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix.gogo</groupId>
+      <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
       <version>0.5.0-SNAPSHOT</version>
     </dependency>
@@ -78,8 +78,7 @@
             <Export-Package>org.osgi.service.log</Export-Package>
             <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
             <Private-Package>${pom.artifactId}</Private-Package>
-            <Bundle-Activator>${artifactId}.Activator</Bundle-Activator>
-            <Import-Package>!org.apache.felix.bundlerepository.*, *</Import-Package>
+            <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
             <DynamicImport-Package>org.apache.felix.bundlerepository, org.apache.felix.bundlerepository.*</DynamicImport-Package>
           </instructions>
         </configuration>
