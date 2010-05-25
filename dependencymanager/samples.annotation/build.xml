@@ -1,5 +1,6 @@
 <project name="TestDM" default="bnd">
   <property name="bndjar" value="${user.home}/.m2/repository/biz/aQute/bnd/0.0.394/bnd-0.0.394.jar"/>
+  <property name="jsonjar" value="${user.home}/.m2/repository/org/json/json/20070829/json-20070829.jar"/>
   <property name="annotjar" value="${user.home}/.m2/repository/org/apache/felix/org.apache.felix.dependencymanager.annotation/3.0.0-SNAPSHOT/org.apache.felix.dependencymanager.annotation-3.0.0-SNAPSHOT.jar"/>
   <property name="corejar" value="${user.home}/.m2/repository/org/osgi/org.osgi.core/4.1.0/org.osgi.core-4.1.0.jar"/>
   <property name="compjar" value="${user.home}/.m2/repository/org/osgi/org.osgi.compendium/4.1.0/org.osgi.compendium-4.1.0.jar"/>
@@ -14,7 +15,7 @@
   <target name="bnd" depends="compile">
     <mkdir dir="target"/>
     <mkdir dir="target/classes"/>
-    <taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${annotjar}:${bndjar}"/>
+    <taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${annotjar}:${bndjar}:${jsonjar}"/>
     <bnd classpath="target/classes" eclipse="false" files="directives.bnd" output="target/org.apache.felix.dependencymanager.samples.annotation-3.0.0-SNAPSHOT.jar"/>
   </target>
 </project>
