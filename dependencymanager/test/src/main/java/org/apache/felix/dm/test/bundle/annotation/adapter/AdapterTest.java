@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.Start;
-import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
+import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
 @Service

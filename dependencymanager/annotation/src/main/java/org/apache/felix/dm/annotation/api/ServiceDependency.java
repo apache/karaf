@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dm.annotation.api.dependency;
+package org.apache.felix.dm.annotation.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -80,7 +80,7 @@ public @interface ServiceDependency
      * <p> 
      * 
      * -1 means no timeout at all (default). 0 means that invocation on a missing service will fail 
-     * immediately. A positive number represents the max timeout in millisends to wait for the service availability.
+     * immediately. A positive number represents the max timeout in millis to wait for the service availability.
      * 
      * <p> Sample Code:<p>
      * <blockquote><pre>

@@ -23,8 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.apache.felix.dm.annotation.api.adapter.FactoryConfigurationAdapterService;
-import org.apache.felix.dm.annotation.api.dependency.ConfigurationDependency;
 
 /**
  * This annotation describes the data types of a configuration Property.

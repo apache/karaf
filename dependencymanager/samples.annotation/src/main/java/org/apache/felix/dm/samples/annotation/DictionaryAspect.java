@@ -23,8 +23,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.dm.annotation.api.AspectService;
 import org.apache.felix.dm.annotation.api.PropertyMetaData;
-import org.apache.felix.dm.annotation.api.dependency.ConfigurationDependency;
-import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
+import org.apache.felix.dm.annotation.api.ConfigurationDependency;
+import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.osgi.service.log.LogService;
 
 /**
@@ -52,7 +52,7 @@ public class DictionaryAspect implements DictionaryService
     private LogService m_log;
 
     /**
-     * Defines a configuration dependency for retrieving our custo words (by default, our PID is our full class name).
+     * Defines a configuration dependency for retrieving our custom words (by default, our PID is our full class name).
      * This annotation actually provides a ManagedService into the registry, and you can specify meta information regarding
      * all the configuration properties (required by webconsole).
      */

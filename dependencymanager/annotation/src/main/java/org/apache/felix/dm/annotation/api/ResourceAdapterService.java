@@ -16,49 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dm.annotation.api.dependency;
+package org.apache.felix.dm.annotation.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.osgi.framework.Bundle;
 
 /**
- * Annotates a method for a bundle dependency.
+ * Annotates a class as a Resource Adapter Service. The adapter will be applied to any resource 
+ * that matches the specified filter condition. For each matching resource
+ * an adapter will be created based on the adapter implementation class.
+ * The adapter will be registered with the specified interface and existing properties
+ * from the original resource plus any extra properties you supply here.
+ * It will also inherit all dependencies, and if you declare the original
+ * service as a member it will be injected.
  */
 @Retention(RetentionPolicy.CLASS)
-@Target(ElementType.METHOD)
-public @interface BundleDependency
+@Target(ElementType.TYPE)
+public @interface ResourceAdapterService
 {
     /**
-     * Returns the callback method to be invoked when the service have changed.
+     * The filter condition to use with the resource.
      */
-    String changed() default "";
+    String filter();
 
     /**
-     * Returns the callback method to invoke when the service is lost.
+     * The interface(s) to use when registering adapters
      */
-    String removed() default "";
-    
-    /**
-     * Returns whether the dependency is required or not.
-     */
-    boolean required() default true;
-    
-    /**
-     * Returns the filter dependency
-     */
-    String filter() default "";
-     
-    /**
-     * Returns the bundle state mask
-     */
-    int stateMask() default Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE;
+    Class<?>[] service() default {};
 
     /**
-     * @TODO
+     * Additional properties to use with the adapter service registration
+     */
+    Property[] properties() default {};
+
+    /**
+     * <code>true</code> if properties from the resource should be propagated to the service.
      */
     boolean propagate() default false;
 }

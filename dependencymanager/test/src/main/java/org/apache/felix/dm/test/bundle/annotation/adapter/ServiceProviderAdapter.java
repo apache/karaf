@@ -19,8 +19,8 @@
 package org.apache.felix.dm.test.bundle.annotation.adapter;
 
 import org.apache.felix.dm.annotation.api.Property;
-import org.apache.felix.dm.annotation.api.adapter.AdapterService;
-import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
+import org.apache.felix.dm.annotation.api.AdapterService;
+import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
 @AdapterService(adapteeService = ServiceInterface.class, adapterProperties={@Property(name="param2", value="value2")})

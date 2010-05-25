@@ -19,7 +19,7 @@
 package org.apache.felix.dm.test.bundle.annotation.aspect;
 
 import org.apache.felix.dm.annotation.api.AspectService;
-import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
+import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
 @AspectService(ranking = 10)

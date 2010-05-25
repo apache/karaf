@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.dm.annotation.api.adapter;
+package org.apache.felix.dm.annotation.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.apache.felix.dm.annotation.api.Property;
 import org.osgi.framework.Bundle;
 
 /**

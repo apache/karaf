@@ -22,7 +22,7 @@ import java.util.Dictionary;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.felix.dm.annotation.api.PropertyMetaData;
-import org.apache.felix.dm.annotation.api.adapter.FactoryConfigurationAdapterService;
+import org.apache.felix.dm.annotation.api.FactoryConfigurationAdapterService;
 
 /**
  * A Dictionary Service. This service uses a FactoryConfigurationAdapterService annotation, 
@@ -65,8 +65,7 @@ public class DictionaryImpl implements DictionaryService
     private CopyOnWriteArrayList<String> m_words = new CopyOnWriteArrayList<String>();
     
     /**
-     * Our service will be initialized from ConfigAdmin, so we define here a configuration dependency
-     * (by default, our PID is our full class name).
+     * Our service will be initialized from ConfigAdmin.
      * @param config The configuration where we'll lookup our words list (key="words").
      */
     protected void updated(Dictionary<String, ?> config) {

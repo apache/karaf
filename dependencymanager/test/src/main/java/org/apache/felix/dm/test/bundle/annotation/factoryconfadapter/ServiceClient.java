@@ -21,7 +21,7 @@ package org.apache.felix.dm.test.bundle.annotation.factoryconfadapter;
 import java.util.Map;
 
 import org.apache.felix.dm.annotation.api.Service;
-import org.apache.felix.dm.annotation.api.dependency.ServiceDependency;
+import org.apache.felix.dm.annotation.api.ServiceDependency;
 
 @Service
 public class ServiceClient
