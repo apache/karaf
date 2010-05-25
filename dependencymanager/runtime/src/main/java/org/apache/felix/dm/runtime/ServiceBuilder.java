@@ -91,7 +91,7 @@ public class ServiceBuilder extends ServiceComponentBuilder
         else
         {
             // We don't instantiate the service, but instead we provide a Set in the registry.
-            // This Set will act as a factory and another component may use registers some
+            // This Set will act as a factory and another component may registers some
             // service configurations into it in order to fire some service instantiations.
 
             ServiceFactory serviceFactory =  new ServiceFactory(b.loadClass(impl), init, start, stop, destroy, 
