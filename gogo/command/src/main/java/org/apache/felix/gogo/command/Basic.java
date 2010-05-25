@@ -620,7 +620,7 @@ public class Basic
     public void refresh(
         @Descriptor(description="target bundles (can be null or empty)") Bundle[] bundles)
     {
-        if ((bundles != null) && (bundles.length != 0))
+        if ((bundles != null) && (bundles.length == 0))
         {
             bundles = null;
         }
@@ -644,7 +644,7 @@ public class Basic
     public void resolve(
         @Descriptor(description="target bundles (can be null or empty)") Bundle[] bundles)
     {
-        if ((bundles != null) && (bundles.length != 0))
+        if ((bundles != null) && (bundles.length == 0))
         {
             bundles = null;
         }
