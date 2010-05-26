@@ -299,7 +299,7 @@ public class Main
         {
             System.err.println("Could not create framework: " + ex);
             ex.printStackTrace();
-            System.exit(-1);
+            System.exit(0);
         }
     }
 
