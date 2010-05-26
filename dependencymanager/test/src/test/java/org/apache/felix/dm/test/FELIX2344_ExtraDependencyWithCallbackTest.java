@@ -51,10 +51,15 @@ public class FELIX2344_ExtraDependencyWithCallbackTest extends Base {
         Ensure e = new Ensure();
         // create a service consumer and provider
         Service sp = m.createService().setInterface(MyService.class.getName(), null).setImplementation(MyServiceImpl.class);
-        Service sc = m.createService().setImplementation(new MyClient(e));
+        Service sc = m.createService().setImplementation(new MyClient(e, false, 1));
+        Service sc2 = m.createService().setImplementation(new MyClient(e, true, 5));
         m.add(sp);
         m.add(sc);
+        m.remove(sc);
         e.waitForStep(4, 5000);
+        m.add(sc2);
+        m.remove(sc2);
+        e.waitForStep(8, 5000);
      }
     
     public interface MyService {
@@ -69,29 +74,33 @@ public class FELIX2344_ExtraDependencyWithCallbackTest extends Base {
     public static class MyClient {
         MyService m_myService;
         private Ensure m_ensure;
+        private final boolean m_required;
+        private final int m_startStep;
 
-        public MyClient(Ensure e) {
+        public MyClient(Ensure e, boolean required, int startStep) {
             m_ensure = e;
+            m_required = required;
+            m_startStep = startStep;
         }
 
         public void init(DependencyManager dm, Service s) {
-            m_ensure.step(1);
+            m_ensure.step(m_startStep);
             s.add(dm.createServiceDependency()
                 .setInstanceBound(true)
                 .setService(MyService.class)
-                .setRequired(true)
+                .setRequired(m_required)
                 .setCallbacks("bind", null));
         }
 
         void bind(MyService myService) {
-            m_ensure.step(2);
+            m_ensure.step(m_startStep + 1);
             m_myService = myService;
         }
 
         public void start() {
-            m_ensure.step(3);
+            m_ensure.step(m_startStep + 2);
             Assert.assertNotNull("Dependendency should have been injected", m_myService);
-            m_ensure.step(4);
+            m_ensure.step(m_startStep + 3);
         }
     }
 }
