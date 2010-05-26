@@ -124,17 +124,12 @@ public class FelixResolverState implements Resolver.ResolverState
 
         if ((module != null) && Util.isFragment(module))
         {
-             addFragment(module);
+            addFragment(module);
         }
         else if (module != null)
         {
             addHost(module);
         }
-
-//System.out.println("UNRESOLVED PACKAGES:");
-//dumpPackageIndex(m_unresolvedPkgIndex);
-//System.out.println("RESOLVED PACKAGES:");
-//dumpPackageIndex(m_resolvedPkgIndex);
     }
 
     public synchronized void removeModule(Module module)
@@ -216,7 +211,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 }
                 if (Util.isFragment(module))
                 {
-                     addFragment(module);
+                    addFragment(module);
                 }
                 else if (module != null)
                 {
@@ -257,7 +252,7 @@ public class FelixResolverState implements Resolver.ResolverState
             }
 
             if ((attachedFragment == null)
-                || (attachedFragment.getVersion().compareTo(fragment.getVersion()) < 0))
+                || (attachedFragment.getVersion().compareTo(fragment.getVersion()) <= 0))
             {
                 // Create a copy of the fragment list and remove the attached
                 // fragment, if necessary.
@@ -300,7 +295,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 }
 
                 // Attach the new fragments to the host.
-                fragments = (newFragments.size() == 0) ? null : newFragments;
+                fragments = (newFragments.isEmpty()) ? null : newFragments;
                 try
                 {
                     ((ModuleImpl) host).attachFragments(fragments);
@@ -344,15 +339,13 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             // Remove from fragment map.
             fragList.remove(fragment);
-            if (fragList.size() == 0)
+            if (fragList.isEmpty())
             {
                 m_fragmentMap.remove(fragment.getSymbolicName());
             }
 
-            // If we have any matching hosts, then remove  fragment while
-            // removing any older version of the new fragment. Also remove host's
-            // existing capabilities from the package index and reindex its new
-            // ones after attaching the fragment.
+            // If we have any matching hosts, then attempt to remove the
+            // fragment from any merged hosts still in the installed state.
             Set<Capability> hostCaps = getMatchingHostCapabilities(fragment);
             for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
             {
@@ -362,7 +355,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 // the host, since it might not be if it wasn't the highest version.
                 // If it was, recalculate the fragments for the host.
                 List<Module> fragments = ((ModuleImpl) host).getFragments();
-                if (fragments.contains(fragment))
+                if ((fragments != null) && fragments.contains(fragment))
                 {
                     List fragmentList = getMatchingFragments(host);
 
@@ -451,6 +444,8 @@ public class FelixResolverState implements Resolver.ResolverState
 
             // Only look at unresolved hosts, since we don't support
             // dynamic attachment of fragments.
+// TODO: FELIX3 - This is potentially too narrow, since it won't allow
+//       attaching with updated modules.
             if (hostCap.getModule().isResolved()
                 || ((BundleImpl) hostCap.getModule().getBundle()).isStale()
                 || ((BundleImpl) hostCap.getModule().getBundle()).isRemovalPending())
@@ -578,7 +573,7 @@ public class FelixResolverState implements Resolver.ResolverState
     {
         // Find the host capability for the current host.
         List<Capability> caps = Util.getCapabilityByNamespace(host, Capability.HOST_NAMESPACE);
-        Capability hostCap = (caps.size() == 0) ? null : caps.get(0);
+        Capability hostCap = (caps.isEmpty()) ? null : caps.get(0);
 
         // If we have a host capability, then loop through all fragments trying to
         // find ones that match.
@@ -598,6 +593,8 @@ public class FelixResolverState implements Resolver.ResolverState
             Module fragment = null;
             for (int i = 0; (fragment == null) && (i < fragments.size()); i++)
             {
+// TODO: FELIX3 - This is potentially too narrow, since it won't allow
+//       attaching with updated modules.
                 Module f = (Module) fragments.get(i);
                 if (!((BundleImpl) f.getBundle()).isStale()
                     && !((BundleImpl) f.getBundle()).isRemovalPending())
@@ -838,7 +835,7 @@ public class FelixResolverState implements Resolver.ResolverState
             // If we have a zero-length native library array, then
             // this means no native library class could be selected
             // so we should fail to resolve.
-            if (libs.size() == 0)
+            if (libs.isEmpty())
             {
                 msg = "No matching native libraries found.";
             }
@@ -885,7 +882,7 @@ public class FelixResolverState implements Resolver.ResolverState
         final List<Capability> modCaps =
             Util.getCapabilityByNamespace(
                 module, Capability.MODULE_NAMESPACE);
-        if (modCaps == null || modCaps.size() == 0)
+        if (modCaps == null || modCaps.isEmpty())
         {
             return false;
         }

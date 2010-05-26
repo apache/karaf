@@ -1031,8 +1031,16 @@ class BundleImpl implements Bundle
 
     synchronized boolean isUsed()
     {
+        boolean unresolved = true;
+        for (int i = 0; unresolved && (i < m_modules.size()); i++)
+        {
+            if (m_modules.get(i).isResolved())
+            {
+                unresolved = false;
+            }
+        }
         boolean used = false;
-        for (int i = 0; !used && (i < m_modules.size()); i++)
+        for (int i = 0; !unresolved && !used && (i < m_modules.size()); i++)
         {
             List<Module> dependents = ((ModuleImpl) m_modules.get(i)).getDependents();
             for (int j = 0; (dependents != null) && (j < dependents.size()) && !used; j++)
