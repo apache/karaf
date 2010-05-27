@@ -31,7 +31,7 @@ import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.osgi.framework.*;
 import org.osgi.service.command.Descriptor;
-import org.osgi.service.command.Flag;
+import org.osgi.service.command.Parameter;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class OBR
@@ -70,10 +70,10 @@ public class OBR
         return (RepositoryAdmin) svcObj;
     }
 
-    @Descriptor(description="manage repositories")
+    @Descriptor("manage repositories")
     public void repos(
-        @Descriptor(description="( add | list | refresh | remove )") String action,
-        @Descriptor(description="space-delimited list of repository URLs") String[] args)
+        @Descriptor("( add | list | refresh | remove )") String action,
+        @Descriptor("space-delimited list of repository URLs") String[] args)
         throws IOException
     {
         Object svcObj = getRepositoryAdmin();
@@ -131,10 +131,11 @@ public class OBR
         }
     }
 
-    @Descriptor(description="list repository resources")
+    @Descriptor("list repository resources")
     public void list(
-        @Flag(name="-v", description="verbose") boolean verbose,
-        @Descriptor(description="optional strings used for name matching") String[] args)
+        @Parameter(name="-v", description="verbose",
+            presentValue="true", absentValue="false") boolean verbose,
+        @Descriptor("optional strings used for name matching") String[] args)
         throws IOException, InvalidSyntaxException
     {
         Object svcObj = getRepositoryAdmin();
@@ -245,9 +246,9 @@ public class OBR
         }
     }
 
-    @Descriptor(description="retrieve resource description from repository")
+    @Descriptor("retrieve resource description from repository")
     public void info(
-        @Descriptor(description="( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
+        @Descriptor("( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
             String[] args)
         throws IOException, InvalidSyntaxException
     {
@@ -288,10 +289,11 @@ public class OBR
         }
     }
 
-    @Descriptor(description="deploy resource from repository")
+    @Descriptor("deploy resource from repository")
     public void deploy(
-        @Flag(name="-s", description="start deployed bundles") boolean start,
-        @Descriptor(description="( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
+        @Parameter(name="-s", description="start deployed bundles",
+            presentValue="true", absentValue="false") boolean start,
+        @Descriptor("( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
             String[] args)
         throws IOException, InvalidSyntaxException
     {
@@ -394,11 +396,12 @@ public class OBR
         }
     }
 
-    @Descriptor(description="retrieve resource source code from repository")
+    @Descriptor("retrieve resource source code from repository")
     public void source(
-        @Flag(name="-x", description="extract") boolean extract,
-        @Descriptor(description="local target directory") File localDir,
-        @Descriptor(description="( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
+        @Parameter(name="-x", description="extract",
+            presentValue="true", absentValue="false") boolean extract,
+        @Descriptor("local target directory") File localDir,
+        @Descriptor("( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
             String[] args)
         throws IOException, InvalidSyntaxException
     {
@@ -443,11 +446,12 @@ public class OBR
         }
     }
 
-    @Descriptor(description="retrieve resource JavaDoc from repository")
+    @Descriptor("retrieve resource JavaDoc from repository")
     public void javadoc(
-        @Flag(name="-x", description="extract") boolean extract,
-        @Descriptor(description="local target directory") File localDir,
-        @Descriptor(description="( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
+        @Parameter(name="-x", description="extract",
+            presentValue="true", absentValue="false") boolean extract,
+        @Descriptor("local target directory") File localDir,
+        @Descriptor("( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
             String[] args)
         throws IOException, InvalidSyntaxException
     {

@@ -27,5 +27,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
 public @interface Descriptor
 {
-    String description();
+    String value();
 }

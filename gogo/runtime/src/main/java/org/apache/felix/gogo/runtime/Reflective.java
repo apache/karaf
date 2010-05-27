@@ -30,8 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Flag;
-import org.osgi.service.command.Option;
+import org.osgi.service.command.Parameter;
 
 public final class Reflective
 {
@@ -213,15 +212,10 @@ public final class Reflective
             Annotation as[] = pas[argIndex];
             for (int a = 0; a < as.length; a++)
             {
-                if (as[a] instanceof Option)
+                if (as[a] instanceof Parameter)
                 {
-                    Option o = (Option) as[a];
-                    out[argIndex] = coerce(session, target, types[argIndex], o.dflt());
-                    start = argIndex + 1;
-                }
-                else if (as[a] instanceof Flag)
-                {
-                    out[argIndex] = coerce(session, target, types[argIndex], false);
+                    Parameter o = (Parameter) as[a];
+                    out[argIndex] = coerce(session, target, types[argIndex], o.absentValue());
                     start = argIndex + 1;
                 }
             }
@@ -241,10 +235,10 @@ public final class Reflective
                         Annotation as[] = pas[argIndex];
                         for (int a = 0; a < as.length; a++)
                         {
-                            if (as[a] instanceof Option)
+                            if (as[a] instanceof Parameter)
                             {
-                                Option o = (Option) as[a];
-                                if (o.name().equals(option))
+                                Parameter o = (Parameter) as[a];
+                                if (o.name().equals(option) && o.presentValue() == null)
                                 {
                                     itArgs.remove();
                                     assert itArgs.hasNext();
@@ -253,15 +247,11 @@ public final class Reflective
                                     out[argIndex] = coerce(session, target,
                                         types[argIndex], value);
                                 }
-                            }
-                            else if (as[a] instanceof Flag)
-                            {
-                                Flag o = (Flag) as[a];
-                                if (o.name().equals(option))
+                                else if (o.name().equals(option) && o.presentValue() != null)
                                 {
                                     itArgs.remove();
                                     out[argIndex] = coerce(session, target,
-                                        types[argIndex], true);
+                                        types[argIndex], o.presentValue());
                                 }
                             }
                         }

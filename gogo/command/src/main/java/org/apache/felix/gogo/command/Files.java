@@ -38,9 +38,9 @@ public class Files
         m_bc = bc;
     }
 
-    @Descriptor(description="get current directory")
+    @Descriptor("get current directory")
     public File cd(
-        @Descriptor(description="automatically supplied shell session") CommandSession session)
+        @Descriptor("automatically supplied shell session") CommandSession session)
     {
         try
         {
@@ -52,10 +52,10 @@ public class Files
         }
     }
 
-    @Descriptor(description="change current directory")
+    @Descriptor("change current directory")
     public File cd(
-        @Descriptor(description="automatically supplied shell session") CommandSession session,
-        @Descriptor(description="target directory") String dir)
+        @Descriptor("automatically supplied shell session") CommandSession session,
+        @Descriptor("target directory") String dir)
         throws IOException
     {
         File cwd = (File) session.get(CWD);
@@ -81,18 +81,18 @@ public class Files
         return cwd;
     }
 
-    @Descriptor(description="get current directory contents")
+    @Descriptor("get current directory contents")
     public File[] ls(
-        @Descriptor(description="automatically supplied shell session") CommandSession session)
+        @Descriptor("automatically supplied shell session") CommandSession session)
         throws IOException
     {
         return ls(session, null);
     }
 
-    @Descriptor(description="get specified path contents")
+    @Descriptor("get specified path contents")
     public File[] ls(
-        @Descriptor(description="automatically supplied shell session") CommandSession session,
-        @Descriptor(description="path with optionally wildcarded file name") String pattern)
+        @Descriptor("automatically supplied shell session") CommandSession session,
+        @Descriptor("path with optionally wildcarded file name") String pattern)
         throws IOException
     {
         pattern = ((pattern == null) || (pattern.length() == 0)) ? "." : pattern;
