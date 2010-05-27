@@ -43,10 +43,6 @@ public class ResolverImpl implements Resolver
 {
     private final Logger m_logger;
 
-    private static final Map<String, Long> m_invokeCounts = new HashMap<String, Long>();
-// TODO: FELIX3 - REMOVE INVOKE COUNTS
-    private static boolean m_isInvokeCount = false;
-
     // Reusable empty array.
     private static final List<Wire> m_emptyWires = Util.m_emptyList;
 
@@ -64,21 +60,10 @@ public class ResolverImpl implements Resolver
         m_logger = logger;
 
         String v = System.getProperty("invoke.count");
-        m_isInvokeCount = (v == null) ? false : Boolean.valueOf(v);
     }
 
     public Map<Module, List<Wire>> resolve(ResolverState state, Module module)
     {
-        m_invokeCounts.clear();
-
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         Map<Module, List<Wire>> wireMap = new HashMap<Module, List<Wire>>();
 
         Map<Module, Packages> modulePkgMap = new HashMap<Module, Packages>();
@@ -149,24 +134,11 @@ public class ResolverImpl implements Resolver
             }
         }
 
-        if (m_isInvokeCount)
-        {
-            System.out.println("INVOKE COUNTS " + m_invokeCounts);
-        }
-
         return wireMap;
     }
 
     public Map<Module, List<Wire>> resolve(ResolverState state, Module module, String pkgName)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         // We can only create a dynamic import if the following
         // conditions are met:
         // 1. The specified module is resolved.
@@ -248,14 +220,6 @@ public class ResolverImpl implements Resolver
     private static Map<Requirement, Set<Capability>> getDynamicImportCandidates(
         ResolverState state, Module module, String pkgName)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         // Unresolved modules cannot dynamically import, nor can the default
         // package be dynamically imported.
         if (!module.isResolved() || pkgName.length() == 0)
@@ -354,14 +318,6 @@ public class ResolverImpl implements Resolver
         Map<Requirement, Set<Capability>> candidateMap,
         Map<Module, Object> resultCache)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         // Determine if we've already calculated this module's candidates.
         // The result cache will have one of three values:
         //   1. A resolve exception if we've already attempted to populate the
@@ -511,14 +467,6 @@ public class ResolverImpl implements Resolver
         ResolverState state, Module module,
         Map<Requirement, Set<Capability>> candidateMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         // There should be one entry in the candidate map, which are the
         // the candidates for the matching dynamic requirement. Get the
         // matching candidates and populate their candidates if necessary.
@@ -557,14 +505,6 @@ public class ResolverImpl implements Resolver
         Map<Capability, List<Module>> usesCycleMap,
         Set<Module> cycle)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if (cycle.contains(module))
         {
             return;
@@ -691,14 +631,6 @@ public class ResolverImpl implements Resolver
         Module current, Requirement currentReq, Capability candCap,
         Map<Module, Packages> modulePkgMap, Map<Requirement, Set<Capability>> candidateMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if (candCap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
             mergeCandidatePackage(
@@ -754,14 +686,6 @@ public class ResolverImpl implements Resolver
         Requirement currentReq, Capability candCap,
         Map<Module, Packages> modulePkgMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if (candCap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
             String pkgName = (String)
@@ -810,14 +734,6 @@ public class ResolverImpl implements Resolver
     private static void addCapabilityDependency(
         Capability cap, Requirement req, Map<Capability, Set<Requirement>> capDepSet)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         Set<Requirement> reqs = capDepSet.get(cap);
         if (reqs == null)
         {
@@ -833,14 +749,6 @@ public class ResolverImpl implements Resolver
         Map<Requirement, Set<Capability>> candidateMap,
         Map<Capability, List<Module>> cycleMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if (!mergeCap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
             return;
@@ -917,14 +825,6 @@ public class ResolverImpl implements Resolver
         Map<Module, Packages> modulePkgMap, Map<Capability, Set<Requirement>> capDepSet,
         Map<Module, Object> resultCache)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if (module.isResolved())
         {
             return;
@@ -1177,14 +1077,6 @@ public class ResolverImpl implements Resolver
     private static void calculateExportedPackages(
         Module module, Map<Module, Packages> modulePkgMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         Packages packages = modulePkgMap.get(module);
         if (packages != null)
         {
@@ -1215,14 +1107,6 @@ public class ResolverImpl implements Resolver
 
     private static boolean hasOverlappingImport(Module module, Capability cap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         List<Requirement> reqs = module.getRequirements();
         for (int i = 0; i < reqs.size(); i++)
         {
@@ -1238,14 +1122,6 @@ public class ResolverImpl implements Resolver
     private boolean isCompatible(
         Capability currentCap, Capability candCap, Map<Module, Packages> modulePkgMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if ((currentCap != null) && (candCap != null))
         {
             if (currentCap.equals(candCap))
@@ -1272,14 +1148,6 @@ public class ResolverImpl implements Resolver
     private List<Capability> getPackageSources(
         Capability cap, Map<Module, Packages> modulePkgMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if (cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
             List<Capability> sources = m_packageSourcesCache.get(cap);
@@ -1299,14 +1167,6 @@ public class ResolverImpl implements Resolver
         Capability cap, Map<Module, Packages> modulePkgMap, List<Capability> sources,
         Set<Capability> cycleMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if (cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
         {
             if (cycleMap.contains(cap))
@@ -1348,14 +1208,6 @@ public class ResolverImpl implements Resolver
     private static Map<Requirement, Set<Capability>> copyCandidateMap(
         Map<Requirement, Set<Capability>> candidateMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         Map<Requirement, Set<Capability>> copy =
             new HashMap<Requirement, Set<Capability>>();
         for (Entry<Requirement, Set<Capability>> entry : candidateMap.entrySet())
@@ -1371,14 +1223,6 @@ public class ResolverImpl implements Resolver
         Module module, Map<Module, Packages> modulePkgMap,
         Map<Module, List<Wire>> wireMap, Map<Requirement, Set<Capability>> candidateMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         if (!module.isResolved() && !wireMap.containsKey(module))
         {
             wireMap.put(module, m_emptyWires);
@@ -1432,14 +1276,6 @@ public class ResolverImpl implements Resolver
         Module module, String pkgName, Map<Module, Packages> modulePkgMap,
         Map<Module, List<Wire>> wireMap, Map<Requirement, Set<Capability>> candidateMap)
     {
-        if (m_isInvokeCount)
-        {
-            String methodName = new Exception().fillInStackTrace().getStackTrace()[0].getMethodName();
-            Long count = m_invokeCounts.get(methodName);
-            count = (count == null) ? new Long(1) : new Long(count.longValue() + 1);
-            m_invokeCounts.put(methodName, count);
-        }
-
         wireMap.put(module, m_emptyWires);
 
         List<Wire> packageWires = new ArrayList<Wire>();
