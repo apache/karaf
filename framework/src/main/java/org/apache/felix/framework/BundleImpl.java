@@ -1086,7 +1086,8 @@ class BundleImpl implements Bundle
 
         // Set protection domain after adding the module to the bundle,
         // since this requires that the bundle has a module.
-        module.setSecurityContext(new BundleProtectionDomain(getFramework(), this));
+        ((ModuleImpl) module).setSecurityContext(
+            new BundleProtectionDomain(getFramework(), this));
 
         SecurityProvider sp = getFramework().getSecurityProvider();
         if ((sp != null) && (System.getSecurityManager() != null))

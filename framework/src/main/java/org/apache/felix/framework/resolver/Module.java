@@ -51,8 +51,6 @@ public interface Module
     String getId();
     List<Wire> getWires();
     boolean isResolved();
-    // TODO: FELIX3 - Shouldn't have mutable method on Module.
-    void setSecurityContext(Object securityContext);
     Object getSecurityContext();
 
     // Content access methods.
