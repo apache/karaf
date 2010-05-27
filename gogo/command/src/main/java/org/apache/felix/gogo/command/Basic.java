@@ -88,9 +88,9 @@ public class Basic
 
     @Descriptor("set bundle start level or initial bundle start level")
     public void bundlelevel(
-        @Parameter(name="-s", description="set the specified bundle's start level",
+        @Parameter(names={ "-s", "--setlevel" }, description="set the bundle's start level",
             presentValue="true", absentValue="false") boolean set,
-        @Parameter(name="-i", description="set the initial bundle start level",
+        @Parameter(names={ "-i", "--setinitial" }, description="set the initial bundle start level",
             presentValue="true", absentValue="false") boolean initial,
         @Descriptor("target level") int level,
         @Descriptor("target identifiers") Bundle[] bundles)
@@ -276,11 +276,11 @@ public class Basic
                             Parameter p = (Parameter) ann;
                             if (p.presentValue().equals(Parameter.UNSPECIFIED))
                             {
-                                options.put(p.name(), p);
+                                options.put(p.names()[0], p);
                             }
                             else
                             {
-                                flags.put(p.name(), p);
+                                flags.put(p.names()[0], p);
                             }
                             found = true;
                         }
@@ -304,10 +304,14 @@ public class Basic
                     System.out.println("   flags:");
                     for (Entry<String, Parameter> entry : flags.entrySet())
                     {
-                        System.out.println("      "
-                            + entry.getValue().name()
-                            + "   "
-                            + entry.getValue().description());
+                        // Print all aliases.
+                        String[] names = entry.getValue().names();
+                        System.out.print("      " + names[0]);
+                        for (int aliasIdx = 1; aliasIdx < names.length; aliasIdx++)
+                        {
+                            System.out.print(", " + names[aliasIdx]);
+                        }
+                        System.out.println("   " + entry.getValue().description());
                     }
                 }
                 if (options.size() > 0)
@@ -315,9 +319,14 @@ public class Basic
                     System.out.println("   options:");
                     for (Entry<String, Parameter> entry : options.entrySet())
                     {
-                        System.out.println("      "
-                            + entry.getValue().name()
-                            + "   "
+                        // Print all aliases.
+                        String[] names = entry.getValue().names();
+                        System.out.print("      " + names[0]);
+                        for (int aliasIdx = 1; aliasIdx < names.length; aliasIdx++)
+                        {
+                            System.out.print(", " + names[aliasIdx]);
+                        }
+                        System.out.println("   "
                             + entry.getValue().description()
                             + ((entry.getValue().absentValue() == null) ? "" : " [optional]"));
                     }
@@ -452,11 +461,11 @@ public class Basic
 
     @Descriptor("list all installed bundles")
     public void lb(
-        @Parameter(name="-l", description="show location",
+        @Parameter(names={ "-l", "--location" }, description="show location",
             presentValue="true", absentValue="false") boolean showLoc,
-        @Parameter(name="-s", description="show symbolic name",
+        @Parameter(names={ "-s", "--symbolicname" }, description="show symbolic name",
             presentValue="true", absentValue="false") boolean showSymbolic,
-        @Parameter(name="-u", description="show update location",
+        @Parameter(names={ "-u", "--updatelocation" }, description="show update location",
             presentValue="true", absentValue="false") boolean showUpdate)
     {
         lb(showLoc, showSymbolic, showUpdate, null);
@@ -464,11 +473,11 @@ public class Basic
 
     @Descriptor("list installed bundles matching a substring")
     public void lb(
-        @Parameter(name="-l", description="show location",
+        @Parameter(names={ "-l", "--location" }, description="show location",
             presentValue="true", absentValue="false") boolean showLoc,
-        @Parameter(name="-s", description="show symbolic name",
+        @Parameter(names={ "-s", "--symbolicname" }, description="show symbolic name",
             presentValue="true", absentValue="false") boolean showSymbolic,
-        @Parameter(name="-u", description="show update location",
+        @Parameter(names={ "-u", "--updatelocation" }, description="show update location",
             presentValue="true", absentValue="false") boolean showUpdate,
         @Descriptor("subtring matched against name or symbolic name") String pattern)
     {
@@ -676,9 +685,9 @@ public class Basic
 
     @Descriptor("start bundles")
     public void start(
-        @Parameter(name="-t", description="transient",
+        @Parameter(names={ "-t", "--transient" }, description="start bundle transiently",
             presentValue="true", absentValue="false") boolean trans,
-        @Parameter(name="-p", description="use declared activation policy",
+        @Parameter(names={ "-p", "--policy" }, description="use declared activation policy",
             presentValue="true", absentValue="false") boolean policy,
         @Descriptor("target bundle identifiers or URLs") String[] ss)
     {
@@ -757,7 +766,7 @@ public class Basic
 
     @Descriptor("stop bundles")
     public void stop(
-        @Parameter(name="-t", description="transient",
+        @Parameter(names={ "-t", "--transient" }, description="stop bundle transiently",
             presentValue="true", absentValue="false") boolean trans,
         @Descriptor("target bundles") Bundle[] bundles)
     {
@@ -1072,37 +1081,5 @@ public class Basic
         {
             return "Unknown    ";
         }
-    }
-
-    private static Bundle getBundle(BundleContext bc, Long id)
-    {
-        Bundle bundle = bc.getBundle(id);
-        if (bundle == null)
-        {
-            System.err.println("Bundle ID " + id + " is invalid");
-        }
-        return bundle;
-    }
-
-    private static List<Bundle> getBundles(BundleContext bc, Long[] ids)
-    {
-        List<Bundle> bundles = new ArrayList<Bundle>();
-        if ((ids != null) && (ids.length > 0))
-        {
-            for (long id : ids)
-            {
-                Bundle bundle = getBundle(bc, id);
-                if (bundle != null)
-                {
-                    bundles.add(bundle);
-                }
-            }
-        }
-        else
-        {
-            bundles = null;
-        }
-
-        return bundles;
     }
 }

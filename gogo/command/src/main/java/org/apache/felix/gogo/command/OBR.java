@@ -133,7 +133,7 @@ public class OBR
 
     @Descriptor("list repository resources")
     public void list(
-        @Parameter(name="-v", description="verbose",
+        @Parameter(names={ "-v", "--verbose" }, description="verbose",
             presentValue="true", absentValue="false") boolean verbose,
         @Descriptor("optional strings used for name matching") String[] args)
         throws IOException, InvalidSyntaxException
@@ -291,7 +291,7 @@ public class OBR
 
     @Descriptor("deploy resource from repository")
     public void deploy(
-        @Parameter(name="-s", description="start deployed bundles",
+        @Parameter(names={ "-s", "--start" }, description="start deployed bundles",
             presentValue="true", absentValue="false") boolean start,
         @Descriptor("( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
             String[] args)
@@ -398,7 +398,7 @@ public class OBR
 
     @Descriptor("retrieve resource source code from repository")
     public void source(
-        @Parameter(name="-x", description="extract",
+        @Parameter(names={ "-x", "--extract" }, description="extract",
             presentValue="true", absentValue="false") boolean extract,
         @Descriptor("local target directory") File localDir,
         @Descriptor("( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")
@@ -448,7 +448,7 @@ public class OBR
 
     @Descriptor("retrieve resource JavaDoc from repository")
     public void javadoc(
-        @Parameter(name="-x", description="extract",
+        @Parameter(names={"-x", "--extract" }, description="extract",
             presentValue="true", absentValue="false") boolean extract,
         @Descriptor("local target directory") File localDir,
         @Descriptor("( <bundle-name> | <symbolic-name> | <bundle-id> )[@<version>] ...")

@@ -30,10 +30,10 @@ public @interface Parameter
     static final String UNSPECIFIED = "org.osgi.service.command.unspecified.parameter";
 
     /**
-     * Parameter name, which must start with the hyphen character.
-     * @return parameter name.
+     * Parameter name and aliases which must start with the hyphen character.
+     * @return parameter names.
     **/
-    String name();
+    String[] names();
 
     /**
      * Optional parameter description.

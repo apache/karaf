@@ -227,8 +227,7 @@ public final class Reflective
             Object item = itArgs.next();
             if (item instanceof String)
             {
-                String option = (String) item;
-                if (option.startsWith("-"))
+                if (((String) item).startsWith("-"))
                 {
                     for (int argIndex = 0; argIndex < pas.length; argIndex++)
                     {
@@ -237,21 +236,28 @@ public final class Reflective
                         {
                             if (as[a] instanceof Parameter)
                             {
-                                Parameter o = (Parameter) as[a];
-                                if (o.name().equals(option) && o.presentValue() == null)
+                                Parameter param = (Parameter) as[a];
+                                for (String name : param.names())
                                 {
-                                    itArgs.remove();
-                                    assert itArgs.hasNext();
-                                    Object value = itArgs.next();
-                                    itArgs.remove();
-                                    out[argIndex] = coerce(session, target,
-                                        types[argIndex], value);
-                                }
-                                else if (o.name().equals(option) && o.presentValue() != null)
-                                {
-                                    itArgs.remove();
-                                    out[argIndex] = coerce(session, target,
-                                        types[argIndex], o.presentValue());
+                                    if (name.equals(item))
+                                    {
+                                        if (param.presentValue() == null)
+                                        {
+                                            itArgs.remove();
+                                            assert itArgs.hasNext();
+                                            Object value = itArgs.next();
+                                            itArgs.remove();
+                                            out[argIndex] = coerce(session, target,
+                                                types[argIndex], value);
+                                        }
+                                        else if (param.presentValue() != null)
+                                        {
+                                            itArgs.remove();
+                                            out[argIndex] = coerce(session, target,
+                                                types[argIndex], param.presentValue());
+                                        }
+                                        break;
+                                    }
                                 }
                             }
                         }
