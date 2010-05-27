@@ -20,7 +20,7 @@
  <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix-parent</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -28,33 +28,12 @@
   <name>Apache Felix Main Distribution</name>
   <artifactId>org.apache.felix.main.distribution</artifactId>
   <version>2.1.0-SNAPSHOT</version>
-  <dependencies>
-    <dependency>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>org.apache.felix.main</artifactId>
-      <version>${framework.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>org.apache.felix.shell</artifactId>
-      <version>${shell.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>org.apache.felix.shell.tui</artifactId>
-      <version>${shell.tui.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>org.apache.felix.bundlerepository</artifactId>
-      <version>${obr.version}</version>
-    </dependency>
-  </dependencies>
   <properties>
     <framework.version>2.1.0-SNAPSHOT</framework.version>
-    <shell.version>1.4.2</shell.version>
-    <shell.tui.version>1.4.1</shell.tui.version>
-    <obr.version>1.4.3</obr.version>
+    <gogo.runtime.version>0.5.0-SNAPSHOT</gogo.runtime.version>
+    <gogo.shell.version>0.5.0-SNAPSHOT</gogo.shell.version>
+    <gogo.command.version>0.5.0-SNAPSHOT</gogo.command.version>
+    <obr.version>1.6.2</obr.version>
   </properties>
   <build>
     <plugins>
@@ -69,41 +48,49 @@
               <goal>copy</goal>
             </goals>
             <configuration>
-                <artifactItems>
-                  <artifactItem>
-                     <groupId>${pom.groupId}</groupId>
-                     <artifactId>org.apache.felix.shell</artifactId>
-                     <version>${shell.version}</version>
-                     <type>jar</type>
-                     <overWrite>true</overWrite>
-                     <outputDirectory>${project.basedir}/bundle</outputDirectory>
-                   </artifactItem>
-                   <artifactItem>
-                     <groupId>${pom.groupId}</groupId>
-                     <artifactId>org.apache.felix.shell.tui</artifactId>
-                     <version>${shell.tui.version}</version>
-                     <type>jar</type>
-                     <overWrite>true</overWrite>
-                     <outputDirectory>${project.basedir}/bundle</outputDirectory>
-                   </artifactItem>
-                   <artifactItem>
-                     <groupId>${pom.groupId}</groupId>
-                     <artifactId>org.apache.felix.bundlerepository</artifactId>
-                     <version>${obr.version}</version>
-                     <type>jar</type>
-                     <overWrite>true</overWrite>
-                     <outputDirectory>${project.basedir}/bundle</outputDirectory>
-                   </artifactItem>
-		   <artifactItem>
-                     <groupId>${pom.groupId}</groupId>
-                     <artifactId>org.apache.felix.main</artifactId>
-                     <version>${framework.version}</version>
-                     <type>jar</type>
-                     <overWrite>true</overWrite>
-                     <outputDirectory>${project.basedir}/bin</outputDirectory>
-		     <destFileName>felix.jar</destFileName>
-                   </artifactItem>
-                 </artifactItems>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${pom.groupId}</groupId>
+                  <artifactId>org.apache.felix.gogo.runtime</artifactId>
+                  <version>${gogo.runtime.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.basedir}/bundle</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>${pom.groupId}</groupId>
+                  <artifactId>org.apache.felix.gogo.shell</artifactId>
+                  <version>${gogo.shell.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.basedir}/bundle</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>${pom.groupId}</groupId>
+                  <artifactId>org.apache.felix.gogo.command</artifactId>
+                  <version>${gogo.command.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.basedir}/bundle</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>${pom.groupId}</groupId>
+                  <artifactId>org.apache.felix.bundlerepository</artifactId>
+                  <version>${obr.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.basedir}/bundle</outputDirectory>
+                </artifactItem>
+		<artifactItem>
+                  <groupId>${pom.groupId}</groupId>
+                  <artifactId>org.apache.felix.main</artifactId>
+                  <version>${framework.version}</version>
+                  <type>jar</type>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.basedir}/bin</outputDirectory>
+		  <destFileName>felix.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
             </configuration>
           </execution>
         </executions>
