@@ -94,7 +94,7 @@ public class ResolverImpl implements Resolver
                     candidateMap = (m_usesPermutations.size() > 0)
                         ? m_usesPermutations.remove(0)
                         : m_importPermutations.remove(0);
-//dumpCandidateMap(state, candidateMap);
+//dumpCandidateMap(candidateMap);
 
                     calculatePackageSpaces(
                         module, candidateMap, modulePkgMap,
@@ -1320,11 +1320,17 @@ public class ResolverImpl implements Resolver
         return wireMap;
     }
 
-    private static void dumpCandidateMap(
-        ResolverState state, Map<Requirement, Set<Capability>> candidateMap)
+    private static void dumpCandidateMap(Map<Requirement, Set<Capability>> candidateMap)
     {
+        // Create set of all modules from requirements.
+        Set<Module> modules = new HashSet();
+        for (Entry<Requirement, Set<Capability>> entry : candidateMap.entrySet())
+        {
+            modules.add(entry.getKey().getModule());
+        }
+        // Now dump the modules.
         System.out.println("=== BEGIN CANDIDATE MAP ===");
-        for (Module module : ((FelixResolverState) state).getModules())
+        for (Module module : modules)
         {
             System.out.println("  " + module
                  + " (" + (module.isResolved() ? "RESOLVED)" : "UNRESOLVED)"));

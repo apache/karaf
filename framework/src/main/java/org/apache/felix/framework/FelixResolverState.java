@@ -712,12 +712,6 @@ public class FelixResolverState implements Resolver.ResolverState
         }
     }
 
-// TODO: FELIX3 - Try to eliminate this.
-    public synchronized List<Module> getModules()
-    {
-        return m_modules;
-    }
-
     public synchronized void moduleResolved(Module module)
     {
         if (module.isResolved())
