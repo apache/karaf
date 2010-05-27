@@ -388,14 +388,13 @@ public class ServiceDependencyImpl extends DependencyBase implements ServiceDepe
         for (int i = 0; i < services.length; i++) {
             DependencyService ds = (DependencyService) services[i];
             if (makeAvailable) {
-                ds.dependencyAvailable(this);
-                
                 // only if this service has already been instantiated should be attempt to
                 // invoke the callback method, if not, this callback will be deferred until
                 // the instance is created (see ServiceImpl.initService())
                 if (ds.getService() != null) {
                     invokeAdded(ds, ref, service);
                 }
+                ds.dependencyAvailable(this);
             }
             else {
                 ds.dependencyChanged(this);

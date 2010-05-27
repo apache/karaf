@@ -53,22 +53,35 @@ public class FELIX2344_ExtraDependencyWithCallbackTest extends Base {
         Service sp = m.createService().setInterface(MyService.class.getName(), null).setImplementation(MyServiceImpl.class);
         Service sc = m.createService().setImplementation(new MyClient(e, false, 1));
         Service sc2 = m.createService().setImplementation(new MyClient(e, true, 5));
+        Service sc3 = m.createService().setImplementation(new MyClient(e, true, 9));
+        
+        // add the provider first, then add the consumer which initially will have no dependencies
+        // but via the init() method an optional dependency with a callback method will be added
         m.add(sp);
         m.add(sc);
+        // remove the consumer again
         m.remove(sc);
         e.waitForStep(4, 5000);
+
+        // next up, add a second consumer, identical to the first, but with a required dependency
+        // with a callback method which will be added in the init() method
         m.add(sc2);
+        // remove the consumer again
         m.remove(sc2);
         e.waitForStep(8, 5000);
-     }
+
+        // now remove the provider, add a third consumer, identical to the second, and after the
+        // consumer has started, add the provider again
+        m.remove(sp);
+        m.add(sc3);
+        m.add(sp);
+        e.waitForStep(12, 5000);
+    }
     
     public interface MyService {
     }
 
     public static class MyServiceImpl implements MyService {
-        public void start() {
-            System.out.println("MyServiceImpl started");
-        }
     }
 
     public static class MyClient {
