@@ -464,7 +464,7 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
     public void setURL(
         URL url, String protocol, String host, int port, String file, String ref)
     {
-        super.setURL(url, protocol, host, port, null, null, file, null, ref);
+        super.setURL(url, protocol, host, port, file, ref);
     }
 
     protected String toExternalForm(URL url)
