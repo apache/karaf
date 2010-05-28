@@ -475,7 +475,7 @@ class ExtensionManager extends URLStreamHandler implements Content
         {
             try
             {
-                result = ((BundleImpl) extBundle).getCurrentModule().getEntry(path);
+                result = ((BundleImpl) extBundle).getCurrentModule().getResourceByDelegation(path);
             }
             catch (Exception ex)
             {
