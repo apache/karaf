@@ -21,9 +21,9 @@
 // DWB10: add SCOPE support: https://www.osgi.org/bugzilla/show_bug.cgi?id=51
 package org.apache.felix.gogo.runtime;
 
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Converter;
-import org.osgi.service.threadio.ThreadIO;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
+import org.apache.felix.service.threadio.ThreadIO;
 
 import java.io.InputStream;
 import java.io.PrintStream;

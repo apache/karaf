@@ -23,9 +23,9 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Descriptor;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Descriptor;
 
 public class Files
 {

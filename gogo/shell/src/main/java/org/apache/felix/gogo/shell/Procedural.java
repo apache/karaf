@@ -21,9 +21,8 @@ package org.apache.felix.gogo.shell;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Function;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
 
 public class Procedural
 {

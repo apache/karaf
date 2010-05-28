@@ -23,14 +23,13 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
-
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Converter;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator, Runnable

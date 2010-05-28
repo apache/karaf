@@ -55,8 +55,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.osgi.service.command; version=${project.version},
-                            org.osgi.service.threadio; version=${project.version}
+                            org.apache.felix.service.command; version=${project.version},
+                            org.apache.felix.service.threadio; version=${project.version}
                         </Export-Package>
                         <Import-Package>
                             org.osgi.service.log*; resolution:=optional,

@@ -30,10 +30,10 @@ import java.util.Set;
 
 import org.apache.felix.gogo.options.Option;
 import org.apache.felix.gogo.options.Options;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
 
 public class Shell
 {

@@ -42,8 +42,8 @@ import java.util.Map.Entry;
 
 import org.apache.felix.gogo.options.Option;
 import org.apache.felix.gogo.options.Options;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Converter;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
 
 /**
  * gosh built-in commands.

@@ -25,7 +25,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 
-import org.osgi.service.command.Converter;
+import org.apache.felix.service.command.Converter;
 
 public class Pipe extends Thread
 {

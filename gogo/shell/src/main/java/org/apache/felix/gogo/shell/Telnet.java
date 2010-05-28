@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.apache.felix.gogo.options.Option;
 import org.apache.felix.gogo.options.Options;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
 
 /*
  * a very simple Telnet server.

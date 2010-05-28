@@ -30,8 +30,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.command.Converter;
-import org.osgi.service.command.Function;
+import org.apache.felix.service.command.Converter;
+import org.apache.felix.service.command.Function;
 import org.osgi.service.startlevel.StartLevel;
 
 public class Converters implements Converter

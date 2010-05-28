@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.felix.gogo.runtime.Tokenizer.Type;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Function;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
 
 public class Closure implements Function, Evaluate
 {

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.felix.gogo.runtime;
 
 public class EOFError extends SyntaxError

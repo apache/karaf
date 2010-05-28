@@ -21,9 +21,8 @@ package org.apache.felix.gogo.shell;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Converter;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
 
 public class Console implements Runnable
 {

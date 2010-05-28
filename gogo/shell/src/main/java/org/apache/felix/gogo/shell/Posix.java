@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import org.apache.felix.gogo.options.Option;
 import org.apache.felix.gogo.options.Options;
-import org.osgi.service.command.CommandSession;
+import org.apache.felix.service.command.CommandSession;
 
 /**
  * Posix-like utilities.

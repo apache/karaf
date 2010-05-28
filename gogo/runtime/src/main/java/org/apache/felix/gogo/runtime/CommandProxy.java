@@ -20,8 +20,8 @@ package org.apache.felix.gogo.runtime;
 
 import java.util.List;
 
-import org.osgi.service.command.Function;
-import org.osgi.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
+import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.BundleContext;
 

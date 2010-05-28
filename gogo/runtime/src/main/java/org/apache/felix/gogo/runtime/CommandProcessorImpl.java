@@ -30,11 +30,11 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Converter;
-import org.osgi.service.command.Function;
-import org.osgi.service.threadio.ThreadIO;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
+import org.apache.felix.service.command.Function;
+import org.apache.felix.service.threadio.ThreadIO;
 
 public class CommandProcessorImpl implements CommandProcessor
 {

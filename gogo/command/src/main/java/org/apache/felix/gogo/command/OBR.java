@@ -29,9 +29,9 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.service.command.Descriptor;
+import org.apache.felix.service.command.Parameter;
 import org.osgi.framework.*;
-import org.osgi.service.command.Descriptor;
-import org.osgi.service.command.Parameter;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class OBR

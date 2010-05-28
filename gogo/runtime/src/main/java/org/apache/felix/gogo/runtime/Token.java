@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.felix.gogo.runtime;
 
 import org.apache.felix.gogo.runtime.Tokenizer.Type;

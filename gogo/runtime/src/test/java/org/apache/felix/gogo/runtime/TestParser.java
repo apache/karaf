@@ -22,8 +22,8 @@ import junit.framework.TestCase;
 
 import org.apache.felix.gogo.runtime.Parser;
 import org.apache.felix.gogo.runtime.Token;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Function;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
 
 import java.io.BufferedReader;
 import java.io.IOException;
