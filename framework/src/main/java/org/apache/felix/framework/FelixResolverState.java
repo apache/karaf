@@ -69,15 +69,15 @@ public class FelixResolverState implements Resolver.ResolverState
 
         List<String> indices = new ArrayList<String>();
         indices.add(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-        m_capSets.put( Capability.MODULE_NAMESPACE,  new CapabilitySet(indices) );
+        m_capSets.put(Capability.MODULE_NAMESPACE, new CapabilitySet(indices));
 
         indices = new ArrayList<String>();
         indices.add(Capability.PACKAGE_ATTR);
-        m_capSets.put( Capability.PACKAGE_NAMESPACE,  new CapabilitySet(indices) );
+        m_capSets.put(Capability.PACKAGE_NAMESPACE, new CapabilitySet(indices));
 
         indices = new ArrayList<String>();
         indices.add(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-        m_capSets.put( Capability.HOST_NAMESPACE,  new CapabilitySet(indices) );
+        m_capSets.put(Capability.HOST_NAMESPACE,  new CapabilitySet(indices));
     }
 
     public synchronized void addModule(Module module)
@@ -377,7 +377,7 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             for (Capability cap : caps)
             {
-                CapabilitySet capSet = m_capSets.get( cap.getNamespace() );
+                CapabilitySet capSet = m_capSets.get(cap.getNamespace());
                 if (capSet == null)
                 {
                     capSet = new CapabilitySet(null);
@@ -394,7 +394,7 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             for (Capability cap : caps)
             {
-                CapabilitySet capSet = m_capSets.get( cap.getNamespace() );
+                CapabilitySet capSet = m_capSets.get(cap.getNamespace());
                 if (capSet != null)
                 {
                     capSet.removeCapability(cap);
@@ -429,7 +429,8 @@ public class FelixResolverState implements Resolver.ResolverState
             }
         }
 
-        Set<Capability> hostCaps = m_capSets.get(Capability.HOST_NAMESPACE).match(hostReq.getFilter(), true);
+        Set<Capability> hostCaps =
+            m_capSets.get(Capability.HOST_NAMESPACE).match(hostReq.getFilter(), true);
 
         for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
         {
@@ -555,7 +556,8 @@ public class FelixResolverState implements Resolver.ResolverState
         SecurityManager sm = System.getSecurityManager();
         if (sm != null)
         {
-            if (!((BundleProtectionDomain) host.getSecurityContext()).impliesDirect(new BundlePermission(host.getSymbolicName(), BundlePermission.HOST)))
+            if (!((BundleProtectionDomain) host.getSecurityContext()).impliesDirect(
+                new BundlePermission(host.getSymbolicName(), BundlePermission.HOST)))
             {
                 return fragmentList;
             }
