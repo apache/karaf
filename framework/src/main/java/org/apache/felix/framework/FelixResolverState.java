@@ -173,6 +173,7 @@ public class FelixResolverState implements Resolver.ResolverState
             }
             catch (Exception ex2)
             {
+                // Ignore
             }
             m_logger.log(Logger.LOG_ERROR,
                 "Serious error attaching fragments.", ex);
@@ -299,6 +300,7 @@ public class FelixResolverState implements Resolver.ResolverState
                     }
                     catch (Exception ex2)
                     {
+                        // Ignore
                     }
                     m_logger.log(Logger.LOG_ERROR,
                         "Serious error attaching fragments.", ex);
@@ -314,7 +316,7 @@ public class FelixResolverState implements Resolver.ResolverState
     private void removeFragment(Module fragment)
     {
         // Get fragment list, which may be null for system bundle fragments.
-        List fragList = (List) m_fragmentMap.get(fragment.getSymbolicName());
+        List<Module> fragList = m_fragmentMap.get(fragment.getSymbolicName());
         if (fragList != null)
         {
             // Remove from fragment map.
@@ -357,6 +359,7 @@ public class FelixResolverState implements Resolver.ResolverState
                         }
                         catch (Exception ex2)
                         {
+                            // Ignore
                         }
                         m_logger.log(Logger.LOG_ERROR,
                             "Serious error attaching fragments.", ex);
@@ -498,6 +501,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 }
                 catch (Exception ex2)
                 {
+                    // Ignore
                 }
                 m_logger.log(Logger.LOG_ERROR,
                     "Serious error attaching fragments.", ex);
@@ -603,7 +607,7 @@ public class FelixResolverState implements Resolver.ResolverState
                     (index < 0) && (listIdx < fragmentList.size());
                     listIdx++)
                 {
-                    Module existing = (Module) fragmentList.get(listIdx);
+                    Module existing = fragmentList.get(listIdx);
                     if (fragment.getBundle().getBundleId()
                         < existing.getBundle().getBundleId())
                     {
@@ -872,12 +876,11 @@ public class FelixResolverState implements Resolver.ResolverState
         else
         {
             Version version = module.getVersion();
-            Version middleVersion = null;
-            int top = 0, bottom = modules.size() - 1, middle = 0;
+            int top = 0, bottom = modules.size() - 1;
             while (top <= bottom)
             {
-                middle = (bottom - top) / 2 + top;
-                middleVersion = modules.get(middle).getVersion();
+                int middle = (bottom - top) / 2 + top;
+                Version middleVersion = modules.get(middle).getVersion();
                 // Sort in reverse version order.
                 int cmp = middleVersion.compareTo(version);
                 if (cmp < 0)
@@ -887,7 +890,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 else if (cmp == 0)
                 {
                     // Sort further by ascending bundle ID.
-                    long middleId = ((Module) modules.get(middle)).getBundle().getBundleId();
+                    long middleId = modules.get(middle).getBundle().getBundleId();
                     long exportId = module.getBundle().getBundleId();
                     if (middleId < exportId)
                     {
