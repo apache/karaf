@@ -27,7 +27,7 @@
     <packaging>bundle</packaging>
     <name>Apache Felix Declarative Services</name>
     <description>
-        Implementation of the Declarative Services specification 1.0
+        Implementation of the Declarative Services specification 1.1
     </description>
     <artifactId>org.apache.felix.scr</artifactId>
     <version>1.4.1-SNAPSHOT</version>
