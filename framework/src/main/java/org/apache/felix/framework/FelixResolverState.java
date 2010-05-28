@@ -47,39 +47,37 @@ public class FelixResolverState implements Resolver.ResolverState
     private final Logger m_logger;
     // List of all modules.
     private final List<Module> m_modules;
-    // Capability set for modules.
-    private final CapabilitySet m_modCapSet;
-    // Capability set for packages.
-    private final CapabilitySet m_pkgCapSet;
-    // Capability set for hosts.
-    private final CapabilitySet m_hostCapSet;
+    // Capability sets.
+    private final Map<String, CapabilitySet> m_capSets;
     // Maps fragment symbolic names to list of fragment modules sorted by version.
     private final Map<String, List<Module>> m_fragmentMap = new HashMap<String, List<Module>>();
     // Maps singleton symbolic names to list of modules sorted by version.
     private final Map<String, List<Module>> m_singletons = new HashMap<String, List<Module>>();
     // Execution environment.
     private final String m_fwkExecEnvStr;
-    private final Set m_fwkExecEnvSet;
+    // Parsed framework environments
+    private final Set<String> m_fwkExecEnvSet;
 
     public FelixResolverState(Logger logger, String fwkExecEnvStr)
     {
         m_logger = logger;
         m_modules = new ArrayList<Module>();
+        m_capSets = new HashMap<String, CapabilitySet>();
 
         m_fwkExecEnvStr = (fwkExecEnvStr != null) ? fwkExecEnvStr.trim() : null;
         m_fwkExecEnvSet = parseExecutionEnvironments(fwkExecEnvStr);
 
         List<String> indices = new ArrayList<String>();
         indices.add(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-        m_modCapSet = new CapabilitySet(indices);
+        m_capSets.put( Capability.MODULE_NAMESPACE,  new CapabilitySet(indices) );
 
         indices = new ArrayList<String>();
         indices.add(Capability.PACKAGE_ATTR);
-        m_pkgCapSet = new CapabilitySet(indices);
+        m_capSets.put( Capability.PACKAGE_NAMESPACE,  new CapabilitySet(indices) );
 
         indices = new ArrayList<String>();
         indices.add(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-        m_hostCapSet = new CapabilitySet(indices);
+        m_capSets.put( Capability.HOST_NAMESPACE,  new CapabilitySet(indices) );
     }
 
     public synchronized void addModule(Module module)
@@ -379,14 +377,13 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             for (Capability cap : caps)
             {
-                if (cap.getNamespace().equals(Capability.MODULE_NAMESPACE))
+                CapabilitySet capSet = m_capSets.get( cap.getNamespace() );
+                if (capSet == null)
                 {
-                    m_modCapSet.addCapability(cap);
+                    capSet = new CapabilitySet(null);
+                    m_capSets.put(cap.getNamespace(), capSet);
                 }
-                else if (cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-                {
-                    m_pkgCapSet.addCapability(cap);
-                }
+                capSet.addCapability(cap);
             }
         }
     }
@@ -397,13 +394,10 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             for (Capability cap : caps)
             {
-                if (cap.getNamespace().equals(Capability.MODULE_NAMESPACE))
+                CapabilitySet capSet = m_capSets.get( cap.getNamespace() );
+                if (capSet != null)
                 {
-                    m_modCapSet.removeCapability(cap);
-                }
-                else if (cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-                {
-                    m_pkgCapSet.removeCapability(cap);
+                    capSet.removeCapability(cap);
                 }
             }
         }
@@ -435,7 +429,7 @@ public class FelixResolverState implements Resolver.ResolverState
             }
         }
 
-        Set<Capability> hostCaps = m_hostCapSet.match(hostReq.getFilter(), true);
+        Set<Capability> hostCaps = m_capSets.get(Capability.HOST_NAMESPACE).match(hostReq.getFilter(), true);
 
         for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
         {
@@ -475,7 +469,7 @@ public class FelixResolverState implements Resolver.ResolverState
         List<Capability> caps = Util.getCapabilityByNamespace(host, Capability.HOST_NAMESPACE);
         if (caps.size() > 0)
         {
-            m_hostCapSet.addCapability(caps.get(0));
+            m_capSets.get(Capability.HOST_NAMESPACE).addCapability(caps.get(0));
         }
 
         //
@@ -527,7 +521,7 @@ public class FelixResolverState implements Resolver.ResolverState
         List<Capability> caps = Util.getCapabilityByNamespace(host, Capability.HOST_NAMESPACE);
         if (caps.size() > 0)
         {
-            m_hostCapSet.removeCapability(caps.get(0));
+            m_capSets.get(Capability.HOST_NAMESPACE).removeCapability(caps.get(0));
         }
 
         // Remove exports from package maps.
@@ -706,7 +700,7 @@ public class FelixResolverState implements Resolver.ResolverState
                             && wire.getCapability().getAttribute(Capability.PACKAGE_ATTR).getValue()
                                 .equals(caps.get(capIdx).getAttribute(Capability.PACKAGE_ATTR).getValue()))
                         {
-                            m_pkgCapSet.removeCapability(caps.get(capIdx));
+                            m_capSets.get(Capability.PACKAGE_NAMESPACE).removeCapability(caps.get(capIdx));
                             break;
                         }
                     }
@@ -719,13 +713,10 @@ public class FelixResolverState implements Resolver.ResolverState
     {
         Set<Capability> result = new TreeSet<Capability>(new CandidateComparator());
 
-        if (req.getNamespace().equals(Capability.MODULE_NAMESPACE))
+        CapabilitySet capSet = m_capSets.get(req.getNamespace());
+        if (capSet != null)
         {
-            result.addAll(m_modCapSet.match(req.getFilter(), obeyMandatory));
-        }
-        else if (req.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-        {
-            result.addAll(m_pkgCapSet.match(req.getFilter(), obeyMandatory));
+            result.addAll(capSet.match(req.getFilter(), obeyMandatory));
         }
 
         return result;
