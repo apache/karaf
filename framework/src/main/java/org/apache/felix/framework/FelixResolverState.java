@@ -586,7 +586,8 @@ public class FelixResolverState implements Resolver.ResolverState
             
             if (sm != null)
             {
-                if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(new BundlePermission(fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
+                if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(
+                    new BundlePermission(fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
                 {
                     continue;
                 }
