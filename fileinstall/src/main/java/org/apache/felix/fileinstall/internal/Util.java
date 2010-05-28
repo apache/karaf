@@ -133,7 +133,7 @@ public class Util
         // return the existing value.
         if ((startDelim < 0) || (stopDelim < 0))
         {
-            return val;
+            return unescape(val);
         }
 
         // At this point, we have found a variable placeholder so
@@ -154,7 +154,7 @@ public class Util
         if (substValue == null)
         {
             // Ignore unknown property values.
-            substValue = System.getProperty(variable, "");
+            substValue = variable.length() > 0 ? System.getProperty(variable, "") : "";
         }
 
         // Remove the found variable from the cycle map, since
@@ -172,6 +172,13 @@ public class Util
         val = substVars(val, currentKey, cycleMap, configProps);
 
         // Remove escape characters preceding {, } and \
+        val = unescape(val);
+
+        // Return the value.
+        return val;
+    }
+
+    private static String unescape(String val) {
         int escape = val.indexOf(ESCAPE_CHAR);
         while (escape >= 0 && escape < val.length() - 1)
         {
@@ -182,8 +189,6 @@ public class Util
             }
             escape = val.indexOf(ESCAPE_CHAR, escape + 1);
         }
-
-        // Return the value.
         return val;
     }
 

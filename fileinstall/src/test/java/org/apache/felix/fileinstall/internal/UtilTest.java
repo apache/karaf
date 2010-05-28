@@ -54,4 +54,31 @@ public class UtilTest extends TestCase
         assertEquals("${a", Util.substVars("${a", "b", null, new Hashtable()));
     }
 
+    public void testEmptyVariable() {
+        assertEquals("", Util.substVars("${}", "b", null, new Hashtable()));
+    }
+
+    public void testInnerSubst() {
+        Dictionary props = new Hashtable();
+        props.put("a", "b");
+        props.put("b", "c");
+        assertEquals("c", Util.substVars("${${a}}", "z", null, props));
+    }
+
+    public void testSubstLoop() {
+        try {
+            Util.substVars("${a}", "a", null, new Hashtable());
+            fail("Should have thrown an exception");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    public void testSubstitutionEscape()
+    {
+        assertEquals("${a}", Util.substVars("$\\{a${#}\\}", "b", null, new Hashtable()));
+        assertEquals("${a}", Util.substVars("$\\{a\\}${#}", "b", null, new Hashtable()));
+        assertEquals("${a}", Util.substVars("$\\{a\\}", "b", null, new Hashtable()));
+    }
+
 }
