@@ -88,10 +88,12 @@ public class Basic
 
     @Descriptor("set bundle start level or initial bundle start level")
     public void bundlelevel(
-        @Parameter(names={ "-s", "--setlevel" }, description="set the bundle's start level",
-            presentValue="true", absentValue="false") boolean set,
-        @Parameter(names={ "-i", "--setinitial" }, description="set the initial bundle start level",
-            presentValue="true", absentValue="false") boolean initial,
+        @Descriptor("set the bundle's start level")
+        @Parameter(names={ "-s", "--setlevel" }, presentValue="true",
+            absentValue="false") boolean set,
+        @Descriptor("set the initial bundle start level")
+        @Parameter(names={ "-i", "--setinitial" }, presentValue="true",
+            absentValue="false") boolean initial,
         @Descriptor("target level") int level,
         @Descriptor("target identifiers") Bundle[] bundles)
     {
@@ -262,36 +264,40 @@ public class Basic
                 // Get flags and options.
                 Class[] paramTypes = m.getParameterTypes();
                 Map<String, Parameter> flags = new TreeMap();
+                Map<String, String> flagDescs = new TreeMap();
                 Map<String, Parameter> options = new TreeMap();
+                Map<String, String> optionDescs = new TreeMap();
                 List<String> params = new ArrayList();
                 Annotation[][] anns = m.getParameterAnnotations();
                 for (int paramIdx = 0; paramIdx < anns.length; paramIdx++)
                 {
-                    boolean found = false;
-                    for (int annIdx = 0; !found && (annIdx < anns[paramIdx].length); annIdx++)
+                    Parameter p = findAnnotation(anns[paramIdx], Parameter.class);
+                    d = findAnnotation(anns[paramIdx], Descriptor.class);
+                    if (p != null)
                     {
-                        Annotation ann = anns[paramIdx][annIdx];
-                        if (ann instanceof Parameter)
+                        if (p.presentValue().equals(Parameter.UNSPECIFIED))
                         {
-                            Parameter p = (Parameter) ann;
-                            if (p.presentValue().equals(Parameter.UNSPECIFIED))
+                            options.put(p.names()[0], p);
+                            if (d != null)
                             {
-                                options.put(p.names()[0], p);
+                                optionDescs.put(p.names()[0], d.value());
                             }
-                            else
-                            {
-                                flags.put(p.names()[0], p);
-                            }
-                            found = true;
                         }
-                        else if (ann instanceof Descriptor)
+                        else
                         {
-                            params.add(paramTypes[paramIdx].getSimpleName());
-                            params.add(((Descriptor) ann).value());
-                            found = true;
+                            flags.put(p.names()[0], p);
+                            if (d != null)
+                            {
+                                flagDescs.put(p.names()[0], d.value());
+                            }
                         }
                     }
-                    if (!found)
+                    else if (d != null)
+                    {
+                        params.add(paramTypes[paramIdx].getSimpleName());
+                        params.add(d.value());
+                    }
+                    else
                     {
                         params.add(paramTypes[paramIdx].getSimpleName());
                         params.add("");
@@ -311,7 +317,7 @@ public class Basic
                         {
                             System.out.print(", " + names[aliasIdx]);
                         }
-                        System.out.println("   " + entry.getValue().description());
+                        System.out.println("   " + flagDescs.get(entry.getKey()));
                     }
                 }
                 if (options.size() > 0)
@@ -327,7 +333,7 @@ public class Basic
                             System.out.print(", " + names[aliasIdx]);
                         }
                         System.out.println("   "
-                            + entry.getValue().description()
+                            + optionDescs.get(entry.getKey())
                             + ((entry.getValue().absentValue() == null) ? "" : " [optional]"));
                     }
                 }
@@ -341,6 +347,18 @@ public class Basic
                 }
             }
         }
+    }
+
+    private static <T extends Annotation> T findAnnotation(Annotation[] anns, Class<T> clazz)
+    {
+        for (int i = 0; (anns != null) && (i < anns.length); i++)
+        {
+            if (clazz.isInstance(anns[i]))
+            {
+                return clazz.cast(anns[i]);
+            }
+        }
+        return null;
     }
 
     private Map<String, List<Method>> getCommands()
@@ -461,24 +479,30 @@ public class Basic
 
     @Descriptor("list all installed bundles")
     public void lb(
-        @Parameter(names={ "-l", "--location" }, description="show location",
-            presentValue="true", absentValue="false") boolean showLoc,
-        @Parameter(names={ "-s", "--symbolicname" }, description="show symbolic name",
-            presentValue="true", absentValue="false") boolean showSymbolic,
-        @Parameter(names={ "-u", "--updatelocation" }, description="show update location",
-            presentValue="true", absentValue="false") boolean showUpdate)
+        @Descriptor("show location")
+        @Parameter(names={ "-l", "--location" }, presentValue="true",
+            absentValue="false") boolean showLoc,
+        @Descriptor("show symbolic name")
+        @Parameter(names={ "-s", "--symbolicname" }, presentValue="true",
+            absentValue="false") boolean showSymbolic,
+        @Descriptor("show update location")
+        @Parameter(names={ "-u", "--updatelocation" }, presentValue="true",
+            absentValue="false") boolean showUpdate)
     {
         lb(showLoc, showSymbolic, showUpdate, null);
     }
 
     @Descriptor("list installed bundles matching a substring")
     public void lb(
-        @Parameter(names={ "-l", "--location" }, description="show location",
-            presentValue="true", absentValue="false") boolean showLoc,
-        @Parameter(names={ "-s", "--symbolicname" }, description="show symbolic name",
-            presentValue="true", absentValue="false") boolean showSymbolic,
-        @Parameter(names={ "-u", "--updatelocation" }, description="show update location",
-            presentValue="true", absentValue="false") boolean showUpdate,
+        @Descriptor("show location")
+        @Parameter(names={ "-l", "--location" }, presentValue="true",
+            absentValue="false") boolean showLoc,
+        @Descriptor("show symbolic name")
+        @Parameter(names={ "-s", "--symbolicname" }, presentValue="true",
+            absentValue="false") boolean showSymbolic,
+        @Descriptor("show update location")
+        @Parameter(names={ "-u", "--updatelocation" }, presentValue="true",
+            absentValue="false") boolean showUpdate,
         @Descriptor("subtring matched against name or symbolic name") String pattern)
     {
         // Keep track of service references.
@@ -685,10 +709,12 @@ public class Basic
 
     @Descriptor("start bundles")
     public void start(
-        @Parameter(names={ "-t", "--transient" }, description="start bundle transiently",
-            presentValue="true", absentValue="false") boolean trans,
-        @Parameter(names={ "-p", "--policy" }, description="use declared activation policy",
-            presentValue="true", absentValue="false") boolean policy,
+        @Descriptor("start bundle transiently")
+        @Parameter(names={ "-t", "--transient" }, presentValue="true",
+            absentValue="false") boolean trans,
+        @Descriptor("use declared activation policy")
+        @Parameter(names={ "-p", "--policy" }, presentValue="true",
+            absentValue="false") boolean policy,
         @Descriptor("target bundle identifiers or URLs") String[] ss)
     {
         int options = 0;
@@ -766,8 +792,9 @@ public class Basic
 
     @Descriptor("stop bundles")
     public void stop(
-        @Parameter(names={ "-t", "--transient" }, description="stop bundle transiently",
-            presentValue="true", absentValue="false") boolean trans,
+        @Descriptor("stop bundle transiently")
+        @Parameter(names={ "-t", "--transient" }, presentValue="true",
+            absentValue="false") boolean trans,
         @Descriptor("target bundles") Bundle[] bundles)
     {
         if ((bundles == null) || (bundles.length == 0))

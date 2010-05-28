@@ -27,19 +27,13 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER})
 public @interface Parameter
 {
-    static final String UNSPECIFIED = "org.osgi.service.command.unspecified.parameter";
+    static final String UNSPECIFIED = "org.apache.felix.service.command.unspecified.parameter";
 
     /**
      * Parameter name and aliases which must start with the hyphen character.
      * @return parameter names.
     **/
     String[] names();
-
-    /**
-     * Optional parameter description.
-     * @return parameter description.
-    **/
-    String description() default "";
 
     /**
      * The default value of the parameter if its name is present on the
