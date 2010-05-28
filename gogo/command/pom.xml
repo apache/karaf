@@ -79,6 +79,7 @@
             <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
             <Private-Package>${pom.artifactId}</Private-Package>
             <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
+            <Include-Resource>{maven-resources},META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,META-INF/DEPENDENCIES=DEPENDENCIES</Include-Resource>
             <DynamicImport-Package>org.apache.felix.bundlerepository, org.apache.felix.bundlerepository.*</DynamicImport-Package>
           </instructions>
         </configuration>
