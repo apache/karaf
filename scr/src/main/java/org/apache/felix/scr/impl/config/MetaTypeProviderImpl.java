@@ -24,7 +24,9 @@ import java.util.Dictionary;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.metatype.*;
+import org.osgi.service.metatype.AttributeDefinition;
+import org.osgi.service.metatype.MetaTypeProvider;
+import org.osgi.service.metatype.ObjectClassDefinition;
 
 public class MetaTypeProviderImpl
     implements MetaTypeProvider, ManagedService

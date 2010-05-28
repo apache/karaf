@@ -21,7 +21,6 @@ package org.apache.felix.scr.impl.helper;
 
 import junit.framework.TestCase;
 
-import org.apache.felix.scr.impl.helper.BindMethod;
 import org.apache.felix.scr.impl.manager.ImmediateComponentManager;
 import org.apache.felix.scr.impl.manager.components.FakeService;
 import org.apache.felix.scr.impl.manager.components.T1;

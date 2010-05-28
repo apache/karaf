@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-import org.apache.felix.scr.impl.helper.SuitableMethodNotAccessibleException;
 import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
