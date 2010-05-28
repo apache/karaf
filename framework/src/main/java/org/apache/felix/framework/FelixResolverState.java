@@ -282,17 +282,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
                 // Remove host's existing exported packages from index.
                 List<Capability> caps = host.getCapabilities();
-                for (int i = 0; (caps != null) && (i < caps.size()); i++)
-                {
-                    if (caps.get(i).getNamespace().equals(Capability.MODULE_NAMESPACE))
-                    {
-                        m_modCapSet.removeCapability(caps.get(i));
-                    }
-                    else if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-                    {
-                        m_pkgCapSet.removeCapability(caps.get(i));
-                    }
-                }
+                removeCapabilities(caps);
 
                 // Attach the new fragments to the host.
                 fragments = (newFragments.isEmpty()) ? null : newFragments;
@@ -316,17 +306,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
                 // Reindex the host's exported packages.
                 caps = host.getCapabilities();
-                for (int i = 0; (caps != null) && (i < caps.size()); i++)
-                {
-                    if (caps.get(i).getNamespace().equals(Capability.MODULE_NAMESPACE))
-                    {
-                        m_modCapSet.addCapability(caps.get(i));
-                    }
-                    else if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-                    {
-                        m_pkgCapSet.addCapability(caps.get(i));
-                    }
-                }
+                addCapabilities(caps);
             }
         }
     }
@@ -361,17 +341,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
                     // Remove host's existing exported packages from index.
                     List<Capability> caps = host.getCapabilities();
-                    for (int i = 0; (caps != null) && (i < caps.size()); i++)
-                    {
-                        if (caps.get(i).getNamespace().equals(Capability.MODULE_NAMESPACE))
-                        {
-                            m_modCapSet.removeCapability(caps.get(i));
-                        }
-                        else if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-                        {
-                            m_pkgCapSet.removeCapability(caps.get(i));
-                        }
-                    }
+                    removeCapabilities(caps);
 
                     // Attach the fragments to the host.
                     try
@@ -394,17 +364,43 @@ public class FelixResolverState implements Resolver.ResolverState
 
                     // Reindex the host's exported packages.
                     caps = host.getCapabilities();
-                    for (int i = 0; (caps != null) && (i < caps.size()); i++)
-                    {
-                        if (caps.get(i).getNamespace().equals(Capability.MODULE_NAMESPACE))
-                        {
-                            m_modCapSet.addCapability(caps.get(i));
-                        }
-                        else if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-                        {
-                            m_pkgCapSet.addCapability(caps.get(i));
-                        }
-                    }
+                    addCapabilities(caps);
+                }
+            }
+        }
+    }
+
+    private void addCapabilities(List<Capability> caps)
+    {
+        if (caps != null)
+        {
+            for (Capability cap : caps)
+            {
+                if (cap.getNamespace().equals(Capability.MODULE_NAMESPACE))
+                {
+                    m_modCapSet.addCapability(cap);
+                }
+                else if (cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
+                {
+                    m_pkgCapSet.addCapability(cap);
+                }
+            }
+        }
+    }
+
+    private void removeCapabilities(List<Capability> caps)
+    {
+        if (caps != null)
+        {
+            for (Capability cap : caps)
+            {
+                if (cap.getNamespace().equals(Capability.MODULE_NAMESPACE))
+                {
+                    m_modCapSet.removeCapability(cap);
+                }
+                else if (cap.getNamespace().equals(Capability.PACKAGE_NAMESPACE))
+                {
+                    m_pkgCapSet.removeCapability(cap);
                 }
             }
         }
@@ -515,17 +511,7 @@ public class FelixResolverState implements Resolver.ResolverState
         caps = host.getCapabilities();
 
         // Add exports to unresolved package map.
-        for (int i = 0; (caps != null) && (i < caps.size()); i++)
-        {
-            if (caps.get(i).getNamespace().equals(Capability.MODULE_NAMESPACE))
-            {
-                m_modCapSet.addCapability(caps.get(i));
-            }
-            else if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-            {
-                m_pkgCapSet.addCapability(caps.get(i));
-            }
-        }
+        addCapabilities(caps);
     }
 
     private void removeHost(Module host)
@@ -542,17 +528,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
         // Remove exports from package maps.
         caps = host.getCapabilities();
-        for (int i = 0; (caps != null) && (i < caps.size()); i++)
-        {
-            if (caps.get(i).getNamespace().equals(Capability.MODULE_NAMESPACE))
-            {
-                m_modCapSet.removeCapability(caps.get(i));
-            }
-            else if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-            {
-                m_pkgCapSet.removeCapability(caps.get(i));
-            }
-        }
+        removeCapabilities(caps);
 
         // Set fragments to null, which will remove the module from all
         // of its dependent fragment modules.
@@ -699,17 +675,7 @@ public class FelixResolverState implements Resolver.ResolverState
         // The system bundle module should always be resolved, so we only need
         // to update the resolved capability map.
         List<Capability> caps = module.getCapabilities();
-        for (int i = 0; (caps != null) && (i < caps.size()); i++)
-        {
-            if (caps.get(i).getNamespace().equals(Capability.MODULE_NAMESPACE))
-            {
-                m_modCapSet.addCapability(caps.get(i));
-            }
-            else if (caps.get(i).getNamespace().equals(Capability.PACKAGE_NAMESPACE))
-            {
-                m_pkgCapSet.addCapability(caps.get(i));
-            }
-        }
+        addCapabilities(caps);
     }
 
     public synchronized void moduleResolved(Module module)
