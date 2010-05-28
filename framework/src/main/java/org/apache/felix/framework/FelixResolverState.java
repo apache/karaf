@@ -54,9 +54,9 @@ public class FelixResolverState implements Resolver.ResolverState
     // Capability set for hosts.
     private final CapabilitySet m_hostCapSet;
     // Maps fragment symbolic names to list of fragment modules sorted by version.
-    private final Map<String, List<Module>> m_fragmentMap = new HashMap();
+    private final Map<String, List<Module>> m_fragmentMap = new HashMap<String, List<Module>>();
     // Maps singleton symbolic names to list of modules sorted by version.
-    private final Map<String, List<Module>> m_singletons = new HashMap();
+    private final Map<String, List<Module>> m_singletons = new HashMap<String, List<Module>>();
     // Execution environment.
     private final String m_fwkExecEnvStr;
     private final Set m_fwkExecEnvSet;
@@ -69,15 +69,15 @@ public class FelixResolverState implements Resolver.ResolverState
         m_fwkExecEnvStr = (fwkExecEnvStr != null) ? fwkExecEnvStr.trim() : null;
         m_fwkExecEnvSet = parseExecutionEnvironments(fwkExecEnvStr);
 
-        List indices = new ArrayList();
+        List<String> indices = new ArrayList<String>();
         indices.add(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
         m_modCapSet = new CapabilitySet(indices);
 
-        indices = new ArrayList();
+        indices = new ArrayList<String>();
         indices.add(Capability.PACKAGE_ATTR);
         m_pkgCapSet = new CapabilitySet(indices);
 
-        indices = new ArrayList();
+        indices = new ArrayList<String>();
         indices.add(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
         m_hostCapSet = new CapabilitySet(indices);
     }
@@ -186,9 +186,9 @@ public class FelixResolverState implements Resolver.ResolverState
         if ((modules != null) && modules.contains(module))
         {
             // If it is, check if there is already a resolved singleton.
-            for (int i = 0; (modules != null) && (i < modules.size()); i++)
+            for (Module mod : modules)
             {
-                if (modules.get(i).isResolved())
+                if (mod.isResolved())
                 {
                     throw new ResolveException(
                         "Only one singleton can be resolved at a time.", null, null);
@@ -213,7 +213,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 {
                     addFragment(module);
                 }
-                else if (module != null)
+                else
                 {
                     addHost(module);
                 }
@@ -232,9 +232,9 @@ public class FelixResolverState implements Resolver.ResolverState
         // symbolic name attached to it or if the currently attached fragment
         // is a lower version.
         Set<Capability> hostCaps = getMatchingHostCapabilities(fragment);
-        for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
+        for (Capability cap : hostCaps)
         {
-            Module host = it.next().getModule();
+            Module host = cap.getModule();
 
             // Get the fragments currently attached to the host so we
             // can remove the older version of the current fragment, if any.
@@ -257,8 +257,8 @@ public class FelixResolverState implements Resolver.ResolverState
                 // Create a copy of the fragment list and remove the attached
                 // fragment, if necessary.
                 List<Module> newFragments = (fragments == null)
-                    ? new ArrayList()
-                    : new ArrayList(fragments);
+                    ? new ArrayList<Module>()
+                    : new ArrayList<Module>(fragments);
                 if (attachedFragment != null)
                 {
                     newFragments.remove(attachedFragment);
@@ -347,9 +347,9 @@ public class FelixResolverState implements Resolver.ResolverState
             // If we have any matching hosts, then attempt to remove the
             // fragment from any merged hosts still in the installed state.
             Set<Capability> hostCaps = getMatchingHostCapabilities(fragment);
-            for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
+            for (Capability hostCap : hostCaps)
             {
-                Module host = it.next().getModule();
+                Module host = hostCap.getModule();
 
                 // Check to see if the removed fragment was actually merged with
                 // the host, since it might not be if it wasn't the highest version.
@@ -357,7 +357,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 List<Module> fragments = ((ModuleImpl) host).getFragments();
                 if ((fragments != null) && fragments.contains(fragment))
                 {
-                    List fragmentList = getMatchingFragments(host);
+                    List<Module> fragmentList = getMatchingFragments(host);
 
                     // Remove host's existing exported packages from index.
                     List<Capability> caps = host.getCapabilities();
@@ -432,7 +432,7 @@ public class FelixResolverState implements Resolver.ResolverState
             if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(
                 new BundlePermission(fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
             {
-                return new HashSet();
+                return new HashSet<Capability>();
             }
         }
 
@@ -569,7 +569,7 @@ public class FelixResolverState implements Resolver.ResolverState
         ((ModuleImpl) host).setWires(null);
     }
 
-    private List getMatchingFragments(Module host)
+    private List<Module> getMatchingFragments(Module host)
     {
         // Find the host capability for the current host.
         List<Capability> caps = Util.getCapabilityByNamespace(host, Capability.HOST_NAMESPACE);
@@ -577,7 +577,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
         // If we have a host capability, then loop through all fragments trying to
         // find ones that match.
-        List fragmentList = new ArrayList();
+        List<Module> fragmentList = new ArrayList<Module>();
         SecurityManager sm = System.getSecurityManager();
         if (sm != null)
         {
@@ -649,9 +649,9 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             Set<Capability> hostCaps = getMatchingHostCapabilities(rootModule);
             Module currentBestHost = null;
-            for (Iterator<Capability> it = hostCaps.iterator(); it.hasNext(); )
+            for (Capability hostCap : hostCaps)
             {
-                Module host = it.next().getModule();
+                Module host = hostCap.getModule();
                 if (currentBestHost == null)
                 {
                     currentBestHost = host;
@@ -747,7 +747,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
     public Set<Capability> getCandidates(Module module, Requirement req, boolean obeyMandatory)
     {
-        Set<Capability> result = new TreeSet(new CandidateComparator());
+        Set<Capability> result = new TreeSet<Capability>(new CandidateComparator());
 
         if (req.getNamespace().equals(Capability.MODULE_NAMESPACE))
         {
@@ -764,9 +764,6 @@ public class FelixResolverState implements Resolver.ResolverState
     /**
      * Checks to see if the passed in module's required execution environment
      * is provided by the framework.
-     * @param fwkExecEvnStr The original property value of the framework's
-     *        supported execution environments.
-     * @param fwkExecEnvSet Parsed set of framework's supported execution environments.
      * @param module The module whose required execution environment is to be to verified.
      * @throws ResolveException if the module's required execution environment does
      *         not match the framework's supported execution environment.
@@ -848,11 +845,12 @@ public class FelixResolverState implements Resolver.ResolverState
      * Updates the framework wide execution environment string and a cached Set of
      * execution environment tokens from the comma delimited list specified by the
      * system variable 'org.osgi.framework.executionenvironment'.
-     * @param frameworkEnvironment Comma delimited string of provided execution environments
+     * @param fwkExecEnvStr Comma delimited string of provided execution environments
+     * @return the parsed set of execution environments
     **/
-    private static Set parseExecutionEnvironments(String fwkExecEnvStr)
+    private static Set<String> parseExecutionEnvironments(String fwkExecEnvStr)
     {
-        Set newSet = new HashSet();
+        Set<String> newSet = new HashSet<String>();
         if (fwkExecEnvStr != null)
         {
             StringTokenizer tokens = new StringTokenizer(fwkExecEnvStr, ",");
@@ -884,7 +882,7 @@ public class FelixResolverState implements Resolver.ResolverState
         for (int dirIdx = 0; (dirs != null) && (dirIdx < dirs.size()); dirIdx++)
         {
             if (dirs.get(dirIdx).getName().equalsIgnoreCase(Constants.SINGLETON_DIRECTIVE)
-                && Boolean.valueOf((String) dirs.get(dirIdx).getValue()).booleanValue())
+                && Boolean.valueOf((String) dirs.get(dirIdx).getValue()))
             {
                 return true;
             }
@@ -892,9 +890,9 @@ public class FelixResolverState implements Resolver.ResolverState
         return false;
     }
 
-    private static Module indexModule(Map map, Module module)
+    private static Module indexModule(Map<String, List<Module>> map, Module module)
     {
-        List modules = (List) map.get(module.getSymbolicName());
+        List<Module> modules = map.get(module.getSymbolicName());
 
         // We want to add the fragment into the list of matching
         // fragments in sorted order (descending version and
@@ -902,7 +900,7 @@ public class FelixResolverState implements Resolver.ResolverState
         // binary search algorithm.
         if (modules == null)
         {
-            modules = new ArrayList();
+            modules = new ArrayList<Module>();
             modules.add(module);
         }
         else
@@ -913,7 +911,7 @@ public class FelixResolverState implements Resolver.ResolverState
             while (top <= bottom)
             {
                 middle = (bottom - top) / 2 + top;
-                middleVersion = ((Module) modules.get(middle)).getVersion();
+                middleVersion = modules.get(middle).getVersion();
                 // Sort in reverse version order.
                 int cmp = middleVersion.compareTo(version);
                 if (cmp < 0)
@@ -949,6 +947,6 @@ public class FelixResolverState implements Resolver.ResolverState
 
         map.put(module.getSymbolicName(), modules);
 
-        return (Module) modules.get(0);
+        return modules.get(0);
     }
 }
