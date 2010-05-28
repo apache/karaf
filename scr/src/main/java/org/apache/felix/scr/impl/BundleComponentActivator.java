@@ -384,7 +384,7 @@ public class BundleComponentActivator implements Logger
      * @param name The name of the component to enable or <code>null</code> to
      *      enable all components.
      */
-    public void enableComponent( String name )
+    public void enableComponent( final String name )
     {
         final ComponentHolder[] holder = getSelectedComponents( name );
         if ( holder == null )
@@ -392,17 +392,35 @@ public class BundleComponentActivator implements Logger
             return;
         }
 
-        for ( int i = 0; i < holder.length; i++ )
+		// FELIX-2368; schedule for asynchronous enablement. According to
+        //    112.5.1 the enabled state should be changed immediately but
+        //    the component(s) should be activated asynchronously. Since
+        //    we do not really handle the enabled state separately we
+        //    schedule enablement and activation for asynchronous execution.
+        schedule( new Runnable()
         {
-            try
+            public void run()
             {
-                holder[i].enableComponents();
+                for ( int i = 0; i < holder.length; i++ )
+                {
+                    try
+                    {
+                        log( LogService.LOG_DEBUG, "Enabling Component", holder[i].getComponentMetadata(), null );
+                        holder[i].enableComponents();
+                    }
+                    catch ( Throwable t )
+                    {
+                        log( LogService.LOG_ERROR, "Cannot enable component", holder[i].getComponentMetadata(), t );
+                    }
+                }
             }
-            catch ( Throwable t )
+
+
+            public String toString()
             {
-                log( LogService.LOG_ERROR, "Cannot enable component", holder[i].getComponentMetadata(), t );
+                return "enableComponent(" + name + ")";
             }
-        }
+        } );
     }
 
 
@@ -417,7 +435,7 @@ public class BundleComponentActivator implements Logger
      * @param name The name of the component to disable or <code>null</code> to
      *      disable all components.
      */
-    public void disableComponent( String name )
+    public void disableComponent( final String name )
     {
         final ComponentHolder[] holder = getSelectedComponents( name );
         if ( holder == null )
@@ -425,18 +443,35 @@ public class BundleComponentActivator implements Logger
             return;
         }
 
-        for ( int i = 0; i < holder.length; i++ )
+        // FELIX-2368; schedule for asynchronous enablement. According to
+        //    112.5.1 the enabled state should be changed immediately but
+        //    the component(s) should be deactivated asynchronously. Since
+        //    we do not really handle the enabled state separately we
+        //    schedule disablement and deactivation for asynchronous execution.
+        schedule( new Runnable()
         {
-            try
+            public void run()
             {
-                log( LogService.LOG_DEBUG, "Disabling Component", holder[i].getComponentMetadata(), null );
-                holder[i].disableComponents();
+                for ( int i = 0; i < holder.length; i++ )
+                {
+                    try
+                    {
+                        log( LogService.LOG_DEBUG, "Disabling Component", holder[i].getComponentMetadata(), null );
+                        holder[i].disableComponents();
+                    }
+                    catch ( Throwable t )
+                    {
+                        log( LogService.LOG_ERROR, "Cannot disable component", holder[i].getComponentMetadata(), t );
+                    }
+                }
             }
-            catch ( Throwable t )
+
+
+            public String toString()
             {
-                log( LogService.LOG_ERROR, "Cannot disable component", holder[i].getComponentMetadata(), t );
+                return "disableComponent(" + name + ")";
             }
-        }
+        } );
     }
 
 
@@ -502,7 +537,7 @@ public class BundleComponentActivator implements Logger
      *
      * @param task The component task to execute
      */
-    public void schedule( ComponentActivatorTask task )
+    public void schedule( Runnable task )
     {
         if ( isActive() )
         {

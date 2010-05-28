@@ -30,7 +30,6 @@ import java.util.List;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.impl.BundleComponentActivator;
-import org.apache.felix.scr.impl.ComponentActivatorTask;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.apache.felix.scr.impl.metadata.ServiceMetadata;
@@ -126,37 +125,24 @@ public abstract class AbstractComponentManager implements Component
      * This method ignores the <i>enabled</i> flag of the component metadata
      * and just enables as requested.
      * <p>
-     * This method schedules the enablement for asynchronous execution.
+     * This method enables and activates the component immediately.
      */
     public final void enable()
     {
         enableInternal();
-
-        getActivator().schedule( new ComponentActivatorTask( "Enable", this )
-        {
-            public void doRun()
-            {
-                activateInternal();
-            }
-        });
+        activateInternal();
     }
 
     /**
      * Disables this component and - if active - first deactivates it. The
      * component may be reenabled by calling the {@link #enable()} method.
      * <p>
-     * This method schedules the disablement for asynchronous execution.
+     * This method deactivates and disables the component immediately.
      */
     public final void disable()
     {
-        getActivator().schedule( new ComponentActivatorTask( "Disable", this )
-        {
-            public void doRun()
-            {
-                deactivateInternal( ComponentConstants.DEACTIVATION_REASON_DISABLED );
-                disableInternal();
-            }
-        });
+        deactivateInternal( ComponentConstants.DEACTIVATION_REASON_DISABLED );
+        disableInternal();
     }
 
     /**
@@ -520,42 +506,6 @@ public abstract class AbstractComponentManager implements Component
         {
             activator.log( level, message, arguments, getComponentMetadata(), ex );
         }
-    }
-
-    /**
-     * Activates this component if satisfied. If any of the dependencies is
-     * not met, the component is not activated and remains unsatisfied.
-     * <p>
-     * This method schedules the activation for asynchronous execution.
-     */
-    public final void activate()
-    {
-        getActivator().schedule( new ComponentActivatorTask( "Activate", this ) {
-            public void doRun()
-            {
-                activateInternal();
-            }
-        });
-    }
-
-    /**
-     * Cycles this component by deactivating it and - if still satisfied -
-     * activating it again asynchronously.
-     * <p>
-     * This method schedules the deactivation and reactivation for asynchronous
-     * execution.
-     */
-    public final void reactivate( final int reason )
-    {
-        getActivator().schedule( new ComponentActivatorTask( "Reactivate", this )
-        {
-
-            public void doRun()
-            {
-                deactivateInternal( reason );
-                activateInternal();
-            }
-        } );
     }
 
 

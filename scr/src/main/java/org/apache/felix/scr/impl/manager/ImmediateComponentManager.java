@@ -404,7 +404,12 @@ public class ImmediateComponentManager extends AbstractComponentManager
             log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration", null );
             int reason = ( configuration == null ) ? ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED
                 : ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED;
-            reactivate( reason );
+
+            // FELIX-2368: cycle component immediately, reconfigure() is
+            //     called through ConfigurationListener API which itself is
+            //     called asynchronously by the Configuration Admin Service
+            deactivateInternal( reason );
+            activateInternal();
         }
     }
 

@@ -203,7 +203,8 @@ public class DependencyManager implements ServiceListener, Reference
                                     "Dependency Manager: Service {0} registered, activate component", new Object[]
                                         { m_dependencyMetadata.getName() }, null );
 
-                                m_componentManager.activate();
+                                // immediately try to activate the component (FELIX-2368)
+                                m_componentManager.activateInternal();
                             }
                         }
                         else if ( isMultiple() )
@@ -278,7 +279,8 @@ public class DependencyManager implements ServiceListener, Reference
                 "Dependency Manager: Service {0} registered, activate component", new Object[]
                     { m_dependencyMetadata.getName() }, null );
 
-            m_componentManager.activate();
+            // immediately try to activate the component (FELIX-2368)
+            m_componentManager.activateInternal();
         }
 
         // otherwise check whether the component is in a state to handle the event
@@ -365,7 +367,8 @@ public class DependencyManager implements ServiceListener, Reference
                         "Dependency Manager: Static dependency on {0}/{1} is broken", new Object[]
                             { m_dependencyMetadata.getName(), m_dependencyMetadata.getInterface() }, null );
                     m_componentManager.deactivateInternal( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
-                    m_componentManager.activate();
+                    // FELIX-2368: immediately try to reactivate
+                    m_componentManager.activateInternal();
                 }
                 catch ( Exception ex )
                 {
