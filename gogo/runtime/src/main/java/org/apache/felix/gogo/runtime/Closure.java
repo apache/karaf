@@ -21,7 +21,6 @@ package org.apache.felix.gogo.runtime;
 import java.io.EOFException;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -220,17 +219,7 @@ public class Closure implements Function, Evaluate
 
         Pipe.reset(mark); // reset IO in case same thread used for new client
 
-        if (last == null)
-        {
-            return null;
-        }
-
-        if (last.result instanceof Object[])
-        {
-            return Arrays.asList((Object[]) last.result);
-        }
-
-        return last.result;
+        return last == null ? null : last.result;
     }
 
     public Object eval(final Token t) throws Exception
@@ -465,6 +454,12 @@ public class Closure implements Function, Evaluate
 
                 return Reflective.method(session, target, args.remove(0).toString(), args);
             }
+            else if (cmd.getClass().isArray() && values.size() == 1)
+            {
+                Object[] cmdv = (Object[])cmd;
+                String index = values.get(0).toString();
+                return "length".equals(index) ? cmdv.length : cmdv[Integer.parseInt(index)];
+            }
             else
             {
                 return Reflective.method(session, cmd, values.remove(0).toString(), values);
@@ -489,7 +484,18 @@ public class Closure implements Function, Evaluate
             List<Object> olist = new ArrayList<Object>();
             for (Token t : list)
             {
-                olist.add(eval(t));
+                Object oval = eval(t);
+                if (oval.getClass().isArray())
+                {
+                    for (Object o : (Object[])oval)
+                    {
+                        olist.add(o);
+                    }
+                }
+                else
+                {
+                    olist.add(oval);
+                }
             }
             return olist;
         }
