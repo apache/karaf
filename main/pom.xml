@@ -72,7 +72,7 @@
             <Private-Package>org.apache.felix.main.*</Private-Package>
             <Export-Package>!org.osgi.service.log, !org.osgi.service.obr,org.osgi.*</Export-Package>
             <Import-Package>!*</Import-Package>
-            <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,{src/main/resources/}</Include-Resource>
+            <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,META-INF/DEPENDENCIES=DEPENDENCIES,{src/main/resources/}</Include-Resource>
           </instructions>
         </configuration>
       </plugin>

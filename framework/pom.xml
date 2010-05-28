@@ -58,7 +58,7 @@
             <Export-Package>org.osgi.framework;-split-package:=merge-first,org.osgi.framework.launch,org.osgi.framework.hooks.service,org.osgi.service.packageadmin,org.osgi.service.url,org.osgi.service.startlevel,org.osgi.util.tracker</Export-Package>
             <Private-Package>org.apache.felix.moduleloader.*,org.apache.felix.framework.*</Private-Package>
             <Import-Package>!*</Import-Package>
-            <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,{src/main/resources/}</Include-Resource> 
+            <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,META-INF/DEPENDENCIES=DEPENDENCIES,{src/main/resources/}</Include-Resource> 
           </instructions>
         </configuration>
       </plugin>
