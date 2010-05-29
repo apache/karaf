@@ -108,19 +108,23 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         if ( service != null )
         {
             serviceContext.setImplementationObject( service );
-            serviceContexts.put( service, serviceContext );
 
-            // if this is the first use of this component, switch to ACTIVE state
-            if ( getState() == STATE_REGISTERED )
+            synchronized ( serviceContexts )
             {
-                synchronized ( this )
+                serviceContexts.put( service, serviceContext );
+
+                // if this is the first use of this component, switch to ACTIVE state
+                if ( getState() == STATE_REGISTERED )
                 {
-                    if ( getState() == STATE_REGISTERED )
-                    {
-                        changeState( Active.getInstance() );
-                    }
+                    changeState( Active.getInstance() );
                 }
             }
+        }
+        else
+        {
+            // log that the service factory component cannot be created (we don't
+            // know why at this moment; this should already have been logged)
+            log( LogService.LOG_ERROR, "Failed creating the component instance; see log for reason", null );
         }
 
         return service;
@@ -137,21 +141,20 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         // When the ungetServiceMethod is called, the implementation object must be deactivated
 
         // private ComponentContext and implementation instances
-        ComponentContext serviceContext = ( ComponentContext ) serviceContexts.remove( service );
+        final ComponentContext serviceContext;
+        synchronized ( serviceContexts )
+        {
+            serviceContext = ( ComponentContext ) serviceContexts.remove( service );
+        }
+
         disposeImplementationObject( service, serviceContext, ComponentConstants.DEACTIVATION_REASON_DISPOSED );
 
         // if this was the last use of the component, go back to REGISTERED state
-        if ( serviceContexts.isEmpty() )
+        synchronized ( serviceContexts )
         {
-            if ( getState() == STATE_ACTIVE )
+            if ( serviceContexts.isEmpty() && getState() == STATE_ACTIVE )
             {
-                synchronized ( this )
-                {
-                    if ( getState() == STATE_ACTIVE )
-                    {
-                        changeState( Registered.getInstance() );
-                    }
-                }
+                changeState( Registered.getInstance() );
             }
         }
     }

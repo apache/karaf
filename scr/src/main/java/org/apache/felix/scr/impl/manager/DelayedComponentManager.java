@@ -19,9 +19,6 @@
 package org.apache.felix.scr.impl.manager;
 
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.felix.scr.impl.BundleComponentActivator;
 import org.apache.felix.scr.impl.config.ComponentHolder;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
@@ -37,7 +34,9 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 {
 
     // keep the using bundles as reference "counters" for instance deactivation
-    private final Set m_usingBundles = new HashSet();
+    private final Object m_useCountLock;
+    private int m_useCount;
+
 
     /**
      * @param activator
@@ -47,6 +46,8 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
         ComponentMetadata metadata )
     {
         super( activator, componentHolder, metadata );
+        this.m_useCountLock = new Object();
+        this.m_useCount = 0;
     }
 
 
@@ -67,7 +68,7 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
         }
 
         // ensure the refence set is also clear
-        m_usingBundles.clear();
+        m_useCount = 0;
     }
 
 
@@ -81,8 +82,11 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 
     public synchronized Object getService( Bundle bundle, ServiceRegistration sr )
     {
-        m_usingBundles.add(bundle);
-        return state().getService( this );
+        synchronized ( m_useCountLock )
+        {
+            m_useCount++;
+            return state().getService( this );
+        }
     }
 
 
@@ -94,10 +98,21 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 
     public void ungetService( Bundle bundle, ServiceRegistration sr, Object service )
     {
-        m_usingBundles.remove( bundle );
-        if ( m_usingBundles.isEmpty() )
+        synchronized ( m_useCountLock )
         {
-            state().ungetService( this );
+            // the framework should not call ungetService more than it calls
+            // calls getService. Still, we want to be sure to not go below zero
+            if ( m_useCount > 0 )
+            {
+                m_useCount--;
+
+                // unget the service instance if no bundle is using it
+                // any longer
+                if ( m_useCount == 0 )
+                {
+                    state().ungetService( this );
+                }
+            }
         }
     }
 }

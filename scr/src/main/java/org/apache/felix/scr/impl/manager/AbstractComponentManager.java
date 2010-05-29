@@ -58,10 +58,10 @@ public abstract class AbstractComponentManager implements Component
     private volatile State m_state;
 
     // The metadata
-    private ComponentMetadata m_componentMetadata;
+    private final ComponentMetadata m_componentMetadata;
 
     // The dependency managers that manage every dependency
-    private List m_dependencyManagers;
+    private final List m_dependencyManagers;
 
     // A reference to the BundleComponentActivator
     private BundleComponentActivator m_activator;
@@ -85,7 +85,7 @@ public abstract class AbstractComponentManager implements Component
         m_componentId = ( activator != null ) ? activator.registerComponentId( this ) : -1;
 
         m_state = Disabled.getInstance();
-        loadDependencyManagers( metadata );
+        m_dependencyManagers = loadDependencyManagers( metadata );
 
         // dump component details
         if ( isLogEnabled( LogService.LOG_DEBUG ) )
@@ -546,9 +546,9 @@ public abstract class AbstractComponentManager implements Component
     }
 
 
-    private void loadDependencyManagers( ComponentMetadata metadata )
+    private List loadDependencyManagers( ComponentMetadata metadata )
     {
-        List depMgrList = new ArrayList();
+        List depMgrList = new ArrayList(metadata.getDependencies().size());
 
         // If this component has got dependencies, create dependency managers for each one of them.
         if ( metadata.getDependencies().size() != 0 )
@@ -565,7 +565,7 @@ public abstract class AbstractComponentManager implements Component
             }
         }
 
-        m_dependencyManagers = depMgrList;
+        return depMgrList;
     }
 
     private void enableDependencyManagers() throws InvalidSyntaxException
@@ -1122,6 +1122,10 @@ public abstract class AbstractComponentManager implements Component
                 dcm.changeState( Active.getInstance() );
                 return dcm.getInstance();
             }
+
+            // log that the delayed component cannot be created (we don't
+            // know why at this moment; this should already have been logged)
+            dcm.log( LogService.LOG_ERROR, "Failed creating the component instance; see log for reason", null );
 
             // component could not really be created. This may be temporary
             // so we stay in the registered state but ensure the component
