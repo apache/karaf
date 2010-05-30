@@ -475,7 +475,7 @@ class ExtensionManager extends URLStreamHandler implements Content
         {
             try
             {
-                result = ((BundleImpl) extBundle).getCurrentModule().getResourceByDelegation(path);
+                result = ((ModuleImpl) ((BundleImpl) extBundle).getCurrentModule()).getResourceLocal(path);
             }
             catch (Exception ex)
             {
@@ -532,7 +532,7 @@ class ExtensionManager extends URLStreamHandler implements Content
                 _add(bundle.getSymbolicName(), bundle);
             }
             m_extensionsCache = (Bundle[])
-                m_extensions.toArray(new Bundle[m_extensions.size()]);            
+                m_extensions.toArray(new Bundle[m_extensions.size()]);
         }
     }
 

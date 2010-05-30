@@ -39,6 +39,7 @@ import org.apache.felix.framework.resolver.Resolver;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.osgi.framework.BundlePermission;
+import org.osgi.framework.PackagePermission;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -420,7 +421,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
         // Create a list of all matching hosts for this fragment.
         SecurityManager sm = System.getSecurityManager();
-        if (sm != null)
+        if ((sm != null) && (fragment.getSymbolicName() != null))
         {
             if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(
                 new BundlePermission(fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
@@ -446,7 +447,7 @@ public class FelixResolverState implements Resolver.ResolverState
             {
                 it.remove();
             }
-            else if (sm != null)
+            else if ((sm != null) && (hostCap.getModule().getSymbolicName() != null))
             {
                 if (!((BundleProtectionDomain) hostCap.getModule()
                     .getSecurityContext()).impliesDirect(
@@ -554,7 +555,7 @@ public class FelixResolverState implements Resolver.ResolverState
         // find ones that match.
         List<Module> fragmentList = new ArrayList<Module>();
         SecurityManager sm = System.getSecurityManager();
-        if (sm != null)
+        if ((sm != null) && (host.getSymbolicName() != null))
         {
             if (!((BundleProtectionDomain) host.getSecurityContext()).impliesDirect(
                 new BundlePermission(host.getSymbolicName(), BundlePermission.HOST)))
@@ -584,7 +585,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 continue;
             }
             
-            if (sm != null)
+            if ((sm != null) && (fragment.getSymbolicName() != null))
             {
                 if (!((BundleProtectionDomain) fragment.getSecurityContext()).impliesDirect(
                     new BundlePermission(fragment.getSymbolicName(), BundlePermission.FRAGMENT)))
@@ -719,7 +720,44 @@ public class FelixResolverState implements Resolver.ResolverState
         CapabilitySet capSet = m_capSets.get(req.getNamespace());
         if (capSet != null)
         {
-            result.addAll(capSet.match(req.getFilter(), obeyMandatory));
+            Set<Capability> matches = capSet.match(req.getFilter(), obeyMandatory);
+            if (System.getSecurityManager() != null)
+            {
+                for (Capability cap : matches)
+                {
+                    if (req.getNamespace().equals(Capability.PACKAGE_NAMESPACE) && (
+                        !((BundleProtectionDomain) cap.getModule().getSecurityContext()).impliesDirect(
+                            new PackagePermission((String) cap.getAttribute(Capability.PACKAGE_ATTR).getValue(), 
+                            PackagePermission.EXPORTONLY)) ||
+                            !((module == null) ||
+                                ((BundleProtectionDomain) module.getSecurityContext()).impliesDirect(
+                                    new PackagePermission((String) cap.getAttribute(Capability.PACKAGE_ATTR).getValue(), 
+                                    cap.getModule().getBundle(),PackagePermission.IMPORT))
+                            )))
+                    {
+                        if (module != cap.getModule())
+                        {
+                            continue;
+                        }
+                    }
+                    if (req.getNamespace().equals(Capability.MODULE_NAMESPACE) && (
+                        !((BundleProtectionDomain) cap.getModule().getSecurityContext()).impliesDirect(
+                            new BundlePermission(cap.getModule().getSymbolicName(), BundlePermission.PROVIDE)) ||
+                            !((module == null) ||
+                                ((BundleProtectionDomain) module.getSecurityContext()).impliesDirect(
+                                    new BundlePermission(module.getSymbolicName(), BundlePermission.REQUIRE))
+                            )))
+                    {
+                        continue;
+                    }
+
+                    result.add(cap);
+                }
+            }
+            else 
+            {
+                result.addAll(matches);
+            }
         }
 
         return result;

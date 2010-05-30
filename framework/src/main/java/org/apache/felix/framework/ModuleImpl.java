@@ -18,9 +18,6 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.resolver.ResourceNotFoundException;
-import org.apache.felix.framework.resolver.Content;
-import org.apache.felix.framework.capabilityset.SimpleFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -29,11 +26,13 @@ import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLStreamHandler;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
-
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,15 +40,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+
 import org.apache.felix.framework.Felix.FelixResolver;
 import org.apache.felix.framework.cache.JarContent;
 import org.apache.felix.framework.capabilityset.Attribute;
 import org.apache.felix.framework.capabilityset.Capability;
 import org.apache.felix.framework.capabilityset.Directive;
-import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.capabilityset.Requirement;
-import org.apache.felix.framework.resolver.Wire;
+import org.apache.felix.framework.capabilityset.SimpleFilter;
+import org.apache.felix.framework.resolver.Content;
+import org.apache.felix.framework.resolver.Module;
 import org.apache.felix.framework.resolver.ResolveException;
+import org.apache.felix.framework.resolver.ResourceNotFoundException;
+import org.apache.felix.framework.resolver.Wire;
 import org.apache.felix.framework.resolver.WireImpl;
 import org.apache.felix.framework.resolver.WireModuleImpl;
 import org.apache.felix.framework.util.CompoundEnumeration;
@@ -777,7 +780,7 @@ public class ModuleImpl implements Module
         return result;
     }
 
-    private URL getResourceLocal(String name)
+    URL getResourceLocal(String name)
     {
         URL url = null;
 
@@ -1352,7 +1355,7 @@ public class ModuleImpl implements Module
     }
 
     private Object searchDynamicImports(
-        String name, String pkgName, boolean isClass)
+        final String name, String pkgName, final boolean isClass)
         throws ClassNotFoundException, ResourceNotFoundException
     {
         // At this point, the module's imports were searched and so was the
@@ -1404,66 +1407,105 @@ public class ModuleImpl implements Module
             // for the bundle and throw an exception.
 
             // Get the class context to see the classes on the stack.
-            Class[] classes = m_sm.getClassContext();
-            // Start from 1 to skip security manager class.
-            for (int i = 1; i < classes.length; i++)
+            final Class[] classes = m_sm.getClassContext();
+            try
             {
-                // Find the first class on the call stack that is not from
-                // the class loader that loaded the Felix classes or is not
-                // a class loader or class itself, because we want to ignore
-                // calls to ClassLoader.loadClass() and Class.forName() since
-                // we are trying to find out who instigated the class load.
-                // Also ignore inner classes of class loaders, since we can
-                // assume they are a class loader too.
+                if (System.getSecurityManager() != null)
+                {
+                    return AccessController
+                        .doPrivileged(new PrivilegedExceptionAction()
+                        {
+                            public Object run() throws Exception
+                            {
+                                return doImplicitBootDelegation(classes, name,
+                                    isClass);
+                            }
+                        });
+                }
+                else
+                {
+                    return doImplicitBootDelegation(classes, name, isClass);
+                }
+            }
+            catch (PrivilegedActionException ex)
+            {
+                Exception cause = ex.getException();
+                if (cause instanceof ClassNotFoundException)
+                {
+                    throw (ClassNotFoundException) cause;
+                }
+                else
+                {
+                    throw (ResourceNotFoundException) cause;
+                }
+            }
+        }
+        return null;
+    }
 
-// TODO: FRAMEWORK - This check is a hack and we should see if we can think
-// of another way to do it, since it won't necessarily work in all situations.
-                // Since Felix uses threads for changing the start level
-                // and refreshing packages, it is possible that there is no
-                // module classes on the call stack; therefore, as soon as we
-                // see Thread on the call stack we exit this loop. Other cases
-                // where modules actually use threads are not an issue because
-                // the module classes will be on the call stack before the
-                // Thread class.
-                if (Thread.class.equals(classes[i]))
+    private Object doImplicitBootDelegation(Class[] classes, String name, boolean isClass)
+    throws ClassNotFoundException, ResourceNotFoundException
+    {
+        // Start from 1 to skip security manager class.
+        for (int i = 1; i < classes.length; i++)
+        {
+            // Find the first class on the call stack that is not from
+            // the class loader that loaded the Felix classes or is not
+            // a class loader or class itself, because we want to ignore
+            // calls to ClassLoader.loadClass() and Class.forName() since
+            // we are trying to find out who instigated the class load.
+            // Also ignore inner classes of class loaders, since we can
+            // assume they are a class loader too.
+
+            // TODO: FRAMEWORK - This check is a hack and we should see if we can think
+            // of another way to do it, since it won't necessarily work in all situations.
+            // Since Felix uses threads for changing the start level
+            // and refreshing packages, it is possible that there is no
+            // module classes on the call stack; therefore, as soon as we
+            // see Thread on the call stack we exit this loop. Other cases
+            // where modules actually use threads are not an issue because
+            // the module classes will be on the call stack before the
+            // Thread class.
+            if (Thread.class.equals(classes[i]))
+            {
+                break;
+            }
+            else if (isClassNotLoadedFromBundle(classes[i]))
+            {
+                // If the instigating class was not from a bundle,
+                // then delegate to the parent class loader; otherwise,
+                // break out of loop and return null.
+                boolean delegate = true;
+                ClassLoader last = null;
+                for (ClassLoader cl = classes[i].getClassLoader(); 
+                (cl != null) && (last != cl); 
+                cl = cl.getClass().getClassLoader())
                 {
-                    break;
+                    last = cl;
+                    if (ModuleClassLoader.class.isInstance(cl))
+                    {
+                        delegate = false;
+                        break;
+                    }
                 }
-                else if (isClassNotLoadedFromBundle(classes[i]))
+                // Delegate to the parent class loader unless this call
+                // is due to outside code calling a method on the bundle
+                // interface (e.g., Bundle.loadClass()).
+                if (delegate && !Bundle.class.isAssignableFrom(classes[i - 1]))
                 {
-                    // If the instigating class was not from a bundle,
-                    // then delegate to the parent class loader; otherwise,
-                    // break out of loop and return null.
-                    boolean delegate = true;
-                    ClassLoader last = null;
-                    for (ClassLoader cl = classes[i].getClassLoader(); (cl != null) && (last != cl); cl = cl.getClass().getClassLoader())
+                    try
                     {
-                        last = cl;
-                        if (ModuleClassLoader.class.isInstance(cl))
-                        {
-                            delegate = false;
-                            break;
-                        }
+                        // Return the class or resource from the parent class loader.
+                        return (isClass)
+                        ? (Object) this.getClass().getClassLoader().loadClass(name)
+                            : (Object) this.getClass().getClassLoader().getResource(name);
                     }
-                    // Delegate to the parent class loader unless this call
-                    // is due to outside code calling a method on the bundle
-                    // interface (e.g., Bundle.loadClass()).
-                    if (delegate && !Bundle.class.isAssignableFrom(classes[i - 1]))
+                    catch (NoClassDefFoundError ex)
                     {
-                        try
-                        {
-                            // Return the class or resource from the parent class loader.
-                            return (isClass)
-                                ? (Object) this.getClass().getClassLoader().loadClass(name)
-                                : (Object) this.getClass().getClassLoader().getResource(name);
-                        }
-                        catch (NoClassDefFoundError ex)
-                        {
-                            // Ignore, will return null
-                        }
+                        // Ignore, will return null
                     }
-                    break;
                 }
+                break;
             }
         }
 
