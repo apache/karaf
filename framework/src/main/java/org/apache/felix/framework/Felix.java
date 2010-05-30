@@ -3045,13 +3045,19 @@ ex.printStackTrace();
         }
         try
         {
-            return (m_extensionManager.getModule().getClassByDelegation(clazz.getName()) == clazz)
-                ? this : null;
+            // For implicit boot delegation, we don't want those classes
+            // to be shown as coming from the system bundle.
+            if (!clazz.getName().startsWith("java."))
+            {
+                return (m_extensionManager.getModule().getClassByDelegation(clazz.getName()) == clazz)
+                    ? this : null;
+            }
         }
         catch(ClassNotFoundException ex)
         {
-            return null;
+            // Ignore and return null.
         }
+        return null;
     }
 
     /**
