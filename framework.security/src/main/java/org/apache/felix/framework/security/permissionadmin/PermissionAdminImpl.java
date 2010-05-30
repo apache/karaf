@@ -30,7 +30,10 @@ import java.util.Map;
 import org.apache.felix.framework.security.condpermadmin.ConditionalPermissionAdminImpl;
 import org.apache.felix.framework.security.util.Permissions;
 import org.apache.felix.framework.security.util.PropertiesCache;
-import org.apache.felix.moduleloader.IContent;
+
+//import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.framework.resolver.Content;
+
 import org.osgi.framework.Bundle;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
@@ -124,7 +127,7 @@ public final class PermissionAdminImpl implements PermissionAdmin
      */
     public Boolean hasPermission(String location, Bundle bundle,
         Permission permission, ConditionalPermissionAdminImpl cpai,
-        ProtectionDomain pd, IContent content)
+        ProtectionDomain pd, Content content)
     {
         PermissionInfo[] permissions = null;
         PermissionInfo[] defaults = null;

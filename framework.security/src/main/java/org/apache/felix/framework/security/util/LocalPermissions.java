@@ -28,7 +28,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.apache.felix.moduleloader.IContent;
+//import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.framework.resolver.Content;
 import org.osgi.framework.Bundle;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
@@ -65,7 +66,7 @@ public final class LocalPermissions
      *            the permission to check
      * @return true if implied by local permissions.
      */
-    public boolean implies(IContent content, Bundle bundle,
+    public boolean implies(Content content, Bundle bundle,
         Permission permission)
     {
         PermissionInfo[] permissions = null;

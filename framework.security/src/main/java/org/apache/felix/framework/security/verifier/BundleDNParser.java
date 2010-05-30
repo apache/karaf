@@ -36,8 +36,14 @@ import java.util.jar.JarInputStream;
 
 import org.apache.felix.framework.security.util.BundleInputStream;
 import org.apache.felix.framework.security.util.TrustManager;
+/*
 import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IModule;
+*/
+import org.apache.felix.framework.resolver.Content;
+import org.apache.felix.framework.resolver.Module;
+
+
 import org.osgi.framework.Bundle;
 
 public final class BundleDNParser
@@ -98,7 +104,7 @@ public final class BundleDNParser
         }
     }
 
-    public void checkDNChains(IModule root, IContent content, int signersType)
+    public void checkDNChains(Module root, Content content, int signersType)
         throws Exception
     {
         if (signersType == Bundle.SIGNERS_TRUSTED)
@@ -165,7 +171,7 @@ public final class BundleDNParser
         }
     }
 
-    public Map getDNChains(IModule root, IContent bundleRevision,
+    public Map getDNChains(Module root, Content bundleRevision,
         int signersType)
     {
         if (signersType == Bundle.SIGNERS_TRUSTED)
@@ -223,7 +229,7 @@ public final class BundleDNParser
         return (result == null) ? new HashMap() : new HashMap(result);
     }
 
-    private Map _getDNChains(IContent content, boolean check)
+    private Map _getDNChains(Content content, boolean check)
         throws IOException
     {
         X509Certificate[] certificates = null;

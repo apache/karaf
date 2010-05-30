@@ -30,7 +30,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
 import org.apache.felix.framework.util.IteratorToEnumeration;
-import org.apache.felix.moduleloader.IContent;
+//import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.framework.resolver.Content;
 
 /**
  * This class makes a given content available as a inputstream with a jar
@@ -38,14 +39,14 @@ import org.apache.felix.moduleloader.IContent;
  */
 public final class BundleInputStream extends InputStream
 {
-    private final IContent m_root;
+    private final Content m_root;
     private final Enumeration m_content;
     private final OutputStreamBuffer m_outputBuffer = new OutputStreamBuffer();
 
     private ByteArrayInputStream m_buffer = null;
     private JarOutputStream m_output = null;
 
-    public BundleInputStream(IContent root) throws IOException
+    public BundleInputStream(Content root) throws IOException
     {
         m_root = root;
 

@@ -30,7 +30,10 @@ import java.util.WeakHashMap;
 
 import org.apache.felix.framework.security.condpermadmin.ConditionalPermissionInfoImpl;
 import org.apache.felix.framework.util.SecureAction;
-import org.apache.felix.moduleloader.IModule;
+
+//import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.framework.resolver.Module;
+
 import org.osgi.framework.Bundle;
 import org.osgi.service.condpermadmin.Condition;
 import org.osgi.service.condpermadmin.ConditionInfo;
@@ -47,7 +50,7 @@ public final class Conditions
 
     private final Map m_cache = new WeakHashMap();
 
-    private final IModule m_module;
+    private final Module m_module;
 
     private final ConditionInfo[] m_conditionInfos;
     private final Condition[] m_conditions;
@@ -58,7 +61,7 @@ public final class Conditions
         this(null, null, action);
     }
 
-    private Conditions(IModule module, ConditionInfo[] conditionInfos,
+    private Conditions(Module module, ConditionInfo[] conditionInfos,
         SecureAction action)
     {
         m_module = module;
@@ -92,7 +95,7 @@ public final class Conditions
         m_action = action;
     }
 
-    public Conditions getConditions(IModule key, ConditionInfo[] conditions)
+    public Conditions getConditions(Module key, ConditionInfo[] conditions)
     {
         Conditions result = null;
         Map index = null;

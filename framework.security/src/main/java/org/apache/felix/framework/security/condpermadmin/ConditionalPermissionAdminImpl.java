@@ -56,11 +56,20 @@ import org.apache.felix.framework.security.util.Permissions;
 import org.apache.felix.framework.security.util.PropertiesCache;
 import org.apache.felix.framework.util.IteratorToEnumeration;
 import org.apache.felix.framework.util.manifestparser.R4Library;
+
+/*
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IRequirement;
 import org.apache.felix.moduleloader.IWire;
+*/
+import org.apache.felix.framework.capabilityset.Capability;
+import org.apache.felix.framework.capabilityset.Requirement;
+import org.apache.felix.framework.resolver.Content;
+import org.apache.felix.framework.resolver.Module;
+import org.apache.felix.framework.resolver.Wire;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -654,7 +663,7 @@ public final class ConditionalPermissionAdminImpl implements
                 {
                     return result.booleanValue();
                 }
-                if (eval(posts, new IModule()
+                if (eval(posts, new Module()
                 {
 
                     public Bundle getBundle()
@@ -662,7 +671,7 @@ public final class ConditionalPermissionAdminImpl implements
                         return fake;
                     }
 
-                    public ICapability[] getCapabilities()
+                    public List<Capability> getCapabilities()
                     {
                         return null;
                     }
@@ -673,7 +682,7 @@ public final class ConditionalPermissionAdminImpl implements
                         return null;
                     }
 
-                    public IContent getContent()
+                    public Content getContent()
                     {
                         return null;
                     }
@@ -683,7 +692,7 @@ public final class ConditionalPermissionAdminImpl implements
                         return 0;
                     }
 
-                    public IRequirement[] getDynamicRequirements()
+                    public List<Requirement> getDynamicRequirements()
                     {
                         return null;
                     }
@@ -709,12 +718,12 @@ public final class ConditionalPermissionAdminImpl implements
                         return null;
                     }
 
-                    public R4Library[] getNativeLibraries()
+                    public List<R4Library> getNativeLibraries()
                     {
                         return null;
                     }
 
-                    public IRequirement[] getRequirements()
+                    public List<Requirement> getRequirements()
                     {
                         return null;
                     }
@@ -744,7 +753,7 @@ public final class ConditionalPermissionAdminImpl implements
                         return null;
                     }
 
-                    public IWire[] getWires()
+                    public List<Wire> getWires()
                     {
                         return null;
                     }
@@ -921,7 +930,7 @@ public final class ConditionalPermissionAdminImpl implements
      * @return true in case the permission is granted or there are postponed
      *         tuples false if not. Again, see the spec for more explanations.
      */
-    public boolean hasPermission(IModule module, IContent content,
+    public boolean hasPermission(Module module, Content content,
         ProtectionDomain pd, Permission permission, boolean direct, Object admin)
     {
         // System.out.println(felixBundle + "-" + permission);
@@ -1005,7 +1014,7 @@ public final class ConditionalPermissionAdminImpl implements
         return result;
     }
 
-    public boolean impliesLocal(Bundle felixBundle, IContent content,
+    public boolean impliesLocal(Bundle felixBundle, Content content,
         Permission permission)
     {
         return m_localPermissions.implies(content, felixBundle, permission);
@@ -1024,7 +1033,7 @@ public final class ConditionalPermissionAdminImpl implements
     // then we make sure their permissions imply the permission and add them
     // to the list of posts. Return true in case we pass or have posts
     // else falls and clear the posts first.
-    private boolean eval(List posts, IModule module, Permission permission,
+    private boolean eval(List posts, Module module, Permission permission,
         Object admin)
     {
         List condPermInfos = null;

@@ -27,7 +27,8 @@ import org.apache.felix.framework.security.permissionadmin.PermissionAdminImpl;
 import org.apache.felix.framework.security.util.TrustManager;
 import org.apache.felix.framework.security.verifier.BundleDNParser;
 import org.apache.felix.framework.util.SecureAction;
-import org.apache.felix.moduleloader.IModule;
+//import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.framework.resolver.Module;
 import org.osgi.framework.Bundle;
 
 /**
@@ -59,7 +60,7 @@ public final class SecurityProviderImpl implements SecurityProvider
      */
     public void checkBundle(Bundle bundle) throws Exception
     {
-        IModule module = ((BundleImpl) bundle).getCurrentModule();
+        Module module = ((BundleImpl) bundle).getCurrentModule();
         m_parser.checkDNChains(module, module.getContent(),
             Bundle.SIGNERS_TRUSTED);
     }
@@ -69,7 +70,7 @@ public final class SecurityProviderImpl implements SecurityProvider
      */
     public Object getSignerMatcher(final Bundle bundle, int signersType)
     {
-        IModule module = ((BundleImpl) bundle).getCurrentModule();
+        Module module = ((BundleImpl) bundle).getCurrentModule();
         return m_parser.getDNChains(module, module.getContent(), signersType);
     }
 
@@ -84,7 +85,7 @@ public final class SecurityProviderImpl implements SecurityProvider
     {
         BundleProtectionDomain pd = (BundleProtectionDomain) bundleProtectionDomain;
         BundleImpl bundle = pd.getBundle();
-        IModule module = pd.getModule();
+        Module module = pd.getModule();
 
         if (bundle.getBundleId() == 0)
         {
