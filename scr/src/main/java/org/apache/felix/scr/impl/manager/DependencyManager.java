@@ -779,14 +779,29 @@ public class DependencyManager implements ServiceListener, Reference
             return service;
         }
 
-        // otherwise acquire the service and keep it
-        service = m_componentManager.getActivator().getBundleContext().getService( serviceReference );
+        // otherwise acquire the service
+        try
+        {
+            service = m_componentManager.getActivator().getBundleContext().getService( serviceReference );
+        }
+        catch ( IllegalStateException ise )
+        {
+            // caused by getService() called on invalid bundle context
+            // or if there is a service reference cycle involving service
+            // factories !
+            m_componentManager.log( LogService.LOG_ERROR, "Failed getting service {0} ({1}/{2,number,#})", new Object[]
+                { m_dependencyMetadata.getName(), m_dependencyMetadata.getInterface(),
+                    serviceReference.getProperty( Constants.SERVICE_ID ) }, ise );
+            service = null;
+        }
+
+        // keep the service for latter ungetting
         if ( service != null )
         {
             m_bound.put( serviceReference, service );
         }
 
-        // returne the acquired service (may be null of course)
+        // return the acquired service (may be null of course)
         return service;
     }
 
