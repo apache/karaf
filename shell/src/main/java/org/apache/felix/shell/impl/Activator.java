@@ -20,15 +20,16 @@ package org.apache.felix.shell.impl;
 
 import java.io.PrintStream;
 import java.security.*;
-import java.util.*;
 
 import org.apache.felix.shell.Command;
 import org.osgi.framework.*;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator
 {
-    private transient BundleContext m_context = null;
-    private transient ShellServiceImpl m_shell = null;
+    private BundleContext m_context = null;
+    private ShellServiceImpl m_shell = null;
+    private volatile ServiceTracker m_tracker = null;
 
     public void start(BundleContext context)
     {
@@ -41,44 +42,23 @@ public class Activator implements BundleActivator
         };
         context.registerService(classes, m_shell = new ShellServiceImpl(), null);
 
-        // Listen for registering/unregistering of impl command
-        // services so that we can automatically add/remove them
-        // from our list of available commands.
-        ServiceListener sl = new ServiceListener() {
-            public void serviceChanged(ServiceEvent event)
-            {
-                if (event.getType() == ServiceEvent.REGISTERED)
-                {
-                    m_shell.addCommand(event.getServiceReference());
-                }
-                else if (event.getType() == ServiceEvent.UNREGISTERING)
-                {
-                    m_shell.removeCommand(event.getServiceReference());
-                }
-                else
-                {
-                }
-            }
-        };
-
-        try
-        {
-            m_context.addServiceListener(sl,
-                "(|(objectClass="
+        // Create a service tracker to listen for command services.
+        String filter = "(|(objectClass="
                 + org.apache.felix.shell.Command.class.getName()
                 + ")(objectClass="
                 + org.ungoverned.osgi.service.shell.Command.class.getName()
-                + "))");
+                + "))";
+        try
+        {
+            m_tracker = new ServiceTracker(
+                context, FrameworkUtil.createFilter(filter), m_tracker);
         }
         catch (InvalidSyntaxException ex)
         {
-            System.err.println("Activator: Cannot register service listener.");
-            System.err.println("Activator: " + ex);
+            // This should never happen.
         }
 
-        // Now manually try to find any commands that have already
-        // been registered (i.e., we didn't see their service events).
-        initializeCommands();
+        m_tracker.open();
 
         // Register "bundlelevel" command service.
         context.registerService(
@@ -180,97 +160,65 @@ public class Activator implements BundleActivator
 
     public void stop(BundleContext context)
     {
-        m_shell.clearCommands();
-    }
-
-    private void initializeCommands()
-    {
-        synchronized (m_shell)
-        {
-            try
-            {
-                ServiceReference[] refs = m_context.getServiceReferences(
-                    org.apache.felix.shell.Command.class.getName(), null);
-                if (refs != null)
-                {
-                    for (int i = 0; i < refs.length; i++)
-                    {
-                        m_shell.addCommand(refs[i]);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.err.println("Activator: " + ex);
-            }
-        }
+        m_tracker.close();
     }
 
     private class ShellServiceImpl implements
         org.apache.felix.shell.ShellService,
         org.ungoverned.osgi.service.shell.ShellService
     {
-        private final HashMap m_commandRefMap = new HashMap();
-        private final TreeMap m_commandNameMap = new TreeMap();
-
         public String[] getCommands()
         {
-        	synchronized(m_commandRefMap)
+            Object[] commands = m_tracker.getServices();
+            String[] names = (commands == null)
+                ? new String[0] : new String[commands.length];
+            for (int i = 0; i < names.length; i++)
             {
-	            Set ks = m_commandNameMap.keySet();
-	            String[] cmds = (ks == null)
-	                ? new String[0] : (String[]) ks.toArray(new String[ks.size()]);
-	            return cmds;
-        	}
+                names[i] = ((Command) commands[i]).getName();
+            }
+            return names;
         }
 
         public String getCommandUsage(String name)
         {
-        	synchronized(m_commandRefMap)
+            Object[] commands = m_tracker.getServices();
+            for (int i = 0; (commands != null) && (i < commands.length); i++)
             {
-        		Command command = (Command) m_commandNameMap.get(name);
-            	return (command == null) ? null : command.getUsage();
-        	}
+                Command command = (Command) commands[i];
+                if (command.getName().equals(name))
+                {
+                    return command.getUsage();
+                }
+            }
+            return null;
         }
 
         public String getCommandDescription(String name)
         {
-        	synchronized(m_commandRefMap)
+            Object[] commands = m_tracker.getServices();
+            for (int i = 0; (commands != null) && (i < commands.length); i++)
             {
-        		Command command = (Command) m_commandNameMap.get(name);
-            	return (command == null) ? null : command.getShortDescription();
-        	}
+                Command command = (Command) commands[i];
+                if (command.getName().equals(name))
+                {
+                    return command.getShortDescription();
+                }
+            }
+            return null;
         }
 
         public ServiceReference getCommandReference(String name)
         {
-            ServiceReference ref = null;
-            synchronized(m_commandRefMap)
+            ServiceReference[] refs = m_tracker.getServiceReferences();
+            for (int i = 0; (refs != null) && (i < refs.length); i++)
             {
-	            Iterator itr = m_commandRefMap.entrySet().iterator();
-	            while (itr.hasNext())
-	            {
-	                Map.Entry entry = (Map.Entry) itr.next();
-	                if (((Command) entry.getValue()).getName().equals(name))
-	                {
-	                    ref = (ServiceReference) entry.getKey();
-	                    break;
-	                }
-	            }
+                Command command = (Command) m_tracker.getService(refs[i]);
+                if ((command != null) && command.getName().equals(name))
+                {
+                    return refs[i];
+                }
             }
-            return ref;
-        }
-
-        public void removeCommand(ServiceReference ref)
-        {
-        	synchronized(m_commandRefMap)
-            {
-	            Command command = (Command) m_commandRefMap.remove(ref);
-	            if (command != null)
-	            {
-	                m_commandNameMap.remove(command.getName());
-	            }
-        	}
+            return null;
         }
 
         public void executeCommand(
@@ -313,36 +261,18 @@ public class Activator implements BundleActivator
             }
         }
 
-        protected Command getCommand(String name)
+        Command getCommand(String name)
         {
-        	synchronized(m_commandRefMap)
+            Object[] commands = m_tracker.getServices();
+            for (int i = 0; (commands != null) && (i < commands.length); i++)
             {
-        		Command command = (Command) m_commandNameMap.get(name);
-            	return (command == null) ? null : command;
-        	}
-        }
-
-        protected void addCommand(ServiceReference ref)
-        {
-            Object cmdObj = m_context.getService(ref);
-            Command command =
-                (cmdObj instanceof org.ungoverned.osgi.service.shell.Command)
-                ? new OldCommandWrapper((org.ungoverned.osgi.service.shell.Command) cmdObj)
-                : (Command) cmdObj;
-            synchronized(m_commandRefMap)
-            {
-            	m_commandRefMap.put(ref, command);
-            	m_commandNameMap.put(command.getName(), command);
+                Command command = (Command) commands[i];
+                if (command.getName().equals(name))
+                {
+                    return command;
+                }
             }
-        }
-
-        protected void clearCommands()
-        {
-        	synchronized(m_commandRefMap)
-            {
-        		m_commandRefMap.clear();
-        		m_commandNameMap.clear();
-        	}
+            return null;
         }
     }
 
