@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.apache.felix.service.command.Converter;
@@ -43,7 +44,7 @@ public class Pipe extends Thread
 
     public static Object[] mark()
     {
-        Object[] mark = {tIn.get(), tOut.get(), tErr.get() };
+        Object[] mark = { tIn.get(), tOut.get(), tErr.get() };
         return mark;
     }
 
@@ -101,7 +102,7 @@ public class Pipe extends Thread
         tOut.set(out);
         tErr.set(err);
         closure.session().threadIO().setStreams(in, out, err);
-        
+
         try
         {
             result = closure.executeStatement(statement);
@@ -124,16 +125,23 @@ public class Pipe extends Thread
 
             try
             {
-                if (in instanceof PipedInputStream)
-                {
-                    in.close();
-                }
                 if (pout != null)
                 {
                     pout.close();
                 }
+
+                if (in instanceof PipedInputStream)
+                {
+                    in.close();
+
+                    // avoid writer waiting when reader has given up (FELIX-2380)
+                    Method m = in.getClass().getDeclaredMethod("receivedLast",
+                        (Class<?>[]) null);
+                    m.setAccessible(true);
+                    m.invoke(in, (Object[]) null);
+                }
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 e.printStackTrace();
             }
