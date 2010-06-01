@@ -99,19 +99,16 @@ public final class Reflective
                 }
 
                 // Check if the command takes a session
-                if ((types.length > 0) && CommandSession.class.isAssignableFrom(types[0]))
+                if ((types.length > 0) && types[0].isInterface()
+                    && types[0].isAssignableFrom(session.getClass()))
                 {
                     xargs.add(0, session);
                 }
 
                 Object[] parms = new Object[types.length];
-                // if (types.length >= args.size() ) {
                 int local = coerce(session, target, m, types, parms, xargs);
                 if ((local >= xargs.size()) && (local >= types.length))
-                { // derek
-                    // -
-                    // stop
-                    // no-args
+                {
                     boolean exact = ((local == xargs.size()) && (local == types.length));
                     if (exact || (local > match))
                     {
@@ -128,21 +125,12 @@ public final class Reflective
                 {
                     possibleTypes.add(types);
                 }
-                // }
-                // if (match == -1 && types.length == 1
-                // && types[0] == Object[].class) {
-                // bestMethod = m;
-                // Object value = args.toArray();
-                // bestArgs = new Object[] { value };
-                // }
             }
         }
 
         if (bestMethod != null)
         {
             bestMethod.setAccessible(true);
-            // derek: BUGFIX catch InvocationTargetException
-            // return bestMethod.invoke(target, bestArgs);
             try
             {
                 return bestMethod.invoke(target, bestArgs);
@@ -159,9 +147,6 @@ public final class Reflective
         }
         else
         {
-            // throw new IllegalArgumentException("Cannot find command:" + name
-            // + " with args:" + args);
-            // { derek
             ArrayList<String> list = new ArrayList<String>();
             for (Class<?>[] types : possibleTypes)
             {
@@ -179,9 +164,18 @@ public final class Reflective
                 list.add(buf.toString());
             }
 
+            StringBuilder params = new StringBuilder();
+            for (Object arg : args)
+            {
+                if (params.length() > 1)
+                {
+                    params.append(", ");
+                }
+                params.append(arg.getClass().getSimpleName());
+            }
+
             throw new IllegalArgumentException(String.format(
-                "Cannot coerce %s%s to any of %s", name, args, list));
-            // } derek
+                "Cannot coerce %s(%s) to any of %s", name, params, list));
         }
     }
 
@@ -215,7 +209,8 @@ public final class Reflective
                 if (as[a] instanceof Parameter)
                 {
                     Parameter o = (Parameter) as[a];
-                    out[argIndex] = coerce(session, target, types[argIndex], o.absentValue());
+                    out[argIndex] = coerce(session, target, types[argIndex],
+                        o.absentValue());
                     start = argIndex + 1;
                 }
             }
@@ -273,8 +268,6 @@ public final class Reflective
             try
             {
                 // Try to convert one argument
-                // derek: add empty array as extra argument
-                // out[i] = coerce(session, target, types[i], in.get(i));
                 if (in.size() == 0)
                 {
                     out[i] = NO_MATCH;
