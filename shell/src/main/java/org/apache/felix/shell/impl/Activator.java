@@ -210,55 +210,70 @@ public class Activator implements BundleActivator
         org.apache.felix.shell.ShellService,
         org.ungoverned.osgi.service.shell.ShellService
     {
-        private HashMap m_commandRefMap = new HashMap();
-        private TreeMap m_commandNameMap = new TreeMap();
+        private final HashMap m_commandRefMap = new HashMap();
+        private final TreeMap m_commandNameMap = new TreeMap();
 
-        public synchronized String[] getCommands()
+        public String[] getCommands()
         {
-            Set ks = m_commandNameMap.keySet();
-            String[] cmds = (ks == null)
-                ? new String[0] : (String[]) ks.toArray(new String[ks.size()]);
-            return cmds;
+        	synchronized(m_commandRefMap)
+            {
+	            Set ks = m_commandNameMap.keySet();
+	            String[] cmds = (ks == null)
+	                ? new String[0] : (String[]) ks.toArray(new String[ks.size()]);
+	            return cmds;
+        	}
         }
 
-        public synchronized String getCommandUsage(String name)
+        public String getCommandUsage(String name)
         {
-            Command command = (Command) m_commandNameMap.get(name);
-            return (command == null) ? null : command.getUsage();
+        	synchronized(m_commandRefMap)
+            {
+        		Command command = (Command) m_commandNameMap.get(name);
+            	return (command == null) ? null : command.getUsage();
+        	}
         }
 
-        public synchronized String getCommandDescription(String name)
+        public String getCommandDescription(String name)
         {
-            Command command = (Command) m_commandNameMap.get(name);
-            return (command == null) ? null : command.getShortDescription();
+        	synchronized(m_commandRefMap)
+            {
+        		Command command = (Command) m_commandNameMap.get(name);
+            	return (command == null) ? null : command.getShortDescription();
+        	}
         }
 
-        public synchronized ServiceReference getCommandReference(String name)
+        public ServiceReference getCommandReference(String name)
         {
             ServiceReference ref = null;
-            Iterator itr = m_commandRefMap.entrySet().iterator();
-            while (itr.hasNext())
+            synchronized(m_commandRefMap)
             {
-                Map.Entry entry = (Map.Entry) itr.next();
-                if (((Command) entry.getValue()).getName().equals(name))
-                {
-                    ref = (ServiceReference) entry.getKey();
-                    break;
-                }
+	            Iterator itr = m_commandRefMap.entrySet().iterator();
+	            while (itr.hasNext())
+	            {
+	                Map.Entry entry = (Map.Entry) itr.next();
+	                if (((Command) entry.getValue()).getName().equals(name))
+	                {
+	                    ref = (ServiceReference) entry.getKey();
+	                    break;
+	                }
+	            }
             }
             return ref;
         }
 
-        public synchronized void removeCommand(ServiceReference ref)
+        public void removeCommand(ServiceReference ref)
         {
-            Command command = (Command) m_commandRefMap.remove(ref);
-            if (command != null)
+        	synchronized(m_commandRefMap)
             {
-                m_commandNameMap.remove(command.getName());
-            }
+	            Command command = (Command) m_commandRefMap.remove(ref);
+	            if (command != null)
+	            {
+	                m_commandNameMap.remove(command.getName());
+	            }
+        	}
         }
 
-        public synchronized void executeCommand(
+        public void executeCommand(
             String commandLine, PrintStream out, PrintStream err) throws Exception
         {
             commandLine = commandLine.trim();
@@ -298,27 +313,36 @@ public class Activator implements BundleActivator
             }
         }
 
-        protected synchronized Command getCommand(String name)
+        protected Command getCommand(String name)
         {
-            Command command = (Command) m_commandNameMap.get(name);
-            return (command == null) ? null : command;
+        	synchronized(m_commandRefMap)
+            {
+        		Command command = (Command) m_commandNameMap.get(name);
+            	return (command == null) ? null : command;
+        	}
         }
 
-        protected synchronized void addCommand(ServiceReference ref)
+        protected void addCommand(ServiceReference ref)
         {
             Object cmdObj = m_context.getService(ref);
             Command command =
                 (cmdObj instanceof org.ungoverned.osgi.service.shell.Command)
                 ? new OldCommandWrapper((org.ungoverned.osgi.service.shell.Command) cmdObj)
                 : (Command) cmdObj;
-            m_commandRefMap.put(ref, command);
-            m_commandNameMap.put(command.getName(), command);
+            synchronized(m_commandRefMap)
+            {
+            	m_commandRefMap.put(ref, command);
+            	m_commandNameMap.put(command.getName(), command);
+            }
         }
 
-        protected synchronized void clearCommands()
+        protected void clearCommands()
         {
-            m_commandRefMap.clear();
-            m_commandNameMap.clear();
+        	synchronized(m_commandRefMap)
+            {
+        		m_commandRefMap.clear();
+        		m_commandNameMap.clear();
+        	}
         }
     }
 
