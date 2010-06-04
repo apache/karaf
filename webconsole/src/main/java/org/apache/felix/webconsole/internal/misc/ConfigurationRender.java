@@ -475,27 +475,74 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         {
             if ( doFilter )
             {
-                super.write( "<br/>", 0, 5 );
+                oldch = '_';
+                this.write('\n'); // write <br/>
             }
             else
             {
                 super.println();
             }
+            oldch = '\n';
         }
 
+        private int oldch = '_';
 
         // write the character unmodified unless filtering is enabled and
         // the character is a "<" in which case &lt; is written
-        public void write( final int character )
+        public void write(final int character)
         {
-            if ( doFilter && character == '<' )
+            if (doFilter)
             {
-                super.write( "&lt;" );
+                switch (character)
+                {
+                    case '<':
+                        super.write('&');
+                        super.write('l');
+                        super.write('t');
+                        super.write(';');
+                        break;
+                    case '>':
+                        super.write('&');
+                        super.write('g');
+                        super.write('t');
+                        super.write(';');
+                        break;
+                    case '&':
+                        super.write('&');
+                        super.write('a');
+                        super.write('m');
+                        super.write('p');
+                        super.write(';');
+                        break;
+                    case ' ':
+                        super.write('&');
+                        super.write('n');
+                        super.write('b');
+                        super.write('s');
+                        super.write('p');
+                        super.write(';');
+                        break;
+                    case '\r':
+                    case '\n':
+                        if (oldch != '\r' && oldch != '\n')
+                        {// don't add twice <br>
+                            super.write('<');
+                            super.write('b');
+                            super.write('r');
+                            super.write('/');
+                            super.write('>');
+                            super.write('\n');
+                        }
+                        break;
+                    default:
+                        super.write(character);
+                }
             }
             else
             {
-                super.write( character );
+                super.write(character);
             }
+            oldch = character;
         }
 
 
@@ -505,7 +552,10 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         {
             if ( doFilter )
             {
-                writeFiltered( new String( chars, off, len ) );
+                for (int i = off; i < len; i++)
+                {
+                    this.write(chars[i]);
+                }
             }
             else
             {
@@ -518,23 +568,9 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
         // which case the writeFiltered(String) method is called for filtering
         public void write( final String string, final int off, final int len )
         {
-            if ( doFilter )
-            {
-                writeFiltered( string.substring( off, len ) );
-            }
-            else
-            {
-                super.write( string, off, len );
-            }
+            write(string.toCharArray(), off, len);
         }
 
-
-        // helper method filter the string for "<" before writing
-        private void writeFiltered( String string )
-        {
-            string = WebConsoleUtil.escapeHtml(string); // filtering
-            super.write( string, 0, string.length() );
-        }
     }
 
     private void addAttachments( final ConfigurationWriter cf, final String mode )
