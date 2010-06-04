@@ -133,6 +133,16 @@ public class Felix extends BundleImpl implements Framework
 
     // Framework's active start level.
     private volatile int m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
+    // Framework's target start level.
+    // Normally the target start will equal the active start level, except
+    // whem the start level is changing, in which case the target start level
+    // will report the new start level while the active start level will report
+    // the old start level. Once the start level change is complete, the two
+    // will become equal again. This is necessary because the spec says the old
+    // start level should be reported until the start level change is complete,
+    // but we need to effectively enact the target start level immediately to
+    // avoid race conditions to restart stopped bundles.
+    private volatile int m_targetStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
 
     // Local bundle cache.
     private BundleCache m_cache = null;
@@ -1013,9 +1023,14 @@ ex.printStackTrace();
     {
         Bundle[] bundles = null;
 
+        // Record the target start level immediately and use this for
+        // comparisons for starting/stopping bundles to avoid race
+        // conditions to restart stopped bundles.
+        m_targetStartLevel = requestedLevel;
+
         // Do nothing if the requested start level is the same as the
         // active start level.
-        if (requestedLevel != getActiveStartLevel())
+        if (m_targetStartLevel != m_activeStartLevel)
         {
             // Synchronization for changing the start level is rather loose.
             // The framework's active start level is volatile, so no lock is
@@ -1043,7 +1058,7 @@ ex.printStackTrace();
 
             // Determine if we are lowering or raising the
             // active start level.
-            boolean lowering = (requestedLevel < getActiveStartLevel());
+            boolean lowering = (m_targetStartLevel < m_activeStartLevel);
 
             synchronized (m_installedBundleLock_Priority2)
             {
@@ -1150,14 +1165,19 @@ ex.printStackTrace();
                     if (((impl.getPersistentState() == Bundle.ACTIVE)
                         || (impl.getPersistentState() == Bundle.STARTING))
                         && (impl.getStartLevel(getInitialBundleStartLevel())
-                            <= requestedLevel))
+                            <= m_targetStartLevel))
                     {
-
+                        // Count up the active start level.
+// TODO: STARTLEVEL - This isn't entirely accurate since a bundle's start
+//       level is written synchronously, if someone were to change a bundle's
+//       start level in the middle of a framework start level change then you
+//       could potentially see the active start level jump around. We really
+//       need to snapshot the existing bundle start levels too.
                         if (m_activeStartLevel != impl.getStartLevel(getInitialBundleStartLevel()))
                         {
                             m_activeStartLevel = impl.getStartLevel(getInitialBundleStartLevel());
                         }
-                        
+
                         try
                         {
 // TODO: LAZY - Not sure if this is the best way...
@@ -1179,9 +1199,14 @@ ex.printStackTrace();
                     else if (((impl.getState() == Bundle.ACTIVE)
                         || (impl.getState() == Bundle.STARTING))
                         && (impl.getStartLevel(getInitialBundleStartLevel())
-                            > requestedLevel))
+                            > m_targetStartLevel))
                     {
-
+                        // Count down the active start level.
+// TODO: STARTLEVEL - This isn't entirely accurate since a bundle's start
+//       level is written synchronously, if someone were to change a bundle's
+//       start level in the middle of a framework start level change then you
+//       could potentially see the active start level jump around. We really
+//       need to snapshot the existing bundle start levels too.
                         if (m_activeStartLevel != impl.getStartLevel(getInitialBundleStartLevel()))
                         {
                             m_activeStartLevel = impl.getStartLevel(getInitialBundleStartLevel());
@@ -1210,8 +1235,7 @@ ex.printStackTrace();
                 bundles[i] = null;
             }
 
-            m_activeStartLevel = requestedLevel;
-
+            m_activeStartLevel = m_targetStartLevel;
         }
 
         if (getState() == Bundle.ACTIVE)
@@ -1331,7 +1355,7 @@ ex.printStackTrace();
                     // Start the bundle if necessary.
                     if (((impl.getPersistentState() == Bundle.ACTIVE)
                         || (impl.getPersistentState() == Bundle.STARTING))
-                        && (startLevel <= getActiveStartLevel()))
+                        && (startLevel <= m_targetStartLevel))
                     {
 // TODO: LAZY - Not sure if this is the best way...
                         int options = Bundle.START_TRANSIENT;
@@ -1343,7 +1367,7 @@ ex.printStackTrace();
                     // Stop the bundle if necessary.
                     else if (((impl.getState() == Bundle.ACTIVE)
                         || (impl.getState() == Bundle.STARTING))
-                        && (startLevel > getActiveStartLevel()))
+                        && (startLevel > m_targetStartLevel))
                     {
                         stopBundle(impl, false);
                     }
@@ -1688,7 +1712,12 @@ ex.printStackTrace();
 
             // Check to see if the bundle's start level is greater than the
             // the framework's active start level.
-            if (bundle.getStartLevel(getInitialBundleStartLevel()) > getActiveStartLevel())
+// TODO: STARTLEVEL - Technically, this is not correct since we could be in the
+//       middle of a framework start level change and we might not have yet
+//       reached the target start level, but we will activate the bundle anyway.
+//       This means the bundle will be running in a higher start level temporarily
+//       until the start level thread catches up.
+            if (bundle.getStartLevel(getInitialBundleStartLevel()) > m_targetStartLevel)
             {
                 // Throw an exception for transient starts.
                 if ((options & Bundle.START_TRANSIENT) != 0)
@@ -1697,7 +1726,7 @@ ex.printStackTrace();
                         "Cannot start bundle " + bundle + " because its start level is "
                         + bundle.getStartLevel(getInitialBundleStartLevel())
                         + ", which is greater than the framework's start level of "
-                        + getActiveStartLevel() + ".");
+                        + m_targetStartLevel + ".");
                 }
                 // Ignore persistent starts.
                 return;
@@ -1808,8 +1837,13 @@ ex.printStackTrace();
         {
             // If the bundle is already active or its start level is not met,
             // simply return.
+// TODO: STARTLEVEL - Technically, this is not correct since we could be in the
+//       middle of a framework start level change and we might not have yet
+//       reached the target start level, but we will activate the bundle anyway.
+//       This means the bundle will be running in a higher start level temporarily
+//       until the start level thread catches up.
             if ((bundle.getState() == Bundle.ACTIVE) ||
-                (bundle.getStartLevel(getInitialBundleStartLevel()) > getActiveStartLevel()))
+                (bundle.getStartLevel(getInitialBundleStartLevel()) > m_targetStartLevel))
             {
                 return;
             }
