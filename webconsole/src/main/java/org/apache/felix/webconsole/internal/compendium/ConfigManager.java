@@ -396,18 +396,23 @@ public class ConfigManager extends ConfigManagerBase
                 }
 
                 // insert and entry for the PID
-                ObjectClassDefinition ocd = this.getObjectClassDefinition(cfgs[i], locale);
-                String name;
-                if (ocd != null)
+                ObjectClassDefinition ocd = null;
+                try
                 {
-                    name = ocd.getName();
+                    ocd = this.getObjectClassDefinition(cfgs[i], locale);
                 }
-                else
+                catch (IllegalArgumentException t)
                 {
-                    name = pid;
+                    // MetaTypeProvider.getObjectClassDefinition might throw illegal 
+                    // argument exception. So we must catch it here, otherwise the
+                    // other configurations will not be shown
+                    // See https://issues.apache.org/jira/browse/FELIX-2390
                 }
 
-                optionsPlain.put(pid, name);
+                if (ocd != null)
+                {
+                    optionsPlain.put(pid, ocd.getName());
+                }
             }
 
             for (Iterator i = optionsPlain.keySet().iterator(); i.hasNext();)
