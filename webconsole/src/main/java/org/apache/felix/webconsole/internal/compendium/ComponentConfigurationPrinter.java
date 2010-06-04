@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
+import org.apache.felix.webconsole.WebConsoleUtil;
 import org.apache.felix.webconsole.internal.AbstractConfigurationPrinter;
 import org.apache.felix.webconsole.internal.Util;
 import org.osgi.framework.Constants;
@@ -218,6 +219,7 @@ public class ComponentConfigurationPrinter extends AbstractConfigurationPrinter
             {
                 String key = ( String ) ki.next();
                 Object value = props.get( key );
+                value = WebConsoleUtil.toString( value );
                 if ( value.getClass().isArray() )
                 {
                     value = Arrays.asList( ( Object[] ) value );

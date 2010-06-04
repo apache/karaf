@@ -378,36 +378,10 @@ public class ConfigurationRender extends SimpleWebConsolePlugin implements OsgiM
             pw.print( " = " );
         }
 
-        pw.print( asString( value ) );
+        pw.print( WebConsoleUtil.toString( value ) );
 
         pw.println();
     }
-
-
-    private static final String asString( final Object value )
-    {
-        if ( value == null )
-        {
-            return "n/a";
-        }
-        else if ( value.getClass().isArray() )
-        {
-            StringBuffer dest = new StringBuffer();
-            Object[] values = ( Object[] ) value;
-            for ( int j = 0; j < values.length; j++ )
-            {
-                if ( j > 0 )
-                    dest.append( ", " );
-                dest.append( values[j] );
-            }
-            return dest.toString();
-        }
-        else
-        {
-            return value.toString();
-        }
-    }
-
 
     private final String getTitle( final String title, final Bundle provider )
     {

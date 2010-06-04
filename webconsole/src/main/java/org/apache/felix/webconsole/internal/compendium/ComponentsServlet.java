@@ -385,10 +385,7 @@ public class ComponentsServlet extends SimpleWebConsolePlugin implements OsgiMan
                 b.append( key ).append( " = " );
 
                 Object prop = props.get( key );
-                if ( prop.getClass().isArray() )
-                {
-                    prop = Arrays.asList( ( Object[] ) prop );
-                }
+                prop = WebConsoleUtil.toString( prop );
                 b.append( prop );
                 buf.put(b.toString());
             }

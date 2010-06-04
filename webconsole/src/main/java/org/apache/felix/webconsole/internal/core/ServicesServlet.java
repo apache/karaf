@@ -182,27 +182,8 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements OsgiManag
 
     static final String propertyAsString( ServiceReference ref, String name )
     {
-        Object value = ref.getProperty( name );
-        if ( value instanceof Object[] )
-        {
-            StringBuffer dest = new StringBuffer();
-            Object[] values = ( Object[] ) value;
-            for ( int j = 0; j < values.length; j++ )
-            {
-                if ( j > 0 )
-                    dest.append( ", " );
-                dest.append( values[j] );
-            }
-            return dest.toString();
-        }
-        else if ( value != null )
-        {
-            return value.toString();
-        }
-        else
-        {
-            return "n/a";
-        }
+        final Object value = ref.getProperty( name );
+        return WebConsoleUtil.toString( value );
     }
 
 
