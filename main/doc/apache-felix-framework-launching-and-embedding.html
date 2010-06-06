@@ -12,27 +12,29 @@
 <ul>
 	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
 	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
-	<li><a href="http://felix.apache.org/site/downloads.cgi" rel="nofollow">downloads</a></li>
+	<li><a href="http://felix.apache.org/site/downloads.cgi" class="external-link" rel="nofollow">downloads</a></li>
 	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
 	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
 	<li><a href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</a></li>
-	<li><a href="http://www.apache.org/" rel="nofollow">asf</a></li>
-	<li><a href="http://www.apache.org/foundation/sponsorship.html" rel="nofollow">sponsorship</a></li>
-	<li><a href="http://www.apache.org/foundation/thanks.html" rel="nofollow">sponsors</a>
+	<li><a href="http://www.apache.org/" class="external-link" rel="nofollow">asf</a></li>
+	<li><a href="http://www.apache.org/foundation/sponsorship.html" class="external-link" rel="nofollow">sponsorship</a></li>
+	<li><a href="http://www.apache.org/foundation/thanks.html" class="external-link" rel="nofollow">sponsors</a>
 <!-- ApacheCon Ad -->
 <iframe src="apache-felix-framework-launching-and-embedding_files/button.html" style="border-width: 0pt; float: left;" frameborder="0" height="135" scrolling="no" width="135"></iframe>
 <p style="height: 100px;">
 <!-- ApacheCon Ad -->
-</p></li></ul> </div>
+</p></li></ul>
+    </div>
     <div class="main">
 <h1><a name="ApacheFelixFrameworkLaunchingandEmbedding-ApacheFelixFrameworkLaunchingandEmbedding"></a>Apache Felix Framework Launching and Embedding</h1>
 
 <p><em>[This document describes framework launching introduced in Felix
-2.0.0 and is incompatible with older versions of the Felix framework.]</em></p>
+Framework 2.0.0 and continuing with the latest releases; it is
+incompatible with older versions of the Felix framework.]</em></p>
 
 <ul>
 	<li><a href="#ApacheFelixFrameworkLaunchingandEmbedding-introduction">Introduction</a></li>
-	<li><a href="#ApacheFelixFrameworkLaunchingandEmbedding-overview">API Overview</a>
+	<li><a href="#ApacheFelixFrameworkLaunchingandEmbedding-overview">OSGi Launching and Embedding API Overview</a>
 	<ul>
 		<li><a href="#ApacheFelixFrameworkLaunchingandEmbedding-creatingandconfiguring">Creating and Configuring the Framework Instance</a></li>
 		<li><a href="#ApacheFelixFrameworkLaunchingandEmbedding-startinginstance">Starting the Framework Instance</a></li>
@@ -66,23 +68,24 @@
 
 <h1><a name="ApacheFelixFrameworkLaunchingandEmbedding-Introduction"></a>Introduction</h1>
 
-<p>The Apache Felix framework is intended to be easily launchable and
-embeddable. For example, Felix avoids the use of system properties for
-configuration, since these are globals and can cause interference if
-multiple framework instances are created in the same VM. Felix also
-tries to multiplex singleton facilities, like the URL stream handler
-factory. The goal is to make it possible to use Felix in as many
-scenarios as possible; however, this is still just a goal. In other
-words, this is a work in progress and if any issues arise, it would be
-greatly appreciated if they are brought to the attention of the Felix
-community. The next section provides a Felix API overview, while the
-remainder of the document is divided into two sections, one focusing on
-how to launch Felix and one focusing on how to embed Felix into a host
-application.</p>
+<p>The Apache Felix Framework is intended to be easily launchable and
+embeddable. For example, the Felix framework implementation avoids the
+use of system properties for configuration, since these are globals and
+can cause interference if multiple framework instances are created in
+the same VM. The framework also tries to multiplex singleton
+facilities, like the URL stream handler factory. The goal is to make it
+possible to use the framework in a variety of scenarios; however, this
+is still just a goal. In other words, this is a work in progress and if
+any issues arise, it would be greatly appreciated if they are brought
+to the attention of the Felix community. The next section provides an
+overview of the standard OSGi launching and embedding API for
+frameworks, while the remainder of the document is divided into two
+sections, one focusing on how to launch Felix and one focusing on how
+to embed Felix into a host application.</p>
 
 <p><a name="ApacheFelixFrameworkLaunchingandEmbedding-overview"></a></p>
 
-<h1><a name="ApacheFelixFrameworkLaunchingandEmbedding-APIOverview"></a>API Overview</h1>
+<h1><a name="ApacheFelixFrameworkLaunchingandEmbedding-OSGiLaunchingandEmbeddingAPIOverview"></a>OSGi Launching and Embedding API Overview</h1>
 
 <p>The Felix framework is implemented by the <tt>org.apache.felix.framework.Felix</tt> class or just <tt>Felix</tt>
 for short. As part of the R4.2 OSGi specification, the launching and
@@ -125,17 +128,17 @@ is to have the framework implement the <tt>org.osgi.framework.launch.Framework</
 <pre class="code-java"><span class="code-keyword">public</span> <span class="code-keyword">interface</span> Framework <span class="code-keyword">extends</span> Bundle
 {
     void init();
-    FrameworkEvent waitForStop();
+    FrameworkEvent waitForStop(<span class="code-object">long</span> timeout);
 }
 </pre>
 </div></div>
 
-<p>To actually construct a framework instance, the R4.2 specification defines the FrameworkFactory interface:</p>
+<p>To actually construct a framework instance, the R4.2 specification defines the <tt>FrameworkFactory</tt> interface:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java"><span class="code-keyword">public</span> <span class="code-keyword">interface</span> FrameworkFactory
 {
-    Framework newFramework(Map configMap);
+    Framework newFramework(Map config);
 }
 </pre>
 </div></div>
@@ -163,14 +166,12 @@ in <tt>org.osgi.framework.system.packages</tt>; there is no default value for th
 to all bundles from the environment (i.e., no need to import them);
 there is no default value for this property and its use should be
 avoided.</li>
-	<li><tt>org.osgi.framework.storage</tt> - specifies the
-path to a directory, which will be created if it does not exist, to use
-for bundle cache storage; the default value for this property is "<tt>felix-cache</tt>" in the current working directory.</li>
-	<li><tt>org.osgi.framework.storage.clean</tt>
-- specifies whether the bundle cache should be flushed; the default
-value for this property is "none", but it can be changed to
-"onFirstInit" to flush the bundle cache when the framework is
-initialized.</li>
+	<li><tt>org.osgi.framework.bundle.parent</tt> - Specifies which class loader is used for boot delegation. Possible values are: <tt>boot</tt> for the boot class loader, <tt>app</tt> for the application class loader, <tt>ext</tt> for the extension class loader, and <tt>framework</tt> for the framework's class loader. The default is <tt>boot</tt>.</li>
+	<li><tt>org.osgi.framework.storage</tt>
+- specifies the path to a directory, which will be created if it does
+not exist, to use for bundle cache storage; the default value for this
+property is "<tt>felix-cache</tt>" in the current working directory.</li>
+	<li><tt>org.osgi.framework.storage.clean</tt> - specifies whether the bundle cache should be flushed; the default value for this property is "<tt>none</tt>", but it can be changed to "<tt>onFirstInit</tt>" to flush the bundle cache when the framework is initialized.</li>
 	<li><tt>org.osgi.framework.startlevel.beginning</tt> - specifies the start level the framework enters upon startup; the default value for this property is 1.</li>
 </ul>
 
@@ -203,7 +204,7 @@ insensitive. You are not able to change the framework's configuration
 after construction. If you need a different configuration, you must
 create a new framework instance.</p>
 
-<div class="panelMacro"><table class="warningMacro"><colgroup><col width="24"><col></colgroup><tbody><tr><td valign="top"><img src="apache-felix-framework-launching-and-embedding_files/forbidden.gif" alt="" align="absmiddle" border="0" height="16" width="16"></td><td><b>WARNING</b><br><p>Felix configuration properties have change considerably starting from <tt>1.4.0</tt>; if you are upgrading from an earlier version, the <a href="http://felix.apache.org/site/apache-felix-framework-usage-documentation.html#ApacheFelixFrameworkUsageDocumentation-migrating">usage document</a> describes the configuration property changes.</p></td></tr></tbody></table></div>
+<div class="panelMacro"><table class="warningMacro"><colgroup><col width="24"><col></colgroup><tbody><tr><td valign="top"><img src="apache-felix-framework-launching-and-embedding_files/forbidden.gif" alt="" align="absmiddle" border="0" height="16" width="16"></td><td><b>WARNING</b><br>Felix configuration properties have change considerably starting from <tt>1.4.0</tt>; if you are upgrading from an earlier version, the <a href="http://felix.apache.org/site/apache-felix-framework-usage-documentation.html#ApacheFelixFrameworkUsageDocumentation-migrating">usage document</a> describes the configuration property changes.</td></tr></tbody></table></div>
 
 <p><a name="ApacheFelixFrameworkLaunchingandEmbedding-startinginstance"></a></p>
 
@@ -217,7 +218,7 @@ create a new framework instance.</p>
 </ul>
 
 
-<p>The <tt>init()</tt> method is necessary since the framework does not have a <tt>BundleContext</tt> when it is first created, so a transition to the <tt>Bundle.STARTING</tt> state is required to acquire its context (via <tt>Bundle.getBundleContext()</tt>) for performing various tasks, such as installing bundles. Note that Felix also provides the <tt>felix.systembundle.activators</tt> property that serves a similar purpose, but is not standard. After the <tt>init()</tt> method completes, the follow actions have been performed:</p>
+<p>The <tt>init()</tt> method is necessary since the framework does not have a <tt>BundleContext</tt> when it is first created, so a transition to the <tt>Bundle.STARTING</tt> state is required to acquire its context (via <tt>Bundle.getBundleContext()</tt>) for performing various tasks, such as installing bundles. Note that the Felix framework also provides the <tt>felix.systembundle.activators</tt> property that serves a similar purpose, but is not standard. After the <tt>init()</tt> method completes, the follow actions have been performed:</p>
 
 <ul>
 	<li>Event handling is enabled.</li>
@@ -257,20 +258,20 @@ have reasonable defaults, but if you are creating a launcher you will
 generally want to more than that, such as automatically installing and
 starting bundles when you start the framework instance. The default
 Felix launcher defines reusable functionality to automatically install
-and/or start bundles upon framework startup; see the <a href="http://felix.apache.org/site/apache-felix-framework-usage-documentation.html#ApacheFelixFrameworkUsageDocumentation-configuringfelix">usage document</a> for more information on configuring Felix and on the various configuration properties.</p>
+and/or start bundles upon framework startup; see the <a href="http://felix.apache.org/site/apache-felix-framework-usage-documentation.html#ApacheFelixFrameworkUsageDocumentation-configuringfelix">usage document</a> for more information on configuring the Felix framework and on the various configuration properties.</p>
 
-<p>The remainder of this section describes how the standard Felix
-launcher works as well as how to create a custom launcher for Felix.</p>
+<p>The remainder of this section describes how the standard Felix launcher works as well as how to create a custom launcher.</p>
 
 <p><a name="ApacheFelixFrameworkLaunchingandEmbedding-standardlauncher"></a></p>
 
 <h2><a name="ApacheFelixFrameworkLaunchingandEmbedding-StandardFelixFrameworkLauncher"></a>Standard Felix Framework Launcher</h2>
 
-<p>The standard Felix launcher is very simple and is not intended to
-solve every possible requirement; it is intended to work for most
-standard situations. Most special launching requirements should be
-resolved by creating a custom launcher. This section describes how the
-standard launcher works. The following code represents the complete <tt>main()</tt> method of the standard launcher, each numbered comment will be described in more detail below:</p>
+<p>The standard Felix framework launcher is very simple and is not
+intended to solve every possible requirement; it is intended to work
+for most standard situations. Most special launching requirements
+should be resolved by creating a custom launcher. This section
+describes how the standard launcher works. The following code
+represents the complete <tt>main()</tt> method of the standard launcher, each numbered comment will be described in more detail below:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java"><span class="code-keyword">public</span> <span class="code-keyword">static</span> void main(<span class="code-object">String</span>[] args) <span class="code-keyword">throws</span> Exception
@@ -295,6 +296,7 @@ standard launcher works. The following code represents the complete <tt>main()</
             cacheDir = args[i];
         }
     }
+
     <span class="code-keyword">if</span> ((args.length &gt; 3) || (expectBundleDir &amp;&amp; bundleDir == <span class="code-keyword">null</span>))
     {
         <span class="code-object">System</span>.out.println(<span class="code-quote">"Usage: [-b &lt;bundle-deploy-dir&gt;] [&lt;bundle-cache-dir&gt;]"</span>);
@@ -331,7 +333,7 @@ standard launcher works. The following code represents the complete <tt>main()</
 </span>    <span class="code-object">String</span> enableHook = configProps.getProperty(SHUTDOWN_HOOK_PROP);
     <span class="code-keyword">if</span> ((enableHook == <span class="code-keyword">null</span>) || !enableHook.equalsIgnoreCase(<span class="code-quote">"<span class="code-keyword">false</span>"</span>))
     {
-        <span class="code-object">Runtime</span>.getRuntime().addShutdownHook(<span class="code-keyword">new</span> <span class="code-object">Thread</span>() {
+        <span class="code-object">Runtime</span>.getRuntime().addShutdownHook(<span class="code-keyword">new</span> <span class="code-object">Thread</span>(<span class="code-quote">"Felix Shutdown Hook"</span>) {
             <span class="code-keyword">public</span> void run()
             {
                 <span class="code-keyword">try</span>
@@ -349,10 +351,6 @@ standard launcher works. The following code represents the complete <tt>main()</
             }
         });
     }
-
-    <span class="code-comment">// Print welcome banner.
-</span>    <span class="code-object">System</span>.out.println(<span class="code-quote">"\nWelcome to Felix"</span>);
-    <span class="code-object">System</span>.out.println(<span class="code-quote">"================\n"</span>);
 
     <span class="code-keyword">try</span>
     {
@@ -373,7 +371,7 @@ standard launcher works. The following code represents the complete <tt>main()</
     {
         <span class="code-object">System</span>.err.println(<span class="code-quote">"Could not create framework: "</span> + ex);
         ex.printStackTrace();
-        <span class="code-object">System</span>.exit(-1);
+        <span class="code-object">System</span>.exit(0);
     }
 }
 </pre>
@@ -392,7 +390,7 @@ provided merely for convenience when system properties must be
 specified. The file is a standard Java properties file, but it also
 supports property substitution using <tt>${&lt;property-name</tt>} syntax. Property substitution can be nested; only system properties will be used for substitution.</li>
 	<li>Load any configuration properties specified in the <tt>config.properties</tt> file; this file is typically located in the <tt>conf/</tt> directory of the Felix installation directory, but it can be specified directly using the <tt>felix.config.properties</tt>
-system property. This file is used to configure the Felix instance
+system property. This file is used to configure the framework instance
 created by the launcher. The file is a standard Java properties file,
 but it also supports property substitution using "<tt>${&lt;property-name&gt;</tt>}"
 syntax. Property substitution can be nested; configuration and system
@@ -427,20 +425,18 @@ bundles provide the only means of interaction.</p>
 
 <p>This section creates a bare-bones launcher to demonstrate the
 minimum requirements for creating an interactive launcher for the Felix
-framework. This example uses the standard Felix shell bundles for
-interactivity, but any other bundles could be used instead. For
-example, the shell service and telnet bundles could be used to launch
-Felix and make it remotely accessible.</p>
-
-<p>This example launcher project has the following directory structure:</p>
+framework. This example uses the standard Gogo shell bundles for
+interactivity, but any other bundles could be used instead. This
+example launcher project has the following directory structure:</p>
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>launcher/
    lib/
-      org.apache.felix.main-2.0.0.jar
+      org.apache.felix.main-3.0.0.jar
    bundle/
-      org.apache.felix.shell-1.4.0.jar
-      org.apache.felix.shell.tui-1.4.0.jar
+      org.apache.felix.gogo.command-0.6.0.jar
+      org.apache.felix.gogo.runtime-0.6.0.jar
+      org.apache.felix.gogo.shell-0.6.0.jar
    src/
       example/
          Main.java
@@ -454,10 +450,10 @@ configuration property handling; if these capabilities are not needed,
 then it would be possible to use the framework JAR file instead of the
 main JAR file. The <tt>bundle/</tt> directory contains the shell
 service and textual shell interface bundles that will be used for
-interacting with the framework instance. Note: If you do not launch
-Felix with interactive bundles, it will appear as if the framework
+interacting with the framework instance. Note: If you do not launch the
+framework with interactive bundles, it will appear as if the framework
 instance is hung, but it is actually just sitting there waiting for
-someone to tell it to do something. The <tt>src/example/</tt> directory contains the following <tt>Main.java</tt> file, which is a very simplistic Felix launcher.</p>
+someone to tell it to do something. The <tt>src/example/</tt> directory contains the following <tt>Main.java</tt> file, which is a very simplistic framework launcher.</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java"><span class="code-keyword">package</span> example;
@@ -473,8 +469,8 @@ someone to tell it to do something. The <tt>src/example/</tt> directory contains
     <span class="code-keyword">public</span> <span class="code-keyword">static</span> void main(<span class="code-object">String</span>[] argv) <span class="code-keyword">throws</span> Exception
     {
         <span class="code-comment">// Print welcome banner.
-</span>        <span class="code-object">System</span>.out.println(<span class="code-quote">"\nWelcome to Felix."</span>);
-        <span class="code-object">System</span>.out.println(<span class="code-quote">"=================\n"</span>);
+</span>        <span class="code-object">System</span>.out.println(<span class="code-quote">"\nWelcome to My Launcher"</span>);
+        <span class="code-object">System</span>.out.println(<span class="code-quote">"======================\n"</span>);
 
         <span class="code-keyword">try</span>
         {
@@ -552,8 +548,8 @@ instance is created, it is initialized with <tt>init()</tt>.</p>
 auto-deploy directory and any referenced from the auto-install/start
 properties. Since we are using an empty configuration, the auto-deploy
 directory is the <tt>bundle</tt> directory in the current directory
-and there are no auto properties. Therefore, in this case, the two
-shell bundles will be installed.</p>
+and there are no auto properties. Therefore, in this case, the shell
+bundles will be installed.</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java">            m_fwk.start();
@@ -582,7 +578,7 @@ can use the <tt>ServiceLoader</tt> API in the JRE to further simplify the factor
 <p>The following command compiles the launcher when run from the root directory of the launcher project:</p>
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
-<pre>javac -d . -classpath lib/org.apache.felix.main-2.0.0.jar src/example/Main.java
+<pre>javac -d . -classpath lib/org.apache.felix.main-3.0.0.jar src/example/Main.java
 </pre>
 </div></div>
 
@@ -592,7 +588,7 @@ file. The following command executes the simple launcher when run from
 the root directory of the launcher project:</p>
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
-<pre>java -cp .:lib/org.apache.felix.main-2.0.0.jar example.Main
+<pre>java -cp .:lib/org.apache.felix.main-3.0.0.jar example.Main
 </pre>
 </div></div>
 
@@ -600,15 +596,15 @@ the root directory of the launcher project:</p>
 
 <p><a name="ApacheFelixFrameworkLaunchingandEmbedding-embedding"></a></p>
 
-<h1><a name="ApacheFelixFrameworkLaunchingandEmbedding-EmbeddingFelix"></a>Embedding Felix</h1>
+<h1><a name="ApacheFelixFrameworkLaunchingandEmbedding-EmbeddingtheFelixFramework"></a>Embedding the Felix Framework</h1>
 
-<p>Embedding Felix into a host application is a simple way to provide a
-sophisticated extensibility mechanism (i.e., a plugin system) to the
-host application. Embedding Felix is very similar to launching Felix as
-described above, the main difference is that the host application
-typically wants to interact with the framework instance and/or
-installed bundles/services from the outside. This is fairly easy to
-achieve with Felix, but there are some subtle issues to understand.
+<p>Embedding the Felix framework into a host application is a simple
+way to provide a sophisticated extensibility mechanism (i.e., a plugin
+system) to the host application. Embedding the Felix framework is very
+similar to launching it as described above, the main difference is that
+the host application typically wants to interact with the framework
+instance and/or installed bundles/services from the outside. This is
+fairly easy to achieve, but there are some subtle issues to understand.
 This section presents the mechanisms for embedding Felix into a host
 application and the issues in doing so.</p>
 
@@ -616,13 +612,17 @@ application and the issues in doing so.</p>
 
 <h2><a name="ApacheFelixFrameworkLaunchingandEmbedding-Host/FelixInteraction"></a>Host/Felix Interaction</h2>
 
-<p>In the section on <a href="#ApacheFelixFrameworkLaunchingandEmbedding-launching">launching</a> Felix above, the <tt>Felix</tt> accepts a configuration property called <tt>felix.systembundle.activators</tt>,
+<p>In the section on <a href="#ApacheFelixFrameworkLaunchingandEmbedding-launching">launching</a> the framework above, the <tt>Felix</tt> class accepts a configuration property called <tt>felix.systembundle.activators</tt>,
 which is a list of bundle activator instances. These bundle activator
 instances provide a convenient way for host applications to interact
-with the Felix framework. The ability offered by these activators can
-also be accomplished by invoking <tt>init()</tt> on the framework instance and the using <tt>getBundleContext()</tt> to get the System Bundle's context, but it can be more convenient to use an activator instance.</p>
+with the Felix framework.</p>
 
-<p>Each activator instance passed into the constructor effectively becomes part of the System Bundle. This means that the <tt>start()</tt>/<tt>stop()</tt> methods of each activator instance in the list gets invoked when the System Bundle's activator <tt>start()</tt>/<tt>stop()</tt> methods gets invoked, respectively. Each activator instance will be given the System Bundle's <tt>BundleContext</tt> object so that they can interact with the framework. Consider following snippet of a bundle activator:</p>
+<div class="panelMacro"><table class="warningMacro"><colgroup><col width="24"><col></colgroup><tbody><tr><td valign="top"><img src="apache-felix-framework-launching-and-embedding_files/forbidden.gif" alt="" align="absmiddle" border="0" height="16" width="16"></td><td><b>WARNING</b><br>The <tt>felix.systembundle.activators</tt>
+configuration property is specific to the Felix framework
+implementation. If you want your code to work with other framework
+implementations, you should call <tt>init()</tt> on the framework instance and use <tt>getBundleContext()</tt> directly. Otherwise, the approach would be very similar.</td></tr></tbody></table></div>
+
+<p>Each activator instance passed into the constructor effectively becomes part of the system bundle. This means that the <tt>start()</tt>/<tt>stop()</tt> methods of each activator instance in the list gets invoked when the system bundle's activator <tt>start()</tt>/<tt>stop()</tt> methods gets invoked, respectively. Each activator instance will be given the system bundle's <tt>BundleContext</tt> object so that they can interact with the framework. Consider following snippet of a bundle activator:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java"><span class="code-keyword">public</span> class HostActivator <span class="code-keyword">implements</span> BundleActivator
@@ -651,9 +651,9 @@ also be accomplished by invoking <tt>init()</tt> on the framework instance and t
 </pre>
 </div></div>
 
-<p>Given the above bundle activator, it is now possible to embed Felix
-into a host application and interact with it as the following snippet
-illustrates:</p>
+<p>Given the above bundle activator, it is now possible to embed the
+Felix framework into a host application and interact with it as the
+following snippet illustrates:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java"><span class="code-keyword">public</span> class HostApplication
@@ -664,7 +664,7 @@ illustrates:</p>
     <span class="code-keyword">public</span> HostApplication()
     {
         <span class="code-comment">// Create a configuration property map.
-</span>        Map configMap = <span class="code-keyword">new</span> HashMap();
+</span>        Map config = <span class="code-keyword">new</span> HashMap();
         <span class="code-comment">// Create host activator;
 </span>        m_activator = <span class="code-keyword">new</span> HostActivator();
         List list = <span class="code-keyword">new</span> ArrayList();
@@ -675,7 +675,7 @@ illustrates:</p>
         {
             <span class="code-comment">// Now create an instance of the framework with
 </span>            <span class="code-comment">// our configuration properties.
-</span>            m_felix = <span class="code-keyword">new</span> Felix(configMap);
+</span>            m_felix = <span class="code-keyword">new</span> Felix(config);
             <span class="code-comment">// Now start Felix instance.
 </span>            m_felix.start();
         }
@@ -698,14 +698,14 @@ illustrates:</p>
         <span class="code-comment">// Shut down the felix framework when stopping the
 </span>        <span class="code-comment">// host application.
 </span>        m_felix.stop();
-        m_felix.waitForStop();
+        m_felix.waitForStop(0);
     }
 }
 </pre>
 </div></div>
 
 <p>Notice how the <tt>HostApplication.getInstalledBundles()</tt> method
-uses its activator instance to get access to the System Bundle's
+uses its activator instance to get access to the system bundle's
 context in order to interact with the embedded Felix framework
 instance. This approach provides the foundation for all interaction
 between the host application and the embedded framework instance.</p>
@@ -732,7 +732,7 @@ instance can import it. This is achieved using the <tt>org.osgi.framework.system
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java"><span class="code-keyword">package</span> host.service.lookup;
 
-<span class="code-keyword">public</span> class Lookup
+<span class="code-keyword">public</span> <span class="code-keyword">interface</span> Lookup
 {
     <span class="code-keyword">public</span> <span class="code-object">Object</span> lookup(<span class="code-object">String</span> name);
 }
@@ -855,7 +855,7 @@ to installed bundles:</p>
         <span class="code-comment">// Shut down the felix framework when stopping the
 </span>        <span class="code-comment">// host application.
 </span>        m_felix.stop();
-        m_felix.waitForStop();
+        m_felix.waitForStop(0);
     }
 }
 </pre>
@@ -1016,11 +1016,10 @@ approach:</p>
 
     <span class="code-keyword">public</span> void shutdownApplication()
     {
-    {
         <span class="code-comment">// Shut down the felix framework when stopping the
 </span>        <span class="code-comment">// host application.
 </span>        m_felix.stop();
-        m_felix.waitForStop();
+        m_felix.waitForStop(0);
     }
 }
 </pre>
@@ -1047,7 +1046,7 @@ standard Java reflection to invoke methods on the service object.</p>
 
 <h3><a name="ApacheFelixFrameworkLaunchingandEmbedding-OtherApproaches"></a>Other Approaches</h3>
 
-<p>The <a href="http://code.google.com/p/transloader/" rel="nofollow">Transloader</a> project is another attempt at dealing with issues of classes loaded from different class loaders and may be of interest.</p>
+<p>The <a href="http://code.google.com/p/transloader/" class="external-link" rel="nofollow">Transloader</a> project is another attempt at dealing with issues of classes loaded from different class loaders and may be of interest.</p>
 
 <p><a name="ApacheFelixFrameworkLaunchingandEmbedding-caveat"></a></p>
 
@@ -1062,6 +1061,6 @@ be corrected.</p>
 
 <h2><a name="ApacheFelixFrameworkLaunchingandEmbedding-Feedback"></a>Feedback</h2>
 
-<p>Subscribe to the Felix users mailing list by sending a message to <a href="mailto:users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org</a>; after subscribing, email questions or feedback to <a href="mailto:users@felix.apache.org" rel="nofollow">users@felix.apache.org</a>.</p>
+<p>Subscribe to the Felix users mailing list by sending a message to <a href="mailto:users-subscribe@felix.apache.org" class="external-link" rel="nofollow">users-subscribe@felix.apache.org</a>; after subscribing, email questions or feedback to <a href="mailto:users@felix.apache.org" class="external-link" rel="nofollow">users@felix.apache.org</a>.</p>
     </div>
   </body></html>
