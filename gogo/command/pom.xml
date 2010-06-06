@@ -28,7 +28,7 @@
 
   <artifactId>org.apache.felix.gogo.command</artifactId>
   <packaging>bundle</packaging>
-  <version>0.5.0-SNAPSHOT</version>
+  <version>0.6.0</version>
   <name>Apache Felix Gogo Command</name>
 
   <description>
@@ -87,4 +87,10 @@
       </plugin>
     </plugins>
   </build>
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.gogo.command-0.6.0</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.gogo.command-0.6.0</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.gogo.command-0.6.0</url>
+  </scm>
 </project>
