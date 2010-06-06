@@ -54,7 +54,9 @@ public class FELIX2344_ExtraDependencyWithCallbackTest extends Base {
         Service sc = m.createService().setImplementation(new MyClient(e, false, 1));
         Service sc2 = m.createService().setImplementation(new MyClient(e, true, 5));
         Service sc3 = m.createService().setImplementation(new MyClient(e, true, 9));
-        
+        Service sc4 = m.createService().setImplementation(new MyClient2(e, true, 13));
+        Service sc5 = m.createService().setImplementation(new MyClient2(e, false, 16));
+
         // add the provider first, then add the consumer which initially will have no dependencies
         // but via the init() method an optional dependency with a callback method will be added
         m.add(sp);
@@ -76,6 +78,21 @@ public class FELIX2344_ExtraDependencyWithCallbackTest extends Base {
         m.add(sc3);
         m.add(sp);
         e.waitForStep(12, 5000);
+        
+        // now, remove the provider, add a fourth consumer (using a required autoconfig dependency, not callbacks), and after
+        // the consumer is started, then add the provider again.
+        m.remove(sc3);
+        m.remove(sp);
+        m.add(sc4);
+        m.add(sp);
+        e.waitForStep(15, 5000);
+        
+        // now, remove the provider, add a fifth consumer (using optional autoconfig, not callbacks), and check 
+        // if the consumer is injected with a NullObject.     
+        m.remove(sc4);
+        m.remove(sp);
+        m.add(sc5);
+        e.waitForStep(18, 5000);
     }
     
     public interface MyService {
@@ -85,7 +102,7 @@ public class FELIX2344_ExtraDependencyWithCallbackTest extends Base {
     }
 
     public static class MyClient {
-        MyService m_myService;
+        volatile MyService m_myService;
         private Ensure m_ensure;
         private final boolean m_required;
         private final int m_startStep;
@@ -114,6 +131,34 @@ public class FELIX2344_ExtraDependencyWithCallbackTest extends Base {
             m_ensure.step(m_startStep + 2);
             Assert.assertNotNull("Dependendency should have been injected", m_myService);
             m_ensure.step(m_startStep + 3);
+        }
+    }
+    // This client is not using callbacks, but instead, it uses auto config.
+    public static class MyClient2 {
+        volatile MyService m_myService;
+        private Ensure m_ensure;
+        private final boolean m_required;
+        private final int m_startStep;
+
+        public MyClient2(Ensure e, boolean required, int startStep) {
+            m_ensure = e;
+            m_required = required;
+            m_startStep = startStep;
+        }
+        
+        public void init(DependencyManager dm, Service s) {
+            m_ensure.step(m_startStep);
+            s.add(dm.createServiceDependency()
+                .setInstanceBound(true)
+                .setService(MyService.class)
+                .setRequired(m_required)
+                .setAutoConfig("m_myService"));
+        }
+
+        public void start() {
+            m_ensure.step(m_startStep + 1);
+            Assert.assertNotNull("Dependendency should have been injected", m_myService);
+            m_ensure.step(m_startStep + 2);
         }
     }
 }
