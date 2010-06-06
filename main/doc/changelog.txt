@@ -4,6 +4,7 @@ Changes from 2.0.5 to 3.0.0
 ** Improvement
     * Update to latest framework version 3.0.0
     * [FELIX-1797] - Customizable Framework startup message
+    * [FELIX-2042] - Use Gogo as the default shell for the framework distribution
     * [FELIX-2336] - Variable substitution in configuration files should ignore mismatched delimiters
 
 Changes from 2.0.4 to 2.0.5
