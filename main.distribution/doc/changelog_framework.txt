@@ -1,3 +1,47 @@
+Changes from 2.0.5 to 3.0.0
+---------------------------
+** Sub-task
+    * [FELIX-2036] - Improve resolver's generic capability/requirement model
+    * [FELIX-2037] - Improve resolver performance by making solution space searching smarter
+
+** Bug
+    * [FELIX-995] - JRE packages are exported with wrong version
+    * [FELIX-1967] - Freeze finding consistent class space
+    * [FELIX-2080] - Updating bundles when debugging switched on might result in a deadlock with 100% CPU usage
+    * [FELIX-2150] - URLStreamHandlerProxy.setURL may not set query component correctly
+    * [FELIX-2172] - Extremely long resolve stage when running CXF-DOSGi system test
+    * [FELIX-2177] - Fragment bundles not loaded after second start when using autodeploy
+    * [FELIX-2271] - CLONE -NPE "name can't be null" when trying to install a bundle in Felix 2.0.3
+    * [FELIX-2273] - getClassLoader-permission required accessing classes from dynamically loaded class
+    * [FELIX-2281] - Bundle id order affects fragment resolution success
+    * [FELIX-2317] - Possible NPE for jars with null Manifest
+    * [FELIX-2321] - BundleException type should be properly set when installing a duplicate bundle
+    * [FELIX-2332] - Lots of contention on ExtensionManager.openConnection(URL)
+    * [FELIX-2335] - Bundle.loadClass() for system bundle doesn't obey boot delegation
+    * [FELIX-2356] - extension bundle cannot load class from embed jar
+    * [FELIX-2383] - Bundles are restarted during start level change
+    * [FELIX-2392] - Felix framework uses a Java5 method
+
+** Improvement
+    * [FELIX-1210] - Allow jars with missing intermediate entries to be handled as if they were present in Bundle.getEntryPaths
+    * [FELIX-1797] - Customizable Framework startup message
+    * [FELIX-2035] - Reimplement framework resolver
+    * [FELIX-2039] - Reimplement standard OSGi LDAP filter to use new filter solution for resolver
+    * [FELIX-2040] - Modify framework service registry to use resolver's new capability/requirement model
+    * [FELIX-2041] - Look into using generics in framework code
+    * [FELIX-2042] - Use Gogo as the default shell for the framework distribution
+    * [FELIX-2324] - Support execution environment so that OBR works properly
+    * [FELIX-2336] - Variable substitution in configuration files should ignore mismatched delimiters
+
+Changes from 2.0.4 to 2.0.5
+---------------------------
+** Bug
+    * [FELIX-1753] - The start level should check that the bundle still exists before starting it to avoid an ugly exception
+    * [FELIX-2087] - NPE "name can't be null" when trying to install a bundle in Felix 2.0.3
+    * [FELIX-2107] - Bundle.findEntries() matches '*<filePattern>' instead of '<filePattern>'
+    * [FELIX-2195] - Using URLDecoder.decode on locations is wrong
+    * [FELIX-2222] - Failure to reinstall a cached bundle will corrupt the bundle cache
+
 Changes from 2.0.3 to 2.0.4
 ---------------------------
 
