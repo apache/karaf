@@ -169,7 +169,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         if (oldState.isTrackingOptional() && newState.isBound()) {
             m_executor.enqueue(new Runnable() {
                 public void run() {
-                    bindService(oldState);
+                    bindService(newState);
                 }});
         }
         if (oldState.isTrackingOptional() && newState.isInactive()) {
@@ -195,7 +195,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         if (oldState.isWaitingForRequiredInstantiated() && newState.isBound()) {
             m_executor.enqueue(new Runnable() {
                 public void run() {
-                    bindService(oldState);
+                    bindService(newState);
                 }});
         }
         if (oldState.isBound() && newState.isWaitingForRequiredInstantiated()) {
@@ -538,6 +538,8 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         synchronized (this) {
             start = m_callbackStart;
         }
+        // configure the service again, because init() might have added more dependencies
+        configureService(state);
         // inform the state listeners we're starting
         stateListenersStarting();
         // invoke the start callback, since we're now ready to be used
@@ -904,74 +906,6 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             if (dependency.isRequired()) {
                 dependency.invokeAdded(this);
             }
-            
-            
-//            if (dependency instanceof ServiceDependencyImpl) {
-//                ServiceDependencyImpl sd = (ServiceDependencyImpl) dependency;
-//                if (sd.isAutoConfig()) {
-//                    if (sd.isRequired()) {
-//                        configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
-//                    }
-//                    else {
-//                        // for optional services, we do an "ad-hoc" lookup to inject the service if it is
-//                        // already available even though the tracker has not yet been started
-//                        configureImplementation(sd.getInterface(), sd.lookupService(), sd.getAutoConfigName());
-//                    }
-//                }
-//                // for required dependencies, we invoke any callbacks here
-//                if (sd.isRequired()) {
-//                    sd.invokeAdded(this, sd.lookupServiceReference(), sd.lookupService());
-//                }
-//            }
-//            else if (dependency instanceof BundleDependencyImpl) {
-//                BundleDependencyImpl bd = (BundleDependencyImpl) dependency;
-//                if (bd.isAutoConfig()) {
-//                    if (bd.isRequired()) {
-//                        configureImplementation(Bundle.class, bd.getBundle()); // TODO AutoConfigName support
-//                    }
-//                    else {
-//                        // for optional services, we do an "ad-hoc" lookup to inject the service if it is
-//                        // already available even though the tracker has not yet been started
-//                        
-//                        // TODO !!! configureImplementation(sd.getInterface(), sd.lookupService(), sd.getAutoConfigName());
-//                    }
-//                }
-//                // for required dependencies, we invoke any callbacks here
-//                if (bd.isRequired()) {
-//                    bd.invokeAdded(this, bd.getBundle());
-//                }
-//            }
-//            else if (dependency instanceof ResourceDependencyImpl) {
-//                ResourceDependencyImpl bd = (ResourceDependencyImpl) dependency;
-//                if (bd.isAutoConfig()) {
-//                    if (bd.isRequired()) {
-//                        configureImplementation(Resource.class, bd.getResource()); // TODO AutoConfigName support
-//                    }
-//                    else {
-//                        // for optional services, we do an "ad-hoc" lookup to inject the service if it is
-//                        // already available even though the tracker has not yet been started
-//                        
-//                        // TODO !!! configureImplementation(sd.getInterface(), sd.lookupService(), sd.getAutoConfigName());
-//                    }
-//                }
-//                // for required dependencies, we invoke any callbacks here
-//                if (bd.isRequired()) {
-//                    bd.invokeAdded(this, bd.getResource());
-//                }
-//            }
-//            else if (dependency instanceof ConfigurationDependencyImpl) {
-//                ConfigurationDependencyImpl cd = (ConfigurationDependencyImpl) dependency;
-//                // for configuration dependencies, we invoke updated
-//                try {
-//                    cd.invokeUpdate(this, this.getService(), cd.getConfiguration());
-//                }
-//                catch (ConfigurationException e) {
-//                    // if this happens, it's definitely an inconsistency
-//                    // when sharing configuration dependencies between services, all implementations
-//                    // should accept the same configurations
-//                    e.printStackTrace();
-//                }
-//            }
         }
     }
 
