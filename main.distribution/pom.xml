@@ -27,7 +27,7 @@
   <packaging>pom</packaging>
   <name>Apache Felix Main Distribution</name>
   <artifactId>org.apache.felix.main.distribution</artifactId>
-  <version>3.0.0</version>
+  <version>3.1.0-SNAPSHOT</version>
   <properties>
     <framework.version>3.0.0</framework.version>
     <gogo.runtime.version>0.6.0</gogo.runtime.version>
@@ -122,10 +122,4 @@
       </resource>
     </resources> 
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main.distribution-3.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main.distribution-3.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main.distribution-3.0.0</url>
-  </scm>
 </project>
