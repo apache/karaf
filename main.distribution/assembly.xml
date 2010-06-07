@@ -61,6 +61,7 @@
         <include>README*</include>
         <include>LICENSE*</include>
         <include>NOTICE*</include>
+        <include>DEPENDENCIES</include>
       </includes>
       <outputDirectory>.</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
