@@ -68,7 +68,7 @@
             <Import-Package>!*</Import-Package>
             <Fragment-Host>system.bundle; extension:=framework</Fragment-Host>
             <Felix-Activator>org.apache.felix.framework.SecurityActivator</Felix-Activator>
-            <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE</Include-Resource> 
+            <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,META-INF/DEPENDENCIES=DEPENDENCIES</Include-Resource> 
           </instructions>
         </configuration>
       </plugin>
