@@ -27,7 +27,7 @@
     <packaging>bundle</packaging>
     <name>Apache Felix Gogo Shell</name>
     <artifactId>org.apache.felix.gogo.shell</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -97,10 +97,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.gogo.shell-0.6.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.gogo.shell-0.6.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.gogo.shell-0.6.0</url>
-  </scm>
 </project>
