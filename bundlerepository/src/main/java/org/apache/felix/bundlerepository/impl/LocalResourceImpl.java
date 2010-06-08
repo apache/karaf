@@ -21,6 +21,7 @@ package org.apache.felix.bundlerepository.impl;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.felix.bundlerepository.Capability;
 import org.osgi.framework.Bundle;
@@ -72,9 +73,12 @@ public class LocalResourceImpl extends ResourceImpl
             String ee = m_bundle.getBundleContext().getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
             if (ee != null)
             {
-                CapabilityImpl cap = new CapabilityImpl(Capability.EXECUTIONENVIRONMENT);
-                cap.addProperty(Capability.EXECUTIONENVIRONMENT, ee);
-                addCapability(cap);
+                StringTokenizer tokens = new StringTokenizer(ee, ",");
+                while (tokens.hasMoreTokens()) {
+                    CapabilityImpl cap = new CapabilityImpl(Capability.EXECUTIONENVIRONMENT);
+                    cap.addProperty(Capability.EXECUTIONENVIRONMENT, tokens.nextToken().trim());
+                    addCapability(cap);
+                }
             }
 
 /* TODO: OBR - Fix system capabilities.
