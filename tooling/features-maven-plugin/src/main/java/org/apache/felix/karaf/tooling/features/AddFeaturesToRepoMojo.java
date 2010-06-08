@@ -143,8 +143,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
                 Artifact artifact;
                 try {
-                    artifact = this.factory.createArtifact(groupId, artifactId, version,
-                            (classifier != null ? classifier : ""), type);
+                    artifact = this.factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
                     getLog().info("Copying bundle: " + bundle);
                     resolver.resolve(artifact, this.remoteRepos, this.localRepo);
                     copy(new FileInputStream(artifact.getFile()),
