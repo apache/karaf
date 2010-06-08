@@ -14,15 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.karaf.admin.management.internal;
+package org.apache.felix.karaf.management;
 
 import java.util.Map;
 import java.util.HashMap;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-
-import org.apache.felix.karaf.admin.management.AdminServiceMBean;
 
 import static org.easymock.classextension.EasyMock.*;
 import org.easymock.classextension.IMocksControl;
@@ -62,4 +60,8 @@ public class MBeanRegistererTest extends TestCase {
            System.getProperties().remove("karaf.name");
         }
     }
+
+	public static interface AdminServiceMBean {
+	    int createInstance(String name) throws Exception;
+	}
 }

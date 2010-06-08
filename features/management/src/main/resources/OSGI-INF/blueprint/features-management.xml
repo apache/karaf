@@ -31,18 +31,11 @@
         <property name="featuresService" ref="featuresService" />
     </bean>
 
-    <bean id="mbeanRegister" class="org.apache.felix.karaf.features.management.internal.MBeanRegistrer">
+    <bean id="mbeanRegister" class="org.apache.felix.karaf.management.MBeanRegistrer">
         <property name="mbeans">
             <map>
-                <entry>
-                    <key>
-                        <bean class="javax.management.StandardMBean">
-                            <argument ref="mbeanImpl" />
-                            <argument value="org.apache.felix.karaf.features.management.FeaturesServiceMBean"/>
-                        </bean>
-                    </key>
-                    <value>org.apache.felix.karaf:type=features,name=${karaf.name}</value>
-                </entry>
+                <entry value="org.apache.felix.karaf:type=features,name=${karaf.name}"
+                    key-ref="mbeanImpl" />
             </map>
         </property>
     </bean>

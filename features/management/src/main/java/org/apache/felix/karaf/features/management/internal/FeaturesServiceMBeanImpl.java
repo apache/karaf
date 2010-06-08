@@ -13,39 +13,40 @@
  */
 package org.apache.felix.karaf.features.management.internal;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.net.URI;
 
+import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
+import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
-import javax.management.Notification;
+import javax.management.StandardEmitterMBean;
 import javax.management.openmbean.TabularData;
 
+import org.apache.felix.karaf.features.Feature;
+import org.apache.felix.karaf.features.FeatureEvent;
+import org.apache.felix.karaf.features.FeaturesListener;
+import org.apache.felix.karaf.features.FeaturesService;
+import org.apache.felix.karaf.features.Repository;
+import org.apache.felix.karaf.features.RepositoryEvent;
 import org.apache.felix.karaf.features.management.FeaturesServiceMBean;
 import org.apache.felix.karaf.features.management.codec.JmxFeature;
 import org.apache.felix.karaf.features.management.codec.JmxFeatureEvent;
 import org.apache.felix.karaf.features.management.codec.JmxRepository;
 import org.apache.felix.karaf.features.management.codec.JmxRepositoryEvent;
-import org.apache.felix.karaf.features.FeaturesListener;
-import org.apache.felix.karaf.features.FeatureEvent;
-import org.apache.felix.karaf.features.RepositoryEvent;
-import org.apache.felix.karaf.features.FeaturesService;
-import org.apache.felix.karaf.features.Feature;
-import org.apache.felix.karaf.features.Repository;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- *
+ * Implementation of {@link FeaturesServiceMBean}.
  */
-
-public class FeaturesServiceMBeanImpl extends NotificationBroadcasterSupport
-                                      implements MBeanRegistration, FeaturesServiceMBean {
+public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
+    MBeanRegistration, FeaturesServiceMBean {
 
     private ServiceRegistration registration;
 
@@ -59,50 +60,31 @@ public class FeaturesServiceMBeanImpl extends NotificationBroadcasterSupport
 
     private FeaturesService featuresService;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.management.MBeanRegistration#preRegister(javax.manamement.MBeanServer, javax.management.ObjectName)
-     */
-	public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
-		objectName = name;
-		this.server = server;
-		return name;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see javax.management.MBeanRegistration#postRegister(java.lang.Boolean)
-	 */
-	public void postRegister(Boolean registrationDone) {
-        registration = bundleContext.registerService(
-                            FeaturesListener.class.getName(),
-                            getFeaturesListener(),
-                            new Hashtable());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see javax.management.MBeanRegistration#preDeregister()
-	 */
-	public void preDeregister() throws Exception {
-        registration.unregister();
-	}
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see javax.management.MBeanRegistration#postDeregister()
-     */
-    public void postDeregister() {
+    public FeaturesServiceMBeanImpl() {
+        super(FeaturesServiceMBean.class, new NotificationBroadcasterSupport(
+            getBroadcastInfo()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.felix.karaf.features.management.FeaturesServiceMBean#getFeatures()
+    @Override
+    public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
+        objectName = name;
+        this.server = server;
+        return name;
+    }
+
+    @Override
+    public void postRegister(Boolean registrationDone) {
+        registration = bundleContext.registerService(FeaturesListener.class.getName(),
+            getFeaturesListener(), new Hashtable());
+    }
+
+    @Override
+    public void preDeregister() throws Exception {
+        registration.unregister();
+    }
+
+    /**
+     * {@inheritDoc}
      */
     public TabularData getFeatures() throws Exception {
         try {
@@ -120,10 +102,8 @@ public class FeaturesServiceMBeanImpl extends NotificationBroadcasterSupport
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.felix.karaf.features.management.FeaturesServiceMBean#getRepositories()
+    /**
+     * {@inheritDoc}
      */
     public TabularData getRepositories() throws Exception {
         try {
@@ -189,6 +169,16 @@ public class FeaturesServiceMBeanImpl extends NotificationBroadcasterSupport
                 }
             }
         };
+    }
+
+
+    private static MBeanNotificationInfo[] getBroadcastInfo() {
+        String type = Notification.class.getCanonicalName();
+        MBeanNotificationInfo info1 = new MBeanNotificationInfo(new String[] {FEATURE_EVENT_EVENT_TYPE},
+            type, "Some features notification");
+        MBeanNotificationInfo info2 = new MBeanNotificationInfo(new String[] {REPOSITORY_EVENT_EVENT_TYPE},
+            type, "Some repository notification");
+        return new MBeanNotificationInfo[] {info1, info2};
     }
 
 }

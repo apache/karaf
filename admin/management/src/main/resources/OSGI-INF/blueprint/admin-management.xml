@@ -29,18 +29,11 @@
         <property name="adminService" ref="adminService" />
     </bean>
 
-    <bean id="mbeanRegister" class="org.apache.felix.karaf.admin.management.internal.MBeanRegistrer">
+    <bean id="mbeanRegister" class="org.apache.felix.karaf.management.MBeanRegistrer">
         <property name="mbeans">
             <map>
-                <entry>
-                    <key>
-                        <bean class="javax.management.StandardMBean">
-                            <argument ref="mbeanImpl" />
-                            <argument value="org.apache.felix.karaf.admin.management.AdminServiceMBean"/>
-                        </bean>
-                    </key>
-                    <value>org.apache.felix.karaf:type=admin,name=${karaf.name}</value>
-                </entry>
+                <entry value="org.apache.felix.karaf:type=admin,name=${karaf.name}"
+                    key-ref="mbeanImpl" />
             </map>
         </property>
     </bean>

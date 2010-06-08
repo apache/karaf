@@ -14,18 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.karaf.features.management.internal;
+package org.apache.felix.karaf.management;
 
 import java.util.Map;
 
+import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.MBeanRegistrationException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.JMException;
 
 public class MBeanRegistrer {
 

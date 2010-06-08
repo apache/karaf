@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.management.StandardMBean;
 import javax.management.openmbean.TabularData;
 
 import org.apache.felix.karaf.admin.management.AdminServiceMBean;
@@ -28,9 +29,13 @@ import org.apache.felix.karaf.admin.Instance;
 import org.apache.felix.karaf.admin.InstanceSettings;
 import org.apache.felix.karaf.admin.management.codec.JmxInstance;
 
-public class AdminServiceMBeanImpl implements AdminServiceMBean {
+public class AdminServiceMBeanImpl extends StandardMBean implements AdminServiceMBean {
 
     private AdminService adminService;
+
+    public AdminServiceMBeanImpl() {
+        super(AdminServiceMBean.class, false);
+    }
 
     public AdminService getAdminService() {
         return adminService;
