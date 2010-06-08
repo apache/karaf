@@ -63,10 +63,9 @@
                     <instructions>
                         <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
                         <Main-Class>org.apache.felix.karaf.client.Main</Main-Class>
+                        <!-- Do not use \r\n in the Class-Path header because the maven-bundle-plugin remove those -->
                         <Class-Path>
-                            ../system/org/apache/sshd/sshd-core/${sshd.version}/sshd-core-${sshd.version}.jar
-                            ../system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar
-                            ../system/org/apache/felix/karaf/shell/org.apache.felix.karaf.shell.console/${project.version}/org.apache.felix.karaf.shell.console-${project.version}.jar
+                            ../system/org/apache/sshd/sshd-core/${sshd.version}/sshd-core-${sshd.version}.jar ../system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar ../system/org/apache/felix/karaf/shell/org.apache.felix.karaf.shell.console/${project.version}/org.apache.felix.karaf.shell.console-${project.version}.jar
                         </Class-Path>
                         <Bundle-Name>Apache Felix Karaf Shell Client</Bundle-Name>
                         <Bundle-Description>Shell client bundle for Apache Felix Karaf.</Bundle-Description>
