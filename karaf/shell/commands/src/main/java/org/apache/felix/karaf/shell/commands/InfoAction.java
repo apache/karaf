@@ -61,6 +61,7 @@ public class InfoAction extends OsgiCommandSupport {
 
         System.out.println("JVM");
         printValue("Java Virtual Machine", maxNameLen, runtime.getVmName() + " version " + runtime.getVmVersion());
+        printValue("Version", maxNameLen, System.getProperty("java.version"));
         printValue("Vendor", maxNameLen, runtime.getVmVendor());
         printValue("Uptime", maxNameLen, printDuration(runtime.getUptime()));
         try {
