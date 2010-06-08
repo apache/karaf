@@ -395,6 +395,40 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected Set<Bundle> findBundlesToRefresh(InstallationState state) {
+        Set<Bundle> bundles = new HashSet<Bundle>();
+        bundles.addAll(findBundlesWithOptionalPackagesToRefresh(state));
+        bundles.addAll(findBundlesWithFramentsToRefresh(state));
+        return bundles;
+    }
+
+    protected Set<Bundle> findBundlesWithFramentsToRefresh(InstallationState state) {
+        Set<Bundle> bundles = new HashSet<Bundle>();
+        for (Bundle b : state.installed) {
+            String hostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
+            if (hostHeader != null) {
+                List<HeaderParser.PathElement> header = HeaderParser.parseHeader(hostHeader);
+                if (header != null && header.size() > 0) {
+                    HeaderParser.PathElement path = header.get(0);
+                    for (Bundle hostBundle : state.bundles) {
+                        if (hostBundle.getSymbolicName().equals(path.getName())) {
+                            String ver = path.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
+                            if (ver != null) {
+                                VersionRange v = VersionRange.parse(ver);
+                                if (v.isInRange(hostBundle.getVersion())) {
+                                    bundles.add(hostBundle);
+                                }
+                            } else {
+                                bundles.add(hostBundle);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return bundles;
+    }
+
+    protected Set<Bundle> findBundlesWithOptionalPackagesToRefresh(InstallationState state) {
         // First pass: include all bundles contained in these features
         Set<Bundle> bundles = new HashSet<Bundle>(state.bundles);
         bundles.removeAll(state.installed);
