@@ -22,27 +22,29 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.jar.JarInputStream;
 
 import junit.framework.TestCase;
-import org.apache.felix.karaf.features.internal.FeaturesServiceImpl;
 import org.apache.felix.karaf.features.internal.FeatureImpl;
+import org.apache.felix.karaf.features.internal.FeaturesServiceImpl;
 import org.easymock.EasyMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
+
+import static org.easymock.EasyMock.*;
 
 public class FeaturesServiceTest extends TestCase {
 
@@ -392,6 +394,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
         expect(installedBundle.getHeaders()).andReturn(new Hashtable());
+        expect(installedBundle.getSymbolicName()).andReturn("bundle");
 
         installedBundle.start();
         
@@ -616,7 +619,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(1234L);
         expect(bundleContext.getBundle(1234L)).andReturn(installedBundle);
-        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable()).anyTimes();
         installedBundle.start();
         
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -733,7 +736,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
         expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getHeaders()).andReturn(new Hashtable());
+        expect(installedBundle2.getHeaders()).andReturn(new Hashtable()).anyTimes();
         installedBundle2.start();
 
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -809,7 +812,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
         expect(installedBundle2.getBundleId()).andReturn(54321L);
-        expect(installedBundle2.getHeaders()).andReturn(new Hashtable());
+        expect(installedBundle2.getHeaders()).andReturn(new Hashtable()).anyTimes();
         installedBundle2.start();
 
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -971,6 +974,100 @@ public class FeaturesServiceTest extends TestCase {
             fail("Call should have thrown an exception");
         } catch (MalformedURLException e) {
         }
+
+//        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+    }
+
+    public void testInstallFeatureWithHostToRefresh() throws Exception {
+        String bundle1 = getJarUrl(PreferencesService.class);
+        String bundle2 = getJarUrl(Bundle.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name='f1'>");
+        pw.println("    <bundle>" + bundle1 + "</bundle>");
+        pw.println("    <bundle>" + bundle2 + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        JarInputStream j = new JarInputStream(new URL(bundle1).openStream());
+        Dictionary<String,String> headers = new Hashtable();
+        for (Map.Entry e : j.getManifest().getMainAttributes().entrySet()) {
+            headers.put(e.getKey().toString(), e.getValue().toString());
+        }
+
+        // loads the state
+        Preferences prefs = EasyMock.createMock(Preferences.class);
+        PreferencesService preferencesService = EasyMock.createMock(PreferencesService.class);
+        Preferences repositoriesNode = EasyMock.createMock(Preferences.class);
+        Preferences repositoriesAvailableNode = EasyMock.createMock(Preferences.class);
+        Preferences featuresNode = EasyMock.createMock(Preferences.class);
+        PackageAdmin packageAdmin = EasyMock.createMock(PackageAdmin.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
+        Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
+
+        // savestate from addRepository
+        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
+        expect(prefs.node("repositories")).andReturn(repositoriesNode);
+        repositoriesNode.clear();
+        repositoriesNode.putInt("count", 1);
+        repositoriesNode.put("item.0", uri.toString());
+        expect(prefs.node("features")).andReturn(featuresNode);
+        featuresNode.clear();
+        prefs.putBoolean("bootFeaturesInstalled", false);
+        prefs.flush();
+
+        // Installs feature f1
+        expect(installedBundle1.getBundleId()).andReturn(12345L).anyTimes();
+        expect(installedBundle1.getSymbolicName()).andReturn(headers.get(Constants.BUNDLE_SYMBOLICNAME)).anyTimes();
+        expect(installedBundle1.getHeaders()).andReturn(headers).anyTimes();
+        expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle1 });
+
+        expect(bundleContext.installBundle(eq(bundle2), isA(InputStream.class))).andReturn(installedBundle2);
+        expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle1, installedBundle2 });
+        expect(installedBundle2.getBundleId()).andReturn(54321L);
+        expect(installedBundle2.getSymbolicName()).andReturn("fragment").anyTimes();
+        Dictionary d = new Hashtable();
+        d.put(Constants.FRAGMENT_HOST, headers.get(Constants.BUNDLE_SYMBOLICNAME));
+        expect(installedBundle2.getHeaders()).andReturn(d).anyTimes();
+
+        expect(installedBundle1.getState()).andReturn(Bundle.ACTIVE);
+        expect(installedBundle1.getState()).andReturn(Bundle.ACTIVE);
+        expect(installedBundle2.getState()).andReturn(Bundle.INSTALLED);
+        expect(installedBundle2.getState()).andReturn(Bundle.INSTALLED);
+
+        //
+        // This is the real test to make sure the host is actually refreshed
+        //
+        packageAdmin.refreshPackages(aryEq(new Bundle[] { installedBundle1 }));
+
+        expect(prefs.node("repositories")).andReturn(repositoriesNode);
+        repositoriesNode.clear();
+        repositoriesNode.putInt("count", 1);
+        repositoriesNode.put("item.0", uri.toString());
+        expect(prefs.node("features")).andReturn(featuresNode);
+        featuresNode.clear();
+        featuresNode.put("f1" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + FeatureImpl.DEFAULT_VERSION, "54321,12345");
+        prefs.putBoolean("bootFeaturesInstalled", false);
+        prefs.flush();
+
+        replay(packageAdmin, preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setPackageAdmin(packageAdmin);
+        svc.setPreferences(preferencesService);
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        List<Feature> features = Arrays.asList(svc.listFeatures());
+        Collections.reverse(features);
+        svc.installFeatures(new CopyOnWriteArraySet<Feature>(features),
+                            EnumSet.noneOf(FeaturesService.Option.class));
 
 //        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
     }
