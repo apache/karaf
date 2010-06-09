@@ -67,10 +67,6 @@
             <groupId>org.apache.felix.gogo</groupId>
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.felix.gogo</groupId>
-            <artifactId>org.apache.felix.gogo.commands</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
