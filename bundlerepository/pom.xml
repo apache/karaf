@@ -109,6 +109,7 @@
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Service>org.apache.felix.bundlerepository.RepositoryAdmin,org.osgi.service.obr.RepositoryAdmin</Export-Service>
             <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
+            <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/LICENSE.kxml2=LICENSE.kxml2,META-INF/NOTICE=NOTICE,META-INF/DEPENDENCIES=DEPENDENCIES,{src/main/resources/}</Include-Resource>
           </instructions>
         </configuration>
       </plugin>
