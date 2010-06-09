@@ -18,6 +18,7 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.BrandingPlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.WebConsoleSecurityProvider;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
@@ -163,6 +165,8 @@ public class OsgiManager extends GenericServlet
 
     private ServiceTracker brandingTracker;
 
+    private ServiceTracker securityProviderTracker;
+
     private ServiceRegistration configurationListener;
 
     // list of OsgiManagerPlugin instances activated during init. All these
@@ -193,6 +197,9 @@ public class OsgiManager extends GenericServlet
     {
         this.bundleContext = bundleContext;
         this.holder = new PluginHolder( bundleContext );
+
+        securityProviderTracker = new ServiceTracker( bundleContext, WebConsoleSecurityProvider.class.getName(), null );
+        securityProviderTracker.open();
 
         updateConfiguration( null );
 
@@ -619,7 +626,6 @@ public class OsgiManager extends GenericServlet
 
     }
 
-
     protected synchronized void bindHttpService( HttpService httpService )
     {
         // do not bind service, when we are already bound
@@ -639,7 +645,7 @@ public class OsgiManager extends GenericServlet
         // register the servlet and resources
         try
         {
-            HttpContext httpContext = new OsgiManagerHttpContext( httpService, realm, userId, password );
+            HttpContext httpContext = new OsgiManagerHttpContext( httpService, realm, new SecurityProvider( securityProviderTracker, userId, password ) );
 
             Dictionary servletConfig = toStringConfig( config );
 
@@ -863,6 +869,34 @@ public class OsgiManager extends GenericServlet
             stringConfig.put( key.toString(), String.valueOf( config.get( key ) ) );
         }
         return stringConfig;
+    }
+
+    static class SecurityProvider implements WebConsoleSecurityProvider {
+
+        final ServiceTracker tracker;
+        final String username;
+        final String password;
+
+        SecurityProvider( ServiceTracker tracker, String username, String password ) {
+            this.tracker = tracker;
+            this.username = username;
+            this.password = password;
+        }
+
+        public Object authenticate(String username, String password) throws GeneralSecurityException {
+            WebConsoleSecurityProvider provider = (WebConsoleSecurityProvider) tracker.getService();
+            if (provider != null) {
+                return provider.authenticate(username, password);
+            }
+            if (this.username.equals(username) && this.password.equals(password)) {
+                return null;
+            }
+            throw new SecurityException("Bad user/password");
+        }
+
+        public void authorize(Object user, String role) throws GeneralSecurityException {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }

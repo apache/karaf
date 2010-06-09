@@ -24,6 +24,7 @@ import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.felix.webconsole.WebConsoleSecurityProvider;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
@@ -37,31 +38,18 @@ final class OsgiManagerHttpContext implements HttpContext
 
     private static final String AUTHENTICATION_SCHEME_BASIC = "Basic";
 
-    /**
-     * The encoding table which causes BaseFlex encoding/deconding to work like
-     * Base64 encoding/deconding.
-     */
-    private static final String base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-    /**
-     * The pad character used in Base64 encoding/deconding.
-     */
-    private static final char base64Pad = '=';
-
     String realm;
 
-    String userId;
-    String user;
+    WebConsoleSecurityProvider securityProvider;
 
     private final HttpContext base;
 
 
-    OsgiManagerHttpContext( HttpService httpService, String realm, String userId, String password )
+    OsgiManagerHttpContext( HttpService httpService, String realm, WebConsoleSecurityProvider securityProvider)
     {
         this.base = httpService.createDefaultHttpContext();
         this.realm = realm;
-        this.userId = userId;
-        this.user = encode( userId, password );
+        this.securityProvider = securityProvider;
     }
 
 
@@ -101,7 +89,7 @@ final class OsgiManagerHttpContext implements HttpContext
     {
 
         // don't care for authentication if no user name is configured
-        if ( this.user == null )
+        if ( this.securityProvider == null )
         {
             return true;
         }
@@ -122,15 +110,29 @@ final class OsgiManagerHttpContext implements HttpContext
                 String authInfo = authHeader.substring( blank ).trim();
 
                 // Check whether authorization type matches
-                if ( authType.equalsIgnoreCase( AUTHENTICATION_SCHEME_BASIC ) && this.user.equals( authInfo ) )
+                if ( authType.equalsIgnoreCase( AUTHENTICATION_SCHEME_BASIC ))
                 {
+                    try
+                    {
+                        String srcString = base64Decode( authInfo );
+                        int i = srcString.indexOf(':');
+                        String username = srcString.substring(0, i);
+                        String password = srcString.substring(i + 1);
 
-                    // as per the spec, set attributes
-                    request.setAttribute( HttpContext.AUTHENTICATION_TYPE, "" );
-                    request.setAttribute( HttpContext.REMOTE_USER, this.userId );
+                        // authenticate
+                        securityProvider.authenticate( username, password );
 
-                    // succeed
-                    return true;
+                        // as per the spec, set attributes
+                        request.setAttribute( HttpContext.AUTHENTICATION_TYPE, "" );
+                        request.setAttribute( HttpContext.REMOTE_USER, username );
+
+                        // succeed
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        // Ignore
+                    }
                 }
             }
         }
@@ -152,110 +154,17 @@ final class OsgiManagerHttpContext implements HttpContext
         return false;
     }
 
-
-    /**
-     * Base64 encodes the user name and password for comparison to the value of
-     * a Basic encoded HTTP header authentication.
-     *
-     * @param user The name of the user in the username/password pair
-     * @param password The password in the username/password pair
-     * @return The Base64 encoded username/password pair or <code>null</code>
-     *         if <code>user</code> is <code>null</code> or empty.
-     */
-    public static String encode( String user, String password )
+    public static String base64Decode( String srcString )
     {
-
-        /* check arguments */
-        if ( user == null || user.length() == 0 )
-            return null;
-
-        String srcString = user + ":";
-        if ( password != null && password.length() > 0 )
-        {
-            srcString += password;
-        }
-
-        // need bytes
-        byte[] src;
+        byte[] transformed = Base64.decodeBase64( srcString );
         try
         {
-            src = srcString.getBytes( "ISO-8859-1" );
+            return new String( transformed, "ISO-8859-1" );
         }
         catch ( UnsupportedEncodingException uee )
         {
-            // we do not expect this, the API presribes ISO-8859-1 to be present
-            // anyway, fallback to platform default
-            src = srcString.getBytes();
+            return new String( transformed );
         }
-
-        int srcsize = src.length;
-        int tbllen = base64Table.length();
-
-        StringBuffer result = new StringBuffer( srcsize );
-
-        /* encode */
-        int tblpos = 0;
-        int bitpos = 0;
-        int bitsread = -1;
-        int inpos = 0;
-        int pos = 0;
-
-        while ( inpos <= srcsize )
-        {
-
-            if ( bitsread < 0 )
-            {
-                if ( inpos < srcsize )
-                {
-                    pos = src[inpos++];
-                }
-                else
-                {
-                    // inpos++;
-                    // pos = 0;
-                    break;
-                }
-                bitsread = 7;
-            }
-
-            tblpos = 0;
-            bitpos = tbllen / 2;
-            while ( bitpos > 0 )
-            {
-                if ( bitsread < 0 )
-                {
-                    pos = ( inpos < srcsize ) ? src[inpos] : '\0';
-                    inpos++;
-                    bitsread = 7;
-                }
-
-                /* test if bit at pos <bitpos> in <pos> is set.. */
-                if ( ( ( 1 << bitsread ) & pos ) != 0 )
-                    tblpos += bitpos;
-
-                bitpos /= 2;
-                bitsread--;
-            }
-
-            // got one
-            result.append( base64Table.charAt( tblpos ) );
-        }
-
-        /* add the padding bytes */
-        while ( bitsread != -1 )
-        {
-            bitpos = tbllen / 2;
-            while ( bitpos > 0 )
-            {
-                if ( bitsread < 0 )
-                    bitsread = 7;
-                bitpos /= 2;
-                bitsread--;
-            }
-
-            result.append( base64Pad );
-        }
-
-        return result.toString();
     }
+
 }
