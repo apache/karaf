@@ -84,7 +84,7 @@
         <felix.osgi.version>1.4.0</felix.osgi.version>
         <felix.plugin.version>2.1.0</felix.plugin.version>
         <felix.prefs.version>1.0.4</felix.prefs.version>
-        <felix.webconsole.version>3.0.0</felix.webconsole.version>
+        <felix.webconsole.version>3.0.1-SNAPSHOT</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
         <aries.blueprint.version>0.1-incubating</aries.blueprint.version>
         <aries.jmx.version>0.1-incubating</aries.jmx.version>
