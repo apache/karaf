@@ -140,11 +140,19 @@ public class FilterImpl implements Filter
             Object value = null;
             if (m_dict != null)
             {
+                // If attribute names are case insensitive, then look in
+                // the case insensitive key map to find the actual case of
+                // the key.
                 if (m_map != null)
                 {
                     key = (String) m_map.get(name);
                 }
-                value = m_dict.get(key);
+                // If the key could not be found in the case insensitive
+                // key map, then avoid doing the dictionary lookup on it.
+                if (key != null)
+                {
+                    value = m_dict.get(key);
+                }
             }
             return (value == null) ? null : new Attribute(key, value, false);
         }
