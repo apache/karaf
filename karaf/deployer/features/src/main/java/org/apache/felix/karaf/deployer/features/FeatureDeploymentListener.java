@@ -17,13 +17,13 @@
 package org.apache.felix.karaf.deployer.features;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -121,6 +121,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             Bundle bundle = bundleEvent.getBundle();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
                 try {
+                    List<URL> urls = new ArrayList<URL>();
                     Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                     while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                         URL url = (URL) featuresUrlEnumeration.nextElement();
@@ -129,44 +130,99 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                             for (Repository repo : featuresService.listRepositories()) {
                                 if (repo.getURI().equals(url.toURI())) {
                                     Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
-                                        featuresService.installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
+                                    featuresService.installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
                                 }
                             }
+                            urls.add(url);
                         } catch (Exception e) {
                             LOGGER.error("Unable to install features", e);
                         }
                     }
-                } catch (Exception e) {
-                    // Ignore exceptions thrown when searching or iterating over the bundle entries
-                }
-            } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
-                try {
-                    Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
-                    while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
-                        URL url = (URL) featuresUrlEnumeration.nextElement();
-                        for (Repository repo : featuresService.listRepositories()) {
-                            try {
-                                if (repo.getURI().equals(url.toURI())) {
-                                    for (Feature f : repo.getFeatures()) {
-                                        try {
-                                            featuresService.uninstallFeature(f.getName(), f.getVersion());
-                                        } catch (Exception e) {
-                                            LOGGER.error("Unable to uninstall feature: " + f.getName(), e);
-                                        }
-                                    }
+                    synchronized (this) {
+                        File file = bundleContext.getDataFile("FeatureDeploymentListener.cfg");
+                        if (file != null) {
+                            Properties props = new Properties();
+                            if (file.exists()) {
+                                InputStream input = new FileInputStream(file);
+                                try {
+                                    props.load(input);
+                                } finally {
+                                    input.close();
                                 }
-                            } catch (Exception e) {
-                                LOGGER.error("Unable to uninstall features: " + url, e);
                             }
-                        }
-                        try {
-                            featuresService.removeRepository(url.toURI());
-                        } catch (URISyntaxException e) {
-                            LOGGER.error("Unable to remove repository: " + url, e);
+                            String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
+                            props.put(prefix + ".count", Integer.toString(urls.size()));
+                            for (int i = 0; i < urls.size(); i++) {
+                                props.put(prefix + ".url." + i, urls.get(i).toExternalForm());
+                            }
+                            OutputStream output = new FileOutputStream(file);
+                            try {
+                                props.store(output, null);
+                            } finally {
+                                output.close();
+                            }
                         }
                     }
                 } catch (Exception e) {
-                    // Ignore exceptions thrown when searching or iterating over the bundle entries
+                    LOGGER.error("Unable to install deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
+                }
+            } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
+                try {
+                    synchronized (this) {
+                        File file = bundleContext.getDataFile("FeatureDeploymentListener.cfg");
+                        if (file != null) {
+                            Properties props = new Properties();
+                            if (file.exists()) {
+                                InputStream input = new FileInputStream(file);
+                                try {
+                                    props.load(input);
+                                } finally {
+                                    input.close();
+                                }
+                            }
+                            String prefix = bundle.getSymbolicName() + "-" + bundle.getVersion();
+                            String countStr = (String) props.get(prefix + ".count");
+                            if (countStr != null) {
+                                int count = Integer.parseInt(countStr);
+                                for (int i = 0; i < count; i++) {
+                                    URL url = new URL((String) props.get(prefix + ".url." + i));
+                                    for (Repository repo : featuresService.listRepositories()) {
+                                        try {
+                                            if (repo.getURI().equals(url.toURI())) {
+                                                for (Feature f : repo.getFeatures()) {
+                                                    try {
+                                                        featuresService.uninstallFeature(f.getName(), f.getVersion());
+                                                    } catch (Exception e) {
+                                                        LOGGER.error("Unable to uninstall feature: " + f.getName(), e);
+                                                    }
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            LOGGER.error("Unable to uninstall features: " + url, e);
+                                        }
+                                    }
+                                    try {
+                                        featuresService.removeRepository(url.toURI());
+                                    } catch (URISyntaxException e) {
+                                        LOGGER.error("Unable to remove repository: " + url, e);
+                                    }
+                                }
+                            }
+                            for (Iterator<Object> it = props.keySet().iterator(); it.hasNext();) {
+                                if (it.next().toString().startsWith(prefix + ".")) {
+                                    it.remove();
+                                }
+                            }
+                            OutputStream output = new FileOutputStream(file);
+                            try {
+                                props.store(output, null);
+                            } finally {
+                                output.close();
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Unable to uninstall deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
                 }
             }
     }
