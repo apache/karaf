@@ -114,7 +114,7 @@ public class DefaultActionPreparator implements ActionPreparator {
             Object param = it.next();
             // Check for help
             if (HELP.name().equals(param) || Arrays.asList(HELP.aliases()).contains(param)) {
-                printUsage(action.getClass().getAnnotation(Command.class), options.keySet(), arguments.keySet(), System.out);
+                printUsage(session, action.getClass().getAnnotation(Command.class), options.keySet(), arguments.keySet(), System.out);
                 return false;
             }
             if (processOptions && param instanceof String && ((String) param).startsWith("-")) {
@@ -205,7 +205,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         return true;
     }
 
-    protected void printUsage(Command command, Set<Option> options, Set<Argument> arguments, PrintStream out)
+    protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> arguments, PrintStream out)
     {
         options = new HashSet<Option>(options);
         options.add(HELP);

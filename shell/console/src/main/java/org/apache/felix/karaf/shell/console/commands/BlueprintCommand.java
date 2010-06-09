@@ -26,7 +26,10 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
 import java.io.PrintStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import jline.Terminal;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
@@ -85,8 +88,9 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
         }
 
         @Override
-        protected void printUsage(Command command, Set<Option> options, Set<Argument> args, PrintStream out)
+        protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> args, PrintStream out)
         {
+            Terminal term = (Terminal) session.get(".jline.terminal");
             List<Argument> arguments = new ArrayList<Argument>(args);
             Collections.sort(arguments, new Comparator<Argument>() {
                 public int compare(Argument o1, Argument o2) {
@@ -98,7 +102,7 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
             if (command != null && (command.description() != null || command.name() != null))
             {
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));
-                out.print("\t");
+                out.print("        ");
                 if (command.name() != null) {
                     out.println(Ansi.ansi().a(command.scope()).a(":").a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
                     out.println();
@@ -133,7 +137,7 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
             }
 
             out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("SYNTAX").a(Ansi.Attribute.RESET));
-            out.print("\t");
+            out.print("        ");
             out.println(syntax.toString());
             out.println();
             if (arguments.size() > 0)
@@ -141,7 +145,9 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("ARGUMENTS").a(Ansi.Attribute.RESET));
                 for (Argument argument : arguments)
                 {
-                    out.println(String.format("\t%-15s%s", argument.name(), argument.description()));
+                    out.print("        ");
+                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
+                    printFormatted("                ", argument.description(), term != null ? term.getTerminalWidth() : 80, out);
                 }
                 out.println();
             }
@@ -155,9 +161,9 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
                     {
                         opt += ", " + alias;
                     }
-                    out.print("\t");
-                    out.println(opt);
-                    out.println(String.format("\t%-15s%s", "", option.description()));
+                    out.print("        ");
+                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
+                    printFormatted("                ", option.description(), term != null ? term.getTerminalWidth() : 80, out);
                 }
                 out.println();
             }
@@ -165,7 +171,13 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
 
         protected void printFormatted(String prefix, String str, int termWidth, PrintStream out) {
             int pfxLen = length(prefix);
-            
+            int maxwidth = termWidth - pfxLen;
+            Pattern wrap = Pattern.compile("(\\S\\S{" + maxwidth + ",}|.{1," + maxwidth + "})(\\s+|$)");
+            Matcher m = wrap.matcher(str);
+            while (m.find()) {
+                out.print(prefix);
+                out.println(m.group());
+            }
         }
 
         protected int length(String str) {

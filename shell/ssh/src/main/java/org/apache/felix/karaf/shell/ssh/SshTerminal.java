@@ -28,7 +28,7 @@ import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.Signal;
 import org.apache.sshd.server.SignalListener;
 
-public class SshTerminal extends Terminal implements SignalListener {
+public class SshTerminal extends Terminal {
 
     public static final short ARROW_START = 27;
     public static final short ARROW_PREFIX = 91;
@@ -52,7 +52,6 @@ public class SshTerminal extends Terminal implements SignalListener {
 
     public SshTerminal(Environment environment) {
         this.environment = environment;
-        this.environment.addSignalListener(this);
         try {
             replayReader = new InputStreamReader(replayStream, encoding);
         } catch (Exception e) {
@@ -98,9 +97,6 @@ public class SshTerminal extends Terminal implements SignalListener {
     }
 
     public void disableEcho() {
-    }
-
-    public void signal(Signal signal) {
     }
 
     public int readVirtualKey(InputStream in) throws IOException {
