@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
+import jline.Terminal;
 import org.apache.felix.karaf.shell.console.Completer;
 import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.felix.karaf.shell.console.jline.Console;
@@ -37,6 +38,8 @@ import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.Signal;
+import org.apache.sshd.server.SignalListener;
 import org.osgi.service.blueprint.container.ReifiedType;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
@@ -93,22 +96,32 @@ public class ShellFactoryImpl implements Factory<Command>
 
         public void start(final Environment env) throws IOException {
             try {
+                final Terminal terminal = new SshTerminal(env);
                 Console console = new Console(commandProcessor,
                                               in,
                                               new PrintStream(new LfToCrLfFilterOutputStream(out), true),
                                               new PrintStream(new LfToCrLfFilterOutputStream(err), true),
-                                              new SshTerminal(env),
+                                              terminal,
                                               new AggregateCompleter(completers),
                                               new Runnable() {
                                                   public void run() {
                                                       destroy();
                                                   }
                                               });
-                CommandSession session = console.getSession();
+                final CommandSession session = console.getSession();
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));
                 for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());
                 }
+                session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
+                session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
+                env.addSignalListener(new SignalListener() {
+                    public void signal(Signal signal) {
+                        session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
+                        session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
+                    }
+                }, Signal.WINCH);
+                session.put(".jline.terminal", terminal);
                 new Thread(console).start();
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
