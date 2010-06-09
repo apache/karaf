@@ -120,14 +120,15 @@ final class OsgiManagerHttpContext implements HttpContext
                         String password = srcString.substring(i + 1);
 
                         // authenticate
-                        securityProvider.authenticate( username, password );
+                        Object id = securityProvider.authenticate( username, password );
+                        if (id != null) {
+                            // as per the spec, set attributes
+                            request.setAttribute( HttpContext.AUTHENTICATION_TYPE, "" );
+                            request.setAttribute( HttpContext.REMOTE_USER, username );
 
-                        // as per the spec, set attributes
-                        request.setAttribute( HttpContext.AUTHENTICATION_TYPE, "" );
-                        request.setAttribute( HttpContext.REMOTE_USER, username );
-
-                        // succeed
-                        return true;
+                            // succeed
+                            return true;
+                        }
                     }
                     catch (Exception e)
                     {

@@ -23,13 +23,13 @@ import java.security.GeneralSecurityException;
 public interface WebConsoleSecurityProvider {
 
     /**
-     * Check if the user with the specified password exists and return an object identifying the user, else throw an exception
+     * Check if the user with the specified password exists and return an object identifying the user, else null
      */
-    public Object authenticate(String username, String password) throws GeneralSecurityException;
+    public Object authenticate(String username, String password);
 
     /**
-     * Check that the authenticated user has the given role permission or throw an exception
+     * Check that the authenticated user has the given role permission
      */
-    public void authorize(Object user, String role) throws GeneralSecurityException;
+    public boolean authorize(Object user, String role);
 
 }

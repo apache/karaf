@@ -883,19 +883,20 @@ public class OsgiManager extends GenericServlet
             this.password = password;
         }
 
-        public Object authenticate(String username, String password) throws GeneralSecurityException {
+        public Object authenticate(String username, String password) {
             WebConsoleSecurityProvider provider = (WebConsoleSecurityProvider) tracker.getService();
             if (provider != null) {
                 return provider.authenticate(username, password);
             }
             if (this.username.equals(username) && this.password.equals(password)) {
-                return null;
+                return username;
             }
-            throw new SecurityException("Bad user/password");
+            return null;
         }
 
-        public void authorize(Object user, String role) throws GeneralSecurityException {
-            throw new UnsupportedOperationException();
+        public boolean authorize(Object user, String role) {
+            // no op: authorize everything
+            return true;
         }
     }
 
