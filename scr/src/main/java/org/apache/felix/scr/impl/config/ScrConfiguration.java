@@ -110,20 +110,15 @@ public class ScrConfiguration
         if ( config == null )
         {
 
-            logLevel = getLogLevel( bundleContext );
+            logLevel = getDefaultLogLevel();
             factoryEnabled = getDefaultFactoryEnabled();
         }
         else
         {
-            logLevel = ( ( Integer ) config.get( PROP_LOGLEVEL ) ).intValue();
-            factoryEnabled = ( ( Boolean ) config.get( PROP_FACTORY_ENABLED ) ).booleanValue();
+            logLevel = getLogLevel( config.get( PROP_LOGLEVEL ) );
+            factoryEnabled = VALUE_TRUE.equals( String.valueOf( config.get( PROP_FACTORY_ENABLED ) ) );
         }
     }
-
-    private boolean getDefaultFactoryEnabled() {
-        return VALUE_TRUE.equals( bundleContext.getProperty( PROP_FACTORY_ENABLED ) );
-    }
-
 
     public int getLogLevel()
     {
@@ -137,11 +132,27 @@ public class ScrConfiguration
     }
 
 
-    private static int getLogLevel( BundleContext bundleContext )
+    private boolean getDefaultFactoryEnabled() {
+        return VALUE_TRUE.equals( bundleContext.getProperty( PROP_FACTORY_ENABLED ) );
+    }
+
+
+    private int getDefaultLogLevel()
     {
-        String levelString = bundleContext.getProperty( PROP_LOGLEVEL );
-        if ( levelString != null )
+        return getLogLevel( bundleContext.getProperty( PROP_LOGLEVEL ) );
+    }
+
+
+    private int getLogLevel( final Object levelObject )
+    {
+        if ( levelObject != null )
         {
+            if ( levelObject instanceof Number )
+            {
+                return ( ( Number ) levelObject ).intValue();
+            }
+
+            String levelString = levelObject.toString();
             try
             {
                 return Integer.parseInt( levelString );
@@ -185,12 +196,13 @@ public class ScrConfiguration
         return LogService.LOG_ERROR;
     }
 
-    private Object tryToCreateMetaTypeProvider(final Object managedService)
+
+    private Object tryToCreateMetaTypeProvider( final Object managedService )
     {
         try
         {
-            return new MetaTypeProviderImpl(getLogLevel( bundleContext ),
-                    getDefaultFactoryEnabled(), (ManagedService)managedService);
+            return new MetaTypeProviderImpl( getDefaultLogLevel(), getDefaultFactoryEnabled(),
+                ( ManagedService ) managedService );
         } catch (Throwable t)
         {
             // we simply ignore this
