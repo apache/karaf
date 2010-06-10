@@ -172,7 +172,7 @@ public class GrepAction extends OsgiCommandSupport {
                 } else {
                     firstPrint = false;
                 }
-                for (int i = 0; i < lineMatch + after; i++) {
+                for (int i = 0; i < lineMatch + after && i < lines.size(); i++) {
                     System.out.println(lines.get(i));
                 }
             }
