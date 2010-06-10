@@ -86,19 +86,6 @@
     </profile>
 
     <profile>
-      <id>packaging-ipojo-bundle</id>
-      <activation>
-        <property>
-          <name>packaging</name>
-          <value>ipojo-bundle</value>
-        </property>
-      </activation>
-      <modules>
-        <!--<module>ipojo/arch</module>-->
-      </modules>
-    </profile>
-
-    <profile>
       <id>packaging-bundle</id>
       <activation>
         <property>
@@ -136,6 +123,8 @@
         <module>webconsole-plugins/event</module>
         <module>fileinstall</module>
         <module>useradmin</module>
+
+		<module>gogo</module>
 
         <module>ipojo</module>
 
