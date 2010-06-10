@@ -151,9 +151,9 @@ pathCanonicalSimple() {
 
 pathCanonical() {
 	local dst=`pathCanonicalSimple "${1}"`
-	while [[ -h "${dst}" ]]; do
+	while [ -h "${dst}" ]; do
 		local linkDst="$(ls -l "${dst}" | sed -e 's/^.*[[:space:]]*->[[:space:]]*\(.*\)[[:space:]]*$/\1/g')"
-		if [[ -z "$(echo "${linkDst}" | grep -E '^/')" ]]; then
+		if [ -z "$(echo "${linkDst}" | grep -E '^/')" ]; then
 			# relative link destination
 			linkDst="$(dirname "${dst}")/${linkDst}"
 		fi
