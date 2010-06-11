@@ -20,10 +20,11 @@ package org.apache.felix.dm.test.bundle.annotation.resource;
 
 import junit.framework.Assert;
 
-import org.apache.felix.dm.annotation.api.Destroy;
-import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ResourceDependency;
+import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
+import org.apache.felix.dm.annotation.api.Start;
+import org.apache.felix.dm.annotation.api.Stop;
 import org.apache.felix.dm.resources.Resource;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
@@ -33,23 +34,30 @@ import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 @Service
 public class ResourceConsumer
 {
-    @ServiceDependency(filter = "(test=resource)")
+    @ServiceDependency(required=true,filter = "(test=resource)")
     Sequencer m_sequencer;
     
     private int m_resourcesSeen;
-
+    
+    @Start
+    void start() 
+    {
+        System.out.println("ResourceConsumer.start: sequencer=" + m_sequencer);
+    }
+    
     @ResourceDependency(required = false, filter = "(&(path=/test)(name=*.txt)(repository=TestRepository))")
     public void add(Resource resource)
     {
+        System.out.println("ResourceConsumer.add: resource=" + resource.getName() + ", m_sequencer=" + m_sequencer);
         if (match(resource, "test1.txt", "/test", "TestRepository"))
         {
-            m_resourcesSeen++;
+            m_resourcesSeen ++;
             return;
         }
 
         if (match(resource, "test2.txt", "/test", "TestRepository"))
         {
-            m_resourcesSeen++;
+            m_resourcesSeen ++;
             return;
         }
 
@@ -62,10 +70,11 @@ public class ResourceConsumer
         return name.equals(resource.getName()) && path.equals(resource.getPath())
             && repo.equals(resource.getRepository());
     }
-
-    @Destroy
-    private void destroy()
+    
+    @Stop
+    void stop() 
     {
+        System.out.println("ResourceConsumer.stop: m_sequencer=" + m_sequencer);
         Assert.assertEquals(2, m_resourcesSeen);
         m_sequencer.step(1);
     }
