@@ -27,7 +27,7 @@ import org.apache.felix.dm.annotation.api.FactoryConfigurationAdapterService;
 /**
  * A Dictionary Service. This service uses a FactoryConfigurationAdapterService annotation, 
  * allowing to instantiate this service from webconsole. This annotation will actually register
- * a ManagedServiceFactory in the registry, and also support meta types for describing metadata of
+ * a ManagedServiceFactory in the registry, and also supports meta types for describing metadata of
  * all configuration properties.
  * 
  * You must configure at least one Dictionary from web console, since the SpellCheck won't start if no Dictionary
