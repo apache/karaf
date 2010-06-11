@@ -51,12 +51,12 @@
 
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.felix.karaf</groupId>
-            <artifactId>org.apache.felix.karaf.commons</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.bundlerepository</artifactId>
         </dependency>
 
         <dependency>
@@ -109,7 +109,11 @@
                             org.apache.felix.karaf.shell.console,
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.felix.karaf.features.internal</Private-Package>
+                        <Private-Package>
+                            org.apache.felix.karaf.features.internal,
+                            org.apache.felix.utils.version,
+                            org.apache.felix.utils.manifest
+                        </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

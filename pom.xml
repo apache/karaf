@@ -36,7 +36,6 @@
 
     <modules>
         <module>main</module>
-        <module>commons</module>
         <module>features</module>
         <module>admin</module>
         <module>deployer</module>
@@ -84,6 +83,7 @@
         <felix.osgi.version>1.4.0</felix.osgi.version>
         <felix.plugin.version>2.1.0</felix.plugin.version>
         <felix.prefs.version>1.0.4</felix.prefs.version>
+        <felix.utils.version>1.0.0</felix.utils.version>
         <felix.webconsole.version>3.0.1-SNAPSHOT</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
         <aries.blueprint.version>0.1-incubating</aries.blueprint.version>
@@ -176,11 +176,6 @@
             <dependency>
                 <groupId>org.apache.felix.karaf</groupId>
                 <artifactId>org.apache.felix.karaf.client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix.karaf</groupId>
-                <artifactId>org.apache.felix.karaf.commons</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -395,6 +390,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.metatype</artifactId>
                 <version>${felix.metatype.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.utils</artifactId>
+                <version>${felix.utils.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

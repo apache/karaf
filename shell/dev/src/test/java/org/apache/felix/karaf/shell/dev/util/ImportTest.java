@@ -21,7 +21,7 @@ import java.util.List;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.felix.karaf.commons.osgi.VersionRange;
+import org.apache.felix.utils.version.VersionRange;
 import org.junit.Test;
 
 /**
@@ -39,7 +39,7 @@ public class ImportTest {
     public void createWithPackageNameAndVersion() {
         Import i = new Import("org.wip.bar;version=\"2.0.0\"");
         assertEquals("org.wip.bar", i.getPackage());
-        assertEquals(VersionRange.parse("2.0.0"), i.getVersion());
+        assertEquals(VersionRange.parseVersionRange("2.0.0"), i.getVersion());
     }
 
     @Test

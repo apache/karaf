@@ -148,7 +148,7 @@ public class ShowBundleTree extends AbstractBundleCommand {
         boolean foundMatch = false;
         if (exporters != null) {
             for (ExportedPackage ep : exporters) {
-                if (i.getVersion().isInRange(ep.getVersion())) {
+                if (i.getVersion().contains(ep.getVersion())) {
                     if (bundle.equals(ep.getExportingBundle())) {
                         foundMatch = true;
                     } else {

@@ -176,15 +176,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/apache/felix/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf:org.apache.felix.karaf.commons</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
                 <include>org.apache.felix.karaf:org.apache.felix.karaf.management</include>
             </includes>
         </dependencySet>
