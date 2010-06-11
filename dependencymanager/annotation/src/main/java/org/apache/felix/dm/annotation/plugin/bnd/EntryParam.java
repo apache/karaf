@@ -34,5 +34,6 @@ public enum EntryParam
     ranking,
     factory,
     factoryConfigure,
-    field
+    field,
+    name
 }

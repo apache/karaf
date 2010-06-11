@@ -90,6 +90,7 @@ public class AnnotationCollector extends ClassDataCollector
     private String m_method;
     private String m_descriptor;
     private Set<String> m_methods = new HashSet<String>();
+    private Set<String> m_dependencyNames = new HashSet<String>();
     private List<EntryWriter> m_writers = new ArrayList<EntryWriter>(); // Last elem is either Service or AspectService
     private MetaType m_metaType;
     private String m_startMethod;
@@ -210,13 +211,13 @@ public class AnnotationCollector extends ClassDataCollector
             //Patterns.parseMethod(m_method, m_descriptor, Patterns.VOID);
             // TODO check if method takes optional params like Service, DependencyManager, etc ...
             m_initMethod = m_method;
-        }
+        } 
         else if (annotation.getName().equals(A_START))
         {
             //Patterns.parseMethod(m_method, m_descriptor, Patterns.VOID);
             // TODO check if method takes optional params like Service, DependencyManager, etc ...
             m_startMethod = m_method;
-        }
+        } 
         else if (annotation.getName().equals(A_STOP))
         {
             //Patterns.parseMethod(m_method, m_descriptor, Patterns.VOID);
@@ -362,7 +363,7 @@ public class AnnotationCollector extends ClassDataCollector
         Long t = (Long) annotation.get(EntryParam.timeout.toString());
         if (t != null && t.longValue() < -1)
         {
-            throw new IllegalArgumentException("Invalid timeout value " + t + " in ServiceDependency annotation in class " + m_className);
+            throw new IllegalArgumentException("Invalid timeout value " + t + " in ServiceDependency annotation from class " + m_className);
         }
         
         // required attribute (not valid if parsing a temporal service dependency)
@@ -372,7 +373,14 @@ public class AnnotationCollector extends ClassDataCollector
         writer.putString(annotation, EntryParam.changed, null);
 
         // removed callback
-        writer.putString(annotation, EntryParam.removed, null);       
+        writer.putString(annotation, EntryParam.removed, null); 
+        
+        // name attribute
+        writer.putString(annotation, EntryParam.name, null);
+        String name = annotation.get(EntryParam.name.toString());
+        if (name != null && ! m_dependencyNames.add(name)) {
+            throw new IllegalArgumentException("Duplicate dependency name " + name + " in ServiceDependency annotation from class " + m_className);
+        }
     }
 
     /**
