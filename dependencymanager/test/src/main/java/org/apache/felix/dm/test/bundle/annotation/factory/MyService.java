@@ -19,23 +19,46 @@
 package org.apache.felix.dm.test.bundle.annotation.factory;
 
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 
+import junit.framework.Assert;
+
+import org.apache.felix.dm.annotation.api.Init;
 import org.apache.felix.dm.annotation.api.Property;
 import org.apache.felix.dm.annotation.api.Service;
+import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.Stop;
-import org.apache.felix.dm.annotation.api.ServiceDependency;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 
+/**
+ * This service will be instantiated by our MyServiceFactory class.
+ */
 @Service(factory = "MyServiceFactory", factoryConfigure = "configure", properties = { @Property(name = "foo", value = "bar") })
 public class MyService implements MyServiceInterface
 {
-    @ServiceDependency
-    Sequencer m_sequencer;
-
+    /**
+     *  The configuration provided by MyServiceFactory
+     */
     @SuppressWarnings("unchecked")
     Dictionary m_configuration;
 
+    /**
+     *  Our sequencer.
+     */
+    @ServiceDependency
+    Sequencer m_sequencer;
+    
+    /**
+     *  An extra dependency (we'll dynamically configure the filter from our init() method).
+     */
+    @ServiceDependency(name="extra")
+    Runnable m_extra;
+
+    /**
+     * This is the first method called: we are provided with the MyServiceFactory configuration.
+     */
     public void configure(Dictionary<?, ?> configuration)
     {
         if (m_configuration == null)
@@ -48,12 +71,32 @@ public class MyService implements MyServiceInterface
         }
     }
 
+    /**
+     * Initialize our Service: we'll dynamically configure our dependency whose name is "extra".
+     */
+    @Init
+    Map init() 
+    {
+        return new HashMap() {{
+            put("extra.filter", "(foo=bar2)");
+            put("extra.required", "true");
+        }};
+    }
+        
+    /**
+     * our Service is starting: at this point, all required dependencies have been injected.
+     */
     @Start
     public void start()
     {
+        Assert.assertNotNull("Extra dependency not injected", m_extra);
+        m_extra.run();
         m_sequencer.step(2);
     }
 
+    /**
+     * Our service is stopping.
+     */
     @Stop
     public void stop()
     {
