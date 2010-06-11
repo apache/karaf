@@ -108,6 +108,40 @@ public @interface ServiceDependency
     /**
      * Sets the dependency name. This attribute is only meaningful when dynamically configuring the dependency 
      * <code>filter</code> and <code>required</code> flag from the Service's init method.
+     * 
+     * Usage Example of a Service whose dependency filter is configured from ConfigAdmin:
+     * 
+     * <blockquote><pre>
+     *  &#47;**
+     *    * A Service whose service dependency filter/require attribute may be configured from ConfigAdmin
+     *    *&#47;
+     *  &#64;Service
+     *  class X {
+     *      private Dictionary m_config;
+     *      
+     *      &#64;ConfigurationDependency(pid="MyPid")
+     *      void configure(Dictionary conf) {
+     *           // Initialize our service from config ...
+     *           
+     *           // And store the config for later usage (from our init method)
+     *           m_config = config;
+     *      }
+     * 
+     *      // The returned Map will be used to configure our "dependency1" Dependency.
+     *      &#64;Init
+     *      Map init() {
+     *          return new HashMap() {{
+     *              put("dependency1.filter", m_config.get("filter"));
+     *              put("dependency1.required", m_config.get("required"));
+     *          }};
+     *      } 
+     *      
+     *      &#64;ServiceDependency(name="dependency1") 
+     *      void bindOtherService(OtherService other) {
+     *         // the filter and required flag will be configured from our init method.
+     *      }
+     *  }
+     *  </pre></blockquote>
      */
     String name() default "";
 }

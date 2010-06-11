@@ -52,24 +52,23 @@ import org.osgi.service.log.LogService;
  * 
  * Example of a Service whose dependency filter is configured from ConfigAdmin:
  * 
- * <blockquote>
- * 
- * <pre>
+ * <blockquote><pre>
  *  &#47;**
- *    * All Service whose service dependency filter/require attribute may be configured from ConfigAdmin
+ *    * A Service whose service dependency filter/require attribute may be configured from ConfigAdmin
  *    *&#47;
  *  &#64;Service
  *  class X {
  *      private Dictionary m_config;
  *      
- *      @ConfigurationDependency(pid="MyPid")
+ *      &#64;ConfigurationDependency(pid="MyPid")
  *      void configure(Dictionary conf) {
  *           // Initialize our service from config ...
  *           
- *           // And store the config for late usage (from our init method)
+ *           // And store the config for later usage (from our init method)
  *           m_config = config;
  *      }
- * 
+ *
+ *      // The returned Map will be used to configure our "dependency1" Dependency.
  *      &#64;Init
  *      Map init() {
  *          return new HashMap() {{
@@ -83,6 +82,7 @@ import org.osgi.service.log.LogService;
  *         // the filter and required flag will be configured from our init method.
  *      }
  *  }
+ *  </pre></blockquote>
  */
 public class ServiceLifecycleHandler
 {
