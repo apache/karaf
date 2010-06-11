@@ -388,16 +388,22 @@ public class ServiceDependencyImpl extends DependencyBase implements ServiceDepe
         for (int i = 0; i < services.length; i++) {
             DependencyService ds = (DependencyService) services[i];
             if (makeAvailable) {
-                // only if this service has already been instantiated should be attempt to
-                // invoke the callback method, if not, this callback will be deferred until
-                // the instance is created (see ServiceImpl.initService())
-                if (ds.getService() != null) {
+                // The dependency callback will be defered until all required dependency are available.
+                ds.dependencyAvailable(this);
+                if (!isRequired()) {
+                    // For optional dependency, we always invoke callback, because at this point, we know
+                    // that the service has been started, and the service start method has been called.
+                    // (See the ServiceImpl.bindService method, which will activate optional dependencies using 
+                    // startTrackingOptional() method). 
                     invokeAdded(ds, ref, service);
                 }
-                ds.dependencyAvailable(this);
             }
             else {
                 ds.dependencyChanged(this);
+                // At this point, either the dependency is optional (meaning that the service has been started,
+                // because if not, then our dependency would not be active); or the dependency is required,
+                // meaning that either the service is not yet started, or already started.
+                // In all cases, we have to inject the required dependency.
                 invokeAdded(ds, ref, service);
             }
         }
