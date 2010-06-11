@@ -393,22 +393,26 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected Set<Bundle> findBundlesWithFramentsToRefresh(InstallationState state) {
         Set<Bundle> bundles = new HashSet<Bundle>();
-        for (Bundle b : state.installed) {
-            String hostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
-            if (hostHeader != null) {
-                Clause[] clauses = Parser.parseHeader(hostHeader);
-                if (clauses != null && clauses.length > 0) {
-                    Clause path = clauses[0];
-                    for (Bundle hostBundle : state.bundles) {
-                        if (hostBundle.getSymbolicName().equals(path.getName())) {
-                            String ver = path.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
-                            if (ver != null) {
-                                VersionRange v = VersionRange.parseVersionRange(ver);
-                                if (v.contains(hostBundle.getVersion())) {
+        Set<Bundle> oldBundles = new HashSet<Bundle>(state.bundles);
+        oldBundles.removeAll(state.installed);
+        if (!oldBundles.isEmpty()) {
+            for (Bundle b : state.installed) {
+                String hostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
+                if (hostHeader != null) {
+                    Clause[] clauses = Parser.parseHeader(hostHeader);
+                    if (clauses != null && clauses.length > 0) {
+                        Clause path = clauses[0];
+                        for (Bundle hostBundle : oldBundles) {
+                            if (hostBundle.getSymbolicName().equals(path.getName())) {
+                                String ver = path.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
+                                if (ver != null) {
+                                    VersionRange v = VersionRange.parseVersionRange(ver);
+                                    if (v.contains(hostBundle.getVersion())) {
+                                        bundles.add(hostBundle);
+                                    }
+                                } else {
                                     bundles.add(hostBundle);
                                 }
-                            } else {
-                                bundles.add(hostBundle);
                             }
                         }
                     }
