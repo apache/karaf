@@ -19,7 +19,7 @@ package org.apache.felix.karaf.shell.dev.util;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.felix.karaf.commons.osgi.VersionRange;
+import org.apache.felix.utils.version.VersionRange;
 
 /**
  * Simple class to model an OSGi Import-Package
@@ -42,7 +42,7 @@ public class Import {
         if (value.contains("version=")) {
             this.version = extractVersion(value);
         } else {
-            this.version = VersionRange.infiniteRange;
+            this.version = VersionRange.ANY_VERSION;
         }
     }
 
@@ -53,9 +53,9 @@ public class Import {
         int begin = value.indexOf("version=") + 8;
         int end = value.indexOf(";", begin);
         if (end < 0) {
-            return VersionRange.parse(unquote(value.substring(begin)));
+            return VersionRange.parseVersionRange(unquote(value.substring(begin)));
         } else {
-            return VersionRange.parse(unquote(value.substring(begin, end)));
+            return VersionRange.parseVersionRange(unquote(value.substring(begin, end)));
         }
     }
 

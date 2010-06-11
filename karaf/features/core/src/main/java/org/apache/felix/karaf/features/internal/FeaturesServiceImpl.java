@@ -22,32 +22,22 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.felix.karaf.commons.osgi.VersionRange;
-import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Feature;
-import org.apache.felix.karaf.features.Repository;
-import org.apache.felix.karaf.features.FeaturesListener;
 import org.apache.felix.karaf.features.FeatureEvent;
+import org.apache.felix.karaf.features.FeaturesListener;
+import org.apache.felix.karaf.features.FeaturesService;
+import org.apache.felix.karaf.features.Repository;
 import org.apache.felix.karaf.features.RepositoryEvent;
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
+import org.apache.felix.utils.version.VersionRange;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -56,10 +46,10 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -406,15 +396,15 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (Bundle b : state.installed) {
             String hostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
             if (hostHeader != null) {
-                List<HeaderParser.PathElement> header = HeaderParser.parseHeader(hostHeader);
-                if (header != null && header.size() > 0) {
-                    HeaderParser.PathElement path = header.get(0);
+                Clause[] clauses = Parser.parseHeader(hostHeader);
+                if (clauses != null && clauses.length > 0) {
+                    Clause path = clauses[0];
                     for (Bundle hostBundle : state.bundles) {
                         if (hostBundle.getSymbolicName().equals(path.getName())) {
                             String ver = path.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE);
                             if (ver != null) {
-                                VersionRange v = VersionRange.parse(ver);
-                                if (v.isInRange(hostBundle.getVersion())) {
+                                VersionRange v = VersionRange.parseVersionRange(ver);
+                                if (v.contains(hostBundle.getVersion())) {
                                     bundles.add(hostBundle);
                                 }
                             } else {
@@ -436,16 +426,16 @@ public class FeaturesServiceImpl implements FeaturesService {
             return bundles;
         }
         // Second pass: for each bundle, check if there is any unresolved optional package that could be resolved
-        Map<Bundle, List<HeaderParser.PathElement>> imports = new HashMap<Bundle, List<HeaderParser.PathElement>>();
+        Map<Bundle, List<Clause>> imports = new HashMap<Bundle, List<Clause>>();
         for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
             Bundle b = it.next();
             String importsStr = (String) b.getHeaders().get(Constants.IMPORT_PACKAGE);
             if (importsStr == null) {
                 it.remove();
             } else {
-                List<HeaderParser.PathElement> importsList = HeaderParser.parseHeader(importsStr);
-                for (Iterator<HeaderParser.PathElement> itp = importsList.iterator(); itp.hasNext();) {
-                    HeaderParser.PathElement p = itp.next();
+                List<Clause> importsList = Arrays.asList(Parser.parseHeader(importsStr));
+                for (Iterator<Clause> itp = importsList.iterator(); itp.hasNext();) {
+                    Clause p = itp.next();
                     String resolution = p.getDirective(Constants.RESOLUTION_DIRECTIVE);
                     if (!Constants.RESOLUTION_OPTIONAL.equals(resolution)) {
                         itp.remove();
@@ -463,27 +453,27 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
         // Third pass: compute a list of packages that are exported by our bundles and see if
         //             some exported packages can be wired to the optional imports
-        List<HeaderParser.PathElement> exports = new ArrayList<HeaderParser.PathElement>();
+        List<Clause> exports = new ArrayList<Clause>();
         for (Bundle b : state.installed) {
             String exportsStr = (String) b.getHeaders().get(Constants.EXPORT_PACKAGE);
             if (exportsStr != null) {
-                List<HeaderParser.PathElement> exportsList = HeaderParser.parseHeader(exportsStr);
-                exports.addAll(exportsList);
+                Clause[] exportsList = Parser.parseHeader(exportsStr);
+                exports.addAll(Arrays.asList(exportsList));
             }
         }
         for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
             Bundle b = it.next();
-            List<HeaderParser.PathElement> importsList = imports.get(b);
-            for (Iterator<HeaderParser.PathElement> itpi = importsList.iterator(); itpi.hasNext();) {
-                HeaderParser.PathElement pi = itpi.next();
+            List<Clause> importsList = imports.get(b);
+            for (Iterator<Clause> itpi = importsList.iterator(); itpi.hasNext();) {
+                Clause pi = itpi.next();
                 boolean matching = false;
-                for (HeaderParser.PathElement pe : exports) {
+                for (Clause pe : exports) {
                     if (pi.getName().equals(pe.getName())) {
                         String evStr = pe.getAttribute(Constants.VERSION_ATTRIBUTE);
                         String ivStr = pi.getAttribute(Constants.VERSION_ATTRIBUTE);
                         Version exported = evStr != null ? Version.parseVersion(evStr) : Version.emptyVersion;
-                        VersionRange imported = ivStr != null ? VersionRange.parse(ivStr) : VersionRange.infiniteRange;
-                        if (imported.isInRange(exported)) {
+                        VersionRange imported = ivStr != null ? VersionRange.parseVersionRange(ivStr) : VersionRange.ANY_VERSION;
+                        if (imported.contains(exported)) {
                             matching = true;
                             break;
                         }
@@ -497,7 +487,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 it.remove();
             } else {
                 LOGGER.debug("Refeshing bundle {} ({}) to solve the following optional imports", b.getSymbolicName(), b.getBundleId());
-                for (HeaderParser.PathElement p : importsList) {
+                for (Clause p : importsList) {
                     LOGGER.debug("    {}", p);
                 }
 

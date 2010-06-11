@@ -37,11 +37,6 @@
     </dependency>
 
     <dependency>
-        <groupId>org.apache.felix.karaf</groupId>
-        <artifactId>org.apache.felix.karaf.commons</artifactId>
-    </dependency>
-
-    <dependency>
         <groupId>org.ops4j.pax.url</groupId>
         <artifactId>pax-url-wrap</artifactId>
     </dependency>
@@ -56,7 +51,13 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>org.osgi.compendium</artifactId>
         <scope>provided</scope>
-    </dependency>    
+    </dependency>
+
+    <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.utils</artifactId>
+        <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -75,7 +76,10 @@
                           org.apache.felix.karaf.shell.console,
                           *
                       </Import-Package>
-                      <Private-Package>!*</Private-Package>
+                      <Private-Package>
+                          org.apache.felix.utils.version,
+                          !*
+                      </Private-Package>
                       <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                   </instructions>
               </configuration>
