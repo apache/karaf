@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * By default, all directly implemented interfaces are registered into the OSGi registry,
  * and the Service is instantiated automatically, when the Service' bundle is started and 
  * when the Service dependencies are available. If you need to take control of when and how 
- * much Service instances are getting created, then you can use the <code>factory</code> 
+ * much Service instance must be created, then you can use the <code>factory</code> 
  * Service attribute.<p> 
  * If a <code>factory</code> attribute is set, the Service is not started automatically 
  * during bundle startup, and a <code>java.util.Set&lt;Dictionary&gt;</code> 
