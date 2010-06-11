@@ -74,7 +74,7 @@ public class ResourceAnnotationTest extends AnnotationBase
         super.stopBundle("ResourceTest", context);
         m_ensure.waitForStep(1, 10000);
     }
-    
+
     /**
      * Tests a ResourceAdapter
      * @param context
@@ -82,8 +82,6 @@ public class ResourceAnnotationTest extends AnnotationBase
     @Test
     public void testResourceAdapterAnnotation(BundleContext context)
     {
-        // TODO currently, this test fails because it sounds like there is a bug in ResourceAdapterImpl, which 
-        // does not propagate the resource adapter filter ...        
         DependencyManager m = new DependencyManager(context);
         Properties props = new Properties() {{ put("test", "adapter"); }};
         m.add(m.createService().setImplementation(this).setInterface(Sequencer.class.getName(), props));
