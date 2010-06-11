@@ -68,13 +68,13 @@ public class Base implements LogService
 
     public void log(int level, String message)
     {
-        System.out.println("[LogService/" + level + "] " + message);
+        System.out.println(getLevel(level) + " " + message);
     }
 
     public void log(int level, String message, Throwable exception)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("[LogService/" + level + "] ");
+        sb.append(getLevel(level) + " ");
         sb.append(message);
         parse(sb, exception);
         System.out.println(sb.toString());
@@ -83,7 +83,7 @@ public class Base implements LogService
     public void log(ServiceReference sr, int level, String message)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("[LogService/" + level + "] ");
+        sb.append(getLevel(level) + " ");
         sb.append(message);
         System.out.println(sb.toString());
     }
@@ -91,7 +91,7 @@ public class Base implements LogService
     public void log(ServiceReference sr, int level, String message, Throwable exception)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("[LogService/" + level + "] ");
+        sb.append(getLevel(level) + " ");
         sb.append(message);
         parse(sb, exception);
         System.out.println(sb.toString());
@@ -106,6 +106,17 @@ public class Base implements LogService
             PrintWriter pw = new PrintWriter(buffer);
             t.printStackTrace(pw);
             sb.append(buffer.toString());
+        }
+    }
+    
+    private String getLevel(int level) {
+        switch(level) 
+        {
+            case LogService.LOG_DEBUG: return "DEBUG";
+            case LogService.LOG_ERROR: return "ERROR";
+            case LogService.LOG_INFO: return "INFO";
+            case LogService.LOG_WARNING: return "WARN";
+            default: return "";
         }
     }
 }
