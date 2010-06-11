@@ -27,12 +27,12 @@
 
     <cm:property-placeholder persistent-id="org.apache.felix.karaf.webconsole">
         <cm:default-properties>
-            <cm:property name="webconsoleRealm" value="karaf"/>
+            <cm:property name="realm" value="karaf"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
     <bean id="securityProvider" class="org.apache.felix.karaf.webconsole.JaasSecurityProvider">
-        <property name="realm" value="${webconsoleRealm}"/>
+        <property name="realm" value="${realm}"/>
     </bean>
 
     <service auto-export="interfaces" ref="securityProvider" />
