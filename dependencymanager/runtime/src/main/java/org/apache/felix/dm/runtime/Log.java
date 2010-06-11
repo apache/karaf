@@ -18,10 +18,12 @@
  */
 package org.apache.felix.dm.runtime;
 
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
-public class Log implements LogService
+/**
+ * This class logs some formattable strings into the OSGi Log Service.
+ */
+public class Log
 {
     /** The log service */
     private LogService m_logService;
@@ -37,24 +39,14 @@ public class Log implements LogService
     public void setLogService(LogService logService) {
         m_logService = logService;
     }
+        
+    public void log(int level, String format, Object ... args) 
+    {
+        m_logService.log(level, String.format(format, args));
+    }
     
-    public void log(int level, String message, Throwable exception)
+    public void log(int level, String format, Throwable t, Object ... args) 
     {
-        m_logService.log(level, message, exception);
-    }
-
-    public void log(int level, String message)
-    {
-        m_logService.log(level, message);
-    }
-
-    public void log(ServiceReference sr, int level, String message, Throwable exception)
-    {
-        m_logService.log(sr, level, message, exception);
-    }
-
-    public void log(ServiceReference sr, int level, String message)
-    {
-        m_logService.log(sr, level, message);
+        m_logService.log(level, String.format(format, args), t);
     }
 }

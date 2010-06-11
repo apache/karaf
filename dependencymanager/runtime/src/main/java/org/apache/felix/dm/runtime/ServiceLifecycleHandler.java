@@ -21,20 +21,68 @@ package org.apache.felix.dm.runtime;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.dependencies.BundleDependency;
+import org.apache.felix.dm.dependencies.ConfigurationDependency;
 import org.apache.felix.dm.dependencies.Dependency;
+import org.apache.felix.dm.dependencies.ResourceDependency;
+import org.apache.felix.dm.dependencies.ServiceDependency;
+import org.apache.felix.dm.dependencies.TemporalServiceDependency;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
+import org.osgi.service.log.LogService;
 
 /**
- * This class acts as a service implementation lifecycle handler. If the actual service implementation
- * init method returns a Map, then this map will is inspected for dependency filters, which will be 
- * applied to the dependencies specified in the service.
+ * Allow Services to configure dynamically their dependency filters from their init() method.
+ * Basically, this class acts as a service implementation lifecycle handler. When we detect that the Service is
+ * called in its init() method, and if its init() method returns a Map, then the Map is assumed to contain
+ * dependency filters, which will be applied to all service dependencies. The Map optionally returned by
+ * Service's init method has to contains the following keys:
+ * <ul>
+ *   <li>name.filter: the value must be a valid OSGi filter. the "name" prefix must match a ServiceDependency 
+ *   name attribute</li>
+ *   <li>name.required: the value is a boolean ("true"|"false") and must the "name" prefix must match a 
+ *   ServiceDependency name attribute</li>
+ * </ul>
+ * 
+ * Example of a Service whose dependency filter is configured from ConfigAdmin:
+ * 
+ * <blockquote>
+ * 
+ * <pre>
+ *  &#47;**
+ *    * All Service whose service dependency filter/require attribute may be configured from ConfigAdmin
+ *    *&#47;
+ *  &#64;Service
+ *  class X {
+ *      private Dictionary m_config;
+ *      
+ *      @ConfigurationDependency(pid="MyPid")
+ *      void configure(Dictionary conf) {
+ *           // Initialize our service from config ...
+ *           
+ *           // And store the config for late usage (from our init method)
+ *           m_config = config;
+ *      }
+ * 
+ *      &#64;Init
+ *      Map init() {
+ *          return new HashMap() {{
+ *              put("dependency1.filter", m_config.get("filter"));
+ *              put("dependency1.required", m_config.get("required"));
+ *          }};
+ *      } 
+ *      
+ *      &#64;ServiceDependency(name="dependency1") 
+ *      void bindOtherService(OtherService other) {
+ *         // the filter and required flag will be configured from our init method.
+ *      }
+ *  }
  */
 public class ServiceLifecycleHandler
 {
@@ -42,86 +90,115 @@ public class ServiceLifecycleHandler
     private String m_start;
     private String m_stop;
     private String m_destroy;
-    private List<MetaData> m_dependencies = new ArrayList<MetaData>();
-    private Map<String, MetaData> m_namedDependencies = new HashMap<String, MetaData>();
+    private MetaData m_srvMeta;
+    private List<MetaData> m_depsMeta;
+    private List<Dependency> m_deps = new ArrayList<Dependency>();
     private Bundle m_bundle;
 
     public ServiceLifecycleHandler(Service srv, Bundle srvBundle, DependencyManager dm,
-                                   MetaData srvMetaData, List<MetaData> srvDep)
+                                   MetaData srvMeta, List<MetaData> depMeta)
         throws Exception
     {
-        m_init = srvMetaData.getString(Params.init, null);
-        m_start = srvMetaData.getString(Params.start, null);
-        m_stop = srvMetaData.getString(Params.stop, null);
-        m_destroy = srvMetaData.getString(Params.destroy, null);
+        m_srvMeta = srvMeta;
+        m_init = srvMeta.getString(Params.init, null);
+        m_start = srvMeta.getString(Params.start, null);
+        m_stop = srvMeta.getString(Params.stop, null);
+        m_destroy = srvMeta.getString(Params.destroy, null);
         m_bundle = srvBundle;
 
+        // Plug configuration dependencies now, and remove them from the dependency list.
+        // (we want these dependencies to be injected before the init method).
+        
         String confDependency = DependencyBuilder.DependencyType.ConfigurationDependency.toString();
-        for (MetaData depMeta: srvDep)
+        Iterator<MetaData> dependencies = depMeta.iterator();
+        while (dependencies.hasNext()) 
         {
-            if (depMeta.getString(Params.type).equals(confDependency))
+            MetaData dependency = dependencies.next();
+            if (dependency.getString(Params.type).equals(confDependency))
             {
-                // Register Configuration dependencies now
-                Dependency dp = new DependencyBuilder(depMeta).build(m_bundle, dm);
+                // Register Configuration dependency now.
+                Dependency dp = new DependencyBuilder(dependency).build(m_bundle, dm);
                 srv.add(dp);
-            }
-            else
-            {
-                String name = depMeta.getString(Params.name, null);
-                if (name != null)
-                {
-                    m_namedDependencies.put(name, depMeta);
-                }
-                else
-                {
-                    m_dependencies.add(depMeta);
-                }
+                dependencies.remove();
             }
         }
-
+        
+        m_depsMeta = depMeta;
     }
 
     @SuppressWarnings("unchecked")
     public void init(Object serviceInstance, DependencyManager dm, Service service)
         throws Exception
     {
-        // Invoke the service instance actual init method.
-        Object o = invokeMethod(serviceInstance, m_init, dm, service);
-
-        // If the init method returned a Map, then apply all filters found from it into
-        // the service dependencies. Keys = Dependency name / values = Dependency filter
-        if (o != null && Map.class.isAssignableFrom(o.getClass()))
+        // Invoke the service instance init method, and check if it returns a dependency
+        // customization map. This map will be used to configure some dependency filters
+        // (or required flag).
+        Object o = invokeMethod(serviceInstance, m_init, dm, service);      
+        Map<String, String> customization = (o != null && Map.class.isAssignableFrom(o.getClass())) ?
+            (Map<String, String>) o : new HashMap<String, String>();
+       
+        Log.instance().log(LogService.LOG_DEBUG,
+                           "ServiceLifecycleHandler.init: invoked init method from service %s " +
+                           ", returned map: %s", serviceInstance, customization); 
+                                 
+        for (MetaData dependency : m_depsMeta) 
         {
-            Map<String, String> filters = (Map<String, String>) o;
-            for (Map.Entry<String, String> entry: filters.entrySet())
+            // Check if this dependency has a name, and if we find the name from the 
+            // customization map, then apply filters and required flag from the map into it.
+            
+            String name = dependency.getString(Params.name, null);
+            if (name != null)
             {
-                String name = entry.getKey();
-                String filter = entry.getValue();
-
-                MetaData dependency = m_namedDependencies.remove(name);
-                if (dependency != null)
-                {
-                    dependency.setString(Params.filter, filter);
-                    DependencyBuilder depBuilder = new DependencyBuilder(dependency);
-                    Dependency d = depBuilder.build(m_bundle, dm, true);
-                    service.add(d);
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Invalid filter Map: the filter key " + name
-                        + " does not correspond " +
-                        " to a known Dependency.");
+                String filter = customization.get(name + ".filter");
+                String required = customization.get(name + ".required");
+                		
+                if (filter != null || required != null) {
+                    dependency = (MetaData) dependency.clone();
+                    if (filter != null) 
+                    {
+                        dependency.setString(Params.filter, filter);
+                    }
+                    if (required != null)
+                    {
+                        dependency.setString(Params.required, required);
+                    }
                 }
             }
+            DependencyBuilder depBuilder = new DependencyBuilder(dependency);
+            Log.instance().log(LogService.LOG_INFO, 
+                               "ServiceLifecycleHandler.init: adding dependency %s into service %s",
+                               dependency, m_srvMeta);
+            Dependency d = depBuilder.build(m_bundle, dm, true);
+            m_deps.add(d);
+            service.add(d);
         }
-
-        plugDependencies(m_namedDependencies.values(), dm, service);
-        plugDependencies(m_dependencies, dm, service);
     }
 
     public void start(Object serviceInstance, DependencyManager dm, Service service)
         throws IllegalArgumentException, IllegalAccessException, InvocationTargetException
     {
+        // Remove "instance bound" flag from all dependencies, because we want to be deactivated
+        // once we lose one of the deps ...
+        Iterator it = m_deps.iterator();
+        while (it.hasNext())
+        {
+            Dependency d = (Dependency) it.next();
+            if (d instanceof ServiceDependency) {
+                ((ServiceDependency)d).setInstanceBound(false);
+            } else if (d instanceof BundleDependency)
+            {
+                ((BundleDependency)d).setInstanceBound(false);
+            } else  if (d instanceof ResourceDependency) 
+            {
+                ((ResourceDependency) d).setInstanceBound(false);
+            } else if (d instanceof ConfigurationDependency) 
+            {
+                ((ConfigurationDependency) d).setInstanceBound(false);
+            } else if (d instanceof TemporalServiceDependency) 
+            {
+                ((TemporalServiceDependency) d).setInstanceBound(false);
+            }
+        }
         invokeMethod(serviceInstance, m_start, dm, service);
     }
 
@@ -141,18 +218,18 @@ public class ServiceLifecycleHandler
         throws IllegalArgumentException, IllegalAccessException, InvocationTargetException
     {
         return invokeMethod(serviceInstance,
-            method,
-            new Class[][] {
-                            { Object.class, DependencyManager.class, Service.class },
-                            { DependencyManager.class, Service.class },
-                            { Object.class },
-                            {}
+                            method,
+                            new Class[][] {
+                                    { Object.class, DependencyManager.class, Service.class },
+                                    { DependencyManager.class, Service.class },
+                                    { Object.class },
+                                    {}
             },
-            new Object[][] {
-                            { serviceInstance, dm, service },
-                            { dm, service },
-                            { serviceInstance },
-                            {}
+                            new Object[][] {
+                                    { serviceInstance, dm, service },
+                                    { dm, service },
+                                    { serviceInstance },
+                                    {}
             });
     }
 
@@ -188,16 +265,5 @@ public class ServiceLifecycleHandler
         }
 
         return null;
-    }
-
-    private void plugDependencies(Collection<MetaData> dependencies, DependencyManager dm, Service service)
-        throws Exception
-    {
-        for (MetaData dependency: dependencies)
-        {
-            DependencyBuilder depBuilder = new DependencyBuilder(dependency);
-            Dependency d = depBuilder.build(m_bundle, dm, true);
-            service.add(d);
-        }
     }
 }

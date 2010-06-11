@@ -84,4 +84,9 @@ public interface MetaData extends Cloneable
      * Modifies a String[] value.
      */
     void setDictionary(Params key, Dictionary<String, Object> dictionary);
+    
+    /**
+     * Clone this MetaData object.
+     */
+    Object clone() throws CloneNotSupportedException;
 }

@@ -31,7 +31,8 @@ import org.osgi.service.log.LogService;
 
 /**
  * This class parses files generated in OSGI-INF/*.dm by the DependencyManager bnd plugin.
- * Each descriptor contains a JSON definition of a Service, along with its corresponding service dependency or configuration dependencies.
+ * Each descriptor contains a JSON definition of a Service, along with its corresponding  
+ * dependencies.
  */
 public class DescriptorParser
 {
@@ -48,7 +49,7 @@ public class DescriptorParser
 
         // The first line is a Service Component (a Service, an Aspect Service, etc ...)
         line = reader.readLine();
-        Log.instance().log(LogService.LOG_DEBUG, "Parsing destriptor entry line: " + line);
+        Log.instance().log(LogService.LOG_DEBUG, "DescriptorParser: parsing service %s", line);
         JSONObject json = new JSONObject(line);
         JSONMetaData serviceMetaData = new JSONMetaData(json);
 
@@ -64,7 +65,7 @@ public class DescriptorParser
         List<MetaData> serviceDependencies = new ArrayList<MetaData>();
         while ((line = reader.readLine()) != null)
         {
-            Log.instance().log(LogService.LOG_DEBUG, "Parsing destriptor entry line: " + line);
+            Log.instance().log(LogService.LOG_DEBUG, "Parsing dependency Ms", line);
             JSONObject dep = new JSONObject(line);
             serviceDependencies.add(new JSONMetaData(dep));
         }

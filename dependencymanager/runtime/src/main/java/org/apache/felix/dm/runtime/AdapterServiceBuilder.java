@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.List;
 
 import org.apache.felix.dm.DependencyManager;
-import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
 
@@ -41,24 +40,21 @@ public class AdapterServiceBuilder extends ServiceComponentBuilder
     }
 
     @Override
-    public void buildService(MetaData serviceMetaData,
-        List<MetaData> serviceDependencies,
-        Bundle b, DependencyManager dm) throws Exception
+    public void buildService(MetaData srvMeta, List<MetaData> depsMeta, Bundle b, DependencyManager dm)
+        throws Exception
     {
-        Class<?> adapterImpl = b.loadClass(serviceMetaData.getString(Params.impl));
-        String[] adapterService = serviceMetaData.getStrings(Params.adapterService, null);
-        Dictionary<String, Object> adapterProperties = serviceMetaData.getDictionary(Params.adapterProperties, null);
-        Class<?> adapteeService = b.loadClass(serviceMetaData.getString(Params.adapteeService));
-        String adapteeFilter = serviceMetaData.getString(Params.adapteeFilter, null);     
+        Class<?> adapterImpl = b.loadClass(srvMeta.getString(Params.impl));
+        String[] adapterService = srvMeta.getStrings(Params.adapterService, null);
+        Dictionary<String, Object> adapterProperties = srvMeta.getDictionary(Params.adapterProperties, null);
+        Class<?> adapteeService = b.loadClass(srvMeta.getString(Params.adapteeService));
+        String adapteeFilter = srvMeta.getString(Params.adapteeFilter, null);     
         Service service = dm.createAdapterService(adapteeService, adapteeFilter)
                             .setInterface(adapterService, adapterProperties)
                             .setImplementation(adapterImpl);
-        setCommonServiceParams(service, serviceMetaData);
-        for (MetaData dependencyMetaData: serviceDependencies)
-        {
-            Dependency dp = new DependencyBuilder(dependencyMetaData).build(b, dm);
-            service.add(dp);
-        }
+        service.setComposition(srvMeta.getString(Params.composition, null));
+        ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(service, b, dm, srvMeta, depsMeta);
+        // The dependencies will be plugged by our lifecycle handler.
+        service.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
         dm.add(service);
     }
 }

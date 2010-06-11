@@ -86,6 +86,9 @@ public class DependencyBuilder
             case ResourceDependency:
                 dp = createResourceDependency(dm, instanceBound);
                 break;
+            
+            default:
+                throw new IllegalArgumentException("Can't build service dependency: " + type);
         }
         return dp;
     }

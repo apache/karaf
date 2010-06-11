@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.List;
 
 import org.apache.felix.dm.DependencyManager;
-import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
@@ -38,29 +37,27 @@ public class AspectServiceBuilder extends ServiceComponentBuilder
     }
 
     @Override
-    public void buildService(MetaData serviceMetaData,
-        List<MetaData> serviceDependencies,
-        Bundle b, DependencyManager dm) throws Exception
+    public void buildService(MetaData srvMeta, List<MetaData> depsMeta, Bundle b, DependencyManager dm) 
+        throws Exception
     {
-        Log.instance().log(LogService.LOG_DEBUG, "building aspect service: service metadata=" + serviceMetaData
-            + ", dependencyMetaData=" + serviceDependencies);
+        Log.instance().log(LogService.LOG_INFO,
+                           "AspectServiceBuilder: building aspect service: %s with dependencies %s", 
+                           srvMeta, depsMeta);
 
-        Class<?> serviceInterface = b.loadClass(serviceMetaData.getString(Params.service));
-        String serviceFilter = serviceMetaData.getString(Params.filter, null);
-        Dictionary<String, Object> aspectProperties = serviceMetaData.getDictionary(Params.properties, null);
-        int ranking = serviceMetaData.getInt(Params.ranking, 1);
-        String implClass = serviceMetaData.getString(Params.impl);
+        Class<?> serviceInterface = b.loadClass(srvMeta.getString(Params.service));
+        String serviceFilter = srvMeta.getString(Params.filter, null);
+        Dictionary<String, Object> aspectProperties = srvMeta.getDictionary(Params.properties, null);
+        int ranking = srvMeta.getInt(Params.ranking, 1);
+        String implClass = srvMeta.getString(Params.impl);
         Object impl = b.loadClass(implClass);        
-        String field = serviceMetaData.getString(Params.field, null);        
+        String field = srvMeta.getString(Params.field, null);        
         Service service = dm.createAspectService(serviceInterface, serviceFilter, ranking, field)
                             .setImplementation(impl)
                             .setServiceProperties(aspectProperties);
-        setCommonServiceParams(service, serviceMetaData);
-        for (MetaData dependencyMetaData: serviceDependencies)
-        {
-            Dependency dp = new DependencyBuilder(dependencyMetaData).build(b, dm);
-            service.add(dp);
-        }
+        service.setComposition(srvMeta.getString(Params.composition, null));
+        ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(service, b, dm, srvMeta, depsMeta);
+        // The dependencies will be plugged by our lifecycle handler.
+        service.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
         dm.add(service);
     }
 }

@@ -37,24 +37,21 @@ public class ResourceAdapterServiceBuilder extends ServiceComponentBuilder
     }
 
     @Override
-    public void buildService(MetaData serviceMetaData,
-        List<MetaData> serviceDependencies,
-        Bundle b, DependencyManager dm) throws Exception
+    public void buildService(MetaData srvMeta, List<MetaData> depsMeta, Bundle b, DependencyManager dm) 
+        throws Exception
     {
-        String filter = serviceMetaData.getString(Params.filter, null);
-        Class<?> impl = b.loadClass(serviceMetaData.getString(Params.impl));
-        String[] service = serviceMetaData.getStrings(Params.service, null);
-        Dictionary<String, Object> properties = serviceMetaData.getDictionary(Params.properties, null);
-        boolean propagate = "true".equals(serviceMetaData.getString(Params.propagate, "false"));
+        String filter = srvMeta.getString(Params.filter, null);
+        Class<?> impl = b.loadClass(srvMeta.getString(Params.impl));
+        String[] service = srvMeta.getStrings(Params.service, null);
+        Dictionary<String, Object> properties = srvMeta.getDictionary(Params.properties, null);
+        boolean propagate = "true".equals(srvMeta.getString(Params.propagate, "false"));
         Service srv = dm.createResourceAdapterService(filter, propagate)
                         .setInterface(service, properties)
                         .setImplementation(impl);
-        setCommonServiceParams(srv, serviceMetaData);
-        for (MetaData dependencyMetaData: serviceDependencies)
-        {
-            Dependency dp = new DependencyBuilder(dependencyMetaData).build(b, dm);
-            srv.add(dp);
-        }
+        srv.setComposition(srvMeta.getString(Params.composition, null));
+        ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(srv, b, dm, srvMeta, depsMeta);
+        // The dependencies will be plugged by our lifecycle handler.
+        srv.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
         dm.add(srv);
     }    
 }

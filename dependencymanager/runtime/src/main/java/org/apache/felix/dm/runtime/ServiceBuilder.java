@@ -32,6 +32,7 @@ import org.osgi.service.log.LogService;
 public class ServiceBuilder extends ServiceComponentBuilder
 {
     private final static String TYPE = "Service";
+    private final static String DM_FACTORY_NAME = "dm.factory.name";
 
     @Override
     public String getType()
@@ -40,72 +41,44 @@ public class ServiceBuilder extends ServiceComponentBuilder
     }
 
     @Override
-    public void buildService(MetaData srvMeta, List<MetaData> srvDeps, Bundle b, DependencyManager dm)
+    public void buildService(MetaData srvMeta, List<MetaData> depsMeta, Bundle b, DependencyManager dm)
         throws Exception
     {
-        Log.instance().log(LogService.LOG_DEBUG, "building service: service metadata=" + srvMeta
-            + ", dependencyMetaData=" + srvDeps);
-
-        // Get service parameters (lifecycle callbacks, composition, factory, etc ...)
-
         Service service = dm.createService();
         String factory = srvMeta.getString(Params.factory, null);
-        String factoryConfigure = srvMeta.getString(Params.factoryConfigure, null);
-        String impl = srvMeta.getString(Params.impl);
-        String init = srvMeta.getString(Params.init, null);
-        String start = srvMeta.getString(Params.start, null);
-        String stop = srvMeta.getString(Params.stop, null);
-        String destroy = srvMeta.getString(Params.destroy, null);
-        String composition = srvMeta.getString(Params.composition, null);
-        Dictionary<String, Object> serviceProperties = srvMeta.getDictionary(Params.properties, null);
-        String[] provide = srvMeta.getStrings(Params.provide, null);
 
         // Check if we must provide a Set Factory.
         if (factory == null)
         {
-            // No: instantiate the service.
-            service.setImplementation(b.loadClass(impl));
-            if (composition != null)
-            {
-                service.setComposition(composition);
-            }
-            if (provide != null)
-            {
-                service.setInterface(provide, serviceProperties);
-            }
+            Log.instance().log(LogService.LOG_INFO, 
+                               "ServiceBuilder: building service %s with dependencies %s",
+                               srvMeta, depsMeta);
 
+            String impl = srvMeta.getString(Params.impl);
+            String composition = srvMeta.getString(Params.composition, null);
+            Dictionary<String, Object> serviceProperties = srvMeta.getDictionary(Params.properties, null);
+            String[] provide = srvMeta.getStrings(Params.provide, null);
+            service.setImplementation(b.loadClass(impl));
+            service.setComposition(composition);
+            service.setInterface(provide, serviceProperties);
             // Creates a ServiceHandler, which will filter all service lifecycle callbacks.
-            /*
-            ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(service, b, dm, srvMeta,
-                                                                               srvDeps);
+            ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(service, b, dm, srvMeta, depsMeta);
             service.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
-            String confDependency = DependencyBuilder.DependencyType.ConfigurationDependency.toString();
-            */
-            // TODO REMOVE
-            for (MetaData depMeta: srvDeps)
-            {
-                Dependency dp = new DependencyBuilder(depMeta).build(b, dm);
-                service.add(dp);
-            }
         }
         else
         {
+            Log.instance().log(LogService.LOG_INFO, 
+                               "ServiceBuilder: providing factory set for service %s with dependencies %s",
+                               srvMeta, depsMeta);
+
             // We don't instantiate the service, but instead we provide a Set in the registry.
             // This Set will act as a factory and another component may registers some
             // service configurations into it in order to fire some service instantiations.
-
-            ServiceFactory serviceFactory =  new ServiceFactory(b.loadClass(impl), init, start, stop, destroy, 
-                                                                composition, serviceProperties, provide, 
-                                                                factoryConfigure);
-            for (MetaData dependencyMetaData: srvDeps)
-            {
-                Dependency dp = new DependencyBuilder(dependencyMetaData).build(b, dm);
-                serviceFactory.addDependency(dp);
-            }
+            ServiceFactory serviceFactory =  new ServiceFactory(b, srvMeta, depsMeta);
             service.setImplementation(serviceFactory);
             service.setCallbacks(null, "start", "stop", null);
             Hashtable<String, String> props = new Hashtable<String, String>();
-            props.put("dm.factory.name", factory);
+            props.put(DM_FACTORY_NAME, factory);
             service.setInterface(Set.class.getName(), props);
         }
 

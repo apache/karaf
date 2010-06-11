@@ -20,8 +20,6 @@ package org.apache.felix.dm.runtime;
 
 import java.lang.reflect.Method;
 import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -30,8 +28,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.dm.DependencyManager;
-import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.service.Service;
+import org.osgi.framework.Bundle;
+import org.osgi.service.log.LogService;
 
 /**
  * This class implements a <code>java.util.Set</code> which acts as a service factory.
@@ -50,41 +49,11 @@ public class ServiceFactory extends AbstractSet<Dictionary>
     private Object m_impl;
 
     /**
-     * The Service class used to instantiate Service instances
-     */
-    private final Class<?> m_implClass;
-
-    /**
-     * The Service init lifecycle callback.
-     */
-    private final String m_init;
-
-    /**
-     * The Service start lifecycle callback.
-     */
-    private final String m_start;
-
-    /**
-     * The Service stop lifecycle callback.
-     */
-    private final String m_stop;
-
-    /**
-     * The Service destroy lifecycle callback.
-     */
-    private final String m_destroy;
-
-    /**
-     * The getComposition Service callback.
-     */
-    private final String m_composition;
-
-    /**
      * The Service provided in the OSGi registry.
      */
     private final String[] m_provide;
 
-    /**factoryConfigure
+    /**
      * The properties to be provided by the Service.
      */
     private final Dictionary m_serviceProperties;
@@ -102,7 +71,12 @@ public class ServiceFactory extends AbstractSet<Dictionary>
     /**
      * The list of Dependencies which are applied in the Service.
      */
-    private final ArrayList<Dependency> m_dependencies = new ArrayList<Dependency>();
+    private MetaData m_srvMeta;
+
+    /**
+     * The list of Dependencies which are applied in the Service.
+     */
+    private List<MetaData> m_depsMeta;
 
     /**
      * The DependencyManager (injected by reflection), which is used to create Service instances.
@@ -121,6 +95,11 @@ public class ServiceFactory extends AbstractSet<Dictionary>
      */
     private volatile boolean m_active;
 
+    /**
+     * The bundle containing the Service annotated with the factory attribute.
+     */
+    private Bundle m_bundle;
+    
     /**
      * Flag used to check if a service is being created
      */
@@ -166,37 +145,20 @@ public class ServiceFactory extends AbstractSet<Dictionary>
 
     /**
      * Sole constructor.
-     * @param impl The Service impl class
-     * @param init The init lifecyle callback
-     * @param start The start lifecyle callback
-     * @param stop The stop lifecyle callback
-     * @param destroy The destroy lifecyle callback
-     * @param composition The getComposition Service method.
+     * @param b the bundle containing the Service annotated with the factory attribute
+     * @param impl The Service implementation class
      * @param serviceProperties The Service properties
      * @param provide The Services provided by this Service
      * @param factoryConfigure The configure callback invoked in order to pass configurations added in this Set.
      */
-    public ServiceFactory(Class<?> impl, String init, String start, String stop, String destroy, String composition, Dictionary serviceProperties, String[] provide, String factoryConfigure)
+    public ServiceFactory(Bundle b, MetaData srvMeta, List<MetaData> depsMeta)
     {
-        m_implClass = impl;
-        m_init = init;
-        m_start = start;
-        m_stop = stop;
-        m_destroy = destroy;
-        m_composition = composition;
-        m_serviceProperties = serviceProperties;
-        m_provide = Arrays.copyOf(provide, provide.length);
-        m_configure = factoryConfigure;
-    }
-
-    /**
-     * Method called in order to track all Dependencies added in our Service. 
-     * The ComponentManager will forward all Service Dependencies in this method and we'll attach them
-     * to all concrete Service instances (when we will create them).
-     */
-    public void addDependency(Dependency dp)
-    {
-        m_dependencies.add(dp);
+        m_serviceProperties = srvMeta.getDictionary(Params.properties, null);;
+        m_provide = srvMeta.getStrings(Params.provide, null);
+        m_configure = srvMeta.getString(Params.factoryConfigure, null);
+        m_bundle = b;
+        m_srvMeta = srvMeta;
+        m_depsMeta = depsMeta;
     }
 
     /**
@@ -379,7 +341,8 @@ public class ServiceFactory extends AbstractSet<Dictionary>
             {
                 // Create the Service / impl
                 Service s = m_dm.createService();
-                m_impl = createServiceImpl();
+                Class implClass = m_bundle.loadClass(m_srvMeta.getString(Params.impl));
+                m_impl = implClass.newInstance();
 
                 // Invoke "configure" callback
                 if (m_configure != null)
@@ -389,30 +352,28 @@ public class ServiceFactory extends AbstractSet<Dictionary>
 
                 // Create Service
                 s.setImplementation(m_impl);
-                s.setCallbacks(m_init, m_start, m_stop, m_destroy);
-                if (m_composition != null)
-                {
-                    s.setComposition(m_composition);
-                }
                 if (m_provide != null)
                 {
                     // Merge service properties with the configuration provided by the factory.
                     Dictionary serviceProperties = mergeSettings(m_serviceProperties, configuration);
                     s.setInterface(m_provide, serviceProperties);
                 }
-
-                // Plug original dependencies
-                s.add((List<Dependency>) m_dependencies.clone());
+                
+                s.setComposition(m_srvMeta.getString(Params.composition, null));
+                ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(s, m_bundle, m_dm, m_srvMeta, m_depsMeta);
+                // The dependencies will be plugged by our lifecycle handler.
+                s.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
 
                 // Register the Service instance, and keep track of it.
+                Log.instance().log(LogService.LOG_INFO, "ServiceFactory: created service %s", m_srvMeta);
                 m_dm.add(s);
                 m_services.put(serviceKey, s);
             }
-            catch (RuntimeException e)
+            catch (Throwable t)
             {
                 // Make sure the SERVICE_CREATING flag is also removed
                 m_services.remove(serviceKey);
-                throw e;
+                Log.instance().log(LogService.LOG_ERROR, "ServiceFactory: could not instantiate service %s", t, m_srvMeta);
             }
         }
         else
@@ -420,6 +381,7 @@ public class ServiceFactory extends AbstractSet<Dictionary>
             // Reconfigure an already existing Service.
             if (m_configure != null)
             {
+                Log.instance().log(LogService.LOG_INFO, "ServiceFactory: updating service %s", m_impl);
                 invokeConfigure(m_impl, m_configure, configuration);
             }
 
@@ -434,6 +396,7 @@ public class ServiceFactory extends AbstractSet<Dictionary>
 
     private void doRemove(Dictionary configuraton)
     {
+        Log.instance().log(LogService.LOG_INFO, "ServiceFactory: removing service %s", m_srvMeta);
         ServiceKey serviceKey = new ServiceKey(configuraton);
         Object service = m_services.remove(serviceKey);
         if (service != null && service != SERVICE_CREATING)
@@ -480,7 +443,7 @@ public class ServiceFactory extends AbstractSet<Dictionary>
                 Object key = keys.nextElement();
                 Object val = serviceProperties.get(key);
                 props.put(key, val);
-            }
+            }        
         }
 
         Enumeration keys = factoryConfiguration.keys();
@@ -495,30 +458,6 @@ public class ServiceFactory extends AbstractSet<Dictionary>
             }
         }
         return props;
-    }
-
-    /**
-     * Create a Service impl instance
-     */
-    private Object createServiceImpl()
-    {
-        try
-        {
-            m_impl = m_implClass.newInstance();
-            return m_impl;
-        }
-        catch (Throwable t)
-        {
-            if (t instanceof RuntimeException)
-            {
-                throw (RuntimeException) t;
-            }
-            else
-            {
-                throw new RuntimeException("Could not create Service instance for class "
-                    + m_implClass, t);
-            }
-        }
     }
 
     /**

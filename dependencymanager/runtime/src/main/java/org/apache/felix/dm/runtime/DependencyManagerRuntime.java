@@ -84,15 +84,13 @@ public class DependencyManagerRuntime implements SynchronousBundleListener
     @SuppressWarnings("unchecked")
     protected void stop()
     {
-        m_log.log(LogService.LOG_INFO, "DependencyManager Runtime stopping: removing services");
+        m_log.log(LogService.LOG_INFO, "Runtime: stopping services");
 
         for (DependencyManager dm: m_managers.values())
         {
             List<Service> services = new ArrayList<Service>(dm.getServices());
             for (Service service: services)
             {
-                m_log.log(LogService.LOG_INFO, "DependencyManager Runtime stopping: removing service: "
-                    + service);
                 dm.remove(service);
             }
         }
@@ -142,7 +140,7 @@ public class DependencyManagerRuntime implements SynchronousBundleListener
             URL descriptorURL = b.getEntry(descriptorPath);
             if (descriptorURL == null)
             {
-                m_log.log(LogService.LOG_ERROR,
+                m_log.log(LogService.LOG_ERROR, "Runtime: " +
                           "DependencyManager component descriptor not found: " + descriptorPath);
                 continue;
             }
@@ -157,16 +155,16 @@ public class DependencyManagerRuntime implements SynchronousBundleListener
     @SuppressWarnings("unchecked")
     private void bundleStopping(Bundle b)
     {
-        m_log.log(LogService.LOG_INFO, "Removing services from stopping bundle: " + b.getSymbolicName());
+        m_log.log(LogService.LOG_INFO, "Runtime: Removing services from stopping bundle: " + b.getSymbolicName());
         DependencyManager dm = m_managers.remove(b);
         if (dm != null)
         {
             List<Service> services = new ArrayList(dm.getServices());
-            for (Service service: services)
+            for (Service service : services)
             {
-                m_log.log(LogService.LOG_INFO, "Removing service service: " + service);
+                m_log.log(LogService.LOG_INFO, "Runtime: Removing service: " + service);
                 dm.remove(service);
-            }
+            }            
         }
     }
 
@@ -177,7 +175,7 @@ public class DependencyManagerRuntime implements SynchronousBundleListener
      */
     private void loadDescriptor(Bundle b, URL descriptorURL)
     {
-        m_log.log(LogService.LOG_DEBUG, "Parsing descriptor " + descriptorURL
+        m_log.log(LogService.LOG_DEBUG, "Runtime: ++++ Parsing descriptor " + descriptorURL
             + " from bundle " + b.getSymbolicName());
 
         BufferedReader in = null;
@@ -197,7 +195,7 @@ public class DependencyManagerRuntime implements SynchronousBundleListener
 
         catch (Throwable t)
         {
-            m_log.log(LogService.LOG_ERROR, "Error while parsing descriptor "
+            m_log.log(LogService.LOG_ERROR, "Runtime: Error while parsing descriptor "
                 + descriptorURL + " from bundle " + b.getSymbolicName(), t);
         }
 
