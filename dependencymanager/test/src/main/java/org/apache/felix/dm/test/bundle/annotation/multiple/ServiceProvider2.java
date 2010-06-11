@@ -31,7 +31,7 @@ public class ServiceProvider2
     Composite m_composite = new Composite();
     Sequencer m_sequencer;
 
-    @ServiceDependency(required = false, filter = "(foo=bar)")
+    @ServiceDependency(required = false, filter = "(foo=bar)") // NullObject
     Runnable m_runnable;
 
     @ServiceDependency(service = Sequencer.class)
@@ -45,9 +45,13 @@ public class ServiceProvider2
     void start()
     {
         m_sequencer.step(3);
-        m_runnable.run();
+        m_runnable.run(); // NullObject
     }
 
+    public void step(int step) { // called by ServiceProvider.start() method
+        m_sequencer.step(step);
+    }
+    
     @Stop
     void stop()
     {
