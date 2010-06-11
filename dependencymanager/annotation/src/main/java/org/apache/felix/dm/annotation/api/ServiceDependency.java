@@ -104,4 +104,10 @@ public @interface ServiceDependency
      * </pre></blockquote>
      */
     long timeout() default -1;
+    
+    /**
+     * Sets the dependency name. This attribute is only meaningful when dynamically configuring the dependency 
+     * <code>filter</code> and <code>required</code> flag from the Service's init method.
+     */
+    String name() default "";
 }
