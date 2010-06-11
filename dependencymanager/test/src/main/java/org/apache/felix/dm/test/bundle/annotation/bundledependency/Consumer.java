@@ -23,6 +23,7 @@ import org.apache.felix.dm.annotation.api.Service;
 import org.apache.felix.dm.annotation.api.Start;
 import org.apache.felix.dm.annotation.api.BundleDependency;
 import org.apache.felix.dm.annotation.api.ServiceDependency;
+import org.apache.felix.dm.annotation.api.Stop;
 import org.apache.felix.dm.test.bundle.annotation.sequencer.Sequencer;
 import org.osgi.framework.Bundle;
 
@@ -58,8 +59,8 @@ public class Consumer
         m_sequencer.step(1);
     }
 
-    @Destroy
-    public void destroy()
+    @Stop
+    public void stop()
     {
         if (!m_added)
         {
