@@ -228,6 +228,17 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         	oldState = m_state;
             m_dependencies.add(dependency);
         }
+        
+        if (dependency.isInstanceBound()) {
+            // At this point: this dependency is added from init(): but we don't want to start it now, 
+            // because if we start it, and if the required dependency is available, then the service.start() 
+            // method will be called, and this is a problem if a further
+            // required (but unavailable) dependency is then added again from the init() method ...
+            // Once the init() method will return, the activateService method will then calculate the state changes,
+            // but at this point, all added extra-dependencies will be known.
+            return this;
+        } 
+        
         if (oldState.isAllRequiredAvailable() || (oldState.isWaitingForRequiredInstantiated() && dependency.isRequired()) || (oldState.isWaitingForRequired() && dependency.isRequired())) {
         	((DependencyActivation) dependency).start(this);
         }
@@ -529,8 +540,21 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         // then we invoke the init callback so the service can further initialize
         // itself
         invoke(init);
+        // start extra/required dependencies which might have been added from the init() method.
+        startExtraRequiredDependencies();
         // see if any of this caused further state changes
         calculateStateChanges();
+    }
+
+    private void startExtraRequiredDependencies() {
+        Iterator i = m_dependencies.iterator();
+        while (i.hasNext()) {
+            Dependency dependency = (Dependency) i.next();
+            if (dependency.isInstanceBound() && dependency.isRequired()) {
+                // Optional extra dependencies will be started later, once our service is started. 
+                ((DependencyActivation) dependency).start(this);
+            }
+        } 
     }
 
     private void bindService(State state) {
@@ -538,8 +562,9 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         synchronized (this) {
             start = m_callbackStart;
         }
-        // configure the service again, because init() might have added more dependencies
-        configureService(state);
+        
+        // configure service with extra-dependencies which might have been added from init() method.
+        configureServiceWithExtraDependencies(state);
         // inform the state listeners we're starting
         stateListenersStarting();
         // invoke the start callback, since we're now ready to be used
@@ -552,6 +577,20 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
         stateListenersStarted();
     }
     
+    private void configureServiceWithExtraDependencies(State state)
+    {
+        Iterator i = state.getDependencies().iterator();
+        while (i.hasNext()) {
+            Dependency dependency = (Dependency) i.next();
+            if (dependency.isAutoConfig() && dependency.isInstanceBound()) {
+                configureImplementation(dependency.getAutoConfigType(), dependency.getAutoConfigInstance(), dependency.getAutoConfigName());
+            }
+            if (dependency.isRequired() && dependency.isInstanceBound()) {
+                dependency.invokeAdded(this);
+            }
+        }
+    }
+
     private void unbindService(State state) {
         String stop;
         synchronized (this) {
