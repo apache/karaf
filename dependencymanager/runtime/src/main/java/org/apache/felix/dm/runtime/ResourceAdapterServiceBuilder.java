@@ -22,7 +22,6 @@ import java.util.Dictionary;
 import java.util.List;
 
 import org.apache.felix.dm.DependencyManager;
-import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
 
@@ -52,6 +51,8 @@ public class ResourceAdapterServiceBuilder extends ServiceComponentBuilder
         ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(srv, b, dm, srvMeta, depsMeta);
         // The dependencies will be plugged by our lifecycle handler.
         srv.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
+        // Adds dependencies (except named dependencies, which are managed by the lifecycle handler).
+        addUnamedDependencies(b, dm, srv, srvMeta, depsMeta);
         dm.add(srv);
     }    
 }

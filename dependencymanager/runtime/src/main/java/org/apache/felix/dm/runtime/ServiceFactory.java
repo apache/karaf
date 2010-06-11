@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
@@ -364,6 +365,20 @@ public class ServiceFactory extends AbstractSet<Dictionary>
                 // The dependencies will be plugged by our lifecycle handler.
                 s.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
 
+                // Adds dependencies (except named dependencies, which are managed by the lifecycle handler).
+                for (MetaData dependency : m_depsMeta) 
+                {
+                    String name = dependency.getString(Params.name, null);
+                    if (name == null) {
+                        DependencyBuilder depBuilder = new DependencyBuilder(dependency);
+                        Log.instance().log(LogService.LOG_INFO, 
+                                           "ServiceLifecycleHandler.init: adding dependency %s into service %s",
+                                           dependency, m_srvMeta);
+                        Dependency d = depBuilder.build(m_bundle, m_dm, false);
+                        s.add(d);
+                    }
+                }
+                
                 // Register the Service instance, and keep track of it.
                 Log.instance().log(LogService.LOG_INFO, "ServiceFactory: created service %s", m_srvMeta);
                 m_dm.add(s);

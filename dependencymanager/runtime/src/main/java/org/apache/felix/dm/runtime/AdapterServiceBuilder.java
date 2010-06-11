@@ -55,6 +55,8 @@ public class AdapterServiceBuilder extends ServiceComponentBuilder
         ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(service, b, dm, srvMeta, depsMeta);
         // The dependencies will be plugged by our lifecycle handler.
         service.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
+        // Adds dependencies (except named dependencies, which are managed by the lifecycle handler).
+        addUnamedDependencies(b, dm, service, srvMeta, depsMeta);
         dm.add(service);
     }
 }

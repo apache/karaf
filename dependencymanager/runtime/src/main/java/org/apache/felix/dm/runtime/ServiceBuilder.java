@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.dm.DependencyManager;
-import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
@@ -64,6 +63,8 @@ public class ServiceBuilder extends ServiceComponentBuilder
             // Creates a ServiceHandler, which will filter all service lifecycle callbacks.
             ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(service, b, dm, srvMeta, depsMeta);
             service.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
+            // Adds dependencies (except named dependencies, which are managed by the lifecycle handler).
+            addUnamedDependencies(b, dm, service, srvMeta, depsMeta);
         }
         else
         {

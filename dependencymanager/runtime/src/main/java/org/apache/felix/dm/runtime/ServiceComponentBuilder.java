@@ -21,8 +21,10 @@ package org.apache.felix.dm.runtime;
 import java.util.List;
 
 import org.apache.felix.dm.DependencyManager;
+import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.service.Service;
 import org.osgi.framework.Bundle;
+import org.osgi.service.log.LogService;
 
 /**
  * The builder which creates a DependencyManager Service (a Service and all its derived classes (Aspect/Adapters).
@@ -59,5 +61,29 @@ public abstract class ServiceComponentBuilder
         {
             service.setComposition(composition);
         }
+    }
+    
+    /**
+     * Registers all unamed dependencies into a given service. Named dependencies are
+     * handled differently, and are managed by the ServiceLifecycleHandler class.
+     * @throws Exception 
+     */
+    protected static void addUnamedDependencies(Bundle b, DependencyManager dm, Service s, 
+                                                MetaData srvMeta, List<MetaData> depsMeta) 
+        throws Exception
+    {
+        for (MetaData dependency : depsMeta) 
+        {
+            String name = dependency.getString(Params.name, null);
+            if (name == null) {
+                DependencyBuilder depBuilder = new DependencyBuilder(dependency);
+                Log.instance().log(LogService.LOG_INFO, 
+                                   "ServiceLifecycleHandler.init: adding dependency %s into service %s",
+                                   dependency, srvMeta);
+                Dependency d = depBuilder.build(b, dm, false);
+                s.add(d);
+            }
+        }
+
     }
 }

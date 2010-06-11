@@ -41,7 +41,7 @@ import org.osgi.service.log.LogService;
  * Allow Services to configure dynamically their dependency filters from their init() method.
  * Basically, this class acts as a service implementation lifecycle handler. When we detect that the Service is
  * called in its init() method, and if its init() method returns a Map, then the Map is assumed to contain
- * dependency filters, which will be applied to all service dependencies. The Map optionally returned by
+ * dependency filters, which will be applied to all named service dependencies. The Map optionally returned by
  * Service's init method has to contains the following keys:
  * <ul>
  *   <li>name.filter: the value must be a valid OSGi filter. the "name" prefix must match a ServiceDependency 
@@ -50,7 +50,10 @@ import org.osgi.service.log.LogService;
  *   ServiceDependency name attribute</li>
  * </ul>
  * 
- * Example of a Service whose dependency filter is configured from ConfigAdmin:
+ * <p>Dependencies which provide a name attribute will be activated after the init method returns. Other
+ * dependencies are injected before the init method.
+ * 
+ * <p>Example of a Service whose dependency filter is configured from ConfigAdmin:
  * 
  * <blockquote><pre>
  *  &#47;**
@@ -133,6 +136,7 @@ public class ServiceLifecycleHandler
         // Invoke the service instance init method, and check if it returns a dependency
         // customization map. This map will be used to configure some dependency filters
         // (or required flag).
+      
         Object o = invokeMethod(serviceInstance, m_init, dm, service);      
         Map<String, String> customization = (o != null && Map.class.isAssignableFrom(o.getClass())) ?
             (Map<String, String>) o : new HashMap<String, String>();
@@ -147,14 +151,14 @@ public class ServiceLifecycleHandler
             // customization map, then apply filters and required flag from the map into it.
             
             String name = dependency.getString(Params.name, null);
-            if (name != null)
-            {
+            if (name != null) {
                 String filter = customization.get(name + ".filter");
                 String required = customization.get(name + ".required");
-                		
-                if (filter != null || required != null) {
+
+                if (filter != null || required != null)
+                {
                     dependency = (MetaData) dependency.clone();
-                    if (filter != null) 
+                    if (filter != null)
                     {
                         dependency.setString(Params.filter, filter);
                     }
@@ -163,14 +167,15 @@ public class ServiceLifecycleHandler
                         dependency.setString(Params.required, required);
                     }
                 }
+
+                DependencyBuilder depBuilder = new DependencyBuilder(dependency);
+                Log.instance().log(LogService.LOG_INFO,
+                                   "ServiceLifecycleHandler.init: adding dependency %s into service %s",
+                                   dependency, m_srvMeta);
+                Dependency d = depBuilder.build(m_bundle, dm, true);
+                m_deps.add(d);
+                service.add(d);
             }
-            DependencyBuilder depBuilder = new DependencyBuilder(dependency);
-            Log.instance().log(LogService.LOG_INFO, 
-                               "ServiceLifecycleHandler.init: adding dependency %s into service %s",
-                               dependency, m_srvMeta);
-            Dependency d = depBuilder.build(m_bundle, dm, true);
-            m_deps.add(d);
-            service.add(d);
         }
     }
 
