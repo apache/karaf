@@ -20,13 +20,13 @@
   <parent>
     <groupId>org.apache.felix.karaf</groupId>
     <artifactId>karaf</artifactId>
-    <version>1.6.2</version>
+    <version>1.7.0-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.felix.karaf</groupId>
   <artifactId>manual</artifactId>
-  <version>1.6.2</version>
+  <version>1.7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Apache Felix Karaf :: Manual</name>
   <description>The Karaf Manual which generates a HTML and PDF representation of the manual.</description>
