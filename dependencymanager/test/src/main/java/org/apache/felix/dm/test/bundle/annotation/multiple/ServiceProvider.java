@@ -39,18 +39,10 @@ public class ServiceProvider implements ServiceInterface
         m_serviceProvider2 = provider2;
     }
 
-    void unbind(ServiceProvider2 provider2)
-    {
-        m_sequencer.step(10);
-    }
-
     @Start
     void start()
     {
-        if (m_serviceProvider2 != null)
-        {
-            m_sequencer.step(4);
-        }
+        m_serviceProvider2.step(4);
         m_sequencer.step(5);
     }
 
@@ -58,6 +50,11 @@ public class ServiceProvider implements ServiceInterface
     void stop()
     {
         m_sequencer.step(9);
+    }
+
+    void unbind(ServiceProvider2 provider2)
+    {
+        m_sequencer.step(10);
     }
 
     public void doService()
