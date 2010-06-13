@@ -178,6 +178,10 @@ public class AnnotationMojo extends AbstractMojo
             jar.write(tmp);
             jar.close();
             
+            if (target.exists() && ! target.delete())
+            {
+                throw new MojoExecutionException("Could not remove " + target);
+            }
             if (!tmp.renameTo(target))
             {
                 throw new MojoExecutionException("Could not rename " + tmp + " to " + target);
