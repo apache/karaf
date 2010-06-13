@@ -66,6 +66,21 @@ public class Base implements LogService
         }
     }
 
+    /**
+     * Suspend the current thread for a while.
+     * @param n the number of milliseconds to wait for.
+     */
+    protected void sleep(int ms)
+    {
+        try
+        {
+            Thread.sleep(ms);
+        }
+        catch (InterruptedException e)
+        {
+        }
+    }
+
     public void log(int level, String message)
     {
         System.out.println(getLevel(level) + " " + message);

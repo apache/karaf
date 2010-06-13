@@ -67,21 +67,6 @@ public class AnnotationBase extends Base implements Sequencer
         }
     }
 
-    /**
-     * Suspend the current thread for a while.
-     * @param n the number of milliseconds to wait for.
-     */
-    protected void sleep(int ms)
-    {
-        try
-        {
-            Thread.sleep(ms);
-        }
-        catch (InterruptedException e)
-        {
-        }
-    }
-
     // ----------------------- Sequencer interface ------------------------------------------
 
     /**
