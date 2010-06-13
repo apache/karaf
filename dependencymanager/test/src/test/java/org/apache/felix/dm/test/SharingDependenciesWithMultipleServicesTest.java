@@ -98,9 +98,15 @@ public class SharingDependenciesWithMultipleServicesTest extends Base {
         // add the first consumer, and wait until its updated() method is invoked
         m.add(consumer1);
         e.waitForStep(2, 15000);
+        // Avoid bug in CM (FELIX-1545), which may miss some updates
+        sleep(200);
+
         // add the second consumer, and wait until its updated() method is invoked
         m.add(consumer2);
         e.waitForStep(3, 15000);
+        // Avoid bug in CM (FELIX-1545), which may miss some updates
+        sleep(200);
+
         // break down the test again
         m.remove(consumer2);
         m.remove(consumer1);
