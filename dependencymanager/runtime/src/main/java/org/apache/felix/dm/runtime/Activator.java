@@ -40,8 +40,6 @@ public class Activator extends DependencyActivatorBase
         // If the "dm.log=true" parameter is configured in the OSGi config.properties
         // then, we'll wait for the LogService, else we'll use an optional dependency over it,
         // and we'll eventually use a Null LogService Object.
-        // Notice that the Felix log service must also be configured from the OSGi config.properites, using
-        // the "org.apache.felix.log.storeDebug=true" property, in order to display DEBUG log levels.
 
         boolean logActive = "true".equals(context.getProperty("dm.log"));
         dm.add(createService()

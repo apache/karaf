@@ -95,7 +95,7 @@ public class ServiceLifecycleHandler
     private String m_destroy;
     private MetaData m_srvMeta;
     private List<MetaData> m_depsMeta;
-    private List<Dependency> m_deps = new ArrayList<Dependency>();
+    private List<Dependency> m_namedDeps = new ArrayList<Dependency>();
     private Bundle m_bundle;
 
     public ServiceLifecycleHandler(Service srv, Bundle srvBundle, DependencyManager dm,
@@ -108,24 +108,6 @@ public class ServiceLifecycleHandler
         m_stop = srvMeta.getString(Params.stop, null);
         m_destroy = srvMeta.getString(Params.destroy, null);
         m_bundle = srvBundle;
-
-        // Plug configuration dependencies now, and remove them from the dependency list.
-        // (we want these dependencies to be injected before the init method).
-        
-        String confDependency = DependencyBuilder.DependencyType.ConfigurationDependency.toString();
-        Iterator<MetaData> dependencies = depMeta.iterator();
-        while (dependencies.hasNext()) 
-        {
-            MetaData dependency = dependencies.next();
-            if (dependency.getString(Params.type).equals(confDependency))
-            {
-                // Register Configuration dependency now.
-                Dependency dp = new DependencyBuilder(dependency).build(m_bundle, dm);
-                srv.add(dp);
-                dependencies.remove();
-            }
-        }
-        
         m_depsMeta = depMeta;
     }
 
@@ -173,7 +155,7 @@ public class ServiceLifecycleHandler
                                    "ServiceLifecycleHandler.init: adding dependency %s into service %s",
                                    dependency, m_srvMeta);
                 Dependency d = depBuilder.build(m_bundle, dm, true);
-                m_deps.add(d);
+                m_namedDeps.add(d);
                 service.add(d);
             }
         }
@@ -184,7 +166,7 @@ public class ServiceLifecycleHandler
     {
         // Remove "instance bound" flag from all dependencies, because we want to be deactivated
         // once we lose one of the deps ...
-        Iterator it = m_deps.iterator();
+        Iterator it = m_namedDeps.iterator();
         while (it.hasNext())
         {
             Dependency d = (Dependency) it.next();

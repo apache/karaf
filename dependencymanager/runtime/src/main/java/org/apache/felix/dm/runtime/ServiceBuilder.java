@@ -60,11 +60,11 @@ public class ServiceBuilder extends ServiceComponentBuilder
             service.setImplementation(b.loadClass(impl));
             service.setComposition(composition);
             service.setInterface(provide, serviceProperties);
+            // Adds dependencies (except named dependencies, which are managed by the lifecycle handler).
+            addUnamedDependencies(b, dm, service, srvMeta, depsMeta);
             // Creates a ServiceHandler, which will filter all service lifecycle callbacks.
             ServiceLifecycleHandler lfcleHandler = new ServiceLifecycleHandler(service, b, dm, srvMeta, depsMeta);
             service.setCallbacks(lfcleHandler, "init", "start", "stop", "destroy");
-            // Adds dependencies (except named dependencies, which are managed by the lifecycle handler).
-            addUnamedDependencies(b, dm, service, srvMeta, depsMeta);
         }
         else
         {
