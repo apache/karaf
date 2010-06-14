@@ -29,7 +29,7 @@
   <artifactId>org.apache.felix.main.distribution</artifactId>
   <version>3.1.0-SNAPSHOT</version>
   <properties>
-    <framework.version>3.0.1</framework.version>
+    <framework.version>3.1.0-SNAPSHOT</framework.version>
     <gogo.runtime.version>0.6.0</gogo.runtime.version>
     <gogo.shell.version>0.6.0</gogo.shell.version>
     <gogo.command.version>0.6.0</gogo.command.version>
