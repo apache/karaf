@@ -1,3 +1,9 @@
+Changes from 3.0.0 to 3.0.1
+---------------------------
+
+** Bug
+    * [FELIX-2401] - NPE in org.apache.felix.framework.FilterImpl.DictionaryCapability.getAttribute(String)
+
 Changes from 2.0.5 to 3.0.0
 ---------------------------
 ** Sub-task
