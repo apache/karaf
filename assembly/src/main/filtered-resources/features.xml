@@ -62,9 +62,8 @@
     </feature>
     <feature name="webconsole" version="${project.version}">
         <feature version="${project.version}">http</feature>
-        <config name="org.apache.felix.webconsole.internal.servlet.OsgiManager">
-          username=karaf
-          password=karaf
+        <config name="org.apache.felix.karaf.webconsole">
+          realm=karaf
         </config>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.branding/${project.version}</bundle>
