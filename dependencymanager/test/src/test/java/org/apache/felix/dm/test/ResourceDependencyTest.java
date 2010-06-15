@@ -24,6 +24,9 @@ import static org.ops4j.pax.exam.CoreOptions.provision;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,13 +68,43 @@ public class ResourceDependencyTest extends Base {
         Ensure e = new Ensure();
         // create a service provider and consumer
         ResourceConsumer c = new ResourceConsumer();
-        Service consumer = m.createService().setImplementation(c).add(m.createResourceDependency().setFilter("(&(path=/test)(name=*.txt)(repository=TestRepository))").setCallbacks("add", "remove"));
-        Service resourceProvider = m.createService().setImplementation(new ResourceProvider(e)).add(m.createServiceDependency().setService(ResourceHandler.class).setCallbacks("add", "remove"));
+        Service consumer = m.createService()
+            .setImplementation(c)
+            .add(m.createResourceDependency()
+                .setFilter("(&(path=/test)(name=*.txt)(repository=TestRepository))")
+                .setCallbacks("add", "remove"));
+        Service dynamicProxyConsumer = m.createService()
+            .setFactory(new ResourceConsumerFactory(e), "create")
+            .add(m.createResourceDependency()
+                    .setFilter("(name=*.doc)")
+                    .setCallbacks("add", null)); 
+        Service resourceProvider = m.createService()
+            .setImplementation(new ResourceProvider(e))
+            .add(m.createServiceDependency()
+                .setService(ResourceHandler.class)
+                .setCallbacks("add", "remove"));
+        
+        // first add the consumer
         m.add(consumer);
+        // then the resource provider, which will provide 3 resources,
+        // 2 of which match the consumers filter conditions
         m.add(resourceProvider);
+        // make sure our consumer invoked openStream() on both resources,
+        // increasing the step counter to 2
         e.step(3);
+        
+        // now add another consumer, that matches only one resource, and uses
+        // a dynamic proxy as its implementation
+        m.add(dynamicProxyConsumer);
+        // ensure the resource was injected properly
+        e.waitForStep(4, 5000);
+        
+        // cleanup
+        m.remove(dynamicProxyConsumer);
         m.remove(resourceProvider);
         m.remove(consumer);
+        
+        // validate that all consumed resources are "unconsumed" again
         c.ensure();
     }
     
@@ -214,4 +247,36 @@ public class ResourceDependencyTest extends Base {
             return null;
         }
     }
+    
+    static class ResourceConsumerFactory {
+        private final Ensure m_ensure;
+        public ResourceConsumerFactory(Ensure ensure) {
+            m_ensure = ensure;
+        }
+        public Object create() {
+            System.out.println("create");
+            ResourceConsumer resourceConsumer = new ResourceConsumer();
+            // create a dynamic proxy for the ResourceProvider
+            return Proxy.newProxyInstance(resourceConsumer.getClass().getClassLoader(), resourceConsumer.getClass().getInterfaces(), new DynamicProxyHandler(resourceConsumer, m_ensure));
+        }
+    }
+
+    static class DynamicProxyHandler implements InvocationHandler {
+        Ensure m_ensure;
+        ResourceConsumer resourceConsumer = null;
+        
+        public DynamicProxyHandler(ResourceConsumer resourceConsumer, Ensure ensure) {
+            this.resourceConsumer = resourceConsumer;
+            m_ensure = ensure;
+        }
+
+        public void add(Resource resource) {
+            m_ensure.step(4);
+            System.out.println("Add resource: " + resource);
+        }
+
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return method.invoke(resourceConsumer, args);
+        }
+    } 
 }
