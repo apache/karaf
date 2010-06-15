@@ -56,7 +56,11 @@ public class Wrapper {
     }
 
     public static Resource unwrap(org.osgi.service.obr.Resource resource) {
-        return ((ResourceWrapper) resource).resource;
+        if (resource instanceof ResourceWrapper) {
+            return ((ResourceWrapper) resource).resource;
+        } else {
+            return new ConvertedResource(resource);
+        }
     }
 
     public static Requirement unwrap(org.osgi.service.obr.Requirement requirement) {
