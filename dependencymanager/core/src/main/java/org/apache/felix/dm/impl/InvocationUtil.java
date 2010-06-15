@@ -3,6 +3,7 @@ package org.apache.felix.dm.impl;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 
 public class InvocationUtil {
     public static void invokeCallbackMethod(Object instance, String methodName, Class[][] signatures, Object[][] parameters) throws NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
@@ -27,6 +28,14 @@ public class InvocationUtil {
         if (clazz == null) {
             throw new IllegalArgumentException("Class cannot be null");
         }
+        
+        // if we're talking to a proxy here, dig one level deeper to expose the
+        // underlying invocation handler (we do the same for injecting instances)
+        if (Proxy.isProxyClass(clazz)) {
+            object = Proxy.getInvocationHandler(object);
+            clazz = object.getClass();
+        }
+        
         Method m = null;
         for (int i = 0; i < signatures.length; i++) {
             Class[] signature = signatures[i];
