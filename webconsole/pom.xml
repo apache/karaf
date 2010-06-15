@@ -100,7 +100,7 @@
                             org.apache.felix.webconsole.internal.OsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.felix.webconsole;version=3.0.0
+                            org.apache.felix.webconsole;version=${project.version}
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
