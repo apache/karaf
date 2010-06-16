@@ -225,40 +225,6 @@ public class OsgiManager extends GenericServlet
         // the OSGi Manager and start the initial setup
         httpServiceTracker = new HttpServiceTracker( this );
         httpServiceTracker.open();
-    }
-
-
-    public void dispose()
-    {
-        // now drop the HttpService and continue with further destroyals
-        if ( httpServiceTracker != null )
-        {
-            httpServiceTracker.close();
-            httpServiceTracker = null;
-        }
-
-        // stop listening for configuration
-        if ( configurationListener != null )
-        {
-            configurationListener.unregister();
-            configurationListener = null;
-        }
-
-        this.bundleContext = null;
-    }
-
-
-    //---------- Servlet API
-
-    /**
-     * @see javax.servlet.GenericServlet#init()
-     */
-    public void init()
-    {
-        // base class initialization not needed, since the GenericServlet.init
-        // is an empty method
-
-        holder.setServletContext( getServletContext() );
 
         // setup the included plugins
         ClassLoader classLoader = getClass().getClassLoader();
@@ -331,6 +297,68 @@ public class OsgiManager extends GenericServlet
     }
 
 
+    public void dispose()
+    {
+        // dispose off held plugins
+        holder.close();
+
+        // dispose off the resource bundle manager
+        if ( resourceBundleManager != null )
+        {
+            resourceBundleManager.dispose();
+            resourceBundleManager = null;
+        }
+
+        // stop listening for brandings
+        if ( brandingTracker != null )
+        {
+            brandingTracker.close();
+            brandingTracker = null;
+        }
+
+        // deactivate any remaining plugins
+        for ( Iterator pi = osgiManagerPlugins.iterator(); pi.hasNext(); )
+        {
+            Object plugin = pi.next();
+            ( ( OsgiManagerPlugin ) plugin ).deactivate();
+        }
+
+        // simply remove all operations, we should not be used anymore
+        this.osgiManagerPlugins.clear();
+
+        // now drop the HttpService and continue with further destroyals
+        if ( httpServiceTracker != null )
+        {
+            httpServiceTracker.close();
+            httpServiceTracker = null;
+        }
+
+        // stop listening for configuration
+        if ( configurationListener != null )
+        {
+            configurationListener.unregister();
+            configurationListener = null;
+        }
+
+        this.bundleContext = null;
+    }
+
+
+    //---------- Servlet API
+
+    /**
+     * @see javax.servlet.GenericServlet#init()
+     */
+    public void init()
+    {
+        // base class initialization not needed, since the GenericServlet.init
+        // is an empty method
+
+        holder.setServletContext( getServletContext() );
+
+    }
+
+
     /**
      * @see javax.servlet.GenericServlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
      */
@@ -370,16 +398,7 @@ public class OsgiManager extends GenericServlet
 
         final Locale locale = getConfiguredLocale( request );
         final String label = pathInfo.substring( 1, slash );
-        AbstractWebConsolePlugin plugin = holder.getPlugin( label );
-
-        if ( plugin == null )
-        {
-            if ( "install".equals( label ) )
-            {
-                plugin = holder.getPlugin( BundlesServlet.NAME );
-            }
-        }
-
+        AbstractWebConsolePlugin plugin = getConsolePlugin( label );
         if ( plugin != null )
         {
             final Map labelMap = holder.getLocalizedLabelMap( resourceBundleManager, locale );
@@ -414,8 +433,22 @@ public class OsgiManager extends GenericServlet
         }
     }
 
+
+    private final AbstractWebConsolePlugin getConsolePlugin( final String label )
+    {
+        // backwards compatibility for the former "install" action which is
+        // used by the Maven Sling Plugin
+        if ( "install".equals( label ) )
+        {
+            return holder.getPlugin( BundlesServlet.NAME );
+        }
+
+        return holder.getPlugin( label );
+    }
+
+
     // See https://issues.apache.org/jira/browse/FELIX-2267
-    private final Locale getConfiguredLocale(HttpServletRequest request)
+    private final Locale getConfiguredLocale( HttpServletRequest request )
     {
         Locale locale = null;
 
@@ -447,32 +480,7 @@ public class OsgiManager extends GenericServlet
         // base class destroy not needed, since the GenericServlet.destroy
         // is an empty method
 
-        // dispose off held plugins
-        holder.close();
-
-        // dispose off the resource bundle manager
-        if ( resourceBundleManager != null )
-        {
-            resourceBundleManager.dispose();
-            resourceBundleManager = null;
-        }
-
-        // stop listening for brandings
-        if ( brandingTracker != null )
-        {
-            brandingTracker.close();
-            brandingTracker = null;
-        }
-
-        // deactivate any remaining plugins
-        for ( Iterator pi = osgiManagerPlugins.iterator(); pi.hasNext(); )
-        {
-            Object plugin = pi.next();
-            ( ( OsgiManagerPlugin ) plugin ).deactivate();
-        }
-
-        // simply remove all operations, we should not be used anymore
-        this.osgiManagerPlugins.clear();
+        holder.setServletContext( null );
     }
 
 
