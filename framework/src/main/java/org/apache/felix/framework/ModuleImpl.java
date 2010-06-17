@@ -1517,8 +1517,13 @@ public class ModuleImpl implements Module
         // If this is an inner class, try to get the enclosing class
         // because we can assume that inner classes of class loaders
         // are really just the class loader and we should ignore them.
-        clazz = getEnclosingClass(clazz);
-        return (this.getClass().getClassLoader() != clazz.getClassLoader())
+        Class enclosing = getEnclosingClass(clazz);
+        return (this.getClass().getClassLoader() != enclosing.getClassLoader())
+            // Do the test on the enclosing class
+            && !ClassLoader.class.isAssignableFrom(enclosing)
+            && !Class.class.equals(enclosing)
+            && !Proxy.class.equals(enclosing)
+            // Do the test on the class itself
             && !ClassLoader.class.isAssignableFrom(clazz)
             && !Class.class.equals(clazz)
             && !Proxy.class.equals(clazz);
