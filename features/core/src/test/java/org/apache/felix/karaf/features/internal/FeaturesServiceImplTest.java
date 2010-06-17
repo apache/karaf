@@ -17,10 +17,12 @@
 package org.apache.felix.karaf.features.internal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 import org.apache.felix.karaf.features.Feature;
+import org.apache.felix.utils.manifest.Clause;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
@@ -110,5 +112,17 @@ public class FeaturesServiceImplTest extends TestCase {
         } catch (Exception e) {
             fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
         }
+    }
+
+    public void testGetOptionalImportsOnly() {
+        FeaturesServiceImpl service = new FeaturesServiceImpl();
+
+        List<Clause> result = service.getOptionalImports("org.apache.felix.karaf,org.apache.felix.karaf.optional;resolution:=optional");
+        assertEquals("One optional import expected", 1, result.size());
+        assertEquals("org.apache.felix.karaf.optional", result.get(0).getName());
+
+        result = service.getOptionalImports(null);
+        assertNotNull(result);
+        assertEquals("No optional imports expected", 0, result.size());
     }
 }
