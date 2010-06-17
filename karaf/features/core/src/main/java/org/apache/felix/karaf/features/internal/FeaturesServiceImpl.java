@@ -434,22 +434,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (Iterator<Bundle> it = bundles.iterator(); it.hasNext();) {
             Bundle b = it.next();
             String importsStr = (String) b.getHeaders().get(Constants.IMPORT_PACKAGE);
-            if (importsStr == null) {
+            List<Clause> importsList = getOptionalImports(importsStr);
+            if (importsList.isEmpty()) {
                 it.remove();
             } else {
-                List<Clause> importsList = Arrays.asList(Parser.parseHeader(importsStr));
-                for (Iterator<Clause> itp = importsList.iterator(); itp.hasNext();) {
-                    Clause p = itp.next();
-                    String resolution = p.getDirective(Constants.RESOLUTION_DIRECTIVE);
-                    if (!Constants.RESOLUTION_OPTIONAL.equals(resolution)) {
-                        itp.remove();
-                    }
-                }
-                if (importsList.isEmpty()) {
-                    it.remove();
-                } else {
-                    imports.put(b, importsList);
-                }
+                imports.put(b, importsList);
             }
         }
         if (bundles.isEmpty()) {
@@ -498,6 +487,21 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
         return bundles;
+    }
+
+    /*
+     * Get the list of optional imports from an OSGi Import-Package string
+     */
+    protected List<Clause> getOptionalImports(String importsStr) {
+        Clause[] imports = Parser.parseHeader(importsStr);
+        List<Clause> result = new LinkedList<Clause>();
+        for (int i = 0; i < imports.length; i++) {
+            String resolution = imports[i].getDirective(Constants.RESOLUTION_DIRECTIVE);
+            if (Constants.RESOLUTION_OPTIONAL.equals(resolution)) {
+                result.add(imports[i]);
+            }
+        }
+        return result;
     }
 
     protected Bundle installBundleIfNeeded(InstallationState state, String bundleLocation) throws IOException, BundleException {
