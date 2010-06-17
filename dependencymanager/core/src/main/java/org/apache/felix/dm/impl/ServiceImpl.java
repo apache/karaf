@@ -20,7 +20,6 @@ package org.apache.felix.dm.impl;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -915,9 +914,7 @@ public class ServiceImpl implements Service, DependencyService, ServiceComponent
             }
             if (m_compositionManagerInstance != null) {
                 try {
-                    Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
-                    m.setAccessible(true);
-                    instances = (Object[]) m.invoke(m_compositionManagerInstance, null);
+                    instances = (Object[]) InvocationUtil.invokeMethod(m_compositionManagerInstance, m_compositionManagerInstance.getClass(), m_compositionManagerGetMethod, new Class[][] {{}}, new Object[][] {{}}, false);
                 }
                 catch (Exception e) {
                     m_logger.log(Logger.LOG_ERROR, "Could not obtain instances from the composition manager.", e);
