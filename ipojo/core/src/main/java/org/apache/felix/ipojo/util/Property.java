@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.util;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
@@ -365,6 +366,25 @@ public class Property implements FieldInterceptor {
         if (type.isArray()) {
             return createArrayObject(type.getComponentType(), ParseUtils.parseArrays(strValue)); 
         }
+        
+        // Enum :
+        if (type.getSuperclass() != null  && type.getSuperclass().getName().equals("java.lang.Enum")) {
+            try {
+                Method valueOf = type.getMethod("valueOf", new Class[] {String.class});
+                if (! valueOf.isAccessible()) {
+                    valueOf.setAccessible(true);
+                }
+                 // Invoke the static method
+                return valueOf.invoke(null, new String[] {strValue});
+            } catch (InvocationTargetException e) {
+                throw new ConfigurationException("Cannot create an enumerated value for " + type 
+                        + " with " + strValue + " : " + e.getTargetException());
+            } catch (Exception e) {
+                throw new ConfigurationException("Cannot create an enumerated value for " + type 
+                        + " with " + strValue + " : " + e.getMessage());
+            }
+        }
+        
         // Else it is a neither a primitive type neither a String -> create
         // the object by calling a constructor with a string in argument.
         try {
