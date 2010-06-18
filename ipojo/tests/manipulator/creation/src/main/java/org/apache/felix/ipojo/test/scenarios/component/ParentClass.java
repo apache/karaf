@@ -6,6 +6,10 @@ public class ParentClass {
 
     public ParentClass(final String n) {
         name = n;
+    }
+    
+    public ParentClass(final StringBuffer n) {
+        name = n.toString();
     } 
 
 }

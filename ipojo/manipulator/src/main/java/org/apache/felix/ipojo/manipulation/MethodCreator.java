@@ -203,7 +203,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
 
             // Insert the new constructor
             MethodVisitor mv = super.visitMethod(ACC_PRIVATE, "<init>", newDesc, signature, exceptions);
-            return new ConstructorCodeAdapter(mv, m_owner, m_fields, ACC_PRIVATE, name, newDesc);
+            return new ConstructorCodeAdapter(mv, m_owner, m_fields, ACC_PRIVATE, name, newDesc, m_superclass);
         }
         
         if ((access & ACC_SYNTHETIC) == ACC_SYNTHETIC && name.startsWith("access$")) { 

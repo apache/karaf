@@ -93,7 +93,6 @@
             </goals>
             <configuration>
               <ignoreAnnotations>true</ignoreAnnotations>
-              <ignoreEmbeddedSchemas>true</ignoreEmbeddedSchemas>
             </configuration>
           </execution>
         </executions>

@@ -48,6 +48,11 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
     private boolean m_superDetected;
     
     /**
+     * The super class. 
+     */
+    private String m_superClass;
+    
+    /**
      * Set of contained fields.
      */
     private Set m_fields;
@@ -63,11 +68,12 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
      * @param desc the constructor descriptor
      * @param name the name
      */
-    public ConstructorCodeAdapter(final MethodVisitor mv, final String owner, Set fields, int access, String name, String desc) {
+    public ConstructorCodeAdapter(final MethodVisitor mv, final String owner, Set fields, int access, String name, String desc, String superClass) {
         super(mv, access, name, desc);
         m_owner = owner;
         m_superDetected = false;
         m_fields = fields;
+        m_superClass = superClass;
     }
     
     /**
@@ -137,7 +143,8 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         
         // A method call is detected, check if it is the super call :
-        if (!m_superDetected && name.equals("<init>")) {
+        // the first init is not necessary the super call, so check that it is really the super class.
+        if (!m_superDetected && name.equals("<init>")  && owner.equals(m_superClass)) {
             m_superDetected = true; 
             // The first invocation is the super call
             // 1) Visit the super constructor :

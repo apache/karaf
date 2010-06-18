@@ -233,6 +233,14 @@ public class POJOCreation extends OSGiTestCase {
         }
     }
     
+    public void testSuperCallWithNew() {
+        try {
+            helper.createComponentInstance("org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructorWithNew");
+        } catch (Throwable e) {
+            fail(e.getMessage());
+        }
+    }
+    
     public void testSuperCallWithBC() {
         try {
             helper.createComponentInstance("org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructorWithBC");

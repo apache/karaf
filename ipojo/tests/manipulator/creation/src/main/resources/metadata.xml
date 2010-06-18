@@ -57,6 +57,7 @@
 	
 	<!-- Try calling super constructors -->
 	 <component classname="org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructor" immediate="true"/>
+     <component classname="org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructorWithNew" immediate="true"/>
 	 <component classname="org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructorWithBC" immediate="true"/>
 	 
 	 <!--  Several constructors -->
