@@ -19,7 +19,6 @@
 package org.apache.felix.dm.impl.dependencies;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -29,6 +28,7 @@ import java.util.Set;
 
 import org.apache.felix.dm.dependencies.ConfigurationDependency;
 import org.apache.felix.dm.dependencies.PropertyMetaData;
+import org.apache.felix.dm.impl.InvocationUtil;
 import org.apache.felix.dm.impl.Logger;
 import org.apache.felix.dm.impl.metatype.MetaTypeProviderImpl;
 import org.apache.felix.dm.management.ServiceComponentDependency;
@@ -204,17 +204,14 @@ public class ConfigurationDependencyImpl extends DependencyBase implements Confi
         }
         if (wasAdded) {
             String callback = (m_callback == null) ? "updated" : m_callback;
-            Method m;
             try {
-                m = service.getClass().getDeclaredMethod(callback, new Class[] { Dictionary.class });
-                m.setAccessible(true);
                 // if exception is thrown here, what does that mean for the
                 // state of this dependency? how smart do we want to be??
                 // it's okay like this, if the new settings contain errors, we
                 // remain in the state we were, assuming that any error causes
                 // the "old" configuration to stay in effect.
                 // CM will log any thrown exceptions.
-                m.invoke(service, new Object[] { settings });
+                InvocationUtil.invokeMethod(service, service.getClass(), callback, new Class[][] {{ Dictionary.class }}, new Object[][] {{ settings }}, false);
             } 
             catch (InvocationTargetException e) {
                 // The component has thrown an exception during it's callback invocation.
