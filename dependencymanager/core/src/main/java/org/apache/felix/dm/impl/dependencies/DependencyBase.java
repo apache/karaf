@@ -1,5 +1,7 @@
 package org.apache.felix.dm.impl.dependencies;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.apache.felix.dm.dependencies.Dependency;
 import org.apache.felix.dm.impl.InvocationUtil;
 import org.apache.felix.dm.impl.Logger;
@@ -37,8 +39,12 @@ public abstract class DependencyBase implements Dependency, DependencyActivation
             catch (NoSuchMethodException e) {
                 // if the method does not exist, ignore it
             }
+            catch (InvocationTargetException e) {
+                // the method itself threw an exception, log that
+                m_logger.log(Logger.LOG_WARNING, "Invocation of '" + methodName + "' failed.", e.getCause());
+            }
             catch (Exception e) {
-                m_logger.log(Logger.LOG_WARNING, "Invocation of '" + methodName + "' failed.", e);
+                m_logger.log(Logger.LOG_WARNING, "Could not invoke '" + methodName + "'.", e);
             }
         }
     }
