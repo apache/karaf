@@ -80,7 +80,7 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
         return new BlueprintActionPreparator();
     }
 
-    class BlueprintActionPreparator extends DefaultActionPreparator {
+    protected class BlueprintActionPreparator extends DefaultActionPreparator {
 
         @Override
         protected Object convert(Action action, CommandSession commandSession, Object o, Type type) throws Exception {

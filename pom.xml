@@ -105,6 +105,7 @@
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring.version>2.5.6.SEC01</spring.version>
         <sshd.version>0.4.0</sshd.version>
+        <xbean.version>3.7</xbean.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
@@ -282,7 +283,12 @@
                 <groupId>org.apache.felix.karaf.shell</groupId>
                 <artifactId>org.apache.felix.karaf.shell.dev</artifactId>
                 <version>${project.version}</version>
-            </dependency> 
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.wrapper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.felix.karaf.jaas</groupId>
                 <artifactId>org.apache.felix.karaf.jaas.boot</artifactId>
@@ -725,6 +731,11 @@
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
                 <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-finder-shaded</artifactId>
+                <version>${xbean.version}}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
