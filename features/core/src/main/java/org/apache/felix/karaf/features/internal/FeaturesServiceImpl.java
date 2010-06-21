@@ -616,7 +616,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         return installed.containsKey(f);
     }
 
-    protected Feature getFeature(String name, String version) throws Exception {
+    public Feature getFeature(String name) throws Exception {
+        return getFeature(name, FeatureImpl.DEFAULT_VERSION);
+    }
+
+    public Feature getFeature(String name, String version) throws Exception {
         if (version != null) {
             version = version.trim();
         }

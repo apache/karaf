@@ -39,27 +39,37 @@
         <command name="features/install">
             <action class="org.apache.felix.karaf.features.command.InstallFeatureCommand"/>
             <completers>
-                <ref component-id="installFeatureCompleter" />
+                <ref component-id="uninstalledFeatureCompleter" />
             </completers>
         </command>
         <command name="features/uninstall">
             <action class="org.apache.felix.karaf.features.command.UninstallFeatureCommand"/>
             <completers>
-                <ref component-id="uninstallFeatureCompleter" />
+                <ref component-id="installedFeatureCompleter" />
             </completers>
         </command>
         <command name="features/list">
             <action class="org.apache.felix.karaf.features.command.ListFeaturesCommand"/>
         </command>
+        <command name="features/info">
+            <action class="org.apache.felix.karaf.features.command.InfoFeatureCommand"/>
+            <completers>
+                <ref component-id="allFeatureCompleter" />
+            </completers>
+        </command>
     </command-bundle>
 
     <reference id="featuresService" interface="org.apache.felix.karaf.features.FeaturesService" />
 
-    <bean id="installFeatureCompleter" class="org.apache.felix.karaf.features.command.completers.AvailableFeatureCompleter">
+    <bean id="uninstalledFeatureCompleter" class="org.apache.felix.karaf.features.command.completers.AvailableFeatureCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
 
-    <bean id="uninstallFeatureCompleter" class="org.apache.felix.karaf.features.command.completers.InstalledFeatureCompleter">
+    <bean id="installedFeatureCompleter" class="org.apache.felix.karaf.features.command.completers.InstalledFeatureCompleter">
+        <property name="featuresService" ref="featuresService" />
+    </bean>
+
+    <bean id="allFeatureCompleter" class="org.apache.felix.karaf.features.command.completers.AllFeatureCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
 

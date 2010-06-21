@@ -19,13 +19,13 @@ package org.apache.felix.karaf.features.command.completers;
 import org.apache.felix.karaf.features.Feature;
 
 /**
- * {@link jline.Completor} for installed features.
+ * {@link jline.Completor} for available features.
  */
-public class InstalledFeatureCompleter extends FeatureCompleterSupport {
+public class AllFeatureCompleter extends FeatureCompleterSupport {
 
     @Override
     protected boolean acceptsFeature(Feature feature) {
-        return featuresService.isInstalled(feature);
+        return true;
     }
 
 }

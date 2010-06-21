@@ -16,40 +16,16 @@
  */
 package org.apache.felix.karaf.features.command.completers;
 
-import java.util.List;
-
-import org.apache.felix.karaf.shell.console.completer.StringsCompleter;
-import org.apache.felix.karaf.shell.console.Completer;
-import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Feature;
 
 /**
- * {@link jline.Completor} for available features.
- *
- * Displays a list of available features from installed repositories.
- *
+ * {@link jline.Completor} for features not installed yet.
  */
-public class AvailableFeatureCompleter implements Completer {
+public class AvailableFeatureCompleter extends FeatureCompleterSupport {
 
-    private FeaturesService featuresService;
-
-    public void setFeaturesService(FeaturesService featuresService) {
-        this.featuresService = featuresService;
+    @Override
+    protected boolean acceptsFeature(Feature feature) {
+        return !featuresService.isInstalled(feature);
     }
-
-    public int complete(final String buffer, final int cursor, final List candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        try {
-            for (Feature feature : featuresService.listFeatures()) {
-                if (!featuresService.isInstalled( feature )) {
-                    delegate.getStrings().add(feature.getName());
-                }
-            }
-        } catch (Exception e) {
-            // Ignore
-        }
-        return delegate.complete(buffer, cursor, candidates);
-    }
-
 
 }

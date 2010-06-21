@@ -58,4 +58,7 @@ public interface FeaturesService {
 
     boolean isInstalled(Feature f);
 
+    Feature getFeature(String name, String version) throws Exception;
+
+    Feature getFeature(String name) throws Exception;
 }
