@@ -735,7 +735,7 @@
             <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-finder-shaded</artifactId>
-                <version>${xbean.version}}</version>
+                <version>${xbean.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
