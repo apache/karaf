@@ -376,7 +376,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 cfg.update(props);
             }
         }
-        Set<Long> bundles = new HashSet<Long>();
+        Set<Long> bundles = new TreeSet<Long>();
         for (String bundleLocation : feature.getBundles()) {
             Bundle b = installBundleIfNeeded(state, bundleLocation);
             bundles.add(b.getBundleId());

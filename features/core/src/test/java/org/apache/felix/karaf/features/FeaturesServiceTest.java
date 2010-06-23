@@ -1052,7 +1052,7 @@ public class FeaturesServiceTest extends TestCase {
         repositoriesNode.put("item.0", uri.toString());
         expect(prefs.node("features")).andReturn(featuresNode);
         featuresNode.clear();
-        featuresNode.put("f1" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + FeatureImpl.DEFAULT_VERSION, "54321,12345");
+        featuresNode.put("f1" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + FeatureImpl.DEFAULT_VERSION, "12345,54321");
         prefs.putBoolean("bootFeaturesInstalled", false);
         prefs.flush();
 
