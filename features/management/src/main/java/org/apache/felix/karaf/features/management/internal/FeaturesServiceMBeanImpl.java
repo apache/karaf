@@ -22,10 +22,10 @@ import java.util.List;
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
+import javax.management.NotCompliantMBeanException;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
-import javax.management.StandardEmitterMBean;
 import javax.management.openmbean.TabularData;
 
 import org.apache.felix.karaf.features.Feature;
@@ -60,27 +60,31 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
 
     private FeaturesService featuresService;
 
-    public FeaturesServiceMBeanImpl() {
-        super(FeaturesServiceMBean.class, new NotificationBroadcasterSupport(
-            getBroadcastInfo()));
+    public FeaturesServiceMBeanImpl() throws NotCompliantMBeanException {
+        super(FeaturesServiceMBean.class, new NotificationBroadcasterSupport() {
+            @Override
+            public MBeanNotificationInfo[] getNotificationInfo() {
+                return getBroadcastInfo();
+            }
+        });
     }
 
-    @Override
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
         objectName = name;
         this.server = server;
         return name;
     }
 
-    @Override
     public void postRegister(Boolean registrationDone) {
         registration = bundleContext.registerService(FeaturesListener.class.getName(),
             getFeaturesListener(), new Hashtable());
     }
 
-    @Override
     public void preDeregister() throws Exception {
         registration.unregister();
+    }
+
+    public void postDeregister() {
     }
 
     /**
