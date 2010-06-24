@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.TabularData;
 
@@ -33,8 +34,8 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
 
     private AdminService adminService;
 
-    public AdminServiceMBeanImpl() {
-        super(AdminServiceMBean.class, false);
+    public AdminServiceMBeanImpl() throws NotCompliantMBeanException {
+        super(AdminServiceMBean.class);
     }
 
     public AdminService getAdminService() {
