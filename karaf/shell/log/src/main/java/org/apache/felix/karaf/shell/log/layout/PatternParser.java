@@ -18,7 +18,9 @@ package org.apache.felix.karaf.shell.log.layout;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.log4j.spi.LoggingEvent;
 import org.ops4j.pax.logging.spi.PaxLocationInfo;
@@ -344,12 +346,12 @@ public class PatternParser {
       pc = new BasicPatternConverter(formattingInfo, NDC_CONVERTER);
       //LogLog.debug("NDC converter.");
       currentLiteral.setLength(0);
-      break;
+      break;*/
     case 'X':
       String xOpt = extractOption();
       pc = new MDCPatternConverter(formattingInfo, xOpt);
       currentLiteral.setLength(0);
-      break;*/
+      break;
     default:
       //LogLog.error("Unexpected char [" +c+"] at position "+i+" in conversion patterrn.");
       pc = new LiteralPatternConverter(currentLiteral.toString());
@@ -522,6 +524,44 @@ public class PatternParser {
     String getFullyQualifiedName(PaxLoggingEvent event) {
       return event.getLoggerName();
     }
+  }
+
+  private class MDCPatternConverter extends PatternConverter {
+    String key;
+
+    MDCPatternConverter(FormattingInfo formattingInfo, String key) {
+      super(formattingInfo);
+      this.key = key;
+    }
+
+    public
+    String convert(PaxLoggingEvent event) {
+        if (key == null) {
+            StringBuffer buf = new StringBuffer("{");
+            Map properties = event.getProperties();
+            if (properties.size() > 0) {
+              Object[] keys = properties.keySet().toArray();
+              Arrays.sort(keys);
+              for (int i = 0; i < keys.length; i++) {
+                  buf.append('{');
+                  buf.append(keys[i]);
+                  buf.append(',');
+                  buf.append(properties.get(keys[i]));
+                  buf.append('}');
+              }
+            }
+            buf.append('}');
+            return buf.toString();
+        } else {
+          Object val = event.getProperties().get(key);
+          if(val == null) {
+              return null;
+          } else {
+              return val.toString();
+          }
+        }
+    }
+
   }
 }
 

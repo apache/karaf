@@ -38,6 +38,7 @@ public class VmLogAppender implements PaxAppender {
 
     public void doAppend(PaxLoggingEvent event) {
         if (events != null) {
+            event.getProperties(); // ensure MDC properties are copied
             events.add(event);
         }
     }
