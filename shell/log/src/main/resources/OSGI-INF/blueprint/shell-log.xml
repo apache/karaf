@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0">
+
+    <!-- TODO: use dynamic CM config -->
+
+    <cm:property-placeholder persistent-id="org.apache.felix.karaf.log">
+        <cm:default-properties>
+            <cm:property name="size" value="500"/>
+            <cm:property name="pattern" value="%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
+        <command name="log/display">
+            <action class="org.apache.felix.karaf.shell.log.DisplayLog">
+                <property name="events" ref="events"/>
+                <property name="pattern" value="${pattern}"/>
+            </action>
+        </command>
+        <link name="log/d" target="log/display"/>
+        <command name="log/display-exception">
+            <action class="org.apache.felix.karaf.shell.log.DisplayException">
+                <property name="events" ref="events"/>
+            </action>
+        </command>
+        <link name="log/de" target="log/display-exception"/>
+        <command name="log/get">
+            <action class="org.apache.felix.karaf.shell.log.GetLogLevel" />
+        </command>
+        <command name="log/set">
+            <action class="org.apache.felix.karaf.shell.log.SetLogLevel" />
+            <completers>
+            	<ref component-id="logLevelCompleter"/>
+            	<null/>
+            </completers>
+        </command>
+
+        <alias name="ld" alias="log/d"/>
+        <alias name="lde" alias="log/de"/>
+    </command-bundle>
+
+    <bean id="vmLogAppender" class="org.apache.felix.karaf.shell.log.VmLogAppender">
+        <property name="events" ref="events"/>
+    </bean>
+
+    <bean id="events" class="org.apache.felix.karaf.shell.log.LruList">
+        <argument value="${size}"/>
+    </bean>
+    
+    <bean id="logLevelCompleter" class="org.apache.felix.karaf.shell.log.completers.LogLevelCompleter"/>
+
+    <service ref="vmLogAppender" interface="org.ops4j.pax.logging.spi.PaxAppender">
+        <service-properties>
+            <entry key="org.ops4j.pax.logging.appender.name" value="VmLogAppender"/>
+        </service-properties>
+    </service>
+
+</blueprint>
