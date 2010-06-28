@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<iPOJO xmlns:dummy="org.apache.felix.ipojo.test.dummy.handler.dummyhandler">
-  <component className="org.apache.felix.ipojo.tests.core.component.DummyImpl" name="dummy.test">
-    <callback transition="validate" method="start" />
-    <callback transition="invalidate" method="stop" />
-
-    <dummy:dummy/>
-  </component>
-</iPOJO>

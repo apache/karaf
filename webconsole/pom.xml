@@ -1,290 +1,43 @@
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-    
-    http://www.apache.org/licenses/LICENSE-2.0
-    
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>felix-parent</artifactId>
-        <version>1.2.0</version>
-        <relativePath>../pom/pom.xml</relativePath>
-    </parent>
+    <!--
 
-    <artifactId>org.apache.felix.webconsole</artifactId>
-    <packaging>bundle</packaging>
-    <version>3.1.1-SNAPSHOT</version>
+        Licensed to the Apache Software Foundation (ASF) under one or more
+        contributor license agreements.  See the NOTICE file distributed with
+        this work for additional information regarding copyright ownership.
+        The ASF licenses this file to You under the Apache License, Version 2.0
+        (the "License"); you may not use this file except in compliance with
+        the License.  You may obtain a copy of the License at
 
-    <name>Apache Felix Web Management Console</name>
-    <description>
-        Web Based Management Console for OSGi Frameworks. See
-        http://felix.apache.org/site/apache-felix-web-console.html for more
-        information on this bundle.
-    </description>
+           http://www.apache.org/licenses/LICENSE-2.0
 
-    <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/webconsole</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/webconsole</developerConnection>
-        <url>http://svn.apache.org/viewvc/felix/trunk/webconsole</url>
-    </scm>
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    -->
 
-    <build>
-        <resources>
-            <!-- default resources (may be removed when compat is removed) -->
-            <resource>
-                <directory>${basedir}/src/main/resources</directory>
-            </resource>
-            <resource>
-                <targetPath>META-INF</targetPath>
-                <directory>${basedir}</directory>
-                <includes>
-                    <include>LICENSE*</include>
-                    <include>NOTICE*</include>
-                </includes>
-            </resource>
-            <!-- CSS and images for backwards compatibility -->
-            <resource>
-                <directory>${basedir}/src/main/compat</directory>
-            </resource>
-        </resources>
-        <plugins>
-            <!-- translate UTF-8 encoded properties files to ISO-8859-1 -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>native2ascii-maven-plugin</artifactId>
-                <version>1.0-alpha-1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>native2ascii</goal>
-                        </goals>
-                        <configuration>
-                            <encoding>UTF-8</encoding>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.3</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>
-                            ${artifactId}
-                        </Bundle-SymbolicName>
-                        <Bundle-Vendor>
-                            The Apache Software Foundation
-                        </Bundle-Vendor>
-                        <Bundle-DocURL>
-                            http://felix.apache.org/site/apache-felix-web-console.html
-                        </Bundle-DocURL>
-                        <Bundle-Activator>
-                            org.apache.felix.webconsole.internal.OsgiManagerActivator
-                        </Bundle-Activator>
-                        <Export-Package>
-                            org.apache.felix.webconsole;version=${project.version}
-                        </Export-Package>
-                        <Private-Package>
-                            !org.apache.felix.webconsole,
-                            org.apache.felix.webconsole.*,
-                        </Private-Package>
-                        <Import-Package>
-                            org.osgi.service.http,
-                            org.apache.felix.scr;
-                            org.apache.felix.shell;
-                            org.osgi.service.*;resolution:=optional,
-                            javax.portlet;resolution:=optional,
-                            javax.servlet.*;version=2.4,
-                            *
-                        </Import-Package>
-                        <DynamicImport-Package>
-                            org.apache.felix.bundlerepository,
-                            org.osgi.service.obr
-                        </DynamicImport-Package>
-                        <Embed-Dependency>
-                            <!-- Import/Export-Package parsing -->
-                            org.apache.felix.utils;inline=org/apache/felix/utils/manifest/**,
-                            org.apache.felix.framework;inline=org/apache/felix/framework/util/VersionRange**,
-                            
-                            <!-- ServiceTracker -->
-                            org.osgi.compendium;
-                                inline=org/osgi/util/tracker/*,
-                                
-                            <!-- Required for JSON data transfer -->
-                            json,
-                            
-                            <!-- File Upload functionality -->
-                            commons-fileupload,
-    
-                            <!-- Required by FileUpload and Util -->
-                            commons-io
-                        </Embed-Dependency>
-                        
-                        <_donotcopy>NOTICE.bare</_donotcopy>
-                        <_removeheaders>
-                            Embed-Dependency,Private-Package,Include-Resource
-                        </_removeheaders>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>org.apache.felix.karaf</groupId>
+    <artifactId>karaf</artifactId>
+    <version>1.7.0-SNAPSHOT</version>
+  </parent>
 
-    <profiles>
-        <!--
-            The "bare-bundle" profile builds a bundle not including certain
-            3rd party libraries and classes, namely: Commons IO, Commons
-            FileUpload, JSON, and the OSGi ServiceTracker. These are imported
-            by this bundle. The classes from the bundlerepository bundle are
-            still included because they are not exported from the
-            bundlerepository bundle and thus cannot be imported.
-            The "bare-bundle" can be used if the non-embedded libraries are
-            provided by the framework in which the web console is installed.
-        -->
-        <profile>
-            <id>bare-bundle</id>
-            <activation><activeByDefault>true</activeByDefault></activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.felix</groupId>
-                        <artifactId>maven-bundle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>bare-bundle</id>
-                                <goals>
-                                    <goal>bundle</goal>
-                                </goals>
-                                <configuration>
-                                    <classifier>bare</classifier>
-                                    <instructions>
-                                        <Bundle-SymbolicName>
-                                            ${artifactId}.bare
-                                        </Bundle-SymbolicName>
-                                        <Include-Resource>
-                                            {maven-resources},META-INF/NOTICE=src/main/bare-resources/NOTICE
-                                        </Include-Resource>
-                                        <_donotcopy>LICENSE.json</_donotcopy>
-                                        <!-- <_donotcopy>(LICENSE.json|NOTICE.bare)</_donotcopy> -->
-                                        <Embed-Dependency>
-                                            org.apache.felix.utils;inline=org/apache/felix/utils/manifest/**,
-                                            org.apache.felix.framework;inline=org/apache/felix/framework/util/VersionRange**
-                                        </Embed-Dependency>
-                                    </instructions>
-                                </configuration>
-                            </execution>
-                        </executions>
-                </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-    
-    <dependencies>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.4</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>1.1.1</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>1.4</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>4.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <version>4.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20070829</version>
-            <scope>compile</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!--
-           Required for a simple VersionRange class, the class from
-           the utils bundle is overkill and requires JDK 1.4 or better
-        -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
-            <version>2.0.2</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <!--  Parsing Import/Export-Package headers -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.utils</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        
-        <!-- OSGi and Apache Felix OBR API -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.service.obr</artifactId>
-            <version>1.0.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
-            <version>1.6.0</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        
-    </dependencies>
+  <groupId>org.apache.felix.karaf.webconsole</groupId>
+  <artifactId>webconsole</artifactId>
+  <packaging>pom</packaging>
+  <version>1.7.0-SNAPSHOT</version>
+  <name>Apache Felix Karaf :: Web Console</name>
+  
+  <modules>
+    <module>features</module>
+    <module>gogo</module>
+    <module>branding</module>
+    <module>admin</module>
+  </modules>
+  
 </project>

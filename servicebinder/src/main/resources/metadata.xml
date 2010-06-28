@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--<!DOCTYPE bundle SYSTEM "metadata.dtd">-->
-<bundle>
-  <component class="org.apache.felix.servicebinder.impl.ArchitectureServiceImpl">
-    <provides service="org.apache.felix.servicebinder.architecture.ArchitectureService"/>
-  </component>
-</bundle>

@@ -1,8 +1,0 @@
-Version 1.0.1
--------------
-    * [FELIX-1236] Jetty HTTP service is exporting incorrect version of the
-      service package.
-
-Version 1.0.0
--------------
-    * Initial release 

@@ -1,9 +1,0 @@
-<repository lastmodified="20061215121044.644" name="referral1_repository">
-    <referral depth="1" url="referred.xml" />
-
-    <resource id="6" presentationname="0_telnetd"
-        symbolicname="com.softsell.open.osgi.telnetd"
-        uri="http://oscar-osgi.sf.net/obr2/telnetd/telnetd.jar"
-        version="1.0.0" />
-        
-</repository>

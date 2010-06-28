@@ -1,9 +1,0 @@
-<archetype>
-	<id>org.apache.felix.ipojo.plugin</id>
-	<sources>
-		<source>src/main/java/source.txt</source>
-	</sources>
-	<resources>
-		<resource>src/main/resources/metadata.xml</resource>
-	</resources>
-</archetype>

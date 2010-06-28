@@ -1,2 +1,0 @@
-Main-Class: org.apache.felix.tool.mangen.MangenMain
-Class-Path: bcel.jar asm.jar felix.main.jar felix.framework.jar org.osgi.core.jar

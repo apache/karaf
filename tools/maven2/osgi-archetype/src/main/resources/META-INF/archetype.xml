@@ -1,6 +1,0 @@
-<archetype>
-  <id>osgi-archetype</id>
-  <sources>
-    <source>src/main/java/Activator.java</source>
-  </sources>
-</archetype>

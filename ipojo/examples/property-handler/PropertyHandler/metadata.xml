@@ -1,9 +1,0 @@
-<ipojo xmlns:props="example.handler.properties">
-
-	<!-- Declare the handler -->
-	<handler name="properties" namespace="example.handler.properties"
-		classname="org.apache.felix.ipojo.handler.properties.PropertiesHandler">
-		<!--  the properties handler does not use any other handler -->
-	</handler>
-
-</ipojo>

@@ -1,9 +1,0 @@
-Changes from 1.0.0 to 1.2.0
----------------------------
-** Task
-    * [FELIX-2294] - Patch Framework Security for compatibility
-
-1.0.0
------
-
-** Initial Release

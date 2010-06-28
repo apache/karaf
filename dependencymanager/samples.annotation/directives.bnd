@@ -1,5 +1,0 @@
-Bundle-Name: Apache Felix Dependency Manager Annotation Sample
-Bundle-SymbolicName: org.apache.felix.dependencymanager.samples.annotation
-Import-Package: *
-Private-Package: org.apache.felix.dm.samples.annotation
--plugin org.apache.felix.dm.annotation.plugin.bnd.AnnotationPlugin

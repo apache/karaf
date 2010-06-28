@@ -1,0 +1,170 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * The webconsole.css is the main CSS which sets up the following parts
+ *
+ *   div main -> outermost div just inside body
+ *   div lead -> the page lead with title and logo
+ *   div technav -> the top navigation
+ *   div content -> the div surrounding the content being rendered by
+ *      the plugin in the renderContent (or service) method
+ *
+ * See also http://felix.apache.org/site/branding-the-web-console.html
+ */
+#main {
+	width: 90% !important;
+	margin-left: 5%;
+}
+#main img { border: none }
+
+
+/* LOGO & BRANDING */
+#lead {
+	padding-top: 10px;
+	margin: 0;
+	height: 73px; /* must be the same as logo (#lead p) height */
+}
+#lead h1 { /* This contains the page title */
+	font-size: 26px;
+	font-weight: bold;
+	float: left;
+}
+#lead p { /* This contains the logo */
+	float: right;
+	height: 73px; /* must be the same as #lead height */
+}
+
+
+/* TOP NAVIGATION */
+#technav {
+	font-size: 10px;
+	line-height: 21px;
+	padding: 0;
+	margin: 0;
+}
+#technav div {
+	display: inline;
+	padding: .2em 1em;
+	white-space: nowrap;
+}
+
+/* CENTRAL CONTENT AREA STYLING */
+#content {
+	font-size: 8pt;
+}
+
+/* used in some plugins - showing ID (long) element in tables */
+.col_Id {
+	width: 5em;
+}
+
+/* styling button groups like in the bundles & log plugins */
+.buttonGroup {
+	text-align: right;
+	padding: .5em 1em .5em 0;
+	vertical-align: middle;
+}
+.buttonGroup select {
+	display: inline;
+	float: none;
+	margin: 0;
+}
+
+/* The following styles are not complete. They usually apply only padding,
+ * margin... mostly *WHERE* the elements are visualised. Visual styling like
+ * colors and fonts are applied automatically by a JavaScript that borrows
+ * the visual element styles from the JQuery UI theme
+ */
+
+/* input box, checkbox & buttons styling */
+.inputText, input.text, input.password, input.file, textarea, select {
+	color: #184054;
+	background-color: #f0f0f0;
+}
+.inputText, input.text, input.password, textarea {
+	border: 1px solid #999999;
+	border-bottom: 1px solid #cccccc;
+	border-right: 1px solid #cccccc;
+}
+
+/* tables styling - must be in synch with tablesorter CSS */
+td, th { vertical-align: top }
+table.nicetable {
+	width: 100%;
+	text-align: left;
+}
+table.nicetable th, table.nicetable td {
+	border-bottom: 1px solid #cccccc;
+	text-align: left;
+	padding: .2em;
+	padding-left: .8em;
+}
+
+/* tablesorter styling */
+tr .header {
+	background-image: url(../lib/bg.gif);
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+tr .headerSortUp {
+	background-image: url(../lib/asc.gif);
+}
+tr .headerSortDown {
+	background-image: url(../lib/desc.gif);
+}
+
+/* status line */
+.statline {
+	margin-top: .5em !important;
+	margin-bottom: .5em !important;
+	padding: .2em;
+}
+
+/* zebra tables */
+.even {
+	/* default background unmodified from JQuery UI Theme */
+}
+
+.odd {
+	/* overwrite background from JQuery UI Theme */
+	background: none !important;
+}
+
+/*
+ * Common UI style to define button icons like in bundles plugin. The HTML markup is:
+ * <ul class="icons ui-widget">
+ *   <li class="dynhover" title="tooltip comes here"><span class="ui-icon ui-icon-refresh">&nbsp;</span></li>
+ * </ul>
+ */
+ul.icons {
+	margin: 0;
+	padding: 0
+}
+ul.icons span.ui-icon {
+	float: left;
+	margin: 0 1px
+}
+ul.icons li {
+	margin: 1px;
+	position: relative;
+	padding: 1px 0;
+	cursor: pointer;
+	float: left;
+	list-style: none
+}
