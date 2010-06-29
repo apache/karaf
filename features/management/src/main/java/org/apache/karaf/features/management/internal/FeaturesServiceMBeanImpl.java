@@ -61,12 +61,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
     private FeaturesService featuresService;
 
     public FeaturesServiceMBeanImpl() throws NotCompliantMBeanException {
-        super(FeaturesServiceMBean.class, new NotificationBroadcasterSupport() {
-            @Override
-            public MBeanNotificationInfo[] getNotificationInfo() {
-                return getBroadcastInfo();
-            }
-        });
+        super(FeaturesServiceMBean.class);
     }
 
     public ObjectName preRegister(MBeanServer server, ObjectName name) throws Exception {
@@ -175,6 +170,9 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         };
     }
 
+    public MBeanNotificationInfo[] getNotificationInfo() {
+        return getBroadcastInfo();
+    }
 
     private static MBeanNotificationInfo[] getBroadcastInfo() {
         String type = Notification.class.getCanonicalName();
