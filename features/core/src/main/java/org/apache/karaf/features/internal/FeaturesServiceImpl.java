@@ -82,6 +82,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     private String boot;
     private boolean bootFeaturesInstalled;
     private List<FeaturesListener> listeners = new CopyOnWriteArrayList<FeaturesListener>();
+    private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
 
     public BundleContext getBundleContext() {
         return bundleContext;
@@ -176,7 +177,14 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void internalRemoveRepository(URI uri) {
         Repository repo = repositories.remove(uri);
+        this.repo.set(repo);
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryRemoved, false));
+        features = null;
+    }
+    
+    public void restoreRepository(URI uri) throws Exception {
+    	repositories.put(uri, (RepositoryImpl)repo.get());
+    	callListeners(new RepositoryEvent(repo.get(), RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
     }
 

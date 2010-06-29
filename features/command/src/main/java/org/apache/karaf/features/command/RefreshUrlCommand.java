@@ -45,6 +45,8 @@ public class RefreshUrlCommand extends FeaturesCommandSupport {
                 admin.addRepository(uri);
             } catch (Exception e) {
                 System.out.println("Could not refresh Feature Repository:\n" + e.getMessage() );
+                //get chance to restore previous, fix for KARAF-4
+                admin.restoreRepository(new URI(strUri));
             }
         }
     }

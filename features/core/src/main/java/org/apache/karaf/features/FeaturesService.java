@@ -35,6 +35,8 @@ public interface FeaturesService {
     void addRepository(URI url) throws Exception;
 
     void removeRepository(URI url);
+    
+    void restoreRepository(URI url) throws Exception;
 
     Repository[] listRepositories();
 
