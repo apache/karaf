@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.karaf.main;
+package org.apache.karaf.main;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -37,7 +37,6 @@ import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.felix.karaf.main.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -340,7 +339,7 @@ public class Main {
     }
 
     private static void processSecurityProperties(Properties m_configProps) {
-        String prop = m_configProps.getProperty("org.apache.felix.karaf.security.providers");
+        String prop = m_configProps.getProperty("org.apache.karaf.security.providers");
         if (prop != null) {
             String[] providers = prop.split(",");
             for (String provider : providers) {
@@ -1048,7 +1047,7 @@ public class Main {
     }
 
     /* (non-Javadoc)
-      * @see org.apache.felix.karaf.main.MainService#getArgs()
+      * @see org.apache.karaf.main.MainService#getArgs()
       */
     public String[] getArgs() {
         return args;
