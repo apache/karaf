@@ -17,11 +17,16 @@ import javax.management.*;
 
 public class StandardEmitterMBean extends StandardMBean implements NotificationEmitter {
 
-    private NotificationBroadcasterSupport emitter;
+    private final NotificationBroadcasterSupport emitter;
 
-    public StandardEmitterMBean(Class mbeanInterface, NotificationBroadcasterSupport emitter) throws NotCompliantMBeanException {
+    public StandardEmitterMBean(Class mbeanInterface) throws NotCompliantMBeanException {
         super(mbeanInterface);
-        this.emitter = emitter;
+        this.emitter = new NotificationBroadcasterSupport() {
+            @Override
+            public MBeanNotificationInfo[] getNotificationInfo() {
+                return StandardEmitterMBean.this.getNotificationInfo();
+            }
+        };
     }
 
     public void sendNotification(Notification notification) {
@@ -42,7 +47,7 @@ public class StandardEmitterMBean extends StandardMBean implements NotificationE
     }
 
     public MBeanNotificationInfo[] getNotificationInfo() {
-        return emitter.getNotificationInfo();
+        return new MBeanNotificationInfo[0];
     }
 
     @Override
