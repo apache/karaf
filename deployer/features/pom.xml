@@ -21,16 +21,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf.deployer</groupId>
+        <groupId>org.apache.karaf.deployer</groupId>
         <artifactId>deployer</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf.deployer</groupId>
-    <artifactId>org.apache.felix.karaf.deployer.features</artifactId>
+    <groupId>org.apache.karaf.deployer</groupId>
+    <artifactId>org.apache.karaf.deployer.features</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Features Deployer</name>
+    <name>Apache Karaf :: Features Deployer</name>
 
     <description>This deployer can deploy features descriptor on the fly</description>
 
@@ -49,8 +49,8 @@
             <artifactId>spring-osgi-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix.karaf.features</groupId>
-            <artifactId>org.apache.felix.karaf.features.core</artifactId>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -78,7 +78,7 @@
                         <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=false</Bundle-SymbolicName>
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>!${project.artifactId}*,*</Import-Package>
-                        <Private-Package>org.apache.felix.karaf.deployer.features</Private-Package>
+                        <Private-Package>org.apache.karaf.deployer.features</Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

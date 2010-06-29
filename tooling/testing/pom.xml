@@ -19,16 +19,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>org.apache.felix.karaf.tooling</groupId>
+      <groupId>org.apache.karaf.tooling</groupId>
       <artifactId>tooling</artifactId>
       <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf.tooling</groupId>
-    <artifactId>org.apache.felix.karaf.tooling.testing</artifactId>
+    <groupId>org.apache.karaf.tooling</groupId>
+    <artifactId>org.apache.karaf.tooling.testing</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Testing environment</name>
+    <name>Apache Karaf :: Testing environment</name>
 
     <description>
       A bundle to help using Pax-Exam and Karaf.
@@ -41,8 +41,8 @@
     <dependencies>
         <!-- The assembly and all the dependencies -->
         <dependency>
-            <groupId>org.apache.felix.karaf</groupId>
-            <artifactId>apache-felix-karaf</artifactId>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>apache-karaf</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -126,15 +126,15 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.felix.karaf.testing;version=${project.version}</Export-Package>
+                        <Export-Package>org.apache.karaf.testing;version=${project.version}</Export-Package>
                         <Import-Package>
-                            !org.apache.felix.karaf.testing*,
+                            !org.apache.karaf.testing*,
                             *
                         </Import-Package>
                         <Include-Resource>
                             {maven-resources},
-                            org/apache/felix/karaf/testing/config.properties=target/classes/config.properties,
-                            org/apache/felix/karaf/testing/startup.properties=target/classes/startup.properties
+                            org/apache/karaf/testing/config.properties=target/classes/config.properties,
+                            org/apache/karaf/testing/startup.properties=target/classes/startup.properties
                         </Include-Resource>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

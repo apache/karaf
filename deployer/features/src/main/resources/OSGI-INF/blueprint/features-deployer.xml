@@ -24,14 +24,14 @@
     	<service-properties>
             <entry key="url.handler.protocol" value="feature"/>
         </service-properties>
-        <bean class="org.apache.felix.karaf.deployer.features.FeatureURLHandler"/>
+        <bean class="org.apache.karaf.deployer.features.FeatureURLHandler"/>
     </service>
 
-    <bean id="featureDeploymentListener" class="org.apache.felix.karaf.deployer.features.FeatureDeploymentListener"
+    <bean id="featureDeploymentListener" class="org.apache.karaf.deployer.features.FeatureDeploymentListener"
           init-method="init" destroy-method="destroy" activation="lazy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService">
-            <reference interface="org.apache.felix.karaf.features.FeaturesService"/>
+            <reference interface="org.apache.karaf.features.FeaturesService"/>
         </property>
     </bean>
 

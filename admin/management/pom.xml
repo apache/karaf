@@ -21,16 +21,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf.admin</groupId>
+        <groupId>org.apache.karaf.admin</groupId>
         <artifactId>admin</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf.admin</groupId>
-    <artifactId>org.apache.felix.karaf.admin.management</artifactId>
+    <groupId>org.apache.karaf.admin</groupId>
+    <artifactId>org.apache.karaf.admin.management</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Admin Management</name>
+    <name>Apache Karaf :: Admin Management</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -50,13 +50,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix.karaf.admin</groupId>
-            <artifactId>org.apache.felix.karaf.admin.core</artifactId>
+            <groupId>org.apache.karaf.admin</groupId>
+            <artifactId>org.apache.karaf.admin.core</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix.karaf</groupId>
-            <artifactId>org.apache.felix.karaf.management</artifactId>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.management</artifactId>
         </dependency>
 
         <dependency>
@@ -85,10 +85,10 @@
                             javax.management.loading,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
-                            org.apache.felix.karaf.shell.console,
+                            org.apache.karaf.shell.console,
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.felix.karaf.admin.management.internal</Private-Package>
+                        <Private-Package>org.apache.karaf.admin.management.internal</Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

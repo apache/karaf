@@ -19,20 +19,20 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <reference id="adminService" interface="org.apache.felix.karaf.admin.AdminService" />
+    <reference id="adminService" interface="org.apache.karaf.admin.AdminService" />
 
     <reference id="mbeanServer" interface="javax.management.MBeanServer">
         <reference-listener ref="mbeanRegister" bind-method="registerMBeanServer" unbind-method="unregisterMBeanServer" />
     </reference>
 
-    <bean id="mbeanImpl" class="org.apache.felix.karaf.admin.management.internal.AdminServiceMBeanImpl">
+    <bean id="mbeanImpl" class="org.apache.karaf.admin.management.internal.AdminServiceMBeanImpl">
         <property name="adminService" ref="adminService" />
     </bean>
 
-    <bean id="mbeanRegister" class="org.apache.felix.karaf.management.MBeanRegistrer">
+    <bean id="mbeanRegister" class="org.apache.karaf.management.MBeanRegistrer">
         <property name="mbeans">
             <map>
-                <entry value="org.apache.felix.karaf:type=admin,name=${karaf.name}"
+                <entry value="org.apache.karaf:type=admin,name=${karaf.name}"
                     key-ref="mbeanImpl" />
             </map>
         </property>

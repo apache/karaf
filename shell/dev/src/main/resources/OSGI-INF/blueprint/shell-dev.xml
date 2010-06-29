@@ -21,16 +21,16 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="dev/show-tree">
-            <action class="org.apache.felix.karaf.shell.dev.ShowBundleTree"/>
+            <action class="org.apache.karaf.shell.dev.ShowBundleTree"/>
         </command>
         <command name="dev/framework">
-            <action class="org.apache.felix.karaf.shell.dev.FrameworkDebug" />
+            <action class="org.apache.karaf.shell.dev.FrameworkDebug" />
         </command>
         <command name="dev/dynamic-import">
-            <action class="org.apache.felix.karaf.shell.dev.DynamicImport" />
+            <action class="org.apache.karaf.shell.dev.DynamicImport" />
         </command>
         <command name="dev/print-stack-traces">
-            <action class="org.apache.felix.karaf.shell.dev.PrintStackTraces" />
+            <action class="org.apache.karaf.shell.dev.PrintStackTraces" />
         </command>
     </command-bundle>
 

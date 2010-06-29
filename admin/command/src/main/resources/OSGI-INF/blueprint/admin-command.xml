@@ -23,12 +23,12 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="admin/create">
-            <action class="org.apache.felix.karaf.admin.command.CreateCommand">
+            <action class="org.apache.karaf.admin.command.CreateCommand">
                 <property name="adminService" ref="adminService" />
             </action>
         </command>
         <command name="admin/connect">
-            <action class="org.apache.felix.karaf.admin.command.ConnectCommand">
+            <action class="org.apache.karaf.admin.command.ConnectCommand">
                 <property name="adminService" ref="adminService" />
             </action>
             <completers>
@@ -37,12 +37,12 @@
             </completers>
         </command>
         <command name="admin/list">
-            <action class="org.apache.felix.karaf.admin.command.ListCommand">
+            <action class="org.apache.karaf.admin.command.ListCommand">
                 <property name="adminService" ref="adminService" />
             </action>
         </command>
         <command name="admin/start">
-            <action class="org.apache.felix.karaf.admin.command.StartCommand">
+            <action class="org.apache.karaf.admin.command.StartCommand">
                 <property name="adminService" ref="adminService" />
             </action>
             <completers>
@@ -51,7 +51,7 @@
             </completers>
         </command>
         <command name="admin/stop">
-            <action class="org.apache.felix.karaf.admin.command.StopCommand">
+            <action class="org.apache.karaf.admin.command.StopCommand">
                 <property name="adminService" ref="adminService" />
             </action>
             <completers>
@@ -60,7 +60,7 @@
             </completers>
         </command>
         <command name="admin/destroy">
-            <action class="org.apache.felix.karaf.admin.command.DestroyCommand">
+            <action class="org.apache.karaf.admin.command.DestroyCommand">
                 <property name="adminService" ref="adminService" />
             </action>
             <completers>
@@ -69,7 +69,7 @@
             </completers>
         </command>
         <command name="admin/change-port">
-            <action class="org.apache.felix.karaf.admin.command.ChangePortCommand">
+            <action class="org.apache.karaf.admin.command.ChangePortCommand">
                 <property name="adminService" ref="adminService" />
             </action>
             <completers>
@@ -79,9 +79,9 @@
         </command>
     </command-bundle>
 
-    <reference id="adminService" interface="org.apache.felix.karaf.admin.AdminService" />
+    <reference id="adminService" interface="org.apache.karaf.admin.AdminService" />
 
-    <bean id="instanceCompleter" class="org.apache.felix.karaf.admin.command.completers.InstanceCompleter">
+    <bean id="instanceCompleter" class="org.apache.karaf.admin.command.completers.InstanceCompleter">
         <property name="adminService" ref="adminService" />
     </bean>
     

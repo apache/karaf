@@ -21,16 +21,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf.jaas</groupId>
+        <groupId>org.apache.karaf.jaas</groupId>
         <artifactId>jaas</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf.jaas</groupId>
-    <artifactId>org.apache.felix.karaf.jaas.modules</artifactId>
+    <groupId>org.apache.karaf.jaas</groupId>
+    <artifactId>org.apache.karaf.jaas.modules</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: JAAS Modules</name>
+    <name>Apache Karaf :: JAAS Modules</name>
 
     <description>
         Provides the JAAS Config
@@ -42,8 +42,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.felix.karaf.jaas</groupId>
-            <artifactId>org.apache.felix.karaf.jaas.config</artifactId>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.config</artifactId>
         </dependency>
 
         <dependency>
@@ -85,7 +85,7 @@
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
                             !${project.artifactId}*,
-                            org.apache.felix.karaf.jaas.config,
+                            org.apache.karaf.jaas.config,
                             org.apache.aries.blueprint.ext,
                             *
                         </Import-Package>

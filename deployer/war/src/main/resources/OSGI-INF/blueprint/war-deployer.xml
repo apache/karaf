@@ -19,7 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="warDeploymentListener" class="org.apache.felix.karaf.deployer.war.WarDeploymentListener"/>
+    <bean id="warDeploymentListener" class="org.apache.karaf.deployer.war.WarDeploymentListener"/>
 
     <reference id="warUrlHandlerRef" interface="org.osgi.service.url.URLStreamHandlerService" filter="url.handler.protocol=war" />
 

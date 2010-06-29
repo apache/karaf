@@ -27,10 +27,10 @@
             <ext:property name="featuresRepositories" value=""/>
             <ext:property name="featuresBoot" value=""/>
         </ext:default-properties>
-        <ext:location>file:$(karaf.base)/etc/org.apache.felix.karaf.features.cfg</ext:location>
+        <ext:location>file:$(karaf.base)/etc/org.apache.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
 
-    <bean id="featuresService" class="org.apache.felix.karaf.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
+    <bean id="featuresService" class="org.apache.karaf.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
         <property name="urls" value="$[featuresRepositories]" />
         <property name="boot" value="$[featuresBoot]" />
         <property name="configAdmin" ref="configAdmin" />
@@ -40,7 +40,7 @@
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 
-    <reference-list id="featuresListeners" interface="org.apache.felix.karaf.features.FeaturesListener" availability="optional">
+    <reference-list id="featuresListeners" interface="org.apache.karaf.features.FeaturesListener" availability="optional">
         <reference-listener ref="featuresService"
                             bind-method="registerListener"
                             unbind-method="unregisterListener" />
@@ -54,6 +54,6 @@
 
     <reference id="startLevel" interface="org.osgi.service.startlevel.StartLevel" />
     
-    <service ref="featuresService" interface="org.apache.felix.karaf.features.FeaturesService" />
+    <service ref="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
 </blueprint>

@@ -21,11 +21,11 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
-    <bean id="adminService" class="org.apache.felix.karaf.admin.internal.AdminServiceImpl" init-method="init">
+    <bean id="adminService" class="org.apache.karaf.admin.internal.AdminServiceImpl" init-method="init">
         <property name="storageLocation" value="${karaf.home}/instances" />
     </bean>
 
-    <service ref="adminService" interface="org.apache.felix.karaf.admin.AdminService" />
+    <service ref="adminService" interface="org.apache.karaf.admin.AdminService" />
 
     <!-- Allow the use of system properties -->
     <ext:property-placeholder />

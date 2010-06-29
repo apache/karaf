@@ -20,26 +20,26 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <bean id="config"
-          class="org.apache.felix.karaf.jaas.config.impl.OsgiConfiguration"
+          class="org.apache.karaf.jaas.config.impl.OsgiConfiguration"
           init-method="init"
           destroy-method="close"/>
 
     <reference-list id="realms"
-                    interface="org.apache.felix.karaf.jaas.config.JaasRealm"
+                    interface="org.apache.karaf.jaas.config.JaasRealm"
                     availability="optional">
         <reference-listener ref="config" bind-method="register" unbind-method="unregister" />
     </reference-list>
 
-    <bean id="proxyLoginModuleInitializer" class="org.apache.felix.karaf.jaas.config.impl.ProxyLoginModuleInitializer" init-method="init">
+    <bean id="proxyLoginModuleInitializer" class="org.apache.karaf.jaas.config.impl.ProxyLoginModuleInitializer" init-method="init">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
 
     <!-- Register the Straight-Through flow -->
-    <bean id="keystoreManager" class="org.apache.felix.karaf.jaas.config.impl.OsgiKeystoreManager" />
-    <service ref="keystoreManager" interface="org.apache.felix.karaf.jaas.config.KeystoreManager" />
+    <bean id="keystoreManager" class="org.apache.karaf.jaas.config.impl.OsgiKeystoreManager" />
+    <service ref="keystoreManager" interface="org.apache.karaf.jaas.config.KeystoreManager" />
 
     <reference-list id="keystores"
-                    interface="org.apache.felix.karaf.jaas.config.KeystoreInstance"
+                    interface="org.apache.karaf.jaas.config.KeystoreInstance"
                     availability="optional">
         <reference-listener ref="keystoreManager" bind-method="register" unbind-method="unregister" />
     </reference-list>
@@ -48,7 +48,7 @@
         <service-properties>
             <entry key="osgi.service.blueprint.namespace" value="http://felix.apache.org/karaf/xmlns/jaas/v1.0.0"/>
         </service-properties>
-        <bean class="org.apache.felix.karaf.jaas.config.impl.NamespaceHandler"/>
+        <bean class="org.apache.karaf.jaas.config.impl.NamespaceHandler"/>
     </service>
 
 </blueprint>

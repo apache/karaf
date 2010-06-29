@@ -18,11 +18,11 @@
 
 -->
 <metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
-    <OCD id="org.apache.felix.karaf.shell.config" name="%config.name" description="%config.description">
+    <OCD id="org.apache.karaf.shell.config" name="%config.name" description="%config.description">
         <AD id="storage" type="String" default="${karaf.base}/etc/"
             name="%storage.name" description="%storage.description"/>
     </OCD>
-    <Designate pid="org.apache.felix.karaf.shell.config">
-        <Object ocdref="org.apache.felix.karaf.shell.config"/>
+    <Designate pid="org.apache.karaf.shell.config">
+        <Object ocdref="org.apache.karaf.shell.config"/>
     </Designate>
 </metatype:MetaData>

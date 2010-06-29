@@ -21,15 +21,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache.felix.karaf.demos</groupId>
+    <groupId>org.apache.karaf.demos</groupId>
     <artifactId>demos</artifactId>
     <version>1.7.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.apache.felix.karaf.demos</groupId>
+  <groupId>org.apache.karaf.demos</groupId>
   <artifactId>web</artifactId>
   <packaging>war</packaging>
-  <name>Apache Felix Karaf :: Demos :: web</name>
+  <name>Apache Karaf :: Demos :: web</name>
   
   <properties>
     <jetty.port>8080</jetty.port>
@@ -42,16 +42,16 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.felix.karaf</groupId>
-      <artifactId>org.apache.felix.karaf.main</artifactId>
+      <groupId>org.apache.karaf</groupId>
+      <artifactId>org.apache.karaf.main</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix.karaf.jaas</groupId>
-      <artifactId>org.apache.felix.karaf.jaas.boot</artifactId>
+      <groupId>org.apache.karaf.jaas</groupId>
+      <artifactId>org.apache.karaf.jaas.boot</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix.karaf</groupId>
-      <artifactId>apache-felix-karaf</artifactId>
+      <groupId>org.apache.karaf</groupId>
+      <artifactId>apache-karaf</artifactId>
       <type>zip</type>
       <scope>provided</scope>
     </dependency>
@@ -121,8 +121,8 @@
                   <configuration>
                       <artifactItems>
                           <artifactItem>
-                              <groupId>org.apache.felix.karaf</groupId>
-                              <artifactId>apache-felix-karaf</artifactId>
+                              <groupId>org.apache.karaf</groupId>
+                              <artifactId>apache-karaf</artifactId>
                               <type>zip</type>
                               <overWrite>true</overWrite>
                               <outputDirectory>${project.build.directory}/karaf/WEB-INF</outputDirectory>
@@ -146,7 +146,7 @@
                   <configuration>
                       <tasks>
                           <move todir="${project.build.directory}/karaf/WEB-INF/karaf">
-                              <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-felix-karaf-${project.version}" />
+                              <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-${project.version}" />
                           </move>
                       </tasks>
                   </configuration>

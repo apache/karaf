@@ -23,10 +23,10 @@
         <service-properties>
             <entry key="url.handler.protocol" value="blueprint"/>
         </service-properties>
-        <bean class="org.apache.felix.karaf.deployer.blueprint.BlueprintURLHandler"/>
+        <bean class="org.apache.karaf.deployer.blueprint.BlueprintURLHandler"/>
     </service>
 
-    <bean id="blueprintDeploymentListener" class="org.apache.felix.karaf.deployer.blueprint.BlueprintDeploymentListener"/>
+    <bean id="blueprintDeploymentListener" class="org.apache.karaf.deployer.blueprint.BlueprintDeploymentListener"/>
 
     <!-- Force a reference to the url handler above from the osgi registry to (try to) make sure
          the url handler is registered inside the framework.  Else we can run into timing issues

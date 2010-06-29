@@ -23,7 +23,7 @@
         <service-properties>
             <entry key="osgi.service.blueprint.namespace" value="http://felix.apache.org/karaf/xmlns/shell/v1.0.0"/>
         </service-properties>
-        <bean class="org.apache.felix.karaf.shell.console.commands.NamespaceHandler"/>
+        <bean class="org.apache.karaf.shell.console.commands.NamespaceHandler"/>
     </service>
 
 </blueprint>

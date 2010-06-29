@@ -21,7 +21,7 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="wrapper/install">
-            <action class="org.apache.felix.karaf.shell.wrapper.InstallCommand"/>
+            <action class="org.apache.karaf.shell.wrapper.InstallCommand"/>
         </command>
     </command-bundle>
 

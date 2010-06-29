@@ -23,10 +23,10 @@
     	<service-properties>
             <entry key="url.handler.protocol" value="spring"/>
         </service-properties>
-        <bean class="org.apache.felix.karaf.deployer.spring.SpringURLHandler"/>
+        <bean class="org.apache.karaf.deployer.spring.SpringURLHandler"/>
     </service>
 
-    <bean id="springDeploymentListener" class="org.apache.felix.karaf.deployer.spring.SpringDeploymentListener"/>
+    <bean id="springDeploymentListener" class="org.apache.karaf.deployer.spring.SpringDeploymentListener"/>
 
     <!-- Force a reference to the url handler above from the osgi registry to (try to) make sure
          the url handler is registered inside the framework.  Else we can run into timing issues

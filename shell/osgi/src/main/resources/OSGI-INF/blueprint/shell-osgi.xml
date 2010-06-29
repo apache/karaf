@@ -21,16 +21,16 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="osgi/bundle-level">
-            <action class="org.apache.felix.karaf.shell.osgi.BundleLevel"/>
+            <action class="org.apache.karaf.shell.osgi.BundleLevel"/>
         </command>
         <command name="osgi/headers">
-            <action class="org.apache.felix.karaf.shell.osgi.Headers"/>
+            <action class="org.apache.karaf.shell.osgi.Headers"/>
         </command>
         <command name="osgi/install">
-            <action class="org.apache.felix.karaf.shell.osgi.InstallBundle"/>
+            <action class="org.apache.karaf.shell.osgi.InstallBundle"/>
         </command>
         <command name="osgi/list">
-            <action class="org.apache.felix.karaf.shell.osgi.ListBundles">
+            <action class="org.apache.karaf.shell.osgi.ListBundles">
                 <property name="bundleStateListenerFactories">
                     <list xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
                         <ref component-id="blueprintListener" />
@@ -40,41 +40,41 @@
             </action>
         </command>
         <command name="osgi/ls">
-            <action class="org.apache.felix.karaf.shell.osgi.ListServices"/>
+            <action class="org.apache.karaf.shell.osgi.ListServices"/>
         </command>
         <command name="osgi/refresh">
-            <action class="org.apache.felix.karaf.shell.osgi.RefreshBundle"/>
+            <action class="org.apache.karaf.shell.osgi.RefreshBundle"/>
         </command>
         <command name="osgi/update">
-            <action class="org.apache.felix.karaf.shell.osgi.UpdateBundle"/>
+            <action class="org.apache.karaf.shell.osgi.UpdateBundle"/>
         </command>
         <command name="osgi/resolve">
-            <action class="org.apache.felix.karaf.shell.osgi.ResolveBundle"/>
+            <action class="org.apache.karaf.shell.osgi.ResolveBundle"/>
         </command>
         <command name="osgi/restart">
-            <action class="org.apache.felix.karaf.shell.osgi.RestartBundle"/>
+            <action class="org.apache.karaf.shell.osgi.RestartBundle"/>
         </command>
         <command name="osgi/shutdown">
-            <action class="org.apache.felix.karaf.shell.osgi.Shutdown"/>
+            <action class="org.apache.karaf.shell.osgi.Shutdown"/>
         </command>
         <command name="osgi/start">
-            <action class="org.apache.felix.karaf.shell.osgi.StartBundle"/>
+            <action class="org.apache.karaf.shell.osgi.StartBundle"/>
         </command>
         <command name="osgi/start-level">
-            <action class="org.apache.felix.karaf.shell.osgi.StartLevel"/>
+            <action class="org.apache.karaf.shell.osgi.StartLevel"/>
         </command>
         <command name="osgi/stop">
-            <action class="org.apache.felix.karaf.shell.osgi.StopBundle"/>
+            <action class="org.apache.karaf.shell.osgi.StopBundle"/>
         </command>
         <command name="osgi/uninstall">
-            <action class="org.apache.felix.karaf.shell.osgi.UninstallBundle"/>
+            <action class="org.apache.karaf.shell.osgi.UninstallBundle"/>
         </command>
     </command-bundle>
 
-    <bean id="blueprintListener" class="org.apache.felix.karaf.shell.osgi.BlueprintListener" />
+    <bean id="blueprintListener" class="org.apache.karaf.shell.osgi.BlueprintListener" />
     <service ref="blueprintListener" interface="org.osgi.service.blueprint.container.BlueprintListener" />
 
-    <bean id="springListener" class="org.apache.felix.karaf.shell.osgi.SpringStateListenerFactory" init-method="init" destroy-method="destroy">
+    <bean id="springListener" class="org.apache.karaf.shell.osgi.SpringStateListenerFactory" init-method="init" destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 

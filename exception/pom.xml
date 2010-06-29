@@ -21,15 +21,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf</groupId>
+        <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf</groupId>
-    <artifactId>org.apache.felix.karaf.exception</artifactId>
+    <groupId>org.apache.karaf</groupId>
+    <artifactId>org.apache.karaf.exception</artifactId>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Exception</name>
+    <name>Apache Karaf :: Exception</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>

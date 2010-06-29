@@ -20,9 +20,9 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0">
 
-    <reference id="adminService" interface="org.apache.felix.karaf.admin.AdminService" />
+    <reference id="adminService" interface="org.apache.karaf.admin.AdminService" />
 
-    <bean id="adminPlugin" class="org.apache.felix.karaf.webconsole.admin.AdminPlugin" init-method="start" destroy-method="stop">
+    <bean id="adminPlugin" class="org.apache.karaf.webconsole.admin.AdminPlugin" init-method="start" destroy-method="stop">
         <property name="adminService" ref="adminService" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>

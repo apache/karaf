@@ -35,11 +35,11 @@
                             unbind-method="unregister"/>
     </reference-list>
 
-    <bean id="commandCompleter" class="org.apache.felix.karaf.shell.console.completer.CommandsCompleter">
+    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
 
-    <bean id="consoleFactory" class="org.apache.felix.karaf.shell.console.jline.ConsoleFactory">
+    <bean id="consoleFactory" class="org.apache.karaf.shell.console.jline.ConsoleFactory">
         <property name="start" value="$[karaf.startLocalConsole]"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="completers">
@@ -50,7 +50,7 @@
         <property name="terminalFactory" ref="terminalFactory"/>
     </bean>
 
-    <bean id="terminalFactory" class="org.apache.felix.karaf.shell.console.jline.TerminalFactory"
+    <bean id="terminalFactory" class="org.apache.karaf.shell.console.jline.TerminalFactory"
           destroy-method="destroy"/>
 
 

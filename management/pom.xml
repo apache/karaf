@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf</groupId>
+        <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf</groupId>
-    <artifactId>org.apache.felix.karaf.management</artifactId>
+    <groupId>org.apache.karaf</groupId>
+    <artifactId>org.apache.karaf.management</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Management</name>
+    <name>Apache Karaf :: Management</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>

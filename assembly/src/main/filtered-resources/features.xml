@@ -32,14 +32,14 @@
         <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.deployer/org.apache.felix.karaf.deployer.spring/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
     <feature name="wrapper" version="${project.version}">
-        <bundle>mvn:org.apache.felix.karaf.shell/org.apache.felix.karaf.shell.wrapper/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
     </feature>
     <feature name="obr" version="${project.version}">
         <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.shell/org.apache.felix.karaf.shell.obr/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.obr/${project.version}</bundle>
     </feature>
     <feature name="http" version="${project.version}">
         <config name="org.ops4j.pax.web">
@@ -58,32 +58,32 @@
         <bundle>mvn:org.ops4j.pax.web/pax-web-extender-war/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.deployer/org.apache.felix.karaf.deployer.war/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.war/${project.version}</bundle>
     </feature>
     <feature name="webconsole" version="${project.version}">
         <feature version="${project.version}">http</feature>
-        <config name="org.apache.felix.karaf.webconsole">
+        <config name="org.apache.karaf.webconsole">
           realm=karaf
         </config>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.branding/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.branding/${project.version}</bundle>
         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.admin/${project.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.features/${project.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.gogo/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.admin/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
     </feature>
     <feature name="ssh" version="${project.version}">
-        <config name="org.apache.felix.karaf.shell.ssh">
+        <config name="org.apache.karaf.shell.ssh">
             sshPort=8101
             sshHost=0.0.0.0
             sshRealm=karaf
         </config>
         <bundle>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
         <bundle>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.shell/org.apache.felix.karaf.shell.ssh/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
     </feature>
     <feature name="management" version="${project.version}">
-        <bundle>mvn:org.apache.felix.karaf/org.apache.felix.karaf.management/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf/org.apache.karaf.management/${project.version}</bundle>
         <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
         <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
     </feature>

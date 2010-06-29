@@ -22,14 +22,14 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
     <type-converters>
-        <bean class="org.apache.felix.karaf.jaas.modules.properties.PropertiesConverter" />
+        <bean class="org.apache.karaf.jaas.modules.properties.PropertiesConverter" />
     </type-converters>
 
     <!-- Bean to allow the $[karaf.base] property to be correctly resolved -->
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
 
     <jaas:config name="karaf">
-        <jaas:module className="org.apache.felix.karaf.jaas.modules.properties.PropertiesLoginModule" flags="required">
+        <jaas:module className="org.apache.karaf.jaas.modules.properties.PropertiesLoginModule" flags="required">
             users = $[karaf.base]/etc/users.properties
         </jaas:module>
     </jaas:config>

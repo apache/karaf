@@ -18,13 +18,13 @@
 
 -->
 <metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
-    <OCD id="org.apache.felix.karaf.log" name="%log.name" description="%log.description">
+    <OCD id="org.apache.karaf.log" name="%log.name" description="%log.description">
         <AD id="size" type="Integer" default="500" name="%size.name"
             description="%size.description"/>
         <AD id="pattern" type="String" default="%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n" name="%pattern.name"
             description="%pattern.description"/>
     </OCD>
-    <Designate pid="org.apache.felix.karaf.log">
-        <Object ocdref="org.apache.felix.karaf.log"/>
+    <Designate pid="org.apache.karaf.log">
+        <Object ocdref="org.apache.karaf.log"/>
     </Designate>
 </metatype:MetaData>

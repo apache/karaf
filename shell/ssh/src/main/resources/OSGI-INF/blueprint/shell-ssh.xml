@@ -24,12 +24,12 @@
            default-activation="lazy">
 
     <type-converters>
-        <bean class="org.apache.felix.karaf.shell.ssh.ShellFactoryImpl" factory-method="getConverter" />
+        <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl" factory-method="getConverter" />
     </type-converters>
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
 
-    <cm:property-placeholder persistent-id="org.apache.felix.karaf.shell">
+    <cm:property-placeholder persistent-id="org.apache.karaf.shell">
         <cm:default-properties>
             <cm:property name="sshPort" value="8101"/>
             <cm:property name="sshHost" value="0.0.0.0"/>
@@ -40,14 +40,14 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="ssh/ssh">
-            <action class="org.apache.felix.karaf.shell.ssh.SshAction">
+            <action class="org.apache.karaf.shell.ssh.SshAction">
                 <property name="sshClientId">
                     <bp:idref component-id="sshClient"/>
                 </property>
             </action>
         </command>
         <command name="ssh/sshd">
-            <action class="org.apache.felix.karaf.shell.ssh.SshServerAction">
+            <action class="org.apache.karaf.shell.ssh.SshServerAction">
                 <property name="sshServerId">
                     <bp:idref component-id="sshServer"/>
                 </property>
@@ -62,7 +62,7 @@
         <property name="port" value="${sshPort}"/>
         <property name="host" value="${sshHost}"/>
         <property name="shellFactory">
-            <bean class="org.apache.felix.karaf.shell.ssh.ShellFactoryImpl">
+            <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl">
                 <property name="completers">
                     <list>
                         <ref component-id="commandCompleter"/>
@@ -72,7 +72,7 @@
             </bean>
         </property>
         <property name="commandFactory">
-            <bean class="org.apache.felix.karaf.shell.ssh.ShellCommandFactory">
+            <bean class="org.apache.karaf.shell.ssh.ShellCommandFactory">
                 <property name="commandProcessor" ref="commandProcessor"/>
             </bean>
         </property>
@@ -87,7 +87,7 @@
         <property name="domain" value="${sshRealm}"/>
     </bean>
 
-    <bean id="sshServerFactory" class="org.apache.felix.karaf.shell.ssh.SshServerFactory" init-method="start"
+    <bean id="sshServerFactory" class="org.apache.karaf.shell.ssh.SshServerFactory" init-method="start"
           destroy-method="stop" activation="eager">
         <argument ref="sshServer"/>
         <property name="start" value="$[karaf.startRemoteShell]"/>
@@ -103,7 +103,7 @@
                             unbind-method="unregister"/>
     </reference-list>
 
-    <bean id="commandCompleter" class="org.apache.felix.karaf.shell.console.completer.CommandsCompleter">
+    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter">
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 

@@ -22,7 +22,7 @@
 
     <!-- TODO: use dynamic CM config -->
 
-    <cm:property-placeholder persistent-id="org.apache.felix.karaf.log">
+    <cm:property-placeholder persistent-id="org.apache.karaf.log">
         <cm:default-properties>
             <cm:property name="size" value="500"/>
             <cm:property name="pattern" value="%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n"/>
@@ -31,23 +31,23 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="log/display">
-            <action class="org.apache.felix.karaf.shell.log.DisplayLog">
+            <action class="org.apache.karaf.shell.log.DisplayLog">
                 <property name="events" ref="events"/>
                 <property name="pattern" value="${pattern}"/>
             </action>
         </command>
         <link name="log/d" target="log/display"/>
         <command name="log/display-exception">
-            <action class="org.apache.felix.karaf.shell.log.DisplayException">
+            <action class="org.apache.karaf.shell.log.DisplayException">
                 <property name="events" ref="events"/>
             </action>
         </command>
         <link name="log/de" target="log/display-exception"/>
         <command name="log/get">
-            <action class="org.apache.felix.karaf.shell.log.GetLogLevel" />
+            <action class="org.apache.karaf.shell.log.GetLogLevel" />
         </command>
         <command name="log/set">
-            <action class="org.apache.felix.karaf.shell.log.SetLogLevel" />
+            <action class="org.apache.karaf.shell.log.SetLogLevel" />
             <completers>
             	<ref component-id="logLevelCompleter"/>
             	<null/>
@@ -58,15 +58,15 @@
         <alias name="lde" alias="log/de"/>
     </command-bundle>
 
-    <bean id="vmLogAppender" class="org.apache.felix.karaf.shell.log.VmLogAppender">
+    <bean id="vmLogAppender" class="org.apache.karaf.shell.log.VmLogAppender">
         <property name="events" ref="events"/>
     </bean>
 
-    <bean id="events" class="org.apache.felix.karaf.shell.log.LruList">
+    <bean id="events" class="org.apache.karaf.shell.log.LruList">
         <argument value="${size}"/>
     </bean>
     
-    <bean id="logLevelCompleter" class="org.apache.felix.karaf.shell.log.completers.LogLevelCompleter"/>
+    <bean id="logLevelCompleter" class="org.apache.karaf.shell.log.completers.LogLevelCompleter"/>
 
     <service ref="vmLogAppender" interface="org.ops4j.pax.logging.spi.PaxAppender">
         <service-properties>

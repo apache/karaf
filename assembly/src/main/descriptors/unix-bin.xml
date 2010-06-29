@@ -120,8 +120,8 @@
         </file>
         <file>
             <source>${basedir}/target/classes/features.xml</source>
-            <outputDirectory>/system/org/apache/felix/karaf/apache-felix-karaf/${project.version}</outputDirectory>
-            <destName>apache-felix-karaf-${project.version}-features.xml</destName>
+            <outputDirectory>/system/org/apache/karaf/apache-karaf/${project.version}</outputDirectory>
+            <destName>apache-karaf-${project.version}-features.xml</destName>
             <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </file>
@@ -133,7 +133,7 @@
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
-                <include>org.apache.felix.karaf:org.apache.felix.karaf.exception</include>
+                <include>org.apache.karaf:org.apache.karaf.exception</include>
             </includes>
         </dependencySet>
 
@@ -182,68 +182,68 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf:org.apache.felix.karaf.management</include>
+                <include>org.apache.karaf:org.apache.karaf.management</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/karaf/features/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/karaf/features/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf.features:org.apache.felix.karaf.features.core</include>
-                <include>org.apache.felix.karaf.features:org.apache.felix.karaf.features.command</include>
-                <include>org.apache.felix.karaf.features:org.apache.felix.karaf.features.management</include>
+                <include>org.apache.karaf.features:org.apache.karaf.features.core</include>
+                <include>org.apache.karaf.features:org.apache.karaf.features.command</include>
+                <include>org.apache.karaf.features:org.apache.karaf.features.management</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/karaf/admin/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/karaf/admin/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf.admin:org.apache.felix.karaf.admin.core</include>
-                <include>org.apache.felix.karaf.admin:org.apache.felix.karaf.admin.command</include>
-                <include>org.apache.felix.karaf.admin:org.apache.felix.karaf.admin.management</include>
+                <include>org.apache.karaf.admin:org.apache.karaf.admin.core</include>
+                <include>org.apache.karaf.admin:org.apache.karaf.admin.command</include>
+                <include>org.apache.karaf.admin:org.apache.karaf.admin.management</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.spring</include>
-                <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.blueprint</include>
-                <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.features</include>
+                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.spring</include>
+                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.blueprint</include>
+                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.features</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console</include>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.dev</include>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.osgi</include>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.log</include>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.config</include>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.packages</include>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.ssh</include>
-                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.commands</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.console</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.dev</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.osgi</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.log</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.config</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.packages</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.ssh</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.commands</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/karaf/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/karaf/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf.jaas:org.apache.felix.karaf.jaas.config</include>
-                <include>org.apache.felix.karaf.jaas:org.apache.felix.karaf.jaas.modules</include>
+                <include>org.apache.karaf.jaas:org.apache.karaf.jaas.config</include>
+                <include>org.apache.karaf.jaas:org.apache.karaf.jaas.modules</include>
             </includes>
         </dependencySet>
         <dependencySet>

@@ -22,58 +22,58 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="features/addUrl">
-            <action class="org.apache.felix.karaf.features.command.AddUrlCommand"/>
+            <action class="org.apache.karaf.features.command.AddUrlCommand"/>
         </command>
         <command name="features/listUrl">
-            <action class="org.apache.felix.karaf.features.command.ListUrlCommand"/>
+            <action class="org.apache.karaf.features.command.ListUrlCommand"/>
         </command>
         <command name="features/removeUrl">
-            <action class="org.apache.felix.karaf.features.command.RemoveUrlCommand"/>
+            <action class="org.apache.karaf.features.command.RemoveUrlCommand"/>
             <completers>
                 <ref component-id="removeUrlCompleter" />
             </completers>
         </command>
         <command name="features/refreshUrl">
-            <action class="org.apache.felix.karaf.features.command.RefreshUrlCommand"/>
+            <action class="org.apache.karaf.features.command.RefreshUrlCommand"/>
         </command>
         <command name="features/install">
-            <action class="org.apache.felix.karaf.features.command.InstallFeatureCommand"/>
+            <action class="org.apache.karaf.features.command.InstallFeatureCommand"/>
             <completers>
                 <ref component-id="uninstalledFeatureCompleter" />
             </completers>
         </command>
         <command name="features/uninstall">
-            <action class="org.apache.felix.karaf.features.command.UninstallFeatureCommand"/>
+            <action class="org.apache.karaf.features.command.UninstallFeatureCommand"/>
             <completers>
                 <ref component-id="installedFeatureCompleter" />
             </completers>
         </command>
         <command name="features/list">
-            <action class="org.apache.felix.karaf.features.command.ListFeaturesCommand"/>
+            <action class="org.apache.karaf.features.command.ListFeaturesCommand"/>
         </command>
         <command name="features/info">
-            <action class="org.apache.felix.karaf.features.command.InfoFeatureCommand"/>
+            <action class="org.apache.karaf.features.command.InfoFeatureCommand"/>
             <completers>
                 <ref component-id="allFeatureCompleter" />
             </completers>
         </command>
     </command-bundle>
 
-    <reference id="featuresService" interface="org.apache.felix.karaf.features.FeaturesService" />
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
-    <bean id="uninstalledFeatureCompleter" class="org.apache.felix.karaf.features.command.completers.AvailableFeatureCompleter">
+    <bean id="uninstalledFeatureCompleter" class="org.apache.karaf.features.command.completers.AvailableFeatureCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
 
-    <bean id="installedFeatureCompleter" class="org.apache.felix.karaf.features.command.completers.InstalledFeatureCompleter">
+    <bean id="installedFeatureCompleter" class="org.apache.karaf.features.command.completers.InstalledFeatureCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
 
-    <bean id="allFeatureCompleter" class="org.apache.felix.karaf.features.command.completers.AllFeatureCompleter">
+    <bean id="allFeatureCompleter" class="org.apache.karaf.features.command.completers.AllFeatureCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
 
-    <bean id="removeUrlCompleter" class="org.apache.felix.karaf.features.command.completers.FeatureRepositoryCompleter">
+    <bean id="removeUrlCompleter" class="org.apache.karaf.features.command.completers.FeatureRepositoryCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
 

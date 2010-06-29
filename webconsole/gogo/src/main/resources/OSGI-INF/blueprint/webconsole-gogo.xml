@@ -22,7 +22,7 @@
 
     <reference id="commandProcessor" interface="org.osgi.service.command.CommandProcessor" />
 
-    <bean id="gogoPlugin" class="org.apache.felix.karaf.webconsole.gogo.GogoPlugin" init-method="start" destroy-method="stop">
+    <bean id="gogoPlugin" class="org.apache.karaf.webconsole.gogo.GogoPlugin" init-method="start" destroy-method="stop">
         <property name="completers">
             <list>
                 <ref component-id="commandCompleter"/>
@@ -38,7 +38,7 @@
                             unbind-method="unregister"/>
     </reference-list>
 
-    <bean id="commandCompleter" class="org.apache.felix.karaf.shell.console.completer.CommandsCompleter">
+    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter">
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 

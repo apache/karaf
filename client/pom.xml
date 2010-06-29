@@ -21,16 +21,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf</groupId>
+        <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf</groupId>
-    <artifactId>org.apache.felix.karaf.client</artifactId>
+    <groupId>org.apache.karaf</groupId>
+    <artifactId>org.apache.karaf.client</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Client</name>
+    <name>Apache Karaf :: Client</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
@@ -42,8 +42,8 @@
             <artifactId>sshd-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix.karaf.shell</groupId>
-            <artifactId>org.apache.felix.karaf.shell.console</artifactId>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -62,17 +62,17 @@
                 <configuration>
                     <instructions>
                         <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
-                        <Main-Class>org.apache.felix.karaf.client.Main</Main-Class>
+                        <Main-Class>org.apache.karaf.client.Main</Main-Class>
                         <!-- Do not use \r\n in the Class-Path header because the maven-bundle-plugin remove those -->
                         <Class-Path>
-                            ../system/org/apache/sshd/sshd-core/${sshd.version}/sshd-core-${sshd.version}.jar ../system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar ../system/org/apache/felix/karaf/shell/org.apache.felix.karaf.shell.console/${project.version}/org.apache.felix.karaf.shell.console-${project.version}.jar
+                            ../system/org/apache/sshd/sshd-core/${sshd.version}/sshd-core-${sshd.version}.jar ../system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar ../system/org/apache/karaf/shell/org.apache.karaf.shell.console/${project.version}/org.apache.karaf.shell.console-${project.version}.jar
                         </Class-Path>
-                        <Bundle-Name>Apache Felix Karaf Shell Client</Bundle-Name>
-                        <Bundle-Description>Shell client bundle for Apache Felix Karaf.</Bundle-Description>
+                        <Bundle-Name>Apache Karaf Shell Client</Bundle-Name>
+                        <Bundle-Description>Shell client bundle for Apache Karaf.</Bundle-Description>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Private-Package>
-                            org.apache.felix.karaf.client;-split-package:=merge-first,
+                            org.apache.karaf.client;-split-package:=merge-first,
                             org.slf4j;-split-package:=merge-first,
                             org.slf4j.spi;-split-package:=merge-first,
                             org.slf4j.helpers;-split-package:=merge-first,

@@ -24,61 +24,61 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="config/cancel">
-            <action class="org.apache.felix.karaf.shell.config.CancelCommand"/>
+            <action class="org.apache.karaf.shell.config.CancelCommand"/>
         </command>
         <command name="config/edit">
-            <action class="org.apache.felix.karaf.shell.config.EditCommand"/>
+            <action class="org.apache.karaf.shell.config.EditCommand"/>
             <completers>
                 <ref component-id="configCompleter" />
                 <null/>
             </completers>
         </command>
         <command name="config/list">
-            <action class="org.apache.felix.karaf.shell.config.ListCommand"/>
+            <action class="org.apache.karaf.shell.config.ListCommand"/>
         </command>
         <command name="config/propdel">
-            <action class="org.apache.felix.karaf.shell.config.PropDelCommand"/>
+            <action class="org.apache.karaf.shell.config.PropDelCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
         <command name="config/proplist">
-            <action class="org.apache.felix.karaf.shell.config.PropListCommand"/>
+            <action class="org.apache.karaf.shell.config.PropListCommand"/>
         </command>
         <command name="config/propset">
-            <action class="org.apache.felix.karaf.shell.config.PropSetCommand"/>
+            <action class="org.apache.karaf.shell.config.PropSetCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
         <command name="config/propappend">
-            <action class="org.apache.felix.karaf.shell.config.PropAppendCommand"/>
+            <action class="org.apache.karaf.shell.config.PropAppendCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
         <command name="config/update">
-            <action class="org.apache.felix.karaf.shell.config.UpdateCommand">
+            <action class="org.apache.karaf.shell.config.UpdateCommand">
                 <property name="storage" value="${storage}" />
             </action>
         </command>
     </command-bundle>
 
-    <bean id="configCompleter" class="org.apache.felix.karaf.shell.config.completers.ConfigurationCompleter" init-method="init">
+    <bean id="configCompleter" class="org.apache.karaf.shell.config.completers.ConfigurationCompleter" init-method="init">
         <property name="admin" ref="configAdmin"/>
     </bean>
     <service ref="configCompleter" interface="org.osgi.service.cm.ConfigurationListener" />
 
-    <bean id="configPropertyCompleter" class="org.apache.felix.karaf.shell.config.completers.ConfigurationPropertyCompleter" />
+    <bean id="configPropertyCompleter" class="org.apache.karaf.shell.config.completers.ConfigurationPropertyCompleter" />
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
 
-    <cm:property-placeholder persistent-id="org.apache.felix.karaf.shell.config">
+    <cm:property-placeholder persistent-id="org.apache.karaf.shell.config">
         <cm:default-properties>
             <cm:property name="storage" value="$[karaf.base]/etc/"/>
         </cm:default-properties>

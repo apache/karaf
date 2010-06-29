@@ -196,7 +196,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 
 :RUN
     SET OPTS=-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=true
-    SET MAIN=org.apache.felix.karaf.main.Main
+    SET MAIN=org.apache.karaf.main.Main
     SET SHIFT=false
     if "%1" == "stop" goto :EXECUTE_STOP
     if "%1" == "console" goto :EXECUTE_CONSOLE
@@ -205,7 +205,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     goto :EXECUTE
 
 :EXECUTE_STOP
-    SET MAIN=org.apache.felix.karaf.main.Stop
+    SET MAIN=org.apache.karaf.main.Stop
     SET SHIFT=true
     goto :EXECUTE
 

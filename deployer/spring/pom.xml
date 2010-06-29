@@ -21,16 +21,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf.deployer</groupId>
+        <groupId>org.apache.karaf.deployer</groupId>
         <artifactId>deployer</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf.deployer</groupId>
-    <artifactId>org.apache.felix.karaf.deployer.spring</artifactId>
+    <groupId>org.apache.karaf.deployer</groupId>
+    <artifactId>org.apache.karaf.deployer.spring</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Spring Deployer</name>
+    <name>Apache Karaf :: Spring Deployer</name>
 
     <description>This deployer transforms a plain spring xml file to a deployable bundle</description>
 
@@ -74,7 +74,7 @@
                         <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=false</Bundle-SymbolicName>
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>!${project.artifactId}*,*</Import-Package>
-                        <Private-Package>org.apache.felix.karaf.deployer.spring</Private-Package>
+                        <Private-Package>org.apache.karaf.deployer.spring</Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

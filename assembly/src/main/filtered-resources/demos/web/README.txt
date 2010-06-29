@@ -66,7 +66,7 @@ you should see the following printed to the console:
 
 Running a Client
 ----------------
-To test the example, you can use the Apache Felix Karaf client
+To test the example, you can use the Apache Karaf client
 to connect to the server and issue a Karaf command. For example,
 try executing the "features:list" command as follows:
 
@@ -105,5 +105,5 @@ container, by completing the following steps:
 Maven builds the web application, web-${project.version}.war, and
 saves it in the target directory of this example. Deploy this
 WAR file to your favorite web container. Once the application
-is running, you can test it using the Apache Felix Karaf client
+is running, you can test it using the Apache Karaf client
 as described in the "Running a Client" section above.

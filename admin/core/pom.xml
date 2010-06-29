@@ -21,16 +21,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix.karaf.admin</groupId>
+        <groupId>org.apache.karaf.admin</groupId>
         <artifactId>admin</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf.admin</groupId>
-    <artifactId>org.apache.felix.karaf.admin.core</artifactId>
+    <groupId>org.apache.karaf.admin</groupId>
+    <artifactId>org.apache.karaf.admin.core</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Admin Core</name>
+    <name>Apache Karaf :: Admin Core</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -55,13 +55,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix.karaf.shell</groupId>
-            <artifactId>org.apache.felix.karaf.shell.console</artifactId>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix.karaf.shell</groupId>
-            <artifactId>org.apache.felix.karaf.shell.obr</artifactId>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.obr</artifactId>
         </dependency>
 
         <dependency>
@@ -108,7 +108,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/classes/org/apache/felix/karaf/admin/etc</outputDirectory>
+                            <outputDirectory>${basedir}/target/classes/org/apache/karaf/admin/etc</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>../../assembly/src/main/distribution/text/etc/</directory>
@@ -117,7 +117,7 @@
                                         <include>*.cfg</include>
                                     </includes>
                                     <excludes>
-                                        <exclude>org.apache.felix.karaf.shell.cfg</exclude>
+                                        <exclude>org.apache.karaf.shell.cfg</exclude>
                                         <exclude>org.ops4j.pax.url.mvn.cfg</exclude>
                                         <exclude>system.properties</exclude>
                                     </excludes>
@@ -133,7 +133,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/classes/org/apache/felix/karaf/admin/etc</outputDirectory>
+                            <outputDirectory>${basedir}/target/classes/org/apache/karaf/admin/etc</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>../../assembly/src/main/filtered-resources/etc</directory>
@@ -155,24 +155,24 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
-                            org.apache.felix.karaf.admin;version=${project.version},
-                            org.apache.felix.karaf.jpm;version=${project.version}
+                            org.apache.karaf.admin;version=${project.version},
+                            org.apache.karaf.jpm;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !org.apache.felix.karaf.admin,
-                            !org.apache.felix.karaf.jpm,
+                            !org.apache.karaf.admin,
+                            !org.apache.karaf.jpm,
                             javax.management,
                             javax.management.loading,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
-                            org.apache.felix.karaf.shell.console,
+                            org.apache.karaf.shell.console,
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.felix.karaf.admin.bin,
-                            org.apache.felix.karaf.admin.etc,
-                            org.apache.felix.karaf.admin.internal,
-                            org.apache.felix.karaf.jpm.impl,
+                            org.apache.karaf.admin.bin,
+                            org.apache.karaf.admin.etc,
+                            org.apache.karaf.admin.internal,
+                            org.apache.karaf.jpm.impl,
                         </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

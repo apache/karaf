@@ -25,13 +25,13 @@
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
 
-    <cm:property-placeholder persistent-id="org.apache.felix.karaf.webconsole">
+    <cm:property-placeholder persistent-id="org.apache.karaf.webconsole">
         <cm:default-properties>
             <cm:property name="realm" value="karaf"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="securityProvider" class="org.apache.felix.karaf.webconsole.JaasSecurityProvider">
+    <bean id="securityProvider" class="org.apache.karaf.webconsole.JaasSecurityProvider">
         <property name="realm" value="${realm}"/>
     </bean>
 

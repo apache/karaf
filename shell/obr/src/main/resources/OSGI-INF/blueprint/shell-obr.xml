@@ -21,37 +21,37 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="obr/addUrl">
-            <action class="org.apache.felix.karaf.shell.obr.AddUrlCommand"/>
+            <action class="org.apache.karaf.shell.obr.AddUrlCommand"/>
         </command>
         <command name="obr/deploy">
-            <action class="org.apache.felix.karaf.shell.obr.DeployCommand"/>
+            <action class="org.apache.karaf.shell.obr.DeployCommand"/>
         </command>
         <command name="obr/find">
-            <action class="org.apache.felix.karaf.shell.obr.FindCommand"/>
+            <action class="org.apache.karaf.shell.obr.FindCommand"/>
         </command>
         <command name="obr/info">
-            <action class="org.apache.felix.karaf.shell.obr.InfoCommand"/>
+            <action class="org.apache.karaf.shell.obr.InfoCommand"/>
         </command>
         <command name="obr/list">
-            <action class="org.apache.felix.karaf.shell.obr.ListCommand"/>
+            <action class="org.apache.karaf.shell.obr.ListCommand"/>
         </command>
         <command name="obr/listUrl">
-            <action class="org.apache.felix.karaf.shell.obr.ListUrlCommand"/>
+            <action class="org.apache.karaf.shell.obr.ListUrlCommand"/>
         </command>
         <command name="obr/refreshUrl">
-            <action class="org.apache.felix.karaf.shell.obr.RefreshUrlCommand"/>
+            <action class="org.apache.karaf.shell.obr.RefreshUrlCommand"/>
         </command>
         <command name="obr/removeUrl">
-            <action class="org.apache.felix.karaf.shell.obr.RemoveUrlCommand"/>
+            <action class="org.apache.karaf.shell.obr.RemoveUrlCommand"/>
         </command>
         <command name="obr/resolve">
-            <action class="org.apache.felix.karaf.shell.obr.ResolveCommand"/>
+            <action class="org.apache.karaf.shell.obr.ResolveCommand"/>
         </command>
         <command name="obr/source">
-            <action class="org.apache.felix.karaf.shell.obr.SourceCommand"/>
+            <action class="org.apache.karaf.shell.obr.SourceCommand"/>
         </command>
         <command name="obr/start">
-            <action class="org.apache.felix.karaf.shell.obr.StartCommand"/>
+            <action class="org.apache.karaf.shell.obr.StartCommand"/>
         </command>
     </command-bundle>
 

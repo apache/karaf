@@ -290,10 +290,10 @@ init() {
 
 run() {
     OPTS="-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=true"
-    MAIN=org.apache.felix.karaf.main.Main
+    MAIN=org.apache.karaf.main.Main
     case "$1" in
         'stop')
-            MAIN=org.apache.felix.karaf.main.Stop
+            MAIN=org.apache.karaf.main.Stop
             shift
             ;;
         'console')

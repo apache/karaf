@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
   
     <parent>
-        <groupId>org.apache.felix.karaf.webconsole</groupId>
+        <groupId>org.apache.karaf.webconsole</groupId>
         <artifactId>webconsole</artifactId>
         <version>1.7.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.felix.karaf.webconsole</groupId>
-    <artifactId>org.apache.felix.karaf.webconsole.admin</artifactId>
+    <groupId>org.apache.karaf.webconsole</groupId>
+    <artifactId>org.apache.karaf.webconsole.admin</artifactId>
     <packaging>bundle</packaging>
     <version>1.7.0-SNAPSHOT</version>
-    <name>Apache Felix Karaf :: Web Console :: Admin Plugin</name>
+    <name>Apache Karaf :: Web Console :: Admin Plugin</name>
   
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -59,8 +59,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix.karaf.admin</groupId>
-            <artifactId>org.apache.felix.karaf.admin.core</artifactId>
+            <groupId>org.apache.karaf.admin</groupId>
+            <artifactId>org.apache.karaf.admin.core</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

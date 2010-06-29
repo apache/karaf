@@ -18,7 +18,7 @@
 
 -->
 <metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
-    <OCD id="org.apache.felix.karaf.management" name="%management.name" description="%management.description">
+    <OCD id="org.apache.karaf.management" name="%management.name" description="%management.description">
         <AD id="rmiRegistryPort" type="Integer" default="1099" name="%rmiRegistryPort.name"
             description="%rmiRegistryPort.description"/>
         <AD id="jmxRealm" type="String" default="karaf" name="%jmxRealm.name"
@@ -29,7 +29,7 @@
         <AD id="threaded" type="Boolean" default="true" name="%threaded.name" description="%threaded.description"/>
         <AD id="objectName" type="String" default="connector:name=rmi" name="%objectName.name" description="%objectName.description"/>
     </OCD>
-    <Designate pid="org.apache.felix.karaf.management">
-        <Object ocdref="org.apache.felix.karaf.management"/>
+    <Designate pid="org.apache.karaf.management">
+        <Object ocdref="org.apache.karaf.management"/>
     </Designate>
 </metatype:MetaData>

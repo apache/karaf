@@ -21,64 +21,64 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="shell/cat">
-            <action class="org.apache.felix.karaf.shell.commands.CatAction"/>
+            <action class="org.apache.karaf.shell.commands.CatAction"/>
         </command>
         <command name="shell/each">
-            <action class="org.apache.felix.karaf.shell.commands.EachAction"/>
+            <action class="org.apache.karaf.shell.commands.EachAction"/>
         </command>
         <command name="shell/echo">
-            <action class="org.apache.felix.karaf.shell.commands.EchoAction"/>
+            <action class="org.apache.karaf.shell.commands.EchoAction"/>
         </command>
         <command name="shell/exec">
-            <action class="org.apache.felix.karaf.shell.commands.ExecuteAction"/>
+            <action class="org.apache.karaf.shell.commands.ExecuteAction"/>
         </command>
         <command name="shell/grep">
-            <action class="org.apache.felix.karaf.shell.commands.GrepAction"/>
+            <action class="org.apache.karaf.shell.commands.GrepAction"/>
         </command>
         <command name="shell/history">
-            <action class="org.apache.felix.karaf.shell.commands.HistoryAction"/>
+            <action class="org.apache.karaf.shell.commands.HistoryAction"/>
         </command>
         <command name="shell/if">
-            <action class="org.apache.felix.karaf.shell.commands.IfAction"/>
+            <action class="org.apache.karaf.shell.commands.IfAction"/>
         </command>
         <command name="shell/info">
-            <action class="org.apache.felix.karaf.shell.commands.InfoAction"/>
+            <action class="org.apache.karaf.shell.commands.InfoAction"/>
         </command>
         <command name="shell/clear">
-            <action class="org.apache.felix.karaf.shell.commands.ClearAction"/>
+            <action class="org.apache.karaf.shell.commands.ClearAction"/>
         </command>
         <command name="shell/java">
-            <action class="org.apache.felix.karaf.shell.commands.JavaAction"/>
+            <action class="org.apache.karaf.shell.commands.JavaAction"/>
         </command>
         <!--
         <command name="shell/more">
-            <action class="org.apache.felix.karaf.shell.commands.MoreAction"/>
+            <action class="org.apache.karaf.shell.commands.MoreAction"/>
         </command>
         -->
         <command name="shell/new">
-            <action class="org.apache.felix.karaf.shell.commands.NewAction">
+            <action class="org.apache.karaf.shell.commands.NewAction">
                 <property name="blueprintConverter" ref="blueprintConverter"/>
             </action>
         </command>
         <command name="shell/logout">
-            <action class="org.apache.felix.karaf.shell.commands.LogoutAction"/>
+            <action class="org.apache.karaf.shell.commands.LogoutAction"/>
         </command>
         <command name="shell/printf">
-            <action class="org.apache.felix.karaf.shell.commands.PrintfAction"/>
+            <action class="org.apache.karaf.shell.commands.PrintfAction"/>
         </command>
         <command name="shell/sleep">
-            <action class="org.apache.felix.karaf.shell.commands.SleepAction"/>
+            <action class="org.apache.karaf.shell.commands.SleepAction"/>
         </command>
         <command name="shell/sort">
-            <action class="org.apache.felix.karaf.shell.commands.SortAction"/>
+            <action class="org.apache.karaf.shell.commands.SortAction"/>
         </command>
         <!--
         <command name="shell/source">
-            <action class="org.apache.felix.karaf.shell.commands.SourceAction"/>
+            <action class="org.apache.karaf.shell.commands.SourceAction"/>
         </command>
         -->
         <command name="shell/tac">
-            <action class="org.apache.felix.karaf.shell.commands.TacAction"/>
+            <action class="org.apache.karaf.shell.commands.TacAction"/>
         </command>
     </command-bundle>
 

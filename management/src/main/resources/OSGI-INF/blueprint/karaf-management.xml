@@ -25,7 +25,7 @@
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
 
     <!-- Property place holder -->
-    <cm:property-placeholder persistent-id="org.apache.felix.karaf.management">
+    <cm:property-placeholder persistent-id="org.apache.karaf.management">
         <cm:default-properties>
             <cm:property name="rmiRegistryPort" value="1099"/>
             <cm:property name="jmxRealm" value="karaf"/>
@@ -37,7 +37,7 @@
     </cm:property-placeholder>
 
     <!-- MBeanServer bean -->
-    <bean id="mbeanServerFactory" class="org.apache.felix.karaf.management.MBeanServerFactory" init-method="init"
+    <bean id="mbeanServerFactory" class="org.apache.karaf.management.MBeanServerFactory" init-method="init"
           destroy-method="destroy" depends-on="rmiRegistryFactory">
         <property name="locateExistingServerIfPossible" value="true"/>
     </bean>
@@ -47,7 +47,7 @@
     <service ref="mbeanServer" interface="javax.management.MBeanServer"/>
 
     <!-- Create a RMI registry -->
-    <bean id="rmiRegistryFactory" class="org.apache.felix.karaf.management.RmiRegistryFactory" init-method="init"
+    <bean id="rmiRegistryFactory" class="org.apache.karaf.management.RmiRegistryFactory" init-method="init"
           destroy-method="destroy">
         <property name="create" value="true"/>
         <property name="locate" value="true"/>
@@ -55,7 +55,7 @@
     </bean>
 
     <!-- Create a JMX connector ServiceFactory -->
-    <bean id="connectorFactory" class="org.apache.felix.karaf.management.ConnectorServerFactory" init-method="init"
+    <bean id="connectorFactory" class="org.apache.karaf.management.ConnectorServerFactory" init-method="init"
           destroy-method="destroy">
         <property name="server" ref="mbeanServer"/>
         <property name="serviceUrl" value="${serviceUrl}"/>
@@ -70,7 +70,7 @@
     </bean>
 
     <!-- JAAS authenticator -->
-    <bean id="jaasAuthenticator" class="org.apache.felix.karaf.management.JaasAuthenticator">
+    <bean id="jaasAuthenticator" class="org.apache.karaf.management.JaasAuthenticator">
         <property name="realm" value="${jmxRealm}"/>
     </bean>
 
