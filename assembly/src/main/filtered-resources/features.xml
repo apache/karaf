@@ -17,11 +17,19 @@
       limitations under the License.
 -->
 <features name="karaf-${project.version}">
+    <feature name="spring" version="${spring2.version}">
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.version}</bundle>
+        <bundle>mvn:org.springframework/spring-core/${spring2.version}</bundle>
+        <bundle>mvn:org.springframework/spring-beans/${spring2.version}</bundle>
+        <bundle>mvn:org.springframework/spring-aop/${spring2.version}</bundle>
+        <bundle>mvn:org.springframework/spring-context/${spring2.version}</bundle>
+        <bundle>mvn:org.springframework/spring-context-support/${spring2.version}</bundle>
+    </feature>
     <feature name="spring" version="${spring.version}">
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.version}</bundle>
         <bundle>mvn:org.springframework/spring-core/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-beans/${spring.version}</bundle>
-        <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>        
+        <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context-support/${spring.version}</bundle>
     </feature>
