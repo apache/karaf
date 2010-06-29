@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.felix.karaf.main;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -37,7 +37,7 @@ import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.karaf.main.Utils;
+import org.apache.felix.karaf.main.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -340,7 +340,7 @@ public class Main {
     }
 
     private static void processSecurityProperties(Properties m_configProps) {
-        String prop = m_configProps.getProperty("org.apache.karaf.security.providers");
+        String prop = m_configProps.getProperty("org.apache.felix.karaf.security.providers");
         if (prop != null) {
             String[] providers = prop.split(",");
             for (String provider : providers) {
@@ -687,7 +687,7 @@ public class Main {
         // installation directory.  Try to load it from one of these
         // places.
 
-            ArrayList<File> bundleDirs = new ArrayList<File>();
+        ArrayList<File> bundleDirs = new ArrayList<File>();
 
         // See if the property URL was specified as a property.
         URL configPropURL = null;
@@ -728,7 +728,13 @@ public class Main {
                 do {
                     location = nextLocation(st);
                     if (location != null) {
-                        File f = new File(location);
+                        File f;
+                        if (karafBase.equals(karafHome)) {
+                        	f = new File(karafHome, location);
+                        } else {
+                        	f = new File(karafBase, location);
+                        	f = new File(karafHome, location);
+                        }
                         if (f.exists() && f.isDirectory()) {
                             bundleDirs.add(f);
                         } else {
@@ -1042,7 +1048,7 @@ public class Main {
     }
 
     /* (non-Javadoc)
-      * @see org.apache.karaf.main.MainService#getArgs()
+      * @see org.apache.felix.karaf.main.MainService#getArgs()
       */
     public String[] getArgs() {
         return args;
