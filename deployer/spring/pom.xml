@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.karaf.deployer</groupId>
         <artifactId>deployer</artifactId>
-        <version>1.7.0-SNAPSHOT</version>
+        <version>1.99.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.karaf.deployer</groupId>
     <artifactId>org.apache.karaf.deployer.spring</artifactId>
     <packaging>bundle</packaging>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.99.0-SNAPSHOT</version>
     <name>Apache Karaf :: Spring Deployer</name>
 
     <description>This deployer transforms a plain spring xml file to a deployable bundle</description>

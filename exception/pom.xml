@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>1.7.0-SNAPSHOT</version>
+        <version>1.99.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.karaf</groupId>
     <artifactId>org.apache.karaf.exception</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.99.0-SNAPSHOT</version>
     <name>Apache Karaf :: Exception</name>
 
     <properties>

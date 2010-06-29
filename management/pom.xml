@@ -24,13 +24,13 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>1.7.0-SNAPSHOT</version>
+        <version>1.99.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.karaf</groupId>
     <artifactId>org.apache.karaf.management</artifactId>
     <packaging>bundle</packaging>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.99.0-SNAPSHOT</version>
     <name>Apache Karaf :: Management</name>
 
     <properties>
