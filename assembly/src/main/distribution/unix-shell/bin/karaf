@@ -144,22 +144,23 @@ setupNativePath() {
     export LD_LIBRARY_PATH
 }
 
-pathCanonicalSimple() {
-	local dst="${1}"
-	cd -P -- "$(dirname -- "${dst}")" &> /dev/null && echo "$(pwd -P)/$(basename -- "${dst}")"
-}
-
 pathCanonical() {
-	local dst=`pathCanonicalSimple "${1}"`
-	while [ -h "${dst}" ]; do
-		local linkDst="$(ls -l "${dst}" | sed -e 's/^.*[[:space:]]*->[[:space:]]*\(.*\)[[:space:]]*$/\1/g')"
-		if [ -z "$(echo "${linkDst}" | grep -E '^/')" ]; then
-			# relative link destination
-			linkDst="$(dirname "${dst}")/${linkDst}"
-		fi
-		dst=`pathCanonicalSimple "${linkDst}"`
-	done
-	echo "${dst}"
+    local dst="${1}"
+    while [ -h "${dst}" ] ; do
+        ls=`ls -ld "${dst}"`
+        link=`expr "$ls" : '.*-> \(.*\)$'`
+        if expr "$link" : '/.*' > /dev/null; then
+            dst="$link"
+        else
+            dst="`dirname "${dst}"`/$link"
+        fi
+    done
+	local bas=`basename "${dst}"`
+	local dir=`dirname "${dst}"`
+    if [ "$bas" != "$dir" ]; then
+		dst="`pathCanonical "$dir"`/$bas"
+    fi
+    echo "${dst}" | sed -e 's#//#/#g' -e 's#/./#/#g' -e 's#/[^/]*/../#/#g'
 }
 
 locateJava() {
@@ -172,6 +173,9 @@ locateJava() {
 	if [ "x$JAVA_HOME" = "x" ] && [ "$darwin" = "true" ]; then
 		JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
 	fi
+    if [ "x$JAVA" = "x" ] && [ -r /etc/gentoo-release ] ; then
+        JAVA_HOME=`java-config --jre-home`
+    fi
     if [ "x$JAVA" = "x" ]; then
         if [ "x$JAVA_HOME" != "x" ]; then
             if [ ! -d "$JAVA_HOME" ]; then
@@ -180,14 +184,15 @@ locateJava() {
             JAVA="$JAVA_HOME/bin/java"
         else
             warn "JAVA_HOME not set; results may vary"
-            JAVA=`which java`
+            JAVA=`type java`
+            JAVA=`expr "$JAVA" : '.*is \(.*\)$'`
             if [ "x$JAVA" = "x" ]; then
                 die "java command not found"
             fi
         fi
     fi
     if [ "x$JAVA_HOME" = "x" ]; then
-        JAVA_HOME=$(dirname $(pathCanonical "$JAVA"))
+        JAVA_HOME="$(dirname $(dirname $(pathCanonical "$JAVA")))"
     fi
 }
 
