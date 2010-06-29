@@ -16,7 +16,7 @@
 --%>
 <html>
 <head>
-<title>Apache Felix Karaf</title>
+<title>Apache Karaf</title>
 </head>
 <body>
 
@@ -27,7 +27,7 @@ Welcome to Apache Karaf web application demo
 </p>
 
 <p>
-You can find more information about Karaf on the <a href="http://felix.apache.org/site/apache-felix-karaf.html">Apache Karaf Site</a>
+You can find more information about Karaf on the <a href="http://karaf.apache.org/">Apache Karaf Site</a>
 </p>
 </body>
 </html>

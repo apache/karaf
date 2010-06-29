@@ -26,7 +26,7 @@
   <display-name>Karaf Embedded Example</display-name>
 
   <listener>
-    <listener-class>org.apache.felix.karaf.web.WebAppListener</listener-class>
+    <listener-class>org.apache.karaf.web.WebAppListener</listener-class>
   </listener>
 
   <welcome-file-list>
