@@ -24,7 +24,6 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>felix-parent</artifactId>
         <version>1.2.1</version>
-        <relativePath>../pom/pom.xml</relativePath>
     </parent>
 
     <groupId>org.apache.karaf</groupId>
@@ -53,9 +52,9 @@
     </modules>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/karaf</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/karaf</developerConnection>
-        <url>http://svn.apache.org/viewvc/felix/trunk/karaf/</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/karaf/trunk</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/trunk</developerConnection>
+        <url>http://svn.apache.org/viewvc/karaf/trunk/</url>
     </scm>
 
     <issueManagement>
