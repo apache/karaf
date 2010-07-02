@@ -113,8 +113,8 @@ public class Main {
             }
             ClientChannel channel;
 			if (sb.length() > 0) {
- 				channel = session.createChannel("exec");
-	            channel.setIn(new ByteArrayInputStream(sb.append("\n").toString().getBytes()));
+                channel = session.createChannel("exec", sb.append("\n").toString());
+                channel.setIn(new ByteArrayInputStream(new byte[0]));
 			} else {
                 terminal = new TerminalFactory().getTerminal();
  				channel = session.createChannel("shell");
