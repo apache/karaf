@@ -16,10 +16,12 @@
  */
 package org.apache.karaf.shell.obr;
 
-import java.io.PrintStream;
+import java.io.*;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.felix.bundlerepository.Reason;
+import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
@@ -247,6 +249,65 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
             reqs[i] = parseRequirement(admin, requirements.get(i));
         }
         return reqs;
+    }
+
+    public static final String REPOSITORY_URL_PROP = "obr.repository.url";
+
+    protected void persistRepositoryList(RepositoryAdmin admin) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (Repository repo : admin.listRepositories()) {
+                if (sb.length() > 0) {
+                    sb.append(",");
+                }
+                sb.append(repo.getURI());
+            }
+            File base = new File(System.getProperty("karaf.base"));
+            File sys = new File(base, "etc/config.properties");
+            File sysTmp = new File(base, "etc/config.properties.tmp");
+
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sysTmp)));
+            boolean modified = false;
+            try {
+                if (sys.exists()) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(sys)));
+                    try {
+                        String line = reader.readLine();
+                        while (line != null) {
+                            if (line.matches("obr\\.repository\\.url[:= ].*")) {
+                                modified = true;
+                                line = "obr.repository.url = " + sb.toString();
+                            }
+                            writer.write(line);
+                            writer.newLine();
+                            line = reader.readLine();
+                        }
+                    } finally {
+                        reader.close();
+                    }
+                }
+                if (!modified) {
+                    writer.newLine();
+                    writer.write("# ");
+                    writer.newLine();
+                    writer.write("# OBR Repository list");
+                    writer.newLine();
+                    writer.write("# ");
+                    writer.newLine();
+                    writer.write("obr.repository.url = " + sb.toString());
+                    writer.newLine();
+                    writer.newLine();
+                }
+            } finally {
+                writer.close();
+            }
+
+            sys.delete();
+            sysTmp.renameTo(sys);
+
+        } catch (Exception e) {
+            System.err.println("Error while persisting repository list");
+        }
     }
 
 }

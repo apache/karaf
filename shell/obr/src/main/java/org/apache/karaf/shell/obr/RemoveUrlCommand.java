@@ -32,5 +32,6 @@ public class RemoveUrlCommand extends ObrCommandSupport {
         for (String url : urls) {
             admin.removeRepository(url);
         }
+        persistRepositoryList(admin);
     }
 }

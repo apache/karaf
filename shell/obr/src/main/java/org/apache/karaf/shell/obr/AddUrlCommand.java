@@ -32,5 +32,6 @@ public class AddUrlCommand extends ObrCommandSupport {
         for (String url : urls) {
             admin.addRepository(url);
         }
+        persistRepositoryList(admin);
     }
 }
