@@ -100,7 +100,7 @@ public class FeaturesServiceTest extends TestCase {
         assertEquals(0, features[0].getDependencies().size());
         assertNotNull(features[0].getBundles());
         assertEquals(1, features[0].getBundles().size());
-        assertEquals(name, features[0].getBundles().get(0));
+        assertEquals(name, features[0].getBundles().get(0).getLocation());
 
         verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
 

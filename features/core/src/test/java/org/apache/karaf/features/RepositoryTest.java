@@ -47,8 +47,8 @@ public class RepositoryTest extends TestCase {
         assertEquals(0, features[0].getDependencies().size());
         assertNotNull(features[0].getBundles());
         assertEquals(2, features[0].getBundles().size());
-        assertEquals("b1", features[0].getBundles().get(0));
-        assertEquals("b2", features[0].getBundles().get(1));
+        assertEquals("b1", features[0].getBundles().get(0).getLocation());
+        assertEquals("b2", features[0].getBundles().get(1).getLocation());
         assertNotNull(features[1]);
         assertEquals("f2", features[1].getName());
         assertNotNull(features[1].getConfigurations());
@@ -58,7 +58,7 @@ public class RepositoryTest extends TestCase {
         assertEquals("f1" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + FeatureImpl.DEFAULT_VERSION, features[1].getDependencies().get(0).toString());
         assertNotNull(features[1].getBundles());
         assertEquals(1, features[1].getBundles().size());
-        assertEquals("b3", features[1].getBundles().get(0));
+        assertEquals("b3", features[1].getBundles().get(0).getLocation());
     }
     
     public void testShowWrongUriInException() throws Exception {
