@@ -30,11 +30,14 @@
         <command name="features/removeUrl">
             <action class="org.apache.karaf.features.command.RemoveUrlCommand"/>
             <completers>
-                <ref component-id="removeUrlCompleter" />
+                <ref component-id="featureUrlCompleter" />
             </completers>
         </command>
         <command name="features/refreshUrl">
             <action class="org.apache.karaf.features.command.RefreshUrlCommand"/>
+            <completers>
+                <ref component-id="featureUrlCompleter" />
+            </completers>
         </command>
         <command name="features/install">
             <action class="org.apache.karaf.features.command.InstallFeatureCommand"/>
@@ -73,7 +76,7 @@
         <property name="featuresService" ref="featuresService" />
     </bean>
 
-    <bean id="removeUrlCompleter" class="org.apache.karaf.features.command.completers.FeatureRepositoryCompleter">
+    <bean id="featureUrlCompleter" class="org.apache.karaf.features.command.completers.FeatureRepositoryCompleter">
         <property name="featuresService" ref="featuresService" />
     </bean>
 
