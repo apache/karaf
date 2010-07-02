@@ -28,6 +28,7 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.RepositoryImpl;
@@ -268,7 +269,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
     private void analyzeExports(Repository repository) throws Exception {
         for (Feature feature : repository.getFeatures()) {
             Set<Clause> exports = new HashSet<Clause>();
-            for (String bundle : feature.getBundles()) {
+            for (String bundle : getBundleLocations(feature)) {
                 exports.addAll(getExports(getManifest(bundles.get(bundle))));
             }
             info("    scanning feature %s for exports", feature.getName());
@@ -281,7 +282,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private void validateBundlesAvailable(Repository repository) throws Exception {
         for (Feature feature : repository.getFeatures()) {
-            for (String bundle : feature.getBundles()) {
+            for (String bundle : getBundleLocations(feature)) {
                 // this will throw an exception if the artifact can not be resolved
                 final Artifact artifact = resolve(bundle);
                 bundles.put(bundle, artifact);
@@ -292,6 +293,19 @@ public class ValidateFeaturesMojo extends MojoSupport {
                 }
             }
         }
+    }
+
+    /*
+     * Get a list of bundle locations in a feature
+     */
+    private List<String> getBundleLocations(Feature feature) {
+        List<String> result = new LinkedList<String>();
+        if (feature != null && feature.getBundles() != null) {
+            for (BundleInfo bundle : feature.getBundles()) {
+                result.add(bundle.getLocation());
+            }
+        }
+        return result;
     }
 
     /*
@@ -319,7 +333,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
                 validateImportsExports(features.get(dependency.getName(), dependency.getVersion()));
             }
         }
-        for (String bundle : feature.getBundles()) {
+        for (String bundle : getBundleLocations(feature)) {
             Manifest meta = manifests.get(bundles.get(bundle));
             exports.addAll(getExports(meta));
             for (Clause clause : getMandatoryImports(meta)) {

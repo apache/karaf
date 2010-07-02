@@ -20,6 +20,7 @@ package org.apache.karaf.webconsole.features;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 
 
@@ -64,7 +65,7 @@ public class ExtendedFeature implements Feature
     //
 
 
-    public List<String> getBundles()
+    public List<BundleInfo> getBundles()
     {
         return this.feature.getBundles();
     }
