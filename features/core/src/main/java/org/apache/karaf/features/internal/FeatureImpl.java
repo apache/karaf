@@ -31,12 +31,16 @@ public class FeatureImpl implements Feature {
     private String id;
     private String name;
     private String version;
+    private String resolver;
     private List<Feature> dependencies = new ArrayList<Feature>();
     private List<String> bundles = new ArrayList<String>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
     public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
     public static String DEFAULT_VERSION = "0.0.0";
-    
+
+    public FeatureImpl() {
+    }
+
     public FeatureImpl(String name) {
         this(name, DEFAULT_VERSION);
     }
@@ -62,6 +66,14 @@ public class FeatureImpl implements Feature {
 	public void setVersion(String version) {
 		this.version = version;
 	}
+
+    public String getResolver() {
+        return resolver;
+    }
+
+    public void setResolver(String resolver) {
+        this.resolver = resolver;
+    }
 
     public List<Feature> getDependencies() {
         return dependencies;

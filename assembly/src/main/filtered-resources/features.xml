@@ -50,6 +50,7 @@
     <feature name="obr" version="${project.version}">
         <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.obr/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.features/org.apache.karaf.features.obr/${project.version}</bundle>
     </feature>
     <feature name="http" version="${project.version}">
         <config name="org.ops4j.pax.web">

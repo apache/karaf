@@ -127,6 +127,11 @@ public class RepositoryImpl implements Repository {
                         f = new FeatureImpl(name);
                     }
 
+                    String resolver = e.getAttribute("resolver");
+                    if (resolver != null && resolver.length() > 0) {
+                        f.setResolver(resolver);
+                    }
+
                     NodeList featureNodes = e.getElementsByTagName("feature");
                     for (int j = 0; j < featureNodes.getLength(); j++) {
                         Element b = (Element) featureNodes.item(j);

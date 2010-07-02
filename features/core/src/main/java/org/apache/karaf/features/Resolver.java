@@ -17,25 +17,9 @@
 package org.apache.karaf.features;
 
 import java.util.List;
-import java.util.Map;
 
-/**
- * A feature is a list of bundles associated identified by its name.
- */
-public interface Feature {
+public interface Resolver {
 
-    String getId();
-
-    String getName();
-
-    String getVersion();
-
-    String getResolver();
-
-    List<Feature> getDependencies();
-
-    List<String> getBundles();
-
-    Map<String, Map<String, String>> getConfigurations();
+    List<String> resolve(Feature feature) throws Exception;
 
 }

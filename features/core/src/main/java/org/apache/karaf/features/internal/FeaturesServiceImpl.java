@@ -38,10 +38,12 @@ import org.apache.karaf.features.RepositoryEvent;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.karaf.features.Resolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.service.cm.Configuration;
@@ -51,6 +53,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.startlevel.StartLevel;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -74,6 +77,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     private ConfigurationAdmin configAdmin;
     private PackageAdmin packageAdmin;
     private StartLevel startLevel;
+    private long resolverTimeout = 5000;
     private PreferencesService preferences;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
@@ -122,6 +126,14 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setStartLevel(StartLevel startLevel) {
         this.startLevel = startLevel;
+    }
+
+    public long getResolverTimeout() {
+        return resolverTimeout;
+    }
+
+    public void setResolverTimeout(long resolverTimeout) {
+        this.resolverTimeout = resolverTimeout;
     }
 
     public void registerListener(FeaturesListener listener) {
@@ -385,11 +397,29 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
         Set<Long> bundles = new TreeSet<Long>();
-        for (String bundleLocation : feature.getBundles()) {
+        for (String bundleLocation : resolve(feature)) {
             Bundle b = installBundleIfNeeded(state, bundleLocation);
             bundles.add(b.getBundleId());
         }
         state.features.put(feature, bundles);
+    }
+
+    protected List<String> resolve(Feature feature) throws Exception {
+        String resolver = feature.getResolver();
+        // If no resolver is specified, we expect a list of uris
+        if (resolver == null || resolver.length() == 0) {
+            return feature.getBundles();
+        }
+        // Else, find the resolver
+        String filter = "(&(" + Constants.OBJECTCLASS + "=" + Resolver.class.getName() + ")(name=" + resolver + "))";
+        ServiceTracker tracker = new ServiceTracker(bundleContext, FrameworkUtil.createFilter(filter), null);
+        tracker.open();
+        try {
+            Resolver r = (Resolver) tracker.waitForService(resolverTimeout);
+            return r.resolve(feature);
+        } finally {
+            tracker.close();
+        }
     }
 
     protected Set<Bundle> findBundlesToRefresh(InstallationState state) {

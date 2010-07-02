@@ -99,6 +99,10 @@ public class ExtendedFeature implements Feature
         return this.feature.getVersion();
     }
 
+    public String getResolver()
+    {
+        return this.feature.getResolver();
+    }
 
     //
     // Additional methods
