@@ -28,6 +28,8 @@
     <feature name="spring" version="${spring.version}">
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.version}</bundle>
         <bundle>mvn:org.springframework/spring-core/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-asm/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-expression/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-beans/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context/${spring.version}</bundle>
