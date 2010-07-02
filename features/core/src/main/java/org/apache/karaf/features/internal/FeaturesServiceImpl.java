@@ -29,6 +29,7 @@ import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
@@ -302,6 +303,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     if (state.installed.contains(b)
                             || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
                                     && getStartLevel().isBundlePersistentlyStarted(b))) {
+                    	// do no start bundles when user request it 
                         try {
                             b.start();
                         } catch (BundleException be) {
@@ -397,18 +399,18 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
         Set<Long> bundles = new TreeSet<Long>();
-        for (String bundleLocation : resolve(feature)) {
-            Bundle b = installBundleIfNeeded(state, bundleLocation);
+        for (BundleInfo bInfo : resolve(feature)) {
+            Bundle b = installBundleIfNeeded(state, bInfo);
             bundles.add(b.getBundleId());
         }
         state.features.put(feature, bundles);
     }
 
-    protected List<String> resolve(Feature feature) throws Exception {
+    protected List<BundleInfo> resolve(Feature feature) throws Exception {
         String resolver = feature.getResolver();
         // If no resolver is specified, we expect a list of uris
         if (resolver == null || resolver.length() == 0) {
-            return feature.getBundles();
+        	return feature.getBundles();
         }
         // Else, find the resolver
         String filter = "(&(" + Constants.OBJECTCLASS + "=" + Resolver.class.getName() + ")(name=" + resolver + "))";
@@ -542,9 +544,10 @@ public class FeaturesServiceImpl implements FeaturesService {
         return result;
     }
 
-    protected Bundle installBundleIfNeeded(InstallationState state, String bundleLocation) throws IOException, BundleException {
-        LOGGER.debug("Checking " + bundleLocation);
+    protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo) throws IOException, BundleException {
+        LOGGER.debug("Checking " + bundleInfo.getLocation());
         InputStream is;
+        String bundleLocation = bundleInfo.getLocation();
         try {
             is = new BufferedInputStream(new URL(bundleLocation).openStream());
         } catch (RuntimeException e) {
@@ -577,6 +580,15 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
             LOGGER.debug("Installing bundle " + bundleLocation);
             Bundle b = getBundleContext().installBundle(bundleLocation, is);
+            
+            // Define the startLevel for the bundle when defined
+            int ibsl = bundleInfo.getStartLevel();
+            if (ibsl > 0 && ibsl < 100) {
+                StartLevel sl = (StartLevel) bundleContext.getService(
+                		bundleContext.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName()));
+                sl.setInitialBundleStartLevel(ibsl);           	
+            }
+
             state.bundles.add(b);
             state.installed.add(b);
             return b;

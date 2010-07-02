@@ -160,7 +160,32 @@ public class RepositoryImpl implements Repository {
                     NodeList bundleNodes = e.getElementsByTagName("bundle");
                     for (int j = 0; j < bundleNodes.getLength(); j++) {
                         Element b = (Element) bundleNodes.item(j);
-                        f.addBundle(b.getTextContent());
+                        String bStartLevel = b.getAttribute("start-level");
+                        String bStart = b.getAttribute("start");
+                        boolean bs;
+                        
+                        // Check if the value of the attribute "start"
+                        // is parseable
+                        if (bStart != null && bStart.length() > 0) {
+                        		bs = Boolean.parseBoolean(bStart);
+                        } else {
+                        	// Assign true when the value is not readable
+                        	bs = true;
+                        }
+                       
+                        if (bStartLevel != null && bStartLevel.length() > 0) {
+                        	
+                        	try {
+                        	  int bsl = Integer.parseInt(bStartLevel);
+                          	  f.addBundle(new BundleImpl(b.getTextContent(), bsl, bs));
+                        	} catch (Exception ex) {
+                        		LOGGER.error("The start-level is not an int value for the bundle : " + b.getTextContent());
+                            }
+ 
+                        } else {
+                        	f.addBundle(new BundleImpl(b.getTextContent(), bs));
+                        }
+                        
                     }
                     features.add(f);
                 }

@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 
@@ -98,13 +99,13 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     }
 
     private void displayBundleInformation(Feature feature) {
-        List<String> bundles = feature.getBundles();
-        if (bundles.isEmpty()) {
+        List<BundleInfo> bundleInfos = feature.getBundles();
+        if (bundleInfos.isEmpty()) {
             System.out.println("Feature has no bundles.");
         } else {
             System.out.println("Feature contains followed bundles:");
-            for (String featureBundle : bundles) {
-                System.out.println("  " + featureBundle);
+            for (BundleInfo featureBundle : bundleInfos) {
+                System.out.println("  " + featureBundle.getLocation());
             }
         }
     }
@@ -147,7 +148,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
 
         if (bundle) {
-            List<String> bundles = resolved != null ? resolved.getBundles() : feature.getBundles();
+            List<BundleInfo> bundles = resolved != null ? resolved.getBundles() : feature.getBundles();
             for (int i = 0, j = bundles.size(); i < j; i++) {
                 System.out.println(prefix + " " + (i+1 == j ? "\\" : "+") + " " + bundles.get(i));
             }

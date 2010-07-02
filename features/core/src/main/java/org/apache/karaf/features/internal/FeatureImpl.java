@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 
 /**
@@ -33,7 +34,9 @@ public class FeatureImpl implements Feature {
     private String version;
     private String resolver;
     private List<Feature> dependencies = new ArrayList<Feature>();
-    private List<String> bundles = new ArrayList<String>();
+    // TODO 
+    // private List<String> bundles = new ArrayList<String>();
+    private List<BundleInfo> bundles = new ArrayList<BundleInfo>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
     public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
     public static String DEFAULT_VERSION = "0.0.0";
@@ -79,7 +82,7 @@ public class FeatureImpl implements Feature {
         return dependencies;
     }
 
-    public List<String> getBundles() {
+    public List<BundleInfo> getBundles() {
         return bundles;
     }
 
@@ -91,7 +94,7 @@ public class FeatureImpl implements Feature {
         dependencies.add(dependency);
     }
 
-    public void addBundle(String bundle) {
+    public void addBundle(BundleInfo bundle) {
         bundles.add(bundle);
     }
 

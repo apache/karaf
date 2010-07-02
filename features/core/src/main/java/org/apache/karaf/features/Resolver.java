@@ -20,6 +20,6 @@ import java.util.List;
 
 public interface Resolver {
 
-    List<String> resolve(Feature feature) throws Exception;
+    List<BundleInfo> resolve(Feature feature) throws Exception;
 
 }

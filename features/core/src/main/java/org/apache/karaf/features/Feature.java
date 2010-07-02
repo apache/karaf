@@ -34,7 +34,7 @@ public interface Feature {
 
     List<Feature> getDependencies();
 
-    List<String> getBundles();
+    List<BundleInfo> getBundles();
 
     Map<String, Map<String, String>> getConfigurations();
 
