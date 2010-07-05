@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
-import java.rmi.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -177,13 +176,13 @@ public class RepositoryImpl implements Repository {
                         	
                         	try {
                         	  int bsl = Integer.parseInt(bStartLevel);
-                          	  f.addBundle(new BundleImpl(b.getTextContent(), bsl, bs));
+                          	  f.addBundle(new BundleInfoImpl(b.getTextContent(), bsl, bs));
                         	} catch (Exception ex) {
                         		LOGGER.error("The start-level is not an int value for the bundle : " + b.getTextContent());
                             }
  
                         } else {
-                        	f.addBundle(new BundleImpl(b.getTextContent(), bs));
+                        	f.addBundle(new BundleInfoImpl(b.getTextContent(), bs));
                         }
                         
                     }

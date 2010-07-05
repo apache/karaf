@@ -22,13 +22,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Resolver;
 import org.osgi.framework.InvalidSyntaxException;
@@ -45,15 +48,20 @@ public class ObrResolver implements Resolver {
         this.repositoryAdmin = repositoryAdmin;
     }
 
-    public List<String> resolve(Feature feature) throws Exception {
+    public List<BundleInfo> resolve(Feature feature) throws Exception {
         List<Requirement> reqs = new ArrayList<Requirement>();
         List<Resource> ress = new ArrayList<Resource>();
-        for (String bundleUrl : feature.getBundles()) {
+        Map<Object, BundleInfo> infos = new HashMap<Object, BundleInfo>();
+        for (BundleInfo bundleInfo : feature.getBundles()) {
             try {
-                URL url = new URL(bundleUrl);
-                ress.add(repositoryAdmin.getHelper().createResource(url));
+                URL url = new URL(bundleInfo.getLocation());
+                Resource res = repositoryAdmin.getHelper().createResource(url);
+                ress.add(res);
+                infos.put(res, bundleInfo);
             } catch (MalformedURLException e) {
-                reqs.add(parseRequirement(bundleUrl));
+                Requirement req = parseRequirement(bundleInfo.getLocation());
+                reqs.add(req);
+                infos.put(req, bundleInfo);
             }
         }
 
@@ -90,11 +98,26 @@ public class ObrResolver implements Resolver {
             throw new Exception("Can not resolve feature:\n" + w.toString());
         }
 
-        List<String> urls = new ArrayList<String>();
+        List<BundleInfo> bundles = new ArrayList<BundleInfo>();
         for (Resource res : resolver.getRequiredResources()) {
-            urls.add(res.getURI());
+            BundleInfo info = infos.get(res);
+            if (info == null) {
+                Reason[] reasons = resolver.getReason(res);
+                if (reasons != null) {
+                    for (Reason r : reasons) {
+                        info = infos.get(r);
+                        if (info != null) {
+                            break;
+                        }
+                    }
+                }
+            }
+            if (info == null) {
+                info = new BundleInfoImpl(res.getURI());
+            }
+            bundles.add(info);
         }
-        return urls;
+        return bundles;
     }
 
     protected void printUnderline(PrintWriter out, int length) {

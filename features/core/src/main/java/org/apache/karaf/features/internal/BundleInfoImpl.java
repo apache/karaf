@@ -21,34 +21,35 @@ import org.apache.karaf.features.BundleInfo;
 /**
  * A holder of bundle info
  */
-public class BundleImpl implements BundleInfo {
+public class BundleInfoImpl implements BundleInfo {
 
     private int startLevel;
     private String location;
     private boolean start;
     
 
-    public BundleImpl() {
+    public BundleInfoImpl() {
     }
 
-    public BundleImpl(String location) {
+    public BundleInfoImpl(String location) {
     	this.location = location;
     }
     
     
-    public BundleImpl(String location, boolean start) {
+    public BundleInfoImpl(String location, boolean start) {
     	this.location = location;
-        this.setStart(start);
+        this.start = start;
     }
     
-    public BundleImpl(String location, Integer startLevel) {
+    public BundleInfoImpl(String location, int startLevel) {
     	this.location = location;
         this.startLevel = startLevel;
     }
     
-    public BundleImpl(String location, Integer startLevel, boolean start) {
+    public BundleInfoImpl(String location, int startLevel, boolean start) {
     	this.location = location;
         this.startLevel = startLevel;
+        this.start = start;
     }
     
     public void setStartLevel(Integer startLevel) {

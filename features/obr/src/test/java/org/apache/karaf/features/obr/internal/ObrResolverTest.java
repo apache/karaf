@@ -18,14 +18,18 @@ package org.apache.karaf.features.obr.internal;
 
 import java.util.List;
 
+import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
+import org.apache.felix.bundlerepository.impl.ReasonImpl;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.internal.FeatureImpl;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.junit.Test;
 
 import static org.easymock.EasyMock.createMock;
@@ -39,18 +43,18 @@ public class ObrResolverTest {
 
     @Test
     public void testResolver() throws Exception {
-        String requirement = "bundle:(&(symbolicname=org.apache.camel.camel-blueprint)(version>=2.4.0)(version<2.4.1))";
+        final String requirement = "bundle:(&(symbolicname=org.apache.camel.camel-blueprint)(version>=2.4.0)(version<2.4.1))";
 
-        FeatureImpl f = new FeatureImpl("f1", "1.0");
+        final FeatureImpl f = new FeatureImpl("f1", "1.0");
         f.setResolver("obr");
-        f.addBundle(requirement);
-        RepositoryAdmin admin = createMock(RepositoryAdmin.class);
-        Resolver resolver = createMock(Resolver.class);
-        Resource resource = createMock(Resource.class);
-        ObrResolver obrResolver = new ObrResolver();
+        f.addBundle(new BundleInfoImpl(requirement));
+        final RepositoryAdmin admin = createMock(RepositoryAdmin.class);
+        final Resolver resolver = createMock(Resolver.class);
+        final Resource resource = createMock(Resource.class);
+        final ObrResolver obrResolver = new ObrResolver();
         obrResolver.setRepositoryAdmin(admin);
 
-        Capture<Requirement> captureReq = new Capture<Requirement>();
+        final Capture<Requirement> captureReq = new Capture<Requirement>();
 
         expect(admin.getHelper()).andReturn(new DataModelHelperImpl()).anyTimes();
         expect(admin.getSystemRepository()).andReturn(createMock(org.apache.felix.bundlerepository.Repository.class));
@@ -60,13 +64,18 @@ public class ObrResolverTest {
         resolver.add(EasyMock.capture(captureReq));
         expect(resolver.resolve(Resolver.NO_OPTIONAL_RESOURCES)).andReturn(true);
         expect(resolver.getRequiredResources()).andReturn(new Resource[] { resource });
+        expect(resolver.getReason(resource)).andAnswer(new IAnswer() {
+            public Object answer() throws Throwable {
+                return new Reason[] { new ReasonImpl( resource, captureReq.getValue()) };
+            }
+        });
         expect(resource.getURI()).andReturn("foo:bar");
         replay(admin, resolver, resource);
 
-        List<String> bundles = obrResolver.resolve(f);
+        List<BundleInfo> bundles = obrResolver.resolve(f);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        assertEquals("foo:bar", bundles.get(0));
+        assertEquals("foo:bar", bundles.get(0).getLocation());
         assertEquals(obrResolver.parseRequirement(requirement).toString(), captureReq.getValue().toString());
         verify(admin, resolver, resource);
     }
