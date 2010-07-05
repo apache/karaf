@@ -21,9 +21,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>felix-parent</artifactId>
-        <version>1.2.1</version>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>7</version>
     </parent>
 
     <groupId>org.apache.karaf</groupId>
@@ -59,8 +59,39 @@
 
     <issueManagement>
         <system>jira</system>
-        <url>https://issues.apache.org/jira/browse/FELIX/component/12312824</url>
+        <url>https://issues.apache.org/jira/browse/KARAF</url>
     </issueManagement>
+
+    <mailingLists>
+        <mailingList>
+            <name>Karaf Dev</name>
+            <subscribe>dev-subscribe@karaf.apache.org</subscribe>
+            <unsubscribe>dev-unsubscribe@karaf.apache.org</unsubscribe>
+            <post>-</post>
+            <archive>http://www.mail-archive.com/dev%karaf.apache.org/</archive>
+        </mailingList>
+        <mailingList>
+            <name>Karaf User</name>
+            <subscribe>user-subscribe@karaf.apache.org</subscribe>
+            <unsubscribe>user-unsubscribe@karaf.apache.org</unsubscribe>
+            <post>-</post>
+            <archive>http://www.mail-archive.com/user%40karaf.apache.org/</archive>
+        </mailingList>
+        <mailingList>
+            <name>Karaf Commits</name>
+            <subscribe>commits-subscribe@karaf.apache.org</subscribe>
+            <unsubscribe>commits-unsubscribe@karaf.apache.org</unsubscribe>
+            <post>-</post>
+            <archive>http://www.mail-archive.com/commits%40karaf.apache.org/</archive>
+        </mailingList>
+        <mailingList>
+            <name>Karaf Issues</name>
+            <subscribe>issues-subscribe@karaf.apache.org</subscribe>
+            <unsubscribe>issues-unsubscribe@karaf.apache.org</unsubscribe>
+            <post>-</post>
+            <archive>http://www.mail-archive.com/issues%40karaf.apache.org/</archive>
+        </mailingList>
+    </mailingLists>
 
     <prerequisites>
         <maven>2.0.7</maven>
@@ -745,6 +776,20 @@
         </dependencies>
     </dependencyManagement>
 
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <defaultGoal>install</defaultGoal>
 
@@ -929,7 +974,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.3</version>
+                <version>2.4</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -949,7 +994,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.1.2</version>
+                <version>2.2</version>
             </plugin>
         </plugins>
     </reporting>
