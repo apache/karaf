@@ -44,6 +44,16 @@
         <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
         <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
+    <feature name="spring2-dm" version="${spring.osgi.version}">
+        <feature version="${spring2.version}">spring</feature>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-io/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
+    </feature>
+
     <feature name="wrapper" version="${project.version}">
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
     </feature>
