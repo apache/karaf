@@ -17,8 +17,12 @@
 package org.apache.karaf.features.internal;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -50,9 +54,6 @@ import org.osgi.framework.Version;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.service.prefs.Preferences;
-import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -79,7 +80,6 @@ public class FeaturesServiceImpl implements FeaturesService {
     private PackageAdmin packageAdmin;
     private StartLevel startLevel;
     private long resolverTimeout = 5000;
-    private PreferencesService preferences;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
     private Map<String, Map<String, Feature>> features;
@@ -111,14 +111,6 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setPackageAdmin(PackageAdmin packageAdmin) {
         this.packageAdmin = packageAdmin;
-    }
-
-    public PreferencesService getPreferences() {
-        return preferences;
-    }
-
-    public void setPreferences(PreferencesService preferences) {
-        this.preferences = preferences;
     }
 
     public StartLevel getStartLevel() {
@@ -823,11 +815,17 @@ public class FeaturesServiceImpl implements FeaturesService {
     
     protected void saveState() {
         try {
-            Preferences prefs = preferences.getUserPreferences("FeaturesServiceState");
-            saveSet(prefs.node("repositories"), repositories.keySet());
-            saveMap(prefs.node("features"), installed);
-            prefs.putBoolean("bootFeaturesInstalled", bootFeaturesInstalled);
-            prefs.flush();
+            File file = bundleContext.getDataFile("FeaturesServiceState.properties");
+            Properties props = new Properties();
+            saveSet(props, "repositories.", repositories.keySet());
+            saveMap(props, "features.", installed);
+            props.put("bootFeaturesInstalled", Boolean.toString(bootFeaturesInstalled));
+            OutputStream os = new FileOutputStream(file);
+            try {
+                props.store(new FileOutputStream(file), "FeaturesService State");
+            } finally {
+                os.close();
+            }
         } catch (Exception e) {
             LOGGER.error("Error persisting FeaturesService state", e);
         }
@@ -835,56 +833,67 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected boolean loadState() {
         try {
-            Preferences prefs = preferences.getUserPreferences("FeaturesServiceState");
-            if (prefs.nodeExists("repositories")) {
-                Set<URI> repositories = loadSet(prefs.node("repositories"));
-                for (URI repo : repositories) {
-                    internalAddRepository(repo);
-                }
-                installed = loadMap(prefs.node("features"));
-                for (Feature f : installed.keySet()) {
-                    callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, true));
-                }
-                bootFeaturesInstalled = prefs.getBoolean("bootFeaturesInstalled", false);
-                return true;
+            File file = bundleContext.getDataFile("FeaturesServiceState.properties");
+            if (!file.exists()) {
+                return false;
             }
+            Properties props = new Properties();
+            InputStream is = new FileInputStream(file);
+            try {
+                props.load(is);
+            } finally {
+                is.close();
+            }
+            Set<URI> repositories = loadSet(props, "repositories.");
+            for (URI repo : repositories) {
+                internalAddRepository(repo);
+            }
+            installed = loadMap(props, "features.");
+            for (Feature f : installed.keySet()) {
+                callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, true));
+            }
+            bootFeaturesInstalled = Boolean.parseBoolean((String) props.get("bootFeaturesInstalled"));
+            return true;
         } catch (Exception e) {
             LOGGER.error("Error loading FeaturesService state", e);
         }
         return false;
     }
 
-    protected void saveSet(Preferences node, Set<URI> set) throws BackingStoreException {
+    protected void saveSet(Properties props, String prefix, Set<URI> set) {
         List<URI> l = new ArrayList<URI>(set);
-        node.clear();
-        node.putInt("count", l.size());
+        props.clear();
+        props.put(prefix + "count", Integer.toString(l.size()));
         for (int i = 0; i < l.size(); i++) {
-            node.put("item." + i, l.get(i).toString());
+            props.put(prefix + "item." + i, l.get(i).toString());
         }
     }
 
-    protected Set<URI> loadSet(Preferences node) {
+    protected Set<URI> loadSet(Properties props, String prefix) {
         Set<URI> l = new HashSet<URI>();
-        int count = node.getInt("count", 0);
-        for (int i = 0; i < count; i++) {
-            l.add(URI.create(node.get("item." + i, null)));
+        String countStr = (String) props.get(prefix + "count");
+        if (countStr != null) {
+            int count = Integer.parseInt(countStr);
+            for (int i = 0; i < count; i++) {
+                l.add(URI.create((String) props.get(prefix + "item." + i)));
+            }
         }
         return l;
     }
 
-    protected void saveMap(Preferences node, Map<Feature, Set<Long>> map) throws BackingStoreException {
-        node.clear();
+    protected void saveMap(Properties props, String prefix, Map<Feature, Set<Long>> map) {
         for (Map.Entry<Feature, Set<Long>> entry : map.entrySet()) {
             Feature key = entry.getKey();
             String val = createValue(entry.getValue());
-            node.put(key.toString(), val);
+            props.put(prefix + key.toString(), val);
         }
     }
 
-    protected Map<Feature, Set<Long>> loadMap(Preferences node) throws BackingStoreException {
+    protected Map<Feature, Set<Long>> loadMap(Properties props, String prefix) {
         Map<Feature, Set<Long>> map = new HashMap<Feature, Set<Long>>();
-        for (String key : node.keys()) {
-            String val = node.get(key, null);
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+            String key = (String) e.nextElement();
+            String val = (String) props.get(key);
             Set<Long> set = readValue(val);
             map.put(FeatureImpl.valueOf(key), set);
         }

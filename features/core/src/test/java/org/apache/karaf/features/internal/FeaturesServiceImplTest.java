@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +25,8 @@ import java.util.Map;
 import junit.framework.TestCase;
 import org.apache.karaf.features.Feature;
 import org.apache.felix.utils.manifest.Clause;
-import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.service.prefs.Preferences;
-import org.osgi.service.prefs.PreferencesService;
+import org.easymock.EasyMock;
+import org.osgi.framework.BundleContext;
 
 import static org.easymock.EasyMock.*;
 
@@ -34,6 +35,12 @@ import static org.easymock.EasyMock.*;
  */
 public class FeaturesServiceImplTest extends TestCase {
     
+    File dataFile;
+
+    protected void setUp() throws IOException {
+        dataFile = File.createTempFile("features", null, null);
+    }
+
     public void testGetFeature() throws Exception {
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
@@ -92,20 +99,12 @@ public class FeaturesServiceImplTest extends TestCase {
         assertSame("2.0.0", impl.getFeature("transaction", FeatureImpl.DEFAULT_VERSION).getVersion());
     }
 
-    public void testStartDoesNotFailWithOneInvalidUri() throws BackingStoreException {
-        PreferencesService preferencesService = createNiceMock(PreferencesService.class);
-        Preferences prefs = createNiceMock(Preferences.class);
-        Preferences emptyPrefs = createNiceMock(Preferences.class);
-        expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
-        replay(preferencesService);
-
-        expect(prefs.node("repositories")).andReturn(emptyPrefs);
-        expect(prefs.node("features")).andReturn(emptyPrefs);
-        replay(prefs);
-
+    public void testStartDoesNotFailWithOneInvalidUri()  {
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        replay(bundleContext);
         FeaturesServiceImpl service = new FeaturesServiceImpl();
-        service.setPreferences(preferencesService);
-
+        service.setBundleContext(bundleContext);
         try {
             service.setUrls("mvn:inexistent/features/1.0/xml/features");
             service.start();

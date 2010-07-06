@@ -17,14 +17,6 @@
       limitations under the License.
 -->
 <features name="karaf-${project.version}">
-    <feature name="spring" version="${spring2.version}">
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.version}</bundle>
-        <bundle>mvn:org.springframework/spring-core/${spring2.version}</bundle>
-        <bundle>mvn:org.springframework/spring-beans/${spring2.version}</bundle>
-        <bundle>mvn:org.springframework/spring-aop/${spring2.version}</bundle>
-        <bundle>mvn:org.springframework/spring-context/${spring2.version}</bundle>
-        <bundle>mvn:org.springframework/spring-context-support/${spring2.version}</bundle>
-    </feature>
     <feature name="spring" version="${spring.version}">
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.version}</bundle>
         <bundle>mvn:org.springframework/spring-core/${spring.version}</bundle>
@@ -44,16 +36,6 @@
         <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
         <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
-    <feature name="spring2-dm" version="${spring.osgi.version}">
-        <feature version="${spring2.version}">spring</feature>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.version}</bundle>
-        <bundle>mvn:org.springframework.osgi/spring-osgi-io/${spring.osgi.version}</bundle>
-        <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
-        <bundle>mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
-        <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
-        <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-    </feature>
-
     <feature name="wrapper" version="${project.version}">
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
     </feature>

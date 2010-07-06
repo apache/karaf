@@ -112,7 +112,6 @@
         <felix.gogo.version>0.4.0</felix.gogo.version>
         <felix.osgi.version>1.4.0</felix.osgi.version>
         <felix.plugin.version>2.1.0</felix.plugin.version>
-        <felix.prefs.version>1.0.4</felix.prefs.version>
         <felix.utils.version>1.0.0</felix.utils.version>
         <felix.webconsole.version>3.1.0</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
@@ -403,11 +402,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.configadmin</artifactId>
                 <version>${felix.configadmin.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.prefs</artifactId>
-                <version>${felix.prefs.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
