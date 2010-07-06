@@ -30,7 +30,7 @@ WRAPPER_CONF="${karaf.base}/etc/${APP_NAME}-wrapper.conf"
 PRIORITY=
 
 # Location of the pid file.
-PIDDIR="${karaf.base}/data"
+PIDDIR="${karaf.data}"
 
 # If uncommented, causes the Wrapper to be shutdown using an anchor file.
 #  When launched with the 'start' command, it will also ignore all INT and

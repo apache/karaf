@@ -55,7 +55,7 @@ public class BootstrapLogManager {
                 fis = new FileInputStream(System.getProperty("karaf.base") + "/etc/org.ops4j.pax.logging.cfg");
                 props.load(fis);
             } catch (IOException e) {
-                props.setProperty("log4j.appender.out.file", "${karaf.base}/data/log/karaf.log");
+                props.setProperty("log4j.appender.out.file", "${karaf.data}/log/karaf.log");
             } finally {
                 if (fis != null) { 
                     try {

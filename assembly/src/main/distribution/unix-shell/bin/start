@@ -82,6 +82,16 @@ locateBase() {
     fi
 }
 
+locateData() {
+    if [ "x$KARAF_DATA" != "x" ]; then
+        if [ ! -d "$KARAF_DATA" ]; then
+            die "KARAF_DATA is not valid: $KARAF_DATA"
+        fi
+    else
+        KARAF_DATA=$KARAF_BASE/data
+    fi
+}
+
 init() {
     # Determine if there is special OS handling we must perform
     detectOS
@@ -91,19 +101,23 @@ init() {
 
     # Locate the Karaf base directory
     locateBase
+    
+    # Locate the Karaf data directory
+    locateData
 }
 
 run() {
     if $cygwin; then
         KARAF_HOME=`cygpath --path --windows "$KARAF_HOME"`
         KARAF_BASE=`cygpath --path --windows "$KARAF_BASE"`
+        KARAF_DATA=`cygpath --path --windows "$KARAF_DATA"`
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
     # Ensure the log directory exists -- we need to have a place to redirect stdout/stderr
-    if [ ! -d "$KARAF_HOME/data/log" ]; then
-        mkdir -p "$KARAF_HOME/data/log"
+    if [ ! -d "$KARAF_DATA/log" ]; then
+        mkdir -p "$KARAF_DATA/log"
     fi
-    exec "$KARAF_HOME"/bin/karaf server "$@" >> "$KARAF_HOME/data/log/karaf.out" 2>&1 &
+    exec "$KARAF_HOME"/bin/karaf server "$@" >> "$KARAF_DATA/karaf.out" 2>&1 &
 }
 
 main() {

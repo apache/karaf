@@ -34,13 +34,13 @@ public class Utils {
         // Use the system property if specified.
         String path = System.getProperty(Main.PROP_KARAF_HOME);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + Main.PROP_KARAF_HOME + " system property");
+            rc = validateDirectoryExists(path, "Invalid " + Main.PROP_KARAF_HOME + " system property", false);
         }
 
         if (rc == null) {
             path = System.getenv(Main.ENV_KARAF_HOME);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + Main.ENV_KARAF_HOME + " environment variable");
+                rc = validateDirectoryExists(path, "Invalid " + Main.ENV_KARAF_HOME + " environment variable", false);
             }
         }
 
@@ -75,40 +75,48 @@ public class Utils {
         return rc;
     }
 
-    public static File validateDirectoryExists(String path, String errPrefix) {
+    public static File validateDirectoryExists(String path, String errPrefix, boolean createDirectory) {
         File rc;
         try {
             rc = new File(path).getCanonicalFile();
         } catch (IOException e) {
             throw new IllegalArgumentException(errPrefix + " '" + path + "' : " + e.getMessage());
         }
-        if (!rc.exists()) {
+        if (!rc.exists() && !createDirectory) {
             throw new IllegalArgumentException(errPrefix + " '" + path + "' : does not exist");
+        }
+        if (!rc.exists()) {
+            try {
+                rc.mkdirs();
+            } catch (SecurityException se) {
+                throw new IllegalArgumentException(errPrefix + " '" + path + "' : " + se.getMessage());
+            }
         }
         if (!rc.isDirectory()) {
             throw new IllegalArgumentException(errPrefix + " '" + path + "' : is not a directory");
         }
         return rc;
     }
-
-    public static File getKarafBase(File defaultValue) {
+    
+    public static File getKarafDirectory(String directoryProperty, String directoryEnvironmentVariable, File defaultValue, boolean create) {
         File rc = null;
-
-        String path = System.getProperty(Main.PROP_KARAF_BASE);
+        
+        String path = System.getProperty(directoryProperty);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + Main.PROP_KARAF_BASE + " system property");
+            rc = validateDirectoryExists(path, "Invalid " + directoryProperty + " system property", create);
         }
-
+        
         if (rc == null) {
-            path = System.getenv(Main.ENV_KARAF_BASE);
+            path = System.getenv(directoryEnvironmentVariable);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + Main.ENV_KARAF_BASE + " environment variable");
+                rc = validateDirectoryExists(path, "Invalid " + directoryEnvironmentVariable  + " environment variable", create);
             }
         }
-
+        
         if (rc == null) {
             rc = defaultValue;
         }
+        
         return rc;
     }
 }

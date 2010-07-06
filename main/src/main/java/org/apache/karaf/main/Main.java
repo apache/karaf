@@ -98,6 +98,16 @@ public class Main {
      * holds the configuration and data for a Karaf instance.
      */
     public static final String ENV_KARAF_BASE = "KARAF_BASE";
+    /**
+     * The system property for specifying the Karaf data directory. The data directory
+     * holds the bundles data and cache for a Karaf instance.
+     */
+    public static final String PROP_KARAF_DATA = "karaf.data";
+    /**
+     * The environment variable for specifying the Karaf data directory. The data directory
+     * holds the bundles data and cache for a Karaf instance.
+     */
+    public static final String ENV_KARAF_DATA = "KARAF_DATA";
 
     /**
      * Config property which identifies directories which contain bundles to be loaded by SMX
@@ -145,6 +155,7 @@ public class Main {
 
     private File karafHome;
     private File karafBase;
+    private File karafData;
     private Properties configProps = null;
     private Framework framework = null;
     private final String[] args;
@@ -162,13 +173,16 @@ public class Main {
 
     public void launch() throws Exception {
         karafHome = Utils.getKarafHome();
-        karafBase = Utils.getKarafBase(karafHome);
+        karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false);
+        karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase.getPath() + "/data"), true);
 
         //System.out.println("Karaf Home: "+main.karafHome.getPath());
         //System.out.println("Karaf Base: "+main.karafBase.getPath());
+        //System.out.println("Karaf Data: "+main.karafData.getPath());
 
         System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
+        System.setProperty(PROP_KARAF_DATA, karafData.getPath());
 
         // Load system properties.
         loadSystemProperties(karafBase);
@@ -188,7 +202,7 @@ public class Main {
         processSecurityProperties(configProps);
 
         if (configProps.getProperty(Constants.FRAMEWORK_STORAGE) == null) {
-            File storage = new File(karafBase.getPath(), "data/cache");
+            File storage = new File(karafData.getPath(), "cache");
             try {
                 storage.mkdirs();
             } catch (SecurityException se) {
