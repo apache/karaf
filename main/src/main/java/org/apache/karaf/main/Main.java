@@ -161,6 +161,8 @@ public class Main {
 
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
+    public static final String INCLUDES_PROPERTY = "${includes}";
+
     Logger LOG = Logger.getLogger(this.getClass().getName());
 
     private File karafHome;
@@ -733,8 +735,8 @@ public class Main {
         }
 
 
-        Properties configProps = loadPropertiesFile(configPropURL);
-        Properties startupProps = loadPropertiesFile(startupPropURL);
+        Properties configProps = loadPropertiesFile(configPropURL, false);
+        Properties startupProps = loadPropertiesFile(startupPropURL, true);
 
         String defaultRepo = System.getProperty(DEFAULT_REPO, "system");
 
@@ -787,7 +789,7 @@ public class Main {
         return configProps;
     }
 
-    protected static Properties loadPropertiesFile(URL configPropURL) throws Exception {
+    protected static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
         // Read the properties file.
         Properties configProps = new Properties();
         InputStream is = null;
@@ -797,21 +799,40 @@ public class Main {
             is.close();
         }
         catch (FileNotFoundException ex) {
-        	if (configPropURL.getFile().lastIndexOf(STARTUP_PROPERTIES_FILE_NAME) != -1) {
-        		throw ex;
-        	}
+            if (failIfNotFound) {
+                throw ex;
+            }
         }
         catch (Exception ex) {
-            System.err.println(
-                    "Error loading config properties from " + configPropURL);
+            System.err.println("Error loading config properties from " + configPropURL);
             System.err.println("Main: " + ex);
+            return configProps;
+        } finally {
             try {
-                if (is != null) is.close();
+                if (is != null) {
+                    is.close();
+                }
             }
             catch (IOException ex2) {
                 // Nothing we can do.
             }
-            return null;
+        }
+        String includes = configProps.getProperty(INCLUDES_PROPERTY);
+        if (includes != null) {
+            StringTokenizer st = new StringTokenizer(includes, "\" ", true);
+            if (st.countTokens() > 0) {
+                String location;
+                do {
+                    location = nextLocation(st);
+                    if (location != null) {
+                        URL url = new URL(configPropURL, location);
+                        Properties props = loadPropertiesFile(url, true);
+                        configProps.putAll(props);
+                    }
+                }
+                while (location != null);
+            }
+            configProps.remove(INCLUDES_PROPERTY);
         }
         return configProps;
     }

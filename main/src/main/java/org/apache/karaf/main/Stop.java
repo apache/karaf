@@ -46,7 +46,7 @@ public class Stop {
 
         File file = new File(new File(karafBase, "etc"), Main.CONFIG_PROPERTIES_FILE_NAME);
         URL configPropURL = file.toURI().toURL();
-        Properties props = Main.loadPropertiesFile(configPropURL);
+        Properties props = Main.loadPropertiesFile(configPropURL, false);
         Main.copySystemProperties(props);
 
         // Perform variable substitution for system properties.
