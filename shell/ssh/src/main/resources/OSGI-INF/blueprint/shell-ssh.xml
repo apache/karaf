@@ -27,7 +27,11 @@
         <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl" factory-method="getConverter" />
     </type-converters>
 
-    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
+        <ext:default-properties>
+            <ext:property name="startRemoteShell" value="true" />
+        </ext:default-properties>
+    </ext:property-placeholder>
 
     <cm:property-placeholder persistent-id="org.apache.karaf.shell">
         <cm:default-properties>

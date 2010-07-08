@@ -98,17 +98,17 @@ public class Utils {
         return rc;
     }
     
-    public static File getKarafDirectory(String directoryProperty, String directoryEnvironmentVariable, File defaultValue, boolean create) {
+    public static File getKarafDirectory(String directoryProperty, String directoryEnvironmentVariable, File defaultValue, boolean create, boolean validate) {
         File rc = null;
         
         String path = System.getProperty(directoryProperty);
-        if (path != null) {
+        if (path != null && validate) {
             rc = validateDirectoryExists(path, "Invalid " + directoryProperty + " system property", create);
         }
         
         if (rc == null) {
             path = System.getenv(directoryEnvironmentVariable);
-            if (path != null) {
+            if (path != null && validate) {
                 rc = validateDirectoryExists(path, "Invalid " + directoryEnvironmentVariable  + " environment variable", create);
             }
         }

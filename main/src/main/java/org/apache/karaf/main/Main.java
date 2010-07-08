@@ -108,6 +108,16 @@ public class Main {
      * holds the bundles data and cache for a Karaf instance.
      */
     public static final String ENV_KARAF_DATA = "KARAF_DATA";
+    /**
+     * The system property for specifying the Karaf data directory. The data directory
+     * holds the bundles data and cache for a Karaf instance.
+     */
+    public static final String PROP_KARAF_INSTANCES = "karaf.instances";
+    /**
+     * The system property for specifying the Karaf data directory. The data directory
+     * holds the bundles data and cache for a Karaf instance.
+     */
+    public static final String ENV_KARAF_INSTANCES = "KARAF_INSTANCES";
 
     /**
      * Config property which identifies directories which contain bundles to be loaded by SMX
@@ -156,6 +166,7 @@ public class Main {
     private File karafHome;
     private File karafBase;
     private File karafData;
+    private File karafInstances;
     private Properties configProps = null;
     private Framework framework = null;
     private final String[] args;
@@ -173,8 +184,9 @@ public class Main {
 
     public void launch() throws Exception {
         karafHome = Utils.getKarafHome();
-        karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false);
-        karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase.getPath() + "/data"), true);
+        karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
+        karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+        karafInstances = Utils.getKarafDirectory(Main.PROP_KARAF_INSTANCES, Main.ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
         //System.out.println("Karaf Home: "+main.karafHome.getPath());
         //System.out.println("Karaf Base: "+main.karafBase.getPath());
@@ -183,6 +195,7 @@ public class Main {
         System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());
+        System.setProperty(PROP_KARAF_INSTANCES, karafInstances.getPath());
 
         // Load system properties.
         loadSystemProperties(karafBase);
@@ -377,9 +390,9 @@ public class Main {
             boolean isRoot = karafHome.equals(karafBase);
             
             if (instanceName != null) {
-                String storage = System.getProperty("storage.location");
+                String storage = System.getProperty("karaf.instances");
                 if (storage == null) {
-                    throw new Exception("System property 'storage.location' is not set. \n" +
+                    throw new Exception("System property 'karaf.instances' is not set. \n" +
                         "This property needs to be set to the full path of the instance.properties file.");
                 }
                 File storageFile = new File(storage);

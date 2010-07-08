@@ -22,7 +22,7 @@
            default-activation="lazy">
 
     <bean id="adminService" class="org.apache.karaf.admin.internal.AdminServiceImpl" init-method="init">
-        <property name="storageLocation" value="${karaf.home}/instances" />
+        <property name="storageLocation" value="${karaf.instances}" />
     </bean>
 
     <service ref="adminService" interface="org.apache.karaf.admin.AdminService" />

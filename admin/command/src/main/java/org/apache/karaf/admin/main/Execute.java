@@ -73,9 +73,9 @@ public class Execute {
             exit(-1);
         }
 
-        String storage = System.getProperty("storage.location");
+        String storage = System.getProperty("karaf.instances");
         if (storage == null) {
-            System.err.println("System property 'storage.location' is not set. \n" +
+            System.err.println("System property 'karaf.instances' is not set. \n" +
         		"This property needs to be set to the full path of the instance.properties file.");
             exit(-1);
         }

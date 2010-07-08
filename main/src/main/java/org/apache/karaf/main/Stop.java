@@ -34,8 +34,8 @@ public class Stop {
 
     public static void main(String[] args) throws Exception {
         File karafHome = Utils.getKarafHome();
-        File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false);
-        File karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase.getPath() + "/data"), true);
+        File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
+        File karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase.getPath(), "data"), true, true);
 
         System.setProperty(Main.PROP_KARAF_HOME, karafHome.getPath());
         System.setProperty(Main.PROP_KARAF_BASE, karafBase.getPath());

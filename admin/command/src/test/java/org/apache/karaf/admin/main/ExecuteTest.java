@@ -93,7 +93,7 @@ public class ExecuteTest extends TestCase {
             assertEquals("-1", re.getMessage());
             
             String s = new String(baos.toByteArray());            
-            assertTrue(s.contains("storage.location"));
+            assertTrue(s.contains("karaf.instances"));
             assertTrue(s.contains("instance.properties"));
         } finally {
             System.setErr(oldErr);
@@ -106,13 +106,13 @@ public class ExecuteTest extends TestCase {
         assertFalse("Precondition failed", 
             tempFile.getParentFile().getParentFile().getCanonicalPath().equals(System.getProperty("user.dir")));
 
-        System.setProperty("storage.location", tempFile.getCanonicalPath());
+        System.setProperty("karaf.instances", tempFile.getCanonicalPath());
         try {
             Execute.main(new String [] {"list"});            
             assertTrue(tempFile.getParentFile().getParentFile().getCanonicalPath().equals(System.getProperty("user.dir")));
         } finally {
             System.setProperties(oldProps);
-            assertNull("Postcondition failed", System.getProperty("storage.location"));
+            assertNull("Postcondition failed", System.getProperty("karaf.instances"));
             delete(tempFile);
         }        
     }
