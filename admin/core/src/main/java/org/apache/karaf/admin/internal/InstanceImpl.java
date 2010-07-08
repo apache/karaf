@@ -240,6 +240,7 @@ public class InstanceImpl implements Instance {
             Properties props = loadPropertiesFile(configPropURL);
             props.put("karaf.base", new File(location).getCanonicalPath());
             props.put("karaf.home", System.getProperty("karaf.home"));
+            props.put("karaf.data", new File(new File(location), "data").getCanonicalPath());
             for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
                 String name = (String) e.nextElement();
                 props.setProperty(name,
