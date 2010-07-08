@@ -31,6 +31,7 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularDataSupport;
 
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
 
@@ -68,8 +69,8 @@ public class JmxFeature {
             itemValues[0] = feature.getName();
             itemValues[1] = feature.getVersion();
             itemValues[2] = getFeatureIdentifierTable(feature.getDependencies());
-            itemValues[3] = feature.getBundles().toArray(new String[feature.getBundles().size()]);
-            itemValues[4]  = getConfigTable(feature.getConfigurations());
+            itemValues[3] = getBundleUris(feature.getBundles());
+            itemValues[4] = getConfigTable(feature.getConfigurations());
             itemValues[5] = installed;
             data = new CompositeDataSupport(FEATURE, itemNames, itemValues);
         } catch (OpenDataException e) {
@@ -98,6 +99,14 @@ public class JmxFeature {
             table.put(ident);
         }
         return table;
+    }
+
+    static String[] getBundleUris(List<BundleInfo> infos) {
+        String[] array = new String[infos.size()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = infos.get(i).getLocation();
+        }
+        return array;
     }
 
     static TabularData getConfigTable(Map<String, Map<String, String>> configs) throws OpenDataException {
