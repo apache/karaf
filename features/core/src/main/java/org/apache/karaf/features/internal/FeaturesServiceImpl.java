@@ -575,10 +575,8 @@ public class FeaturesServiceImpl implements FeaturesService {
             
             // Define the startLevel for the bundle when defined
             int ibsl = bundleInfo.getStartLevel();
-            if (ibsl > 0 && ibsl < 100) {
-                StartLevel sl = (StartLevel) bundleContext.getService(
-                		bundleContext.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName()));
-                sl.setInitialBundleStartLevel(ibsl);           	
+            if (ibsl > 0) {
+                getStartLevel().setBundleStartLevel(b, ibsl);
             }
 
             state.bundles.add(b);
