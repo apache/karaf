@@ -891,9 +891,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         Map<Feature, Set<Long>> map = new HashMap<Feature, Set<Long>>();
         for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String key = (String) e.nextElement();
-            String val = (String) props.get(key);
-            Set<Long> set = readValue(val);
-            map.put(FeatureImpl.valueOf(key), set);
+            if (key.startsWith(prefix)) {
+                String val = (String) props.get(key);
+                Set<Long> set = readValue(val);
+                map.put(FeatureImpl.valueOf(key.substring(prefix.length())), set);
+            }
         }
         return map;
     }
