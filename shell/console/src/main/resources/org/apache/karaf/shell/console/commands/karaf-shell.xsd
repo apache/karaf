@@ -20,10 +20,10 @@
 
 <!-- $Rev: 699828 $ $Date: 2008-09-28 16:35:27 +0200 (Sun, 28 Sep 2008) $ -->
 
-<xsd:schema xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0"
+<xsd:schema xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-        targetNamespace="http://felix.apache.org/karaf/xmlns/shell/v1.0.0"
+        targetNamespace="http://karaf.apache.org/xmlns/shell/v1.0.0"
         elementFormDefault="qualified"
         attributeFormDefault="unqualified">
 

@@ -19,7 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="shell/cat">
             <action class="org.apache.karaf.shell.commands.CatAction"/>
         </command>

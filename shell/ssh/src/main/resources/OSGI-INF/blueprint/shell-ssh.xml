@@ -42,7 +42,7 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="ssh/ssh">
             <action class="org.apache.karaf.shell.ssh.SshAction">
                 <property name="sshClientId">

@@ -18,10 +18,10 @@
 
 -->
 <xs:schema elementFormDefault='qualified'
-           targetNamespace='http://felix.apache.org/karaf/xmlns/jaas/v1.0.0'
+           targetNamespace='http://karaf.apache.org/xmlns/jaas/v1.0.0'
            xmlns:xs='http://www.w3.org/2001/XMLSchema'
            xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:tns='http://felix.apache.org/karaf/xmlns/jaas/v1.0.0'>
+           xmlns:tns='http://karaf.apache.org/xmlns/jaas/v1.0.0'>
 
     <xs:import namespace="http://www.osgi.org/xmlns/blueprint/v1.0.0"/>
 
