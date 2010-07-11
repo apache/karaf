@@ -99,6 +99,8 @@
                                     <includes>
                                         <include>config.properties</include>
                                         <include>startup.properties</include>
+                                        <include>jre.properties</include>
+                                        <include>custom.properties</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -134,6 +136,8 @@
                         <Include-Resource>
                             {maven-resources},
                             org/apache/karaf/testing/config.properties=target/classes/config.properties,
+                            org/apache/karaf/testing/jre.properties=target/classes/jre.properties,
+                            org/apache/karaf/testing/custom.properties=target/classes/custom.properties,
                             org/apache/karaf/testing/startup.properties=target/classes/startup.properties
                         </Include-Resource>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>

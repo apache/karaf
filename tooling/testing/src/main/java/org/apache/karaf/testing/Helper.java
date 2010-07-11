@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
@@ -58,6 +59,8 @@ import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
  *
  */
 public final class Helper {
+	
+	public static final String INCLUDES_PROPERTY = "${includes}";
 
     private Helper() {
     }
@@ -148,8 +151,12 @@ public final class Helper {
             String value = configProps.getProperty(name);
             value = align(value);
             if ("org.osgi.framework.system.packages".equals(name)) {
-                String extra = align(configProps.getProperty("org.osgi.framework.system.packages.extra"));
-                vmOptions = vmOptions + " -D" + name + "=" + value + "," + extra;
+            	String extra = align(configProps.getProperty("org.osgi.framework.system.packages.extra"));
+            	if (extra != null && extra.length() > 0) {
+                	vmOptions = vmOptions + " -D" + name + "=" + value + "," + extra;
+                } else {
+                	vmOptions = vmOptions + " -D" + name + "=" + value;
+                }
             } else if ("org.osgi.framework.bootdelegation".equals(name)) {
                 options.add(bootDelegationPackages(value));
             } else {
@@ -270,6 +277,23 @@ public final class Helper {
                 props.load(is);
             } finally {
                 is.close();
+            }
+            String includes = props.getProperty(INCLUDES_PROPERTY);
+            if (includes != null) {
+                StringTokenizer st = new StringTokenizer(includes, "\" ", true);
+                if (st.countTokens() > 0) {
+                    String includeUrl;
+                    do {
+                    	includeUrl = nextLocation(st);
+                        if (includeUrl != null) {
+                        	URL url = new URL(location, includeUrl);
+                            Properties properties = loadProperties(url);
+                            props.putAll(properties);
+                        }
+                    }
+                    while (includeUrl != null);
+                }
+                props.remove(INCLUDES_PROPERTY);
             }
             return props;
         } catch (IOException e) {
@@ -436,4 +460,46 @@ public final class Helper {
         return value != null ? value.replaceAll("\r", "").replaceAll("\n", "").replaceAll(" ", "") : "";
     }
 
+    private static String nextLocation(StringTokenizer st) {
+        String retVal = null;
+
+        if (st.countTokens() > 0) {
+            String tokenList = "\" ";
+            StringBuffer tokBuf = new StringBuffer(10);
+            String tok = null;
+            boolean inQuote = false;
+            boolean tokStarted = false;
+            boolean exit = false;
+            while ((st.hasMoreTokens()) && (!exit)) {
+                tok = st.nextToken(tokenList);
+                if (tok.equals("\"")) {
+                    inQuote = !inQuote;
+                    if (inQuote) {
+                        tokenList = "\"";
+                    } else {
+                        tokenList = "\" ";
+                    }
+
+                } else if (tok.equals(" ")) {
+                    if (tokStarted) {
+                        retVal = tokBuf.toString();
+                        tokStarted = false;
+                        tokBuf = new StringBuffer(10);
+                        exit = true;
+                    }
+                } else {
+                    tokStarted = true;
+                    tokBuf.append(tok.trim());
+                }
+            }
+
+            // Handle case where end of token stream and
+            // still got data
+            if ((!exit) && (tokStarted)) {
+                retVal = tokBuf.toString();
+            }
+        }
+
+        return retVal;
+    }
 }
