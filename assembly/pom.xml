@@ -156,6 +156,22 @@
             <artifactId>org.apache.karaf.management</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.webconsole</groupId>
+            <artifactId>org.apache.karaf.webconsole.admin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.webconsole</groupId>
+            <artifactId>org.apache.karaf.webconsole.branding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.webconsole</groupId>
+            <artifactId>org.apache.karaf.webconsole.features</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.webconsole</groupId>
+            <artifactId>org.apache.karaf.webconsole.gogo</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-extender</artifactId>
         </dependency>
@@ -214,6 +230,10 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.metatype</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.webconsole</artifactId>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>

@@ -128,7 +128,7 @@
         <pax.exam.version>1.2.0</pax.exam.version>
         <pax.logging.version>1.5.2</pax.logging.version>
         <pax.runner.version>1.4.0</pax.runner.version>
-        <pax.url.version>1.1.3</pax.url.version>
+        <pax.url.version>1.1.2</pax.url.version>
         <pax.web.version>0.7.2</pax.web.version>
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
@@ -337,6 +337,26 @@
             <dependency>
                 <groupId>org.apache.karaf.jaas</groupId>
                 <artifactId>org.apache.karaf.jaas.modules</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.webconsole</groupId>
+                <artifactId>org.apache.karaf.webconsole.admin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.webconsole</groupId>
+                <artifactId>org.apache.karaf.webconsole.branding</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.webconsole</groupId>
+                <artifactId>org.apache.karaf.webconsole.features</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.webconsole</groupId>
+                <artifactId>org.apache.karaf.webconsole.gogo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
