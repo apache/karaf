@@ -150,6 +150,8 @@ public class AdminServiceImpl implements AdminService {
         mkdir(karafBase, "data");
 
         copyResourceToDir(karafBase, "etc/config.properties", true);
+        copyResourceToDir(karafBase, "etc/jre.properties", true);
+        copyResourceToDir(karafBase, "etc/custom.properties", true);
         copyResourceToDir(karafBase, "etc/java.util.logging.properties", true);
         copyResourceToDir(karafBase, "etc/org.apache.felix.fileinstall-deploy.cfg", true);
         copyResourceToDir(karafBase, "etc/org.apache.karaf.log.cfg", true);
