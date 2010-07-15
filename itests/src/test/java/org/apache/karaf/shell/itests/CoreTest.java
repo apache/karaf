@@ -124,7 +124,7 @@ public class CoreTest extends AbstractIntegrationTest {
             equinox(), felix()
         );
         // Stop the shell log bundle 
-        Helper.findMaven(options, "org.apache.karaf.shell", "org.apache.karaf.shell.log").noStart();
+            Helper.findMaven(options, "org.apache.karaf.shell", "org.apache.karaf.shell.log").noStart();
         return options;
     }
 
