@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.testing;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -75,7 +77,51 @@ public final class Helper {
      * @return the provisioning option for the given bundle
      */
     public static MavenArtifactProvisionOption mavenBundle(String groupId, String artifactId) {
-        return CoreOptions.mavenBundle(groupId, artifactId).versionAsInProject();
+        return mavenBundle(groupId, artifactId, null, null, null);
+    }
+
+    public static MavenArtifactProvisionOption mavenBundle(String groupId, String artifactId, String version, String classifier, String type) {
+        MavenArtifactProvisionOption m = CoreOptions.mavenBundle().groupId(groupId).artifactId(artifactId);
+        if (version != null) {
+            m.version(version);
+        } else {
+            try {
+                m.versionAsInProject();
+            } catch (RuntimeException t) {
+                //in eclipse, the dependencies.properties may not be avail since it's not
+                //generated into a source directory (directly into classes).
+                //thus, try and load it manually
+
+                try {
+                    File file = new File("META-INF/maven/dependencies.properties");
+                    if (!file.exists()) {
+                        file = new File("target/classes/META-INF/maven/dependencies.properties");
+                    }
+                    if (file.exists()) {
+                        Properties dependencies = new Properties();
+                        InputStream is = new FileInputStream(file);
+                        try {
+                            dependencies.load(is);
+                        } finally {
+                            is.close();
+                        }
+                        version = dependencies.getProperty( groupId + "/" + artifactId + "/version" );
+                        m.version(version);
+                    } else {
+                        throw t;
+                    }
+                } catch (Throwable t2) {
+                    throw t;
+                }
+            }
+        }
+        if (classifier != null) {
+            m.classifier(classifier);
+        }
+        if (type != null) {
+            m.type(type);
+        }
+        return m;
     }
 
     /**
