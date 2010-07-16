@@ -115,8 +115,8 @@
         <felix.utils.version>1.0.0</felix.utils.version>
         <felix.webconsole.version>3.1.0</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
-        <aries.blueprint.version>0.1-incubating</aries.blueprint.version>
-        <aries.jmx.version>0.1-incubating</aries.jmx.version>
+        <aries.blueprint.version>0.1-r964701</aries.blueprint.version>
+        <aries.jmx.version>0.1-r964701</aries.jmx.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <jansi.version>1.2</jansi.version>
         <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
