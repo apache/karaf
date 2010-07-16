@@ -244,6 +244,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 InstallationState s = new InstallationState();
             	try {
                     doInstallFeature(s, f);
+                    state.bundleInfos.putAll(s.bundleInfos);
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
                     state.installed.addAll(s.installed);
@@ -295,18 +296,26 @@ public class FeaturesServiceImpl implements FeaturesService {
                     if (state.installed.contains(b)
                             || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
                                     && getStartLevel().isBundlePersistentlyStarted(b))) {
-                    	// do no start bundles when user request it 
-                        try {
-                            b.start();
-                        } catch (BundleException be) {
-                            String[] msgdata = new String[]{
-                                b.getLocation(),
-                                getFeaturesContainingBundleList(b),
-                                be.getMessage()
-                            };
-                            String msg = MessageFormatter.arrayFormat("Could not start bundle {} in feature(s) {}: {}", msgdata);
-                            throw new Exception(msg, be);
-                        }
+                    	// do no start bundles when user request it
+                    	Long bundleId = b.getBundleId();
+                    	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
+                    	boolean status = true;
+                    	if (bundleInfo != null) {
+                    		status = bundleInfo.isStart();
+                    	}
+                     	if(status) {
+	                        try {
+	                            b.start();
+	                        } catch (BundleException be) {
+	                            String[] msgdata = new String[]{
+	                                b.getLocation(),
+	                                getFeaturesContainingBundleList(b),
+	                                be.getMessage()
+	                            };
+	                            String msg = MessageFormatter.arrayFormat("Could not start bundle {} in feature(s) {}: {}", msgdata);
+	                            throw new Exception(msg, be);
+	                        }
+                    	}
                     }
                 }
             }
@@ -364,6 +373,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     protected static class InstallationState {
         final Set<Bundle> installed = new HashSet<Bundle>();
         final List<Bundle> bundles = new ArrayList<Bundle>();
+        final Map<Long, BundleInfo> bundleInfos = new HashMap<Long, BundleInfo>();
         final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
     }
 
@@ -394,6 +404,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (BundleInfo bInfo : resolve(feature)) {
             Bundle b = installBundleIfNeeded(state, bInfo);
             bundles.add(b.getBundleId());
+            state.bundleInfos.put(b.getBundleId(), bInfo);
         }
         state.features.put(feature, bundles);
     }
