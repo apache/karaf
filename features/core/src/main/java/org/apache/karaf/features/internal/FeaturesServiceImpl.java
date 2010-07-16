@@ -299,11 +299,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     	// do no start bundles when user request it
                     	Long bundleId = b.getBundleId();
                     	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
-                    	boolean status = true;
-                    	if (bundleInfo != null) {
-                    		status = bundleInfo.isStart();
-                    	}
-                     	if(status) {
+                        if (bundleInfo == null || bundleInfo.isStart()) {
 	                        try {
 	                            b.start();
 	                        } catch (BundleException be) {
