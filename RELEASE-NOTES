@@ -15,6 +15,65 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.0.0
+                    ==================
+
+  Overview
+  --------
+
+ The Apache Karaf 2.0.0 is the first release since the move of Apache Felix Karaf to Apache Karaf.
+ This release brings new features, improvements and bug fixes. The changelog below contains the whole
+ list of changes.
+
+  Changelog
+  ---------
+
+ The following list shows the bug fixes and enhancements included in this release:
+
+** New Feature
+    * [KARAF-31] - Use OBR if available to compute the transitive closure of karaf features
+    * [KARAF-110] - Provide a placeholder for overriding the configuration properties
+    * [KARAF-111] - Allow includes of additional configuration files through a custom property when loading the main configuration files 
+** Improvement
+    * [KARAF-45] - Improve war deployer in order to provide the WebApp-context
+    * [KARAF-54] - Minimum default properties
+    * [KARAF-59] - Introduce a ${karaf.data} system property to be able to easily move the data directory to a different location
+    * [KARAF-67] - Change the webconsole config in the features descriptor to specifiy the realm and not the username/password which aren't used anymore
+    * [KARAF-95] - Upgrade Spring to 3.x
+    * [KARAF-96] - Enhance the features to support the start level
+    * [KARAF-97] - Upgrade to Felix framework 3.x
+    * [KARAF-98] - Upgrade to equinox 3.6.0
+    * [KARAF-103] - add a spring-dm feature which use spring 2.5.6 inside
+    * [KARAF-105] - Remove dependencies on the preference service
+    * [KARAF-107] - Improve default log configuration with a rolling file appender
+    * [KARAF-108] - Change 'storage.location' system property to 'karaf.instances' for better homogeneity
+    * [KARAF-109] - Split the JVM packages from the main config.properties file for easier maintenance
+    * [KARAF-112] - Free the org.osgi.framework.system.packages.extra property for users
+    * [KARAF-117] - refactor tooling/testing/Helper to accomodate recent changes in config.properties
+    * [KARAF-118] - Update Pax Url Wrap to version 1.1.3
+    * [KARAF-120] - Some jars are not included in our system repository
+    * [KARAF-121] - Better exception handling in JaasSecurityProvider
+    * [KARAF-127] - Enahnce features mechanism to allow to stop/start bundle
+** Bug
+    * [KARAF-4] - [Karaf] If features:refreshUrl reads an incorrect <features> definition, it deletes the old version
+    * [KARAF-16] - The JRE provided ciphers are not used on ubuntu server
+    * [KARAF-65] - NPE in StandardEmitterMBean on JDK 6
+    * [KARAF-99] - new spring 3.0.3.RELEASE feature miss some bundles
+    * [KARAF-100] - The list of OBR repositories is not persisted
+    * [KARAF-101] - features:refreshUrl doesn't auto complete!
+    * [KARAF-102] - The client jar does not work when given a command to execute on the command line
+    * [KARAF-122] - Webconsole login doesn't work with karaf.framework set to equinox
+    * [KARAF-123] - File jre.properties is not copied and so it is not possible to start a second karaf instance
+    * [KARAF-124] - Karaf start script doesn't correctly include jre/lib/ext directory
+    * [KARAF-126] - Password: Error executing command: Failed to get the session.
+    * [KARAF-128] - java.lang.IndexOutOfBoundsException during generation of User Guide pdf blocking release build.
+** Task
+    * [KARAF-113] - Change the namespace of the two blueprint schemas
+** Sub-task
+    * [KARAF-115] - Document Karaf Release Guide
+    * [KARAF-119] - Establish KEYS file.
+
+
                     Apache Felix Karaf 1.2.0
                     ========================
 
