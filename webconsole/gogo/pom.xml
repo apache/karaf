@@ -24,13 +24,13 @@
   <parent>
       <groupId>org.apache.karaf.webconsole</groupId>
       <artifactId>webconsole</artifactId>
-      <version>2.0.0</version>
+      <version>2.0.1-SNAPSHOT</version>
   </parent>
 
   <groupId>org.apache.karaf.webconsole</groupId>
   <artifactId>org.apache.karaf.webconsole.gogo</artifactId>
   <packaging>bundle</packaging>
-  <version>2.0.0</version>
+  <version>2.0.1-SNAPSHOT</version>
   <name>Apache Karaf :: Web Console :: Gogo Plugin</name>
   
   <properties>

@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.karaf.shell</groupId>
     <artifactId>shell</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.0</version>
+    <version>2.0.1-SNAPSHOT</version>
     <name>Apache Karaf :: Shell</name>
 
     <modules>

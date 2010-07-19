@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.karaf.shell</groupId>
         <artifactId>shell</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.karaf.shell</groupId>
     <artifactId>org.apache.karaf.shell.osgi</artifactId>
     <packaging>bundle</packaging>
-    <version>2.0.0</version>
+    <version>2.0.1-SNAPSHOT</version>
     <name>Apache Karaf :: Shell OSGi Commands</name>
 
     <description>
