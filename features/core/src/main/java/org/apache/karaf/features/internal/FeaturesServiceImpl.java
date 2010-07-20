@@ -165,8 +165,8 @@ public class FeaturesServiceImpl implements FeaturesService {
     protected RepositoryImpl internalAddRepository(URI uri) throws Exception {
     	RepositoryImpl repo = null;
         repo = new RepositoryImpl(uri);
-        repo.load();
         repositories.put(uri, repo);
+        repo.load();
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
         return repo;
@@ -732,7 +732,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             if (uris != null) {
                 for (URI uri : uris) {
                     try {
-                        internalAddRepository(uri);
+                    	internalAddRepository(uri);
                     } catch (Exception e) {
                         LOGGER.warn(format("Unable to add features repository %s at startup", uri), e);    
                     }
@@ -851,7 +851,11 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
             Set<URI> repositories = loadSet(props, "repositories.");
             for (URI repo : repositories) {
-                internalAddRepository(repo);
+            	try {
+            		internalAddRepository(repo);
+            	} catch (Exception e) {
+            		LOGGER.warn(format("Unable to add features repository %s at startup", repo), e);
+            	}
             }
             installed = loadMap(props, "features.");
             for (Feature f : installed.keySet()) {

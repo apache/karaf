@@ -27,7 +27,8 @@ public class ListUrlCommand extends FeaturesCommandSupport {
         Repository[] repos = admin.listRepositories();
         if ((repos != null) && (repos.length > 0)) {
             for (int i = 0; i < repos.length; i++) {
-                System.out.println(repos[i].getURI());
+            	String status = repos[i].isValid() ? "    valid" : "    invalid";
+            	System.out.println(repos[i].getURI().toString() + status);
             }
         } else {
             System.out.println("No repository URLs are set.");

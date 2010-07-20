@@ -55,6 +55,7 @@ public class RepositoryImpl implements Repository {
     private URI uri;
     private List<Feature> features;
     private List<URI> repositories;
+    private boolean valid;
 
     public RepositoryImpl(URI uri) {
         this.uri = uri;
@@ -84,6 +85,7 @@ public class RepositoryImpl implements Repository {
 
     public void load() throws IOException {
         try {
+        	valid = true;
             repositories = new ArrayList<URI>();
             features = new ArrayList<Feature>();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -182,13 +184,17 @@ public class RepositoryImpl implements Repository {
                 }
             }
         } catch (SAXException e) {
+        	valid = false;
             throw (IOException) new IOException().initCause(e);
         } catch (ParserConfigurationException e) {
-            throw (IOException) new IOException().initCause(e);
+        	valid = false;
+        	throw (IOException) new IOException().initCause(e);
         } catch (IllegalArgumentException e) {
-            throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+        	valid = false;
+        	throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
         } catch (Exception e) {
-            throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+        	valid = false;
+        	throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
         }
     }
 
@@ -207,5 +213,9 @@ public class RepositoryImpl implements Repository {
             properties.put(key, val);
         }
     }
+
+	public boolean isValid() {
+		return this.valid;
+	}
 
 }
