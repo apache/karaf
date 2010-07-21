@@ -233,7 +233,7 @@ public class SortAction extends OsgiCommandSupport {
         protected int[] getSortKey(String str, List<Integer> fields, Key key) {
             int start;
             int end;
-            if (key.startField * 2 < fields.size()) {
+            if (key.startField * 2 <= fields.size()) {
                 start = fields.get((key.startField - 1) * 2);
                 if (key.ignoreBlanksStart) {
                     while (start < fields.get((key.startField - 1) * 2 + 1) && Character.isWhitespace(str.charAt(start))) {
@@ -246,7 +246,7 @@ public class SortAction extends OsgiCommandSupport {
             } else {
                 start = 0;
             }
-            if (key.endField > 0 && key.endField * 2 < fields.size()) {
+            if (key.endField > 0 && key.endField * 2 <= fields.size()) {
                 end =  fields.get((key.endField - 1) * 2);
                 if (key.ignoreBlanksEnd) {
                     while (end < fields.get((key.endField - 1) * 2 + 1) && Character.isWhitespace(str.charAt(end))) {

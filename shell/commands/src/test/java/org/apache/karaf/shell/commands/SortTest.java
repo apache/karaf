@@ -55,6 +55,9 @@ public class SortTest extends TestCase {
 
         Collections.sort(strings, new SortAction.SortComparator(false, false, false, true, '\0', null));
         assertTrue(Arrays.asList(s1, s2, s0).equals(strings));
+
+        Collections.sort(strings, new SortAction.SortComparator(false, true, false, false, '\0', Arrays.asList("4")));
+        assertTrue(Arrays.asList(s2, s1, s0).equals(strings));
     }
 
 }
