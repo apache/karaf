@@ -167,6 +167,14 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
                     sendNotification(notification);
                 }
             }
+            
+            public boolean equals(Object o) {
+            	if (this == o) {
+            		return true;
+            	}
+            	return o.equals(this);
+              }
+
         };
     }
 
