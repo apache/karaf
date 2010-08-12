@@ -22,6 +22,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.felix.gogo.commands.Option;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -48,21 +49,17 @@ public class UpdateCommand extends ConfigCommandSupport {
         if (props == null) {
             System.err.println("No configuration is being edited. Run the edit command first");
         } else if (!bypassStorage && storage != null) {
-            Properties p = new Properties();
+        	String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
+        	File storageFile = new File(storage, pid + ".cfg");
+            PropertiesConfiguration p = new PropertiesConfiguration(storageFile);
             for (Enumeration keys = props.keys(); keys.hasMoreElements();) {
                 Object key = keys.nextElement();
                 if (!"service.pid".equals(key) && !"felix.fileinstall.filename".equals(key)) {
-                    p.put(key, props.get(key));
+                    p.setProperty((String) key, props.get(key));
                 }
             }
             storage.mkdirs();
-            String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
-            FileOutputStream os = new FileOutputStream(new File(storage, pid + ".cfg"));
-            try {
-                p.store(os, null);
-            } finally {
-                os.close();
-            }
+            p.save();
             this.session.put(PROPERTY_CONFIG_PID, null);
             this.session.put(PROPERTY_CONFIG_PROPS, null);
         } else {

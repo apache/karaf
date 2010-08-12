@@ -101,6 +101,14 @@
         <aopalliance.version>1.0_3</aopalliance.version>
         <cglib.version>2.1_3_4</cglib.version>
         <commons.logging.version>1.1.1</commons.logging.version>
+        <commons-configuration.version>1.4_1-SNAPSHOT</commons-configuration.version>
+        <commons-beanutils.version>1.8.2_1-SNAPSHOT</commons-beanutils.version>
+        <commons-codec.version>1.3_2</commons-codec.version>
+        <commons-jxpath.version>1.2_4-SNAPSHOT</commons-jxpath.version>
+        <commons-collections.version>3.2.1</commons-collections.version>
+        <commons-digester.version>1.8_1-SNAPSHOT</commons-digester.version>
+        <commons-lang.version>2.4_3</commons-lang.version>
+        <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
         <easymock.version>2.4</easymock.version>
         <equinox.version>3.6.0.v20100517</equinox.version>
@@ -594,6 +602,11 @@
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
                 <version>${commons.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.commons-configuration</artifactId>
+                <version>${commons-configuration.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.maven.artifact</groupId>
