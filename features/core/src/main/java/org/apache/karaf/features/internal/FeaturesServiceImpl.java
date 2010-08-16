@@ -557,6 +557,9 @@ public class FeaturesServiceImpl implements FeaturesService {
             is.mark(256 * 1024);
             JarInputStream jar = new JarInputStream(is);
             Manifest m = jar.getManifest();
+            if(m == null) {
+                throw new BundleException("Manifest not present in the first entry of the zip");
+            }
             String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
             String vStr = m.getMainAttributes().getValue(Constants.BUNDLE_VERSION);
             Version v = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
