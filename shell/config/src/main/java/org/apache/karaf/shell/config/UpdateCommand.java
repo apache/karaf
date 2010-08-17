@@ -17,12 +17,9 @@
 package org.apache.karaf.shell.config;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.Properties;
 
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.felix.gogo.commands.Option;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -51,11 +48,11 @@ public class UpdateCommand extends ConfigCommandSupport {
         } else if (!bypassStorage && storage != null) {
         	String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
         	File storageFile = new File(storage, pid + ".cfg");
-            PropertiesConfiguration p = new PropertiesConfiguration(storageFile);
+            Properties p = new Properties(storageFile);
             for (Enumeration keys = props.keys(); keys.hasMoreElements();) {
                 Object key = keys.nextElement();
                 if (!"service.pid".equals(key) && !"felix.fileinstall.filename".equals(key)) {
-                    p.setProperty((String) key, props.get(key));
+                    p.put((String) key, (String) props.get(key));
                 }
             }
             storage.mkdirs();
