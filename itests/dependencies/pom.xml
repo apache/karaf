@@ -27,14 +27,41 @@
     </parent>
 
     <groupId>org.apache.karaf.itests</groupId>
-    <artifactId>itests</artifactId>
+    <artifactId>dependencies</artifactId>
     <packaging>pom</packaging>
     <version>2.0.1-SNAPSHOT</version>
-    <name>Apache Karaf :: Integration Tests Parent</name>
+    <name>Apache Karaf :: Integration Tests Dependencies</name>
 
-    <modules>
-        <module>dependencies</module>
-        <module>tests</module>
-    </modules>
+    <repositories>
+        <repository>
+            <id>pax-runner</id>
+            <url>http://osgi.sonatype.org/content/groups/pax-runner</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.main</artifactId>
+			<version>2.0.2</version>
+        </dependency>
+        <dependency>
+			<groupId>org.eclipse</groupId>
+			<artifactId>osgi</artifactId>
+			<version>3.5.1.R35x_v20090827</version>
+        </dependency>
+<!--
+        <dependency>
+			<groupId>org.junit</groupId>
+			<artifactId>com.springsource.junit</artifactId>
+			<version>4.4.0</version>
+        </dependency>
+-->
+        <dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-container-default</artifactId>
+			<version>${pax.exam.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -31,6 +31,7 @@ import java.util.StringTokenizer;
 
 import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.options.JUnitBundlesOption;
 import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
 import org.ops4j.pax.exam.options.SystemPropertyOption;
 
@@ -266,13 +267,17 @@ public final class Helper {
             options.add(opt);
         }
         options.add(mavenBundle("org.apache.karaf.tooling", "org.apache.karaf.tooling.testing"));
-        options.add(wrappedBundle(maven("org.ops4j.pax.exam", "pax-exam-container-default")));
+        options.add(wrappedBundle(mavenBundle("org.ops4j.pax.exam", "pax-exam-container-default")));
         // We need to add pax-exam-junit here when running with the ibm
         // jdk to avoid the following exception during the test run:
         // ClassNotFoundException: org.ops4j.pax.exam.junit.Configuration
         if ("IBM Corporation".equals(System.getProperty("java.vendor"))) {
             options.add(wrappedBundle(maven("org.ops4j.pax.exam", "pax-exam-junit")));
         }
+		// Add ServiceMix junit bundle
+		JUnitBundlesOption jubo = new JUnitBundlesOption();
+		((MavenArtifactProvisionOption) jubo.getDelegate()).groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.junit").version("4.7_1");
+		options.add(jubo);
         return options.toArray(new Option[options.size()]);
     }
 

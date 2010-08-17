@@ -114,7 +114,7 @@ public class CoreTest extends AbstractIntegrationTest {
             // Default karaf environment
             Helper.getDefaultOptions(
                 // this is how you set the default log level when using pax logging (logProfile)
-                systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("DEBUG")),
+                systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("TRACE")),
 
             workingDirectory("target/paxrunner/core/"),
 
@@ -124,7 +124,7 @@ public class CoreTest extends AbstractIntegrationTest {
             equinox(), felix()
         );
         // Stop the shell log bundle 
-            Helper.findMaven(options, "org.apache.karaf.shell", "org.apache.karaf.shell.log").noStart();
+        Helper.findMaven(options, "org.apache.karaf.shell", "org.apache.karaf.shell.log").noStart();
         return options;
     }
 

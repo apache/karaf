@@ -131,6 +131,7 @@
                         <Export-Package>org.apache.karaf.testing;version=${project.version}</Export-Package>
                         <Import-Package>
                             !org.apache.karaf.testing*,
+                            !org.ops4j.pax.exam.junit.options,
                             *
                         </Import-Package>
                         <Include-Resource>
