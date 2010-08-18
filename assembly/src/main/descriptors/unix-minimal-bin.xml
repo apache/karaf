@@ -15,13 +15,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<assembly>
-    <id></id> <!-- intentionally left blank -> http://jira.codehaus.org/browse/MASSEMBLY-301 -->
+<assembly xmlns='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1'
+          xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+          xsi:schemaLocation='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1 http://maven.apache.org/xsd/assembly-1.1.1.xsd'>
+    <id>minimal</id> <!-- Used as artifact discriminator -->
     <formats>
-        <format>zip</format>
+        <format>tar.gz</format>
     </formats>
     <fileSets>
-      <!-- Copy license and other files from root -->
+
+        <!-- Copy license and other files from root -->
         <fileSet>
             <directory>..</directory>
             <outputDirectory>/</outputDirectory>
@@ -29,62 +32,83 @@
                 <include>README</include>
                 <include>RELEASE*</include>
             </includes>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
         </fileSet>
 
-      <!-- Copy over everything that needs to get dos line endings -->
+        <!-- Copy over everything that needs to get unix line endings -->
         <fileSet>
             <directory>src/main/distribution/text</directory>
             <outputDirectory>/</outputDirectory>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
-            <directory>src/main/distribution/windows-text</directory>
+            <directory>src/main/distribution/unix-text</directory>
             <outputDirectory>/</outputDirectory>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <directory>target/classes/bin</directory>
             <outputDirectory>/bin/</outputDirectory>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
             <includes>
-                <include>admin.bat</include>
+                <include>admin</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>target/classes/etc</directory>
+            <excludes>
+                <exclude>org.apache.karaf.features.cfg</exclude>
+                <exclude>startup.properties</exclude>
+            </excludes>
             <outputDirectory>/etc/</outputDirectory>
-            <lineEnding>dos</lineEnding>
-        </fileSet>        
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        
+        <fileSet>
+            <directory>target/classes/minimal</directory>
+            <outputDirectory>/etc/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+
+
         <!-- Copy over the examples -->
         <fileSet>
             <directory>target/classes/demos</directory>
             <outputDirectory>/demos/</outputDirectory>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
         </fileSet>
-
         <fileSet>
             <directory>../demos</directory>
             <outputDirectory>/demos/</outputDirectory>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
             <excludes>
                 <exclude>**/target/**</exclude>
             </excludes>
         </fileSet>
 
-      <!-- Copy over files that should not get the line endings converted -->
+        <!-- Copy over files that should not get the line endings converted -->
         <fileSet>
             <directory>src/main/distribution/binary</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
 
-      <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
+        <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
         <fileSet>
-            <directory>src/main/distribution/windows-binary</directory>
+            <directory>src/main/distribution/unix-binary</directory>
             <outputDirectory>/</outputDirectory>
+            <fileMode>0755</fileMode>
         </fileSet>
-      
-      <!-- Copy over jar files -->
+
+        <!-- Copy over the files that need unix line endings and also chmod to 755 -->
+        <fileSet>
+            <directory>src/main/distribution/unix-shell</directory>
+            <outputDirectory>/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+        </fileSet>
+
+        <!-- Copy over jar files -->
         <fileSet>
             <directory>target/dependencies</directory>
             <outputDirectory>/</outputDirectory>
@@ -98,21 +122,21 @@
             <outputDirectory>/</outputDirectory>
             <destName>LICENSE</destName>
             <fileMode>0644</fileMode>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
         </file>
         <file>
             <source>${basedir}/NOTICE</source>
             <outputDirectory>/</outputDirectory>
             <destName>NOTICE</destName>
             <fileMode>0644</fileMode>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
         </file>
         <file>
             <source>${basedir}/target/classes/features.xml</source>
             <outputDirectory>/system/org/apache/karaf/apache-karaf/${project.version}</outputDirectory>
             <destName>apache-karaf-${project.version}-features.xml</destName>
             <fileMode>0644</fileMode>
-            <lineEnding>dos</lineEnding>
+            <lineEnding>unix</lineEnding>
         </file>
     </files>
 
@@ -190,28 +214,6 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/admin/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.karaf.admin:org.apache.karaf.admin.core</include>
-                <include>org.apache.karaf.admin:org.apache.karaf.admin.command</include>
-                <include>org.apache.karaf.admin:org.apache.karaf.admin.management</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.spring</include>
-                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.blueprint</include>
-                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.features</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/apache/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.console</include>
@@ -220,7 +222,6 @@
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.log</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.config</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.packages</include>
-                <include>org.apache.karaf.shell:org.apache.karaf.shell.ssh</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.commands</include>
             </includes>
         </dependencySet>
@@ -232,24 +233,6 @@
             <includes>
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.config</include>
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.modules</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/sshd/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.sshd:sshd-core</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/mina/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.mina:mina-core</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -280,7 +263,5 @@
                 <include>org.apache.aries.jmx:org.apache.aries.jmx.blueprint</include>
             </includes>
         </dependencySet>
-
     </dependencySets>
-
 </assembly>

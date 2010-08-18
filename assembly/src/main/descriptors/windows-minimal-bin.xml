@@ -16,11 +16,13 @@
     limitations under the License.
 -->
 <assembly>
-    <id></id> <!-- intentionally left blank -> http://jira.codehaus.org/browse/MASSEMBLY-301 -->
+    <id>minimal</id> <!-- Used as artifact discriminator -->
     <formats>
         <format>zip</format>
     </formats>
     <fileSets>
+
+
       <!-- Copy license and other files from root -->
         <fileSet>
             <directory>..</directory>
@@ -34,7 +36,7 @@
 
       <!-- Copy over everything that needs to get dos line endings -->
         <fileSet>
-            <directory>src/main/distribution/text</directory>
+            <directory>target/classes/text</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>dos</lineEnding>
         </fileSet>
@@ -53,9 +55,19 @@
         </fileSet>
         <fileSet>
             <directory>target/classes/etc</directory>
+			<excludes>
+				<exclude>org.apache.karaf.features.cfg</exclude>
+				<exclude>startup.properties</exclude>
+			</excludes>
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>dos</lineEnding>
-        </fileSet>        
+        </fileSet>
+        <fileSet>
+            <directory>target/classes/minimal</directory>
+            <outputDirectory>/etc/</outputDirectory>
+            <lineEnding>dos</lineEnding>
+        </fileSet>
+
         <!-- Copy over the examples -->
         <fileSet>
             <directory>target/classes/demos</directory>
@@ -190,28 +202,6 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/admin/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.karaf.admin:org.apache.karaf.admin.core</include>
-                <include>org.apache.karaf.admin:org.apache.karaf.admin.command</include>
-                <include>org.apache.karaf.admin:org.apache.karaf.admin.management</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.spring</include>
-                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.blueprint</include>
-                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.features</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/apache/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.console</include>
@@ -232,24 +222,6 @@
             <includes>
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.config</include>
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.modules</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/sshd/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.sshd:sshd-core</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/mina/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.mina:mina-core</include>
             </includes>
         </dependencySet>
         <dependencySet>

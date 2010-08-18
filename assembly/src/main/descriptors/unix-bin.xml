@@ -38,12 +38,12 @@
             <directory>src/main/distribution/text</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>unix</lineEnding>
-        </fileSet>        
+        </fileSet>
         <fileSet>
             <directory>src/main/distribution/unix-text</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>unix</lineEnding>
-        </fileSet>        
+        </fileSet>
         <fileSet>
             <directory>target/classes/bin</directory>
             <outputDirectory>/bin/</outputDirectory>
@@ -58,7 +58,6 @@
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
         </fileSet>
-
         <!-- Copy over the examples -->
         <fileSet>
             <directory>target/classes/demos</directory>
@@ -164,24 +163,6 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.felix:org.apache.felix.metatype</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.felix:org.apache.felix.webconsole</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/ops4j/pax/logging/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.ops4j.pax.logging:pax-logging-api</include>
@@ -205,18 +186,6 @@
             <outputFileNameMapping>org/apache/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf:org.apache.karaf.management</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/webconsole/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.karaf.webconsole:org.apache.karaf.webconsole.admin</include>
-                <include>org.apache.karaf.webconsole:org.apache.karaf.webconsole.branding</include>
-                <include>org.apache.karaf.webconsole:org.apache.karaf.webconsole.features</include>
-                <include>org.apache.karaf.webconsole:org.apache.karaf.webconsole.gogo</include>
             </includes>
         </dependencySet>
         <dependencySet>

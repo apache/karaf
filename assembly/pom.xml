@@ -1,3 +1,4 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
@@ -138,7 +139,7 @@
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.dev</artifactId>
-        </dependency>      
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.boot</artifactId>
@@ -425,6 +426,20 @@
                         <phase>none</phase>
                     </execution>
                     <execution>
+                        <id>unix-minimal-bin</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/descriptors/unix-minimal-bin.xml</descriptor>
+                            </descriptors>
+                            <finalName>${project.artifactId}-minimal-${project.version}</finalName>
+                            <tarLongFileMode>gnu</tarLongFileMode>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>unix-bin</id>
                         <phase>package</phase>
                         <goals>
@@ -436,6 +451,21 @@
                             </descriptors>
                             <finalName>${project.artifactId}-${project.version}</finalName>
                             <tarLongFileMode>gnu</tarLongFileMode>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>windows-minimal-bin</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/descriptors/windows-minimal-bin.xml</descriptor>
+                            </descriptors>
+                            <finalName>${project.artifactId}-minimal-${project.version}</finalName>
+                            <appendAssemblyId>true</appendAssemblyId>
+                            <assemblyId />
                         </configuration>
                     </execution>
                     <execution>

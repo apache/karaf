@@ -79,10 +79,11 @@
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
     </feature>
     <feature name="ssh" version="${project.version}">
-        <config name="org.apache.karaf.shell.ssh">
+        <config name="org.apache.karaf.shell">
             sshPort=8101
             sshHost=0.0.0.0
             sshRealm=karaf
+            hostKey=${karaf.base}/etc/host.key
         </config>
         <bundle>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
         <bundle>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
