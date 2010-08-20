@@ -23,7 +23,6 @@ import java.util.Hashtable;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.command.Function;
-import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
 

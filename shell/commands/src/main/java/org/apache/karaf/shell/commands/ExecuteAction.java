@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.commands.utils.PumpStreamHandler;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
@@ -29,7 +30,7 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
  * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
  */
 @Command(scope = "shell", name = "exec", description = "Executes system processes")
-public class ExecuteAction extends OsgiCommandSupport {
+public class ExecuteAction extends AbstractAction {
 
     @Argument(index = 0, name = "command", description = "Execution command with arguments", required = true, multiValued = true)
     private List<String> args;

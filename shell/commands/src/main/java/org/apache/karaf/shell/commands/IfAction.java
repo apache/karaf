@@ -18,6 +18,7 @@ package org.apache.karaf.shell.commands;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.service.command.Function;
 
@@ -25,7 +26,7 @@ import org.osgi.service.command.Function;
  * Execute a closure on a list of arguments.
  */
 @Command(scope = "shell", name = "if", description = "If/Then/Else block.")
-public class IfAction extends OsgiCommandSupport {
+public class IfAction extends AbstractAction {
 
     @Argument(name = "condition", index = 0, multiValued = false, required = true, description = "The condition")
     Function condition;

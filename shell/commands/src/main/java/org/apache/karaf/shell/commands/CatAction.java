@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
@@ -38,7 +39,7 @@ import org.apache.felix.gogo.commands.Command;
  * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
  */
 @Command(scope = "shell", name = "cat", description = "Displays the content of a file or url")
-public class CatAction extends OsgiCommandSupport {
+public class CatAction extends AbstractAction {
 
     @Option(name = "-n", aliases = {}, description = "The number the output lines, starting at 1.", required = false, multiValued = false)
     private boolean displayLineNumbers;

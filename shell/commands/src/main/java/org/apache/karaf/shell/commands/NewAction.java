@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.console.commands.GenericType;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
@@ -39,7 +40,7 @@ import org.osgi.service.blueprint.container.ReifiedType;
  * Execute a closure on a list of arguments.
  */
 @Command(scope = "shell", name = "new", description = "Creates a new java object.")
-public class NewAction extends OsgiCommandSupport {
+public class NewAction extends AbstractAction {
 
     @Argument(name = "class", index = 0, multiValued = false, required = true, description = "The object class")
     Class clazz;

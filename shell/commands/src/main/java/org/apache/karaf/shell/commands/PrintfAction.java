@@ -18,12 +18,13 @@ package org.apache.karaf.shell.commands;
 
 import java.util.Collection;
 
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "shell", name = "printf", description = "Format and print arguments")
-public class PrintfAction extends OsgiCommandSupport {
+public class PrintfAction extends AbstractAction {
 
     @Argument(index = 0, name = "format", description = "The format pattern to use", required = true, multiValued = false)
     private String format;

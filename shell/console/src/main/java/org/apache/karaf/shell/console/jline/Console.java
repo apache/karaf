@@ -248,7 +248,7 @@ public class Console implements Runnable
         }
     }
 
-    private Properties loadBrandingProperties() {
+    protected Properties loadBrandingProperties() {
         Properties props = new Properties();
         loadProps(props, "org/apache/karaf/shell/console/branding.properties");
         loadProps(props, "org/apache/karaf/branding/branding.properties");

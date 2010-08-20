@@ -1,0 +1,15 @@
+org.apache.karaf.shell.commands.CatAction
+org.apache.karaf.shell.commands.ClearAction
+org.apache.karaf.shell.commands.EachAction
+org.apache.karaf.shell.commands.EchoAction
+org.apache.karaf.shell.commands.ExecuteAction
+org.apache.karaf.shell.commands.GrepAction
+org.apache.karaf.shell.commands.HistoryAction
+org.apache.karaf.shell.commands.IfAction
+org.apache.karaf.shell.commands.JavaAction
+org.apache.karaf.shell.commands.LogoutAction
+org.apache.karaf.shell.commands.NewAction
+org.apache.karaf.shell.commands.PrintfAction
+org.apache.karaf.shell.commands.SleepAction
+org.apache.karaf.shell.commands.SortAction
+org.apache.karaf.shell.commands.TacAction

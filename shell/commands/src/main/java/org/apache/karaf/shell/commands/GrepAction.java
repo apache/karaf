@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
@@ -34,7 +35,7 @@ import org.fusesource.jansi.Ansi;
 
 
 @Command(scope = "shell", name="grep", description="Prints lines matching the given pattern")
-public class GrepAction extends OsgiCommandSupport {
+public class GrepAction extends AbstractAction {
 
     public static enum ColorOption {
         never,

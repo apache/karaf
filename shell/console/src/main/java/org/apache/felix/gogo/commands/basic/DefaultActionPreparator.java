@@ -21,22 +21,19 @@ package org.apache.felix.gogo.commands.basic;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 import java.io.PrintStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import jline.Terminal;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.basic.ActionPreparator;
 import org.apache.felix.gogo.commands.converter.DefaultConverter;
+import org.fusesource.jansi.Ansi;
 import org.osgi.service.command.CommandSession;
 
 public class DefaultActionPreparator implements ActionPreparator {
@@ -205,62 +202,100 @@ public class DefaultActionPreparator implements ActionPreparator {
         return true;
     }
 
-    protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> arguments, PrintStream out)
+    protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> args, PrintStream out)
     {
+        Terminal term = (Terminal) session.get(".jline.terminal");
+        List<Argument> arguments = new ArrayList<Argument>(args);
+        Collections.sort(arguments, new Comparator<Argument>() {
+            public int compare(Argument o1, Argument o2) {
+                return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
+            }
+        });
         options = new HashSet<Option>(options);
         options.add(HELP);
-        if (command != null && command.description() != null && command.description().length() > 0)
+        if (command != null && (command.description() != null || command.name() != null))
         {
+            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));
+            out.print("        ");
+            if (command.name() != null) {
+                out.println(Ansi.ansi().a(command.scope()).a(":").a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                out.println();
+            }
+            out.print("\t");
             out.println(command.description());
             out.println();
         }
-        String syntax = "syntax: ";
+        StringBuffer syntax = new StringBuffer();
         if (command != null)
         {
-            syntax += command.scope() + ":" + command.name();
+            syntax.append(String.format("%s:%s", command.scope(), command.name()));
         }
         if (options.size() > 0)
         {
-            syntax += " [options]";
+            syntax.append(" [options]");
         }
         if (arguments.size() > 0)
         {
-            syntax += " [arguments]";
+            syntax.append(' ');
+            for (Argument argument : arguments)
+            {
+                if (!argument.required())
+                {
+                    syntax.append(String.format("[%s] ", argument.name()));
+                }
+                else
+                {
+                    syntax.append(String.format("%s ", argument.name()));
+                }
+            }
         }
-        out.println(syntax);
+
+        out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("SYNTAX").a(Ansi.Attribute.RESET));
+        out.print("        ");
+        out.println(syntax.toString());
         out.println();
         if (arguments.size() > 0)
         {
-            out.println("arguments:");
+            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("ARGUMENTS").a(Ansi.Attribute.RESET));
             for (Argument argument : arguments)
             {
-                out.print("  ");
-                out.print(argument.name());
-                out.print("  ");
-                out.print(argument.description());
-                out.println();
+                out.print("        ");
+                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
+                printFormatted("                ", argument.description(), term != null ? term.getTerminalWidth() : 80, out);
             }
             out.println();
         }
         if (options.size() > 0)
         {
-            out.println("options:");
+            out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("OPTIONS").a(Ansi.Attribute.RESET));
             for (Option option : options)
             {
-                out.print("  ");
-                out.print(option.name());
-                out.print("  ");
-                if (option.aliases().length > 0)
+                String opt = option.name();
+                for (String alias : option.aliases())
                 {
-                    out.print("(");
-                    out.print(Arrays.toString(option.aliases()));
-                    out.print(")  ");
+                    opt += ", " + alias;
                 }
-                out.print(option.description());
-                out.println();
+                out.print("        ");
+                out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
+                printFormatted("                ", option.description(), term != null ? term.getTerminalWidth() : 80, out);
             }
             out.println();
         }
+    }
+
+    protected void printFormatted(String prefix, String str, int termWidth, PrintStream out) {
+        int pfxLen = length(prefix);
+        int maxwidth = termWidth - pfxLen;
+        Pattern wrap = Pattern.compile("(\\S\\S{" + maxwidth + ",}|.{1," + maxwidth + "})(\\s+|$)");
+        Matcher m = wrap.matcher(str);
+        while (m.find()) {
+            out.print(prefix);
+            out.println(m.group());
+        }
+    }
+
+    protected int length(String str) {
+        return str.length();
     }
 
     protected Object convert(Action action, CommandSession session, Object value, Type toType) throws Exception

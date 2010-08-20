@@ -111,12 +111,15 @@
                         </Import-Package>
                         <Export-Package>
                             org.apache.felix.gogo.commands*;version=${felix.gogo.version},
+                            org.osgi.service.command;version=${felix.gogo.version},
+                            org.osgi.service.threadio;version=${felix.gogo.version},
                             org.apache.karaf.shell.console*;version=${project.version},
                             org.fusesource.jansi;version=${jansi.version},
                             jline;version=${jline.version}
                         </Export-Package>
                         <Private-Package>
-                            org.fusesource.jansi.internal
+                            org.fusesource.jansi.internal,
+                            org.apache.felix.gogo.runtime*
                         </Private-Package>
                         <Bundle-NativeCode>jline/jline32.dll;
                                            osname=Win32;
@@ -126,6 +129,12 @@
                                            processor=x86-64,
                                            *
                         </Bundle-NativeCode>
+                        <Bundle-Activator>
+                            org.apache.felix.gogo.runtime.Activator
+                        </Bundle-Activator>
+                        <Main-Class>
+                            org.apache.karaf.shell.console.Main
+                        </Main-Class>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                     <unpackBundle>true</unpackBundle>

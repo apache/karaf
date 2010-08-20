@@ -25,16 +25,13 @@ import org.apache.felix.gogo.commands.Action;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.command.CommandSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public abstract class OsgiCommandSupport implements Action, BundleContextAware {
+public abstract class OsgiCommandSupport extends AbstractAction implements Action, BundleContextAware {
 
-    protected final Logger log = LoggerFactory.getLogger(getClass());
     protected BundleContext bundleContext;
-    protected CommandSession session;
     protected List<ServiceReference> usedReferences;
 
+    @Override
     public Object execute(CommandSession session) throws Exception {
         this.session = session;
         try {
@@ -43,8 +40,6 @@ public abstract class OsgiCommandSupport implements Action, BundleContextAware {
             ungetServices();
         }
     }
-
-    protected abstract Object doExecute() throws Exception;
 
     public BundleContext getBundleContext() {
         return bundleContext;

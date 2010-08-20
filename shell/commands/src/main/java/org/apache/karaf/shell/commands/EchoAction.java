@@ -21,10 +21,11 @@ import java.util.List;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 @Command(scope = "shell", name = "echo", description="Echoes or prints arguments to STDOUT")
-public class EchoAction extends OsgiCommandSupport
+public class EchoAction extends AbstractAction
 {
     @Option(name = "-n", aliases = {}, description = "Do not print the trailing newline character", required = false, multiValued = false)
     private boolean noTrailingNewline = false;

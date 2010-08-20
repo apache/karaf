@@ -21,6 +21,7 @@ import java.util.Collections;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.service.command.Function;
 
@@ -28,7 +29,7 @@ import org.osgi.service.command.Function;
  * Execute a closure on a list of arguments.
  */
 @Command(scope = "shell", name = "each", description = "Execute a closure on a list of arguments.")
-public class EachAction extends OsgiCommandSupport {
+public class EachAction extends AbstractAction {
 
     @Argument(name = "values", index = 0, multiValued = false, required = true, description = "The collection of arguments to iterate on")
     Collection<Object> values;

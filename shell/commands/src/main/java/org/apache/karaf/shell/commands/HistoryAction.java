@@ -20,6 +20,7 @@ import java.util.List;
 
 import jline.History;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.fusesource.jansi.Ansi;
 
@@ -27,7 +28,7 @@ import org.fusesource.jansi.Ansi;
  * History command
  */
 @Command(scope = "shell", name="history", description="Prints command history")
-public class HistoryAction extends OsgiCommandSupport {
+public class HistoryAction extends AbstractAction {
 
     @Override
     protected Object doExecute() throws Exception {
