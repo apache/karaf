@@ -54,6 +54,12 @@
         <command name="features/list">
             <action class="org.apache.karaf.features.command.ListFeaturesCommand"/>
         </command>
+        <command name="features/listVersions">
+            <action class="org.apache.karaf.features.command.ListFeatureVersionsCommand"/>
+            <completers>
+                <ref component-id="allFeatureCompleter" />
+            </completers>
+        </command>
         <command name="features/info">
             <action class="org.apache.karaf.features.command.InfoFeatureCommand"/>
             <completers>
