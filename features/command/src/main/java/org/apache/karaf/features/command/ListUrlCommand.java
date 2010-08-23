@@ -23,15 +23,46 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "features", name = "listUrl", description = "Displays a list of all defined repository URLs.")
 public class ListUrlCommand extends FeaturesCommandSupport {
 
+	private static final String REPOSITORY = "Repository";
+	private static final String REPOSITORY_URL = "Repository URL";
+	
     protected void doExecute(FeaturesService admin) throws Exception {
+    	
+        StringBuffer sb = null;      
+
         Repository[] repos = admin.listRepositories();
+          
+    	int maxRepositorySize = REPOSITORY.length();    	
+        int maxRepositoryUrlSize = REPOSITORY_URL.length();
+        for (Repository r : repos) { 
+        	maxRepositorySize = Math.max(maxRepositorySize, r.getName().length());
+        	maxRepositoryUrlSize = Math.max(maxRepositoryUrlSize, r.getURI().toString().length());
+        }
+        
         if ((repos != null) && (repos.length > 0)) {
-            for (int i = 0; i < repos.length; i++) {
-            	String status = repos[i].isValid() ? "    valid" : "    invalid";
-            	System.out.println(repos[i].getURI().toString() + status);
+            // Prepare the header
+            sb = new StringBuffer();        
+            append(sb, REPOSITORY, maxRepositorySize + 2);
+            append(sb, REPOSITORY_URL, maxRepositoryUrlSize + 2);        
+            System.out.println(sb.toString());
+            
+
+        	for (int i = 0; i < repos.length; i++) {
+            	sb = new StringBuffer();        
+                append(sb, repos[i].getName(), maxRepositorySize + 2);
+                append(sb, repos[i].getURI().toString(), maxRepositoryUrlSize + 2); 
+            	sb.append(repos[i].isValid() ? "    valid" : "    invalid");
+            	System.out.println(sb.toString());
             }
         } else {
             System.out.println("No repository URLs are set.");
         }
+    }
+    
+    private void append(StringBuffer sb, String s, int width) { 
+    	sb.append(s);
+    	for (int i = s.length(); i < width; i++) { 
+    		sb.append(" ");
+    	}
     }
 }
