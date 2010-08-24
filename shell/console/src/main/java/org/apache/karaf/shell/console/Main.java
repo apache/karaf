@@ -47,9 +47,15 @@ import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
 
 public class Main {
+    private String application = System.getProperty("karaf.name", "root");
+    private String user = "karaf";
 
     public static void main(String args[]) throws Exception {
+        Main main = new Main();
+        main.run(args);
+    }
 
+    public void run(String args[]) throws Exception {
         ThreadIOImpl threadio = new ThreadIOImpl();
         threadio.start();
 
@@ -112,8 +118,8 @@ public class Main {
             }
         };
         CommandSession session = console.getSession();
-        session.put("USER", "karaf");
-        session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+        session.put("USER", user);
+        session.put("APPLICATION", application);
         session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
         session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
         session.put(".jline.terminal", terminal);
@@ -132,6 +138,22 @@ public class Main {
         }
 
         terminalFactory.destroy();
+    }
+
+    public String getApplication() {
+        return application;
+    }
+
+    public void setApplication(String application) {
+        this.application = application;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
     }
 
     private static PrintStream wrap(PrintStream stream) {
