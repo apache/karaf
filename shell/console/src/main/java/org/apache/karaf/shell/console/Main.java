@@ -19,12 +19,15 @@
 package org.apache.karaf.shell.console;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -54,8 +57,17 @@ public class Main {
         commandProcessor.setThreadio(threadio);
         commandProcessor.setConverter(new Support());
 
-        List<String> actions = new ArrayList<String>();
-        Enumeration<URL> urls = Main.class.getClassLoader().getResources("META-INF/services/org/apache/karaf/shell/commands");
+        ClassLoader cl = Main.class.getClassLoader();
+        if (args.length > 0 && args[0].startsWith("--classpath=")) {
+            String base = args[0].substring("--classpath=".length());
+            List<URL> urls = getFiles(new File(base));
+            cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), cl);
+            String[] a = new String[args.length - 1];
+            System.arraycopy(args, 1, a, 0, a.length);
+            args = a;
+        }
+
+        Enumeration<URL> urls = cl.getResources("META-INF/services/org/apache/karaf/shell/commands");
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
             BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -63,7 +75,7 @@ public class Main {
             while (line != null) {
                 line = line.trim();
                 if (line.length() > 0 && line.charAt(0) != '#') {
-                        final Class<Action> actionClass = (Class<Action>) Main.class.getClassLoader().loadClass(line);
+                        final Class<Action> actionClass = (Class<Action>) cl.loadClass(line);
                         try {
                             Command cmd = actionClass.getAnnotation(Command.class);
                             Function function = new AbstractCommand() {
@@ -73,7 +85,6 @@ public class Main {
                                 }
                             };
                             commandProcessor.addCommand(cmd.scope(), function, cmd.name());
-//                            System.out.println("Registering " + cmd.scope() + ":" + cmd.name());
                         } catch (Exception e) {
                         }
                 }
@@ -138,6 +149,22 @@ public class Main {
             return (T) mth.invoke(stream);
         } catch (Throwable t) {
             return stream;
+        }
+    }
+
+    private static List<URL> getFiles(File base) throws MalformedURLException {
+        List<URL> urls = new ArrayList<URL>();
+        getFiles(base, urls);
+        return urls;
+    }
+
+    private static void getFiles(File base, List<URL> urls) throws MalformedURLException {
+        for (File f : base.listFiles()) {
+            if (f.isDirectory()) {
+                getFiles(f, urls);
+            } else if (f.getName().endsWith(".jar")) {
+                urls.add(f.toURI().toURL());
+            }
         }
     }
 }

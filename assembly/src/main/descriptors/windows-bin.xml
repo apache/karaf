@@ -49,6 +49,7 @@
             <lineEnding>dos</lineEnding>
             <includes>
                 <include>admin.bat</include>
+                <include>shell.bat</include>
             </includes>
         </fileSet>
         <fileSet>
