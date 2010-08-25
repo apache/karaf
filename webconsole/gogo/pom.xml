@@ -89,7 +89,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Import-Package>!${project.artifactId}*,*</Import-Package>
+            <Import-Package>!${project.artifactId}*,
+                            jline;version="[${jline.version}, ${jline.version}]",
+                            *
+            </Import-Package>
             <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
             <Embed-Dependency>
                <!-- Required for JSON data transfer -->
