@@ -73,7 +73,7 @@ public class Main {
             args = a;
         }
 
-        Enumeration<URL> urls = cl.getResources("META-INF/services/org/apache/karaf/shell/commands");
+        Enumeration<URL> urls = cl.getResources(getDiscoveryResource());
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
             BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -138,6 +138,16 @@ public class Main {
         }
 
         terminalFactory.destroy();
+    }
+
+    /**
+     * Sub classes can override so that their registered commands do not conflict with the default shell
+     * implementation.
+     *
+     * @return
+     */
+    public String getDiscoveryResource() {
+        return "META-INF/services/org/apache/karaf/shell/commands";
     }
 
     public String getApplication() {
