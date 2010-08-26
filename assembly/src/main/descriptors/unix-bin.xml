@@ -52,6 +52,7 @@
             <includes>
                 <include>admin</include>
                 <include>shell</include>
+                <include>client</include>
             </includes>
         </fileSet>
         <fileSet>
