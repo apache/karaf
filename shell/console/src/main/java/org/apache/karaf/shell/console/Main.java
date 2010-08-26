@@ -182,7 +182,7 @@ public class Main {
     }
 
     private void discoverCommands(CommandShellImpl commandProcessor, ClassLoader cl, SimpleCommandsCompleter completer) throws IOException, ClassNotFoundException {
-        Enumeration<URL> urls = cl.getResources("META-INF/services/org/apache/karaf/shell/commands");
+        Enumeration<URL> urls = cl.getResources(getDiscoveryResource());
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
             BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
