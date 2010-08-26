@@ -18,12 +18,7 @@
  */
 package org.apache.karaf.shell.console;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -45,6 +40,7 @@ import org.apache.karaf.shell.console.jline.TerminalFactory;
 import org.fusesource.jansi.AnsiConsole;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
+import org.osgi.service.threadio.ThreadIO;
 
 public class Main {
     private String application = System.getProperty("karaf.name", "root");
@@ -55,7 +51,14 @@ public class Main {
         main.run(args);
     }
 
+    /**
+     * Use this method when the shell is being executed as a top level shell.
+     *
+     * @param args
+     * @throws Exception
+     */
     public void run(String args[]) throws Exception {
+
         ThreadIOImpl threadio = new ThreadIOImpl();
         threadio.start();
 
@@ -73,45 +76,58 @@ public class Main {
             args = a;
         }
 
-        Enumeration<URL> urls = cl.getResources(getDiscoveryResource());
-        while (urls.hasMoreElements()) {
-            URL url = urls.nextElement();
-            BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
-            String line = r.readLine();
-            while (line != null) {
-                line = line.trim();
-                if (line.length() > 0 && line.charAt(0) != '#') {
-                        final Class<Action> actionClass = (Class<Action>) cl.loadClass(line);
-                        try {
-                            Command cmd = actionClass.getAnnotation(Command.class);
-                            Function function = new AbstractCommand() {
-                                @Override
-                                protected Action createNewAction() throws Exception {
-                                    return actionClass.newInstance();
-                                }
-                            };
-                            commandProcessor.addCommand(cmd.scope(), function, cmd.name());
-                        } catch (Exception e) {
-                        }
-                }
-                line = r.readLine();
-            }
-            r.close();
-        }
-
-        TerminalFactory terminalFactory = new TerminalFactory();
+        discoverCommands(commandProcessor, cl);
 
         InputStream in = unwrap(System.in);
-        PrintStream out = unwrap(System.out);
-        PrintStream err = unwrap(System.err);
+        PrintStream out = wrap(unwrap(System.out));
+        PrintStream err = wrap(unwrap(System.err));
+        run(commandProcessor, args, in, out, err);
+
+        // TODO: do we need to stop the threadio that was started?
+        // threadio.stop();
+    }
+
+    /**
+     * Use this method when the shell is being executed as a command
+     * of another shell.
+     *
+     * @param parent
+     * @param args
+     * @throws Exception
+     */
+    public void run(CommandSession parent, String args[]) throws Exception {
+
+        CommandShellImpl commandProcessor = new CommandShellImpl();
+        // TODO: find out what the down side of not using a real ThreadIO implementation is.
+        commandProcessor.setThreadio(new ThreadIO(){
+            public void setStreams(InputStream in, PrintStream out, PrintStream err) {
+            }
+            public void close() {
+            }
+        });
+        commandProcessor.setConverter(new Support());
+
+        ClassLoader cl = Main.class.getClassLoader();
+        if (args.length > 0 && args[0].startsWith("--classpath=")) {
+            String base = args[0].substring("--classpath=".length());
+            List<URL> urls = getFiles(new File(base));
+            cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), cl);
+            String[] a = new String[args.length - 1];
+            System.arraycopy(args, 1, a, 0, a.length);
+            args = a;
+        }
+        discoverCommands(commandProcessor, cl);
+
+        InputStream in = parent.getKeyboard();
+        PrintStream out = parent.getConsole();
+        PrintStream err = parent.getConsole();
+        run(commandProcessor, args, in, out, err);
+    }
+
+    private void run(final CommandShellImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
+        TerminalFactory terminalFactory = new TerminalFactory();
         Terminal terminal = terminalFactory.getTerminal();
-        Console console = new Console(commandProcessor,
-                                   in,
-                                   wrap(out),
-                                   wrap(err),
-                                   terminal,
-                                   null,
-                                   null) {
+        Console console = new Console(commandProcessor, in, out, err, terminal, null, null) {
             @Override
             protected Properties loadBrandingProperties() {
                 return super.loadBrandingProperties();
@@ -149,6 +165,35 @@ public class Main {
     public String getDiscoveryResource() {
         return "META-INF/services/org/apache/karaf/shell/commands";
     }
+
+    private void discoverCommands(CommandShellImpl commandProcessor, ClassLoader cl) throws IOException, ClassNotFoundException {
+        Enumeration<URL> urls = cl.getResources("META-INF/services/org/apache/karaf/shell/commands");
+        while (urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
+            String line = r.readLine();
+            while (line != null) {
+                line = line.trim();
+                if (line.length() > 0 && line.charAt(0) != '#') {
+                        final Class<Action> actionClass = (Class<Action>) cl.loadClass(line);
+                        try {
+                            Command cmd = actionClass.getAnnotation(Command.class);
+                            Function function = new AbstractCommand() {
+                                @Override
+                                protected Action createNewAction() throws Exception {
+                                    return actionClass.newInstance();
+                                }
+                            };
+                            commandProcessor.addCommand(cmd.scope(), function, cmd.name());
+                        } catch (Exception e) {
+                        }
+                }
+                line = r.readLine();
+            }
+            r.close();
+        }
+    }
+
 
     public String getApplication() {
         return application;

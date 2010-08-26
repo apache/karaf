@@ -67,7 +67,7 @@ public class Console implements Runnable
     private BlockingQueue<Integer> queue;
     private boolean interrupt;
     private Thread pipe;
-    private boolean running;
+    volatile private boolean running;
     private Runnable closeCallback;
     private Terminal terminal;
     private InputStream consoleInput;
@@ -131,7 +131,6 @@ public class Console implements Runnable
         //System.err.println("Closing");
         running = false;
         pipe.interrupt();
-        Thread.interrupted();
     }
 
     public void run()
@@ -211,6 +210,7 @@ public class Console implements Runnable
                 }
             }
         }
+        close();
         //System.err.println("Exiting console...");
         if (closeCallback != null)
         {
