@@ -62,7 +62,7 @@ public class Console implements Runnable
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
-    private CommandSession session;
+    protected CommandSession session;
     private ConsoleReader reader;
     private BlockingQueue<Integer> queue;
     private boolean interrupt;
@@ -138,9 +138,8 @@ public class Console implements Runnable
         thread = Thread.currentThread();
         running = true;
         pipe.start();
-        Properties props = loadBrandingProperties();
-        welcome(props);
-        setSessionProperties(props);
+        welcome();
+        setSessionProperties();
         String scriptFileName = System.getProperty(SHELL_INIT_SCRIPT);
         if (scriptFileName != null) {
             Reader r = null;
@@ -232,14 +231,16 @@ public class Console implements Runnable
         return Boolean.parseBoolean(s.toString());
     }
 
-    protected void welcome(Properties props) {
+    protected void welcome() {
+        Properties props = loadBrandingProperties();
         String welcome = props.getProperty("welcome");
         if (welcome != null && welcome.length() > 0) {
             session.getConsole().println(welcome);
         }
     }
 
-    private void setSessionProperties(Properties props) {
+    protected void setSessionProperties() {
+        Properties props = loadBrandingProperties();
         for (Map.Entry<Object, Object> entry : props.entrySet()) {
             String key = (String) entry.getKey();
             if (key.startsWith("session.")) {
@@ -255,7 +256,7 @@ public class Console implements Runnable
         return props;
     }
 
-    private void loadProps(Properties props, String resource) {
+    protected void loadProps(Properties props, String resource) {
         InputStream is = null;
         try {
             is = getClass().getClassLoader().getResourceAsStream(resource);

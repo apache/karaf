@@ -127,12 +127,7 @@ public class Main {
     private void run(final CommandShellImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
         TerminalFactory terminalFactory = new TerminalFactory();
         Terminal terminal = terminalFactory.getTerminal();
-        Console console = new Console(commandProcessor, in, out, err, terminal, null, null) {
-            @Override
-            protected Properties loadBrandingProperties() {
-                return super.loadBrandingProperties();
-            }
-        };
+        Console console = createConsole(commandProcessor, in, out, err, terminal);
         CommandSession session = console.getSession();
         session.put("USER", user);
         session.put("APPLICATION", application);
@@ -154,6 +149,21 @@ public class Main {
         }
 
         terminalFactory.destroy();
+    }
+
+    /**
+     * Allow sub classes of main to change the Console implementation used.
+     * 
+     * @param commandProcessor
+     * @param in
+     * @param out
+     * @param err
+     * @param terminal
+     * @return
+     * @throws Exception
+     */
+    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+        return new Console(commandProcessor, in, out, err, terminal, null, null);
     }
 
     /**
