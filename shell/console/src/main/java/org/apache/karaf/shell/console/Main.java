@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import jline.Terminal;
 import org.apache.felix.gogo.commands.Action;
@@ -35,6 +36,7 @@ import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.runtime.lang.Support;
 import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.karaf.shell.console.completer.SimpleCommandsCompleter;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.karaf.shell.console.jline.TerminalFactory;
 import org.fusesource.jansi.AnsiConsole;
@@ -76,12 +78,13 @@ public class Main {
             args = a;
         }
 
-        discoverCommands(commandProcessor, cl);
+        SimpleCommandsCompleter completer = new SimpleCommandsCompleter(getApplication());
+        discoverCommands(commandProcessor, cl, completer);
 
         InputStream in = unwrap(System.in);
         PrintStream out = wrap(unwrap(System.out));
         PrintStream err = wrap(unwrap(System.err));
-        run(commandProcessor, args, in, out, err);
+        run(commandProcessor, args, in, out, err, completer);
 
         // TODO: do we need to stop the threadio that was started?
         // threadio.stop();
@@ -116,18 +119,20 @@ public class Main {
             System.arraycopy(args, 1, a, 0, a.length);
             args = a;
         }
-        discoverCommands(commandProcessor, cl);
+
+        SimpleCommandsCompleter completer = new SimpleCommandsCompleter(getApplication());
+        discoverCommands(commandProcessor, cl, completer);
 
         InputStream in = parent.getKeyboard();
         PrintStream out = parent.getConsole();
         PrintStream err = parent.getConsole();
-        run(commandProcessor, args, in, out, err);
+        run(commandProcessor, args, in, out, err, completer);
     }
 
-    private void run(final CommandShellImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
+    private void run(final CommandShellImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err, final Completer completer) throws Exception {
         TerminalFactory terminalFactory = new TerminalFactory();
         Terminal terminal = terminalFactory.getTerminal();
-        Console console = createConsole(commandProcessor, in, out, err, terminal);
+        Console console = createConsole(commandProcessor, in, out, err, terminal, completer);
         CommandSession session = console.getSession();
         session.put("USER", user);
         session.put("APPLICATION", application);
@@ -162,8 +167,8 @@ public class Main {
      * @return
      * @throws Exception
      */
-    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
-        return new Console(commandProcessor, in, out, err, terminal, null, null);
+    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal, Completer completer) throws Exception {
+        return new Console(commandProcessor, in, out, err, terminal, completer, null);
     }
 
     /**
@@ -176,7 +181,7 @@ public class Main {
         return "META-INF/services/org/apache/karaf/shell/commands";
     }
 
-    private void discoverCommands(CommandShellImpl commandProcessor, ClassLoader cl) throws IOException, ClassNotFoundException {
+    private void discoverCommands(CommandShellImpl commandProcessor, ClassLoader cl, SimpleCommandsCompleter completer) throws IOException, ClassNotFoundException {
         Enumeration<URL> urls = cl.getResources("META-INF/services/org/apache/karaf/shell/commands");
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
@@ -195,6 +200,7 @@ public class Main {
                                 }
                             };
                             commandProcessor.addCommand(cmd.scope(), function, cmd.name());
+                            completer.addCommand(cmd, function);
                         } catch (Exception e) {
                         }
                 }

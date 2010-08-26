@@ -46,8 +46,8 @@ public class ExampleSubclassMain extends Main  {
     }
 
     @Override
-    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
-        return new Console(commandProcessor, in, out, err, terminal, null, null) {
+    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal, Completer completer) throws Exception {
+        return new Console(commandProcessor, in, out, err, terminal, completer, null) {
 
             /**
              * If you don't overwrite, then karaf will use the welcome message found in the
