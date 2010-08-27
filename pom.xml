@@ -123,6 +123,7 @@
         <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
         <junit.version>4.7_1</junit.version>
         <jline.version>0.9.95.20100209</jline.version>
+        <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.16</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.0-RC1</mina.version>
@@ -787,6 +788,11 @@
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-finder-shaded</artifactId>
                 <version>${xbean.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tanukisoft</groupId>
+                <artifactId>wrapper</artifactId>
+                <version>${jsw.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

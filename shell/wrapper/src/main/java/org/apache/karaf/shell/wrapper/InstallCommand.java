@@ -25,6 +25,8 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
 
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Option;
@@ -62,7 +64,8 @@ public class InstallCommand extends OsgiCommandSupport
     		
 			HashMap<String, String> props = new HashMap<String, String>();
 			props.put("${karaf.home}", System.getProperty("karaf.home"));
-			props.put("${karaf.base}", base.getPath());
+            props.put("${karaf.base}", base.getPath());
+            props.put("${karaf.data}", System.getProperty("karaf.data"));
 			props.put("${name}", name);
 			props.put("${displayName}", getDisplayName());
 			props.put("${description}", getDescription());
@@ -132,6 +135,8 @@ public class InstallCommand extends OsgiCommandSupport
 			mkdir(lib);
 			copyResourceTo(new File(lib, "karaf-wrapper.jar"), "all/karaf-wrapper.jar", false);
 			mkdir(etc);
+
+            createJar(new File(lib, "karaf-wrapper-main.jar"), "org/apache/karaf/shell/wrapper/Main.class");
 
 			System.out.println("");
 			System.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file:");
@@ -235,6 +240,35 @@ public class InstallCommand extends OsgiCommandSupport
         handler.stop();
         return status;
 	}
+
+    private void createJar(File outFile, String resource) throws Exception {
+        if( !outFile.exists() ) {
+            System.out.println(Ansi.ansi().a("Creating file: ")
+                                          .a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
+            InputStream is = getClass().getClassLoader().getResourceAsStream(resource);
+            if (is == null) {
+                throw new IllegalStateException("Resource " + resource + " not found!");
+            }
+            try {
+                JarOutputStream jar = new JarOutputStream(new FileOutputStream( outFile ));
+                int idx = resource.indexOf('/');
+                while (idx > 0) {
+                    jar.putNextEntry(new ZipEntry(resource.substring(0, idx)));
+                    jar.closeEntry();
+                    idx = resource.indexOf('/', idx + 1);
+                }
+                jar.putNextEntry(new ZipEntry(resource));
+                int c;
+                while ( (c = is.read()) >= 0 ) {
+                    jar.write(c);
+                }
+                jar.closeEntry();
+                jar.close();
+            } finally {
+                safeClose(is);
+            }
+        }
+    }
 
 	private void copyResourceTo(File outFile, String resource, boolean text) throws Exception {
 		if( !outFile.exists() ) {

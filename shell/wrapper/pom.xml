@@ -45,7 +45,14 @@
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.main</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tanukisoft</groupId>
+            <artifactId>wrapper</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -86,6 +93,8 @@
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
                             !${project.artifactId}*,
+                            !org.apache.karaf.main,
+                            !org.tanukisoftware.wrapper,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
