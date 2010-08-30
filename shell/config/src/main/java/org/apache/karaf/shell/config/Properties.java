@@ -57,7 +57,8 @@ public class Properties extends AbstractMap<String, String> {
 
     public Properties(File location) throws IOException {
         this.location = location;
-        load(location);
+        if(location.exists())
+            load(location);
     }
 
     public void load(File location) throws IOException {
@@ -226,14 +227,14 @@ public class Properties extends AbstractMap<String, String> {
         for (String key : storage.keySet())
         {
             Layout l = layout.get(key);
-            if (l.getCommentLines() != null)
+            if (l != null && l.getCommentLines() != null)
             {
                 for (String s : l.getCommentLines())
                 {
                     writer.writeln(s);
                 }
             }
-            if (l.getValueLines() != null)
+            if (l != null && l.getValueLines() != null)
             {
                 for (String s : l.getValueLines())
                 {
