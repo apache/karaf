@@ -40,6 +40,7 @@ import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.basic.ActionPreparator;
 import org.apache.karaf.shell.console.commands.BlueprintCommand;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -76,8 +77,21 @@ public class CmdHelpMojo extends AbstractMojo {
      */
     protected File targetFolder;
 
+    /**
+     * The output format
+     *
+     * @parameter default-value="docbx";
+     */
+    protected String format;
+
+    private static final String FORMAT_CONF = "conf";
+    private static final String FORMAT_DOCBX = "docbx";
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
+            if (!FORMAT_DOCBX.equals(format) && !FORMAT_CONF.equals(format)) {
+                throw new MojoFailureException("Unsupported format: " + format + ". Supported formats are: docbx or conf.");
+            }
             if (!targetFolder.exists()) {
                 targetFolder.mkdirs();
             }
@@ -99,9 +113,14 @@ public class CmdHelpMojo extends AbstractMojo {
 
             for (Class clazz : classes) {
                 try {
-                    String help = new HelpPrinter(clazz).printHelp();
+                    String help = new HelpPrinter(clazz).printHelp(format);
                     Command cmd = (Command) clazz.getAnnotation(Command.class);
-                    File output = new File(targetFolder, cmd.scope() + "-" + cmd.name() + ".xml");
+                    File output = null;
+                    if (FORMAT_DOCBX.equals(format)) {
+                        output = new File(targetFolder, cmd.scope() + "-" + cmd.name() + ".xml");
+                    } else if (FORMAT_CONF.equals(format)) {
+                        output = new File(targetFolder, cmd.scope() + "-" + cmd.name() + ".conf");
+                    }
                     Writer writer = new OutputStreamWriter(new FileOutputStream(output));
                     writer.write(help);
                     writer.close();
@@ -118,21 +137,35 @@ public class CmdHelpMojo extends AbstractMojo {
                 }
             }
 
-            PrintStream writer = new PrintStream(new FileOutputStream(new File(targetFolder, "commands.xml")));
-            writer.println("<chapter id='commands' xmlns:xi=\"http://www.w3.org/2001/XInclude\">");
-            writer.println("  <title>Commands</title>");
-            writer.println("  <toc></toc>");
-
-            for (String key : commands.keySet()) {
-                writer.println("  <section id='commands-" + key + "'>");
-                writer.println("    <title>" + key + "</title>");
-                for (String cmd : commands.get(key)) {
-                    writer.println("    <xi:include href='" + key + "-" + cmd + ".xml' parse='xml'/>");
+            if (FORMAT_DOCBX.equals(format)) {
+                PrintStream writer = new PrintStream(new FileOutputStream(new File(targetFolder, "commands.xml")));
+                writer.println("<chapter id='commands' xmlns:xi=\"http://www.w3.org/2001/XInclude\">");
+                writer.println("  <title>Commands</title>");
+                writer.println("  <toc></toc>");
+                for (String key : commands.keySet()) {
+                    writer.println("  <section id='commands-" + key + "'>");
+                    writer.println("    <title>" + key + "</title>");
+                    for (String cmd : commands.get(key)) {
+                        writer.println("    <xi:include href='" + key + "-" + cmd + ".xml' parse='xml'/>");
+                    }
+                    writer.println("  </section>");
                 }
-                writer.println("  </section>");
+                writer.println("</chapter>");
+                writer.close();
+            } else if (FORMAT_CONF.equals(format)) {
+                PrintStream writer = new PrintStream(new FileOutputStream(new File(targetFolder, "commands.conf")));
+                writer.println("h1. Commands");
+                writer.println();
+                for (String key : commands.keySet()) {
+                    writer.println("h2. " + key);
+                    writer.println();
+                    for (String cmd : commands.get(key)) {
+                        writer.println("* [" + key + "-" + cmd + "]");
+                    }
+                    writer.println();
+                }
+                writer.close();
             }
-            writer.println("</chapter>");
-            writer.close();
 
         } catch (Exception e) {
             throw new MojoExecutionException("Error building commands help", e);
@@ -147,7 +180,7 @@ public class CmdHelpMojo extends AbstractMojo {
             this.actionClass = actionClass;
         }
 
-        public String printHelp() throws Exception {
+        public String printHelp(String format) throws Exception {
             PrintStream oldout = System.out;
             try {
                 Action action = actionClass.newInstance();
@@ -155,7 +188,13 @@ public class CmdHelpMojo extends AbstractMojo {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 PrintStream newout = new PrintStream(baos);
                 System.setOut(newout);
-                new Preparator().prepare(action, session, Collections.<Object>singletonList("--help"));
+                ActionPreparator preparator;
+                if (FORMAT_DOCBX.equals(format)) {
+                    preparator = new DocbxPreparator();
+                } else {
+                    preparator = new ConfPreparator();
+                }
+                preparator.prepare(action, session, Collections.<Object>singletonList("--help"));
                 newout.close();
                 baos.close();
                 return baos.toString();
@@ -164,7 +203,7 @@ public class CmdHelpMojo extends AbstractMojo {
             }
         }
 
-        protected class Preparator extends BlueprintActionPreparator {
+        protected class DocbxPreparator extends BlueprintActionPreparator {
 
             @Override
             protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> args, PrintStream out)
@@ -248,6 +287,70 @@ public class CmdHelpMojo extends AbstractMojo {
                     out.println("  </section>");
                 }
                 out.println("</section>");
+            }
+
+        }
+
+        protected class ConfPreparator extends BlueprintActionPreparator {
+
+            @Override
+            protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> args, PrintStream out)
+            {
+                List<Argument> arguments = new ArrayList<Argument>(args);
+                Collections.sort(arguments, new Comparator<Argument>() {
+                    public int compare(Argument o1, Argument o2) {
+                        return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
+                    }
+                });
+                options = new HashSet<Option>(options);
+                options.add(HELP);
+
+                out.println("h1. " + command.scope() + ":" + command.name());
+                out.println();
+
+                out.println("h2. Description");
+                out.println(command.description());
+                out.println();
+
+                StringBuffer syntax = new StringBuffer();
+                syntax.append(String.format("%s:%s", command.scope(), command.name()));
+                if (options.size() > 0) {
+                    syntax.append(" [options]");
+                }
+                if (arguments.size() > 0) {
+                    syntax.append(' ');
+                    for (Argument argument : arguments) {
+                        syntax.append(String.format(argument.required() ? "%s " : "[%s] ", argument.name()));
+                    }
+                }
+                out.println("h2. Syntax");
+                out.println(syntax.toString());
+                out.println();
+
+                if (arguments.size() > 0)
+                {
+                    out.println("h2. Arguments");
+                    for (Argument argument : arguments)
+                    {
+                        out.println("| " + argument.name() + " | " + argument.description() + " |");
+                    }
+                    out.println();
+                }
+                if (options.size() > 0)
+                {
+                    out.println("h2. Options");
+                    for (Option option : options)
+                    {
+                        String opt = option.name();
+                        for (String alias : option.aliases())
+                        {
+                            opt += ", " + alias;
+                        }
+                        out.println("| " + opt + " | " + option.description() + " |");
+                    }
+                    out.println();
+                }
+                out.println();
             }
 
         }
