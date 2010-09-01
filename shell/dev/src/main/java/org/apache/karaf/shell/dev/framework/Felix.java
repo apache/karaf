@@ -24,6 +24,8 @@ import java.io.IOException;
  */
 public class Felix extends Framework {
 
+    public static final String NAME = "Felix";
+
     /**
      * Create a instance of Karaf running with Felix in the given base directory
      *
@@ -34,7 +36,7 @@ public class Felix extends Framework {
     }
 
     public String getName() {
-        return "Felix";
+        return NAME;
     }
 
     public void enableDebug(File directory) throws IOException {

@@ -24,7 +24,7 @@
             <action class="org.apache.karaf.shell.dev.ShowBundleTree"/>
         </command>
         <command name="dev/framework">
-            <action class="org.apache.karaf.shell.dev.FrameworkDebug" />
+            <action class="org.apache.karaf.shell.dev.FrameworkOptions" />
         </command>
         <command name="dev/dynamic-import">
             <action class="org.apache.karaf.shell.dev.DynamicImport" />

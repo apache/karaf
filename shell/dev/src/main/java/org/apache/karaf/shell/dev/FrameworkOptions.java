@@ -18,19 +18,21 @@ package org.apache.karaf.shell.dev;
 
 import java.io.File;
 
+import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.dev.framework.Equinox;
 import org.apache.karaf.shell.dev.framework.Felix;
 import org.apache.karaf.shell.dev.framework.Framework;
+import org.apache.karaf.shell.dev.util.Properties;
 
 /**
  * Command for enabling/disabling debug logging on the OSGi framework
  */
 @Command(scope = "dev", name = "framework",
-         description = "Enable/disable debugging for the OSGi Framework")
-public class FrameworkDebug extends OsgiCommandSupport {
+         description = "OSGi Framework options")
+public class FrameworkOptions extends OsgiCommandSupport {
 
     private static final String KARAF_BASE = System.getProperty("karaf.base");
 
@@ -40,24 +42,37 @@ public class FrameworkDebug extends OsgiCommandSupport {
     @Option(name = "-nodebug", aliases={"--disable-debug"}, description="Disable debug for the OSGi framework", required = false, multiValued = false)
     boolean nodebug;
 
+    @Argument(name = "framework", required = false, description = "Name of the OSGi framework to use")
+    String framework;
+
     @Override
     protected Object doExecute() throws Exception {
-        Framework framework = getFramework();
 
-        if (!debug^nodebug) {
-            System.err.printf("Required option missing: use -debug or -nodebug%n");
+        if (!debug^nodebug && framework == null) {
+            System.out.printf("Current OSGi framework is %s%n", getFramework().getName());
             return null;
         }
         if (debug) {
-            System.out.printf("Enabling debug for OSGi framework (%s)%n", framework.getName());
-            framework.enableDebug(new File(KARAF_BASE));
+            Framework frwk = getFramework();
+            System.out.printf("Enabling debug for OSGi framework (%s)%n", frwk.getName());
+            frwk.enableDebug(new File(KARAF_BASE));
         }
         if (nodebug) {
-            System.out.printf("Disabling debug for OSGi framework (%s)%n", framework.getName());
-            framework.disableDebug(new File(KARAF_BASE));
+            Framework frwk = getFramework();
+            System.out.printf("Disabling debug for OSGi framework (%s)%n", frwk.getName());
+            frwk.disableDebug(new File(KARAF_BASE));
+        }
+        if (framework != null) {
+            if (!Felix.NAME.equalsIgnoreCase(framework) && !Equinox.NAME.equalsIgnoreCase(framework)) {
+                System.err.printf("Unsupported framework: %s%n", framework);
+                return null;
+            }
+            Properties props = new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
+            props.put("karaf.framework", framework.toLowerCase());
+            props.save();
         }
 
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
 
@@ -68,4 +83,5 @@ public class FrameworkDebug extends OsgiCommandSupport {
             return new Equinox(new File(KARAF_BASE));
         }
     }
+
 }

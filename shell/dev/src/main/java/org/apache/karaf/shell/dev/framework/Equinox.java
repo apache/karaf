@@ -26,6 +26,8 @@ import org.apache.karaf.shell.dev.util.IO;
  */
 public class Equinox extends Framework {
 
+    public static final String NAME = "Equinox";
+
     /**
      * Create a new instance
      *
@@ -36,7 +38,7 @@ public class Equinox extends Framework {
     }
 
     public String getName() {
-        return "Equinox";
+        return NAME;
     }
 
     public void enableDebug(File directory) throws IOException {
