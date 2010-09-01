@@ -98,8 +98,12 @@
     </prerequisites>
 
     <properties>
-        <aopalliance.version>1.0_3</aopalliance.version>
-        <cglib.version>2.1_3_4</cglib.version>
+        <!-- Apache ServiceMix Bundles -->
+        <aopalliance.bundle.version>1.0_4</aopalliance.bundle.version>
+        <cglib.bundle.version>2.1_3_6</cglib.bundle.version>
+        <jetty.bundle.version>6.1.22_2</jetty.bundle.version>
+        <junit.bundle.version>4.7_1</junit.bundle.version>
+
         <commons.logging.version>1.1.1</commons.logging.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
@@ -120,8 +124,6 @@
         <aries.jmx.version>0.1-r964701</aries.jmx.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <jansi.version>1.2</jansi.version>
-        <jetty.bundle.version>6.1.22_1</jetty.bundle.version>
-        <junit.version>4.7_1</junit.version>
         <jline.version>0.9.95.20100209</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.16</log4j.version>
@@ -570,7 +572,7 @@
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-                <version>${junit.version}</version>
+                <version>${junit.bundle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
