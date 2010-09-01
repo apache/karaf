@@ -208,34 +208,42 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     SET OPTS=-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=true
     SET MAIN=org.apache.karaf.main.Main
     SET SHIFT=false
+
+:RUN_LOOP
     if "%1" == "stop" goto :EXECUTE_STOP
     if "%1" == "console" goto :EXECUTE_CONSOLE
     if "%1" == "server" goto :EXECUTE_SERVER
     if "%1" == "client" goto :EXECUTE_CLIENT
+    if "%1" == "clean" goto :EXECUTE_CLEAN
     goto :EXECUTE
 
 :EXECUTE_STOP
     SET MAIN=org.apache.karaf.main.Stop
-    SET SHIFT=true
-    goto :EXECUTE
+    shift
+    goto :RUN_LOOP
 
 :EXECUTE_CONSOLE
-    SET SHIFT=true
-    goto :EXECUTE
+    shift
+    goto :RUN_LOOP
 
 :EXECUTE_SERVER
     SET OPTS=-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true
-    SET SHIFT=true
-    goto :EXECUTE
+    shift
+    goto :RUN_LOOP
 
 :EXECUTE_CLIENT
     SET OPTS=-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=false
-    SET SHIFT=true
-    goto :EXECUTE
+    shift
+    goto :RUN_LOOP
+
+:EXECUTE_CLEAN
+    rmdir /S /Q %KARAF_DATA%
+    shift
+    goto :RUN_LOOP
+
 
 :EXECUTE
-    if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
-    if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8
+    SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8
     rem Execute the Java Virtual Machine
     cd %KARAF_BASE%
     "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Djava.endorsed.dirs="%JAVA_HOME%\jre\lib\endorsed;%JAVA_HOME%\lib\endorsed;%KARAF_HOME%\lib\endorsed" -Djava.ext.dirs="%JAVA_HOME%\jre\lib\ext;%JAVA_HOME%\lib\ext;%KARAF_HOME%\lib\ext" -Dkaraf.instances="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Dkaraf.data="%KARAF_DATA%" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" %MAIN% %ARGS%

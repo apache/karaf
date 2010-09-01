@@ -325,6 +325,10 @@ run() {
             OPTS="-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=false"
             shift
             ;;
+        'clean')
+            rm -Rf $KARAF_DATA
+            shift
+            ;;
     esac
 
     if $cygwin; then
