@@ -212,7 +212,7 @@ public class Main {
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
 
-        updateClassLoader(configProps);
+        ClassLoader classLoader = updateClassLoader(configProps);
 
         processSecurityProperties(configProps);
 
@@ -232,11 +232,11 @@ public class Main {
         configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
         // Start up the OSGI framework
 
-        InputStream is = getClass().getResourceAsStream("/META-INF/services/" + FrameworkFactory.class.getName());
+        InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
         BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String factoryClass = br.readLine();
         br.close();
-        FrameworkFactory factory = (FrameworkFactory) getClass().getClassLoader().loadClass(factoryClass).newInstance();
+        FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
         framework = factory.newFramework(new StringMap(configProps, false));
         framework.start();
         processAutoProperties(framework.getBundleContext());
@@ -348,22 +348,35 @@ public class Main {
      * @throws Exception If an error occurs.
      **/
     public static void main(String[] args) throws Exception {
-        final Main main = new Main(args);
-        try {
-            main.launch();
-        } catch (Throwable ex) {
-            main.setExitCode(-1);
-            System.err.println("Could not create framework: " + ex);
-            ex.printStackTrace();
-        }        
-        try {
-            main.destroy(true);
-        } catch (Throwable ex) {
-            main.setExitCode(-2);
-            System.err.println("Error occured shutting down framework: " + ex);
-            ex.printStackTrace();
-        } finally {
-            System.exit(main.getExitCode());
+        while (true) {
+            boolean restart = false;
+            System.setProperty("karaf.restart", "false");
+            if (Boolean.getBoolean("karaf.restart.clean")) {
+                File karafHome = Utils.getKarafHome();
+                File karafBase = Utils.getKarafDirectory(Main.PROP_KARAF_BASE, Main.ENV_KARAF_BASE, karafHome, false, true);
+                File karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
+                Utils.deleteDirectory(karafData);
+            }
+            final Main main = new Main(args);
+            try {
+                main.launch();
+            } catch (Throwable ex) {
+                main.setExitCode(-1);
+                System.err.println("Could not create framework: " + ex);
+                ex.printStackTrace();
+            }
+            try {
+                main.destroy(true);
+                restart = Boolean.getBoolean("karaf.restart");
+            } catch (Throwable ex) {
+                main.setExitCode(-2);
+                System.err.println("Error occured shutting down framework: " + ex);
+                ex.printStackTrace();
+            } finally {
+                if (!restart) {
+                    System.exit(main.getExitCode());
+                }
+            }
         }
     }
 
@@ -849,7 +862,7 @@ public class Main {
         }
     }
     
-    private void updateClassLoader(Properties configProps) throws Exception {
+    private ClassLoader updateClassLoader(Properties configProps) throws Exception {
     	String framework = configProps.getProperty(KARAF_FRAMEWORK);
         if (framework == null) {
             throw new IllegalArgumentException("Property " + KARAF_FRAMEWORK + " must be set in the etc/" + CONFIG_PROPERTIES_FILE_NAME + " configuration file");
@@ -866,11 +879,8 @@ public class Main {
             throw new FileNotFoundException(bundleFile.getAbsolutePath());
         }
 
-        URLClassLoader classLoader = (URLClassLoader) Main.class.getClassLoader();
-        Method mth = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-        mth.setAccessible(true);
-        mth.invoke(classLoader, bundleFile.toURL());
-
+        URLClassLoader classLoader = new URLClassLoader(new URL[] { bundleFile.toURI().toURL() }, Main.class.getClassLoader());
+        return classLoader;
     }
 
     /**
@@ -1120,7 +1130,7 @@ public class Main {
                 lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
                 boolean lockLogged = false;
                 setStartLevel(lockStartLevel);
-                for (;;) {
+                while (!exiting) {
                     if (lock.lock()) {
                         if (lockLogged) {
                             LOG.info("Lock acquired.");

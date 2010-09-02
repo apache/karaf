@@ -75,6 +75,10 @@
                         </Private-Package>
                         <Import-Package>!*</Import-Package>
                         -->
+                        <Private-Package>
+                            org.apache.karaf.main*,
+                            org.osgi.*
+                        </Private-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>

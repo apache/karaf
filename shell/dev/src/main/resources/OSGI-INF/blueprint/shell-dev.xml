@@ -32,6 +32,9 @@
         <command name="dev/print-stack-traces">
             <action class="org.apache.karaf.shell.dev.PrintStackTraces" />
         </command>
+        <command name="dev/restart">
+            <action class="org.apache.karaf.shell.dev.Restart" />
+        </command>
     </command-bundle>
 
 </blueprint>
