@@ -67,7 +67,7 @@ public class CommandsCompleter implements Completer {
                 function = unProxy(function);
                 if (function instanceof AbstractCommand) {
                     List<Completer> cl = new ArrayList<Completer>();
-                    cl.add(new StringsCompleter(new String[] { command }));
+                    cl.add(new StringsCompleter(getNames(command)));
                     if (function instanceof CompletableFunction) {
                         List<Completer> fcl = ((CompletableFunction) function).getCompleters();
                         if (fcl != null) {
@@ -85,6 +85,11 @@ public class CommandsCompleter implements Completer {
                 commands.add(command);
             }
         }
+    }
+
+    private String[] getNames(String command) {
+        String[] s = command.split(":");
+        return new String[] { command, s[1] };
     }
 
     protected Function unProxy(Function function) {

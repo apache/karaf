@@ -28,7 +28,6 @@ import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -42,9 +41,7 @@ import jline.Terminal;
 import jline.UnsupportedTerminal;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
-import org.apache.karaf.shell.console.completer.SessionScopeCompleter;
 import org.fusesource.jansi.Ansi;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
@@ -242,13 +239,7 @@ public class Console implements Runnable
     }
 
     protected Completer createCompleter() {
-        Completer completer = new CommandsCompleter(session);
-        return new AggregateCompleter(
-                    Arrays.asList(
-                        completer,
-                        new SessionScopeCompleter( session, completer )
-                    )
-                );
+        return new CommandsCompleter(session);
     }
 
     protected Properties loadBrandingProperties() {

@@ -24,7 +24,8 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.karaf.shell.console.Completer;
 
@@ -62,7 +63,7 @@ public class ArgumentCompleter implements Completer {
      *  @param  completers  the embedded argument completers
      */
     public ArgumentCompleter(final Completer[] completers) {
-        this(completers, new WhitespaceArgumentDelimiter());
+        this(completers, new GogoArgumentDelimiter());
     }
 
     /**
@@ -210,69 +211,32 @@ public class ArgumentCompleter implements Completer {
     }
 
     /**
-     *  Abstract implementation of a delimiter that uses the
-     *  {@link #isDelimiter} method to determine if a particular
-     *  character should be used as a delimiter.
+     *  Implementation of a delimiter that uses the
+     *  Gogo parser.
      *
-     *  @author  <a href="mailto:mwp1@cornell.edu">Marc Prud'hommeaux</a>
+     *  @author  <a href="mailto:gnodet@gmail.com">Guillaume Nodet</a>
      */
-    public abstract static class AbstractArgumentDelimiter
-        implements ArgumentDelimiter {
-        private char[] quoteChars = new char[] { '\'', '"' };
-        private char[] escapeChars = new char[] { '\\' };
-
-        public void setQuoteChars(final char[] quoteChars) {
-            this.quoteChars = quoteChars;
-        }
-
-        public char[] getQuoteChars() {
-            return this.quoteChars;
-        }
-
-        public void setEscapeChars(final char[] escapeChars) {
-            this.escapeChars = escapeChars;
-        }
-
-        public char[] getEscapeChars() {
-            return this.escapeChars;
-        }
+    public static class GogoArgumentDelimiter implements ArgumentDelimiter {
 
         public ArgumentList delimit(final String buffer, final int cursor) {
-            List<String> args = new LinkedList<String>();
-            StringBuffer arg = new StringBuffer();
-            int argpos = -1;
-            int bindex = -1;
-
-            for (int i = 0; (buffer != null) && (i <= buffer.length()); i++) {
-                // once we reach the cursor, set the
-                // position of the selected index
-                if (i == cursor) {
-                    bindex = args.size();
-                    // the position in the current argument is just the
-                    // length of the current argument
-                    argpos = arg.length();
+            Parser parser = new Parser(buffer, cursor);
+            try {
+                List<List<List<CharSequence>>> program = parser.program();
+                List<CharSequence> pipe = program.get(parser.c0).get(parser.c1);
+                List<String> args = new LinkedList<String>();
+                for (CharSequence arg : pipe) {
+                    args.add(arg.toString());
                 }
-
-                if ((i == buffer.length()) || isDelimiter(buffer, i)) {
-                    if (arg.length() > 0) {
-                        args.add(arg.toString());
-                        arg.setLength(0); // reset the arg
-                    }
-                } else {
-                    arg.append(buffer.charAt(i));
-                }
+                return new ArgumentList(args.toArray(new String[args.size()]), parser.c2, parser.c3, cursor);
+            } catch (Throwable t) {
+                return new ArgumentList(new String[] { buffer }, 0, cursor, cursor);
             }
-
-            return new ArgumentList(args.
-                toArray(new String[args.size()]), bindex, argpos, cursor);
         }
 
         /**
          *  Returns true if the specified character is a whitespace
          *  parameter. Check to ensure that the character is not
-         *  escaped by any of
-         *  {@link #getQuoteChars}, and is not escaped by ant of the
-         *  {@link #getEscapeChars}, and returns true from
+         *  escaped and returns true from
          *  {@link #isDelimiterChar}.
          *
          *  @param  buffer the complete command buffer
@@ -280,57 +244,13 @@ public class ArgumentCompleter implements Completer {
          *  @return        true if the character should be a delimiter
          */
         public boolean isDelimiter(final String buffer, final int pos) {
-            if (isQuoted(buffer, pos)) {
-                return false;
-            }
-
-            if (isEscaped(buffer, pos)) {
-                return false;
-            }
-
-            return isDelimiterChar(buffer, pos);
-        }
-
-        public boolean isQuoted(final String buffer, final int pos) {
-            return false;
+            return !isEscaped(buffer, pos) && isDelimiterChar(buffer, pos);
         }
 
         public boolean isEscaped(final String buffer, final int pos) {
-            if (pos <= 0) {
-                return false;
-            }
-
-            for (int i = 0; (escapeChars != null) && (i < escapeChars.length);
-                     i++) {
-                if (buffer.charAt(pos) == escapeChars[i]) {
-                    return !isEscaped(buffer, pos - 1); // escape escape
-                }
-            }
-
-            return false;
+            return pos > 0 && buffer.charAt(pos) == '\\' && !isEscaped(buffer, pos - 1);
         }
 
-        /**
-         *  Returns true if the character at the specified position
-         *  if a delimiter. This method will only be called if the
-         *  character is not enclosed in any of the
-         *  {@link #getQuoteChars}, and is not escaped by ant of the
-         *  {@link #getEscapeChars}. To perform escaping manually,
-         *  override {@link #isDelimiter} instead.
-         */
-        public abstract boolean isDelimiterChar(String buffer, int pos);
-    }
-
-    /**
-     *  {@link ArgumentCompleter.ArgumentDelimiter}
-     *  implementation that counts all
-     *  whitespace (as reported by {@link Character#isWhitespace})
-     *  as being a delimiter.
-     *
-     *  @author  <a href="mailto:mwp1@cornell.edu">Marc Prud'hommeaux</a>
-     */
-    public static class WhitespaceArgumentDelimiter
-        extends AbstractArgumentDelimiter {
         /**
          *  The character is a delimiter if it is whitespace, and the
          *  preceeding character is not an escape character.
@@ -338,6 +258,7 @@ public class ArgumentCompleter implements Completer {
         public boolean isDelimiterChar(String buffer, int pos) {
             return Character.isWhitespace(buffer.charAt(pos));
         }
+
     }
 
     /**
