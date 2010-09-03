@@ -49,6 +49,7 @@
         <module>demos</module>
         <module>itests</module>
         <module>tooling</module>
+        <module>archetypes</module>
     </modules>
 
     <scm>
