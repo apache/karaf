@@ -84,6 +84,30 @@ public class DefaultActionPreparator implements ActionPreparator {
                 }
                 Argument argument = field.getAnnotation(Argument.class);
                 if (argument != null) {
+                    if (Argument.DEFAULT.equals(argument.name())) {
+                        final Argument delegate = argument;
+                        final String name = field.getName();
+                        argument = new Argument() {
+                            public String name() {
+                                return name;
+                            }
+                            public String description() {
+                                return delegate.description();
+                            }
+                            public boolean required() {
+                                return delegate.required();
+                            }
+                            public int index() {
+                                return delegate.index();
+                            }
+                            public boolean multiValued() {
+                                return delegate.multiValued();
+                            }
+                            public Class<? extends Annotation> annotationType() {
+                                return delegate.annotationType();
+                            }
+                        };
+                    }
                     arguments.put(argument, field);
                     int index = argument.index();
                     while (orderedArguments.size() <= index) {
