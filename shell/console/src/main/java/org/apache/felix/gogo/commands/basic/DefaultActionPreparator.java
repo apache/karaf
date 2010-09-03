@@ -283,7 +283,8 @@ public class DefaultActionPreparator implements ActionPreparator {
         }
     }
 
-    protected void printFormatted(String prefix, String str, int termWidth, PrintStream out) {
+    // TODO move this to a helper class?
+    public static void printFormatted(String prefix, String str, int termWidth, PrintStream out) {
         int pfxLen = length(prefix);
         int maxwidth = termWidth - pfxLen;
         Pattern wrap = Pattern.compile("(\\S\\S{" + maxwidth + ",}|.{1," + maxwidth + "})(\\s+|$)");
@@ -294,7 +295,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         }
     }
 
-    protected int length(String str) {
+    public static int length(String str) {
         return str.length();
     }
 

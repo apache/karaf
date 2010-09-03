@@ -26,8 +26,6 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 import jline.Terminal;
 import org.apache.felix.gogo.commands.Action;
@@ -36,6 +34,7 @@ import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.runtime.lang.Support;
 import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.karaf.shell.console.commands.Help;
 import org.apache.karaf.shell.console.completer.SimpleCommandsCompleter;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.karaf.shell.console.jline.TerminalFactory;
@@ -78,7 +77,18 @@ public class Main {
             args = a;
         }
 
-        SimpleCommandsCompleter completer = new SimpleCommandsCompleter(getApplication());
+        final SimpleCommandsCompleter completer = new SimpleCommandsCompleter(this);
+
+        // add top level help
+        Command helpCommand = Help.class.getAnnotation(Command.class);
+        Function helpFunction = new AbstractCommand() {
+            @Override
+            protected Action createNewAction() throws Exception {
+                return new Help(completer);
+            }
+        };
+        addCommand(helpCommand, helpFunction, commandProcessor, completer);
+
         discoverCommands(commandProcessor, cl, completer);
 
         InputStream in = unwrap(System.in);
@@ -120,7 +130,7 @@ public class Main {
             args = a;
         }
 
-        SimpleCommandsCompleter completer = new SimpleCommandsCompleter(getApplication());
+        SimpleCommandsCompleter completer = new SimpleCommandsCompleter(this);
         discoverCommands(commandProcessor, cl, completer);
 
         InputStream in = parent.getKeyboard();
@@ -190,23 +200,27 @@ public class Main {
             while (line != null) {
                 line = line.trim();
                 if (line.length() > 0 && line.charAt(0) != '#') {
-                        final Class<Action> actionClass = (Class<Action>) cl.loadClass(line);
-                        try {
-                            Command cmd = actionClass.getAnnotation(Command.class);
-                            Function function = new AbstractCommand() {
-                                @Override
-                                protected Action createNewAction() throws Exception {
-                                    return actionClass.newInstance();
-                                }
-                            };
-                            commandProcessor.addCommand(cmd.scope(), function, cmd.name());
-                            completer.addCommand(cmd, function);
-                        } catch (Exception e) {
+                    final Class<Action> actionClass = (Class<Action>) cl.loadClass(line);
+                    Command cmd = actionClass.getAnnotation(Command.class);
+                    Function function = new AbstractCommand() {
+                        @Override
+                        protected Action createNewAction() throws Exception {
+                            return ((Class<? extends Action>) actionClass).newInstance();
                         }
+                    };
+                    addCommand(cmd, function, commandProcessor, completer);
                 }
                 line = r.readLine();
             }
             r.close();
+        }
+    }
+
+    protected void addCommand(Command cmd, Function function, CommandShellImpl commandProcessor, SimpleCommandsCompleter completer) {
+        try {
+            commandProcessor.addCommand(cmd.scope(), function, cmd.name());
+            completer.addCommand(cmd, function);
+        } catch (Exception e) {
         }
     }
 
