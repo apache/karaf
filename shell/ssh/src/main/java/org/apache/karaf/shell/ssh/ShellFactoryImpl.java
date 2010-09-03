@@ -52,14 +52,9 @@ import org.osgi.service.command.CommandSession;
 public class ShellFactoryImpl implements Factory<Command>
 {
     private CommandProcessor commandProcessor;
-    private List<Completer> completers;
 
     public void setCommandProcessor(CommandProcessor commandProcessor) {
         this.commandProcessor = commandProcessor;
-    }
-
-    public void setCompleters(List<Completer> completers) {
-        this.completers = completers;
     }
 
     public Command create() {
@@ -102,7 +97,6 @@ public class ShellFactoryImpl implements Factory<Command>
                                               new PrintStream(new LfToCrLfFilterOutputStream(out), true),
                                               new PrintStream(new LfToCrLfFilterOutputStream(err), true),
                                               terminal,
-                                              new AggregateCompleter(completers),
                                               new Runnable() {
                                                   public void run() {
                                                       destroy();

@@ -67,11 +67,6 @@
         <property name="host" value="${sshHost}"/>
         <property name="shellFactory">
             <bean class="org.apache.karaf.shell.ssh.ShellFactoryImpl">
-                <property name="completers">
-                    <list>
-                        <ref component-id="commandCompleter"/>
-                    </list>
-                </property>
                 <property name="commandProcessor" ref="commandProcessor"/>
             </bean>
         </property>
@@ -106,9 +101,5 @@
                             bind-method="register"
                             unbind-method="unregister"/>
     </reference-list>
-
-    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter">
-        <property name="bundleContext" ref="blueprintBundleContext" />
-    </bean>
 
 </blueprint>

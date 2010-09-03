@@ -20,8 +20,15 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+        <command name="*/help">
+            <action class="org.apache.karaf.shell.commands.HelpAction"/>
+        </command>
+
         <command name="shell/cat">
             <action class="org.apache.karaf.shell.commands.CatAction"/>
+        </command>
+        <command name="shell/clear">
+            <action class="org.apache.karaf.shell.commands.ClearAction"/>
         </command>
         <command name="shell/each">
             <action class="org.apache.karaf.shell.commands.EachAction"/>
@@ -43,9 +50,6 @@
         </command>
         <command name="shell/info">
             <action class="org.apache.karaf.shell.commands.InfoAction"/>
-        </command>
-        <command name="shell/clear">
-            <action class="org.apache.karaf.shell.commands.ClearAction"/>
         </command>
         <command name="shell/java">
             <action class="org.apache.karaf.shell.commands.JavaAction"/>

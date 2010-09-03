@@ -18,7 +18,13 @@
  */
 package org.apache.karaf.shell.console;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,8 +40,6 @@ import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.runtime.lang.Support;
 import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
-import org.apache.karaf.shell.console.commands.Help;
-import org.apache.karaf.shell.console.completer.SimpleCommandsCompleter;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.karaf.shell.console.jline.TerminalFactory;
 import org.fusesource.jansi.AnsiConsole;
@@ -77,24 +81,12 @@ public class Main {
             args = a;
         }
 
-        final SimpleCommandsCompleter completer = new SimpleCommandsCompleter(this);
-
-        // add top level help
-        Command helpCommand = Help.class.getAnnotation(Command.class);
-        Function helpFunction = new AbstractCommand() {
-            @Override
-            protected Action createNewAction() throws Exception {
-                return new Help(completer);
-            }
-        };
-        addCommand(helpCommand, helpFunction, commandProcessor, completer);
-
-        discoverCommands(commandProcessor, cl, completer);
+        discoverCommands(commandProcessor, cl);
 
         InputStream in = unwrap(System.in);
         PrintStream out = wrap(unwrap(System.out));
         PrintStream err = wrap(unwrap(System.err));
-        run(commandProcessor, args, in, out, err, completer);
+        run(commandProcessor, args, in, out, err);
 
         // TODO: do we need to stop the threadio that was started?
         // threadio.stop();
@@ -130,19 +122,18 @@ public class Main {
             args = a;
         }
 
-        SimpleCommandsCompleter completer = new SimpleCommandsCompleter(this);
-        discoverCommands(commandProcessor, cl, completer);
+        discoverCommands(commandProcessor, cl);
 
         InputStream in = parent.getKeyboard();
         PrintStream out = parent.getConsole();
         PrintStream err = parent.getConsole();
-        run(commandProcessor, args, in, out, err, completer);
+        run(commandProcessor, args, in, out, err);
     }
 
-    private void run(final CommandShellImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err, final Completer completer) throws Exception {
+    private void run(final CommandShellImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
         TerminalFactory terminalFactory = new TerminalFactory();
         Terminal terminal = terminalFactory.getTerminal();
-        Console console = createConsole(commandProcessor, in, out, err, terminal, completer);
+        Console console = createConsole(commandProcessor, in, out, err, terminal);
         CommandSession session = console.getSession();
         session.put("USER", user);
         session.put("APPLICATION", application);
@@ -177,8 +168,8 @@ public class Main {
      * @return
      * @throws Exception
      */
-    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal, Completer completer) throws Exception {
-        return new Console(commandProcessor, in, out, err, terminal, completer, null);
+    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+        return new Console(commandProcessor, in, out, err, terminal, null);
     }
 
     /**
@@ -191,7 +182,7 @@ public class Main {
         return "META-INF/services/org/apache/karaf/shell/commands";
     }
 
-    private void discoverCommands(CommandShellImpl commandProcessor, ClassLoader cl, SimpleCommandsCompleter completer) throws IOException, ClassNotFoundException {
+    private void discoverCommands(CommandShellImpl commandProcessor, ClassLoader cl) throws IOException, ClassNotFoundException {
         Enumeration<URL> urls = cl.getResources(getDiscoveryResource());
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
@@ -208,7 +199,7 @@ public class Main {
                             return ((Class<? extends Action>) actionClass).newInstance();
                         }
                     };
-                    addCommand(cmd, function, commandProcessor, completer);
+                    addCommand(cmd, function, commandProcessor);
                 }
                 line = r.readLine();
             }
@@ -216,10 +207,9 @@ public class Main {
         }
     }
 
-    protected void addCommand(Command cmd, Function function, CommandShellImpl commandProcessor, SimpleCommandsCompleter completer) {
+    protected void addCommand(Command cmd, Function function, CommandShellImpl commandProcessor) {
         try {
             commandProcessor.addCommand(cmd.scope(), function, cmd.name());
-            completer.addCommand(cmd, function);
         } catch (Exception e) {
         }
     }

@@ -26,6 +26,9 @@ import org.osgi.service.command.Function;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
 
+/**
+ * A very simple {@link Function} which creates {@link Action} based on a class name.
+ */
 public class SimpleCommand extends AbstractCommand {
 
     private Class<? extends Action> actionClass;

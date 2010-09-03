@@ -43,6 +43,7 @@ import jline.UnsupportedTerminal;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.AggregateCompleter;
+import org.apache.karaf.shell.console.completer.CommandsCompleter;
 import org.apache.karaf.shell.console.completer.SessionScopeCompleter;
 import org.fusesource.jansi.Ansi;
 import org.osgi.service.command.CommandProcessor;
@@ -81,7 +82,6 @@ public class Console implements Runnable
                    PrintStream out,
                    PrintStream err,
                    Terminal term,
-                   Completer completer,
                    Runnable closeCallback) throws Exception
     {
         this.in = in;
@@ -103,17 +103,9 @@ public class Console implements Runnable
         file.getParentFile().mkdirs();
         reader.getHistory().setHistoryFile(file);
         session.put(".jline.history", reader.getHistory());
+        Completer completer = createCompleter();
         if (completer != null) {
-            reader.addCompletor(
-                new CompleterAsCompletor(
-                    new AggregateCompleter(
-                        Arrays.asList(
-                            completer,
-                            new SessionScopeCompleter( session, completer )
-                        )
-                    )
-                )
-            );
+            reader.addCompletor(new CompleterAsCompletor(completer));
         }
         if (Boolean.getBoolean("jline.nobell")) {
             reader.setBellEnabled(false);
@@ -247,6 +239,16 @@ public class Console implements Runnable
                 session.put(key.substring("session.".length()), entry.getValue());
             }
         }
+    }
+
+    protected Completer createCompleter() {
+        Completer completer = new CommandsCompleter(session);
+        return new AggregateCompleter(
+                    Arrays.asList(
+                        completer,
+                        new SessionScopeCompleter( session, completer )
+                    )
+                );
     }
 
     protected Properties loadBrandingProperties() {

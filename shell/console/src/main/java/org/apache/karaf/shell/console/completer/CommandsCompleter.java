@@ -18,89 +18,97 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.apache.karaf.shell.console.Completer;
+import org.apache.felix.gogo.commands.basic.AbstractCommand;
+import org.apache.felix.gogo.runtime.shell.CommandProxy;
+import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
 import org.apache.karaf.shell.console.CompletableFunction;
-import org.osgi.framework.ServiceReference;
+import org.apache.karaf.shell.console.Completer;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.command.CommandProcessor;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Function;
 
+/**
+ * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
+ * instead used from the non-OSGi {@link org.apache.karaf.shell.console.Main}
+ */
 public class CommandsCompleter implements Completer {
 
-    private final Map<ServiceReference, Completer> completers = new ConcurrentHashMap<ServiceReference, Completer>();
+    private CommandSession session;
+    private final List<Completer> completers = new ArrayList<Completer>();
+    private final Set<String> commands = new HashSet<String>();
 
-    private BundleContext bundleContext;
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    public CommandsCompleter(CommandSession session) {
+        this.session = session;
     }
 
-    public void register(ServiceReference reference) {
-        Set<String> functions = getNames(reference);
-        if (functions != null) {
-            List<Completer> cl = new ArrayList<Completer>();
-            cl.add(new StringsCompleter(functions));
-            try {
-                Object function = bundleContext.getService(reference);
-                if (function instanceof CompletableFunction) {
-                    List<Completer> fcl = ((CompletableFunction) function).getCompleters();
-                    if (fcl != null) {
-                        for (Completer c : fcl) {
-                            cl.add(c == null ? NullCompleter.INSTANCE : c);
+
+    public int complete(String buffer, int cursor, List<String> candidates) {
+        checkData();
+        int res = new AggregateCompleter(completers).complete(buffer, cursor, candidates);
+        Collections.sort(candidates);
+        return res;
+    }
+
+    protected synchronized void checkData() {
+        Set<String> names = (Set<String>) session.get(CommandSessionImpl.COMMANDS);
+        if (!names.equals(commands)) {
+            commands.clear();
+            completers.clear();
+            for (String command : names) {
+                Function function = (Function) session.get(command);
+                function = unProxy(function);
+                if (function instanceof AbstractCommand) {
+                    List<Completer> cl = new ArrayList<Completer>();
+                    cl.add(new StringsCompleter(new String[] { command }));
+                    if (function instanceof CompletableFunction) {
+                        List<Completer> fcl = ((CompletableFunction) function).getCompleters();
+                        if (fcl != null) {
+                            for (Completer c : fcl) {
+                                cl.add(c == null ? NullCompleter.INSTANCE : c);
+                            }
+                        } else {
+                            cl.add(NullCompleter.INSTANCE);
                         }
                     } else {
                         cl.add(NullCompleter.INSTANCE);
                     }
-                } else {
-                    cl.add(NullCompleter.INSTANCE);
+                    completers.add(new ArgumentCompleter(cl));
                 }
-            } finally {
-                bundleContext.ungetService(reference);
+                commands.add(command);
             }
-            ArgumentCompleter c = new ArgumentCompleter(cl);
-            completers.put(reference, c);
         }
     }
 
-    public void unregister(ServiceReference reference) {
-        if (reference != null) {
-            completers.remove(reference);
-        }
-    }
-
-    private Set<String> getNames(ServiceReference reference) {
-        Set<String> names = new HashSet<String>();
-        Object scope = reference.getProperty(CommandProcessor.COMMAND_SCOPE);
-        Object function = reference.getProperty(CommandProcessor.COMMAND_FUNCTION);
-        if(scope != null && function != null)
-        {
-            if (function.getClass().isArray())
-            {
-                for (Object f : ((Object[]) function))
-                {
-                    names.add(scope + ":" + f.toString());
+    protected Function unProxy(Function function) {
+        try {
+            if (function instanceof CommandProxy) {
+                Field contextField = function.getClass().getDeclaredField("context");
+                Field referenceField = function.getClass().getDeclaredField("reference");
+                contextField.setAccessible(true);
+                referenceField.setAccessible(true);
+                BundleContext context = (BundleContext) contextField.get(function);
+                ServiceReference reference = (ServiceReference) referenceField.get(function);
+                Object target = context.getService(reference);
+                try {
+                    if (target instanceof Function) {
+                        function = (Function) target;
+                    }
+                } finally {
+                    context.ungetService(reference);
                 }
             }
-            else
-            {
-                names.add(scope + ":" + function.toString());
-            }
-            return names;
+        } catch (Throwable t) {
         }
-        return null;
+        return function;
     }
 
-    public int complete(String buffer, int cursor, List<String> candidates) {
-        int res =  new AggregateCompleter(completers.values()).complete(buffer, cursor, candidates);
-        Collections.sort(candidates);
-        return res;
-    }
 }
 

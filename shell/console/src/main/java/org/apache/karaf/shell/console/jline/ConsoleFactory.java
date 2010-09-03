@@ -37,7 +37,6 @@ public class ConsoleFactory {
 
     private BundleContext bundleContext;
     private CommandProcessor commandProcessor;
-    private List<Completer> completers;
     private TerminalFactory terminalFactory;
     private Console console;
     private boolean start;
@@ -54,10 +53,6 @@ public class ConsoleFactory {
     public synchronized void unregisterCommandProcessor(CommandProcessor commandProcessor) throws Exception {
         this.commandProcessor = null;
         stop();
-    }
-
-    public void setCompleters(List<Completer> completers) {
-        this.completers = completers;
     }
 
     public void setTerminalFactory(TerminalFactory terminalFactory) {
@@ -88,7 +83,6 @@ public class ConsoleFactory {
                                        wrap(out),
                                        wrap(err),
                                        terminal,
-                                       new AggregateCompleter(completers),
                                        callback);
             CommandSession session = console.getSession();
             session.put("USER", "karaf");

@@ -71,8 +71,6 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
     private CommandProcessor commandProcessor;
 
-    private List<Completer> completers;
-
     public void setBundleContext(BundleContext bundleContext)
     {
         this.bundleContext = bundleContext;
@@ -81,11 +79,6 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     public void setCommandProcessor(CommandProcessor commandProcessor)
     {
         this.commandProcessor = commandProcessor;
-    }
-
-    public void setCompleters(List<Completer> completers)
-    {
-        this.completers = completers;
     }
 
     /*
@@ -213,7 +206,6 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                                       pipedOut,
                                       pipedOut,
                                       new WebTerminal(TERM_WIDTH, TERM_HEIGHT),
-                                      new AggregateCompleter(completers),
                                       null);
                 CommandSession session = console.getSession();
                 session.put("APPLICATION", System.getProperty("karaf.name", "root"));

@@ -38,10 +38,6 @@
                             unbind-method="unregister"/>
     </reference-list>
 
-    <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter">
-        <property name="bundleContext" ref="blueprintBundleContext" />
-    </bean>
-
     <service ref="gogoPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
             <entry key="felix.webconsole.label" value="gogo"/>
