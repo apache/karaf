@@ -22,7 +22,6 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -32,10 +31,10 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 
@@ -43,23 +42,17 @@ import org.apache.karaf.jaas.modules.UserPrincipal;
  * JAAS Login module for user / password, based on two properties files.
  *
  */
-public class PropertiesLoginModule implements LoginModule {
+public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
     private static final String USER_FILE = "users";
     private static final Log LOG = LogFactory.getLog(PropertiesLoginModule.class);
 
-    private Subject subject;
-    private CallbackHandler callbackHandler;
-    private boolean debug;
+    
     private String usersFile;
-    private String user;
-    private Set principals = new HashSet();
 
+    @Override
     public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
-        this.subject = sub;
-        this.callbackHandler = handler;
-
-        debug = "true".equalsIgnoreCase((String) options.get("debug"));
+        super.initialize(sub,handler,options);
         usersFile = (String) options.get(USER_FILE) + "";
 
         if (debug) {
@@ -122,15 +115,6 @@ public class PropertiesLoginModule implements LoginModule {
         return true;
     }
 
-    public boolean commit() throws LoginException {
-        subject.getPrincipals().addAll(principals);
-        clear();
-        if (debug) {
-            LOG.debug("commit");
-        }
-        return true;
-    }
-
     public boolean abort() throws LoginException {
         clear();
         if (debug) {
@@ -146,9 +130,5 @@ public class PropertiesLoginModule implements LoginModule {
             LOG.debug("logout");
         }
         return true;
-    }
-
-    private void clear() {
-        user = null;
     }
 }

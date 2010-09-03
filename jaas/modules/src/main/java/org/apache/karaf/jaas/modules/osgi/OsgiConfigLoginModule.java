@@ -31,27 +31,19 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
+import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.osgi.service.cm.Configuration;
 
-public class OsgiConfigLoginModule implements LoginModule {
+public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
 
     public static final String PID = "pid";
     public static final String USER_PREFIX = "user.";
 
-    private Subject subject;
-    private CallbackHandler callbackHandler;
-    private Map<String, ?> options;
-
-    private Set<Principal> principals;
-
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
-        this.subject = subject;
-        this.callbackHandler = callbackHandler;
-        this.options = options;
+        super.initialize(subject, callbackHandler, options);
     }
 
     public boolean login() throws LoginException {
@@ -103,10 +95,6 @@ public class OsgiConfigLoginModule implements LoginModule {
         }
     }
 
-    public boolean commit() throws LoginException {
-        subject.getPrincipals().addAll(principals);
-        return true;
-    }
 
     public boolean abort() throws LoginException {
         subject = null;
