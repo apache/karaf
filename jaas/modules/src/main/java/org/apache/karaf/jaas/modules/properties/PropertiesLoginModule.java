@@ -50,7 +50,6 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
     
     private String usersFile;
 
-    @Override
     public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
         super.initialize(sub,handler,options);
         usersFile = (String) options.get(USER_FILE) + "";
