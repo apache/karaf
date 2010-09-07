@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -103,7 +104,8 @@ public abstract class AbstractArchetypeTest extends TestCase {
 
         //Some archetypes require additional parameters
         if (archetypeRequiredParameters != null) {
-            for (String key : archetypeRequiredParameters.stringPropertyNames()) {
+            for (Enumeration e = archetypeRequiredParameters.propertyNames(); e.hasMoreElements();) {
+                String key = (String) e.nextElement();
                 props.setProperty(key, archetypeRequiredParameters.getProperty(key));
             }
         }
