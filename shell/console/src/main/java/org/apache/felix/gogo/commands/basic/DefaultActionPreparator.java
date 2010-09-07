@@ -135,7 +135,7 @@ public class DefaultActionPreparator implements ActionPreparator {
             Object param = it.next();
             // Check for help
             if (HELP.name().equals(param) || Arrays.asList(HELP.aliases()).contains(param)) {
-                printUsage(session, action.getClass().getAnnotation(Command.class), options.keySet(), arguments.keySet(), System.out);
+                printUsage(session, action, options, arguments, System.out);
                 return false;
             }
             if (processOptions && param instanceof String && ((String) param).startsWith("-")) {
@@ -226,16 +226,17 @@ public class DefaultActionPreparator implements ActionPreparator {
         return true;
     }
 
-    protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> args, PrintStream out)
+    protected void printUsage(CommandSession session, Action action, Map<Option,Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
     {
+        Command command = action.getClass().getAnnotation(Command.class);
         Terminal term = (Terminal) session.get(".jline.terminal");
-        List<Argument> arguments = new ArrayList<Argument>(args);
+        List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
         Collections.sort(arguments, new Comparator<Argument>() {
             public int compare(Argument o1, Argument o2) {
                 return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
             }
         });
-        options = new HashSet<Option>(options);
+        Set<Option> options = new HashSet<Option>(optionsMap.keySet());
         options.add(HELP);
         if (command != null && (command.description() != null || command.name() != null))
         {
@@ -286,6 +287,21 @@ public class DefaultActionPreparator implements ActionPreparator {
                 out.print("        ");
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
                 printFormatted("                ", argument.description(), term != null ? term.getTerminalWidth() : 80, out);
+                if (!argument.required()) {
+                    try {
+                        argsMap.get(argument).setAccessible(true);
+                        Object o = argsMap.get(argument).get(action);
+                        if (o != null
+                                && (!(o instanceof Boolean) || ((Boolean) o))
+                                && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                            out.print("                    (defaults to ");
+                            out.print(o.toString());
+                            out.println(")");
+                        }
+                    } catch (Throwable t) {
+                        // Ignore
+                    }
+                }
             }
             out.println();
         }
@@ -302,6 +318,19 @@ public class DefaultActionPreparator implements ActionPreparator {
                 out.print("        ");
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
                 printFormatted("                ", option.description(), term != null ? term.getTerminalWidth() : 80, out);
+                try {
+                    optionsMap.get(option).setAccessible(true);
+                    Object o = optionsMap.get(option).get(action);
+                    if (o != null
+                            && (!(o instanceof Boolean) || ((Boolean) o))
+                            && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                        out.print("                (defaults to ");
+                        out.print(o.toString());
+                        out.println(")");
+                    }
+                } catch (Throwable t) {
+                    // Ignore
+                }
             }
             out.println();
         }

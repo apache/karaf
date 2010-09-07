@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -206,15 +207,16 @@ public class CmdHelpMojo extends AbstractMojo {
         protected class DocbxPreparator extends BlueprintActionPreparator {
 
             @Override
-            protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> args, PrintStream out)
+            protected void printUsage(CommandSession session, Action action, Map<Option,Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
             {
-                List<Argument> arguments = new ArrayList<Argument>(args);
+                Command command = action.getClass().getAnnotation(Command.class);
+                List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
                 Collections.sort(arguments, new Comparator<Argument>() {
                     public int compare(Argument o1, Argument o2) {
                         return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
                     }
                 });
-                options = new HashSet<Option>(options);
+                Set<Option> options = new HashSet<Option>(optionsMap.keySet());
                 options.add(HELP);
 
                 out.println("<section>");
@@ -294,15 +296,16 @@ public class CmdHelpMojo extends AbstractMojo {
         protected class ConfPreparator extends BlueprintActionPreparator {
 
             @Override
-            protected void printUsage(CommandSession session, Command command, Set<Option> options, Set<Argument> args, PrintStream out)
+            protected void printUsage(CommandSession session, Action action, Map<Option, Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
             {
-                List<Argument> arguments = new ArrayList<Argument>(args);
+                Command command = action.getClass().getAnnotation(Command.class);
+                List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
                 Collections.sort(arguments, new Comparator<Argument>() {
                     public int compare(Argument o1, Argument o2) {
                         return Integer.valueOf(o1.index()).compareTo(Integer.valueOf(o2.index()));
                     }
                 });
-                options = new HashSet<Option>(options);
+                Set<Option> options = new HashSet<Option>(optionsMap.keySet());
                 options.add(HELP);
 
                 out.println("h1. " + command.scope() + ":" + command.name());
@@ -332,7 +335,21 @@ public class CmdHelpMojo extends AbstractMojo {
                     out.println("h2. Arguments");
                     for (Argument argument : arguments)
                     {
-                        out.println("| " + argument.name() + " | " + argument.description() + " |");
+                        String description = argument.description();
+                        if (!argument.required()) {
+                            try {
+                                argsMap.get(argument).setAccessible(true);
+                                Object o = argsMap.get(argument).get(action);
+                                if (o != null
+                                        && (!(o instanceof Boolean) || ((Boolean) o))
+                                        && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                                    description += " (defaults to " + o.toString() + ")";
+                                }
+                            } catch (Throwable t) {
+                                // Ignore
+                            }
+                        }
+                        out.println("| " + argument.name() + " | " + description + " |");
                     }
                     out.println();
                 }
@@ -342,11 +359,23 @@ public class CmdHelpMojo extends AbstractMojo {
                     for (Option option : options)
                     {
                         String opt = option.name();
+                        String desc = option.description();
                         for (String alias : option.aliases())
                         {
                             opt += ", " + alias;
                         }
-                        out.println("| " + opt + " | " + option.description() + " |");
+                        try {
+                            optionsMap.get(option).setAccessible(true);
+                            Object o = optionsMap.get(option).get(action);
+                            if (o != null
+                                    && (!(o instanceof Boolean) || ((Boolean) o))
+                                    && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                                desc += " (defaults to " + o.toString() + ")";
+                            }
+                        } catch (Throwable t) {
+                            // Ignore
+                        }
+                        out.println("| " + opt + " | " + desc + " |");
                     }
                     out.println();
                 }
