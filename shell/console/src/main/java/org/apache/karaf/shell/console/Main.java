@@ -36,12 +36,14 @@ import java.util.List;
 import jline.Terminal;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.runtime.lang.Support;
 import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.karaf.shell.console.jline.TerminalFactory;
+import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Function;
@@ -149,7 +151,17 @@ public class Main {
                 }
                 sb.append(args[i]);
             }
-            session.execute(sb);
+            try {
+                session.execute(sb);
+            } catch (Throwable t) {
+                if (t instanceof CommandException) {
+                    session.getConsole().println(((CommandException) t).getNiceHelp());
+                } else {
+                    session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                    t.printStackTrace(session.getConsole());
+                    session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+                }
+            }
         } else {
             console.run();
         }
