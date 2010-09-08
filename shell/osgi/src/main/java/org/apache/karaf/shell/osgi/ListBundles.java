@@ -38,6 +38,9 @@ public class ListBundles extends OsgiCommandSupport {
 
     @Option(name = "-u", description = "Shows the update locations", required = false, multiValued = false)
     boolean showUpdate;
+    
+    @Option(name = "-t", description = "Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.", required = false, multiValued = false)
+    int bundleLevelThreshold = -1;
 
     private List<BundleStateListener.Factory> bundleStateListenerFactories;
 
@@ -66,9 +69,22 @@ public class ListBundles extends OsgiCommandSupport {
 
         Bundle[] bundles = getBundleContext().getBundles();
         if (bundles != null) {
+            // Determine threshold
+            final String sbslProp = bundleContext.getProperty("karaf.systemBundlesStartLevel");
+            if (sbslProp != null) {
+                try {
+                   if (bundleLevelThreshold < 0) {
+                       bundleLevelThreshold = Integer.valueOf( sbslProp );
+                   }
+                }
+                catch( Exception ignore ) {
+                   // ignore
+                }
+            }
             // Display active start level.
             if (sl != null) {
-                System.out.println("START LEVEL " + sl.getStartLevel());
+                System.out.println("START LEVEL " + sl.getStartLevel() + 
+                                   " , List Threshold: " + bundleLevelThreshold);
             }
 
             // Print column headers.
@@ -93,85 +109,87 @@ public class ListBundles extends OsgiCommandSupport {
             headers += level + msg;
             System.out.println(headers);
             for (int i = 0; i < bundles.length; i++) {
-                // Get the bundle name or location.
-                String name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
-                // If there is no name, then default to symbolic name.
-                name = (name == null) ? bundles[i].getSymbolicName() : name;
-                // If there is no symbolic name, resort to location.
-                name = (name == null) ? bundles[i].getLocation() : name;
-
-                // Overwrite the default value is the user specifically
-                // requested to display one or the other.
-                if (showLoc) {
-                    name = bundles[i].getLocation();
-                }
-                else if (showSymbolic) {
-                    name = bundles[i].getSymbolicName();
-                    name = (name == null) ? "<no symbolic name>" : name;
-                }
-                else if (showUpdate) {
-                    name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
-                    name = (name == null) ? bundles[i].getLocation() : name;
-                }
-                // Show bundle version if not showing location.
-                String version = (String) bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
-                name = (!showLoc && !showUpdate && (version != null)) ? name + " (" + version + ")" : name;
-                long l = bundles[i].getBundleId();
-                String id = String.valueOf(l);
-                if (sl == null) {
-                    level = "1";
-                }
-                else {
-                    level = String.valueOf(sl.getBundleStartLevel(bundles[i]));
-                }
-                while (level.length() < 5) {
-                    level = " " + level;
-                }
-                while (id.length() < 4) {
-                    id = " " + id;
-                }
-                String line = "[" + id + "] [" + getStateString(bundles[i]) + "]";
-                for (BundleStateListener.Factory factory : bundleStateListenerFactories) {
-                    BundleStateListener listener = factory.getListener();
-                    if (listener != null) {
-                        String state = listener.getState(bundles[i]);
-                        line += " [" + getStateString(state, listener.getName().length()) + "]";
-                    }
-                }
-                line += " [" + level + "] " + name;
-                System.out.println(line);
-
-                if (admin != null) {
-                    Bundle[] fragments = admin.getFragments(bundles[i]);
-                    Bundle[] hosts = admin.getHosts(bundles[i]);
-
-                    if (fragments != null) {
-                        System.out.print("                                       Fragments: ");
-                        int ii = 0;
-                        for (Bundle fragment : fragments) {
-                            ii++;
-                            System.out.print(fragment.getBundleId());
-                            if ((fragments.length > 1) && ii < (fragments.length)) {
-                                System.out.print(",");
-                            }
-                        }
-                        System.out.println();
-                    }
-
-                    if (hosts != null) {
-                        System.out.print("                                       Hosts: ");
-                        int ii = 0;
-                        for (Bundle host : hosts) {
-                            ii++;
-                            System.out.print(host.getBundleId());
-                            if ((hosts.length > 1) && ii < (hosts.length)) {
-                                System.out.print(",");
-                            }
-                        }
-                        System.out.println();
-                    }
-
-                }
+            	if (sl.getBundleStartLevel(bundles[i]) >= bundleLevelThreshold) { 
+	                // Get the bundle name or location.
+	                String name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
+	                // If there is no name, then default to symbolic name.
+	                name = (name == null) ? bundles[i].getSymbolicName() : name;
+	                // If there is no symbolic name, resort to location.
+	                name = (name == null) ? bundles[i].getLocation() : name;
+	
+	                // Overwrite the default value is the user specifically
+	                // requested to display one or the other.
+	                if (showLoc) {
+	                    name = bundles[i].getLocation();
+	                }
+	                else if (showSymbolic) {
+	                    name = bundles[i].getSymbolicName();
+	                    name = (name == null) ? "<no symbolic name>" : name;
+	                }
+	                else if (showUpdate) {
+	                    name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
+	                    name = (name == null) ? bundles[i].getLocation() : name;
+	                }
+	                // Show bundle version if not showing location.
+	                String version = (String) bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
+	                name = (!showLoc && !showUpdate && (version != null)) ? name + " (" + version + ")" : name;
+	                long l = bundles[i].getBundleId();
+	                String id = String.valueOf(l);
+	                if (sl == null) {
+	                    level = "1";
+	                }
+	                else {
+	                    level = String.valueOf(sl.getBundleStartLevel(bundles[i]));
+	                }
+	                while (level.length() < 5) {
+	                    level = " " + level;
+	                }
+	                while (id.length() < 4) {
+	                    id = " " + id;
+	                }
+	                String line = "[" + id + "] [" + getStateString(bundles[i]) + "]";
+	                for (BundleStateListener.Factory factory : bundleStateListenerFactories) {
+	                    BundleStateListener listener = factory.getListener();
+	                    if (listener != null) {
+	                        String state = listener.getState(bundles[i]);
+	                        line += " [" + getStateString(state, listener.getName().length()) + "]";
+	                    }
+	                }
+	                line += " [" + level + "] " + name;
+	                System.out.println(line);
+	
+	                if (admin != null) {
+	                    Bundle[] fragments = admin.getFragments(bundles[i]);
+	                    Bundle[] hosts = admin.getHosts(bundles[i]);
+	
+	                    if (fragments != null) {
+	                        System.out.print("                                       Fragments: ");
+	                        int ii = 0;
+	                        for (Bundle fragment : fragments) {
+	                            ii++;
+	                            System.out.print(fragment.getBundleId());
+	                            if ((fragments.length > 1) && ii < (fragments.length)) {
+	                                System.out.print(",");
+	                            }
+	                        }
+	                        System.out.println();
+	                    }
+	
+	                    if (hosts != null) {
+	                        System.out.print("                                       Hosts: ");
+	                        int ii = 0;
+	                        for (Bundle host : hosts) {
+	                            ii++;
+	                            System.out.print(host.getBundleId());
+	                            if ((hosts.length > 1) && ii < (hosts.length)) {
+	                                System.out.print(",");
+	                            }
+	                        }
+	                        System.out.println();
+	                    }
+	
+	                }
+	            }
             }
         }
         else {
