@@ -27,12 +27,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jline.Terminal;
+import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.basic.ActionPreparator;
 import org.apache.felix.gogo.commands.converter.DefaultConverter;
+import org.apache.felix.gogo.commands.converter.GenericType;
 import org.fusesource.jansi.Ansi;
 import org.osgi.service.command.CommandSession;
 
@@ -156,7 +158,24 @@ public class DefaultActionPreparator implements ActionPreparator {
                     }
                 }
                 if (option == null) {
-                    throw new IllegalArgumentException("Undefined option: " + param);
+                    Command command = action.getClass().getAnnotation(Command.class);
+                    throw new CommandException(
+                            Ansi.ansi()
+                                    .fg(Ansi.Color.RED)
+                                    .a("Error executing command ")
+                                    .a(command.scope())
+                                    .a(":")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(command.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(" undefined option ")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(param)
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .fg(Ansi.Color.DEFAULT)
+                                    .toString(),
+                            "Undefined option: " + param
+                    );
                 }
                 Field field = options.get(option);
                 if (value == null && (field.getType() == boolean.class || field.getType() == Boolean.class)) {
@@ -166,7 +185,24 @@ public class DefaultActionPreparator implements ActionPreparator {
                     value = it.next();
                 }
                 if (value == null) {
-                    throw new IllegalArgumentException("Missing value for option " + param);
+                    Command command = action.getClass().getAnnotation(Command.class);
+                    throw new CommandException(
+                            Ansi.ansi()
+                                    .fg(Ansi.Color.RED)
+                                    .a("Error executing command ")
+                                    .a(command.scope())
+                                    .a(":")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(command.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(" missing value for option ")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(param)
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .fg(Ansi.Color.DEFAULT)
+                                    .toString(),
+                            "Missing value for option: " + param
+                    );
                 }
                 if (option.multiValued()) {
                     List<Object> l = (List<Object>) optionValues.get(option);
@@ -181,7 +217,21 @@ public class DefaultActionPreparator implements ActionPreparator {
             } else {
                 processOptions = false;
                 if (argIndex >= orderedArguments.size()) {
-                    throw new IllegalArgumentException("Too many arguments specified");
+                    Command command = action.getClass().getAnnotation(Command.class);
+                    throw new CommandException(
+                            Ansi.ansi()
+                                    .fg(Ansi.Color.RED)
+                                    .a("Error executing command ")
+                                    .a(command.scope())
+                                    .a(":")
+                                    .a(Ansi.Attribute.INTENSITY_BOLD)
+                                    .a(command.name())
+                                    .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                    .a(": too many arguments specified")
+                                    .fg(Ansi.Color.DEFAULT)
+                                    .toString(),
+                            "Too many arguments specified"
+                    );
                 }
                 Argument argument = orderedArguments.get(argIndex);
                 if (!argument.multiValued()) {
@@ -202,24 +252,116 @@ public class DefaultActionPreparator implements ActionPreparator {
         // Check required arguments / options
         for (Option option : options.keySet()) {
             if (option.required() && optionValues.get(option) == null) {
-                throw new IllegalArgumentException("Option " + option.name() + " is required");
+                Command command = action.getClass().getAnnotation(Command.class);
+                throw new CommandException(
+                        Ansi.ansi()
+                                .fg(Ansi.Color.RED)
+                                .a("Error executing command ")
+                                .a(command.scope())
+                                .a(":")
+                                .a(Ansi.Attribute.INTENSITY_BOLD)
+                                .a(command.name())
+                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                .a(": option ")
+                                .a(Ansi.Attribute.INTENSITY_BOLD)
+                                .a(option.name())
+                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                .a(" is required")
+                                .fg(Ansi.Color.DEFAULT)
+                                .toString(),
+                        "Option " + option.name() + " is required"
+                );
             }
         }
         for (Argument argument : arguments.keySet()) {
             if (argument.required() && argumentValues.get(argument) == null) {
-                throw new IllegalArgumentException("Argument " + argument.name() + " is required");
+                Command command = action.getClass().getAnnotation(Command.class);
+                throw new CommandException(
+                        Ansi.ansi()
+                                .fg(Ansi.Color.RED)
+                                .a("Error executing command ")
+                                .a(command.scope())
+                                .a(":")
+                                .a(Ansi.Attribute.INTENSITY_BOLD)
+                                .a(command.name())
+                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                .a(": argument ")
+                                .a(Ansi.Attribute.INTENSITY_BOLD)
+                                .a(argument.name())
+                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                .a(" is required")
+                                .fg(Ansi.Color.DEFAULT)
+                                .toString(),
+                        "Argument " + argument.name() + " is required"
+                );
             }
         }
         // Convert and inject values
         for (Map.Entry<Option, Object> entry : optionValues.entrySet()) {
             Field field = options.get(entry.getKey());
-            Object value = convert(action, session, entry.getValue(), field.getGenericType());
+            Object value;
+            try {
+                value = convert(action, session, entry.getValue(), field.getGenericType());
+            } catch (Exception e) {
+                Command command = action.getClass().getAnnotation(Command.class);
+                throw new CommandException(
+                        Ansi.ansi()
+                                .fg(Ansi.Color.RED)
+                                .a("Error executing command ")
+                                .a(command.scope())
+                                .a(":")
+                                .a(Ansi.Attribute.INTENSITY_BOLD)
+                                .a(command.name())
+                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                .a(": unable to convert option ")
+                                .a(Ansi.Attribute.INTENSITY_BOLD)
+                                .a(entry.getKey().name())
+                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                .a(" with value '")
+                                .a(entry.getValue())
+                                .a("' to type ")
+                                .a(new GenericType(field.getGenericType()).toString())
+                                .fg(Ansi.Color.DEFAULT)
+                                .toString(),
+                        "Unable to convert option " + entry.getKey().name() + " with value '"
+                                + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
+                        e
+                );
+            }
             field.setAccessible(true);
             field.set(action, value);
         }
         for (Map.Entry<Argument, Object> entry : argumentValues.entrySet()) {
             Field field = arguments.get(entry.getKey());
-            Object value = convert(action, session, entry.getValue(), field.getGenericType());
+            Object value;
+            try {
+                value = convert(action, session, entry.getValue(), field.getGenericType());
+            } catch (Exception e) {
+                Command command = action.getClass().getAnnotation(Command.class);
+                throw new CommandException(
+                        Ansi.ansi()
+                                .fg(Ansi.Color.RED)
+                                .a("Error executing command ")
+                                .a(command.scope())
+                                .a(":")
+                                .a(Ansi.Attribute.INTENSITY_BOLD)
+                                .a(command.name())
+                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                .a(": unable to convert argument ")
+                                .a(Ansi.Attribute.INTENSITY_BOLD)
+                                .a(entry.getKey().name())
+                                .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                                .a(" with value '")
+                                .a(entry.getValue())
+                                .a("' to type ")
+                                .a(new GenericType(field.getGenericType()).toString())
+                                .fg(Ansi.Color.DEFAULT)
+                                .toString(),
+                        "Unable to convert argument " + entry.getKey().name() + " with value '" 
+                                + entry.getValue() + "' to type " + new GenericType(field.getGenericType()).toString(),
+                        e
+                );
+            }
             field.setAccessible(true);
             field.set(action, value);
         }

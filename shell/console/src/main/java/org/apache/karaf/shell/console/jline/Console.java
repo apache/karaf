@@ -39,6 +39,7 @@ import jline.AnsiWindowsTerminal;
 import jline.ConsoleReader;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
+import org.apache.felix.gogo.commands.CommandException;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
@@ -184,15 +185,20 @@ public class Console implements Runnable
                 try {
                     LOGGER.info("Exception caught while executing command", t);
                     session.put(LAST_EXCEPTION, t);
-                    session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
-                    if ( isPrintStackTraces()) {
-                        t.printStackTrace(session.getConsole());
+                    if (t instanceof CommandException) {
+                        session.getConsole().println(((CommandException) t).getNiceHelp());
                     }
-                    else {
+                    if ( isPrintStackTraces()) {
+                        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
+                        t.printStackTrace(session.getConsole());
+                        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
+                    }
+                    else if (!(t instanceof CommandException)) {
+                        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                         session.getConsole().println("Error executing command: "
                                 + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
+                        session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
                     }
-                    session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
                 } catch (Exception ignore) {
                         // ignore
                 }

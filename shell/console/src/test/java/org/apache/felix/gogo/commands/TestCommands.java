@@ -61,7 +61,7 @@ public class TestCommands extends TestCase {
             c.execute("my-action");
             fail("Action should have thrown an exception because of a missing argument");
         }
-        catch (IllegalArgumentException e)
+        catch (CommandException e)
         {
         }
 
