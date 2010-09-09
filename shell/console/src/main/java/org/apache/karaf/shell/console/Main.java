@@ -207,8 +207,14 @@ public class Main {
                     Command cmd = actionClass.getAnnotation(Command.class);
                     Function function = new AbstractCommand() {
                         @Override
-                        protected Action createNewAction() throws Exception {
-                            return ((Class<? extends Action>) actionClass).newInstance();
+                        public Action createNewAction() {
+                            try {
+                                return ((Class<? extends Action>) actionClass).newInstance();
+                            } catch (InstantiationException e) {
+                                throw new RuntimeException(e);
+                            } catch (IllegalAccessException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     };
                     addCommand(cmd, function, commandProcessor);

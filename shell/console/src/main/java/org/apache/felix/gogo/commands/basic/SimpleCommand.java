@@ -52,8 +52,14 @@ public class SimpleCommand extends AbstractCommand {
         this.actionClass = actionClass;
     }
 
-    protected Action createNewAction() throws Exception {
-        return actionClass.newInstance();
+    public Action createNewAction() {
+        try {
+            return actionClass.newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

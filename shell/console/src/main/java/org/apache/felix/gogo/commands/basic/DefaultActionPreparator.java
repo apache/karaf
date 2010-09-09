@@ -40,7 +40,7 @@ import org.osgi.service.command.CommandSession;
 
 public class DefaultActionPreparator implements ActionPreparator {
 
-    protected static final Option HELP = new Option() {
+    public static final Option HELP = new Option() {
         public String name()
         {
             return "--help";
@@ -152,7 +152,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                 }
                 Option option = null;
                 for (Option opt : options.keySet()) {
-                    if (name.equals(opt.name()) || Arrays.binarySearch(opt.aliases(), name) >= 0) {
+                    if (name.equals(opt.name()) || Arrays.asList(opt.aliases()).contains(name)) {
                         option = opt;
                         break;
                     }

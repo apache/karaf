@@ -16,9 +16,18 @@
  */
 package org.apache.karaf.shell.console.completer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.felix.gogo.commands.Action;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.basic.SimpleCommand;
+import org.apache.karaf.shell.console.CompletableFunction;
+import org.apache.karaf.shell.console.Completer;
 import org.junit.Test;
+import org.osgi.service.command.CommandSession;
 
 import static org.junit.Assert.*;
 
@@ -27,7 +36,7 @@ public class ArgumentCompleterTest {
     @Test
     public void testParser1() throws Exception {
         Parser parser = new Parser("echo foo | cat bar ; ta", 23);
-        List<List<List<CharSequence>>> p = parser.program();
+        List<List<List<String>>> p = parser.program();
         assertEquals(1, parser.c0);
         assertEquals(0, parser.c1);
         assertEquals(0, parser.c2);
@@ -37,7 +46,7 @@ public class ArgumentCompleterTest {
     @Test
     public void testParser2() throws Exception {
         Parser parser = new Parser("echo foo ; cat bar | ta", 23);
-        List<List<List<CharSequence>>> p = parser.program();
+        List<List<List<String>>> p = parser.program();
         assertEquals(1, parser.c0);
         assertEquals(1, parser.c1);
         assertEquals(0, parser.c2);
@@ -47,7 +56,7 @@ public class ArgumentCompleterTest {
     @Test
     public void testParser3() throws Exception {
         Parser parser = new Parser("echo foo ; cat bar | ta", 22);
-        List<List<List<CharSequence>>> p = parser.program();
+        List<List<List<String>>> p = parser.program();
         assertEquals(1, parser.c0);
         assertEquals(1, parser.c1);
         assertEquals(0, parser.c2);
@@ -57,7 +66,7 @@ public class ArgumentCompleterTest {
     @Test
     public void testParser4() throws Exception {
         Parser parser = new Parser("echo foo ; cat bar | ta reta", 27);
-        List<List<List<CharSequence>>> p = parser.program();
+        List<List<List<String>>> p = parser.program();
         assertEquals(1, parser.c0);
         assertEquals(1, parser.c1);
         assertEquals(1, parser.c2);
@@ -67,11 +76,55 @@ public class ArgumentCompleterTest {
     @Test
     public void testParser5() throws Exception {
         Parser parser = new Parser("echo foo ; cat bar | ta reta", 24);
-        List<List<List<CharSequence>>> p = parser.program();
+        List<List<List<String>>> p = parser.program();
         assertEquals(1, parser.c0);
         assertEquals(1, parser.c1);
         assertEquals(1, parser.c2);
         assertEquals(0, parser.c3);
+    }
+
+    @Test
+    public void testCompleteOptions() throws Exception {
+        Completer comp = new ArgumentCompleter(new MyFunction(), "my:action");
+        assertEquals(Arrays.asList("--check", "--foo", "--help", "-c", "-f"), complete(comp, "action -"));
+        assertEquals(Arrays.asList(), complete(comp, "action --foo "));
+        assertEquals(Arrays.asList("action "), complete(comp, "acti"));
+        assertEquals(Arrays.asList("my:action "), complete(comp, "my:ac"));
+        assertEquals(Arrays.asList("--foo "), complete(comp, "action --f"));
+        assertEquals(Arrays.asList("--help "), complete(comp, "action --h"));
+        assertEquals(Arrays.asList("-c "), complete(comp, "action -c"));
+        assertEquals(Arrays.asList("--check "), complete(comp, "action -f 2 --c"));
+        assertEquals(Arrays.asList("foo1 "), complete(comp, "action -f 2 --check foo1"));
+        assertEquals(Arrays.asList("bar1", "bar2"), complete(comp, "action -f 2 --check foo1 "));
+    }
+
+    protected List<String> complete(Completer completer, String buf) {
+        List<String> candidates = new ArrayList<String>();
+        completer.complete(buf, buf.length(), candidates);
+        return candidates;
+    }
+
+    public static class MyFunction extends SimpleCommand implements CompletableFunction {
+        public MyFunction() {
+            super(MyAction.class);
+        }
+        public List<Completer> getCompleters() {
+            return Arrays.<Completer>asList(
+                    new StringsCompleter(Arrays.asList("foo1", "foo2")),
+                    new StringsCompleter(Arrays.asList("bar1", "bar2"))
+            );
+        }
+    }
+
+    public static class MyAction implements Action {
+        @Option(name = "-f", aliases = { "--foo" })
+        int f;
+        @Option(name = "-c", aliases = "--check")
+        boolean check;
+
+        public Object execute(CommandSession session) throws Exception {
+            return null;
+        }
     }
 
 }

@@ -75,7 +75,7 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
 
     }
 
-    protected Action createNewAction() throws Exception {
+    public Action createNewAction() {
         Action action = (Action) blueprintContainer.getComponentInstance(actionId);
         if (action instanceof BlueprintContainerAware) {
             ((BlueprintContainerAware) action).setBlueprintContainer(blueprintContainer);

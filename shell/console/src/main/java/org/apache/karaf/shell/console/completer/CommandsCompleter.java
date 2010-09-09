@@ -66,30 +66,11 @@ public class CommandsCompleter implements Completer {
                 Function function = (Function) session.get(command);
                 function = unProxy(function);
                 if (function instanceof AbstractCommand) {
-                    List<Completer> cl = new ArrayList<Completer>();
-                    cl.add(new StringsCompleter(getNames(command)));
-                    if (function instanceof CompletableFunction) {
-                        List<Completer> fcl = ((CompletableFunction) function).getCompleters();
-                        if (fcl != null) {
-                            for (Completer c : fcl) {
-                                cl.add(c == null ? NullCompleter.INSTANCE : c);
-                            }
-                        } else {
-                            cl.add(NullCompleter.INSTANCE);
-                        }
-                    } else {
-                        cl.add(NullCompleter.INSTANCE);
-                    }
-                    completers.add(new ArgumentCompleter(cl));
+                    completers.add(new ArgumentCompleter((AbstractCommand) function, command));
                 }
                 commands.add(command);
             }
         }
-    }
-
-    private String[] getNames(String command) {
-        String[] s = command.split(":");
-        return new String[] { command, s[1] };
     }
 
     protected Function unProxy(Function function) {

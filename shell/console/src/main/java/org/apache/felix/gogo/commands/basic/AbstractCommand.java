@@ -41,7 +41,11 @@ public abstract class AbstractCommand implements Function {
         }
     }
 
-    protected abstract Action createNewAction() throws Exception;
+    public Class<? extends Action> getActionClass() {
+        return createNewAction().getClass();
+    }
+
+    public abstract Action createNewAction();
 
     /**
      * Release the used Action.
@@ -49,7 +53,7 @@ public abstract class AbstractCommand implements Function {
      * @param action Action that was executed
      * @throws Exception if something went wrong during the Action release
      */
-    protected void releaseAction(Action action) throws Exception {
+    public void releaseAction(Action action) throws Exception {
     	// Do nothing by default (stateful)
     }
 

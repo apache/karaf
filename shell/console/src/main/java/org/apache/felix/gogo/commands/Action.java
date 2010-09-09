@@ -26,3 +26,4 @@ public interface Action
     Object execute(CommandSession session) throws Exception;
 
 }
+

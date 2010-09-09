@@ -24,73 +24,68 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import java.util.LinkedList;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.basic.AbstractCommand;
+import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
+import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 
 public class ArgumentCompleter implements Completer {
-    final Completer[] completers;
-    final ArgumentDelimiter delim;
+    final Completer commandCompleter;
+    final Completer optionsCompleter;
+    final List<Completer> argsCompleters;
+    final AbstractCommand function;
+    final Map<Option, Field> fields = new HashMap<Option, Field>();
+    final Map<String, Option> options = new HashMap<String, Option>();
     boolean strict = true;
 
-    /**
-     *  Constuctor: create a new completor with the default
-     *  argument separator of " ".
-     *
-     *  @param  completer  the embedded completer
-     */
-    public ArgumentCompleter(final Completer completer) {
-        this(new Completer[] {
-                 completer
-             });
+    public ArgumentCompleter(AbstractCommand function, String command) {
+        this.function = function;
+        // Command name completer
+        commandCompleter = new StringsCompleter(getNames(command));
+        // Build options completer
+        for (Class type = function.getActionClass(); type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                Option option = field.getAnnotation(Option.class);
+                if (option != null) {
+                    fields.put(option, field);
+                    options.put(option.name(), option);
+                    String[] aliases = option.aliases();
+                    if (aliases != null) {
+                        for (String alias : aliases) {
+                            options.put(alias, option);
+                        }
+                    }
+                }
+            }
+        }
+        options.put(DefaultActionPreparator.HELP.name(), DefaultActionPreparator.HELP);
+        optionsCompleter = new StringsCompleter(options.keySet());
+        // Build arguments completers
+        argsCompleters = new ArrayList<Completer>();
+        if (function instanceof CompletableFunction) {
+            List<Completer> fcl = ((CompletableFunction) function).getCompleters();
+            if (fcl != null) {
+                for (Completer c : fcl) {
+                    argsCompleters.add(c == null ? NullCompleter.INSTANCE : c);
+                }
+            } else {
+                argsCompleters.add(NullCompleter.INSTANCE);
+            }
+        } else {
+            argsCompleters.add(NullCompleter.INSTANCE);
+        }
     }
 
-    /**
-     *  Constuctor: create a new completor with the default
-     *  argument separator of " ".
-     *
-     *  @param  completers  the List of completors to use
-     */
-    public ArgumentCompleter(final List<Completer> completers) {
-        this(completers.toArray(new Completer[completers.size()]));
-    }
-
-    /**
-     *  Constuctor: create a new completor with the default
-     *  argument separator of " ".
-     *
-     *  @param  completers  the embedded argument completers
-     */
-    public ArgumentCompleter(final Completer[] completers) {
-        this(completers, new GogoArgumentDelimiter());
-    }
-
-    /**
-     *  Constuctor: create a new completor with the specified
-     *  argument delimiter.
-     *
-     *  @param  completer the embedded completer
-     *  @param  delim     the delimiter for parsing arguments
-     */
-    public ArgumentCompleter(final Completer completer,
-                             final ArgumentDelimiter delim) {
-        this(new Completer[] {
-                 completer
-             }, delim);
-    }
-
-    /**
-     *  Constuctor: create a new completor with the specified
-     *  argument delimiter.
-     *
-     *  @param  completers the embedded completers
-     *  @param  delim      the delimiter for parsing arguments
-     */
-    public ArgumentCompleter(final Completer[] completers,
-                             final ArgumentDelimiter delim) {
-        this.completers = completers;
-        this.delim = delim;
+    private String[] getNames(String command) {
+        String[] s = command.split(":");
+        return new String[] { command, s[1] };
     }
 
     /**
@@ -111,39 +106,57 @@ public class ArgumentCompleter implements Completer {
 
     public int complete(final String buffer, final int cursor,
                         final List<String> candidates) {
-        ArgumentList list = delim.delimit(buffer, cursor);
+        ArgumentList list = delimit(buffer, cursor);
         int argpos = list.getArgumentPosition();
         int argIndex = list.getCursorArgumentIndex();
 
-        if (argIndex < 0) {
-            return -1;
-        }
-
-        final Completer comp;
-
-        // if we are beyond the end of the completors, just use the last one
-        if (argIndex >= completers.length) {
-            comp = completers[completers.length - 1];
+        Completer comp = null;
+        String[] args = list.getArguments();
+        int index = 0;
+        // First argument is command name
+        if (index < argIndex) {
+            // Verify command name
+            if (!verifyCompleter(commandCompleter, args[index])) {
+                return -1;
+            }
+            index++;
         } else {
-            comp = completers[argIndex];
+            comp = commandCompleter;
         }
-
-        // ensure that all the previous completors are successful before
-        // allowing this completor to pass (only if strict is true).
-        for (int i = 0; getStrict() && (i < argIndex); i++) {
-            Completer sub = completers[(i >= completers.length) ? (completers.length - 1) : i];
-            String[] args = list.getArguments();
-            String arg = ((args == null) || (i >= args.length)) ? "" : args[i];
-
-            List<String> subCandidates = new LinkedList<String>();
-
-            if (sub.complete(arg, arg.length(), subCandidates) == -1) {
-                return -1;
+        // Now, check options
+        if (comp == null) {
+            while (index < argIndex && args[index].startsWith("-")) {
+                if (!verifyCompleter(optionsCompleter, args[index])) {
+                    return -1;
+                }
+                Option option = options.get(args[index]);
+                if (option == null) {
+                    return -1;
+                }
+                Field field = fields.get(option);
+                if (field != null && field.getType() != boolean.class && field.getType() != Boolean.class) {
+                    if (++index == argIndex) {
+                        comp = NullCompleter.INSTANCE;
+                    }
+                }
+                index++;
             }
-
-            if (subCandidates.size() == 0) {
-                return -1;
+            if (comp == null && index >= argIndex && index < args.length && args[index].startsWith("-")) {
+                comp = optionsCompleter;
             }
+        }
+        // Check arguments
+        if (comp == null) {
+            int indexArg = 0;
+            while (index < argIndex) {
+                Completer sub = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
+                if (!verifyCompleter(sub, args[index])) {
+                    return -1;
+                }
+                index++;
+                indexArg++;
+            }
+            comp = argsCompleters.get(indexArg >= argsCompleters.size() ? argsCompleters.size() - 1 : indexArg);
         }
 
         int ret = comp.complete(list.getCursorArgument(), argpos, candidates);
@@ -164,12 +177,12 @@ public class ArgumentCompleter implements Completer {
          *  enter "f bar" into the buffer, and move to after the "f"
          *  and hit TAB, we want "foo bar" instead of "foo  bar".
          */
-        if ((cursor != buffer.length()) && delim.isDelimiter(buffer, cursor)) {
+        if ((cursor != buffer.length()) && isDelimiter(buffer, cursor)) {
             for (int i = 0; i < candidates.size(); i++) {
                 String val = candidates.get(i);
 
                 while ((val.length() > 0)
-                    && delim.isDelimiter(val, val.length() - 1)) {
+                    && isDelimiter(val, val.length() - 1)) {
                     val = val.substring(0, val.length() - 1);
                 }
 
@@ -180,85 +193,46 @@ public class ArgumentCompleter implements Completer {
         return pos;
     }
 
-    /**
-     *  The {@link ArgumentCompleter.ArgumentDelimiter} allows custom
-     *  breaking up of a {@link String} into individual arguments in
-     *  order to dispatch the arguments to the nested {@link Completer}.
-     *
-     *  @author  <a href="mailto:mwp1@cornell.edu">Marc Prud'hommeaux</a>
-     */
-    public static interface ArgumentDelimiter {
-        /**
-         *  Break the specified buffer into individual tokens
-         *  that can be completed on their own.
-         *
-         *  @param  buffer           the buffer to split
-         *  @param  argumentPosition the current position of the
-         *                           cursor in the buffer
-         *  @return                  the tokens
-         */
-        ArgumentList delimit(String buffer, int argumentPosition);
+    protected boolean verifyCompleter(Completer completer, String argument) {
+        List<String> candidates = new ArrayList<String>();
+        return completer.complete(argument, argument.length(), candidates) != -1 && !candidates.isEmpty();
+    }
 
-        /**
-         *  Returns true if the specified character is a whitespace
-         *  parameter.
-         *
-         *  @param  buffer the complete command buffer
-         *  @param  pos    the index of the character in the buffer
-         *  @return        true if the character should be a delimiter
-         */
-        boolean isDelimiter(String buffer, int pos);
+    public ArgumentList delimit(final String buffer, final int cursor) {
+        Parser parser = new Parser(buffer, cursor);
+        try {
+            List<List<List<String>>> program = parser.program();
+            List<String> pipe = program.get(parser.c0).get(parser.c1);
+            return new ArgumentList(pipe.toArray(new String[pipe.size()]), parser.c2, parser.c3, cursor);
+        } catch (Throwable t) {
+            return new ArgumentList(new String[] { buffer }, 0, cursor, cursor);
+        }
     }
 
     /**
-     *  Implementation of a delimiter that uses the
-     *  Gogo parser.
+     *  Returns true if the specified character is a whitespace
+     *  parameter. Check to ensure that the character is not
+     *  escaped and returns true from
+     *  {@link #isDelimiterChar}.
      *
-     *  @author  <a href="mailto:gnodet@gmail.com">Guillaume Nodet</a>
+     *  @param  buffer the complete command buffer
+     *  @param  pos    the index of the character in the buffer
+     *  @return        true if the character should be a delimiter
      */
-    public static class GogoArgumentDelimiter implements ArgumentDelimiter {
+    public boolean isDelimiter(final String buffer, final int pos) {
+        return !isEscaped(buffer, pos) && isDelimiterChar(buffer, pos);
+    }
 
-        public ArgumentList delimit(final String buffer, final int cursor) {
-            Parser parser = new Parser(buffer, cursor);
-            try {
-                List<List<List<CharSequence>>> program = parser.program();
-                List<CharSequence> pipe = program.get(parser.c0).get(parser.c1);
-                List<String> args = new LinkedList<String>();
-                for (CharSequence arg : pipe) {
-                    args.add(arg.toString());
-                }
-                return new ArgumentList(args.toArray(new String[args.size()]), parser.c2, parser.c3, cursor);
-            } catch (Throwable t) {
-                return new ArgumentList(new String[] { buffer }, 0, cursor, cursor);
-            }
-        }
+    public boolean isEscaped(final String buffer, final int pos) {
+        return pos > 0 && buffer.charAt(pos) == '\\' && !isEscaped(buffer, pos - 1);
+    }
 
-        /**
-         *  Returns true if the specified character is a whitespace
-         *  parameter. Check to ensure that the character is not
-         *  escaped and returns true from
-         *  {@link #isDelimiterChar}.
-         *
-         *  @param  buffer the complete command buffer
-         *  @param  pos    the index of the character in the buffer
-         *  @return        true if the character should be a delimiter
-         */
-        public boolean isDelimiter(final String buffer, final int pos) {
-            return !isEscaped(buffer, pos) && isDelimiterChar(buffer, pos);
-        }
-
-        public boolean isEscaped(final String buffer, final int pos) {
-            return pos > 0 && buffer.charAt(pos) == '\\' && !isEscaped(buffer, pos - 1);
-        }
-
-        /**
-         *  The character is a delimiter if it is whitespace, and the
-         *  preceeding character is not an escape character.
-         */
-        public boolean isDelimiterChar(String buffer, int pos) {
-            return Character.isWhitespace(buffer.charAt(pos));
-        }
-
+    /**
+     *  The character is a delimiter if it is whitespace, and the
+     *  preceeding character is not an escape character.
+     */
+    public boolean isDelimiterChar(String buffer, int pos) {
+        return Character.isWhitespace(buffer.charAt(pos));
     }
 
     /**

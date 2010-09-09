@@ -26,13 +26,13 @@ import java.util.List;
 public class Parser
 {
     int current = 0;
-    CharSequence text;
+    String text;
     boolean escaped;
     static final String SPECIAL = "<;|{[\"'$`(=";
 
-    List<List<List<CharSequence>>> program;
-    List<List<CharSequence>> statements;
-    List<CharSequence> statement;
+    List<List<List<String>>> program;
+    List<List<String>> statements;
+    List<String> statement;
     int cursor;
     int start = -1;
     int c0;
@@ -40,7 +40,7 @@ public class Parser
     int c2;
     int c3;
 
-    public Parser(CharSequence text, int cursor)
+    public Parser(String text, int cursor)
     {
         this.text = text;
         this.cursor = cursor;
@@ -151,9 +151,9 @@ public class Parser
         return c;
     }
 
-    public List<List<List<CharSequence>>> program()
+    public List<List<List<String>>> program()
     {
-        program = new ArrayList<List<List<CharSequence>>>();
+        program = new ArrayList<List<List<String>>>();
         ws();
         if (!eof())
         {
@@ -161,7 +161,7 @@ public class Parser
             while (peek() == ';')
             {
                 current++;
-                List<List<CharSequence>> pipeline = pipeline();
+                List<List<String>> pipeline = pipeline();
                 program.add(pipeline);
             }
         }
@@ -170,7 +170,7 @@ public class Parser
             throw new RuntimeException("Program has trailing text: " + context(current));
         }
 
-        List<List<List<CharSequence>>> p = program;
+        List<List<List<String>>> p = program;
         program = null;
         return p;
     }
@@ -181,9 +181,9 @@ public class Parser
             current + 4));
     }
 
-    public List<List<CharSequence>> pipeline()
+    public List<List<String>> pipeline()
     {
-        statements = new ArrayList<List<CharSequence>>();
+        statements = new ArrayList<List<String>>();
         statements.add(statement());
         while (peek() == '|')
         {
@@ -195,18 +195,18 @@ public class Parser
             }
             else
             {
-                statements.add(new ArrayList<CharSequence>());
+                statements.add(new ArrayList<String>());
                 break;
             }
         }
-        List<List<CharSequence>> s = statements;
+        List<List<String>> s = statements;
         statements = null;
         return s;
     }
 
-    public List<CharSequence> statement()
+    public List<String> statement()
     {
-        statement = new ArrayList<CharSequence>();
+        statement = new ArrayList<String>();
         statement.add(value());
         while (!eof())
         {
@@ -221,17 +221,18 @@ public class Parser
                 statement.add(messy());
             }
         }
-        List<CharSequence> s = statement;
+        List<String> s = statement;
         statement = null;
         return s;
     }
 
-    public CharSequence messy()
+    public String messy()
     {
+        start = current;
         char c = peek();
         if (c > 0 && SPECIAL.indexOf(c) < 0)
         {
-            start = current++;
+            current++;
             try {
                 while (!eof())
                 {
@@ -242,7 +243,7 @@ public class Parser
                     }
                     next();
                 }
-                return text.subSequence(start, current);
+                return text.substring(start, current);
             } finally {
                 start = -1;
             }
@@ -253,7 +254,7 @@ public class Parser
         }
     }
 
-    CharSequence value()
+    String value()
     {
         ws();
 
@@ -265,15 +266,15 @@ public class Parser
                 switch (c)
                 {
                     case '{':
-                        return text.subSequence(start, find('}', '{'));
+                        return text.substring(start, find('}', '{'));
                     case '(':
-                        return text.subSequence(start, find(')', '('));
+                        return text.substring(start, find(')', '('));
                     case '[':
-                        return text.subSequence(start, find(']', '['));
+                        return text.substring(start, find(']', '['));
                     case '<':
-                        return text.subSequence(start, find('>', '<'));
+                        return text.substring(start, find('>', '<'));
                     case '=':
-                        return text.subSequence(start, current);
+                        return text.substring(start, current);
                     case '"':
                     case '\'':
                         quote(c);
@@ -327,7 +328,7 @@ public class Parser
                     next();
                 }
             }
-            return text.subSequence(start, current);
+            return text.substring(start, current);
         } finally {
             start = -1;
         }
