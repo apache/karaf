@@ -72,6 +72,12 @@
             <groupId>org.apache.aries.blueprint</groupId>
             <artifactId>org.apache.aries.blueprint</artifactId>
         </dependency>        
+        
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -87,6 +93,7 @@
                             !${project.artifactId}*,
                             org.apache.karaf.jaas.config,
                             org.apache.aries.blueprint.ext,
+                            org.jasypt*,
                             *
                         </Import-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>

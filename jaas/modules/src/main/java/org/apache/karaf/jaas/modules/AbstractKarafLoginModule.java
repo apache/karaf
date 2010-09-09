@@ -23,10 +23,16 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.jasypt.util.password.ConfigurablePasswordEncryptor;
+import org.jasypt.util.password.PasswordEncryptor;
+
 
 /**
- *
- * @author iocanel
+ * <p>
+ * Abstract JAAS login module extended by all Karaf Login Modules.
+ * </p>
+ * 
+ * @author iocanel, jbonofre
  */
 public abstract class AbstractKarafLoginModule implements LoginModule {
 
@@ -39,6 +45,20 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
 
     protected String rolePolicy;
     protected String roleDiscriminator;
+    
+    /** 
+     * Algorithm used to encrypt password such as:
+     *  MD2
+     *  MD5
+     *  SHA-1
+     *  SHA-256
+     *  SHA-384
+     *  SHA-512 
+     */
+    protected String encryptionAlgorithm = "MD5";
+    
+    /** Jasypt password encryptor */
+    private ConfigurablePasswordEncryptor passwordEncryptor;
 
     public boolean commit() throws LoginException {
         RolePolicy policy = RolePolicy.getPolicy(rolePolicy);
@@ -51,12 +71,42 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     protected void clear() {
         user = null;
     }
+    
+    /**
+     * <p>
+     * Util method to encrypt a password given in plain format.
+     * </p>
+     * 
+     * @param plain the plain password.
+     * @return the encrypted password.
+     */
+    public String encryptPassword(String plain) {
+        ConfigurablePasswordEncryptor encryptor = new ConfigurablePasswordEncryptor();
+        encryptor.setAlgorithm(encryptionAlgorithm);
+        return null;
+    }
+    
+    /**
+     * <p>
+     * Check a password in plain with an encrypted password.
+     * </p>
+     * 
+     * @param plainPassword a plain password in plain.
+     * @param encryptedPassword an encrypted password.
+     * @return true if the plain password match the encrypted one, false else.
+     */
+    public boolean checkPassword(String plainPassword, String encryptedPassword) {
+        return passwordEncryptor.checkPassword(plainPassword, encryptedPassword);
+    }
 
     public void initialize(Subject sub, CallbackHandler handler, Map options) {
         this.subject = sub;
         this.callbackHandler = handler;
-        rolePolicy = (String) options.get("rolePolicy");
-        roleDiscriminator = (String) options.get("roleDisciriminator");
-        debug = "true".equalsIgnoreCase((String) options.get("debug"));
+        this.rolePolicy = (String) options.get("rolePolicy");
+        this.roleDiscriminator = (String) options.get("roleDisciriminator");
+        this.debug = "true".equalsIgnoreCase((String) options.get("debug"));
+        this.encryptionAlgorithm = (String) options.get("encryptionAlgorithm");
+        this.passwordEncryptor = new ConfigurablePasswordEncryptor();
+        this.passwordEncryptor.setAlgorithm(encryptionAlgorithm);
     }
 }

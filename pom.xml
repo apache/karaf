@@ -102,6 +102,9 @@
         <!-- Apache ServiceMix Bundles -->
         <aopalliance.bundle.version>1.0_4</aopalliance.bundle.version>
         <cglib.bundle.version>2.1_3_6</cglib.bundle.version>
+        <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
+        <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
+        <jasypt.bundle.version>1.6_1-SNAPSHOT</jasypt.bundle.version>
         <jetty.bundle.version>6.1.22_2</jetty.bundle.version>
         <junit.bundle.version>4.7_1</junit.bundle.version>
 
@@ -796,6 +799,21 @@
                 <groupId>tanukisoft</groupId>
                 <artifactId>wrapper</artifactId>
                 <version>${jsw.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.commons-codec</artifactId>
+                <version>${commons-codec.bundle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.commons-lang</artifactId>
+                <version>${commons-lang.bundle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
+                <version>${jasypt.bundle.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
