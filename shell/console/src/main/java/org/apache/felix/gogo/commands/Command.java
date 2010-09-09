@@ -45,4 +45,9 @@ public @interface Command
      * Returns the description of the command which is used to generate command line help
      */
     String description() default "";
+
+    /**
+     * Returns a detailed description of the command
+     */
+    String detailedDescription() default "";
 }

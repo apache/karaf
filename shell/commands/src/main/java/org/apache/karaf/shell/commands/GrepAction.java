@@ -34,7 +34,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.fusesource.jansi.Ansi;
 
 
-@Command(scope = "shell", name="grep", description="Prints lines matching the given pattern")
+@Command(scope = "shell", name="grep", description="Prints lines matching the given pattern", detailedDescription="classpath:grep.txt")
 public class GrepAction extends AbstractAction {
 
     public static enum ColorOption {
