@@ -35,13 +35,13 @@ public class Utils {
         // Use the system property if specified.
         String path = System.getProperty(Main.PROP_KARAF_HOME);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + Main.PROP_KARAF_HOME + " system property", false);
+            rc = validateDirectoryExists(path, "Invalid " + Main.PROP_KARAF_HOME + " system property", false, true);
         }
 
         if (rc == null) {
             path = System.getenv(Main.ENV_KARAF_HOME);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + Main.ENV_KARAF_HOME + " environment variable", false);
+                rc = validateDirectoryExists(path, "Invalid " + Main.ENV_KARAF_HOME + " environment variable", false, true);
             }
         }
 
@@ -76,24 +76,24 @@ public class Utils {
         return rc;
     }
 
-    public static File validateDirectoryExists(String path, String errPrefix, boolean createDirectory) {
+    public static File validateDirectoryExists(String path, String errPrefix, boolean createDirectory, boolean validate) {
         File rc;
         try {
             rc = new File(path).getCanonicalFile();
         } catch (IOException e) {
             throw new IllegalArgumentException(errPrefix + " '" + path + "' : " + e.getMessage());
         }
-        if (!rc.exists() && !createDirectory) {
+        if (!rc.exists() && !createDirectory && validate) {
             throw new IllegalArgumentException(errPrefix + " '" + path + "' : does not exist");
         }
-        if (!rc.exists()) {
+        if (!rc.exists() && createDirectory) {
             try {
                 rc.mkdirs();
             } catch (SecurityException se) {
                 throw new IllegalArgumentException(errPrefix + " '" + path + "' : " + se.getMessage());
             }
         }
-        if (!rc.isDirectory()) {
+        if (rc.exists() && !rc.isDirectory()) {
             throw new IllegalArgumentException(errPrefix + " '" + path + "' : is not a directory");
         }
         return rc;
@@ -103,14 +103,14 @@ public class Utils {
         File rc = null;
         
         String path = System.getProperty(directoryProperty);
-        if (path != null && validate) {
-            rc = validateDirectoryExists(path, "Invalid " + directoryProperty + " system property", create);
+        if (path != null) {
+            rc = validateDirectoryExists(path, "Invalid " + directoryProperty + " system property", create, validate);
         }
         
         if (rc == null) {
             path = System.getenv(directoryEnvironmentVariable);
             if (path != null && validate) {
-                rc = validateDirectoryExists(path, "Invalid " + directoryEnvironmentVariable  + " environment variable", create);
+                rc = validateDirectoryExists(path, "Invalid " + directoryEnvironmentVariable  + " environment variable", create, validate);
             }
         }
         
