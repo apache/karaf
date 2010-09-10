@@ -62,9 +62,11 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
 
     public boolean commit() throws LoginException {
         RolePolicy policy = RolePolicy.getPolicy(rolePolicy);
-        if(policy != null && roleDiscriminator != null) {
+        if (policy != null && roleDiscriminator != null) {
             policy.handleRoles(subject, principals, roleDiscriminator);
-        } else subject.getPrincipals().addAll(principals);
+        } else {
+            subject.getPrincipals().addAll(principals);
+        }
         return true;
     }
 
@@ -106,7 +108,5 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         this.roleDiscriminator = (String) options.get("roleDisciriminator");
         this.debug = "true".equalsIgnoreCase((String) options.get("debug"));
         this.encryptionAlgorithm = (String) options.get("encryptionAlgorithm");
-        this.passwordEncryptor = new ConfigurablePasswordEncryptor();
-        this.passwordEncryptor.setAlgorithm(encryptionAlgorithm);
     }
 }
