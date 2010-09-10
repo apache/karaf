@@ -377,7 +377,7 @@ public class DefaultActionPreparator implements ActionPreparator {
     protected void printUsage(CommandSession session, Action action, Map<Option,Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
     {
         Command command = action.getClass().getAnnotation(Command.class);
-        Terminal term = (Terminal) session.get(".jline.terminal");
+        Terminal term = session != null ? (Terminal) session.get(".jline.terminal") : null;
         List<Argument> arguments = new ArrayList<Argument>(argsMap.keySet());
         Collections.sort(arguments, new Comparator<Argument>() {
             public int compare(Argument o1, Argument o2) {

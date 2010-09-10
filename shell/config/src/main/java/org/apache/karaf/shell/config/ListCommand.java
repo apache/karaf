@@ -32,19 +32,21 @@ public class ListCommand extends ConfigCommandSupport {
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Configuration[] configs = admin.listConfigurations(query);
-        for (Configuration config : configs) {
-            System.out.println("----------------------------------------------------------------");
-            System.out.println("Pid:            " + config.getPid());
-            if (config.getFactoryPid() != null) {
-                System.out.println("FactoryPid:     " + config.getFactoryPid());
-            }
-            System.out.println("BundleLocation: " + config.getBundleLocation());
-            if (config.getProperties() != null) {
-                System.out.println("Properties:");
-                Dictionary props = config.getProperties();
-                for (Enumeration e = props.keys(); e.hasMoreElements();) {
-                    Object key = e.nextElement();
-                    System.out.println("   " + key + " = " + props.get(key));
+        if (configs != null) {
+            for (Configuration config : configs) {
+                System.out.println("----------------------------------------------------------------");
+                System.out.println("Pid:            " + config.getPid());
+                if (config.getFactoryPid() != null) {
+                    System.out.println("FactoryPid:     " + config.getFactoryPid());
+                }
+                System.out.println("BundleLocation: " + config.getBundleLocation());
+                if (config.getProperties() != null) {
+                    System.out.println("Properties:");
+                    Dictionary props = config.getProperties();
+                    for (Enumeration e = props.keys(); e.hasMoreElements();) {
+                        Object key = e.nextElement();
+                        System.out.println("   " + key + " = " + props.get(key));
+                    }
                 }
             }
         }

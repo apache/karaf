@@ -58,6 +58,9 @@ public class NewAction extends AbstractAction {
 
     @Override
     protected Object doExecute() throws Exception {
+        if (args == null) {
+            args = Collections.emptyList();
+        }
         // Map of matching constructors
         Map<Constructor, List<Object>> matches = findMatchingConstructors(clazz, args, Arrays.asList(new ReifiedType[args.size()]));
         if (matches.size() == 1) {

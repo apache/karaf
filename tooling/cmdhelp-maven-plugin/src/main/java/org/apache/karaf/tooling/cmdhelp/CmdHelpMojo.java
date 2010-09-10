@@ -161,7 +161,7 @@ public class CmdHelpMojo extends AbstractMojo {
                     writer.println("h2. " + key);
                     writer.println();
                     for (String cmd : commands.get(key)) {
-                        writer.println("* [" + key + "-" + cmd + "]");
+                        writer.println("* [" + key + ":" + cmd + "|" + key + "-" + cmd + "]");
                     }
                     writer.println();
                 }
