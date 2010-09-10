@@ -216,17 +216,6 @@
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.ssh</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.commands</include>
             </includes>
-        </dependencySet>        
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/servicemix/bundles/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.commons-codec</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.commons-lang</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.jasypt</include>
-            </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>

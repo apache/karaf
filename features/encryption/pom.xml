@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
 
@@ -17,27 +18,19 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-
+    
     <modelVersion>4.0.0</modelVersion>
-
+    
     <parent>
-        <groupId>org.apache.karaf</groupId>
-        <artifactId>karaf</artifactId>
+        <groupId>org.apache.karaf.features</groupId>
+        <artifactId>features</artifactId>
         <version>2.0.1-SNAPSHOT</version>
     </parent>
-
+    
     <groupId>org.apache.karaf.features</groupId>
-    <artifactId>features</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>org.apache.karaf.features.encryption</artifactId>
+    <packaging>bundle</packaging>
     <version>2.0.1-SNAPSHOT</version>
-    <name>Apache Karaf :: Features</name>
-
-    <modules>
-        <module>core</module>
-        <module>command</module>
-        <module>management</module>
-        <module>obr</module>
-        <module>encryption</module>
-    </modules>
+    <name>Apache Karaf :: Features Encryption</name>
 
 </project>
