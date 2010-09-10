@@ -24,7 +24,6 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
-import org.jasypt.util.password.PasswordEncryptor;
 
 
 /**
@@ -105,8 +104,8 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         this.subject = sub;
         this.callbackHandler = handler;
         this.rolePolicy = (String) options.get("rolePolicy");
-        this.roleDiscriminator = (String) options.get("roleDisciriminator");
-        this.debug = "true".equalsIgnoreCase((String) options.get("debug"));
+        this.roleDiscriminator = (String) options.get("roleDiscriminator");
+        this.debug = Boolean.parseBoolean((String) options.get("debug"));
         this.encryptionAlgorithm = (String) options.get("encryptionAlgorithm");
     }
 }
