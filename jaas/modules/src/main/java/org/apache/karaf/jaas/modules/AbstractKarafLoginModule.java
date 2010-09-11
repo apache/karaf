@@ -44,9 +44,8 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     protected String rolePolicy;
     protected String roleDiscriminator;
     
-    // TODO add an encryption attribute types to the Encryption interface
-    // If null, no encryption is used, else the encryption and password
-    // checking is delegated to the encryption service.
+    /** define the encryption algorithm to use to encrypt password */
+    protected String encryption;
 
     public boolean commit() throws LoginException {
         RolePolicy policy = RolePolicy.getPolicy(rolePolicy);
@@ -68,5 +67,40 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         this.rolePolicy = (String) options.get("rolePolicy");
         this.roleDiscriminator = (String) options.get("roleDiscriminator");
         this.debug = Boolean.parseBoolean((String) options.get("debug"));
+        this.encryption = (String) options.get("encryption");
     }
+    
+    /**
+     * <p>
+     * Encrypt password.
+     * </p>
+     * 
+     * @param password the password in plain format.
+     * @return the encrypted password format.
+     */
+    public String encryptPassword(String password) {
+        if (this.encryption == null) {
+            return password;
+        }
+        // TODO call the encryption service
+        return null;
+    }
+    
+    /**
+     * <p>
+     * Check if the provided password match the reference one.
+     * </p>
+     * 
+     * @param input the provided password (plain format).
+     * @param password the reference one (encrypted format).
+     * @return true if the passwords match, false else.
+     */
+    public boolean checkPassword(String input, String password) {
+        if (this.encryption == null) {
+            return input.equals(password);
+        }
+        // TODO call the encryption service
+        return true;
+    }
+    
 }
