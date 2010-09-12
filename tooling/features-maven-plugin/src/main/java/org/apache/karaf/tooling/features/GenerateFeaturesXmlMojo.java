@@ -507,6 +507,9 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
     }
     
     public static String toString(Artifact artifact) {
+        if (artifact.getType().equals("jar")) {
+            return String.format("%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+        }
         return String.format("%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getType());
     }
 
@@ -554,8 +557,11 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
                     out.println("    <feature version='"
             		+ next.getBaseVersion() + "'>" + String.format("%s</feature>", next.getArtifactId()));
                 } else {
-            		out.println(String.format("    <bundle>mvn:%s/%s/%s/%s</bundle>", 
-                            next.getGroupId(), next.getArtifactId(), next.getBaseVersion(), next.getType()));
+                    if (next.getType().equals("jar")) {
+                        out.println(String.format("    <bundle>mvn:%s/%s/%s</bundle>", next.getGroupId(), next.getArtifactId(), next.getBaseVersion()));
+                    } else {
+                        out.println(String.format("    <bundle>mvn:%s/%s/%s/%s</bundle>", next.getGroupId(), next.getArtifactId(), next.getBaseVersion(), next.getType()));
+                    }
                 }
             }
             out.println("  </feature>");
