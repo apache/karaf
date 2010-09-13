@@ -318,7 +318,7 @@ public class CmdHelpMojo extends AbstractMojo {
                 StringBuffer syntax = new StringBuffer();
                 syntax.append(String.format("%s:%s", command.scope(), command.name()));
                 if (options.size() > 0) {
-                    syntax.append(" [options]");
+                    syntax.append(" \\[options\\]");
                 }
                 if (arguments.size() > 0) {
                     syntax.append(' ');
