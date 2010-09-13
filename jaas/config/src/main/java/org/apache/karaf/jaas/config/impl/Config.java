@@ -76,6 +76,10 @@ public class Config implements JaasRealm {
             AppConfigurationEntry[] entries = new AppConfigurationEntry[modules.length];
             for (int i = 0; i < modules.length; i++) {
                 Map<String,Object> options = new HashMap<String,Object>();
+                // put the bundle context in the options map
+                // it's required to be able to use the encryption service
+                // in the AbstractKarafLoginModule
+                options.put(BundleContext.class.getName(), bundleContext);
                 if (modules[i].getOptions() != null) {
                     for (Map.Entry e : modules[i].getOptions().entrySet()) {
                         options.put(e.getKey().toString(), e.getValue());

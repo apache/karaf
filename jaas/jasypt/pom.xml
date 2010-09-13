@@ -22,31 +22,49 @@
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
-        <groupId>org.apache.karaf.features</groupId>
-        <artifactId>features</artifactId>
+        <groupId>org.apache.karaf.jaas</groupId>
+        <artifactId>jaas</artifactId>
         <version>2.0.1-SNAPSHOT</version>
     </parent>
     
-    <groupId>org.apache.karaf.features</groupId>
-    <artifactId>org.apache.karaf.features.encryption</artifactId>
+    <groupId>org.apache.karaf.jaas</groupId>
+    <artifactId>org.apache.karaf.jaas.jasypt</artifactId>
     <packaging>bundle</packaging>
     <version>2.0.1-SNAPSHOT</version>
-    <name>Apache Karaf :: Features Encryption</name>
+    <name>Apache Karaf :: JAAS Jasypt Encryption</name>
+    
+    <description>
+        This bundle provides the default encryption implementation for password
+        encryption used in login module.
+        This implementation uses Jasypt encryption tool.
+    </description>
+    
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
     
     <dependencies>
+    
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.modules</artifactId>
-            <scope>provided</scope>
+            <artifactId>org.apache.karaf.jaas.modules</artifactId>    
         </dependency>
+        
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
-            <scope>provided</scope>
         </dependency>
-    </dependencies>
+        
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>3.4.4</version>
+            <scope>test</scope>
+        </dependency>
     
-        <build>
+    </dependencies>
+
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -61,7 +79,7 @@
                             !${project.artifactId}*,
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.features.encryption.internal</Private-Package>
+                        <Private-Package>org.apache.karaf.jaas.encryption.impl</Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

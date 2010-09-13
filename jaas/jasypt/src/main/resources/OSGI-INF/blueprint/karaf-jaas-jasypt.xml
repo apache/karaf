@@ -19,8 +19,8 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <bean id="encryption" class="org.apache.karaf.features.encryption.internal.JasyptEncryption" />
-
+    <bean id="encryption" class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryption" />
+    
     <service ref="encryption" interface="org.apache.karaf.jaas.modules.Encryption" />
 
 </blueprint>

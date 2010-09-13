@@ -36,6 +36,7 @@
         <module>boot</module>
         <module>config</module>
         <module>modules</module>
+        <module>jasypt</module>
     </modules>
 
 </project>
