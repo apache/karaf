@@ -847,6 +847,13 @@ public class Main {
             }
             configProps.remove(INCLUDES_PROPERTY);
         }
+        for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
+            Object key = e.nextElement();
+            if (key instanceof String) {
+                String v = configProps.getProperty((String) key);
+                configProps.put(key, v.trim());
+            }
+        }
         return configProps;
     }
 
