@@ -35,6 +35,6 @@
     </jaas:config>
     
     <!-- Encryption Service provided by the encryption feature by default -->
-    <reference id="encryption" interface="org.apache.karaf.jaas.modules.Encryption" />
+    <reference id="encryption" interface="org.apache.karaf.jaas.modules.Encryption" availability="optional"/>
 
 </blueprint>
