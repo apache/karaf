@@ -97,7 +97,8 @@ public class Console implements Runnable
                                    getClass().getResourceAsStream("keybinding.properties"),
                                    this.terminal);
 
-        File file = new File(System.getProperty("user.home"), ".karaf/karaf.history");
+        File file = new File(System.getProperty("karaf.history",
+                             new File(System.getProperty("user.home"), ".karaf/karaf.history").toString()));
         file.getParentFile().mkdirs();
         reader.getHistory().setHistoryFile(file);
         session.put(".jline.history", reader.getHistory());
