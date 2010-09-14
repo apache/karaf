@@ -30,9 +30,7 @@ package java.lang;
 public class Exception extends Throwable {
     private static final long serialVersionUID = -3387516993124229948L;
 
-    private static volatile SecurityManagerEx sm;
-
-    private transient Class[] classContext = SecurityManagerEx.getSm().getThrowableContext(this);
+    private transient Class[] classContext = SecurityManagerEx.getInstance().getThrowableContext(this);
 
     /**
      * Constructs a new {@code Exception} that includes the current stack trace.
@@ -83,16 +81,15 @@ public class Exception extends Throwable {
     private static class SecurityManagerEx extends SecurityManager
     {
 
-        private static SecurityManagerEx getSm() {
+        private static SecurityManagerEx sm;
+
+        public static SecurityManagerEx getInstance() {
+            // No synchronized block because we don't really care
+            // if multiple instances are created at some point
             if (sm == null) {
                 sm = new SecurityManagerEx();
             }
             return sm;
-        }
-
-        public Class[] getClassContext()
-        {
-            return super.getClassContext();
         }
 
         public Class[] getThrowableContext(Throwable t) {
