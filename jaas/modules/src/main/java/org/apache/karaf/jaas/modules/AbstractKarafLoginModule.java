@@ -15,6 +15,8 @@
 package org.apache.karaf.jaas.modules;
 
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -50,11 +52,10 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     protected String rolePolicy;
     protected String roleDiscriminator;
     
-    /** define the encryption algorithm to use to encrypt password */
-    protected String encryption;
-    
     /** the bundle context is required to use the encryption service */
     protected BundleContext bundleContext;
+
+    protected Encryption encryption;
     
     private static final Log LOG = LogFactory.getLog(AbstractKarafLoginModule.class);
 
@@ -75,94 +76,76 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     public void initialize(Subject sub, CallbackHandler handler, Map options) {
         this.subject = sub;
         this.callbackHandler = handler;
+        this.options = options;
         this.rolePolicy = (String) options.get("rolePolicy");
         this.roleDiscriminator = (String) options.get("roleDiscriminator");
         this.debug = Boolean.parseBoolean((String) options.get("debug"));
-        this.encryption = (String) options.get("encryption");
         // the bundle context is set in the Config JaasRealm by default
         this.bundleContext = (BundleContext) options.get(BundleContext.class.getName());
     }
-    
-    /**
-     * <p>
-     * Encrypt password.
-     * </p>
-     * 
-     * @param password the password in plain format.
-     * @return the encrypted password format.
-     */
-    public String encryptPassword(String password) {
-        if (this.encryption == null || this.encryption.trim().length() == 0) {
-            if (debug) {
-                LOG.debug("Encryption is disabled.");
+
+    public Encryption getEncryption() {
+        if (encryption == null) {
+            Map<String,String> encOpts = new HashMap<String,String>();
+            for (String key : options.keySet()) {
+                if (key.startsWith("encryption.")) {
+                    encOpts.put(key.substring("encryption.".length()), options.get(key).toString());
+                }
             }
-            return password;
-        }
-        if (debug) {
-            LOG.debug("Encryption is enabled and use " + encryption + " encryption algorithm.");
-        }
-        // lookup the encryption service reference
-        ServiceReference[] encryptionServiceReferences;
-        try {
-            encryptionServiceReferences = bundleContext.getServiceReferences(Encryption.class.getName(), "(algorithm=" + encryption + ")");
-        } catch (InvalidSyntaxException e) {
-            throw new IllegalStateException("The encryption service filter is not well formed.", e);
-        }
-        if (encryptionServiceReferences.length == 0) {
-            throw new IllegalStateException("Encryption service not found for encryption algorithm " + encryption + ". Please install the Karaf encryption feature and check that the encryption algorithm is supported..");
-        }
-        // get the encryption service implementation
-        Encryption encryptionService = (Encryption) bundleContext.getService(encryptionServiceReferences[0]);
-        if (encryptionService == null) {
-            throw new IllegalStateException("Encryption service not found. Please install the Karaf encryption feature.");
-        }
-        // encrypt the password
-        String encryptedPassword = encryptionService.encryptPassword(password);
-        // release the encryption service reference
-        bundleContext.ungetService(encryptionServiceReferences[0]);
-        return encryptedPassword;
-    }
-    
-    /**
-     * <p>
-     * Check if the provided password match the reference one.
-     * </p>
-     * 
-     * @param input the provided password (plain format).
-     * @param password the reference one (encrypted format).
-     * @return true if the passwords match, false else.
-     */
-    public boolean checkPassword(String input, String password) {
-        if (this.encryption == null || this.encryption.trim().length() == 0) {
-            if (debug) {
-                LOG.debug("Encryption is disabled.");
+            boolean enabled = Boolean.parseBoolean(encOpts.remove("enabled"));
+            if (!enabled) {
+                if (debug) {
+                    LOG.debug("Encryption is disabled.");
+                }
+            } else {
+                String name = encOpts.remove("name");
+                if (debug) {
+                    if (name != null) {
+                        LOG.debug("Encryption is enabled. Using service " + name + " with options " + encOpts);
+                    } else {
+                        LOG.debug("Encryption is enabled. Using options " + encOpts);
+                    }
+                }
+                // lookup the encryption service reference
+                ServiceReference[] encryptionServiceReferences;
+                try {
+                    encryptionServiceReferences = bundleContext.getServiceReferences(
+                                EncryptionService.class.getName(),
+                                name != null && name.length() > 0 ? "(name=" + name + ")" : null);
+                } catch (InvalidSyntaxException e) {
+                    throw new IllegalStateException("The encryption service filter is not well formed.", e);
+                }
+                if (encryptionServiceReferences.length == 0) {
+                    if (name != null && name.length() > 0) {
+                        throw new IllegalStateException("Encryption service " + name + " not found. Please check that the encryption service is correctly set up.");
+                    } else {
+                        throw new IllegalStateException("No encryption service found. Please install the Karaf encryption feature and check that the encryption algorithm is supported..");
+                    }
+                }
+                Arrays.sort(encryptionServiceReferences);
+                for (ServiceReference ref : encryptionServiceReferences) {
+                    try {
+                        EncryptionService encryptionService = (EncryptionService) bundleContext.getService(ref);
+                        if (encryptionService != null) {
+                            try {
+                                encryption = encryptionService.createEncryption(encOpts);
+                                if (encryption != null) {
+                                    break;
+                                }
+                            } finally {
+                                bundleContext.ungetService(ref);
+                            }
+                        }
+                    } catch (IllegalStateException e) {
+                         // continue
+                    }
+                }
+                if (encryption == null) {
+                    throw new IllegalStateException("No EncryptionService supporting the required options could be found.");
+                }
             }
-            return input.equals(password);
-        }        
-        if (debug) {
-            LOG.debug("Encryption is enabled and use " + encryption + " encryption algorithm.");
         }
-        // lookup the encryption service reference
-        ServiceReference[] encryptionServiceReferences = new ServiceReference[0];
-        try {
-            encryptionServiceReferences = bundleContext.getServiceReferences(Encryption.class.getName(), "(algorithm=" + encryption + ")");
-        } catch (InvalidSyntaxException e) {
-            throw new IllegalStateException("The encryption service filter is not well formed.", e);
-        }
-        if (encryptionServiceReferences.length == 0) {
-            throw new IllegalStateException("Encryption service not found for encryption algorithm " + encryption + ". Please install the Karaf encryption feature and check that the encryption algorithm is supported..");
-        }
-        // get the encryption service implementation
-        Encryption encryptionService = (Encryption) bundleContext.getService(encryptionServiceReferences[0]);
-        if (encryptionService == null) {
-            throw new IllegalStateException("Encryption service not found. Please install the Karaf encryption feature.");
-        }
-        // check password
-        boolean equals = encryptionService.checkPassword(input, password);
-        String encryptedPassword = encryptionService.encryptPassword(password);
-        // release the encryption service reference
-        bundleContext.ungetService(encryptionServiceReferences[0]);
-        return equals;
+        return encryption;
     }
-    
+
 }

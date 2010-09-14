@@ -36,6 +36,7 @@ import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 
@@ -104,7 +105,8 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         String storedPassword = infos[0];
         
         // check if encryption is enabled
-        if (this.encryption != null && !this.encryption.trim().isEmpty()) {
+        Encryption encryption = getEncryption();
+        if (encryption != null) {
             if (debug) {
                 LOG.debug("Encryption is enabled.");
             }
@@ -113,7 +115,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
                 if (debug) {
                     LOG.debug("The password isn't flagged as encrypted, encrypt it.");
                 }
-                storedPassword = "{CRYPT}" + this.encryptPassword(storedPassword);
+                storedPassword = "{CRYPT}" + encryption.encryptPassword(storedPassword);
                 if (debug) {
                     LOG.debug("Rebuild the user informations string.");
                 }
@@ -144,7 +146,13 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         }
 
         // check the provided password
-        if (!this.checkPassword(password, storedPassword)) {
+        boolean result;
+        if (encryption == null) {
+            result = storedPassword.equals(password);
+        } else {
+            result = encryption.checkPassword(password, storedPassword);
+        }
+        if (!result) {
             LOG.error("Check password failed: " + password + " / " + storedPassword);
             throw new FailedLoginException("Password for " + user + " does not match");
         }
