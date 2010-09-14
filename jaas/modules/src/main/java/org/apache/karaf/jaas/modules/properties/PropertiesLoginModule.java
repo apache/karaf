@@ -111,7 +111,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             // check if the stored password is flagged as encrypted
             if (!storedPassword.startsWith("{CRYPT}")) {
                 if (debug) {
-                    LOG.debug("The password isn't flag as encrypted, encrypt it.");
+                    LOG.debug("The password isn't flagged as encrypted, encrypt it.");
                 }
                 storedPassword = "{CRYPT}" + this.encryptPassword(storedPassword);
                 if (debug) {
