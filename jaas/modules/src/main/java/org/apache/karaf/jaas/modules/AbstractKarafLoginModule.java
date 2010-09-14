@@ -92,7 +92,7 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
      * @return the encrypted password format.
      */
     public String encryptPassword(String password) {
-        if (this.encryption == null || this.encryption.trim().isEmpty()) {
+        if (this.encryption == null || this.encryption.trim().length() == 0) {
             if (debug) {
                 LOG.debug("Encryption is disabled.");
             }
@@ -133,7 +133,7 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
      * @return true if the passwords match, false else.
      */
     public boolean checkPassword(String input, String password) {
-        if (this.encryption == null || this.encryption.trim().isEmpty()) {
+        if (this.encryption == null || this.encryption.trim().length() == 0) {
             if (debug) {
                 LOG.debug("Encryption is disabled.");
             }
