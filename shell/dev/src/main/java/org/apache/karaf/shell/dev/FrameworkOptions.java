@@ -25,7 +25,7 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.dev.framework.Equinox;
 import org.apache.karaf.shell.dev.framework.Felix;
 import org.apache.karaf.shell.dev.framework.Framework;
-import org.apache.karaf.shell.dev.util.Properties;
+import org.apache.karaf.util.Properties;
 
 /**
  * Command for enabling/disabling debug logging on the OSGi framework

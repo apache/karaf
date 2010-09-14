@@ -16,6 +16,11 @@
  */
 package org.apache.karaf.util;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+
 import junit.framework.TestCase;
 
 /**
@@ -51,4 +56,36 @@ public class PropertiesTest extends TestCase {
         assertEquals("test", properties.get("test"));
     }
     
+    public void testLoadSave() throws IOException {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        pw.println("# ");
+        pw.println("# The Main  ");
+        pw.println("# ");
+        pw.println("# Comment ");
+        pw.println("# ");
+        pw.println("");
+        pw.println("# Another comment");
+        pw.println("");
+        pw.println("# A value comment");
+        pw.println("key1 = val1");
+        pw.println("");
+        pw.println("# Another value comment");
+        pw.println("key2 = ${key1}/foo");
+        pw.println("");
+        pw.println("# A third comment");
+        pw.println("key3 = val3");
+        pw.println("");
+
+
+        Properties props = new Properties();
+        props.load(new StringReader(sw.toString()));
+        props.save(System.err);
+        System.err.println("=====");
+
+        props.put("key2", props.get("key2"));
+        props.put("key3", "foo");
+        props.save(System.err);
+        System.err.println("=====");
+    }
 }
