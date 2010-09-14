@@ -47,6 +47,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
         </dependency>
@@ -89,6 +94,9 @@
                             org.apache.aries.blueprint.ext,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.util
+                        </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
