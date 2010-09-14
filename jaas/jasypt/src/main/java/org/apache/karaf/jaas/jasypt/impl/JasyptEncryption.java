@@ -31,6 +31,11 @@ package org.apache.karaf.jaas.jasypt.impl;
 import java.util.Map;
 
 import org.apache.karaf.jaas.modules.Encryption;
+import org.apache.karaf.jaas.modules.EncryptionService;
+import org.jasypt.digest.config.DigesterConfig;
+import org.jasypt.digest.config.SimpleDigesterConfig;
+import org.jasypt.digest.config.SimpleStringDigesterConfig;
+import org.jasypt.exceptions.EncryptionInitializationException;
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 
 /**
@@ -52,9 +57,33 @@ public class JasyptEncryption implements Encryption {
      * @param params encryption parameters
      */
     public JasyptEncryption(Map<String,String> params) {
+        SimpleStringDigesterConfig config = new SimpleStringDigesterConfig();
+        for (String key : params.keySet()) {
+            if (EncryptionService.ALGORITHM.equalsIgnoreCase(key)) {
+                config.setAlgorithm(params.get(key));
+            } else if (EncryptionService.ENCODING.equalsIgnoreCase(key)) {
+                config.setStringOutputType(params.get(key));
+            } else if ("providerName".equalsIgnoreCase(key)) {
+                config.setProviderName(params.get(key));
+            } else if ("saltSizeBytes".equalsIgnoreCase(key)) {
+                config.setSaltSizeBytes(params.get(key));
+            } else if ("iterations".equalsIgnoreCase(key)) {
+                config.setIterations(params.get(key));
+            } else if ("providerClassName".equalsIgnoreCase(key)) {
+                config.setProviderClassName(params.get(key));
+            } else if ("saltGeneratorClassName".equalsIgnoreCase(key)) {
+                config.setSaltGeneratorClassName(params.get(key));
+            } else {
+                throw new IllegalArgumentException("Unsupported encryption parameter: " + key);
+            }
+        }
         this.passwordEncryptor = new ConfigurablePasswordEncryptor();
-
-        // TODO: configure
+        this.passwordEncryptor.setConfig(config);
+        try {
+            this.passwordEncryptor.encryptPassword("test");
+        } catch (EncryptionInitializationException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
     
     /*

@@ -17,13 +17,10 @@
 package org.apache.karaf.jaas.modules.properties;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -39,6 +36,7 @@ import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
+import org.apache.karaf.util.Properties;
 
 /**
  * <p>
@@ -64,10 +62,10 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
     }
 
     public boolean login() throws LoginException {
-        Properties users = new Properties();
         File f = new File(usersFile);
+        Properties users;
         try {
-            users.load(new java.io.FileInputStream(f));
+            users = new Properties(f);
         } catch (IOException ioe) {
             throw new LoginException("Unable to load user properties file " + f);
         }
@@ -135,9 +133,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
                     if (debug) {
                         LOG.debug("Store the users properties file.");
                     }
-                    // TODO use Karaf Properties (to maintain comments, etc)
-                    // TODO close the stream to avoid leaks
-                    users.store(new FileOutputStream(f), null);
+                    users.save();
                 } catch (IOException ioe) {
                     LOG.warn("Unable to write user properties file " + f, ioe);
                 }

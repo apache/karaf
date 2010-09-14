@@ -32,18 +32,24 @@
     <!-- AdminConfig property place holder for the org.apache.karaf.jaas  -->
     <cm:property-placeholder persistent-id="org.apache.karaf.jaas">
         <cm:default-properties>
-            <cm:property name="encryption.digest" value="" />
+            <cm:property name="encryption.name" value="" />
+            <cm:property name="encryption.enabled" value="false" />
+            <cm:property name="encryption.algorithm" value="MD5" />
+            <cm:property name="encryption.encoding" value="" />
         </cm:default-properties>
     </cm:property-placeholder>
 
     <jaas:config name="karaf">
         <jaas:module className="org.apache.karaf.jaas.modules.properties.PropertiesLoginModule" flags="required">
             users = $[karaf.base]/etc/users.properties
-            encryption.digest = ${encryption.digest}
+            encryption.name = ${encryption.name}
+            encryption.enabled = ${encryption.enabled}
+            encryption.algorithm = ${encryption.algorithm}
+            encryption.encoding = ${encryption.encoding}
         </jaas:module>
     </jaas:config>
 
-    <service interface="org.apache.karaf.jaas.modules.EncrypionService">
+    <service interface="org.apache.karaf.jaas.modules.EncryptionService" ranking="-1">
         <service-properties>
             <entry key="name" value="basic"/>
         </service-properties>

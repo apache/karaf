@@ -19,58 +19,11 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <service interface="org.apache.karaf.jaas.modules.Encryption">
+    <service interface="org.apache.karaf.jaas.modules.EncryptionService">
         <service-properties>
-            <entry key="algorithm" value="MD2" />
+            <entry key="name" value="jasypt" />
         </service-properties>
-        <bean class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryption">
-            <argument value="MD2" />
-        </bean>
-    </service>
-
-    <service interface="org.apache.karaf.jaas.modules.Encryption">
-        <service-properties>
-            <entry key="algorithm" value="MD5" />
-        </service-properties>
-        <bean class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryption">
-            <argument value="MD5" />
-        </bean>
-    </service>
-    
-    <service interface="org.apache.karaf.jaas.modules.Encryption">
-        <service-properties>
-            <entry key="algorithm" value="SHA-1" />
-        </service-properties>
-        <bean class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryption">
-            <argument value="SHA-1" />
-        </bean>
-    </service>
-
-    <service interface="org.apache.karaf.jaas.modules.Encryption">
-        <service-properties>
-            <entry key="algorithm" value="SHA-256" />
-        </service-properties>
-        <bean class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryption">
-            <argument value="SHA-256" />
-        </bean>
-    </service>    
-
-    <service interface="org.apache.karaf.jaas.modules.Encryption">
-        <service-properties>
-            <entry key="algorithm" value="SHA-384" />
-        </service-properties>
-        <bean class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryption">
-            <argument value="SHA-384" />
-        </bean>
-    </service>
-    
-    <service interface="org.apache.karaf.jaas.modules.Encryption">
-        <service-properties>
-            <entry key="algorithm" value="SHA-512" />
-        </service-properties>
-        <bean class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryption">
-            <argument value="SHA-512" />
-        </bean>
+        <bean class="org.apache.karaf.jaas.jasypt.impl.JasyptEncryptionService"/>
     </service>
 
 </blueprint>

@@ -30,32 +30,34 @@ public class BasicEncryption implements Encryption {
 
     private static final Logger log = LoggerFactory.getLogger(BasicEncryption.class);
 
-    private String digest;
+    private String algorithm;
     private String encoding;
     private MessageDigest md;
 
     public BasicEncryption(Map<String, String> params) {
         for (String key : params.keySet()) {
             if (EncryptionService.ALGORITHM.equalsIgnoreCase(key)) {
-                digest = params.get(key);
+                algorithm = params.get(key);
             } else if (EncryptionService.ENCODING.equalsIgnoreCase(key)) {
                 encoding = params.get(key);
             } else {
                 throw new IllegalArgumentException("Unsupported encryption parameter: " + key);
             }
         }
-        if (digest == null) {
+        if (algorithm == null) {
             throw new IllegalArgumentException("Digest algorithm must be specified");
         }
-        // Check if the digest algorithm is available
+        // Check if the algorithm algorithm is available
         try {
-            md = MessageDigest.getInstance(digest);
+            md = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
-            log.error("Initialization failed. Digest algorithm " + digest + " is not available.", e);
+            log.error("Initialization failed. Digest algorithm " + algorithm + " is not available.", e);
             throw new IllegalArgumentException("Unable to configure login module: " + e.getMessage(), e);
         }
-        if (encoding != null && !"hex".equalsIgnoreCase(encoding) && !"base64".equalsIgnoreCase(encoding)) {
-            log.error("Initialization failed. Digest Encoding " + encoding + " is not supported.");
+        if (encoding != null && encoding.length() > 0
+                && !EncryptionService.ENCODING_HEXADECIMAL.equalsIgnoreCase(encoding)
+                && !EncryptionService.ENCODING_BASE64.equalsIgnoreCase(encoding)) {
+            log.error("Initialization failed. Digest encoding " + encoding + " is not supported.");
             throw new IllegalArgumentException(
                     "Unable to configure login module. Digest Encoding " + encoding + " not supported.");
         }
@@ -67,9 +69,9 @@ public class BasicEncryption implements Encryption {
         }
         // Digest the user provided password
         byte[] data = md.digest(password.getBytes());
-        if (encoding == null || "hex".equalsIgnoreCase(encoding)) {
+        if (encoding == null || encoding.length() == 0 || EncryptionService.ENCODING_HEXADECIMAL.equalsIgnoreCase(encoding)) {
             return hexEncode(data);
-        } else if ("base64".equalsIgnoreCase(encoding)) {
+        } else if (EncryptionService.ENCODING_BASE64.equalsIgnoreCase(encoding)) {
             return base64Encode(data);
         } else {
             throw new IllegalArgumentException(
@@ -86,9 +88,9 @@ public class BasicEncryption implements Encryption {
         }
         // both are non-null
         String encoded = encryptPassword(provided);
-        if (encoding == null || "hex".equalsIgnoreCase(encoding)) {
+        if (encoding == null || encoding.length() == 0 || EncryptionService.ENCODING_HEXADECIMAL.equalsIgnoreCase(encoding)) {
             return real.equalsIgnoreCase(encoded);
-        } else if ("base64".equalsIgnoreCase(encoding)) {
+        } else if (EncryptionService.ENCODING_BASE64.equalsIgnoreCase(encoding)) {
             return real.equals(encoded);
         }
         return false;

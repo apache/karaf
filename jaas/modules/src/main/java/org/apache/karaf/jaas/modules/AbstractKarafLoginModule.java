@@ -100,7 +100,7 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
             } else {
                 String name = encOpts.remove("name");
                 if (debug) {
-                    if (name != null) {
+                    if (name != null && name.length() > 0) {
                         LOG.debug("Encryption is enabled. Using service " + name + " with options " + encOpts);
                     } else {
                         LOG.debug("Encryption is enabled. Using options " + encOpts);

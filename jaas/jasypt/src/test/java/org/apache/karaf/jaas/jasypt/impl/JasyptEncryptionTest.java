@@ -14,7 +14,11 @@
  */
 package org.apache.karaf.jaas.jasypt.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.TestCase;
+import org.apache.karaf.jaas.modules.EncryptionService;
 
 /**
  * <p>
@@ -32,7 +36,9 @@ public class JasyptEncryptionTest extends TestCase {
      * @see junit.framework.TestCase#setUp()
      */
     public void setUp() {
-        this.encryption = new JasyptEncryption("MD5");
+        Map<String,String> props = new HashMap<String,String>();
+        props.put(EncryptionService.ALGORITHM, "MD5");
+        this.encryption = new JasyptEncryption(props);
     }
     
     /**

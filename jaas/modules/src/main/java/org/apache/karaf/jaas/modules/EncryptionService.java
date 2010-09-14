@@ -21,7 +21,18 @@ import java.util.Map;
 public interface EncryptionService {
 
     String ALGORITHM = "algorithm";
+
+    String ALGORITHM_MD2 = "MD2";
+    String ALGORITHM_MD5 = "MD5";
+    String ALGORITHM_SHA1 = "SHA-1";
+    String ALGORITHM_SHA256 = "SHA-256";
+    String ALGORITHM_SHA384 = "SHA-384";
+    String ALGORITHM_SHA512 = "SHA-512";
+
     String ENCODING = "encoding";
+
+    String ENCODING_HEXADECIMAL = "hexadecimal";
+    String ENCODING_BASE64 = "base64";
 
     /**
      * Create an encryption service with the specified parameters.
