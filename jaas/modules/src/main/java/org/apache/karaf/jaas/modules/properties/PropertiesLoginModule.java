@@ -134,6 +134,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
                         LOG.debug("Store the users properties file.");
                     }
                     // TODO use Karaf Properties (to maintain comments, etc)
+                    // TODO close the stream to avoid leaks
                     users.store(new FileOutputStream(f), null);
                 } catch (IOException ioe) {
                     LOG.warn("Unable to write user properties file " + f, ioe);

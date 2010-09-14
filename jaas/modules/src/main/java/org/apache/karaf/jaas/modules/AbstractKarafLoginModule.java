@@ -102,7 +102,7 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
             LOG.debug("Encryption is enabled and use " + encryption + " encryption algorithm.");
         }
         // lookup the encryption service reference
-        ServiceReference[] encryptionServiceReferences = new ServiceReference[0];
+        ServiceReference[] encryptionServiceReferences;
         try {
             encryptionServiceReferences = bundleContext.getServiceReferences(Encryption.class.getName(), "(algorithm=" + encryption + ")");
         } catch (InvalidSyntaxException e) {
