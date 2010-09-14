@@ -30,20 +30,13 @@ public class JasyptEncryption implements Encryption {
     
     /**
      * <p>
-     * Default constructor.
+     * Default constructor with the encryption algorithm.
      * </p>
+     * 
+     * @algorithm the encryption algorithm to use.
      */
-    public JasyptEncryption() {
+    public JasyptEncryption(String algorithm) {
         this.passwordEncryptor = new ConfigurablePasswordEncryptor();
-        // set MD5 encryption algorithm by default
-        this.passwordEncryptor.setAlgorithm("MD5");
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.apache.karaf.jaas.modules.Encryption#setAlgorithm(java.lang.String)
-     */
-    public void setAlgorithm(String algorithm) {
         this.passwordEncryptor.setAlgorithm(algorithm);
     }
     

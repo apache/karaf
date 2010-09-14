@@ -32,8 +32,7 @@ public class JasyptEncryptionTest extends TestCase {
      * @see junit.framework.TestCase#setUp()
      */
     public void setUp() {
-        this.encryption = new JasyptEncryption();
-        this.encryption.setAlgorithm("MD5");
+        this.encryption = new JasyptEncryption("MD5");
     }
     
     /**

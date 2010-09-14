@@ -43,14 +43,5 @@ public interface Encryption {
      * @return true if the password match, false else.
      */
     public boolean checkPassword(String input, String password);
-    
-    /**
-     * <p>
-     * Set the encryption algorithm to use.
-     * </p>
-     * 
-     * @param algorithm the encryption algorithm.
-     */
-    public void setAlgorithm(String algorithm);
 
 }
