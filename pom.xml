@@ -34,6 +34,7 @@
     <inceptionYear>2007</inceptionYear>
 
     <modules>
+        <module>util</module>
         <module>main</module>
         <module>features</module>
         <module>admin</module>
