@@ -210,6 +210,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
+                <artifactId>org.apache.karaf.util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf</groupId>
                 <artifactId>org.apache.karaf.exception</artifactId>
                 <version>${project.version}</version>
             </dependency>

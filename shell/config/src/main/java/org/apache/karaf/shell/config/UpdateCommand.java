@@ -21,6 +21,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 
 import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.util.Properties;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.felix.gogo.commands.Command;
