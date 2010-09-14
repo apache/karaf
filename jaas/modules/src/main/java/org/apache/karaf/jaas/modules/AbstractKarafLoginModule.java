@@ -24,6 +24,8 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -52,6 +54,8 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     
     /** the bundle context is required to use the encryption service */
     protected BundleContext bundleContext;
+    
+    private static final Log LOG = LogFactory.getLog(AbstractKarafLoginModule.class);
 
     public boolean commit() throws LoginException {
         RolePolicy policy = RolePolicy.getPolicy(rolePolicy);
@@ -87,8 +91,14 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
      * @return the encrypted password format.
      */
     public String encryptPassword(String password) {
-        if (this.encryption == null) {
+        if (this.encryption == null || this.encryption.trim().isEmpty()) {
+            if (debug) {
+                LOG.debug("Encryption is disabled.");
+            }
             return password;
+        }
+        if (debug) {
+            LOG.debug("Encryption is enabled and use " + encryption + " encryption algorithm.");
         }
         // lookup the encryption service reference
         ServiceReference encryptionServiceReference = bundleContext.getServiceReference(Encryption.class.getName());
@@ -119,17 +129,25 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
      * @return true if the passwords match, false else.
      */
     public boolean checkPassword(String input, String password) {
-        if (this.encryption == null) {
+        if (this.encryption == null || this.encryption.trim().isEmpty()) {
+            if (debug) {
+                LOG.debug("Encryption is disabled.");
+            }
             return input.equals(password);
+        }
+        if (debug) {
+            LOG.debug("Encryption is enabled and use " + encryption + " encryption algorithm.");
         }
         // lookup the encryption service reference
         ServiceReference encryptionServiceReference = bundleContext.getServiceReference(Encryption.class.getName());
         if (encryptionServiceReference == null) {
+            LOG.error("Encryption service not found.");
             throw new IllegalStateException("Encryption service not found. Please install the Karaf encryption feature.");
         }
         // get the encryption service implementation
         Encryption encryptionService = (Encryption) bundleContext.getService(encryptionServiceReference);
         if (encryptionService == null) {
+            LOG.error("Encryption service not found.");
             throw new IllegalStateException("Encryption service not found. Please install the Karaf encryption feature.");
         }
         // set the encryption algorithm

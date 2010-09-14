@@ -60,7 +60,7 @@ public class JasyptEncryption implements Encryption {
      * @see org.apache.karaf.jaas.modules.Encryption#checkPassword(java.lang.String, java.lang.String)
      */
     public boolean checkPassword(String input, String password) {
-        return this.passwordEncryptor.checkPassword(input, password);
+        return passwordEncryptor.checkPassword(input, password);
     }
     
 }

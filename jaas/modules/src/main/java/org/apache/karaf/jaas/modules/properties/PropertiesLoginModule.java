@@ -17,6 +17,7 @@
 package org.apache.karaf.jaas.modules.properties;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.HashSet;
@@ -39,15 +40,17 @@ import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 
 /**
+ * <p>
  * JAAS Login module for user / password, based on two properties files.
+ * </p>
  *
+ * @author gnodet, jbonofre
  */
 public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
     private static final String USER_FILE = "users";
     private static final Log LOG = LogFactory.getLog(PropertiesLoginModule.class);
 
-    
     private String usersFile;
 
     public void initialize(Subject sub, CallbackHandler handler, Map sharedState, Map options) {
@@ -79,12 +82,12 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         } catch (UnsupportedCallbackException uce) {
             throw new LoginException(uce.getMessage() + " not available to obtain information from user");
         }
+        // user callback get value
         user = ((NameCallback) callbacks[0]).getName();
-        char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
-        if (tmpPassword == null) {
-            tmpPassword = new char[0];
-        }
+        // password callback get value
+        String password = new String(((PasswordCallback) callbacks[1]).getPassword());
 
+        // user infos container read from the users properties file
         String userInfos = null;
 
         try {
@@ -95,8 +98,53 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         if (userInfos == null) {
             throw new FailedLoginException("User " + user + " does not exist");
         }
+        
+        // the password is in the first position
         String[] infos = userInfos.split(",");
-        if (!new String(tmpPassword).equals(infos[0])) {
+        String storedPassword = infos[0];
+        
+        // check if encryption is enabled
+        if (this.encryption != null && !this.encryption.trim().isEmpty()) {
+            if (debug) {
+                LOG.debug("Encryption is enabled.");
+            }
+            // check if the stored password is flagged as encrypted
+            if (!storedPassword.startsWith("{CRYPT}")) {
+                if (debug) {
+                    LOG.debug("The password isn't flag as encrypted, encrypt it.");
+                }
+                storedPassword = "{CRYPT}" + this.encryptPassword(storedPassword);
+                if (debug) {
+                    LOG.debug("Rebuild the user informations string.");
+                }
+                userInfos = storedPassword + ",";
+                for (int i = 1; i < infos.length; i++) {
+                    if (i == (infos.length - 1)) {
+                        userInfos = userInfos + infos[i];
+                    } else {
+                        userInfos = userInfos + infos[i] + ",";
+                    }
+                }
+                if (debug) {
+                    LOG.debug("Push back the user informations in the users properties.");
+                }
+                users.put(user, userInfos);
+                try {
+                    if (debug) {
+                        LOG.debug("Store the users properties file.");
+                    }
+                    // TODO use Karaf Properties (to maintain comments, etc)
+                    users.store(new FileOutputStream(f), null);
+                } catch (IOException ioe) {
+                    LOG.warn("Unable to write user properties file " + f, ioe);
+                }
+            }
+            storedPassword = storedPassword.substring(7);
+        }
+
+        // check the provided password
+        if (!this.checkPassword(password, storedPassword)) {
+            LOG.error("Check password failed: " + password + " / " + storedPassword);
             throw new FailedLoginException("Password for " + user + " does not match");
         }
 

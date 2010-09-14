@@ -19,22 +19,28 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:jaas="http://karaf.apache.org/xmlns/jaas/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
     <type-converters>
         <bean class="org.apache.karaf.jaas.modules.properties.PropertiesConverter" />
     </type-converters>
 
-    <!-- Bean to allow the $[karaf.base] property to be correctly resolved -->
+    <!-- Allow usage of System properties, especially the karaf.base property -->
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
+    
+    <!-- AdminConfig property place holder for the org.apache.karaf.jaas  -->
+    <cm:property-placeholder persistent-id="org.apache.karaf.jaas">
+        <cm:default-properties>
+            <cm:property name="encryption" value="" />
+        </cm:default-properties>
+    </cm:property-placeholder>
 
     <jaas:config name="karaf">
         <jaas:module className="org.apache.karaf.jaas.modules.properties.PropertiesLoginModule" flags="required">
             users = $[karaf.base]/etc/users.properties
+            encryption = ${encryption}
         </jaas:module>
     </jaas:config>
-    
-    <!-- Encryption Service provided by the encryption feature by default -->
-    <reference id="encryption" interface="org.apache.karaf.jaas.modules.Encryption" availability="optional"/>
 
 </blueprint>
