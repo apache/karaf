@@ -22,4 +22,4 @@
 //
 ld = { log:display $args } ;
 lde = { log:display-exception $args } ;
-la = { osgi:list -t 0 } ;
+la = { osgi:list -t 0 $args } ;
