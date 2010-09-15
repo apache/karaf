@@ -435,7 +435,7 @@
                             <descriptors>
                                 <descriptor>src/main/descriptors/unix-minimal-bin.xml</descriptor>
                             </descriptors>
-                            <finalName>${project.artifactId}-minimal-${project.version}</finalName>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
                             <tarLongFileMode>gnu</tarLongFileMode>
                         </configuration>
                     </execution>
@@ -463,7 +463,7 @@
                             <descriptors>
                                 <descriptor>src/main/descriptors/windows-minimal-bin.xml</descriptor>
                             </descriptors>
-                            <finalName>${project.artifactId}-minimal-${project.version}</finalName>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
                             <appendAssemblyId>true</appendAssemblyId>
                             <assemblyId />
                         </configuration>
