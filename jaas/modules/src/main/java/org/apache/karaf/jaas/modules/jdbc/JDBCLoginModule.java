@@ -58,7 +58,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         datasourceURL = (String) options.get(DATASOURCE);
-        if (datasourceURL == null || datasourceURL.isEmpty()) {
+        if (datasourceURL == null || datasourceURL.trim().length() == 0) {
             LOG.error("No datasource was specified ");
         } else if (!datasourceURL.startsWith(JNDI) && !datasourceURL.startsWith(OSGI)) {
             LOG.error("Invalid datasource lookup protocol");
@@ -74,7 +74,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
     public Object createDatasource(String url) throws Exception {
         if (url == null) {
             throw new Exception("Illegal datasource url format. Datasource URL cannot be null.");
-        } else if (url.trim().isEmpty()) {
+        } else if (url.trim().length() == 0) {
             throw new Exception("Illegal datasource url format. Datasource URL cannot be empty.");
         } else if (url.startsWith(JNDI)) {
             String jndiName = url.substring(JNDI.length());
@@ -180,19 +180,19 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
             throw new LoginException("Error has occured while retrieving credentials from databse:" + ex.getMessage());
         } finally {
             try {
-                if (passwordResultSet != null && !passwordResultSet.isClosed()) {
+                if (passwordResultSet != null) {
                     passwordResultSet.close();
                 }
-                if (passwordStatement != null && !passwordStatement.isClosed()) {
+                if (passwordStatement != null) {
                     passwordStatement.close();
                 }
-                if (roleResultSet != null && !roleResultSet.isClosed()) {
+                if (roleResultSet != null) {
                     roleResultSet.close();
                 }
-                if (roleStatement != null && !roleStatement.isClosed()) {
+                if (roleStatement != null) {
                     roleStatement.close();
                 }
-                if (connection != null && !connection.isClosed()) {
+                if (connection != null) {
                     connection.close();
                 }
             } catch (SQLException ex) {
