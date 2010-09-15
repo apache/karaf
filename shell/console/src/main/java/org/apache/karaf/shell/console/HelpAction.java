@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.commands;
+package org.apache.karaf.shell.console;
 
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -31,9 +31,6 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
-import org.apache.felix.gogo.runtime.shell.CommandProxy;
-import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
-import org.apache.karaf.shell.console.AbstractAction;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
