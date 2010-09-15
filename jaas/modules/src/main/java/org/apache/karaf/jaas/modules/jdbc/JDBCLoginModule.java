@@ -79,7 +79,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         } else if (url.startsWith(JNDI)) {
             String jndiName = url.substring(JNDI.length());
             InitialContext ic = new InitialContext();
-            DataSource ds = (DataSource) ic.lookup(jndiName);
+            Object ds =  ic.lookup(jndiName);
             return ds;
         } else if (url.startsWith(OSGI)) {
             String osgiFilter = url.substring(OSGI.length());
@@ -97,7 +97,9 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
             ServiceReference[] references = bundleContext.getServiceReferences(clazz, filter);
             if (references != null) {
                 ServiceReference ref = references[0];
-                return bundleContext.getService(ref);
+                Object ds = bundleContext.getService(ref);
+                bundleContext.ungetService(ref);
+                return ds;
             } else {
                 throw new Exception("Unable to find service reference for datasource: " + clazz + "/" + filter);
             }
