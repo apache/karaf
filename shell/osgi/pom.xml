@@ -94,7 +94,11 @@
                         <DynamicImport-Package>
                             org.springframework.*
                         </DynamicImport-Package>
-                        <Private-Package>org.apache.felix.utils.version,!*</Private-Package>
+                        <Private-Package>
+                            org.apache.felix.utils.version,
+                            org.apache.felix.utils.manifest,
+                            !*
+                        </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
