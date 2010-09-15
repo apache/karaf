@@ -23,20 +23,9 @@
     <reference id="commandProcessor" interface="org.osgi.service.command.CommandProcessor" />
 
     <bean id="gogoPlugin" class="org.apache.karaf.webconsole.gogo.GogoPlugin" init-method="start" destroy-method="stop">
-        <property name="completers">
-            <list>
-                <ref component-id="commandCompleter"/>
-            </list>
-        </property>
         <property name="commandProcessor" ref="commandProcessor" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
-
-    <reference-list id="functions" filter="(&amp;(osgi.command.scope=*)(osgi.command.function=*))" availability="optional">
-        <reference-listener ref="commandCompleter"
-                            bind-method="register"
-                            unbind-method="unregister"/>
-    </reference-list>
 
     <service ref="gogoPlugin" interface="javax.servlet.Servlet" >
         <service-properties>
