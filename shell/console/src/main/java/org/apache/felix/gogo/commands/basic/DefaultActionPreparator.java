@@ -538,6 +538,9 @@ public class DefaultActionPreparator implements ActionPreparator {
 
     protected Object convert(Action action, CommandSession session, Object value, Type toType) throws Exception
     {
+        if (toType == String.class) {
+            return value != null ? value.toString() : null;
+        }
         return new DefaultConverter(action.getClass().getClassLoader()).convert(value, toType);
     }
 
