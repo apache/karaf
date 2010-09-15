@@ -28,6 +28,7 @@ import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.RuntimeSshException;
 
+import org.apache.sshd.common.util.NoCloseInputStream;
 import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.impl.SimpleLogger;
 
@@ -118,7 +119,7 @@ public class Main {
 			} else {
                 terminal = new TerminalFactory().getTerminal();
  				channel = session.createChannel("shell");
-                channel.setIn(System.in);
+                channel.setIn(new NoCloseInputStream(System.in));
                 ((ChannelShell) channel).setupSensibleDefaultPty();
             }
             channel.setOut(AnsiConsole.wrapOutputStream(System.out));
