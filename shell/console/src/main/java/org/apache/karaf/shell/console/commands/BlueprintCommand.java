@@ -70,7 +70,11 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
 
         @Override
         protected Object convert(Action action, CommandSession commandSession, Object o, Type type) throws Exception {
-            return blueprintConverter.convert(o, new GenericType(type));
+            GenericType t = new GenericType(type);
+            if (t.getRawClass() == String.class) {
+                return o != null ? o.toString() : null;
+            }
+            return blueprintConverter.convert(o, t);
         }
 
     }
