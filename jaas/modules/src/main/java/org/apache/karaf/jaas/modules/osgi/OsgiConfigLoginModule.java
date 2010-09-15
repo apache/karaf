@@ -21,7 +21,6 @@ import java.security.Principal;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -31,6 +30,9 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 
 import org.apache.karaf.jaas.modules.RolePrincipal;
@@ -41,6 +43,8 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
 
     public static final String PID = "pid";
     public static final String USER_PREFIX = "user.";
+
+    private static final Log LOG = LogFactory.getLog(OsgiConfigLoginModule.class);
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
@@ -64,18 +68,18 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
                 throw new LoginException(uce.getMessage() + " not available to obtain information from user");
             }
             String user = ((NameCallback) callbacks[0]).getName();
-            char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
-            if (tmpPassword == null) {
-                tmpPassword = new char[0];
-            }
+            String password = new String(((PasswordCallback) callbacks[1]).getPassword());
 
             String userInfos = (String) properties.get(USER_PREFIX + user);
             if (userInfos == null) {
                 throw new FailedLoginException("User does not exist");
             }
             String[] infos = userInfos.split(",");
-            if (!new String(tmpPassword).equals(infos[0])) {
-                throw new FailedLoginException("Password does not match");
+            String storedPassword = infos[0];
+
+            // check the provided password
+            if (!checkPassword(password, storedPassword)) {
+                throw new FailedLoginException("Password for " + user + " does not match");
             }
 
             principals = new HashSet<Principal>();
