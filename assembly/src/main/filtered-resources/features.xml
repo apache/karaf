@@ -94,7 +94,7 @@
         <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
         <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
     </feature>
-    <feature name="encryption" version="${project.version}">
+    <feature name="jasypt-encryption" version="${project.version}">
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-codec/${commons-codec.bundle.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/${commons-lang.bundle.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
