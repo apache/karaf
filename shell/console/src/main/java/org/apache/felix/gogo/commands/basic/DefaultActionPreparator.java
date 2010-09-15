@@ -26,7 +26,6 @@ import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.*;
 import java.io.PrintStream;
 import java.util.regex.Matcher;
@@ -38,9 +37,9 @@ import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.basic.ActionPreparator;
 import org.apache.felix.gogo.commands.converter.DefaultConverter;
 import org.apache.felix.gogo.commands.converter.GenericType;
+import org.apache.karaf.shell.console.NameScoping;
 import org.fusesource.jansi.Ansi;
 import org.osgi.service.command.CommandSession;
 
@@ -386,12 +385,17 @@ public class DefaultActionPreparator implements ActionPreparator {
         });
         Set<Option> options = new HashSet<Option>(optionsMap.keySet());
         options.add(HELP);
+        boolean globalScope = NameScoping.isGlobalScope(session, command.scope());
         if (command != null && (command.description() != null || command.name() != null))
         {
             out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DESCRIPTION").a(Ansi.Attribute.RESET));
             out.print("        ");
             if (command.name() != null) {
-                out.println(Ansi.ansi().a(command.scope()).a(":").a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                if (globalScope) {
+                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                } else {
+                    out.println(Ansi.ansi().a(command.scope()).a(":").a(Ansi.Attribute.INTENSITY_BOLD).a(command.name()).a(Ansi.Attribute.RESET));
+                }
                 out.println();
             }
             out.print("\t");
@@ -401,7 +405,11 @@ public class DefaultActionPreparator implements ActionPreparator {
         StringBuffer syntax = new StringBuffer();
         if (command != null)
         {
-            syntax.append(String.format("%s:%s", command.scope(), command.name()));
+            if (globalScope) {
+                syntax.append(command.name());
+            } else {
+                syntax.append(String.format("%s:%s", command.scope(), command.name()));
+            }
         }
         if (options.size() > 0)
         {

@@ -77,7 +77,8 @@ public class HelpAction extends AbstractAction {
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("COMMANDS").a(Ansi.Attribute.RESET));
                 for (Map.Entry<String,String> entry : commands.entrySet()) {
                     out.print("        ");
-                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(entry.getKey()).a(Ansi.Attribute.RESET));
+                    String key = NameScoping.getCommandNameWithoutGlobalPrefix(session, entry.getKey());
+                    out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(key).a(Ansi.Attribute.RESET));
                     if (entry.getValue() != null) {
                         DefaultActionPreparator.printFormatted("                ", entry.getValue(), term != null ? term.getTerminalWidth() : 80, out);
                     }

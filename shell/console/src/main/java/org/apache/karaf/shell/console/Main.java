@@ -142,6 +142,7 @@ public class Main {
         session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
         session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
         session.put(".jline.terminal", terminal);
+        session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
 
         if (args.length > 0) {
             StringBuilder sb = new StringBuilder();
@@ -247,6 +248,16 @@ public class Main {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    /**
+     * Returns whether or not we are in multi-scope mode.
+     *
+     * The default mode is multi-scoped where we prefix commands by their scope. If we are in single
+     * scoped mode then we don't use scope prefixes when registering or tab completing commands.
+     */
+    public boolean isMultiScopeMode() {
+        return true;
     }
 
     private static PrintStream wrap(PrintStream stream) {
