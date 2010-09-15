@@ -33,7 +33,6 @@ import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
-import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.util.Properties;
@@ -90,7 +89,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         String userInfos = null;
 
         try {
-            userInfos = (String) users.get(user);
+            userInfos = users.get(user);
         } catch (NullPointerException e) {
             //error handled in the next statement
         }
@@ -102,54 +101,40 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         String[] infos = userInfos.split(",");
         String storedPassword = infos[0];
         
-        // check if encryption is enabled
-        Encryption encryption = getEncryption();
-        if (encryption != null) {
+        // check if the stored password is flagged as encrypted
+        String encryptedPassword = getEncryptedPassword(storedPassword);
+        if (!storedPassword.equals(encryptedPassword)) {
             if (debug) {
-                LOG.debug("Encryption is enabled.");
+                LOG.debug("The password isn't flagged as encrypted, encrypt it.");
             }
-            // check if the stored password is flagged as encrypted
-            if (!storedPassword.startsWith("{CRYPT}")) {
-                if (debug) {
-                    LOG.debug("The password isn't flagged as encrypted, encrypt it.");
-                }
-                storedPassword = "{CRYPT}" + encryption.encryptPassword(storedPassword);
-                if (debug) {
-                    LOG.debug("Rebuild the user informations string.");
-                }
-                userInfos = storedPassword + ",";
-                for (int i = 1; i < infos.length; i++) {
-                    if (i == (infos.length - 1)) {
-                        userInfos = userInfos + infos[i];
-                    } else {
-                        userInfos = userInfos + infos[i] + ",";
-                    }
-                }
-                if (debug) {
-                    LOG.debug("Push back the user informations in the users properties.");
-                }
-                users.put(user, userInfos);
-                try {
-                    if (debug) {
-                        LOG.debug("Store the users properties file.");
-                    }
-                    users.save();
-                } catch (IOException ioe) {
-                    LOG.warn("Unable to write user properties file " + f, ioe);
+            if (debug) {
+                LOG.debug("Rebuild the user informations string.");
+            }
+            userInfos = encryptedPassword + ",";
+            for (int i = 1; i < infos.length; i++) {
+                if (i == (infos.length - 1)) {
+                    userInfos = userInfos + infos[i];
+                } else {
+                    userInfos = userInfos + infos[i] + ",";
                 }
             }
-            storedPassword = storedPassword.substring(7);
+            if (debug) {
+                LOG.debug("Push back the user informations in the users properties.");
+            }
+            users.put(user, userInfos);
+            try {
+                if (debug) {
+                    LOG.debug("Store the users properties file.");
+                }
+                users.save();
+            } catch (IOException ioe) {
+                LOG.warn("Unable to write user properties file " + f, ioe);
+            }
+            storedPassword = encryptedPassword;
         }
 
         // check the provided password
-        boolean result;
-        if (encryption == null) {
-            result = storedPassword.equals(password);
-        } else {
-            result = encryption.checkPassword(password, storedPassword);
-        }
-        if (!result) {
-            LOG.error("Check password failed: " + password + " / " + storedPassword);
+        if (!checkPassword(password, storedPassword)) {
             throw new FailedLoginException("Password for " + user + " does not match");
         }
 

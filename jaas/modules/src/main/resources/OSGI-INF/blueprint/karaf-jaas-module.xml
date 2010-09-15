@@ -34,8 +34,10 @@
         <cm:default-properties>
             <cm:property name="encryption.name" value="" />
             <cm:property name="encryption.enabled" value="false" />
+            <cm:property name="encryption.prefix" value="{CRYPT}" />
+            <cm:property name="encryption.suffix" value="{CRYPT}" />
             <cm:property name="encryption.algorithm" value="MD5" />
-            <cm:property name="encryption.encoding" value="" />
+            <cm:property name="encryption.encoding" value="hexadeciman" />
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -44,6 +46,8 @@
             users = $[karaf.base]/etc/users.properties
             encryption.name = ${encryption.name}
             encryption.enabled = ${encryption.enabled}
+            encryption.prefix = ${encryption.prefix}
+            encryption.suffix = ${encryption.suffix}
             encryption.algorithm = ${encryption.algorithm}
             encryption.encoding = ${encryption.encoding}
         </jaas:module>

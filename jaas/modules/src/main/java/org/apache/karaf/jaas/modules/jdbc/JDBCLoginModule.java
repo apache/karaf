@@ -162,14 +162,10 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
             } else {
                 String storedPassword = passwordResultSet.getString(1);
 
-                encryption = getEncryption();
-                if (encryption != null && encryption.checkPassword(password, storedPassword)) {
-                    principals.add(new UserPrincipal(user));
-                } else if (encryption == null && password.equals(storedPassword)) {
-                    principals.add(new UserPrincipal(user));
-                } else {
+                if (!checkPassword(password, storedPassword)) {
                     throw new LoginException("Password for " + user + " does not match");
                 }
+                principals.add(new UserPrincipal(user));
             }
 
             //Retrieve user roles from database
