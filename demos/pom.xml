@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>2.0.1-SNAPSHOT</version>
+        <version>2.1.99-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.karaf.demos</groupId>
     <artifactId>demos</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.1.99-SNAPSHOT</version>
     <name>Apache Karaf :: Demos</name>
 
     <modules>
