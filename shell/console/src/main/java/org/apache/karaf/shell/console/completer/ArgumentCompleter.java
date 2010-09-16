@@ -25,11 +25,17 @@
 package org.apache.karaf.shell.console.completer;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.gogo.commands.Action;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.CompleterValues;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
@@ -37,14 +43,19 @@ import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.NameScoping;
 import org.osgi.service.command.CommandSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ArgumentCompleter implements Completer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArgumentCompleter.class);
+
     final Completer commandCompleter;
     final Completer optionsCompleter;
     final List<Completer> argsCompleters;
     final AbstractCommand function;
     final Map<Option, Field> fields = new HashMap<Option, Field>();
     final Map<String, Option> options = new HashMap<String, Option>();
+    final Map<Integer, Argument> arguments = new HashMap<Integer, Argument>();
     boolean strict = true;
 
     public ArgumentCompleter(CommandSession session, AbstractCommand function, String command) {
@@ -65,6 +76,15 @@ public class ArgumentCompleter implements Completer {
                         }
                     }
                 }
+                Argument argument = field.getAnnotation(Argument.class);
+                if (argument != null) {
+                    Integer key = argument.index();
+                    if (arguments.containsKey(key)) {
+                        LOGGER.warn("Duplicate @Argument annotations on class " + type.getName() + " for index: " + key + " see: " + field);
+                    } else {
+                        arguments.put(key, argument);
+                    }
+                }
             }
         }
         options.put(DefaultActionPreparator.HELP.name(), DefaultActionPreparator.HELP);
@@ -81,7 +101,55 @@ public class ArgumentCompleter implements Completer {
                 argsCompleters.add(NullCompleter.INSTANCE);
             }
         } else {
-            argsCompleters.add(NullCompleter.INSTANCE);
+            final Map<Integer, Method> methods = new HashMap<Integer, Method>();
+            for (Class type = function.getActionClass(); type != null; type = type.getSuperclass()) {
+                for (Method method : type.getDeclaredMethods()) {
+                    CompleterValues completerMethod = method.getAnnotation(CompleterValues.class);
+                    if (completerMethod != null) {
+                        Integer key = completerMethod.index();
+                        if (methods.containsKey(key)) {
+                            LOGGER.warn("Duplicate @CompleterMethod annotations on class " + type.getName() + " for index: " + key + " see: " + method);
+                        } else {
+                            methods.put(key, method);
+                        }
+                    }
+                }
+            }
+            for (int i = 0, size = arguments.size(); i < size; i++) {
+                Method method = methods.get(i);
+                Completer argCompleter = NullCompleter.INSTANCE;
+                if (method != null) {
+                    // lets invoke the method
+                    System.out.println("About to invoke method: " + method);
+                    Action action = function.createNewAction();
+                    try {
+                        Object value = method.invoke(action);
+                        if (value instanceof String[]) {
+                            argCompleter = new StringsCompleter((String[]) value);
+                        } else if (value instanceof Collection) {
+                            argCompleter = new StringsCompleter((Collection<String>) value);
+                        } else {
+                            LOGGER.warn("Could not use value " + value + " as set of completions!");
+                        }
+                    } catch (IllegalAccessException e) {
+                        LOGGER.warn("Could not invoke @CompleterMethod on " + function + ". " + e, e);
+                    } catch (InvocationTargetException e) {
+                        Throwable target = e.getTargetException();
+                        if (target == null) {
+                            target = e;
+                        }
+                        LOGGER.warn("Could not invoke @CompleterMethod on " + function + ". " + target, target);
+                    } finally {
+                        try {
+                            function.releaseAction(action);
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to release action: " + action + ". " + e, e);
+                        }
+                    }
+
+                }
+                argsCompleters.add(argCompleter);
+            }
         }
     }
 
