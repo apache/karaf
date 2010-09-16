@@ -66,7 +66,7 @@ public class CommandsCompleter implements Completer {
                 Function function = (Function) session.get(command);
                 function = unProxy(function);
                 if (function instanceof AbstractCommand) {
-                    completers.add(new ArgumentCompleter((AbstractCommand) function, command));
+                    completers.add(new ArgumentCompleter(session, (AbstractCommand) function, command));
                 }
                 commands.add(command);
             }
