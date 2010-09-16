@@ -79,8 +79,8 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         this.subject = sub;
         this.callbackHandler = handler;
         this.options = options;
-        this.rolePolicy = (String) options.get("rolePolicy");
-        this.roleDiscriminator = (String) options.get("roleDiscriminator");
+        this.rolePolicy = (String) options.get("role.policy");
+        this.roleDiscriminator = (String) options.get("role.discriminator");
         this.debug = Boolean.parseBoolean((String) options.get("debug"));
         // the bundle context is set in the Config JaasRealm by default
         this.bundleContext = (BundleContext) options.get(BundleContext.class.getName());
