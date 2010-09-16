@@ -16,14 +16,16 @@
  */
 package org.apache.karaf.shell.console.completer;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.basic.SimpleCommand;
+import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.junit.Test;
@@ -85,7 +87,8 @@ public class ArgumentCompleterTest {
 
     @Test
     public void testCompleteOptions() throws Exception {
-        Completer comp = new ArgumentCompleter(new MyFunction(), "my:action");
+        CommandSession session = new DummyCommandSession();
+        Completer comp = new ArgumentCompleter(session, new MyFunction(), "my:action");
         assertEquals(Arrays.asList("--check", "--foo", "--help", "-c", "-f"), complete(comp, "action -"));
         assertEquals(Arrays.asList(), complete(comp, "action --foo "));
         assertEquals(Arrays.asList("action "), complete(comp, "acti"));
@@ -123,6 +126,31 @@ public class ArgumentCompleterTest {
         boolean check;
 
         public Object execute(CommandSession session) throws Exception {
+            return null;
+        }
+    }
+
+    protected static class DummyCommandSession implements CommandSession {
+        public Object convert(Class<?> type, Object instance) {
+            return null;
+        }
+        public CharSequence format(Object target, int level) {
+            return null;
+        }
+        public void put(String name, Object value) {
+        }
+        public Object get(String name) {
+            return null;
+        }
+        public PrintStream getConsole() {
+            return null;
+        }
+        public InputStream getKeyboard() {
+            return null;
+        }
+        public void close() {
+        }
+        public Object execute(CharSequence commandline) throws Exception {
             return null;
         }
     }

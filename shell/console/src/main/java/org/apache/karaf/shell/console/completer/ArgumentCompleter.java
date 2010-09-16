@@ -35,6 +35,8 @@ import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.console.NameScoping;
+import org.osgi.service.command.CommandSession;
 
 public class ArgumentCompleter implements Completer {
     final Completer commandCompleter;
@@ -45,10 +47,10 @@ public class ArgumentCompleter implements Completer {
     final Map<String, Option> options = new HashMap<String, Option>();
     boolean strict = true;
 
-    public ArgumentCompleter(AbstractCommand function, String command) {
+    public ArgumentCompleter(CommandSession session, AbstractCommand function, String command) {
         this.function = function;
         // Command name completer
-        commandCompleter = new StringsCompleter(getNames(command));
+        commandCompleter = new StringsCompleter(getNames(session, command));
         // Build options completer
         for (Class type = function.getActionClass(); type != null; type = type.getSuperclass()) {
             for (Field field : type.getDeclaredFields()) {
@@ -83,9 +85,14 @@ public class ArgumentCompleter implements Completer {
         }
     }
 
-    private String[] getNames(String command) {
+    private String[] getNames(CommandSession session, String scopedCommand) {
+        String command = NameScoping.getCommandNameWithoutGlobalPrefix(session, scopedCommand);
         String[] s = command.split(":");
-        return new String[] { command, s[1] };
+        if (s.length == 1) {
+            return s;
+        } else {
+            return new String[] { command, s[1] };
+        }
     }
 
     /**
