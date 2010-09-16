@@ -120,7 +120,6 @@ public class ArgumentCompleter implements Completer {
                 Completer argCompleter = NullCompleter.INSTANCE;
                 if (method != null) {
                     // lets invoke the method
-                    System.out.println("About to invoke method: " + method);
                     Action action = function.createNewAction();
                     try {
                         Object value = method.invoke(action);
