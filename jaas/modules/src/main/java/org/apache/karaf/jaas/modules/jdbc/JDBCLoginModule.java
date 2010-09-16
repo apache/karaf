@@ -49,6 +49,8 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
 
     private static final Log LOG = LogFactory.getLog(PropertiesLoginModule.class);
     private static final String DATASOURCE = "datasource";
+    private static final String PASSWORD_QUERY = "query.password";
+    private static final String ROLE_QUERY = "query.role";
     private static final String JNDI = "jndi:";
     private static final String OSGI = "osgi:";
     private String datasourceURL;
@@ -58,6 +60,8 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
         datasourceURL = (String) options.get(DATASOURCE);
+        passwordQuery = (String) options.get(PASSWORD_QUERY);
+        roleQuery = (String) options.get(ROLE_QUERY);
         if (datasourceURL == null || datasourceURL.trim().length() == 0) {
             LOG.error("No datasource was specified ");
         } else if (!datasourceURL.startsWith(JNDI) && !datasourceURL.startsWith(OSGI)) {
