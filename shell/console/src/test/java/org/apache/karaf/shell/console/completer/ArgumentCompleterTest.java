@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +23,6 @@ import java.util.List;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.basic.SimpleCommand;
-import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.junit.Test;
@@ -33,7 +30,7 @@ import org.osgi.service.command.CommandSession;
 
 import static org.junit.Assert.*;
 
-public class ArgumentCompleterTest {
+public class ArgumentCompleterTest extends CompleterTestSupport {
 
     @Test
     public void testParser1() throws Exception {
@@ -101,12 +98,6 @@ public class ArgumentCompleterTest {
         assertEquals(Arrays.asList("bar1", "bar2"), complete(comp, "action -f 2 --check foo1 "));
     }
 
-    protected List<String> complete(Completer completer, String buf) {
-        List<String> candidates = new ArrayList<String>();
-        completer.complete(buf, buf.length(), candidates);
-        return candidates;
-    }
-
     public static class MyFunction extends SimpleCommand implements CompletableFunction {
         public MyFunction() {
             super(MyAction.class);
@@ -126,31 +117,6 @@ public class ArgumentCompleterTest {
         boolean check;
 
         public Object execute(CommandSession session) throws Exception {
-            return null;
-        }
-    }
-
-    protected static class DummyCommandSession implements CommandSession {
-        public Object convert(Class<?> type, Object instance) {
-            return null;
-        }
-        public CharSequence format(Object target, int level) {
-            return null;
-        }
-        public void put(String name, Object value) {
-        }
-        public Object get(String name) {
-            return null;
-        }
-        public PrintStream getConsole() {
-            return null;
-        }
-        public InputStream getKeyboard() {
-            return null;
-        }
-        public void close() {
-        }
-        public Object execute(CharSequence commandline) throws Exception {
             return null;
         }
     }
