@@ -24,6 +24,7 @@
  */
 package org.apache.karaf.shell.console.completer;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -55,7 +56,7 @@ public class ArgumentCompleter implements Completer {
     final AbstractCommand function;
     final Map<Option, Field> fields = new HashMap<Option, Field>();
     final Map<String, Option> options = new HashMap<String, Option>();
-    final Map<Integer, Argument> arguments = new HashMap<Integer, Argument>();
+    final Map<Integer, Field> arguments = new HashMap<Integer, Field>();
     boolean strict = true;
 
     public ArgumentCompleter(CommandSession session, AbstractCommand function, String command) {
@@ -82,7 +83,7 @@ public class ArgumentCompleter implements Completer {
                     if (arguments.containsKey(key)) {
                         LOGGER.warn("Duplicate @Argument annotations on class " + type.getName() + " for index: " + key + " see: " + field);
                     } else {
-                        arguments.put(key, argument);
+                        arguments.put(key, field);
                     }
                 }
             }
@@ -106,7 +107,11 @@ public class ArgumentCompleter implements Completer {
                 for (Method method : type.getDeclaredMethods()) {
                     CompleterValues completerMethod = method.getAnnotation(CompleterValues.class);
                     if (completerMethod != null) {
-                        Integer key = completerMethod.index();
+                        int index = completerMethod.index();
+                        Integer key = index;
+                        if (index >= arguments.size() || index < 0) {
+                            LOGGER.warn("Index out of range on @CompleterValues on class " + type.getName() + " for index: " + key + " see: " + method);
+                        }
                         if (methods.containsKey(key)) {
                             LOGGER.warn("Duplicate @CompleterMethod annotations on class " + type.getName() + " for index: " + key + " see: " + method);
                         } else {
@@ -116,8 +121,8 @@ public class ArgumentCompleter implements Completer {
                 }
             }
             for (int i = 0, size = arguments.size(); i < size; i++) {
-                Method method = methods.get(i);
                 Completer argCompleter = NullCompleter.INSTANCE;
+                Method method = methods.get(i);
                 if (method != null) {
                     // lets invoke the method
                     Action action = function.createNewAction();
@@ -145,7 +150,16 @@ public class ArgumentCompleter implements Completer {
                             LOGGER.warn("Failed to release action: " + action + ". " + e, e);
                         }
                     }
-
+                } else {
+                    Field field = arguments.get(i);
+                    Class<?> type = field.getType();
+                    if (type.isAssignableFrom(File.class)) {
+                        argCompleter = new FileCompleter(session);
+                    } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
+                        argCompleter = new StringsCompleter(new String[] {"false", "true"});
+                    } else {
+                        // TODO any other completers we can add?
+                    }
                 }
                 argsCompleters.add(argCompleter);
             }
