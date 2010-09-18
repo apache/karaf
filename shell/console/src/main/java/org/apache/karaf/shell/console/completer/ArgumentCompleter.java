@@ -30,9 +30,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
@@ -156,7 +159,13 @@ public class ArgumentCompleter implements Completer {
                     if (type.isAssignableFrom(File.class)) {
                         argCompleter = new FileCompleter(session);
                     } else if (type.isAssignableFrom(Boolean.class) || type.isAssignableFrom(boolean.class)) {
-                        argCompleter = new StringsCompleter(new String[] {"false", "true"});
+                        argCompleter = new StringsCompleter(new String[] {"false", "true"}, false);
+                    } else if (type.isAssignableFrom(Enum.class)) {
+                        Set<String> values = new HashSet<String>();
+                        for (Object o : EnumSet.allOf((Class<Enum>) type)) {
+                            values.add(o.toString());
+                        }
+                        argCompleter = new StringsCompleter(values, false);
                     } else {
                         // TODO any other completers we can add?
                     }

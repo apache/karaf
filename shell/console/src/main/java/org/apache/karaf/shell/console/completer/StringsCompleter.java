@@ -35,12 +35,30 @@ public class StringsCompleter
     implements Completer
 {
     private final SortedSet<String> strings = new TreeSet<String>();
+    private final boolean caseSensitive;
 
-    public StringsCompleter() {}
+    public StringsCompleter() {
+        this(true);
+    }
+
+
+    public StringsCompleter(final boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+    }
 
     public StringsCompleter(final Collection<String> strings) {
+        this();
         assert strings != null;
+        getStrings().addAll(strings);
+    }
 
+    public StringsCompleter(final String[] strings, boolean caseSensitive) {
+        this(Arrays.asList(strings), caseSensitive);
+    }
+
+    public StringsCompleter(final Collection<String> strings, boolean caseSensitive) {
+        this(caseSensitive);
+        assert strings != null;
         getStrings().addAll(strings);
     }
 
@@ -59,11 +77,15 @@ public class StringsCompleter
         if (buffer == null) {
             buffer = "";
         }
+        if (!caseSensitive) {
+            buffer = buffer.toLowerCase();
+        }
 
         SortedSet<String> matches = strings.tailSet(buffer);
 
         for (String match : matches) {
-            if (!match.startsWith(buffer)) {
+            String s = caseSensitive ? match : match.toLowerCase();
+            if (!s.startsWith(buffer)) {
                 break;
             }
 
