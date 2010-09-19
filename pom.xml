@@ -54,9 +54,9 @@
     </modules>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/karaf/trunk</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/trunk</developerConnection>
-        <url>http://svn.apache.org/viewvc/karaf/trunk/</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/karaf/branches/karaf-2.1.x</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/branches/karaf-2.1.x</developerConnection>
+        <url>http://svn.apache.org/viewvc/karaf/branches/karaf-2.1.x/</url>
     </scm>
 
     <issueManagement>
