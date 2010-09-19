@@ -105,7 +105,7 @@
         <cglib.bundle.version>2.1_3_6</cglib.bundle.version>
         <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
         <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
-        <jasypt.bundle.version>1.6_1-SNAPSHOT</jasypt.bundle.version>
+        <jasypt.bundle.version>1.6_1</jasypt.bundle.version>
         <jetty.bundle.version>6.1.22_2</jetty.bundle.version>
         <junit.bundle.version>4.7_1</junit.bundle.version>
 
