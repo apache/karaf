@@ -15,6 +15,96 @@
  * limitations under the License.
  */
 
+
+                    Apache Karaf 2.1.0
+                    ==================
+
+  Changelog
+  ---------
+
+ The following list shows the bug fixes and enhancements included in this release:
+
+** Bug
+    * [KARAF-13] - javax.annotation not exported
+    * [KARAF-19] - Exception in pax-web when shutting down karaf
+    * [KARAF-125] - Webconsole can't concat strings?
+    * [KARAF-133] - NPE when installing a bundle with a MANIFEST.MF not in the first entry of the zip
+    * [KARAF-134] - The sort command does not work when trying to sort on the last field
+    * [KARAF-136] - should override equals method for FeaturesListener to handle the proxy compared to wrapped object case
+    * [KARAF-137] - IOException on web demo when trying to connect through SSH
+    * [KARAF-138] - WarDeploymentListener: checks for manifest osgi entries but fails if no manifest is found
+    * [KARAF-142] - NPE at org.apache.felix.webconsole.internal.servlet.OsgiManager.service - karaf started in server mode
+    * [KARAF-143] - Setting "karaf.instances" system property has no effect
+    * [KARAF-145] - Reading Properties like karaf.framework should be trimmed before reusage
+    * [KARAF-150] - Config admin contains 2 configurations for SSH port in Karaf
+    * [KARAF-162] - need exactly specify the import jline package version for webconsole.gogo
+    * [KARAF-167] - Creating a new config using the shell commands lead to a FileNotFoundException instead of the file being created
+    * [KARAF-169] - Do not use the ClassPath manifest header for the karaf client jar
+    * [KARAF-178] - When the karaf runtime is launched under JSW, the bin/client script fails to connect
+    * [KARAF-189] - Java endorsed dirs on AIX (IBM JVM)
+    * [KARAF-190] - karaf-wrapper.conf is incorrect
+    * [KARAF-199] - WarDeploymentListener: doesn't handle the default Webapp-Context correct on a Windows System
+    * [KARAF-204] - Ctrl+D needs to be followed by another character to be recognized (at least when using the karaf client)
+    * [KARAF-206] - The converter used for converting commands arguments and options can't convert objects to String
+
+** Improvement
+    * [KARAF-106] - Provide a more minimal / static disitrbution of karaf
+    * [KARAF-130] - Allow a repository URL to be added to feature repository URL list even though it is an invalid one
+    * [KARAF-135] - The package:export command should have more option to control the output
+    * [KARAF-139] - Add a Shell Console branding demo
+    * [KARAF-140] - Modifying properties and saving them via the Config Console removes comments in the original file
+    * [KARAF-141] - Tests should be able to be run without any internet connections
+    * [KARAF-146] - osgi:list should only print out 'system' bundles above a certain level, by default, this should be 50, but it should be configurable
+    * [KARAF-148] - features:listUrl should print the repository names as well as the Url. 
+    * [KARAF-152] - when using the @Argument annotation, if there is no name specified it would be nice to reuse the name of the field, rather than use VAL
+    * [KARAF-155] - optional @Argument values (and I guess @Option values) can have default values which could be displayed in the help screen by reflecting into the value and finding non-zero/null values
+    * [KARAF-157] - [PATH] minor patch to make it easier to reuse the Karaf command line console from outside Karaf specialising the user and application
+    * [KARAF-158] - better display of errors when running a non-osgi command line outside of the shell
+    * [KARAF-159] - when a bad command is typed (e.g. invalid command, argument, option) we should use some kind of syntax highlighting for the name of the command/argument/option in the error message
+    * [KARAF-161] - provide an easy implementation of "public static void main(String[] args)" for a single command (i.e. for non-shells)
+    * [KARAF-163] - Generate Features XML should handle artifact types
+    * [KARAF-164] - Allow sub classes of Main to override the META-INF path used to discover commands
+    * [KARAF-168] - Upgrade to latest Felix framework
+    * [KARAF-170] - Main --help should behave like Main someCommand --help and list all the possible sub commands when outside of OSGi
+    * [KARAF-171] - provide a default "help" sub command in shells used outside of OSGi
+    * [KARAF-173] - Make it easier to configure the Karaf Main shell by subclassing.
+    * [KARAF-174] - tab completion of sub commands not working in the non-osgi shell
+    * [KARAF-175] - Upgrade to Java Service Wrapper 3.2.3
+    * [KARAF-176] - Improve integration to provide a clean shutdown when running as a service
+    * [KARAF-177] - Support 64 bits platforms for Java Service Wrapper on OS X
+    * [KARAF-181] - Allow the cmdhelp maven plugin to generate output in confluence format
+    * [KARAF-182] - Upgrade to Aries 0.2-incubating
+    * [KARAF-184] - Enhance the dev:framework command to display or set the OSGi framework name
+    * [KARAF-185] - Have a 'clean' parameter on the main shell script to clean the working folder
+    * [KARAF-186] - Upgrade to pax-logging 1.5.3
+    * [KARAF-187] - The completers do not work when several commands are on the same line separated by a column or pipe
+    * [KARAF-191] - Create a Karaf Util module gathering all util classes
+    * [KARAF-192] - Completion does not work on options, or even on arguments if an option is specified
+    * [KARAF-193] - It should be possible to load a Command description from a text file
+    * [KARAF-196] - Improve the output of osgi:headers command
+    * [KARAF-198] - Remove dependency upon org.slf4j.helpers.MessageFormatter
+    * [KARAF-200] - Upgrade to latest pax-runner and pax-exam
+    * [KARAF-202] - Create la alias in shell.init.script
+    * [KARAF-207] - The webconsole feature should not depend on the admin bundles
+    * [KARAF-208] - when reusing the karaf shell outside of OSGi where there's only one shell scope, it would be nice to avoid prefixing the command names with the scope or with "*:" which is confusing
+    * [KARAF-210] - Allow to specific context-path when installing a war file using the war url handler
+
+** New Feature
+    * [KARAF-26] - have restart clean command/API
+    * [KARAF-144] - Allow using the console and commands outside of OSGi
+    * [KARAF-147] - We should have a features:listVersions command that lists all the known versions of a feature
+    * [KARAF-149] - Add a features:removeRepository command
+    * [KARAF-166] - Allow subclasses of org.apache.karaf.shell.console.Main to be used as sub shells
+    * [KARAF-172] - Implement a mechanism that would allow a karaf application to distingush between UserPrincipal & RolePrincipal without depending from Karaf JAAS Modules
+    * [KARAF-180] - JAAS Database Login Module
+    * [KARAF-212] - provide a simple annotation, say,@CompleterValues which can be used on methods on an action to provide a list of available values for an argument for tab completion
+
+** Task
+    * [KARAF-40] - Create a maven archetype for creating shell commands
+
+
+
+
                     Apache Karaf 2.0.0
                     ==================
 
