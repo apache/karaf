@@ -18,28 +18,13 @@
 package org.apache.karaf.deployer.war;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * A deployment listener that listens for war deployements.
@@ -47,11 +32,6 @@ import org.xml.sax.SAXParseException;
 public class WarDeploymentListener implements ArtifactUrlTransformer {
 
 	private static final String PATH_SEPERATOR = "/";
-
-	private static final Log LOGGER = LogFactory
-			.getLog(WarDeploymentListener.class);
-
-	private DocumentBuilderFactory dbf;
 
 	public boolean canHandle(File artifact) {
 		try {
@@ -80,79 +60,24 @@ public class WarDeploymentListener implements ArtifactUrlTransformer {
 		String path = artifact.getPath();
 		String protocol = artifact.getProtocol();
 
+		int lastSlash = 0;
 		// match the last slash to retrieve the name of the archive
-		int lastSlash = path.lastIndexOf(PATH_SEPERATOR);
+		if ("jardir".equalsIgnoreCase(protocol)) {
+		    // just to make sure this works on all kinds of windows
+		    File fileInstance = new File(path);
+		    // with a jardir this is system specific
+		    lastSlash = fileInstance.getAbsolutePath().lastIndexOf(File.separator);
+		} else {
+		    // a standard file is not system specific, this is always a standardized URL path
+		    lastSlash = path.lastIndexOf(PATH_SEPERATOR);
+		}
 		// match the suffix so we get rid of it for displaying
-		int suffixPos = path.lastIndexOf(".war");
+		int suffixPos = path.length() - 4; // usually this should be a war but might also be a jar plus the colon makes 4 signs
 
-		// Fall back if there is no display-name set in the web.xml or if the
-		// web.xml can't be read.
+		// the display name for a web context is derived from the name of the archive
 		String displayName = path.substring(lastSlash + 1, suffixPos);
-		try {
-			// step through the jar to find the web.xml
-			JarInputStream jar = new JarInputStream(artifact.openStream());
-			JarEntry nextJarEntry = jar.getNextJarEntry();
-			boolean found = false;
-			while (nextJarEntry != null) {
-				if (nextJarEntry.getName().indexOf("web.xml") != -1
-						&& !nextJarEntry.isDirectory()) {
-					Document doc = parse(jar); // found the web.xml
-					NodeList nodeList = doc.getDocumentElement()
-							.getChildNodes(); // getElementsByTagName("display-name");
-					for (int i = 0; i < nodeList.getLength(); i++) {
-						Node item = nodeList.item(i);
-						String nodeName = item.getNodeName();
-						if ("display-name".equalsIgnoreCase(nodeName)) {
-							String nodeValue = item.getFirstChild()
-									.getNodeValue();
-							if (nodeValue != null) {
-								displayName = nodeValue;
-							}
-							found = true;
-							jar.close();
-							break;
-						}
-					}
-				}
-				if (found)
-					break;
-				else
-					nextJarEntry = jar.getNextJarEntry();
-			}
-			// alter the original URL artifact
-		} catch (Exception e) {
-			LOGGER.warn("Unable to create Webapp-Context from web.xml", e);
-		}
-		return new URL("war", null, protocol + ":" + path + "?Webapp-Context="
-				+ displayName);
-	}
-
-	private Document parse(InputStream inputStream)
-			throws ParserConfigurationException, SAXException, IOException {
-		if (dbf == null) {
-			dbf = DocumentBuilderFactory.newInstance();
-			dbf.setNamespaceAware(true);
-		}
-
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		db.setErrorHandler(new ErrorHandler() {
-
-			public void warning(SAXParseException exception)
-					throws SAXException {
-				// ignore waring
-			}
-
-			public void fatalError(SAXParseException exception)
-					throws SAXException {
-				throw exception;
-			}
-
-			public void error(SAXParseException exception) throws SAXException {
-				throw exception;
-			}
-		});
-
-		return db.parse(inputStream);
+		
+		return new URL("war", null, protocol + ":" + path + "?Webapp-Context=" + displayName);
 	}
 
 }
