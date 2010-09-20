@@ -19,6 +19,16 @@
                     Apache Karaf 2.1.0
                     ==================
 
+  Overview
+  --------
+
+ New to this release of Apache Karaf is a JAAS Database Login Module, and a mechanism 
+ that allows a karaf application to distingush between UserPrincipal & RolePrincipal
+ without depending from the Karaf JAAS Module. Various new and improved commands have been
+ implemented, and are now available for general use. We have also resolved a number of
+ outstanding issues, and improved support on OS X and IBM Java based systems. For more
+ detail please see the change log below.
+
   Changelog
   ---------
 
