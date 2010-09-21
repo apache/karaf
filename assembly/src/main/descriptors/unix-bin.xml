@@ -100,7 +100,10 @@
             <directory>target/dependencies</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
-
+        <fileSet>
+          <directory>target/features-repo</directory>
+          <outputDirectory>system</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <files>

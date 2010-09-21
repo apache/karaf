@@ -44,6 +44,17 @@
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.obr/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.features/org.apache.karaf.features.obr/${project.version}</bundle>
     </feature>
+    <feature name="config" version="${project.version}">
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-configuration/${commons-configuration.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-beanutils/${commons-beanutils.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-codec/${commons-codec.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-jxpath/${commons-jxpath.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-digester/${commons-digester.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/${commons-lang.version}</bundle>
+        <bundle>mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
+        <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
+    </feature>
     <feature name="http" version="${project.version}">
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
