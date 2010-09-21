@@ -38,7 +38,7 @@ public class GenerateFeaturesXmlMojoTest extends TestCase {
         
         replay(artifact);
         
-        assertEquals("org.apache.karaf.test/test-artifact/1.2.3/jar", GenerateFeaturesXmlMojo.toString(artifact));
-    }
+        assertEquals("org.apache.karaf.test/test-artifact/1.2.3", GenerateFeaturesXmlMojo.toString(artifact));
+    } 
 
 }
