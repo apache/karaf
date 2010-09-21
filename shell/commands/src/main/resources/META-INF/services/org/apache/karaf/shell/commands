@@ -24,6 +24,7 @@ org.apache.karaf.shell.commands.HistoryAction
 org.apache.karaf.shell.commands.IfAction
 org.apache.karaf.shell.commands.JavaAction
 org.apache.karaf.shell.commands.LogoutAction
+org.apache.karaf.shell.commands.MoreAction
 org.apache.karaf.shell.commands.NewAction
 org.apache.karaf.shell.commands.PrintfAction
 org.apache.karaf.shell.commands.SleepAction

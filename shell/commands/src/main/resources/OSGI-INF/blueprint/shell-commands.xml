@@ -50,11 +50,9 @@
         <command name="shell/java">
             <action class="org.apache.karaf.shell.commands.JavaAction"/>
         </command>
-        <!--
         <command name="shell/more">
             <action class="org.apache.karaf.shell.commands.MoreAction"/>
         </command>
-        -->
         <command name="shell/new">
             <action class="org.apache.karaf.shell.commands.NewAction">
                 <property name="blueprintConverter" ref="blueprintConverter"/>
