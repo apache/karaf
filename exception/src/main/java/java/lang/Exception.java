@@ -30,7 +30,9 @@ package java.lang;
 public class Exception extends Throwable {
     private static final long serialVersionUID = -3387516993124229948L;
 
-    private transient Class[] classContext = sm.getThrowableContext(this);
+    private static volatile SecurityManagerEx sm;
+
+    private transient Class[] classContext = SecurityManagerEx.getSm().getThrowableContext(this);
 
     /**
      * Constructs a new {@code Exception} that includes the current stack trace.
@@ -78,10 +80,16 @@ public class Exception extends Throwable {
         return classContext;
     }
 
-    private static final SecurityManagerEx sm = new SecurityManagerEx();
-
-    static class SecurityManagerEx extends SecurityManager
+    private static class SecurityManagerEx extends SecurityManager
     {
+
+        private static SecurityManagerEx getSm() {
+            if (sm == null) {
+                sm = new SecurityManagerEx();
+            }
+            return sm;
+        }
+
         public Class[] getClassContext()
         {
             return super.getClassContext();
