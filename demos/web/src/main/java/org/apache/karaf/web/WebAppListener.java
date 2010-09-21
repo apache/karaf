@@ -33,7 +33,9 @@ public class WebAppListener implements ServletContextListener {
 			String root = new File(sce.getServletContext().getRealPath("/") + "WEB-INF/karaf").getAbsolutePath();
 			System.err.println("Root: " + root);
 			System.setProperty("karaf.home", root);
-			System.setProperty("karaf.base", root);
+            System.setProperty("karaf.base", root);
+            System.setProperty("karaf.data", root + "/data");
+            System.setProperty("karaf.history", root + "/data/history.txt");
             System.setProperty("karaf.instances", root + "/instances");
 			System.setProperty("karaf.startLocalConsole", "false");
 			System.setProperty("karaf.startRemoteShell", "true");
