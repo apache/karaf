@@ -58,7 +58,6 @@ import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.MessageFormatter;
 
 import static java.lang.String.format;
 
@@ -308,7 +307,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 	                                getFeaturesContainingBundleList(b),
 	                                be.getMessage()
 	                            };
-	                            String msg = MessageFormatter.arrayFormat("Could not start bundle {} in feature(s) {}: {}", msgdata);
+	                            String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
 	                            throw new Exception(msg, be);
 	                        }
                     	}
