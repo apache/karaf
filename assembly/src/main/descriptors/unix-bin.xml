@@ -51,6 +51,7 @@
             <fileMode>0755</fileMode>
             <includes>
                 <include>admin</include>
+                <include>client</include>
             </includes>
         </fileSet>
         <fileSet>
