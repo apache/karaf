@@ -61,7 +61,7 @@ public class WarDeploymentListener implements ArtifactUrlTransformer {
 			}
 			// Only handle non OSGi bundles
 			Manifest m = jar.getManifest();
-			if (m.getMainAttributes().getValue(
+			if (m!= null && m.getMainAttributes().getValue(
 					new Attributes.Name("Bundle-SymbolicName")) != null
 					&& m.getMainAttributes().getValue(
 							new Attributes.Name("Bundle-Version")) != null) {
@@ -128,7 +128,7 @@ public class WarDeploymentListener implements ArtifactUrlTransformer {
 			}
 			// alter the original URL artifact
 		} catch (Exception e) {
-			LOGGER.warn("Unable to create Weapp-Context from web.xml", e);
+			LOGGER.warn("Unable to create Webapp-Context from web.xml", e);
 		}
 		return new URL("war", null, protocol + ":" + path + "?Webapp-Context="
 				+ displayName);
