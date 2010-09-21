@@ -34,10 +34,11 @@ public class GenerateFeaturesXmlMojoTest extends TestCase {
         expect(artifact.getGroupId()).andReturn("org.apache.karaf.test");
         expect(artifact.getArtifactId()).andReturn("test-artifact");
         expect(artifact.getVersion()).andReturn("1.2.3");
+        expect(artifact.getType()).andReturn("jar");
         
         replay(artifact);
         
-        assertEquals("org.apache.karaf.test/test-artifact/1.2.3", GenerateFeaturesXmlMojo.toString(artifact));
+        assertEquals("org.apache.karaf.test/test-artifact/1.2.3/jar", GenerateFeaturesXmlMojo.toString(artifact));
     }
 
 }
