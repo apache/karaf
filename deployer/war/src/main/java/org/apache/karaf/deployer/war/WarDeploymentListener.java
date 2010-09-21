@@ -46,6 +46,8 @@ import org.xml.sax.SAXParseException;
  */
 public class WarDeploymentListener implements ArtifactUrlTransformer {
 
+	private static final String PATH_SEPERATOR = "/";
+
 	private static final Log LOGGER = LogFactory
 			.getLog(WarDeploymentListener.class);
 
@@ -78,19 +80,10 @@ public class WarDeploymentListener implements ArtifactUrlTransformer {
 		String path = artifact.getPath();
 		String protocol = artifact.getProtocol();
 
-		int lastSlash = 0;
-		
-		if ("jardir".equalsIgnoreCase(protocol)) {
-			lastSlash = path.lastIndexOf(File.separator); 
-			// match the last File.seperator to
-			// retrieve the name of the archive
-		} else {
-			lastSlash = path.lastIndexOf(File.separator); 
-			// match the last slash to
-			// retrieve the name of the archive
-		}
-		int suffixPos = path.lastIndexOf(".war"); // match the suffix so we get
-													// rid of it for displaying
+		// match the last slash to retrieve the name of the archive
+		int lastSlash = path.lastIndexOf(PATH_SEPERATOR);
+		// match the suffix so we get rid of it for displaying
+		int suffixPos = path.lastIndexOf(".war");
 
 		// Fall back if there is no display-name set in the web.xml or if the
 		// web.xml can't be read.
