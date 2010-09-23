@@ -38,6 +38,7 @@ import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
+import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.command.CommandSession;
@@ -158,7 +159,16 @@ public class Main {
             try {
                 session.execute(sb);
             } catch (Throwable t) {
-                if (t instanceof CommandException) {
+                if (t instanceof CommandNotFoundException) {
+                    String str = Ansi.ansi()
+                        .fg(Ansi.Color.RED)
+                        .a("Command not found: ")
+                        .a(Ansi.Attribute.INTENSITY_BOLD)
+                        .a(((CommandNotFoundException) t).getCommand())
+                        .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                        .fg(Ansi.Color.DEFAULT).toString();
+                    session.getConsole().println(str);
+                } else if (t instanceof CommandException) {
                     session.getConsole().println(((CommandException) t).getNiceHelp());
                 } else {
                     session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
