@@ -69,7 +69,7 @@
             <artifactId>org.apache.aries.blueprint</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix.gogo</groupId>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
         </dependency>
     </dependencies>
@@ -115,9 +115,9 @@
                             *
                         </Import-Package>
                         <Export-Package>
-                            org.apache.felix.gogo.commands*;version=${felix.gogo.version},
-                            org.osgi.service.command;version=${felix.gogo.version},
-                            org.osgi.service.threadio;version=${felix.gogo.version},
+                            org.apache.felix.gogo*;version=${felix.gogo.version},
+                            org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
+                            org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status,
                             org.apache.karaf.shell.console*;version=${project.version},
                             org.fusesource.jansi;version=${jansi.version},
                             jline*;version=${jline.version},
@@ -134,7 +134,7 @@
                             *
                         </Bundle-NativeCode>
                         <Bundle-Activator>
-                            org.apache.felix.gogo.runtime.Activator
+                            org.apache.felix.gogo.runtime.activator.Activator
                         </Bundle-Activator>
                         <Main-Class>
                             org.apache.karaf.shell.console.Main

@@ -18,10 +18,9 @@
 package org.apache.karaf.shell.console.completer;
 
 import jline.console.completer.FileNameCompleter;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.Completer;
-import org.osgi.service.command.CommandSession;
 
-import java.io.File;
 import java.util.List;
 
 /**

@@ -38,16 +38,15 @@ import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
-import org.apache.felix.gogo.runtime.lang.Support;
-import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
+import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.karaf.shell.console.jline.TerminalFactory;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Function;
-import org.osgi.service.threadio.ThreadIO;
 
 public class Main {
     private String application = System.getProperty("karaf.name", "root");
@@ -69,9 +68,7 @@ public class Main {
         ThreadIOImpl threadio = new ThreadIOImpl();
         threadio.start();
 
-        CommandShellImpl commandProcessor = new CommandShellImpl();
-        commandProcessor.setThreadio(threadio);
-        commandProcessor.setConverter(new Support());
+        CommandProcessorImpl commandProcessor = new CommandProcessorImpl(threadio);
 
         ClassLoader cl = Main.class.getClassLoader();
         if (args.length > 0 && args[0].startsWith("--classpath=")) {
@@ -104,15 +101,13 @@ public class Main {
      */
     public void run(CommandSession parent, String args[]) throws Exception {
 
-        CommandShellImpl commandProcessor = new CommandShellImpl();
         // TODO: find out what the down side of not using a real ThreadIO implementation is.
-        commandProcessor.setThreadio(new ThreadIO(){
+        CommandProcessorImpl commandProcessor = new CommandProcessorImpl(new ThreadIO() {
             public void setStreams(InputStream in, PrintStream out, PrintStream err) {
             }
             public void close() {
             }
         });
-        commandProcessor.setConverter(new Support());
 
         ClassLoader cl = Main.class.getClassLoader();
         if (args.length > 0 && args[0].startsWith("--classpath=")) {
@@ -132,7 +127,7 @@ public class Main {
         run(commandProcessor, args, in, out, err);
     }
 
-    private void run(final CommandShellImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
+    private void run(final CommandProcessorImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
         TerminalFactory terminalFactory = new TerminalFactory();
         Terminal terminal = terminalFactory.getTerminal();
         Console console = createConsole(commandProcessor, in, out, err, terminal);
@@ -181,7 +176,7 @@ public class Main {
      * @return
      * @throws Exception
      */
-    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+    protected Console createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
         return new Console(commandProcessor, in, out, err, terminal, null);
     }
 
@@ -195,7 +190,7 @@ public class Main {
         return "META-INF/services/org/apache/karaf/shell/commands";
     }
 
-    private void discoverCommands(CommandShellImpl commandProcessor, ClassLoader cl) throws IOException, ClassNotFoundException {
+    private void discoverCommands(CommandProcessorImpl commandProcessor, ClassLoader cl) throws IOException, ClassNotFoundException {
         Enumeration<URL> urls = cl.getResources(getDiscoveryResource());
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
@@ -226,7 +221,7 @@ public class Main {
         }
     }
 
-    protected void addCommand(Command cmd, Function function, CommandShellImpl commandProcessor) {
+    protected void addCommand(Command cmd, Function function, CommandProcessorImpl commandProcessor) {
         try {
             commandProcessor.addCommand(cmd.scope(), function, cmd.name());
         } catch (Exception e) {

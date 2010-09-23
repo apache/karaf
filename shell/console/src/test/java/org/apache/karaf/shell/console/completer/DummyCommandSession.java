@@ -17,10 +17,10 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import org.osgi.service.command.CommandSession;
-
 import java.io.InputStream;
 import java.io.PrintStream;
+
+import org.apache.felix.service.command.CommandSession;
 
 public class DummyCommandSession implements CommandSession {
     public Object convert(Class<?> type, Object instance) {

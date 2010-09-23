@@ -24,6 +24,7 @@ import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.commands.basic.ActionPreparator;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.BlueprintContainerAware;
 import org.apache.karaf.shell.console.BundleContextAware;
 import org.apache.karaf.shell.console.CompletableFunction;
@@ -31,7 +32,6 @@ import org.apache.karaf.shell.console.Completer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.osgi.service.blueprint.container.Converter;
-import org.osgi.service.command.CommandSession;
 
 public class BlueprintCommand extends AbstractCommand implements CompletableFunction
 {

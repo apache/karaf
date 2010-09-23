@@ -17,7 +17,7 @@
 package org.apache.karaf.shell.console;
 
 import jline.Terminal;
-import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
+import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.karaf.shell.console.jline.Console;
 
 import java.io.InputStream;
@@ -46,7 +46,7 @@ public class ExampleSubclassMain extends Main  {
     }
 
     @Override
-    protected Console createConsole(CommandShellImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
+    protected Console createConsole(CommandProcessorImpl commandProcessor, InputStream in, PrintStream out, PrintStream err, Terminal terminal) throws Exception {
         return new Console(commandProcessor, in, out, err, terminal, null) {
 
             /**

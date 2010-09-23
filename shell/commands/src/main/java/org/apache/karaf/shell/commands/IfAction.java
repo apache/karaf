@@ -18,9 +18,8 @@ package org.apache.karaf.shell.commands;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.osgi.service.command.Function;
 
 /**
  * Execute a closure on a list of arguments.

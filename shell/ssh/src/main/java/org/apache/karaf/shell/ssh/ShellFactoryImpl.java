@@ -31,6 +31,8 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 
 import jline.Terminal;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.karaf.shell.console.jline.Console;
@@ -41,8 +43,6 @@ import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.Signal;
 import org.apache.sshd.server.SignalListener;
 import org.osgi.service.blueprint.container.ReifiedType;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
 
 /**
  * SSHD {@link org.apache.sshd.server.Command} factory which provides access to Shell.

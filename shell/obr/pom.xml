@@ -86,7 +86,7 @@
                         </Export-Package>
                         <Import-Package>
                             !${project.artifactId}*,
-                            org.osgi.service.command,
+                            org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
                             *

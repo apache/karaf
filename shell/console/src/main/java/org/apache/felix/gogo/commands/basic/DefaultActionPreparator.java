@@ -39,9 +39,9 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.converter.DefaultConverter;
 import org.apache.felix.gogo.commands.converter.GenericType;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.NameScoping;
 import org.fusesource.jansi.Ansi;
-import org.osgi.service.command.CommandSession;
 
 public class DefaultActionPreparator implements ActionPreparator {
 

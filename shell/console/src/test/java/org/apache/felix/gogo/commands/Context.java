@@ -18,27 +18,31 @@
  */
 package org.apache.felix.gogo.commands;
 
+import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
-import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
-import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
 
-public class Context extends CommandShellImpl
+public class Context extends CommandProcessorImpl
 {
     public static final String EMPTY = "";
-    CommandSessionImpl session = (CommandSessionImpl) createSession(System.in, System.out, System.err);
+    CommandSessionImpl session;
     static ThreadIOImpl threadio;
 
     static
     {
         threadio = new ThreadIOImpl();
         threadio.start();
-
     }
 
     public Context()
     {
-        setThreadio(threadio);
+        super(threadio);
+        addCommand("osgi", this, "addCommand");
+        addCommand("osgi", this, "removeCommand");
+        addCommand("osgi", this, "eval");
+        session = (CommandSessionImpl) createSession(System.in, System.out, System.err);
     }
+
 
     public Object execute(CharSequence source) throws Exception
     {

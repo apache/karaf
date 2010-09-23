@@ -19,19 +19,15 @@
 package org.apache.karaf.shell.console.jline;
 
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.concurrent.Callable;
 
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.AggregateCompleter;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
-import org.fusesource.jansi.AnsiConsole;
 import jline.Terminal;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.fusesource.jansi.AnsiConsole;
+import org.osgi.framework.BundleContext;
 
 public class ConsoleFactory {
 

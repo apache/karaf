@@ -18,13 +18,13 @@ package org.apache.karaf.shell.osgi;
 
 import java.util.List;
 
+import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.command.Function;
 
 @Command(scope = "osgi", name = "ls", description = "Lists OSGi services")
 public class ListServices extends OsgiCommandSupport {

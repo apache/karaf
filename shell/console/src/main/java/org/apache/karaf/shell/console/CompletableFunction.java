@@ -20,7 +20,7 @@ package org.apache.karaf.shell.console;
 
 import java.util.List;
 
-import org.osgi.service.command.Function;
+import org.apache.felix.service.command.Function;
 
 public interface CompletableFunction extends Function {
 

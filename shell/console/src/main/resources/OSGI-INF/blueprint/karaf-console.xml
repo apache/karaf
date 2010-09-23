@@ -26,7 +26,7 @@
         </ext:default-properties>
     </ext:property-placeholder>
 
-    <reference id="commandProcessor" interface="org.osgi.service.command.CommandProcessor">
+    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
         <reference-listener ref="consoleFactory"
                             bind-method="registerCommandProcessor"
                             unbind-method="unregisterCommandProcessor"/>
@@ -38,12 +38,17 @@
         <property name="terminalFactory" ref="terminalFactory"/>
     </bean>
 
+    <bean id="converters" class="org.apache.karaf.shell.console.Converters">
+        <argument ref="blueprintBundleContext"/>
+    </bean>
+    <service ref="converters" interface="org.apache.felix.service.command.Converter"/>
+
     <bean id="terminalFactory" class="org.apache.karaf.shell.console.jline.TerminalFactory"
           destroy-method="destroy"/>
 
     <service>
         <interfaces>
-            <value>org.osgi.service.command.Function</value>
+            <value>org.apache.felix.service.command.Function</value>
             <value>org.apache.karaf.shell.console.CompletableFunction</value>
         </interfaces>
         <service-properties>

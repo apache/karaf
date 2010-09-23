@@ -43,10 +43,10 @@ import org.apache.felix.gogo.commands.CompleterValues;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.NameScoping;
-import org.osgi.service.command.CommandSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -20,9 +20,9 @@ package org.apache.felix.gogo.commands.basic;
 
 import java.util.Hashtable;
 
+import org.apache.felix.service.command.Function;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.command.Function;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
 

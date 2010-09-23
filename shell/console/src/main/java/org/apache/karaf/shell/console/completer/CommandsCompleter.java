@@ -26,14 +26,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
-import org.apache.felix.gogo.runtime.shell.CommandProxy;
-import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
+import org.apache.felix.gogo.runtime.CommandProxy;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Function;
 
 /**
  * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
