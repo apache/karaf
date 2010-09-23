@@ -87,8 +87,8 @@ public class ConsoleFactory {
             CommandSession session = console.getSession();
             session.put("USER", "karaf");
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-            session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
-            session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
+            session.put("LINES", Integer.toString(terminal.getHeight()));
+            session.put("COLUMNS", Integer.toString(terminal.getWidth()));
             session.put(".jline.terminal", terminal);
             new Thread(console, "Karaf Shell Console Thread").start();
         }

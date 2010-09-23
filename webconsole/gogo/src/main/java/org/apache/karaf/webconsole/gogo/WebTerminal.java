@@ -16,33 +16,31 @@
  */
 package org.apache.karaf.webconsole.gogo;
 
-import java.io.InputStreamReader;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
-public class WebTerminal extends jline.Terminal {
+import jline.TerminalSupport;
+import jline.console.Key;
+import jline.internal.ReplayPrefixOneCharInputStream;
 
-    public static final short ARROW_START = 27;
-    public static final short ARROW_PREFIX = 91;
-    public static final short ARROW_LEFT = 68;
-    public static final short ARROW_RIGHT = 67;
-    public static final short ARROW_UP = 65;
-    public static final short ARROW_DOWN = 66;
-    public static final short O_PREFIX = 79;
-    public static final short HOME_CODE = 72;
-    public static final short END_CODE = 70;
+import static jline.console.Key.*;
+import static org.apache.karaf.webconsole.gogo.WebTerminal.UnixKey.*;
 
-    public static final short DEL_THIRD = 51;
-    public static final short DEL_SECOND = 126;
+public class WebTerminal extends TerminalSupport {
 
     private int width;
     private int height;
-    private boolean backspaceDeleteSwitched = false;
     private String encoding = System.getProperty("input.encoding", "UTF-8");
     private ReplayPrefixOneCharInputStream replayStream = new ReplayPrefixOneCharInputStream(encoding);
     private InputStreamReader replayReader;
+    private boolean deleteSendsBackspace = false;
+    private boolean backspaceSendsDelete = false;
 
     public WebTerminal(int width, int height) {
+        super(true);
         this.width = width;
         this.height = height;
         try {
@@ -52,87 +50,76 @@ public class WebTerminal extends jline.Terminal {
         }
     }
 
-    public void initializeTerminal() throws Exception {
+    public void init() throws Exception {
     }
 
-    public void restoreTerminal() throws Exception {
+    public void restore() throws Exception {
     }
 
-    public int getTerminalWidth() {
+    public int getWidth() {
         return width;
     }
 
-    public int getTerminalHeight() {
+    public int getHeight() {
         return height;
     }
 
-    public boolean isSupported() {
-        return true;
-    }
-
-    public boolean getEcho() {
-        return false;
-    }
-
-    public boolean isEchoEnabled() {
-        return false;
-    }
-
-    public void enableEcho() {
-    }
-
-    public void disableEcho() {
-    }
-
-    public int readVirtualKey(InputStream in) throws IOException {
+    @Override
+    public int readVirtualKey(final InputStream in) throws IOException {
         int c = readCharacter(in);
 
-        if (backspaceDeleteSwitched) {
-            if (c == DELETE) {
-                c = '\b';
-            } else if (c == '\b') {
-                c = DELETE;
-            }
+        if (Key.valueOf(c) == DELETE && deleteSendsBackspace) {
+            c = BACKSPACE.code;
+        } else if (Key.valueOf(c) == BACKSPACE && backspaceSendsDelete) {
+            c = DELETE.code;
         }
 
-        // in Unix terminals, arrow keys are represented by
-        // a sequence of 3 characters. E.g., the up arrow
-        // key yields 27, 91, 68
-        if (c == ARROW_START) {
-            //also the escape key is 27
-            //thats why we read until we
-            //have something different than 27
-            //this is a bugfix, because otherwise
-            //pressing escape and than an arrow key
-            //was an undefined state
-            while (c == ARROW_START) {
+        UnixKey key = UnixKey.valueOf(c);
+
+        // in Unix terminals, arrow keys are represented by a sequence of 3 characters. E.g., the up arrow key yields 27, 91, 68
+        if (key == ARROW_START) {
+            // also the escape key is 27 thats why we read until we have something different than 27
+            // this is a bugfix, because otherwise pressing escape and than an arrow key was an undefined state
+            while (key == ARROW_START) {
                 c = readCharacter(in);
+                key = UnixKey.valueOf(c);
             }
-            if (c == ARROW_PREFIX || c == O_PREFIX) {
+
+            if (key == ARROW_PREFIX || key == O_PREFIX) {
                 c = readCharacter(in);
-                if (c == ARROW_UP) {
-                    return CTRL_P;
-                } else if (c == ARROW_DOWN) {
-                    return CTRL_N;
-                } else if (c == ARROW_LEFT) {
-                    return CTRL_B;
-                } else if (c == ARROW_RIGHT) {
-                    return CTRL_F;
-                } else if (c == HOME_CODE) {
-                    return CTRL_A;
-                } else if (c == END_CODE) {
-                    return CTRL_E;
-                } else if (c == DEL_THIRD) {
-                    c = readCharacter(in); // read 4th
-                    return DELETE;
+                key = UnixKey.valueOf(c);
+
+                if (key == ARROW_UP) {
+                    return CTRL_P.code;
+                }
+                else if (key == ARROW_DOWN) {
+                    return CTRL_N.code;
+                }
+                else if (key == ARROW_LEFT) {
+                    return CTRL_B.code;
+                }
+                else if (key == ARROW_RIGHT) {
+                    return CTRL_F.code;
+                }
+                else if (key == HOME_CODE) {
+                    return CTRL_A.code;
+                }
+                else if (key == END_CODE) {
+                    return CTRL_E.code;
+                }
+                else if (key == DEL_THIRD) {
+                    readCharacter(in); // read 4th & ignore
+                    return DELETE.code;
                 }
             }
         }
+
         // handle unicode characters, thanks for a patch from amyi@inf.ed.ac.uk
         if (c > 128) {
-          // handle unicode characters longer than 2 bytes,
-          // thanks to Marc.Herbert@continuent.com
+            // handle unicode characters longer than 2 bytes,
+            // thanks to Marc.Herbert@continuent.com
             replayStream.setInput(c, in);
+            // replayReader = new InputStreamReader(replayStream, encoding);
             c = replayReader.read();
         }
 
@@ -140,78 +127,52 @@ public class WebTerminal extends jline.Terminal {
     }
 
     /**
-     * This is awkward and inefficient, but probably the minimal way to add
-     * UTF-8 support to JLine
-     *
-     * @author <a href="mailto:Marc.Herbert@continuent.com">Marc Herbert</a>
+     * Unix keys.
      */
-    static class ReplayPrefixOneCharInputStream extends InputStream {
+    public static enum UnixKey
+    {
+        ARROW_START(27),
 
-        byte firstByte;
-        int byteLength;
-        InputStream wrappedStream;
-        int byteRead;
+        ARROW_PREFIX(91),
 
-        final String encoding;
+        ARROW_LEFT(68),
 
-        public ReplayPrefixOneCharInputStream(String encoding) {
-            this.encoding = encoding;
+        ARROW_RIGHT(67),
+
+        ARROW_UP(65),
+
+        ARROW_DOWN(66),
+
+        O_PREFIX(79),
+
+        HOME_CODE(72),
+
+        END_CODE(70),
+
+        DEL_THIRD(51),
+
+        DEL_SECOND(126),;
+
+        public final short code;
+
+        UnixKey(final int code) {
+            this.code = (short) code;
         }
 
-        public void setInput(int recorded, InputStream wrapped) throws IOException {
-            this.byteRead = 0;
-            this.firstByte = (byte) recorded;
-            this.wrappedStream = wrapped;
+        private static final Map<Short, UnixKey> codes;
 
-            byteLength = 1;
-            if (encoding.equalsIgnoreCase("UTF-8")) {
-                setInputUTF8(recorded, wrapped);
-            } else if (encoding.equalsIgnoreCase("UTF-16")) {
-                byteLength = 2;
-            } else if (encoding.equalsIgnoreCase("UTF-32")) {
-                byteLength = 4;
+        static {
+            Map<Short, UnixKey> map = new HashMap<Short, UnixKey>();
+
+            for (UnixKey key : UnixKey.values()) {
+                map.put(key.code, key);
             }
+
+            codes = map;
         }
 
-
-        public void setInputUTF8(int recorded, InputStream wrapped) throws IOException {
-            // 110yyyyy 10zzzzzz
-            if ((firstByte & (byte) 0xE0) == (byte) 0xC0) {
-                this.byteLength = 2;
-            // 1110xxxx 10yyyyyy 10zzzzzz
-            } else if ((firstByte & (byte) 0xF0) == (byte) 0xE0) {
-                this.byteLength = 3;
-            // 11110www 10xxxxxx 10yyyyyy 10zzzzzz
-            } else if ((firstByte & (byte) 0xF8) == (byte) 0xF0) {
-                this.byteLength = 4;
-            } else {
-                throw new IOException("invalid UTF-8 first byte: " + firstByte);
-            }
-        }
-
-        public int read() throws IOException {
-            if (available() == 0) {
-                return -1;
-            }
-
-            byteRead++;
-
-            if (byteRead == 1) {
-                return firstByte;
-            }
-
-            return wrappedStream.read();
-        }
-
-        /**
-        * InputStreamReader is greedy and will try to read bytes in advance. We
-        * do NOT want this to happen since we use a temporary/"losing bytes"
-        * InputStreamReader above, that's why we hide the real
-        * wrappedStream.available() here.
-        */
-        public int available() {
-            return byteLength - byteRead;
+        public static UnixKey valueOf(final int code) {
+            return codes.get((short) code);
         }
     }
-
 }

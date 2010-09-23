@@ -17,7 +17,7 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import jline.FileNameCompletor;
+import jline.console.completer.FileNameCompleter;
 import org.apache.karaf.shell.console.Completer;
 import org.osgi.service.command.CommandSession;
 
@@ -29,13 +29,13 @@ import java.util.List;
  */
 public class FileCompleter implements Completer {
     private final CommandSession session;
-    private FileNameCompletor completor = new FileNameCompletor();
+    private FileNameCompleter completor = new FileNameCompleter();
 
     public FileCompleter(CommandSession session) {
         this.session = session;
     }
 
-    public int complete(String buffer, int cursor, List<String> candidates) {
+    public int complete(String buffer, int cursor, List candidates) {
         return completor.complete(buffer, cursor, candidates);
     }
 }

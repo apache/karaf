@@ -107,12 +107,12 @@ public class ShellFactoryImpl implements Factory<Command>
                 for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());
                 }
-                session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
-                session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
+                session.put("LINES", Integer.toString(terminal.getHeight()));
+                session.put("COLUMNS", Integer.toString(terminal.getWidth()));
                 env.addSignalListener(new SignalListener() {
                     public void signal(Signal signal) {
-                        session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
-                        session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
+                        session.put("LINES", Integer.toString(terminal.getHeight()));
+                        session.put("COLUMNS", Integer.toString(terminal.getWidth()));
                     }
                 }, Signal.WINCH);
                 session.put(".jline.terminal", terminal);

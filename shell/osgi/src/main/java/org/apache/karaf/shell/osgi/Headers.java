@@ -257,7 +257,7 @@ public class Headers extends OsgiCommandSupport {
 
     protected int getTermWidth() {
         Terminal term = (Terminal) session.get(".jline.terminal");
-        return term != null ? term.getTerminalWidth() : 80;
+        return term != null ? term.getWidth() : 80;
 
     }
 

@@ -20,14 +20,11 @@ package org.apache.karaf.shell.console.jline;
 
 import java.util.List;
 
-import jline.Completor;
-import org.apache.karaf.shell.console.Completer;
+public class CompleterAsCompletor implements jline.console.completer.Completer {
 
-public class CompleterAsCompletor implements Completor {
+    private final org.apache.karaf.shell.console.Completer completer;
 
-    private final Completer completer;
-
-    public CompleterAsCompletor(Completer completer) {
+    public CompleterAsCompletor(org.apache.karaf.shell.console.Completer completer) {
         this.completer = completer;
     }
 

@@ -139,8 +139,8 @@ public class Main {
         CommandSession session = console.getSession();
         session.put("USER", user);
         session.put("APPLICATION", application);
-        session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
-        session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
+        session.put("LINES", Integer.toString(terminal.getHeight()));
+        session.put("COLUMNS", Integer.toString(terminal.getWidth()));
         session.put(".jline.terminal", terminal);
         session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
 
