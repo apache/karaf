@@ -33,6 +33,7 @@ import java.util.concurrent.Callable;
 import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.karaf.shell.console.jline.Console;
@@ -107,14 +108,16 @@ public class ShellFactoryImpl implements Factory<Command>
                 for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                     session.put(e.getKey(), e.getValue());
                 }
-                session.put("LINES", Integer.toString(terminal.getHeight()));
-                session.put("COLUMNS", Integer.toString(terminal.getWidth()));
-                env.addSignalListener(new SignalListener() {
-                    public void signal(Signal signal) {
-                        session.put("LINES", Integer.toString(terminal.getHeight()));
-                        session.put("COLUMNS", Integer.toString(terminal.getWidth()));
+                session.put("#LINES", new Function() {
+                    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                        return Integer.toString(terminal.getHeight());
                     }
-                }, Signal.WINCH);
+                });
+                session.put("#COLUMNS", new Function() {
+                    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                        return Integer.toString(terminal.getWidth());
+                    }
+                });
                 session.put(".jline.terminal", terminal);
                 new Thread(console).start();
             } catch (Exception e) {

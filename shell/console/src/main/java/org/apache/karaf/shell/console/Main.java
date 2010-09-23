@@ -128,14 +128,22 @@ public class Main {
     }
 
     private void run(final CommandProcessorImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
-        TerminalFactory terminalFactory = new TerminalFactory();
-        Terminal terminal = terminalFactory.getTerminal();
+        final TerminalFactory terminalFactory = new TerminalFactory();
+        final Terminal terminal = terminalFactory.getTerminal();
         Console console = createConsole(commandProcessor, in, out, err, terminal);
         CommandSession session = console.getSession();
         session.put("USER", user);
         session.put("APPLICATION", application);
-        session.put("LINES", Integer.toString(terminal.getHeight()));
-        session.put("COLUMNS", Integer.toString(terminal.getWidth()));
+        session.put("#LINES", new Function() {
+            public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                return Integer.toString(terminal.getHeight());
+            }
+        });
+        session.put("#COLUMNS", new Function() {
+            public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                return Integer.toString(terminal.getWidth());
+            }
+        });
         session.put(".jline.terminal", terminal);
         session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
 
