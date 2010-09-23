@@ -28,12 +28,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.jar.Manifest;
 
 import org.ops4j.pax.exam.CoreOptions;
+import org.ops4j.pax.exam.Customizer;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.options.JUnitBundlesOption;
 import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
 import org.ops4j.pax.exam.options.SystemPropertyOption;
+import org.osgi.framework.Constants;
 
 import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
 import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackages;
@@ -42,6 +45,7 @@ import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.modifyBundle;
 
 /**
  * Helper class for setting up a pax-exam test environment for karaf.
@@ -66,6 +70,41 @@ public final class Helper {
 	public static final String INCLUDES_PROPERTY = "${includes}";
 
     private Helper() {
+    }
+
+    public static Customizer felixProvisionalApis() {
+        return new Customizer() {
+            @Override
+            public InputStream customizeTestProbe(InputStream testProbe) throws Exception {
+                Manifest mf = new Manifest();
+                testProbe = HeaderParser.wireTapManifest( testProbe, mf );
+                List<HeaderParser.PathElement> elems = HeaderParser.parseHeader( mf.getMainAttributes().getValue( Constants.IMPORT_PACKAGE ));
+                StringBuilder sb = new StringBuilder();
+                for (HeaderParser.PathElement elem : elems) {
+                    if (elem.getName().startsWith("org.apache.felix.service.")) {
+                        elem.getAttributes().put("status", "provisional");
+                    }
+                    if (sb.length() > 0) {
+                        sb.append(",");
+                    }
+                    sb.append(elem.toString());
+                }
+
+                System.out.println("==============================");
+                System.out.println("");
+                System.out.println("Old: " + mf.getMainAttributes().getValue( Constants.IMPORT_PACKAGE ));
+                System.out.println("");
+                System.out.println("==============================");
+                System.out.println("");
+                System.out.println("New: " + sb.toString());
+                System.out.println("");
+                System.out.println("==============================");
+
+                return modifyBundle( testProbe )
+                            .set( Constants.IMPORT_PACKAGE, sb.toString() )
+                            .build();
+            }
+        };
     }
 
     /**

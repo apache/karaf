@@ -16,12 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.itests;
+package org.apache.karaf.testing;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 /**
  * Utility class to parse a standard OSGi header with paths.
@@ -33,6 +38,16 @@ public final class HeaderParser  {
 
     // Private constructor for static final class
     private HeaderParser() {
+    }
+
+    public static InputStream wireTapManifest( InputStream is, Manifest mf ) throws IOException {
+        BufferedInputStream bis = new BufferedInputStream( is, 64 * 1024 );
+        bis.mark( 64 * 1024 );
+        JarInputStream jis = new JarInputStream( bis );
+        mf.getMainAttributes().putAll( jis.getManifest().getMainAttributes() );
+        mf.getEntries().putAll( jis.getManifest().getEntries() );
+        bis.reset();
+        return bis;
     }
 
     /**
