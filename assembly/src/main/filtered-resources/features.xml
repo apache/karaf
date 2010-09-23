@@ -66,6 +66,9 @@
         <bundle>mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
         <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.war/${project.version}</bundle>
     </feature>
+    <feature name="kar" version="${project.version}">
+        <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
+    </feature>
     <feature name="webconsole-base" version="${project.version}">
         <feature version="${project.version}">http</feature>
         <config name="org.apache.karaf.webconsole">

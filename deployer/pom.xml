@@ -37,6 +37,7 @@
         <module>blueprint</module>
         <module>features</module>
         <module>war</module>
+        <module>kar</module>
     </modules>
 
 </project>
