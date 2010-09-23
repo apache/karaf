@@ -134,7 +134,7 @@
                             *
                         </Bundle-NativeCode>
                         <Bundle-Activator>
-                            org.apache.felix.gogo.runtime.activator.Activator
+                            org.apache.karaf.shell.console.jline.Activator
                         </Bundle-Activator>
                         <Main-Class>
                             org.apache.karaf.shell.console.Main
