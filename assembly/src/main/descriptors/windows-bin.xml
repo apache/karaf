@@ -274,6 +274,15 @@
                 <include>org.apache.aries.jmx:org.apache.aries.jmx.blueprint</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>org/fusesource/cade/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.fusesource.cade:cade-bundle</include>
+            </includes>
+        </dependencySet>
 
     </dependencySets>
 
