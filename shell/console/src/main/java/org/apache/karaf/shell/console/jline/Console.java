@@ -42,6 +42,7 @@ import jline.UnsupportedTerminal;
 import jline.console.history.FileHistory;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
+import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
@@ -197,13 +198,22 @@ public class Console implements Runnable
                     session.put(LAST_EXCEPTION, t);
                     if (t instanceof CommandException) {
                         session.getConsole().println(((CommandException) t).getNiceHelp());
+                    } else if (t instanceof CommandNotFoundException) {
+                        String str = Ansi.ansi()
+                            .fg(Ansi.Color.RED)
+                            .a("Command not found: ")
+                            .a(Ansi.Attribute.INTENSITY_BOLD)
+                            .a(((CommandNotFoundException) t).getCommand())
+                            .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                            .fg(Ansi.Color.DEFAULT).toString();
+                        session.getConsole().println(str);
                     }
                     if ( isPrintStackTraces()) {
                         session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                         t.printStackTrace(session.getConsole());
                         session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
                     }
-                    else if (!(t instanceof CommandException)) {
+                    else if (!(t instanceof CommandException) && !(t instanceof CommandNotFoundException)) {
                         session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                         session.getConsole().println("Error executing command: "
                                 + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
