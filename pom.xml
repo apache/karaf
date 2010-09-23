@@ -245,6 +245,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.karaf.deployer</groupId>
+                <artifactId>org.apache.karaf.deployer.kar</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>org.apache.karaf.management</artifactId>
                 <version>${project.version}</version>

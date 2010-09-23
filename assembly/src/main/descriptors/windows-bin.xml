@@ -199,6 +199,7 @@
                 <include>org.apache.karaf.deployer:org.apache.karaf.deployer.spring</include>
                 <include>org.apache.karaf.deployer:org.apache.karaf.deployer.blueprint</include>
                 <include>org.apache.karaf.deployer:org.apache.karaf.deployer.features</include>
+                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.kar</include>                
             </includes>
         </dependencySet>
         <dependencySet>

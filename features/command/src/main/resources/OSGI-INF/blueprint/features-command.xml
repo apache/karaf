@@ -37,11 +37,11 @@
             </completers>
         </command>
         <command name="features/removeRepository">
-            <action class="org.apache.karaf.features.command.RemoveRepositoryCommand"/>
-            <completers>
-                <ref component-id="featureRepositoryNameCompleter" />
-            </completers>        
-        </command>        
+             <action class="org.apache.karaf.features.command.RemoveRepositoryCommand"/>
+             <completers>
+                 <ref component-id="featureRepositoryNameCompleter" />
+             </completers>
+         </command>
         <command name="features/refreshUrl">
             <action class="org.apache.karaf.features.command.RefreshUrlCommand"/>
             <completers>
@@ -96,7 +96,7 @@
     </bean>
     
     <bean id="featureRepositoryNameCompleter" class="org.apache.karaf.features.command.completers.FeatureRepositoryNameCompleter">
-    	<property name="featuresService" ref="featuresService"/>
+        <property name="featuresService" ref="featuresService"/>
     </bean>
 
 </blueprint>
