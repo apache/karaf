@@ -23,8 +23,8 @@ import java.util.List;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
 import org.apache.felix.gogo.commands.basic.ActionPreparator;
 import org.apache.felix.gogo.commands.Action;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Function;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
 
 public abstract class AbstractCommand implements Function {
 

@@ -18,7 +18,8 @@
  */
 package org.apache.felix.gogo.commands;
 
-import org.osgi.service.command.CommandSession;
+import org.apache.felix.service.command.CommandSession;
+
 
 public interface Action
 {

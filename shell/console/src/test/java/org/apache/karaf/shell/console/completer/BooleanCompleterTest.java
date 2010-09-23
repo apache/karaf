@@ -21,9 +21,9 @@ import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.CompleterValues;
 import org.apache.felix.gogo.commands.basic.SimpleCommand;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.Completer;
 import org.junit.Test;
-import org.osgi.service.command.CommandSession;
 
 import java.io.File;
 import java.util.Arrays;

@@ -119,7 +119,7 @@
         <felix.configadmin.version>1.2.4</felix.configadmin.version>
         <felix.fileinstall.version>3.0.2</felix.fileinstall.version>
         <felix.framework.version>3.0.2</felix.framework.version>
-        <felix.gogo.version>0.4.0</felix.gogo.version>
+        <felix.gogo.version>0.7.0-SNAPSHOT</felix.gogo.version>
         <felix.osgi.version>1.4.0</felix.osgi.version>
         <felix.plugin.version>2.1.0</felix.plugin.version>
         <felix.utils.version>1.0.0</felix.utils.version>
@@ -747,12 +747,12 @@
                 <version>${aries.jmx.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.gogo</groupId>
+                <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.runtime</artifactId>
                 <version>${felix.gogo.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.gogo</groupId>
+                <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.commands</artifactId>
                 <version>${felix.gogo.version}</version>
             </dependency>

@@ -92,7 +92,7 @@
         <property name="start" value="$[karaf.startRemoteShell]"/>
     </bean>
 
-    <reference id="commandProcessor" interface="org.osgi.service.command.CommandProcessor">
+    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor">
     </reference>
 
 </blueprint>

@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.gogo.commands.Action;
+import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.command.CommandSession;
 
 public abstract class OsgiCommandSupport extends AbstractAction implements Action, BundleContextAware {
 

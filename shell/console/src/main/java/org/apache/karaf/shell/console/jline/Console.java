@@ -42,13 +42,13 @@ import jline.UnsupportedTerminal;
 import jline.console.history.FileHistory;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
 import org.fusesource.jansi.Ansi;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Converter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

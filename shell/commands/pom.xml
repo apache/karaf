@@ -46,7 +46,7 @@
             <artifactId>org.apache.karaf.shell.console</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix.gogo</groupId>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
         </dependency>
         <dependency>
@@ -80,7 +80,7 @@
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
                             !${project.artifactId}*,
-                            org.osgi.service.command,
+                            org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
                             *

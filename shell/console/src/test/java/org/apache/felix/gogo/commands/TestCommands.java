@@ -26,8 +26,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
-import org.osgi.service.command.CommandSession;
 import org.apache.felix.gogo.commands.basic.SimpleCommand;
+import org.apache.felix.service.command.CommandSession;
 
 public class TestCommands extends TestCase {
 

@@ -29,12 +29,12 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.apache.felix.service.command.CommandSession;
 import org.easymock.EasyMock;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.command.CommandSession;
 
 /**
  * Test cases for {@link EditCommand}

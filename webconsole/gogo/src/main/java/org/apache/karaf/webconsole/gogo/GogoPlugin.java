@@ -42,13 +42,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.AggregateCompleter;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
 
 /**
  * The <code>GogoPlugin</code>

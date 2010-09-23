@@ -48,7 +48,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.xbean.finder.ClassFinder;
-import org.osgi.service.command.CommandSession;
+import org.apache.felix.service.command.CommandSession;
 
 /**
  * Generates docbook for Karaf commands

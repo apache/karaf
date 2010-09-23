@@ -20,12 +20,12 @@ package org.apache.karaf.shell.osgi;
 
 import java.io.IOException;
 
+import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
-import org.osgi.service.command.CommandSession;
 
 public class Util
 {

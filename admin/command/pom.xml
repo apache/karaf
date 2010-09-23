@@ -88,7 +88,7 @@
                             !org.apache.karaf.admin.internal,
                             javax.management,
                             javax.management.loading,
-                            org.osgi.service.command,
+                            org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
                             *

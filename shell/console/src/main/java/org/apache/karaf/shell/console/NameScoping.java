@@ -17,7 +17,8 @@
  */
 package org.apache.karaf.shell.console;
 
-import org.osgi.service.command.CommandSession;
+import org.apache.felix.service.command.CommandSession;
+
 
 /**
  * A helper class for name scoping

@@ -24,12 +24,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.command.CommandSession;
 
 public class ShellCommandFactory implements CommandFactory {
 

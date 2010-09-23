@@ -19,7 +19,7 @@
 package org.apache.karaf.shell.console;
 
 import org.apache.felix.gogo.commands.Action;
-import org.osgi.service.command.CommandSession;
+import org.apache.felix.service.command.CommandSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

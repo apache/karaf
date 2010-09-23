@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.felix.service.command.Function;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -46,7 +47,6 @@ import org.osgi.service.blueprint.reflect.RefMetadata;
 import org.osgi.service.blueprint.reflect.NullMetadata;
 import org.osgi.service.blueprint.reflect.BeanMetadata;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
-import org.osgi.service.command.Function;
 
 
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
