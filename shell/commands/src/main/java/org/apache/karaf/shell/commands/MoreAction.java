@@ -51,13 +51,13 @@ public class MoreAction extends AbstractAction {
             }
             return null;
         } else {
-            boolean echo = term.getEcho();
-            term.disableEcho();
+            boolean echo = term.isEchoEnabled();
+            term.setEchoEnabled(false);
             try {
                 if (lines == 0) {
-                    lines = term.getTerminalHeight();
+                    lines = term.getHeight();
                 }
-                LineSplitter reader = new LineSplitter(new BufferedReader(new InputStreamReader(System.in)), term.getTerminalWidth());
+                LineSplitter reader = new LineSplitter(new BufferedReader(new InputStreamReader(System.in)), term.getWidth());
                 int count = 0;
                 int c;
                 do {
@@ -103,11 +103,7 @@ public class MoreAction extends AbstractAction {
                 } while (c != 'q');
                 return null;
             } finally {
-                if (echo) {
-                    term.enableEcho();
-                } else {
-                    term.disableEcho();
-                }
+                term.setEchoEnabled(echo);
             }
         }
     }
