@@ -139,7 +139,7 @@ public class Main {
             } catch (Throwable t) { }
             try {
                 if (terminal != null) {
-                    terminal.restoreTerminal();
+                    terminal.restore();
                 }
             } catch (Throwable t) { }
         }

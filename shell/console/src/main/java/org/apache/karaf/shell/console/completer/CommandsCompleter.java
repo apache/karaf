@@ -58,7 +58,9 @@ public class CommandsCompleter implements Completer {
     }
 
     protected synchronized void checkData() {
-        Set<String> names = (Set<String>) session.get(CommandSessionImpl.COMMANDS);
+        // Copy the set to avoid concurrent modification exceptions
+        // TODO: fix that in gogo instead
+        Set<String> names = new HashSet<String>((Set<String>) session.get(CommandSessionImpl.COMMANDS));
         if (!names.equals(commands)) {
             commands.clear();
             completers.clear();

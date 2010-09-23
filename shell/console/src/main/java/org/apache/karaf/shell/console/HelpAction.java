@@ -80,7 +80,7 @@ public class HelpAction extends AbstractAction {
                     String key = NameScoping.getCommandNameWithoutGlobalPrefix(session, entry.getKey());
                     out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(key).a(Ansi.Attribute.RESET));
                     if (entry.getValue() != null) {
-                        DefaultActionPreparator.printFormatted("                ", entry.getValue(), term != null ? term.getTerminalWidth() : 80, out);
+                        DefaultActionPreparator.printFormatted("                ", entry.getValue(), term != null ? term.getWidth() : 80, out);
                     }
                 }
                 out.println();

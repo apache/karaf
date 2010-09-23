@@ -16,12 +16,9 @@
  */
 package org.apache.karaf.shell.commands;
 
-import java.util.List;
-
-import jline.History;
+import jline.console.history.History;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.fusesource.jansi.Ansi;
 
 /**
@@ -33,18 +30,15 @@ public class HistoryAction extends AbstractAction {
     @Override
     protected Object doExecute() throws Exception {
         History history = (History) session.get(".jline.history");
-        List<String> elements = history.getHistoryList();
 
-        int i = 0;
-        for (String element : elements) {
+        for (History.Entry element : history) {
             System.out.println(
                     Ansi.ansi()
                         .a("  ")
-                        .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", i).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
+                        .a(Ansi.Attribute.INTENSITY_BOLD).render("%3d", element.index()).a(Ansi.Attribute.INTENSITY_BOLD_OFF)
                         .a("  ")
-                        .a(element)
+                        .a(element.value())
                         .toString());
-            i++;
         }
         return null;
     }

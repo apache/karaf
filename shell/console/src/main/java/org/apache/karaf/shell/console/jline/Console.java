@@ -36,9 +36,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jline.AnsiWindowsTerminal;
-import jline.ConsoleReader;
+import jline.console.ConsoleReader;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
+import jline.console.history.FileHistory;
+import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.Completer;
@@ -100,11 +102,11 @@ public class Console implements Runnable
         File file = new File(System.getProperty("karaf.history",
                              new File(System.getProperty("user.home"), ".karaf/karaf.history").toString()));
         file.getParentFile().mkdirs();
-        reader.getHistory().setHistoryFile(file);
+        reader.setHistory(new FileHistory(file));
         session.put(".jline.history", reader.getHistory());
         Completer completer = createCompleter();
         if (completer != null) {
-            reader.addCompletor(new CompleterAsCompletor(completer));
+            reader.addCompleter(new CompleterAsCompletor(completer));
         }
         if (Boolean.getBoolean("jline.nobell")) {
             reader.setBellEnabled(false);
@@ -120,6 +122,13 @@ public class Console implements Runnable
 
     public void close() {
         //System.err.println("Closing");
+        if (reader.getHistory() instanceof PersistentHistory) {
+            try {
+                ((PersistentHistory) reader.getHistory()).flush();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
         running = false;
         pipe.interrupt();
     }
@@ -380,12 +389,7 @@ public class Console implements Runnable
                 {
                     try
                     {
-                        int c;
-                        if (terminal instanceof AnsiWindowsTerminal) {
-                            c = ((AnsiWindowsTerminal) terminal).readDirectChar(in);
-                        } else {
-                            c = terminal.readCharacter(in);
-                        }
+                        int c = terminal.readCharacter(in);
                         if (c == -1)
                         {
                             queue.put(c);
@@ -398,7 +402,7 @@ public class Console implements Runnable
                         else if (c == 3)
                         {
                             err.println("^C");
-                            reader.getCursorBuffer().clearBuffer();
+                            reader.getCursorBuffer().clear();
                             interrupt();
                         }
                         queue.put(c);

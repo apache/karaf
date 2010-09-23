@@ -442,7 +442,7 @@ public class DefaultActionPreparator implements ActionPreparator {
             {
                 out.print("        ");
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
-                printFormatted("                ", argument.description(), term != null ? term.getTerminalWidth() : 80, out);
+                printFormatted("                ", argument.description(), term != null ? term.getWidth() : 80, out);
                 if (!argument.required()) {
                     try {
                         argsMap.get(argument).setAccessible(true);
@@ -473,7 +473,7 @@ public class DefaultActionPreparator implements ActionPreparator {
                 }
                 out.print("        ");
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
-                printFormatted("                ", option.description(), term != null ? term.getTerminalWidth() : 80, out);
+                printFormatted("                ", option.description(), term != null ? term.getWidth() : 80, out);
                 try {
                     optionsMap.get(option).setAccessible(true);
                     Object o = optionsMap.get(option).get(action);
@@ -493,7 +493,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         if (command.detailedDescription().length() > 0) {
             out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("DETAILS").a(Ansi.Attribute.RESET));
             String desc = loadDescription(action.getClass(), command.detailedDescription());
-            printFormatted("        ", desc, term != null ? term.getTerminalWidth() : 80, out);
+            printFormatted("        ", desc, term != null ? term.getWidth() : 80, out);
         }
     }
 

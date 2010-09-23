@@ -217,10 +217,6 @@
             <artifactId>mina-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>jline</groupId>
-            <artifactId>jline</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>

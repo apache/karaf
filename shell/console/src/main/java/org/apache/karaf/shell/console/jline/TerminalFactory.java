@@ -45,11 +45,11 @@ public class TerminalFactory {
             if (windows) {
                 AnsiWindowsTerminal t = new AnsiWindowsTerminal();
                 t.setDirectConsole(true);
-                t.initializeTerminal();
+                t.init();
                 term = t;
             } else {
                 NoInterruptUnixTerminal t = new NoInterruptUnixTerminal();
-                t.initializeTerminal();
+                t.init();
                 term = t;
             }
         } catch (Throwable e) {
@@ -60,7 +60,7 @@ public class TerminalFactory {
 
     public synchronized void destroy() throws Exception {
         if (term != null) {
-            term.restoreTerminal();
+            term.restore();
             term = null;
         }
     }
