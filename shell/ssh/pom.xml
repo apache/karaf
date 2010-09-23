@@ -68,6 +68,11 @@
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.fusesource.cade</groupId>
+            <artifactId>cade-bundle</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -18,16 +18,44 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.apache.sshd.SshServer;
+import java.util.Map;
 
-public class SshServerFactory {
+import org.apache.sshd.SshServer;
+import org.apache.sshd.server.jaas.JaasPasswordAuthenticator;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import org.fusesource.cade.Configurable;
+import org.osgi.service.blueprint.container.BlueprintContainer;
+import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class SshServerFactory implements Configurable<SshConfig> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SshServerFactory.class);
+
+    private String serverId;
+    private BlueprintContainer blueprintContainer;
+    private boolean start;
 
     private SshServer server;
 
-    private boolean start;
+    public SshServerFactory() {
+    }
 
-    public SshServerFactory(SshServer server) {
-        this.server = server;
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
+    }
+
+    public BlueprintContainer getBlueprintContainer() {
+        return blueprintContainer;
+    }
+
+    public void setBlueprintContainer(BlueprintContainer blueprintContainer) {
+        this.blueprintContainer = blueprintContainer;
     }
 
     public boolean isStart() {
@@ -38,21 +66,46 @@ public class SshServerFactory {
         this.start = start;
     }
 
-    public void start() throws Exception {
+    public void start(final SshConfig config) {
         if (start) {
             try {
+                server = (SshServer) blueprintContainer.getComponentInstance(serverId);
+                server.setPort(config.sshPort());
+                server.setHost(config.sshHost());
+                server.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(config.hostKey()));
+                server.setPasswordAuthenticator(newJaasPasswordAuthenticator((config.sshRealm())));
                 server.start();
             } catch (Exception e) {
-                e.printStackTrace();
-                throw e;
+                LOGGER.info("Error updating SSH server", e);
             }
         }
     }
 
-    public void stop() throws Exception {
-        if (start) {
-            server.stop();
+    private JaasPasswordAuthenticator newJaasPasswordAuthenticator(String domain) {
+        JaasPasswordAuthenticator auth = new JaasPasswordAuthenticator();
+        auth.setDomain(domain);
+        return auth;
+    }
+
+    public void stop() {
+        if (start && server != null) {
+            try {
+                server.stop();
+            } catch (Exception e) {
+                LOGGER.info("Error stopping SSH server", e);
+            } finally {
+                server = null;
+            }
         }
+    }
+
+    public void setup(SshConfig sshConfig) {
+        stop();
+        start(sshConfig);
+    }
+
+    public void deleted() {
+        stop();
     }
 
 }
