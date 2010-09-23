@@ -22,10 +22,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Function;
 import org.fusesource.jansi.AnsiConsole;
 import org.osgi.framework.BundleContext;
 
@@ -73,7 +75,7 @@ public class ConsoleFactory {
                     }
                 }
             };
-            Terminal terminal = terminalFactory.getTerminal();
+            final Terminal terminal = terminalFactory.getTerminal();
             this.console = new Console(commandProcessor,
                                        in,
                                        wrap(out),
@@ -83,8 +85,16 @@ public class ConsoleFactory {
             CommandSession session = console.getSession();
             session.put("USER", "karaf");
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-            session.put("LINES", Integer.toString(terminal.getHeight()));
-            session.put("COLUMNS", Integer.toString(terminal.getWidth()));
+            session.put("#LINES", new Function() {
+                public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                    return Integer.toString(terminal.getHeight());
+                }
+            });
+            session.put("#COLUMNS", new Function() {
+                public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                    return Integer.toString(terminal.getWidth());
+                }
+            });
             session.put(".jline.terminal", terminal);
             new Thread(console, "Karaf Shell Console Thread").start();
         }
