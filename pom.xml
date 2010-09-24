@@ -101,17 +101,12 @@
         <!-- Apache ServiceMix Bundles -->
         <aopalliance.bundle.version>1.0_4</aopalliance.bundle.version>
         <cglib.bundle.version>2.1_3_6</cglib.bundle.version>
+        <commons-codec.version>1.3_2</commons-codec.version>
+        <commons-lang.version>2.4_3</commons-lang.version>
         <jetty.bundle.version>6.1.22_2</jetty.bundle.version>
         <junit.bundle.version>4.7_1</junit.bundle.version>
 
         <commons.logging.version>1.1.1</commons.logging.version>
-        <commons-configuration.version>1.4_1-SNAPSHOT</commons-configuration.version>
-        <commons-beanutils.version>1.8.2_1-SNAPSHOT</commons-beanutils.version>
-        <commons-codec.version>1.3_2</commons-codec.version>
-        <commons-jxpath.version>1.2_4-SNAPSHOT</commons-jxpath.version>
-        <commons-collections.version>3.2.1</commons-collections.version>
-        <commons-digester.version>1.8_1-SNAPSHOT</commons-digester.version>
-        <commons-lang.version>2.4_3</commons-lang.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
         <easymock.version>2.4</easymock.version>
@@ -605,11 +600,6 @@
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
                 <version>${commons.logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.commons-configuration</artifactId>
-                <version>${commons-configuration.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.maven.artifact</groupId>
