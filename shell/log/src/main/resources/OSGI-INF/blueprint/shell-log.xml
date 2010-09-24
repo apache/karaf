@@ -36,13 +36,11 @@
                 <property name="pattern" value="${pattern}"/>
             </action>
         </command>
-        <link name="log/d" target="log/display"/>
         <command name="log/display-exception">
             <action class="org.apache.karaf.shell.log.DisplayException">
                 <property name="events" ref="events"/>
             </action>
         </command>
-        <link name="log/de" target="log/display-exception"/>
         <command name="log/get">
             <action class="org.apache.karaf.shell.log.GetLogLevel" />
         </command>
@@ -53,9 +51,6 @@
             	<null/>
             </completers>
         </command>
-
-        <alias name="ld" alias="log/d"/>
-        <alias name="lde" alias="log/de"/>
     </command-bundle>
 
     <bean id="vmLogAppender" class="org.apache.karaf.shell.log.VmLogAppender">
