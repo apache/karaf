@@ -45,7 +45,7 @@
         <bundle>mvn:org.apache.karaf.features/org.apache.karaf.features.obr/${project.version}</bundle>
     </feature>
     <feature name="config" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
+        <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
     </feature>
     <feature name="http" version="${project.version}">
         <config name="org.ops4j.pax.web">
