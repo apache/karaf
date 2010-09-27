@@ -26,6 +26,12 @@
         <cm:default-properties>
             <cm:property name="size" value="500"/>
             <cm:property name="pattern" value="%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n"/>
+            <cm:property name="fatalColor" value="31"/>
+            <cm:property name="errorColor" value="31"/>
+            <cm:property name="warnColor" value="35"/>
+            <cm:property name="infoColor" value="36"/>
+            <cm:property name="debugColor" value="39"/>
+            <cm:property name="traceColor" value="39"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -34,6 +40,12 @@
             <action class="org.apache.karaf.shell.log.DisplayLog">
                 <property name="events" ref="events"/>
                 <property name="pattern" value="${pattern}"/>
+                <property name="fatalColor" value="${fatalColor}"/>
+                <property name="errorColor" value="${errorColor}"/>
+                <property name="warnColor" value="${warnColor}"/>
+                <property name="infoColor" value="${infoColor}"/>
+                <property name="debugColor" value="${debugColor}"/>
+                <property name="traceColor" value="${traceColor}"/>
             </action>
         </command>
         <command name="log/display-exception">
@@ -65,7 +77,7 @@
 
     <service ref="vmLogAppender" interface="org.ops4j.pax.logging.spi.PaxAppender">
         <service-properties>
-            <entry key="org.ops4j.pax.logging.appender.name" value="VmLogAppender"/>
+                <entry key="org.ops4j.pax.logging.appender.name" value="VmLogAppender"/>
         </service-properties>
     </service>
 
