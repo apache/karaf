@@ -107,6 +107,7 @@
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
+                            org.osgi.service.event*;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>
