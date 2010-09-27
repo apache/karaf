@@ -35,8 +35,28 @@ public class DisplayLog extends OsgiCommandSupport {
     @Option(name = "-p", aliases = {}, description="Pattern for formatting the output", required = false, multiValued = false)
     protected String overridenPattern;
 
+    @Option(name = "--no-color", description="Disable syntax coloring of log events", required = false, multiValued = false)
+    protected boolean noColor;
+
     protected String pattern;
     protected LruList events;
+    protected String fatalColor;
+    protected String errorColor;
+    protected String warnColor;
+    protected String infoColor;
+    protected String debugColor;
+    protected String traceColor;
+
+    private static final String FATAL = "fatal";
+    private static final String ERROR = "error";
+    private static final String WARN = "warn";
+    private static final String INFO = "info";
+    private static final String DEBUG = "debug";
+    private static final String TRACE = "trace";
+
+    private static final char FIRST_ESC_CHAR = 27;
+	private static final char SECOND_ESC_CHAR = '[';
+    private static final char COMMAND_CHAR = 'm';
 
     public LruList getEvents() {
         return events;
@@ -54,26 +74,111 @@ public class DisplayLog extends OsgiCommandSupport {
         this.pattern = pattern;
     }
 
+    public String getFatalColor() {
+        return fatalColor;
+    }
+
+    public void setFatalColor(String fatalColor) {
+        this.fatalColor = fatalColor;
+    }
+
+    public String getErrorColor() {
+        return errorColor;
+    }
+
+    public void setErrorColor(String errorColor) {
+        this.errorColor = errorColor;
+    }
+
+    public String getWarnColor() {
+        return warnColor;
+    }
+
+    public void setWarnColor(String warnColor) {
+        this.warnColor = warnColor;
+    }
+
+    public String getInfoColor() {
+        return infoColor;
+    }
+
+    public void setInfoColor(String infoColor) {
+        this.infoColor = infoColor;
+    }
+
+    public String getDebugColor() {
+        return debugColor;
+    }
+
+    public void setDebugColor(String debugColor) {
+        this.debugColor = debugColor;
+    }
+
+    public String getTraceColor() {
+        return traceColor;
+    }
+
+    public void setTraceColor(String traceColor) {
+        this.traceColor = traceColor;
+    }
+
     protected Object doExecute() throws Exception {
         PatternConverter cnv = new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
 
         Iterable<PaxLoggingEvent> le = events.getElements(entries == 0 ? Integer.MAX_VALUE : entries);
         StringBuffer sb = new StringBuffer();
         for (PaxLoggingEvent event : le) {
+            String color = getColor(event);
             sb.setLength(0);
+            if (color != null) {
+                sb.append(FIRST_ESC_CHAR);
+                sb.append(SECOND_ESC_CHAR);
+                sb.append(color);
+                sb.append(COMMAND_CHAR);
+            }
             for (PatternConverter pc = cnv; pc != null; pc = pc.next) {
                 pc.format(sb, event);
             }
-            System.out.print(sb.toString());
             if (event.getThrowableStrRep() != null) {
                 for (String r : event.getThrowableStrRep()) {
-                    System.out.println(r);
+                    sb.append(r).append('\n');
                 }
             }
+            if (color != null) {
+                sb.append(FIRST_ESC_CHAR);
+                sb.append(SECOND_ESC_CHAR);
+                sb.append("0");
+                sb.append(COMMAND_CHAR);
+            }
+            System.out.print(sb.toString());
         }
         System.out.println();
         
         return null;
+    }
+
+    private String getColor(PaxLoggingEvent event) {
+        String color = null;
+        if (!noColor) {
+            String lvl = event.getLevel().toString().toLowerCase();
+            if (FATAL.equals(lvl)) {
+                color = fatalColor;
+            } else if (ERROR.equals(lvl)) {
+                color = errorColor;
+            } else if (WARN.equals(lvl)) {
+                color = warnColor;
+            } else if (INFO.equals(lvl)) {
+                color = infoColor;
+            } else if (DEBUG.equals(lvl)) {
+                color = debugColor;
+            } else if (TRACE.equals(lvl)) {
+                color = traceColor;
+            }
+            if (color != null && color.length() == 0) {
+                color = null;
+            }
+        }
+        return color;
     }
 
 }
