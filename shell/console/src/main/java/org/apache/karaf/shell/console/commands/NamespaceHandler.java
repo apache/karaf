@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.felix.service.command.Function;
+import org.osgi.service.blueprint.reflect.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -37,45 +38,21 @@ import org.apache.aries.blueprint.mutable.MutableValueMetadata;
 import org.apache.aries.blueprint.mutable.MutableRefMetadata;
 import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
 import org.apache.karaf.shell.console.CompletableFunction;
-import org.osgi.service.blueprint.reflect.BeanArgument;
-import org.osgi.service.blueprint.reflect.BeanProperty;
-import org.osgi.service.blueprint.reflect.ComponentMetadata;
-import org.osgi.service.blueprint.reflect.IdRefMetadata;
-import org.osgi.service.blueprint.reflect.Metadata;
-import org.osgi.service.blueprint.reflect.ValueMetadata;
-import org.osgi.service.blueprint.reflect.RefMetadata;
-import org.osgi.service.blueprint.reflect.NullMetadata;
-import org.osgi.service.blueprint.reflect.BeanMetadata;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 
 
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
 
     public static final String ID = "id";
-    public static final String DESCRIPTION = "description";
-    public static final String PLUGIN_TEMPLATE = "pluginTemplate";
     public static final String ACTION = "action";
     public static final String ACTION_ID = "actionId";
-    public static final String COMMAND_TEMPLATE_SUFFIX = "CommandTemplate";
     public static final String COMMAND_BUNDLE = "command-bundle";
     public static final String NAME = "name";
-    public static final String LOCATION = "location";
-    public static final String COMMANDS = "commands";
     public static final String COMMAND = "command";
-    public static final String DOCUMENTER = "documenter";
-    public static final String COMPLETER = "completer";
     public static final String COMPLETERS = "completers";
     public static final String BEAN = "bean";
     public static final String REF = "ref";
     public static final String NULL = "null";
-    public static final String MESSAGE_SOURCE = "message-source";
-    public static final String MESSAGES = "messages";
-    public static final String PROTOTYPE = "prototype";
-    public static final String ALIAS = "alias";
-    public static final String ALIASES = "aliases";
-    public static final String LINK = "link";
-    public static final String LINKS = "links";
-    public static final String TARGET = "target";
     public static final String BLUEPRINT_CONTAINER = "blueprintContainer";
     public static final String BLUEPRINT_CONVERTER = "blueprintConverter";
 
@@ -114,10 +91,6 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     private void parseChildElement(Element element, ParserContext context) {
         if (nodeNameEquals(element, COMMAND)) {
             parseCommand(element, context);
-        } else if (nodeNameEquals(element, LINK)) {
-//            parseLink(element, context);
-        } else if (nodeNameEquals(element, ALIAS)) {
-//            parseAlias(element, context);
         }
     }
 
@@ -126,16 +99,6 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         command.setRuntimeClass(BlueprintCommand.class);
         command.addProperty(BLUEPRINT_CONTAINER, createRef(context, BLUEPRINT_CONTAINER));
         command.addProperty(BLUEPRINT_CONVERTER, createRef(context, BLUEPRINT_CONVERTER));
-//        MutableBeanMetadata documenter = context.createMetadata(MutableBeanMetadata.class);
-//        documenter.setRuntimeClass(MessageSourceCommandDocumenter.class);
-//        command.addProperty(DOCUMENTER, documenter);
-//        MutableBeanMetadata messages = context.createMetadata(MutableBeanMetadata.class);
-//        messages.setRuntimeClass(CommandMessageSource.class);
-//        command.addProperty(MESSAGES, messages);
-//        MutableBeanMetadata location = context.createMetadata(MutableBeanMetadata.class);
-//        location.setRuntimeClass(CommandLocationImpl.class);
-//        location.addArgument(createStringValue(context, element.getAttribute(NAME)), String.class.getName(), 0);
-//        command.addProperty(LOCATION, location);
 
         String location = element.getAttribute(NAME);
         location = location.replace('/', ':');
@@ -170,8 +133,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         MutableServiceMetadata commandService = context.createMetadata(MutableServiceMetadata.class);
         commandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
         commandService.setId(getName());
-        commandService.addInterface(Function.class.getName());
-        commandService.addInterface(CompletableFunction.class.getName());
+        commandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
         commandService.setServiceComponent(command);
         commandService.addServiceProperty(createStringValue(context, "osgi.command.scope"),
                                           createStringValue(context, scope));
@@ -223,32 +185,6 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         return collection;
     }
 
-//    private void parseLink(Element element, ParserContext context) {
-//        MutableBeanMetadata link = context.createMetadata(MutableBeanMetadata.class);
-//        link.setRuntimeClass(LinkImpl.class);
-//        link.addArgument(createStringValue(context, element.getAttribute(NAME)), String.class.getName(), 0);
-//        link.addArgument(createStringValue(context, element.getAttribute(TARGET)), String.class.getName(), 0);
-//
-//        MutableServiceMetadata linkService = context.createMetadata(MutableServiceMetadata.class);
-//        linkService.setId(getName());
-//        linkService.addInterface(Link.class.getName());
-//        linkService.setServiceComponent(link);
-//        context.getComponentDefinitionRegistry().registerComponentDefinition(linkService);
-//    }
-//
-//    private void parseAlias(Element element, ParserContext context) {
-//        MutableBeanMetadata alias = context.createMetadata(MutableBeanMetadata.class);
-//        alias.setRuntimeClass(AliasImpl.class);
-//        alias.addArgument(createStringValue(context, element.getAttribute(NAME)), String.class.getName(), 0);
-//        alias.addArgument(createStringValue(context, element.getAttribute(ALIAS)), String.class.getName(), 0);
-//
-//        MutableServiceMetadata aliasService = context.createMetadata(MutableServiceMetadata.class);
-//        aliasService.setId(getName());
-//        aliasService.addInterface(Alias.class.getName());
-//        aliasService.setServiceComponent(alias);
-//        context.getComponentDefinitionRegistry().registerComponentDefinition(aliasService);
-//    }
-//
     private ValueMetadata createStringValue(ParserContext context, String str) {
         MutableValueMetadata value = context.createMetadata(MutableValueMetadata.class);
         value.setStringValue(str);
