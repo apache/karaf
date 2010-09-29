@@ -23,7 +23,9 @@ import static org.apache.karaf.tooling.features.ManifestUtils.matches;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URL;
 import java.util.*;
+import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -46,6 +48,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 /**
  * Validates a features XML file
@@ -61,6 +65,7 @@ import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
 public class ValidateFeaturesMojo extends MojoSupport {
 
     private static final String MVN_URI_PREFIX = "mvn:";
+    private static final String WRAP_URI_PREFIX = "wrap:";
     private static final String MVN_REPO_SEPARATOR = "!";
 
     /**
@@ -222,7 +227,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
                     info("    scanning %s for exports", artifact);
                     if (Artifact.SCOPE_PROVIDED.equals(artifact.getScope()) && !artifact.getType().equals("pom")) {
                         try {
-                            for (Clause clause : ManifestUtils.getExports(getManifest(artifact))) {
+                            for (Clause clause : ManifestUtils.getExports(getManifest("", artifact))) {
                                 getLog().debug(" adding " + clause.getName() + " to list of available packages");
                                 systemExports.add(clause.getName());
                             }
@@ -270,7 +275,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
         for (Feature feature : repository.getFeatures()) {
             Set<Clause> exports = new HashSet<Clause>();
             for (String bundle : getBundleLocations(feature)) {
-                exports.addAll(getExports(getManifest(bundles.get(bundle))));
+                exports.addAll(getExports(getManifest(bundle, bundles.get(bundle))));
             }
             info("    scanning feature %s for exports", feature.getName());
             featureExports.put(feature.getName(), exports);
@@ -286,8 +291,8 @@ public class ValidateFeaturesMojo extends MojoSupport {
                 // this will throw an exception if the artifact can not be resolved
                 final Artifact artifact = resolve(bundle);
                 bundles.put(bundle, artifact);
-                if (isBundle(artifact)) {
-                    manifests.put(artifact, getManifest(artifact));
+                if (isBundle(bundle, artifact)) {
+                    manifests.put(artifact, getManifest(bundle, artifact));
                 } else {
                     throw new Exception(String.format("%s is not an OSGi bundle", bundle));
                 }
@@ -379,12 +384,12 @@ public class ValidateFeaturesMojo extends MojoSupport {
     /*
      * Check if the artifact is an OSGi bundle
      */
-    private boolean isBundle(Artifact artifact) {
+    private boolean isBundle(String bundle, Artifact artifact) {
         if ("bundle".equals(artifact.getArtifactHandler().getPackaging())) {
             return true;
         } else {
             try {
-                return ManifestUtils.isBundle(getManifest(artifact));
+                return ManifestUtils.isBundle(getManifest(bundle, artifact));
             } catch (ZipException e) {
                 getLog().debug("Unable to determine if " + artifact + " is a bundle; defaulting to false", e);
             } catch (IOException e) {
@@ -399,25 +404,52 @@ public class ValidateFeaturesMojo extends MojoSupport {
     /*
      * Extract the META-INF/MANIFEST.MF file from an artifact
      */
-    private Manifest getManifest(Artifact artifact) throws ArtifactResolutionException, ArtifactNotFoundException, 
+    private Manifest getManifest(String bundle, Artifact artifact) throws ArtifactResolutionException, ArtifactNotFoundException, 
                                                            ZipException, IOException {
-        File localFile = new File(localRepo.pathOf(artifact));
-        ZipFile file;
-        if (localFile.exists()) {
-            // avoid going over to the repository if the file is already on the disk
-            file = new ZipFile(localFile);
-        } else {
-            resolver.resolve(artifact, remoteRepos, localRepo);
-            file = new ZipFile(artifact.getFile());
-        }
-        // let's replace syserr for now to hide warnings being issues by the Manifest reading process
-        PrintStream original = System.err;
-        try {
-            System.setErr(new PrintStream(new ByteArrayOutputStream()));
-            return new Manifest(file.getInputStream(file.getEntry("META-INF/MANIFEST.MF")));
-        } finally {
-            System.setErr(original);
-        }
+    	ZipFile file = null;
+    	if (bundle.startsWith(WRAP_URI_PREFIX)) {
+    		//use ops4j wrap handler directly to create the file
+    		File localFile = new File(localRepo.pathOf(artifact));
+    		if (!localFile.exists()) {
+				resolver.resolve(artifact, remoteRepos, localRepo);
+				localFile = artifact.getFile();
+			} 	
+			InputStream is = null;
+			is = new BufferedInputStream(new URL(null, WRAP_URI_PREFIX + localFile.toURL(), new org.ops4j.pax.url.wrap.Handler()).openStream());
+			try {
+                is.mark(256 * 1024);
+                JarInputStream jar = new JarInputStream(is);
+                Manifest m = jar.getManifest();
+                System.out.println("export package is " + m.getMainAttributes().getValue(Constants.EXPORT_PACKAGE));
+                System.out.println("import package is " + m.getMainAttributes().getValue(Constants.IMPORT_PACKAGE));
+                if(m == null) {
+                    throw new IOException("Manifest not present in the first entry of the zip");
+                }
+                
+                return m;
+            } finally {
+                is.close();
+            }
+    	} else {
+			File localFile = new File(localRepo.pathOf(artifact));
+			if (localFile.exists()) {
+				// avoid going over to the repository if the file is already on
+				// the disk
+				file = new ZipFile(localFile);
+			} else {
+				resolver.resolve(artifact, remoteRepos, localRepo);
+				file = new ZipFile(artifact.getFile());
+			}
+			// let's replace syserr for now to hide warnings being issues by the Manifest reading process
+	        PrintStream original = System.err;
+	        try {
+	            System.setErr(new PrintStream(new ByteArrayOutputStream()));
+	            Manifest manifest = new Manifest(file.getInputStream(file.getEntry("META-INF/MANIFEST.MF")));
+	            return manifest; 
+	        } finally {
+	            System.setErr(original);
+	        }
+    	}
     }
 
     /*
@@ -426,7 +458,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
     private Artifact resolve(String bundle) throws Exception, ArtifactNotFoundException {
         Artifact artifact = getArtifact(bundle);
         if (bundle.indexOf(MVN_REPO_SEPARATOR) >= 0) {
-            if (bundle.startsWith(MVN_URI_PREFIX)) {
+        	if (bundle.startsWith(MVN_URI_PREFIX)) {
                 bundle = bundle.substring(MVN_URI_PREFIX.length());
             }
             String repo = bundle.substring(0, bundle.indexOf(MVN_REPO_SEPARATOR));
@@ -450,6 +482,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private Artifact getArtifact(String uri) {
         // remove the mvn: prefix when necessary
+    	if (uri.startsWith(WRAP_URI_PREFIX)) {
+    		uri = uri.substring(WRAP_URI_PREFIX.length());
+    	}
         if (uri.startsWith(MVN_URI_PREFIX)) {
             uri = uri.substring(MVN_URI_PREFIX.length());
         }
