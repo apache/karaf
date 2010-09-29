@@ -19,7 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:jaas="http://karaf.apache.org/xmlns/jaas/v1.0.0"
-           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
     <type-converters>
@@ -30,7 +30,7 @@
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
     
     <!-- AdminConfig property place holder for the org.apache.karaf.jaas  -->
-    <cm:property-placeholder persistent-id="org.apache.karaf.jaas">
+    <cm:property-placeholder persistent-id="org.apache.karaf.jaas" update-strategy="reload">
         <cm:default-properties>
             <cm:property name="encryption.name" value="" />
             <cm:property name="encryption.enabled" value="false" />
