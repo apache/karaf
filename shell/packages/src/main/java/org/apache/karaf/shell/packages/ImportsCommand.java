@@ -28,12 +28,16 @@ import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 
 @Command(scope = "packages", name = "imports", description = "Display imported packages")
 public class ImportsCommand extends PackageCommandSupport {
 
 	@Argument(index = 0, name = "ids", description = "The IDs of bundles to check", required = false, multiValued = true)
     List<Long> ids;
+	
+    @Option(name = "-i", aliases = { "--show-importer" }, description = "show the bundle that is importing a package", required = false, multiValued = false)
+    private boolean showImporter;
 
     protected void doExecute(PackageAdmin admin) throws Exception {
         Map<Long, List<ExportedPackage>> packages = new HashMap<Long, List<ExportedPackage>>();
@@ -62,14 +66,36 @@ public class ImportsCommand extends PackageCommandSupport {
             }
         }
         else {
-            List<ExportedPackage> pkgs = new ArrayList<ExportedPackage>();
-            for (List<ExportedPackage> l : packages.values()) {
-                pkgs.addAll(l);
+            if (showImporter) {
+                printImports(System.out, packages);
+            } else {
+                List<ExportedPackage> pkgs = new ArrayList<ExportedPackage>();
+                for (List<ExportedPackage> l : packages.values()) {
+                    pkgs.addAll(l);
+                }
+                printImports(System.out, null, pkgs);
             }
-            printImports(System.out, null, pkgs);
+        }
+    }   
+    
+    protected void printImports(PrintStream out, Map<Long, List<ExportedPackage>> imports) {
+        for (Map.Entry<Long, List<ExportedPackage>> entry : imports.entrySet()) {
+            for (ExportedPackage p : entry.getValue()) {
+                // print bundle that is importing this package
+                Bundle importer = getBundleContext().getBundle(entry.getKey());
+                out.print(getBundleName(importer));
+                out.print(" imports: ");
+                
+                // print bundle that is exporting this package
+                Bundle exporter = p.getExportingBundle();
+                out.print(getBundleName(exporter));
+                
+                // print the package
+                out.println(": " + p);
+            }
         }
     }
-
+    
     protected void printImports(PrintStream out, Bundle target, List<ExportedPackage> imports) {
         if ((imports != null) && (imports.size() > 0)) {
             for (ExportedPackage p : imports) {
