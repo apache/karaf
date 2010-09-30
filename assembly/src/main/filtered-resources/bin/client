@@ -245,7 +245,7 @@ setupDefaults() {
     fi
 
     # Add the jars in the lib dir
-    CLASSPATH="$KARAF_HOME/lib/karaf-client.jar"
+    CLASSPATH="$KARAF_HOME/lib/bin/karaf-client.jar"
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/apache/sshd/sshd-core/${sshd.version}/sshd-core-${sshd.version}.jar"
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar"
     CLASSPATH="$CLASSPATH:$KARAF_HOME/system/org/apache/karaf/shell/org.apache.karaf.shell.console/${project.version}/org.apache.karaf.shell.console-${project.version}.jar"
