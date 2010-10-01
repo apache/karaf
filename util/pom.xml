@@ -27,10 +27,8 @@
         <version>2.1.99-SNAPSHOT</version>
     </parent>
     
-    <groupId>org.apache.karaf</groupId>
     <artifactId>org.apache.karaf.util</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.99-SNAPSHOT</version>
     <name>Apache Karaf :: Util</name>
     
     <description>
