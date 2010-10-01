@@ -27,11 +27,9 @@
         <version>2.1.99-SNAPSHOT</version>
     </parent>
     
-    <groupId>org.apache.karaf.jaas</groupId>
     <artifactId>org.apache.karaf.jaas.jasypt</artifactId>
     <packaging>bundle</packaging>
-    <version>2.1.99-SNAPSHOT</version>
-    <name>Apache Karaf :: JAAS Jasypt Encryption</name>
+    <name>Apache Karaf :: JAAS :: Jasypt Encryption</name>
     
     <description>
         This bundle provides the default encryption implementation for password
