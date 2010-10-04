@@ -87,6 +87,10 @@ public class FeaturesServiceImpl implements FeaturesService {
     private boolean bootFeaturesInstalled;
     private List<FeaturesListener> listeners = new CopyOnWriteArrayList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
+    private EventAdminListener eventAdminListener;
+
+    public FeaturesServiceImpl() {
+    }
 
     public BundleContext getBundleContext() {
         return bundleContext;
@@ -730,6 +734,15 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void start() throws Exception {
+        EventAdminListener listener = null;
+        try {
+            getClass().getClassLoader().loadClass("org.osgi.service.event.EventAdmin");
+            listener = new EventAdminListener(bundleContext);
+        } catch (Throwable t) {
+            // Ignore, if the EventAdmin package is not available, just don't use it
+            LOGGER.debug("EventAdmin package is not available, just don't use it");
+        }
+        this.eventAdminListener = listener;
         if (!loadState()) {
             if (uris != null) {
                 for (URI uri : uris) {
@@ -931,12 +944,18 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected void callListeners(FeatureEvent event) {
+        if (eventAdminListener != null) {
+            eventAdminListener.featureEvent(event);
+        }
         for (FeaturesListener listener : listeners) {
             listener.featureEvent(event);
         }
     }
 
     protected void callListeners(RepositoryEvent event) {
+        if (eventAdminListener != null) {
+            eventAdminListener.repositoryEvent(event);
+        }
         for (FeaturesListener listener : listeners) {
             listener.repositoryEvent(event);
         }
