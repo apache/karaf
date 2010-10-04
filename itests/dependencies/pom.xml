@@ -39,6 +39,7 @@
     </repositories>
 
     <dependencies>
+        <!--
         <dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
@@ -49,7 +50,6 @@
 			<artifactId>osgi</artifactId>
 			<version>3.5.1.R35x_v20090827</version>
         </dependency>
-<!--
         <dependency>
 			<groupId>org.junit</groupId>
 			<artifactId>com.springsource.junit</artifactId>
