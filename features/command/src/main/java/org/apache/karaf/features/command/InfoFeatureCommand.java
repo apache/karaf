@@ -150,7 +150,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         if (bundle) {
             List<BundleInfo> bundles = resolved != null ? resolved.getBundles() : feature.getBundles();
             for (int i = 0, j = bundles.size(); i < j; i++) {
-                System.out.println(prefix + " " + (i+1 == j ? "\\" : "+") + " " + bundles.get(i));
+                System.out.println(prefix + " " + (i+1 == j ? "\\" : "+") + " " + bundles.get(i).getLocation());
             }
         }
         List<Feature> dependencies = resolved != null ? resolved.getDependencies() : feature.getDependencies();
