@@ -133,7 +133,9 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         MutableServiceMetadata commandService = context.createMetadata(MutableServiceMetadata.class);
         commandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
         commandService.setId(getName());
-        commandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
+        //commandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
+        commandService.addInterface(CompletableFunction.class.getName());
+        commandService.addInterface(Function.class.getName());
         commandService.setServiceComponent(command);
         commandService.addServiceProperty(createStringValue(context, "osgi.command.scope"),
                                           createStringValue(context, scope));
