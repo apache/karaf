@@ -16,28 +16,26 @@
  */
 package org.apache.karaf.shell.commands;
 
-import java.util.Locale;
-import java.text.DecimalFormatSymbols;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ClassLoadingMXBean;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.ThreadMXBean;
-import java.lang.management.RuntimeMXBean;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.reflect.Method;
-
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.info.InfoProvider;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.fusesource.jansi.Ansi;
+
+import java.lang.management.*;
+import java.lang.reflect.Method;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.List;
+import java.util.Locale;
 
 @Command(scope = "shell", name = "info", description = "Prints system informations")
 public class InfoAction extends OsgiCommandSupport {
 
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
+
+    private List<InfoProvider> infoProviders;
 
     protected Object doExecute() throws Exception {
         int maxNameLen;
@@ -56,7 +54,7 @@ public class InfoAction extends OsgiCommandSupport {
         printValue("Karaf home", maxNameLen, System.getProperty("karaf.home"));
         printValue("Karaf base", maxNameLen, System.getProperty("karaf.base"));
         printValue("OSGi Framework", maxNameLen, bundleContext.getBundle(0).getSymbolicName() + " - " +
-            bundleContext.getBundle(0).getVersion());
+                bundleContext.getBundle(0).getVersion());
         System.out.println();
 
         System.out.println("JVM");
@@ -66,7 +64,8 @@ public class InfoAction extends OsgiCommandSupport {
         printValue("Uptime", maxNameLen, printDuration(runtime.getUptime()));
         try {
             printValue("Process CPU time", maxNameLen, printDuration(getSunOsValueAsLong(os, "getProcessCpuTime") / 1000000));
-        } catch (Throwable t) {}
+        } catch (Throwable t) {
+        }
         printValue("Total compile time", maxNameLen, printDuration(ManagementFactory.getCompilationMXBean().getTotalCompilationTime()));
 
         System.out.println("Threads");
@@ -100,7 +99,18 @@ public class InfoAction extends OsgiCommandSupport {
             printValue("Committed virtual memory", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getCommittedVirtualMemorySize")));
             printValue("Total swap space", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getTotalSwapSpaceSize")));
             printValue("Free swap space", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getFreeSwapSpaceSize")));
-        } catch (Throwable t) {}
+        } catch (Throwable t) {
+        }
+
+        //Display Information from external information providers.
+        if (infoProviders != null) {
+            for (InfoProvider provider : infoProviders) {
+                System.out.println(provider.getName());
+                for (String propertyName : provider.getProperties().stringPropertyNames()) {
+                    printValue(propertyName, maxNameLen, provider.getProperties().getProperty(propertyName));
+                }
+            }
+        }
 
         return null;
     }
@@ -155,8 +165,8 @@ public class InfoAction extends OsgiCommandSupport {
 
     void printValue(String name, int pad, String value) {
         System.out.println(Ansi.ansi().a("  ")
-                                .a(Ansi.Attribute.INTENSITY_BOLD).a(name).a(spaces(pad - name.length())).a(Ansi.Attribute.RESET)
-                                .a("   ").a(value).toString());
+                .a(Ansi.Attribute.INTENSITY_BOLD).a(name).a(spaces(pad - name.length())).a(Ansi.Attribute.RESET)
+                .a("   ").a(value).toString());
     }
 
     String spaces(int nb) {
@@ -167,4 +177,11 @@ public class InfoAction extends OsgiCommandSupport {
         return sb.toString();
     }
 
+    public List<InfoProvider> getInfoProviders() {
+        return infoProviders;
+    }
+
+    public void setInfoProviders(List<InfoProvider> infoProviders) {
+        this.infoProviders = infoProviders;
+    }
 }

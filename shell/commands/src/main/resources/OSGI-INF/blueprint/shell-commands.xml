@@ -45,7 +45,9 @@
             <action class="org.apache.karaf.shell.commands.IfAction"/>
         </command>
         <command name="shell/info">
-            <action class="org.apache.karaf.shell.commands.InfoAction"/>
+            <action class="org.apache.karaf.shell.commands.InfoAction">
+                <property name="infoProviders" ref="infoProviders"/>
+            </action>
         </command>
         <command name="shell/java">
             <action class="org.apache.karaf.shell.commands.JavaAction"/>
@@ -79,5 +81,8 @@
             <action class="org.apache.karaf.shell.commands.TacAction"/>
         </command>
     </command-bundle>
+
+    <reference-list id="infoProviders" interface="org.apache.karaf.shell.commands.info.InfoProvider"
+                    availability="optional"/>
 
 </blueprint>
