@@ -886,7 +886,15 @@ public class Main {
             throw new FileNotFoundException(bundleFile.getAbsolutePath());
         }
 
-        URLClassLoader classLoader = new URLClassLoader(new URL[] { bundleFile.toURI().toURL() }, Main.class.getClassLoader());
+        List<URL> urls = new ArrayList<URL>();
+        urls.add( bundleFile.toURI().toURL() );
+        for (File f : new File(karafHome, "lib").listFiles()) {
+            if (f.isFile() && f.canRead() && f.getName().endsWith(".jar")) {
+                urls.add(f.toURI().toURL());
+            }
+        }
+
+        URLClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), Main.class.getClassLoader());
         return classLoader;
     }
 
