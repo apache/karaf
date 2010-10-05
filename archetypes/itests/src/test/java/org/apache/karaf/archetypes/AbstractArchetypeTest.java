@@ -17,7 +17,9 @@
 package org.apache.karaf.archetypes;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Collections;
@@ -114,7 +116,7 @@ public abstract class AbstractArchetypeTest extends TestCase {
         System.setProperties((Properties) sysProps.clone());
 
         maven.execute(parent,
-                Collections.singletonList("archetype:generate"),
+                Collections.singletonList(getArchetypeGenerateGoal()),
                 eventMonitor,
                 new ConsoleDownloadMonitor(),
                 props,
@@ -131,6 +133,34 @@ public abstract class AbstractArchetypeTest extends TestCase {
                 new ConsoleDownloadMonitor(),
                 new Properties(),
                 targetDir);
+    }
+
+    private String getArchetypeGenerateGoal() {
+        String groupId = "org.apache.maven.plugins";
+        String artifactId = "maven-archetype-plugin";
+        String version = getVersion(groupId, artifactId);
+        return groupId + ":" + artifactId + (version != null ? ":" + version : "") + ":generate";
+    }
+
+    private String getVersion(String groupId, String artifactId) {
+        try {
+            File file = new File("META-INF/maven/dependencies.properties");
+            if (!file.exists()) {
+                file = new File("target/classes/META-INF/maven/dependencies.properties");
+            }
+            if (file.exists()) {
+                Properties dependencies = new Properties();
+                InputStream is = new FileInputStream(file);
+                try {
+                    dependencies.load(is);
+                } finally {
+                    is.close();
+                }
+                return dependencies.getProperty( groupId + "/" + artifactId + "/version" );
+            }
+        } catch (Throwable t2) {
+        }
+        return null;
     }
 
     private File getDefaultArchetypePom(File pomFile) throws IOException {
