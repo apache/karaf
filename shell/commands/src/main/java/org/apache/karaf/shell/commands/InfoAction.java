@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -106,8 +107,10 @@ public class InfoAction extends OsgiCommandSupport {
         if (infoProviders != null) {
             for (InfoProvider provider : infoProviders) {
                 System.out.println(provider.getName());
-                for (String propertyName : provider.getProperties().stringPropertyNames()) {
-                    printValue(propertyName, maxNameLen, provider.getProperties().getProperty(propertyName));
+				Iterator propertyNames =  provider.getProperties().keySet().iterator();
+                while(propertyNames.hasNext()) {
+					Object propertyKey = propertyNames.next();
+                    printValue(String.valueOf(propertyKey), maxNameLen, provider.getProperties().getProperty(String.valueOf(propertyKey)));
                 }
             }
         }
