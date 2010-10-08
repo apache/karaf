@@ -27,6 +27,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -36,7 +37,7 @@ public class InfoAction extends OsgiCommandSupport {
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    private List<InfoProvider> infoProviders;
+    private List<InfoProvider> infoProviders = new LinkedList<InfoProvider>();
 
     protected Object doExecute() throws Exception {
         int maxNameLen;
