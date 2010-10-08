@@ -82,7 +82,19 @@
         </command>
     </command-bundle>
 
-    <reference-list id="infoProviders" interface="org.apache.karaf.shell.commands.info.InfoProvider"
-                    availability="optional"/>
+   <bean class="org.osgi.util.tracker.BundleTracker" init-method="open"
+        destroy-method="close">
+        <argument ref="blueprintBundleContext" />
+        <argument value="32" />
+        <argument>
+            <bean class="org.apache.karaf.shell.commands.info.InfoBundleTrackerCustomizer">
+                <argument ref="blueprintBundleContext" />
+            </bean>
+        </argument>
+    </bean>
 
+    <reference-list id="infoProviders" interface="org.apache.karaf.shell.commands.info.InfoProvider"
+        availability="optional">
+    </reference-list>
+ 
 </blueprint>

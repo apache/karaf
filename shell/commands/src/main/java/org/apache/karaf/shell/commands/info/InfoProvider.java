@@ -23,8 +23,8 @@ import java.util.Properties;
  */
 public interface InfoProvider {
 
-    public String getName();
+	public String getName();
 
-    public Properties getProperties();
+	public Properties getProperties();
 
 }
