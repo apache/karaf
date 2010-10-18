@@ -33,7 +33,6 @@ import java.security.Security;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -178,7 +177,6 @@ public class Main {
     private int lockStartLevel = 1;
     private int lockDelay = 1000;
     private boolean exiting = false;
-    private boolean cmProcessed;
 
     public Main(String[] args) {
         this.args = args;
@@ -212,7 +210,7 @@ public class Main {
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
 
-        ClassLoader classLoader = updateClassLoader(configProps);
+        ClassLoader classLoader = createClassLoader(configProps);
 
         processSecurityProperties(configProps);
 
@@ -385,12 +383,16 @@ public class Main {
         if (prop != null) {
             String[] providers = prop.split(",");
             for (String provider : providers) {
-                try {
-                    Security.addProvider((Provider) Class.forName(provider).newInstance());
-                } catch (Throwable t) {
-                    System.err.println("Unable to register security provider: " + t);
-                }
+                addProvider(provider);
             }
+        }
+    }
+
+    private static void addProvider(String provider) {
+        try {
+            Security.addProvider((Provider) Class.forName(provider).newInstance());
+        } catch (Throwable t) {
+            System.err.println("Unable to register security provider: " + t);
         }
     }
 
@@ -459,6 +461,8 @@ public class Main {
      * <p/>
      * Processes the auto-install and auto-start properties from the
      * specified configuration properties.
+     *
+     * @param context the system bundle context
      */
     private void processAutoProperties(BundleContext context) {
         // Check if we want to convert URLs to maven style
@@ -509,8 +513,8 @@ public class Main {
     private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, StartLevel sl, boolean convertToMavenUrls) {
         Map<Integer, String> autoStart = new TreeMap<Integer, String>();
         List<Bundle> bundles = new ArrayList<Bundle>();
-        for (Iterator i = configProps.keySet().iterator(); i.hasNext();) {
-            String key = (String) i.next();
+        for (Object o : configProps.keySet()) {
+            String key = (String) o;
             // Ignore all keys that are not the auto-start property.
             if (!key.startsWith(propertyPrefix)) {
                 continue;
@@ -522,8 +526,7 @@ public class Main {
             if (!key.equals(propertyPrefix)) {
                 try {
                     startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
-                }
-                catch (NumberFormatException ex) {
+                } catch (NumberFormatException ex) {
                     System.err.println("Invalid property: " + key);
                 }
             }
@@ -532,7 +535,7 @@ public class Main {
         for (Integer startLevel : autoStart.keySet()) {
             StringTokenizer st = new StringTokenizer(autoStart.get(startLevel), "\" ", true);
             if (st.countTokens() > 0) {
-                String location = null;
+                String location;
                 do {
                     location = nextLocation(st);
                     if (location != null) {
@@ -558,7 +561,6 @@ public class Main {
         if (convertToMavenUrls) {
             String[] p = parts[1].split("/");
             if (p.length >= 4 && p[p.length-1].startsWith(p[p.length-3] + "-" + p[p.length-2])) {
-                String groupId = null;
                 String artifactId = p[p.length-3];
                 String version = p[p.length-2];
                 String classifier;
@@ -605,7 +607,7 @@ public class Main {
         if (st.countTokens() > 0) {
             String tokenList = "\" ";
             StringBuffer tokBuf = new StringBuffer(10);
-            String tok = null;
+            String tok;
             boolean inQuote = false;
             boolean tokStarted = false;
             boolean exit = false;
@@ -655,6 +657,8 @@ public class Main {
      * initializing the "<tt>felix.system.properties</tt>" system property to an
      * arbitrary URL.
      * </p>
+     *
+     * @param karafBase the karaf base folder
      */
     protected static void loadSystemProperties(File karafBase) {
         // The system properties file is either specified by a system
@@ -662,10 +666,10 @@ public class Main {
         // Try to load it from one of these places.
 
         // See if the property URL was specified as a property.
-        URL propURL = null;
+        URL propURL;
         try {
             File file = new File(new File(karafBase, "etc"), SYSTEM_PROPERTIES_FILE_NAME);
-            propURL = file.toURL();
+            propURL = file.toURI().toURL();
         }
         catch (MalformedURLException ex) {
             System.err.print("Main: " + ex);
@@ -720,7 +724,7 @@ public class Main {
      * </p>
      *
      * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
-     * @throws Exception 
+     * @throws Exception if something wrong occurs
      */
     private Properties loadConfigProperties() throws Exception {
         // The config properties file is either specified by a system
@@ -728,11 +732,11 @@ public class Main {
         // installation directory.  Try to load it from one of these
         // places.
 
-        ArrayList<File> bundleDirs = new ArrayList<File>();
+        List<File> bundleDirs = new ArrayList<File>();
 
         // See if the property URL was specified as a property.
-        URL configPropURL = null;
-        URL startupPropURL = null;
+        URL configPropURL;
+        URL startupPropURL;
 
         try {
             File file = new File(new File(karafBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
@@ -765,7 +769,7 @@ public class Main {
         if (locations != null) {
             StringTokenizer st = new StringTokenizer(locations, "\" ", true);
             if (st.countTokens() > 0) {
-                String location = null;
+                String location;
                 do {
                     location = nextLocation(st);
                     if (location != null) {
@@ -869,7 +873,7 @@ public class Main {
         }
     }
     
-    private ClassLoader updateClassLoader(Properties configProps) throws Exception {
+    private ClassLoader createClassLoader(Properties configProps) throws Exception {
     	String framework = configProps.getProperty(KARAF_FRAMEWORK);
         if (framework == null) {
             throw new IllegalArgumentException("Property " + KARAF_FRAMEWORK + " must be set in the etc/" + CONFIG_PROPERTIES_FILE_NAME + " configuration file");
@@ -894,21 +898,22 @@ public class Main {
             }
         }
 
-        URLClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), Main.class.getClassLoader());
-        return classLoader;
+        return new URLClassLoader(urls.toArray(new URL[urls.size()]), Main.class.getClassLoader());
     }
 
     /**
      * Process properties to customize default felix behavior
      *
-     * @param startupProps
+     * @param configProps properties loaded from etc/config.properties
+     * @param startupProps properties loaded from etc/startup.properties
+     * @param bundleDirs location to load bundles from (usually system/)
      */
-    private static void processConfigurationProperties(Properties props, Properties startupProps, ArrayList<File> bundleDirs) {
+    private static void processConfigurationProperties(Properties configProps, Properties startupProps, List<File> bundleDirs) {
         if (bundleDirs == null) {
             return;
         }
-        if ("all".equals(props.getProperty(PROPERTY_AUTO_START, "").trim())) {
-            props.remove(PROPERTY_AUTO_START);
+        if ("all".equals(configProps.getProperty(PROPERTY_AUTO_START, "").trim())) {
+            configProps.remove(PROPERTY_AUTO_START);
             ArrayList<File> jars = new ArrayList<File>();
 
             // We should start all the bundles in the system dir.
@@ -920,20 +925,20 @@ public class Main {
 
             for (File jar : jars) {
                 try {
-                    sb.append("\"").append(jar.toURL().toString()).append("\" ");
+                    sb.append("\"").append(jar.toURI().toURL().toString()).append("\" ");
                 } catch (MalformedURLException e) {
                     System.err.print("Ignoring " + jar.toString() + " (" + e + ")");
                 }
             }
 
-            props.setProperty(PROPERTY_AUTO_START, sb.toString());
+            configProps.setProperty(PROPERTY_AUTO_START, sb.toString());
 
-        } else if (STARTUP_PROPERTIES_FILE_NAME.equals(props.getProperty(PROPERTY_AUTO_START, "").trim())) {
-            props.remove(PROPERTY_AUTO_START);
+        } else if (STARTUP_PROPERTIES_FILE_NAME.equals(configProps.getProperty(PROPERTY_AUTO_START, "").trim())) {
+            configProps.remove(PROPERTY_AUTO_START);
             // We should start the bundles in the startup.properties file.
             HashMap<Integer, StringBuffer> levels = new HashMap<Integer, StringBuffer>();
-            for (Iterator iterator = startupProps.keySet().iterator(); iterator.hasNext();) {
-                String name = (String) iterator.next();
+            for (Object o : startupProps.keySet()) {
+                String name = (String) o;
                 File file = findFile(bundleDirs, name);
 
                 if (file != null) {
@@ -950,7 +955,7 @@ public class Main {
                         levels.put(level, sb);
                     }
                     try {
-                        sb.append("\"").append(file.toURL().toString()).append("|").append(name).append("\" ");
+                        sb.append("\"").append(file.toURI().toURL().toString()).append("|").append(name).append("\" ");
                     } catch (MalformedURLException e) {
                         System.err.print("Ignoring " + file.toString() + " (" + e + ")");
                     }
@@ -960,13 +965,13 @@ public class Main {
             }
 
             for (Map.Entry<Integer, StringBuffer> entry : levels.entrySet()) {
-                props.setProperty(PROPERTY_AUTO_START + "." + entry.getKey(), entry.getValue().toString());
+                configProps.setProperty(PROPERTY_AUTO_START + "." + entry.getKey(), entry.getValue().toString());
             }
         }
 
     }
 
-    private static File findFile(ArrayList<File> bundleDirs, String name) {
+    private static File findFile(List<File> bundleDirs, String name) {
         for (File bundleDir : bundleDirs) {
             File file = findFile(bundleDir, name);
             if (file != null) {
@@ -1119,9 +1124,11 @@ public class Main {
         return val;
     }
 
-    /* (non-Javadoc)
-      * @see org.apache.karaf.main.MainService#getArgs()
-      */
+    /**
+     * Retrieve the arguments used when launching Karaf
+     *
+     * @return the arguments of the main karaf process
+     */
     public String[] getArgs() {
         return args;
     }
@@ -1141,38 +1148,42 @@ public class Main {
     public void lock(Properties props) {
         try {
             if (Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"))) {
-                String clz = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
-                lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
-                boolean lockLogged = false;
-                setStartLevel(lockStartLevel);
-                while (!exiting) {
-                    if (lock.lock()) {
-                        if (lockLogged) {
-                            LOG.info("Lock acquired.");
-                        }
-                        setupShutdown(props);
-                        setStartLevel(defaultStartLevel);
-                        for (;;) {
-                            if (!lock.isAlive()) {
-                                break;
-                            }
-                            Thread.sleep(lockDelay);
-                        }
-                        if (framework.getState() == Bundle.ACTIVE && !exiting) {
-                            LOG.info("Lost the lock, stopping this instance ...");
-                            setStartLevel(lockStartLevel);
-                        }
-                    } else if (!lockLogged) {
-                        LOG.info("Waiting for the lock ...");
-                        lockLogged = true;
-                    }
-                    Thread.sleep(lockDelay);
-                } 
+                doLock(props);
             } else {
                 setStartLevel(defaultStartLevel);
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void doLock(Properties props) throws Exception {
+        String clz = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
+        lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
+        boolean lockLogged = false;
+        setStartLevel(lockStartLevel);
+        while (!exiting) {
+            if (lock.lock()) {
+                if (lockLogged) {
+                    LOG.info("Lock acquired.");
+                }
+                setupShutdown(props);
+                setStartLevel(defaultStartLevel);
+                for (;;) {
+                    if (!lock.isAlive()) {
+                        break;
+                    }
+                    Thread.sleep(lockDelay);
+                }
+                if (framework.getState() == Bundle.ACTIVE && !exiting) {
+                    LOG.info("Lost the lock, stopping this instance ...");
+                    setStartLevel(lockStartLevel);
+                }
+            } else if (!lockLogged) {
+                LOG.info("Waiting for the lock ...");
+                lockLogged = true;
+            }
+            Thread.sleep(lockDelay);
         }
     }
 
@@ -1194,6 +1205,32 @@ public class Main {
     private ServerSocket shutdownSocket;
 
     protected void setupShutdown(Properties props) {
+        writePid(props);
+        try {
+            int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
+            String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
+            String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
+            final String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
+            if (port >= 0) {
+                shutdownSocket = new ServerSocket(port, 1, InetAddress.getByName(host));
+                if (port == 0) {
+                    port = shutdownSocket.getLocalPort();
+                }
+                if (portFile != null) {
+                    Writer w = new OutputStreamWriter(new FileOutputStream(portFile));
+                    w.write(Integer.toString(port));
+                    w.close();
+                }
+                Thread thread = new ShutdownSocketThread(shutdown);
+                thread.setDaemon(true);
+                thread.start();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writePid(Properties props) {
         try {
             String pidFile = props.getProperty(KARAF_SHUTDOWN_PID_FILE);
             if (pidFile != null) {
@@ -1211,99 +1248,86 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        try {
-            int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
-            String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
-            String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
-            final String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
-            if (port >= 0) {
-                shutdownSocket = new ServerSocket(port, 1, InetAddress.getByName(host));
-                if (port == 0) {
-                    port = shutdownSocket.getLocalPort();
-                }
-                if (portFile != null) {
-                    Writer w = new OutputStreamWriter(new FileOutputStream(portFile));
-                    w.write(Integer.toString(port));
-                    w.close();
-                }
-                Thread thread = new Thread() {
-                    public void run() {
-                        try {
-                            while (true) {
-                                // Wait for the next connection
-                                Socket socket = null;
-                                InputStream stream = null;
-                                try {
-                                    socket = shutdownSocket.accept();
-                                    socket.setSoTimeout(10 * 1000);  // Ten seconds
-                                    stream = socket.getInputStream();
-                                } catch (AccessControlException ace) {
-                                    LOG.log(Level.WARNING, "Karaf shutdown socket: security exception: "
-                                                       + ace.getMessage(), ace);
-                                    continue;
-                                } catch (IOException e) {
-                                    LOG.log(Level.SEVERE, "Karaf shutdown socket: accept: ", e);
-                                    System.exit(1);
-                                }
-
-                                // Read a set of characters from the socket
-                                StringBuilder command = new StringBuilder();
-                                int expected = 1024; // Cut off to avoid DoS attack
-                                while (expected < shutdown.length()) {
-                                    if (random == null) {
-                                        random = new Random();
-                                    }
-                                    expected += (random.nextInt() % 1024);
-                                }
-                                while (expected > 0) {
-                                    int ch = -1;
-                                    try {
-                                        ch = stream.read();
-                                    } catch (IOException e) {
-                                        LOG.log(Level.WARNING, "Karaf shutdown socket:  read: ", e);
-                                        ch = -1;
-                                    }
-                                    if (ch < 32) {  // Control character or EOF terminates loop
-                                        break;
-                                    }
-                                    command.append((char) ch);
-                                    expected--;
-                                }
-
-                                // Close the socket now that we are done with it
-                                try {
-                                    socket.close();
-                                } catch (IOException e) {
-                                    // Ignore
-                                }
-
-                                // Match against our command string
-                                boolean match = command.toString().equals(shutdown);
-                                if (match) {
-                                    LOG.log(Level.INFO, "Karaf shutdown socket: received shutdown command. Stopping framework...");
-                                    framework.stop();
-                                    break;
-                                } else {
-                                    LOG.log(Level.WARNING, "Karaf shutdown socket:  Invalid command '" +
-                                                       command.toString() + "' received");
-                                }
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        } finally {
-                            try {
-                                shutdownSocket.close();
-                            } catch (IOException e) {
-                            }
-                        }
-                    }
-                };
-                thread.setDaemon(true);
-                thread.start();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
+    private class ShutdownSocketThread extends Thread {
+
+        private final String shutdown;
+
+        public ShutdownSocketThread(String shutdown) {
+            this.shutdown = shutdown;
+        }
+
+        public void run() {
+            try {
+                while (true) {
+                    // Wait for the next connection
+                    Socket socket = null;
+                    InputStream stream = null;
+                    try {
+                        socket = shutdownSocket.accept();
+                        socket.setSoTimeout(10 * 1000);  // Ten seconds
+                        stream = socket.getInputStream();
+                    } catch (AccessControlException ace) {
+                        LOG.log(Level.WARNING, "Karaf shutdown socket: security exception: "
+                                           + ace.getMessage(), ace);
+                        continue;
+                    } catch (IOException e) {
+                        LOG.log(Level.SEVERE, "Karaf shutdown socket: accept: ", e);
+                        System.exit(1);
+                    }
+
+                    // Read a set of characters from the socket
+                    StringBuilder command = new StringBuilder();
+                    int expected = 1024; // Cut off to avoid DoS attack
+                    while (expected < shutdown.length()) {
+                        if (random == null) {
+                            random = new Random();
+                        }
+                        expected += (random.nextInt() % 1024);
+                    }
+                    while (expected > 0) {
+                        int ch;
+                        try {
+                            ch = stream.read();
+                        } catch (IOException e) {
+                            LOG.log(Level.WARNING, "Karaf shutdown socket:  read: ", e);
+                            ch = -1;
+                        }
+                        if (ch < 32) {  // Control character or EOF terminates loop
+                            break;
+                        }
+                        command.append((char) ch);
+                        expected--;
+                    }
+
+                    // Close the socket now that we are done with it
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+
+                    // Match against our command string
+                    boolean match = command.toString().equals(shutdown);
+                    if (match) {
+                        LOG.log(Level.INFO, "Karaf shutdown socket: received shutdown command. Stopping framework...");
+                        framework.stop();
+                        break;
+                    } else {
+                        LOG.log(Level.WARNING, "Karaf shutdown socket:  Invalid command '" +
+                                           command.toString() + "' received");
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    shutdownSocket.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
 }
