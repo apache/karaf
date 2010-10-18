@@ -1,0 +1,58 @@
+-#
+-# Copyright (C) 2009-2010 the original author or authors.
+-# See the notice.md file distributed with this work for additional
+-# information regarding copyright ownership.
+-#
+-# Licensed under the Apache License, Version 2.0 (the "License");
+-# you may not use this file except in compliance with the License.
+-# You may obtain a copy of the License at
+-#
+-#     http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing, software
+-# distributed under the License is distributed on an "AS IS" BASIS,
+-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-# See the License for the specific language governing permissions and
+-# limitations under the License.
+-#
+
+-@ var body: String
+-@ var title : String = "Apache Karaf ${pom.version} Guide"
+- response.setContentType("text/html")
+
+-# Only include the console if it's available and the engine is in dev mode.
+- val include_console = engine.isDevelopmentMode && engine.resourceLoader.exists("/org/fusesource/scalate/console/console_head.scaml")
+
+!!! Basic
+%html(lang="en")
+  %head
+    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    %meta(name="description" content="description goes here")
+    %meta(name="keywords" content="keywords,goes,here")
+    %meta(name="author" content="The Apache Karaf Team")
+
+    - if (include_console)
+      = include("/org/fusesource/scalate/console/console_head.scaml")
+
+    %link(href={uri("/css/style.css")} rel="stylesheet" type="text/css")
+    %link(href={uri("/css/pygmentize.css")} rel="stylesheet" type="text/css")
+
+    - if (include_console)
+      %link(href={uri("/css/scalate/console.css")} rel="stylesheet" type="text/css")
+
+    %title
+      = title
+  
+  %body
+    #navigation
+      .wrapper
+        = include("/_navigation.ssp")
+    #content
+      .wrapper
+        !~~ body
+    
+    #footer
+      .wrapper
+        %br
+        - if (include_console)
+          = include("/org/fusesource/scalate/console/console.scaml")

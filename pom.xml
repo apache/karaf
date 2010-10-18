@@ -44,6 +44,7 @@
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
+        <module>documentation</module>
         <module>webconsole</module>
         <module>manual</module>
         <module>exception</module>

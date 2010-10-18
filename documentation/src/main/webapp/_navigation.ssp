@@ -1,0 +1,5 @@
+<ul>
+  <li><a href="${uri("/index.html")}">Home</a></li>
+  <li><a href="${uri("/users-guide/index.html")}">Users Guide</a></li>
+  <li><a href="${uri("/developers-guide/index.html")}">Developers Guide</a></li>
+</ul>
