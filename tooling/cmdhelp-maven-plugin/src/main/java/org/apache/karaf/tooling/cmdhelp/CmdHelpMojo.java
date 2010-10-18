@@ -85,6 +85,13 @@ public class CmdHelpMojo extends AbstractMojo {
      */
     protected String format;
 
+    /**
+     * The classloader to use to load the commands
+     *
+     * @parameter default-value="project"
+     */
+    protected String classLoader;
+
     private static final String FORMAT_CONF = "conf";
     private static final String FORMAT_DOCBX = "docbx";
 
@@ -96,15 +103,21 @@ public class CmdHelpMojo extends AbstractMojo {
             if (!targetFolder.exists()) {
                 targetFolder.mkdirs();
             }
-            
-            List<URL> urls = new ArrayList<URL>();
-            for (Object object : project.getCompileClasspathElements()) {
-                String path = (String) object;
-                urls.add(new File(path).toURI().toURL());
-            }
 
-            ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
-            ClassFinder finder = new ClassFinder(loader, urls);
+            ClassFinder finder;
+            if ("project".equals(classLoader)) {
+                List<URL> urls = new ArrayList<URL>();
+                for (Object object : project.getCompileClasspathElements()) {
+                    String path = (String) object;
+                    urls.add(new File(path).toURI().toURL());
+                }
+                ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
+                finder = new ClassFinder(loader, urls);
+            } else if ("plugin".equals(classLoader)) {
+                finder = new ClassFinder(getClass().getClassLoader());
+            } else {
+                throw new MojoFailureException("classLoader attribute must be 'project' or 'plugin'");
+            }
             List<Class> classes = finder.findAnnotatedClasses(Command.class);
             if (classes.isEmpty()) {
                 throw new MojoFailureException("No command found");
