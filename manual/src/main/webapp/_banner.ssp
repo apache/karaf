@@ -1,0 +1,14 @@
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td align="left" class="topbardiv" nowrap="">
+<a href="http://karaf.apache.org/" title="A server side OSGi distribution">
+            <!--<img border="0" src="http://karaf.apache.org/images/logo.png"></img>--><span style="position: relative; top: -24px; font-family: Comic Sans MS; font-size: 64px; color: black;">Apache Karaf</span>
+</a>
+          </td>
+          <td align="right" nowrap="">
+<a href="http://www.apache.org/" title="The Apache Sofware Foundation">
+            <img border="0" src="/images/asf-logo.png">
+</a>
+          </td>
+        </tr>
+      </table>
