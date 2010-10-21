@@ -26,7 +26,8 @@ public class BundleInfoImpl implements BundleInfo {
     private int startLevel;
     private String location;
     private boolean start;
-    
+    private boolean dependency;
+
 
     public BundleInfoImpl() {
     }
@@ -34,36 +35,43 @@ public class BundleInfoImpl implements BundleInfo {
     public BundleInfoImpl(String location) {
     	this.location = location;
     }
-    
-    
+
+
     public BundleInfoImpl(String location, boolean start) {
     	this.location = location;
         this.start = start;
     }
-    
+
     public BundleInfoImpl(String location, int startLevel) {
     	this.location = location;
         this.startLevel = startLevel;
     }
-    
+
     public BundleInfoImpl(String location, int startLevel, boolean start) {
     	this.location = location;
         this.startLevel = startLevel;
         this.start = start;
     }
-    
+
+    public BundleInfoImpl(String location, int startLevel, boolean start, boolean dependency) {
+        this.location = location;
+        this.startLevel = startLevel;
+        this.start = start;
+        this.dependency = dependency;
+    }
+
     public void setStartLevel(Integer startLevel) {
     	this.startLevel = startLevel;
     }
-	
+
     public int getStartLevel() {
 		return this.startLevel;
 	}
-	
+
 	public void setName(String location) {
 		this.location = location;
 	}
-	
+
 	public String getLocation() {
 		return this.location;
 	}
@@ -75,4 +83,13 @@ public class BundleInfoImpl implements BundleInfo {
 	public boolean isStart() {
 		return start;
 	}
+
+    public void setDependency(boolean dependency) {
+        this.dependency = dependency;
+    }
+
+    public boolean isDependency() {
+        return dependency;
+    }
+
 }
