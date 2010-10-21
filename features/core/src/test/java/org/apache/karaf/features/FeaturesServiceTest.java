@@ -43,6 +43,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.slf4j.Logger;
 
 import static org.easymock.EasyMock.*;
 
@@ -338,9 +339,9 @@ public class FeaturesServiceTest extends TestCase {
     }    
 
 
-    // Tests install of a Repository that includes a feature 
-    // with a feature dependency  
-    // The dependant feature is in the same repository 
+    // Tests install of a Repository that includes a feature
+    // with a feature dependency
+    // The dependant feature is in the same repository
     // Tests uninstall of features
     public void testInstallFeatureWithDependantFeatures() throws Exception {
 
@@ -362,7 +363,7 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle = EasyMock.createMock(Bundle.class);        
+        Bundle installedBundle = EasyMock.createMock(Bundle.class);
 
         // Installs feature f1 with dependency on f2
         // so will install f2 first
@@ -375,7 +376,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
         expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
-        
+
         // Then installs f1
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(isA(String.class),
@@ -386,7 +387,7 @@ public class FeaturesServiceTest extends TestCase {
         expect(bundleContext.getBundle(1234L)).andReturn(installedBundle);
         expect(installedBundle.getHeaders()).andReturn(new Hashtable()).anyTimes();
         installedBundle.start();
-        
+
         // uninstalls first feature name = f1, version = 0.1
         expect(bundleContext.getBundle(1234)).andReturn(installedBundle);
         installedBundle.uninstall();
@@ -401,14 +402,201 @@ public class FeaturesServiceTest extends TestCase {
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
-        svc.addRepository(uri);    
+        svc.addRepository(uri);
 
         svc.installFeature("f1", "0.1");
-                
+
         // Uninstall repository
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f2", "0.1");
-        
+
+    }
+
+    // Tests install of a Repository that includes a feature with a feature dependency
+    public void testInstallFeatureWithDependantFeaturesAndVersionWithoutPreinstall() throws Exception {
+
+        String name = getJarUrl(Bundle.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name=\"f1\" version=\"0.1\">");
+        pw.println("    <feature version=\"0.1\">f2</feature>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.1\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.2\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        BundleContext bundleContext = prepareBundleContextForInstallUninstall();
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        svc.installFeature("f1", "0.1");
+
+        // Uninstall repository
+        svc.uninstallFeature("f1", "0.1");
+        svc.uninstallFeature("f2", "0.1");
+    }
+
+    // Tests install of a Repository that includes a feature with a feature dependency
+    public void testInstallFeatureWithDependantFeaturesAndNoVersionWithoutPreinstall() throws Exception {
+
+        String name = getJarUrl(Bundle.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name=\"f1\" version=\"0.1\">");
+        pw.println("    <feature>f2</feature>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.1\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.2\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        BundleContext bundleContext = prepareBundleContextForInstallUninstall();
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        svc.installFeature("f1", "0.1");
+
+        // Uninstall repository
+        svc.uninstallFeature("f1", "0.1");
+        svc.uninstallFeature("f2", "0.2");
+    }
+
+    public void testInstallFeatureWithDependantFeaturesAndRangeWithoutPreinstall() throws Exception {
+
+        String name = getJarUrl(Bundle.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name=\"f1\" version=\"0.1\">");
+        pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.1\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.2\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        BundleContext bundleContext = prepareBundleContextForInstallUninstall();
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        svc.installFeature("f1", "0.1");
+
+        // Uninstall repository
+        svc.uninstallFeature("f1", "0.1");
+        svc.uninstallFeature("f2", "0.2");
+    }
+
+    public void testInstallFeatureWithDependantFeaturesAndRangeWithPreinstall() throws Exception {
+
+        String name = getJarUrl(Bundle.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name=\"f1\" version=\"0.1\">");
+        pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.1\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.2\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle installedBundle = EasyMock.createMock(Bundle.class);
+
+        // Installs feature f1 with dependency on f2
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(isA(String.class),
+                                           isA(InputStream.class))).andReturn(installedBundle);
+        expect(installedBundle.getBundleId()).andReturn(12345L).anyTimes();
+        expect(bundleContext.getBundle(12345L)).andReturn(installedBundle).anyTimes();
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable()).anyTimes();
+        installedBundle.start();
+
+        expect(bundleContext.getBundles()).andReturn(new Bundle[] { installedBundle });
+        expect(installedBundle.getSymbolicName()).andReturn(name).anyTimes();
+        expect(bundleContext.installBundle(isA(String.class),
+                                           isA(InputStream.class))).andReturn(installedBundle);
+        installedBundle.start();
+
+        // uninstalls first feature name = f2, version = 0.1
+        installedBundle.uninstall();
+
+        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+
+        replay(bundleContext, installedBundle);
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
+
+        svc.installFeature("f2", "0.1");
+        svc.installFeature("f1", "0.1");
+
+        // Uninstall repository
+        svc.uninstallFeature("f1", "0.1");
+        svc.uninstallFeature("f2", "0.1");
+    }
+
+    private BundleContext prepareBundleContextForInstallUninstall() throws Exception {
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle installedBundle = EasyMock.createMock(Bundle.class);
+
+        // Installs feature f1 with dependency on f2
+        expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
+        expect(bundleContext.installBundle(isA(String.class),
+                                           isA(InputStream.class))).andReturn(installedBundle);
+        expect(installedBundle.getBundleId()).andReturn(12345L);
+        expect(installedBundle.getBundleId()).andReturn(12345L);
+        expect(installedBundle.getBundleId()).andReturn(12345L);
+        expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
+        installedBundle.start();
+
+        // uninstalls first feature name = f2, version = 0.1
+        expect(bundleContext.getBundle(12345)).andReturn(installedBundle);
+        installedBundle.uninstall();
+
+        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+
+        replay(bundleContext, installedBundle);
+        return bundleContext;
     }
 
     public void testInstallBatchFeatureWithContinueOnFailureNoClean() throws Exception {

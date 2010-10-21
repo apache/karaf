@@ -33,6 +33,7 @@ import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
@@ -378,12 +379,37 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected void doInstallFeature(InstallationState state, Feature feature) throws Exception {
         for (Feature dependency : feature.getDependencies()) {
-            Feature f = getFeature(dependency.getName(), dependency.getVersion());
-            if (f == null) {
+            VersionRange range = FeatureImpl.DEFAULT_VERSION.equals(dependency.getVersion())
+                        ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
+            Feature fi = null;
+            for (Feature f : installed.keySet()) {
+                if (f.getName().equals(dependency.getName())) {
+                    Version v = VersionTable.getVersion(f.getVersion());
+                    if (range.contains(v)) {
+                        if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
+                            fi = f;
+                        }
+                    }
+                }
+            }
+            if (fi == null) {
+                Map<String, Feature> avail = getFeatures().get(dependency.getName());
+                if (avail != null) {
+                    for (Feature f : avail.values()) {
+                        Version v = VersionTable.getVersion(f.getVersion());
+                        if (range.contains(v)) {
+                            if (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0) {
+                                fi = f;
+                            }
+                        }
+                    }
+                }
+            }
+            if (fi == null) {
                 throw new Exception("No feature named '" + dependency.getName()
                         + "' with version '" + dependency.getVersion() + "' available");
             }
-        	doInstallFeature(state, f);
+            doInstallFeature(state, fi);
         }
         for (String config : feature.getConfigurations().keySet()) {
             Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
