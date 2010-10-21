@@ -17,7 +17,7 @@
       limitations under the License.
 -->
 <features name="karaf-${project.version}">
-    <feature name="spring" version="${spring2.version}">
+    <feature name="spring" version="${spring2.version}" resolver="(obr)">
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
         <bundle>mvn:org.springframework/spring-core/${spring2.version}</bundle>
         <bundle>mvn:org.springframework/spring-beans/${spring2.version}</bundle>
@@ -25,7 +25,7 @@
         <bundle>mvn:org.springframework/spring-context/${spring2.version}</bundle>
         <bundle>mvn:org.springframework/spring-context-support/${spring2.version}</bundle>
     </feature>
-    <feature name="spring" version="${spring.version}">
+    <feature name="spring" version="${spring.version}" resolver="(obr)">
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
         <bundle>mvn:org.springframework/spring-core/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-asm/${spring.version}</bundle>
@@ -35,9 +35,9 @@
         <bundle>mvn:org.springframework/spring-context/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context-support/${spring.version}</bundle>
     </feature>
-    <feature name="spring-dm" version="${spring.osgi.version}">
+    <feature name="spring-dm" version="${spring.osgi.version}" resolver="(obr)">
         <feature version="[2.5.6,4)">spring</feature>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.bundle.version}</bundle>
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.bundle.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-io/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
