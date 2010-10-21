@@ -34,8 +34,6 @@ public class FeatureImpl implements Feature {
     private String version;
     private String resolver;
     private List<Feature> dependencies = new ArrayList<Feature>();
-    // TODO 
-    // private List<String> bundles = new ArrayList<String>();
     private List<BundleInfo> bundles = new ArrayList<BundleInfo>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
     public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";

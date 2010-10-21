@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ public class ObrResolver implements Resolver {
     public List<BundleInfo> resolve(Feature feature) throws Exception {
         List<Requirement> reqs = new ArrayList<Requirement>();
         List<Resource> ress = new ArrayList<Resource>();
+        List<Resource> deploy = new ArrayList<Resource>();
         Map<Object, BundleInfo> infos = new HashMap<Object, BundleInfo>();
         for (BundleInfo bundleInfo : feature.getBundles()) {
             try {
@@ -74,7 +76,9 @@ public class ObrResolver implements Resolver {
         org.apache.felix.bundlerepository.Resolver resolver = repositoryAdmin.resolver(repos.toArray(new Repository[repos.size()]));
 
         for (Resource res : ress) {
-            resolver.add(res);
+            if (!infos.get(res).isDependency()) {
+                resolver.add(res);
+            }
         }
         for (Requirement req : reqs) {
             resolver.add(req);
@@ -99,7 +103,9 @@ public class ObrResolver implements Resolver {
         }
 
         List<BundleInfo> bundles = new ArrayList<BundleInfo>();
-        for (Resource res : resolver.getRequiredResources()) {
+        Collections.addAll(deploy, resolver.getAddedResources());
+        Collections.addAll(deploy, resolver.getRequiredResources());
+        for (Resource res : deploy) {
             BundleInfo info = infos.get(res);
             if (info == null) {
                 Reason[] reasons = resolver.getReason(res);

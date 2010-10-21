@@ -163,12 +163,18 @@ public class RepositoryImpl implements Repository {
                         Element b = (Element) bundleNodes.item(j);
                         String bStartLevel = b.getAttribute("start-level");
                         String bStart = b.getAttribute("start");
+                        String bDependency = b.getAttribute("dependency");
                         boolean bs = true;
+                        boolean bd = false;
                         int bsl = 0;
                         
                         // Check the value of the "start" attribute
                         if (bStart != null && bStart.length() > 0) {
                             bs = Boolean.parseBoolean(bStart);
+                        }
+                        // Check the value of the "dependency" attribute
+                        if (bDependency != null && bDependency.length() > 0) {
+                            bd = Boolean.parseBoolean(bDependency);
                         }
                         // Check start level
                         if (bStartLevel != null && bStartLevel.length() > 0) {
@@ -178,7 +184,7 @@ public class RepositoryImpl implements Repository {
                         		LOGGER.error("The start-level is not an int value for the bundle : " + b.getTextContent());
                             }
                         }
-                        f.addBundle(new BundleInfoImpl(b.getTextContent(), bsl, bs));
+                        f.addBundle(new BundleInfoImpl(b.getTextContent(), bsl, bs, bd));
                     }
                     features.add(f);
                 }

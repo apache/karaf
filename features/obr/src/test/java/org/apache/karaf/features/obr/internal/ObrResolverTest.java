@@ -63,6 +63,7 @@ public class ObrResolverTest {
         expect(admin.resolver(EasyMock.<org.apache.felix.bundlerepository.Repository[]>anyObject())).andReturn(resolver);
         resolver.add(EasyMock.capture(captureReq));
         expect(resolver.resolve(Resolver.NO_OPTIONAL_RESOURCES)).andReturn(true);
+        expect(resolver.getAddedResources()).andReturn(new Resource[] { });
         expect(resolver.getRequiredResources()).andReturn(new Resource[] { resource });
         expect(resolver.getReason(resource)).andAnswer(new IAnswer() {
             public Object answer() throws Throwable {
