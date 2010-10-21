@@ -45,7 +45,6 @@
         <module>client</module>
         <module>management</module>
         <module>webconsole</module>
-        <module>manual</module>
         <module>exception</module>
         <module>assembly</module>
         <module>demos</module>
@@ -894,7 +893,7 @@
                         <useReleaseProfile>false</useReleaseProfile>
                         <preparationGoals>clean install</preparationGoals>
                         <goals>deploy</goals>
-                        <arguments>-Prelease,deploy</arguments>
+                        <arguments>-Prelease,deploy,manual</arguments>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                     </configuration>
                 </plugin>
@@ -1086,6 +1085,12 @@
             <properties>
                 <maven.test.skip>true</maven.test.skip>
             </properties>
+        </profile>
+        <profile>
+            <id>manual</id>
+            <modules>
+              <module>manual</module>
+            </modules>
         </profile>
         <profile>
             <id>rat</id>
