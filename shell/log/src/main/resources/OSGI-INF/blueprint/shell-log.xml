@@ -53,6 +53,11 @@
                 <property name="events" ref="events"/>
             </action>
         </command>
+        <command name="log/clear">
+            <action class="org.apache.karaf.shell.log.ClearLog">
+                <property name="events" ref="events"/>
+            </action>
+        </command>
         <command name="log/get">
             <action class="org.apache.karaf.shell.log.GetLogLevel" />
         </command>

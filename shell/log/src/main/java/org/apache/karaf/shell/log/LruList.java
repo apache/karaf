@@ -55,6 +55,14 @@ public class LruList {
         }
     }
 
+    public void clear() {
+        synchronized (elements) {
+            start = 0;
+            end = 0;
+            elements = new PaxLoggingEvent[maxElements];
+        }
+    }
+
     public void add(PaxLoggingEvent element) {
         synchronized (elements) {
             if (null == element) {
