@@ -21,9 +21,11 @@
     <OCD id="org.apache.karaf.management" name="%management.name" description="%management.description">
         <AD id="rmiRegistryPort" type="Integer" default="1099" name="%rmiRegistryPort.name"
             description="%rmiRegistryPort.description"/>
+        <AD id="rmiServerPort" type="Integer" default="44444" name="%rmiServerPort.name"
+            description="%rmiServerPort.description"/>
         <AD id="jmxRealm" type="String" default="karaf" name="%jmxRealm.name"
             description="%jmxRealm.description"/>
-        <AD id="serviceUrl" type="String" default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi" name="%serviceUrl.name"
+        <AD id="serviceUrl" type="String" default="service:jmx:rmi://localhost:44444/jndi/rmi://localhost:1099/jmxrmi" name="%serviceUrl.name"
             description="%serviceUrl.description"/>
         <AD id="daemon" type="Boolean" default="true" name="%daemon.name" description="%daemon.description"/>
         <AD id="threaded" type="Boolean" default="true" name="%threaded.name" description="%threaded.description"/>
