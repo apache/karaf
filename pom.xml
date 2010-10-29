@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
 
@@ -371,6 +372,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.karaf.jaas</groupId>
+                <artifactId>org.apache.karaf.jaas.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.karaf.webconsole</groupId>
                 <artifactId>org.apache.karaf.webconsole.admin</artifactId>
                 <version>${project.version}</version>
@@ -647,12 +653,12 @@
                 <version>${mina.version}</version>
                 <exclusions>
                     <exclusion>
-                      <groupId>org.easymock</groupId>
-                      <artifactId>easymock</artifactId>
+                        <groupId>org.easymock</groupId>
+                        <artifactId>easymock</artifactId>
                     </exclusion>
                     <exclusion>
-                      <groupId>org.easymock</groupId>
-                      <artifactId>easymockclassextension</artifactId>
+                        <groupId>org.easymock</groupId>
+                        <artifactId>easymockclassextension</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1014,7 +1020,8 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <tasks>
-                                <copy file="NOTICE" todir="target/maven-shared-archive-resources/META-INF" failonerror="false" overwrite="true" />
+                                <copy file="NOTICE" todir="target/maven-shared-archive-resources/META-INF"
+                                      failonerror="false" overwrite="true"/>
                             </tasks>
                         </configuration>
                         <goals>
@@ -1030,22 +1037,22 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-				<inherited>true</inherited>
-				<executions>
-					<execution>
-						<id>cleanVersions</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>cleanVersions</goal>
-						</goals>
-						<configuration>
-							<versions>
-								<karaf.osgi.version>${project.version}</karaf.osgi.version>
-							</versions>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+                <inherited>true</inherited>
+                <executions>
+                    <execution>
+                        <id>cleanVersions</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>cleanVersions</goal>
+                        </goals>
+                        <configuration>
+                            <versions>
+                                <karaf.osgi.version>${project.version}</karaf.osgi.version>
+                            </versions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -1089,7 +1096,7 @@
         <profile>
             <id>manual</id>
             <modules>
-              <module>manual</module>
+                <module>manual</module>
             </modules>
         </profile>
         <profile>
@@ -1132,7 +1139,7 @@
         <profile>
             <id>release</id>
             <modules>
-              <module>manual</module>
+                <module>manual</module>
             </modules>
             <build>
                 <plugins>
