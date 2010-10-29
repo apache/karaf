@@ -16,32 +16,22 @@
  */
 package org.apache.karaf.jaas.config.impl;
 
+import org.apache.aries.blueprint.ParserContext;
+import org.apache.aries.blueprint.mutable.*;
+import org.apache.karaf.jaas.boot.ProxyLoginModule;
+import org.apache.karaf.jaas.config.JaasRealm;
+import org.apache.karaf.jaas.config.KeystoreInstance;
+import org.osgi.service.blueprint.container.ComponentDefinitionException;
+import org.osgi.service.blueprint.reflect.ComponentMetadata;
+import org.osgi.service.blueprint.reflect.Metadata;
+import org.osgi.service.blueprint.reflect.RefMetadata;
+import org.osgi.service.blueprint.reflect.ValueMetadata;
+import org.w3c.dom.*;
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Comment;
-import org.w3c.dom.EntityReference;
-
-import org.osgi.service.blueprint.container.ComponentDefinitionException;
-import org.osgi.service.blueprint.reflect.ComponentMetadata;
-import org.osgi.service.blueprint.reflect.ValueMetadata;
-import org.osgi.service.blueprint.reflect.RefMetadata;
-import org.osgi.service.blueprint.reflect.Metadata;
-import org.apache.karaf.jaas.config.JaasRealm;
-import org.apache.karaf.jaas.config.KeystoreInstance;
-import org.apache.karaf.jaas.boot.ProxyLoginModule;
-import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
-import org.apache.aries.blueprint.mutable.MutableValueMetadata;
-import org.apache.aries.blueprint.mutable.MutableRefMetadata;
-import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
-import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
-import org.apache.aries.blueprint.ParserContext;
 
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
 
@@ -49,15 +39,15 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         return getClass().getResource("/org/apache/karaf/jaas/config/karaf-jaas.xsd");
     }
 
-	public Set<Class> getManagedClasses() {
-		return new HashSet<Class>(Arrays.asList(
-			Config.class,
-			ResourceKeystoreInstance.class
-		));
-	}
+    public Set<Class> getManagedClasses() {
+        return new HashSet<Class>(Arrays.asList(
+                Config.class,
+                ResourceKeystoreInstance.class
+        ));
+    }
 
     public Metadata parse(Element element, ParserContext context) {
-		String name = element.getLocalName() != null ? element.getLocalName() : element.getNodeName();
+        String name = element.getLocalName() != null ? element.getLocalName() : element.getNodeName();
         if ("config".equals(name)) {
             return parseConfig(element, context);
         } else if ("keystore".equals(name)) {
@@ -88,6 +78,9 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
                 MutableBeanMetadata md = context.createMetadata(MutableBeanMetadata.class);
                 md.setRuntimeClass(Module.class);
                 md.addProperty("className", createValue(context, childElement.getAttribute("className")));
+                if (childElement.getAttribute("name") != null) {
+                    md.addProperty("name", createValue(context, childElement.getAttribute("name")));
+                }
                 if (childElement.getAttribute("flags") != null) {
                     md.addProperty("flags", createValue(context, childElement.getAttribute("flags")));
                 }
@@ -101,7 +94,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         }
         // Publish Config
         MutableServiceMetadata service = context.createMetadata(MutableServiceMetadata.class);
-		service.setId(name);
+        service.setId(name);
         service.setServiceComponent(bean);
         service.addInterface(JaasRealm.class.getName());
         service.addServiceProperty(createValue(context, ProxyLoginModule.PROPERTY_MODULE), createValue(context, name));
@@ -136,7 +129,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         }
         // Publish Config
         MutableServiceMetadata service = context.createMetadata(MutableServiceMetadata.class);
-		service.setId(name);
+        service.setId(name);
         service.setServiceComponent(bean);
         service.addInterface(KeystoreInstance.class.getName());
         return service;

@@ -24,9 +24,18 @@ import java.util.Properties;
  */
 public class Module {
 
+    private String name;
     private String className;
     private String flags;
     private Properties options;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getClassName() {
         return className;

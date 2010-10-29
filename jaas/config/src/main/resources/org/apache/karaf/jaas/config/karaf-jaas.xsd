@@ -30,7 +30,8 @@
             <xs:sequence>
                 <xs:element name="module" minOccurs="0" maxOccurs="unbounded">
                     <xs:complexType mixed="true">
-                        <xs:attribute name="className" use="required" type="xs:string" />
+                        <xs:attribute name="name" use="optional" type="xs:string"/>
+                        <xs:attribute name="className" use="required" type="xs:string"/>
                         <xs:attribute name="flags" default="required">
                             <xs:simpleType>
                                 <xs:restriction base="xs:NMTOKEN">
@@ -44,19 +45,19 @@
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
-            <xs:attribute name="name" use="required" type="xs:string" />
-            <xs:attribute name="rank" use="optional" default="0" type="xs:int" />
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="rank" use="optional" default="0" type="xs:int"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="keystore">
         <xs:complexType>
-            <xs:attribute name="name" use="required" type="xs:string" />
-            <xs:attribute name="rank" use="optional" default="0" type="xs:int" />
-            <xs:attribute name="path" use="required" type="xs:string" />
-            <xs:attribute name="keystorePassword" use="optional" type="xs:string" />
-            <xs:attribute name="keyPasswords" use="optional" type="xs:string" />
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="rank" use="optional" default="0" type="xs:int"/>
+            <xs:attribute name="path" use="required" type="xs:string"/>
+            <xs:attribute name="keystorePassword" use="optional" type="xs:string"/>
+            <xs:attribute name="keyPasswords" use="optional" type="xs:string"/>
         </xs:complexType>
     </xs:element>
-    
+
 </xs:schema>
