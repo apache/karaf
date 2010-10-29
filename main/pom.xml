@@ -159,12 +159,12 @@
                                             <classifier>sources</classifier>
                                         </artifactItem>
                                         <artifactItem>
-                                            <groupId>org.apache.felix</groupId>
+                                            <groupId>org.osgi</groupId>
                                             <artifactId>org.osgi.core</artifactId>
                                             <classifier>sources</classifier>
                                         </artifactItem>
                                         <artifactItem>
-                                            <groupId>org.apache.felix</groupId>
+                                            <groupId>org.osgi</groupId>
                                             <artifactId>org.apache.felix.framework</artifactId>
                                             <classifier>sources</classifier>
                                         </artifactItem>
