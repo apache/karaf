@@ -16,12 +16,13 @@
     limitations under the License.
 -->
 <assembly>
-    <id></id> <!-- intentionally left blank -> http://jira.codehaus.org/browse/MASSEMBLY-301 -->
+    <id></id>
+    <!-- intentionally left blank -> http://jira.codehaus.org/browse/MASSEMBLY-301 -->
     <formats>
         <format>zip</format>
     </formats>
     <fileSets>
-      <!-- Copy license and other files from root -->
+        <!-- Copy license and other files from root -->
         <fileSet>
             <directory>..</directory>
             <outputDirectory>/</outputDirectory>
@@ -32,7 +33,7 @@
             <lineEnding>dos</lineEnding>
         </fileSet>
 
-      <!-- Copy over everything that needs to get dos line endings -->
+        <!-- Copy over everything that needs to get dos line endings -->
         <fileSet>
             <directory>src/main/distribution/text</directory>
             <outputDirectory>/</outputDirectory>
@@ -57,7 +58,7 @@
             <directory>target/classes/etc</directory>
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>dos</lineEnding>
-        </fileSet>        
+        </fileSet>
         <!-- Copy over the examples -->
         <fileSet>
             <directory>target/classes/demos</directory>
@@ -74,19 +75,19 @@
             </excludes>
         </fileSet>
 
-      <!-- Copy over files that should not get the line endings converted -->
+        <!-- Copy over files that should not get the line endings converted -->
         <fileSet>
             <directory>src/main/distribution/binary</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
 
-      <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
+        <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
         <fileSet>
             <directory>src/main/distribution/windows-binary</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
-      
-      <!-- Copy over jar files -->
+
+        <!-- Copy over jar files -->
         <fileSet>
             <directory>target/dependencies</directory>
             <outputDirectory>/</outputDirectory>
@@ -132,7 +133,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/felix/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
                 <include>org.apache.felix:org.apache.felix.framework</include>
@@ -143,7 +146,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/ops4j/pax/logging/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/ops4j/pax/logging/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.ops4j.pax.logging:pax-logging-api</include>
                 <include>org.ops4j.pax.logging:pax-logging-service</include>
@@ -153,7 +158,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/ops4j/pax/url/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/ops4j/pax/url/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.ops4j.pax.url:pax-url-mvn</include>
                 <include>org.ops4j.pax.url:pax-url-wrap</include>
@@ -163,7 +170,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf:org.apache.karaf.management</include>
             </includes>
@@ -172,7 +181,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/features/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/karaf/features/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf.features:org.apache.karaf.features.core</include>
                 <include>org.apache.karaf.features:org.apache.karaf.features.command</include>
@@ -183,7 +194,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/admin/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/karaf/admin/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf.admin:org.apache.karaf.admin.core</include>
                 <include>org.apache.karaf.admin:org.apache.karaf.admin.command</include>
@@ -194,19 +207,23 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf.deployer:org.apache.karaf.deployer.spring</include>
                 <include>org.apache.karaf.deployer:org.apache.karaf.deployer.blueprint</include>
                 <include>org.apache.karaf.deployer:org.apache.karaf.deployer.features</include>
-                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.kar</include>                
+                <include>org.apache.karaf.deployer:org.apache.karaf.deployer.kar</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.console</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.dev</include>
@@ -222,17 +239,22 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/karaf/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/karaf/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.config</include>
                 <include>org.apache.karaf.jaas:org.apache.karaf.jaas.modules</include>
+                <include>org.apache.karaf.jaas:org.apache.karaf.jaas.command</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/sshd/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/sshd/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.sshd:sshd-core</include>
             </includes>
@@ -241,7 +263,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/mina/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/mina/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.mina:mina-core</include>
             </includes>
@@ -250,7 +274,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/eclipse/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/eclipse/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.eclipse:osgi</include>
             </includes>
@@ -259,7 +285,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/aries/blueprint/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/aries/blueprint/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.aries.blueprint:org.apache.aries.blueprint</include>
             </includes>
@@ -268,7 +296,9 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/aries/jmx/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>
+                org/apache/aries/jmx/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
             <includes>
                 <include>org.apache.aries.jmx:org.apache.aries.jmx</include>
                 <include>org.apache.aries.jmx:org.apache.aries.jmx.blueprint</include>
