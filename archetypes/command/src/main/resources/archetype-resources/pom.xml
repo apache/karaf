@@ -27,7 +27,7 @@
 
     <properties>
         <junit.version>4.7_1</junit.version>
-        <felix.osgi.version>1.4.0</felix.osgi.version>
+        <osgi.version>4.2.0</osgi.version>
     </properties>
 
     <dependencies>
@@ -38,16 +38,16 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>${felix.osgi.version}</version>
+            <version>${osgi.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>${felix.osgi.version}</version>
+            <version>${osgi.version}</version>
             <scope>provided</scope>
         </dependency>
 
