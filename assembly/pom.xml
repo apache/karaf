@@ -285,9 +285,48 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.jetty-bundle</artifactId>
-            <optional>true</optional>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-continuation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-xml</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>org.objectweb.asm</groupId>
+<artifactId>com.springsource.org.objectweb.asm</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>org.objectweb.asm</groupId>
+<artifactId>com.springsource.org.objectweb.asm.tree</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>org.objectweb.asm</groupId>
+<artifactId>com.springsource.org.objectweb.asm.commons</artifactId>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
@@ -322,6 +361,11 @@
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-extender-whiteboard</artifactId>
+            <optional>true</optional>
+        </dependency>
+         <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-deployer</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

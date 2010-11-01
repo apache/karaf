@@ -55,33 +55,47 @@
     <feature name="config" version="${project.version}">
         <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
     </feature>
-    <feature name="http" version="${project.version}">
+	<feature name="jetty" version="${jetty.version}" resolver="(obr)">
+        <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
+        <bundle dependency='true'>mvn:org.objectweb.asm/com.springsource.org.objectweb.asm/${asm.version}</bundle>
+	    <bundle dependency='true'>mvn:org.objectweb.asm/com.springsource.org.objectweb.asm.tree/${asm.version}</bundle>
+	    <bundle dependency='true'>mvn:org.objectweb.asm/com.springsource.org.objectweb.asm.commons/${asm.version}</bundle>
+	    <bundle>mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
+	    <bundle>mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
+	    <bundle>mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
+	    <bundle>mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
+	    <bundle>mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle>
+	    <bundle>mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle>
+	    <bundle>mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
+    	<bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
+	</feature>
+    <feature name="http" version="${project.version}" resolver="(obr)">
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
+            org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
         </config>
-        <bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jetty-bundle/${jetty.bundle.version}</bundle>
-        <bundle>mvn:org.ops4j.pax.web/pax-web-api/${pax.web.version}</bundle>
+        <feature version="[7.0,8.0)">jetty</feature>
+    	<bundle>mvn:org.ops4j.pax.web/pax-web-api/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${pax.web.version}</bundle>
     </feature>
-    <feature name="war" version="${project.version}">
-        <feature version="${project.version}">http</feature>
+    <feature name="war" version="${project.version}" resolver="(obr)">
+        <feature>http</feature>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-extender-war/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-extender-whiteboard/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-deployer/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.url/pax-url-war/${pax.url.version}</bundle>
-        <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.war/${project.version}</bundle>
     </feature>
     <feature name="kar" version="${project.version}">
         <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
     </feature>
     <feature name="webconsole-base" version="${project.version}">
-        <feature version="${project.version}">http</feature>
         <config name="org.apache.karaf.webconsole">
             realm=karaf
         </config>
+        <feature>http</feature>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.branding/${project.version}</bundle>
         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}</bundle>
