@@ -79,7 +79,7 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>${commons.logging.version}</version>
+            <version>${commons-logging.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

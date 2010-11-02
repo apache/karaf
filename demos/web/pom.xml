@@ -33,7 +33,7 @@
   
   <properties>
     <jetty.port>8080</jetty.port>
-    <jetty.version>6.1.12rc1</jetty.version>
+    <maven-jetty-plugin.version>6.1.25</maven-jetty-plugin.version>
     <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
 
     <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -87,7 +87,7 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
-        <version>${jetty.version}</version>
+        <version>${maven-jetty-plugin.version}</version>
         <configuration>
           <connectors>
             <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
