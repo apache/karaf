@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
@@ -106,12 +107,11 @@
         <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
         <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
         <jasypt.bundle.version>1.6_1</jasypt.bundle.version>
-        <jetty.bundle.version>6.1.22_2</jetty.bundle.version>
-        <junit.bundle.version>4.7_1</junit.bundle.version>
+        <jetty.bundle.version>6.1.25_1-SNAPSHOT</jetty.bundle.version>
+        <junit.bundle.version>4.7_2</junit.bundle.version>
 
-        <commons.logging.version>1.1.1</commons.logging.version>
-        <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-        <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
+        <commons-logging.version>1.1.1</commons-logging.version>
+        <depends-maven-plugin.version>1.0</depends-maven-plugin.version>
         <easymock.version>2.4</easymock.version>
         <equinox.version>3.6.0.v20100517</equinox.version>
         <felix.bundlerepository.version>1.6.4</felix.bundlerepository.version>
@@ -142,7 +142,7 @@
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring2.version>2.5.6.SEC01</spring2.version>
-        <spring.version>3.0.3.RELEASE</spring.version>
+        <spring.version>3.0.4.RELEASE</spring.version>
         <sshd.version>0.4.0</sshd.version>
         <xbean.version>3.7</xbean.version>
 
@@ -586,7 +586,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.jetty-bundle</artifactId>
+                <artifactId>org.apache.servicemix.bundles.jetty</artifactId>
                 <version>${jetty.bundle.version}</version>
             </dependency>
             <dependency>
@@ -607,7 +607,7 @@
             <dependency>
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
-                <version>${commons.logging.version}</version>
+                <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.maven.artifact</groupId>
@@ -898,7 +898,7 @@
                 <plugin>
                     <groupId>org.apache.servicemix.tooling</groupId>
                     <artifactId>depends-maven-plugin</artifactId>
-                    <version>${depends.maven.plugin.version}</version>
+                    <version>${depends-maven-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
