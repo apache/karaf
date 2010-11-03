@@ -24,7 +24,7 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
-    private org.apache.felix.gogo.runtime.activator.Activator activator = new org.apache.felix.gogo.runtime.activator.Activator();
+    private org.apache.felix.gogo.runtime.Activator activator = new org.apache.felix.gogo.runtime.Activator();
 
     public void start(BundleContext context) throws Exception {
         AnsiConsole.systemInstall();
