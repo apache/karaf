@@ -54,7 +54,7 @@ public abstract class AbstractBundleCommand extends OsgiCommandSupport {
 
         Bundle bundle = getBundleContext().getBundle(id);
         if (bundle == null) {
-            System.err.println("Bundle ID" + id + " is invalid");
+            System.err.println("Bundle ID " + id + " is invalid");
             return null;
         }
 

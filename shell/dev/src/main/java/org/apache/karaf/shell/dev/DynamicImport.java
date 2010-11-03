@@ -120,6 +120,9 @@ public class DynamicImport extends AbstractBundleCommand {
                 result.append(",");
             }
         }
+        if (result.length() == 0) {
+            return "--none--";
+        }
         return result.toString();
     }
 }
