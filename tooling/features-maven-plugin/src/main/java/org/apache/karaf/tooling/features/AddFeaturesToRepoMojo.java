@@ -106,7 +106,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 else {
                     bundle = bundle.substring(index);
                 }
-                // Truncate the URL when a '#' or a '?' is encountered
+                // Truncate the URL when a '#', a '?' or a '$' is encountered
                 final int index1 = bundle.indexOf('?');
                 final int index2 = bundle.indexOf('#');
                 int endIndex = -1;
@@ -121,6 +121,10 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 }
                 if (endIndex >= 0) {
                     bundle = bundle.substring(0, endIndex);
+                }
+                final int index3 = bundle.indexOf('$');
+                if (index3 > 0) {
+                	bundle = bundle.substring(0, index3);
                 }
                               
                 String[] parts = bundle.substring("mvn:".length()).split("/");
