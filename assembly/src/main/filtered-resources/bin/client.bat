@@ -81,7 +81,7 @@ if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
     call :warn Enabling Java debug options: %JAVA_DEBUG_OPTS%
 :KARAF_DEBUG_END
 
-set CLASSPATH=%KARAF_HOME%\lib\karaf-client.jar
+set CLASSPATH=%KARAF_HOME%\lib\bin\karaf-client.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\sshd\sshd-core\${sshd.version}\sshd-core-${sshd.version}.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\mina\mina-core\${mina.version}\mina-core-${mina.version}.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.karaf.shell.console\${project.version}\org.apache.karaf.shell.console-${project.version}.jar

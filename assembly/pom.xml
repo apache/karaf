@@ -367,7 +367,7 @@
                                 <artifactItem>
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.client</artifactId>
-                                    <outputDirectory>target/dependencies/lib</outputDirectory>
+                                    <outputDirectory>target/dependencies/lib/bin</outputDirectory>
                                     <destFileName>karaf-client.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
