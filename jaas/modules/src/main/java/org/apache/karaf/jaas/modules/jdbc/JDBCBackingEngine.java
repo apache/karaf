@@ -19,12 +19,17 @@ package org.apache.karaf.jaas.modules.jdbc;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.jaas.modules.RolePrincipal;
+import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author iocanel
@@ -43,6 +48,8 @@ public class JDBCBackingEngine implements BackingEngine {
     private String deleteRoleStatement = "DELETE FROM ROLES WHERE USERNAME=? AND ROLE=?";
     private String deleteAllUserRolesStatement = "DELETE FROM ROLES WHERE USERNAME=?";
     private String deleteUserStatement = "DELETE FROM USERS WHERE USERNAME=?";
+    private String selectUsersStatement = "SELECT USERNAME FROM USERS";
+    private String selectRolesStatement = "SELECT ROLE FROM ROLES WHERE USERNAME=?";
 
 
     /**
@@ -158,6 +165,103 @@ public class JDBCBackingEngine implements BackingEngine {
                 }
             }
         }
+    }
+
+    /**
+     * List all Users
+     *
+     * @return
+     */
+    public List<UserPrincipal> listUsers() {
+        List<UserPrincipal> users = new ArrayList<UserPrincipal>();
+
+        Connection connection = null;
+        PreparedStatement listUserStatement = null;
+        ResultSet usersResultSet = null;
+
+
+        if (dataSource != null) {
+
+            try {
+                connection = dataSource.getConnection();
+
+                //Remove from users
+                listUserStatement = connection.prepareStatement(selectUsersStatement);
+                usersResultSet = listUserStatement.executeQuery();
+                while (!usersResultSet.next()) {
+                    String username = usersResultSet.getString(0);
+                    users.add(new UserPrincipal(username));
+                }
+            } catch (SQLException e) {
+                LOG.error("Error executiong statement", e);
+            } finally {
+                try {
+                    if (usersResultSet != null) {
+                        usersResultSet.close();
+                    }
+                    if (listUserStatement != null) {
+                        listUserStatement.close();
+                    }
+                    if (connection != null) {
+                        connection.close();
+                    }
+                } catch (SQLException e) {
+                    LOG.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+                }
+            }
+        }
+        return users;
+    }
+
+    /**
+     * List the roles of the {@param user}.
+     *
+     * @param user
+     * @return
+     */
+    public List<RolePrincipal> listRoles(UserPrincipal user) {
+        List<RolePrincipal> roles = new ArrayList<RolePrincipal>();
+
+        Connection connection = null;
+        PreparedStatement listRolesStatement = null;
+        ResultSet rolesResultSet = null;
+
+
+        if (dataSource != null) {
+
+            try {
+                connection = dataSource.getConnection();
+
+                //Remove from roles
+                listRolesStatement = connection.prepareStatement(selectRolesStatement);
+                listRolesStatement.setString(1, user.getName());
+
+                rolesResultSet = listRolesStatement.executeQuery();
+
+                while (!rolesResultSet.next()) {
+                    String role = rolesResultSet.getString(1);
+                    roles.add(new RolePrincipal(role));
+                }
+
+            } catch (SQLException e) {
+                LOG.error("Error executiong statement", e);
+            } finally {
+                try {
+                    if (rolesResultSet != null) {
+                        rolesResultSet.close();
+                    }
+                    if (listRolesStatement != null) {
+                        listRolesStatement.close();
+                    }
+                    if (connection != null) {
+                        connection.close();
+                    }
+                } catch (SQLException e) {
+                    LOG.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+                }
+            }
+        }
+        return roles;
     }
 
     /**
