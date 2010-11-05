@@ -17,8 +17,8 @@ import java.util.Queue;
  *
  * @author iocanel
  */
-@Command(scope = "jaas", name = "list", description = "Lists the modification on the active realm/module.")
-public class ListCommand extends JaasCommandSupport {
+@Command(scope = "jaas", name = "pending", description = "Lists the modification on the active realm/module.")
+public class ListPendingCommand extends JaasCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
@@ -35,7 +35,7 @@ public class ListCommand extends JaasCommandSupport {
                     System.out.println(command);
                 }
             } else {
-                System.err.println("No JAAS command in queue.");
+                System.err.println("No JAAS command¾ in queue.");
             }
         } else {
             System.err.println("No JAAS Realm / Module has been selected.");

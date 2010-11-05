@@ -19,8 +19,13 @@ package org.apache.karaf.jaas.modules.properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.jaas.modules.RolePrincipal;
+import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.apache.karaf.util.Properties;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -96,6 +101,37 @@ public class PropertiesBackingEngine implements BackingEngine {
     public void deleteUser(String username) {
         users.remove(username);
 
+    }
+
+    /**
+     * List Users
+     *
+     * @return
+     */
+    public List<UserPrincipal> listUsers() {
+        List<UserPrincipal> result = new ArrayList<UserPrincipal>();
+
+        for (String userNames : users.keySet()) {
+            UserPrincipal userPrincipal = new UserPrincipal(userNames);
+            result.add(userPrincipal);
+        }
+        return result;
+    }
+
+    /**
+     * List the Roles of the {@param user}
+     *
+     * @param user
+     * @return
+     */
+    public List<RolePrincipal> listRoles(UserPrincipal user) {
+        List<RolePrincipal> result = new ArrayList<RolePrincipal>();
+        String userInfo = users.get(user.getName());
+        String[] infos = userInfo.split(",");
+        for (int i = 1; i < infos.length; i++) {
+            result.add(new RolePrincipal(infos[i]));
+        }
+        return result;
     }
 
     /**

@@ -14,6 +14,8 @@
  */
 package org.apache.karaf.jaas.modules;
 
+import java.util.List;
+
 /**
  * @author iocanel
  */
@@ -34,6 +36,19 @@ public interface BackingEngine {
      * @param username
      */
     void deleteUser(String username);
+
+    /**
+     * List Users
+     */
+    List<UserPrincipal> listUsers();
+
+    /**
+     * List Roles for {@param user}.
+     *
+     * @param user
+     * @return
+     */
+    List<RolePrincipal> listRoles(UserPrincipal user);
 
     /**
      * Add a role to the user

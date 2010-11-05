@@ -84,7 +84,7 @@ public class EncryptionSupport {
                 } catch (InvalidSyntaxException e) {
                     throw new IllegalStateException("The encryption service filter is not well formed.", e);
                 }
-                if (encryptionServiceReferences.length == 0) {
+                if (encryptionServiceReferences == null || encryptionServiceReferences.length == 0) {
                     if (name != null && name.length() > 0) {
                         throw new IllegalStateException("Encryption service " + name + " not found. Please check that the encryption service is correctly set up.");
                     } else {
