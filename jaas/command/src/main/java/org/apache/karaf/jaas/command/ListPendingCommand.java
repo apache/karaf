@@ -35,7 +35,7 @@ public class ListPendingCommand extends JaasCommandSupport {
                     System.out.println(command);
                 }
             } else {
-                System.err.println("No JAAS command¾ in queue.");
+                System.err.println("No JAAS command in queue.");
             }
         } else {
             System.err.println("No JAAS Realm / Module has been selected.");
