@@ -112,7 +112,7 @@ public class RepositoryImpl implements Repository {
                 if ("repository".equals(node.getNodeName())) {
                     Element e = (Element) nodes.item(i);
                     try {
-                        URI newrepo = new URI(e.getTextContent());
+                        URI newrepo = new URI(e.getTextContent().trim());
                         repositories.add(newrepo);
                     } catch (URISyntaxException ex) {
                         LOGGER.error("Could not load feature repository: " + ex.getMessage() + " in feature repository " + uri);
@@ -184,7 +184,7 @@ public class RepositoryImpl implements Repository {
                         		LOGGER.error("The start-level is not an int value for the bundle : " + b.getTextContent());
                             }
                         }
-                        f.addBundle(new BundleInfoImpl(b.getTextContent(), bsl, bs, bd));
+                        f.addBundle(new BundleInfoImpl(b.getTextContent().trim(), bsl, bs, bd));
                     }
                     features.add(f);
                 }
