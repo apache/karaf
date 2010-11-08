@@ -118,11 +118,11 @@
         <equinox.version>3.6.0.v20100517</equinox.version>
         <felix.bundlerepository.version>1.6.4</felix.bundlerepository.version>
         <felix.configadmin.version>1.2.8</felix.configadmin.version>
-        <felix.fileinstall.version>3.0.2</felix.fileinstall.version>
-        <felix.framework.version>3.0.5</felix.framework.version>
+        <felix.fileinstall.version>3.1.0</felix.fileinstall.version>
+        <felix.framework.version>3.0.6</felix.framework.version>
         <felix.gogo.version>0.6.1</felix.gogo.version>
         <felix.plugin.version>2.1.0</felix.plugin.version>
-        <felix.utils.version>1.0.0</felix.utils.version>
+        <felix.utils.version>1.1.0</felix.utils.version>
         <felix.webconsole.version>3.1.2</felix.webconsole.version>
         <felix.metatype.version>1.0.4</felix.metatype.version>
         <aries.blueprint.version>0.3-incubating-SNAPSHOT</aries.blueprint.version>
@@ -144,7 +144,7 @@
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring2.version>2.5.6.SEC02</spring2.version>
         <spring.version>3.0.4.RELEASE</spring.version>
-        <sshd.version>0.4.0</sshd.version>
+        <sshd.version>0.5.0</sshd.version>
         <xbean.version>3.7</xbean.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
