@@ -1,6 +1,4 @@
-*.iml
-*.ipr
-*.iws
+*.i??
 .project
 .classpath
 .settings
