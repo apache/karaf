@@ -103,6 +103,7 @@
     <properties>
         <!-- Apache ServiceMix Bundles -->
         <aopalliance.bundle.version>1.0_4</aopalliance.bundle.version>
+        <asm.bundle.version>3.1_1-SNAPSHOT</asm.bundle.version>
         <cglib.bundle.version>2.1_3_6</cglib.bundle.version>
         <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
         <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
@@ -110,7 +111,6 @@
         <jetty.version>7.1.6.v20100715</jetty.version>
         <junit.bundle.version>4.7_2</junit.bundle.version>
 
-        <asm.version>3.1.0</asm.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <depends-maven-plugin.version>1.0</depends-maven-plugin.version>
@@ -200,18 +200,6 @@
             </snapshots>
         </repository>
         <!-- Springsource repository -->
-        <!-- TODO remove this repository when using the ServiceMix ASM bundle -->
-        <repository>
-            <id>springsource.bundles.external</id>
-            <name>Springsource bundles external repository</name>
-            <url>http://repository.springsource.com/maven/bundles/external/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -650,19 +638,9 @@
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
-            	<groupId>org.objectweb.asm</groupId>
-				<artifactId>com.springsource.org.objectweb.asm</artifactId>
-				<version>${asm.version}</version>
-            </dependency>
-            <dependency>
-            	<groupId>org.objectweb.asm</groupId>
-				<artifactId>com.springsource.org.objectweb.asm.tree</artifactId>
-				<version>${asm.version}</version>
-            </dependency>
-            <dependency>
-            	<groupId>org.objectweb.asm</groupId>
-				<artifactId>com.springsource.org.objectweb.asm.commons</artifactId>
-				<version>${asm.version}</version>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.asm</artifactId>
+                <version>${asm.bundle.version}</version>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>

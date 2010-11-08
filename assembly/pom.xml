@@ -317,16 +317,8 @@
             <artifactId>jetty-xml</artifactId>
         </dependency>
         <dependency>
-        	<groupId>org.objectweb.asm</groupId>
-<artifactId>com.springsource.org.objectweb.asm</artifactId>
-        </dependency>
-        <dependency>
-        	<groupId>org.objectweb.asm</groupId>
-<artifactId>com.springsource.org.objectweb.asm.tree</artifactId>
-        </dependency>
-        <dependency>
-        	<groupId>org.objectweb.asm</groupId>
-<artifactId>com.springsource.org.objectweb.asm.commons</artifactId>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.asm</artifactId>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
