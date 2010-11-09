@@ -107,7 +107,7 @@
         <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
         <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
         <jasypt.bundle.version>1.6_1</jasypt.bundle.version>
-        <jetty.bundle.version>6.1.25_1-SNAPSHOT</jetty.bundle.version>
+        <jetty.bundle.version>6.1.25_1</jetty.bundle.version>
         <junit.bundle.version>4.7_2</junit.bundle.version>
 
         <commons-logging.version>1.1.1</commons-logging.version>
