@@ -15,6 +15,40 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.1.1
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.1.x series branch, representing an update to Apache Karaf 2.1.0. It contains multiple bug fixes, while introducing a minimal number of changes to dependencies from our last release. For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Sub-task
+    * KARAF-269 - Update jetty bundle version in main karaf 2.1.1 pom.
+
+** Bug
+    * KARAF-17 - ANSI support not properly initialized when creating an Karaf instances from WebConsole or JMX
+    * KARAF-156 - command dev:dynamic-import does not work
+    * KARAF-221 - When starting a bare karaf, a single bundle is displayed when using osgi:list, we should display none
+    * KARAF-232 - validate goal of features-maven-plugin should support wrap jar
+    * KARAF-238 - SLF4J Duplicate bindings warning when using Equinox
+    * KARAF-239 - Equinox Framework Extensions
+    * KARAF-261 - Cannot run command admin on cygwin.
+    * KARAF-265 - add-features-to-repo goal of features-maven-plugin should support wrap jar with additional instructions
+    * KARAF-268 - When installing a bundle from a feature with blancks before / after the bundle url, those bundles are not loaded on restart (on felix)
+
+** Improvement
+    * KARAF-234 - validate goal of features-maven-plugin should support spring/blueprint/feature protocol prefix
+    * KARAF-247 - Add J2SE-1.2 to org.osgi.framework.executionenvironment
+    * KARAF-263 - Upgrade to Spring 3.0.4.RELEASE
+    * KARAF-264 - Upgrade to Jetty 6.1.25
+
+** New Feature
+    * KARAF-225 - FeaturesService should publish OSGi events
+
 
                     Apache Karaf 2.1.0
                     ==================
