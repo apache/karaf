@@ -29,6 +29,9 @@ WRAPPER_CONF="${karaf.base}/etc/${APP_NAME}-wrapper.conf"
 #  nice is only used if a priority is specified.
 PRIORITY=
 
+# Location of the data folder.
+DATADIR="${karaf.data}"
+
 # Location of the pid file.
 PIDDIR="${karaf.data}"
 
@@ -393,11 +396,11 @@ start() {
     getpid
     if [ "X$pid" = "X" ]
     then
-        if [ ! -d ../../data ]; then
-            mkdir ../../data
+        if [ ! -d $DATADIR ]; then
+            mkdir $DATADIR
         fi
-        if [ ! -d ../../data/log ]; then
-            mkdir ../../data/log
+        if [ ! -d $DATADIR/log ]; then
+            mkdir $DATADIR/log
         fi
         COMMAND_LINE="$CMDNICE $WRAPPER_CMD $WRAPPER_CONF wrapper.syslog.ident=$APP_NAME wrapper.pidfile=$PIDFILE wrapper.daemonize=TRUE $ANCHORPROP $IGNOREPROP $LOCKPROP"
         exec $COMMAND_LINE
