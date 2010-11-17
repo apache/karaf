@@ -30,6 +30,7 @@
     * [KARAF-270] - karaf-service scripts tries to create "data" directory in wrong location 
     * [KARAF-273] - java.lang.NullPointerException: Inflater has been closed
     * [KARAF-277] - The bin/client script does not work anymore
+    * [KARAF-262] - The command admin create new instance cannot create good script in bash language on cygwin
 
 ** Task
     * [KARAF-276] - upgrade to pax-url 1.2.1
