@@ -169,7 +169,8 @@ public class AdminServiceImpl implements AdminService {
         props.put("${SUBST-SSH-PORT}", Integer.toString(sshPort));
         copyFilteredResourceToDir(karafBase, "etc/system.properties", props);
         copyFilteredResourceToDir(karafBase, "etc/org.apache.karaf.shell.cfg", props);
-        if( System.getProperty("os.name").startsWith("Win") ) {
+        // If we use batch files, use batch files, else use bash scripts (even on cygwin)
+        if( new File( System.getProperty("karaf.home"), "bin/admin.bat" ).exists() ) {
             copyFilteredResourceToDir(karafBase, "bin/karaf.bat", props);
             copyFilteredResourceToDir(karafBase, "bin/start.bat", props);
             copyFilteredResourceToDir(karafBase, "bin/stop.bat", props);
