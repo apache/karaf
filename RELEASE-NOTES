@@ -15,6 +15,25 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.1.2
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.1.x series branch, representing an update to Apache Karaf 2.1.1. It contains several bug fixes identified in the prior release, and updates the pax-url version. For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-270] - karaf-service scripts tries to create "data" directory in wrong location 
+    * [KARAF-273] - java.lang.NullPointerException: Inflater has been closed
+    * [KARAF-277] - The bin/client script does not work anymore
+
+** Task
+    * [KARAF-276] - upgrade to pax-url 1.2.1
+
                     Apache Karaf 2.1.1
                     ==================
 
