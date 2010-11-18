@@ -18,7 +18,6 @@ package org.apache.karaf.shell.commands;
 
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
  * A command to clear the console buffer

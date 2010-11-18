@@ -22,7 +22,6 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 @Command(scope = "shell", name = "echo", description="Echoes or prints arguments to STDOUT")
 public class EchoAction extends AbstractAction
