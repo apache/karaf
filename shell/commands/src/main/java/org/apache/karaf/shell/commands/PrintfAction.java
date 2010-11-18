@@ -19,7 +19,6 @@ package org.apache.karaf.shell.commands;
 import java.util.Collection;
 
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 

@@ -16,6 +16,13 @@
  */
 package org.apache.karaf.shell.commands;
 
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.converter.DefaultConverter;
+import org.apache.felix.gogo.commands.converter.ReifiedType;
+import org.apache.felix.gogo.commands.converter.GenericType;
+import org.apache.karaf.shell.console.AbstractAction;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -27,17 +34,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.console.commands.GenericType;
-import org.osgi.service.blueprint.container.ComponentDefinitionException;
-import org.osgi.service.blueprint.container.Converter;
-import org.osgi.service.blueprint.container.ReifiedType;
-
 /**
- * Execute a closure on a list of arguments.
+ * Instanciate a new object
  */
 @Command(scope = "shell", name = "new", description = "Creates a new java object.")
 public class NewAction extends AbstractAction {
@@ -50,11 +48,7 @@ public class NewAction extends AbstractAction {
 
     boolean reorderArguments;
 
-    protected Converter blueprintConverter;
-
-    public void setBlueprintConverter(Converter blueprintConverter) {
-        this.blueprintConverter = blueprintConverter;
-    }
+    protected DefaultConverter converter = new DefaultConverter(getClass().getClassLoader());
 
     @Override
     protected Object doExecute() throws Exception {
@@ -68,12 +62,12 @@ public class NewAction extends AbstractAction {
                 Map.Entry<Constructor, List<Object>> match = matches.entrySet().iterator().next();
                 return newInstance(match.getKey(), match.getValue().toArray());
             } catch (Throwable e) {
-                throw new ComponentDefinitionException("Error when instanciating object of class " + clazz.getName(), getRealCause(e));
+                throw new Exception("Error when instanciating object of class " + clazz.getName(), getRealCause(e));
             }
         } else if (matches.size() == 0) {
-            throw new ComponentDefinitionException("Unable to find a matching constructor on class " + clazz.getName() + " for arguments " + args + " when instanciating object.");
+            throw new Exception("Unable to find a matching constructor on class " + clazz.getName() + " for arguments " + args + " when instanciating object.");
         } else {
-            throw new ComponentDefinitionException("Multiple matching constructors found on class " + clazz.getName() + " for arguments " + args + " when instanciating object: " + matches.keySet());
+            throw new Exception("Multiple matching constructors found on class " + clazz.getName() + " for arguments " + args + " when instanciating object: " + matches.keySet());
         }
     }
 
@@ -188,11 +182,11 @@ public class NewAction extends AbstractAction {
     }
 
     protected Object convert(Object obj, Type type) throws Exception {
-        return blueprintConverter.convert(obj,  new GenericType(type));
+        return converter.convert(obj, new GenericType(type));
     }
 
     protected Object convert(Object obj, ReifiedType type) throws Exception {
-        return blueprintConverter.convert(obj,  type);
+        return converter.convert(obj, type);
     }
 
     public static boolean isAssignable(Object source, ReifiedType target) {
