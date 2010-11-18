@@ -30,7 +30,6 @@
             <xs:sequence>
                 <xs:element name="module" minOccurs="0" maxOccurs="unbounded">
                     <xs:complexType mixed="true">
-                        <xs:attribute name="name" use="optional" type="xs:string"/>
                         <xs:attribute name="className" use="required" type="xs:string"/>
                         <xs:attribute name="flags" default="required">
                             <xs:simpleType>
