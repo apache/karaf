@@ -36,7 +36,7 @@ import java.util.Set;
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
 
     public URL getSchemaLocation(String namespace) {
-        return getClass().getResource("/org/apache/karaf/jaas/config/karaf-jaas.xsd");
+        return getClass().getResource("/org/apache/karaf/jaas/config/karaf-jaas-1.1.0.xsd");
     }
 
     public Set<Class> getManagedClasses() {
