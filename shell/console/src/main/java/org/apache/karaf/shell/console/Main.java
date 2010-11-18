@@ -129,24 +129,6 @@ public class Main {
     }
 
     private void run(final CommandProcessorImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
-        final TerminalFactory terminalFactory = new TerminalFactory();
-        final Terminal terminal = terminalFactory.getTerminal();
-        Console console = createConsole(commandProcessor, in, out, err, terminal);
-        CommandSession session = console.getSession();
-        session.put("USER", user);
-        session.put("APPLICATION", application);
-        session.put("#LINES", new Function() {
-            public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-                return Integer.toString(terminal.getHeight());
-            }
-        });
-        session.put("#COLUMNS", new Function() {
-            public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-                return Integer.toString(terminal.getWidth());
-            }
-        });
-        session.put(".jline.terminal", terminal);
-        session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
 
         if (args.length > 0) {
             StringBuilder sb = new StringBuilder();
@@ -156,6 +138,14 @@ public class Main {
                 }
                 sb.append(args[i]);
             }
+
+            // Shell is directly executing a sub/command, we don't setup a terminal and console
+            // in this case, this avoids us reading from stdin un-necessarily.
+            CommandSession session = commandProcessor.createSession(in,out, err);
+            session.put("USER", user);
+            session.put("APPLICATION", application);
+            session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
+
             try {
                 session.execute(sb);
             } catch (Throwable t) {
@@ -177,10 +167,32 @@ public class Main {
                 }
             }
         } else {
+            // We are going into full blown interactive shell mode.
+
+            final TerminalFactory terminalFactory = new TerminalFactory();
+            final Terminal terminal = terminalFactory.getTerminal();
+            Console console = createConsole(commandProcessor, in, out, err, terminal);
+            CommandSession session = console.getSession();
+            session.put("USER", user);
+            session.put("APPLICATION", application);
+            session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
+            session.put("#LINES", new Function() {
+                public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                    return Integer.toString(terminal.getHeight());
+                }
+            });
+            session.put("#COLUMNS", new Function() {
+                public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                    return Integer.toString(terminal.getWidth());
+                }
+            });
+            session.put(".jline.terminal", terminal);
+
             console.run();
+
+            terminalFactory.destroy();
         }
 
-        terminalFactory.destroy();
     }
 
     /**
