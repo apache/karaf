@@ -46,13 +46,16 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         this.adminService = adminService;
     }
 
-    public int createInstance(String name, int port, String location, String features, String featureURLs)
+    public int createInstance(String name, int port, String location, String javaOpts, String features, String featureURLs)
             throws Exception {
         if ("".equals(location)) {
             location = null;
         }
+        if ("".equals(javaOpts)) {
+            javaOpts = null;
+        }
 
-        InstanceSettings settings = new InstanceSettings(port, location,
+        InstanceSettings settings = new InstanceSettings(port, location, javaOpts,
                 parseStringList(featureURLs), parseStringList(features));
 
         Instance inst = adminService.createInstance(name, settings);
@@ -65,6 +68,10 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
 
     public void changePort(String name, int port) throws Exception {
         getExistingInstance(name).changePort(port);
+    }
+
+    public void changeJavaOpts(String name, String javaOpts) throws Exception {
+        getExistingInstance(name).changeJavaOpts(javaOpts);
     }
 
     public void destroyInstance(String name) throws Exception {

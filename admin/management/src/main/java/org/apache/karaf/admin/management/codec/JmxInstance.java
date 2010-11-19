@@ -60,6 +60,7 @@ public class JmxInstance {
                 itemValues[4] = "Error";
             }
             itemValues[5] = instance.getLocation();
+            itemValues[6] = instance.getJavaOpts();
 
             data = new CompositeDataSupport(INSTANCE, itemNames, itemValues);
         } catch (OpenDataException e) {
@@ -91,6 +92,9 @@ public class JmxInstance {
 
             itemTypes[5] = SimpleType.STRING;
             descriptions[5] = "The location of the instance.";
+
+            itemTypes[6] = SimpleType.STRING;
+            descriptions[6] = "The java options of the instance.";
 
             return new CompositeType("Instance", desc, itemNames, descriptions, itemTypes);
         } catch (OpenDataException e) {

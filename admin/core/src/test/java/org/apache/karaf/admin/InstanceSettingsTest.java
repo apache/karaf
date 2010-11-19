@@ -27,7 +27,7 @@ import org.junit.Assert;
 public class InstanceSettingsTest extends TestCase {
     public void testInstanceSettings() {
         InstanceSettings is =
-            new InstanceSettings(1, null, Collections.<String>emptyList(), Arrays.asList("hi"));
+            new InstanceSettings(1, null, null, Collections.<String>emptyList(), Arrays.asList("hi"));
         assertEquals(1, is.getPort());
         Assert.assertNull(is.getLocation());
         assertEquals(Arrays.asList("hi"), is.getFeatures());
@@ -35,19 +35,19 @@ public class InstanceSettingsTest extends TestCase {
     }
     
     public void testEqualsHashCode() {
-        testEqualsHashCode(1, "top", Collections.<String>emptyList(), Arrays.asList("hi"));
-        testEqualsHashCode(0, null, null, null);
+        testEqualsHashCode(1, "top", "foo", Collections.<String>emptyList(), Arrays.asList("hi"));
+        testEqualsHashCode(0, null, null, null, null);
     }
 
-    private void testEqualsHashCode(int port, String location, List<String> featureURLs, List<String> features) {
-        InstanceSettings is = new InstanceSettings(port, location, featureURLs, features);
-        InstanceSettings is2 = new InstanceSettings(port, location, featureURLs, features);
+    private void testEqualsHashCode(int port, String location, String javaOpts, List<String> featureURLs, List<String> features) {
+        InstanceSettings is = new InstanceSettings(port, location, javaOpts, featureURLs, features);
+        InstanceSettings is2 = new InstanceSettings(port, location, javaOpts, featureURLs, features);
         assertEquals(is, is2);
         assertEquals(is.hashCode(), is2.hashCode());
     }
     
     public void testEqualsHashCode2() {
-        InstanceSettings is = new InstanceSettings(1, "top", Collections.<String>emptyList(), Arrays.asList("hi"));
+        InstanceSettings is = new InstanceSettings(1, "top", "foo", Collections.<String>emptyList(), Arrays.asList("hi"));
         Assert.assertFalse(is.equals(null));
         Assert.assertFalse(is.equals(new Object()));
         assertEquals(is, is);

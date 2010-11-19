@@ -29,6 +29,7 @@ function renderView() {
     "<td>Name: <input id='name' type='text' name='name' style='width:70%' colspan='2'/></td>" +
     "<td>Port: <input id='port' type='text' name='port' style='width:70%' colspan='2'/></td>" +
     "<td>Location: <input id='location' type='text' name='location' style='width:70%' colspan='2'/></td>" +
+    "<td>JavaOpts: <input id='javaopts' type='text' name='javaopts' style='width:70%' colspan='2'/></td>" +
     "<td />" +
     "</tr><tr><td>Features: <input id='features' type='text' name='features' style='width:70%' colspan='2'" + 
     " title='Specify initial features separated by commas.'/></td>" + 
@@ -37,7 +38,7 @@ function renderView() {
     "<td class='col_Actions'><input type='button' value='Create' onclick='createInstance()'/></td>" +
     "</tr></tbody></table></div></form><br/>";
     $("#plugin_content").append( txt );
-    renderTable( "Karaf Instances", "instances_table", ["Pid", "Name", "Port", "State", "Location", "Actions"] );
+    renderTable( "Karaf Instances", "instances_table", ["Pid", "Name", "Port", "State", "JavaOpts", "Location", "Actions"] );
     renderStatusLine();
 }
 
@@ -45,15 +46,16 @@ function createInstance() {
     var name = document.getElementById( "name" ).value;
     var port = document.getElementById( "port" ).value;
     var location = document.getElementById( "location" ).value;
+    var javaopts = document.getElementById( "javaopts" ).value;
     var features = document.getElementById( "features" ).value;
     var featureURLs = document.getElementById( "featureURLs" ).value;
-    postCreateInstance( name, port, location, features, featureURLs );
+    postCreateInstance( name, port, location, javaopts, features, featureURLs );
 }
 
 function postCreateInstance( /* String */ name, /* String */ port, /* String */ location, 
-		/* String */ features, /* String */ featureURLs ) {
+		/* String */ javaopts, /* String */ features, /* String */ featureURLs ) {
     $.post( pluginRoot, {"action": "create", "name": name, "port": port, "location": location, 
-                             "features": features, "featureURLs": featureURLs }, function( data ) {
+                             "javaopts": javaopts, "features": features, "featureURLs": featureURLs }, function( data ) {
         renderData( data );
     }, "json" );
 }
@@ -109,6 +111,7 @@ function renderInstanceData( /* Element */ parent, /* Object */ instance ) {
     parent.appendChild( td( null, null, [ text( instance.port ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.state ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.location ) ] ) );
+    parent.appendChild( td( null, null, [ text( instance.javaopts ) ] ) );
     var actionsTd = td( null, null );
     var div = createElement( "div", null, {
         style: { 

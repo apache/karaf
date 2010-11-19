@@ -29,9 +29,14 @@ public class ListCommand extends AdminCommandSupport {
     @Option(name = "-l", aliases = { "--location" }, description = "Displays the location of the container instances", required = false, multiValued = false)
     boolean location;
 
+    @Option(name = "-o", aliases = { "--java-opts" }, description = "Displays the java options used to launch the JVM", required = false, multiValued = false)
+    boolean javaOpts;
+
     protected Object doExecute() throws Exception {
         Instance[] instances = getAdminService().getInstances();
-        if (location) {
+        if (javaOpts) {
+            System.out.println("  Port   State       Pid  JavaOpts");
+        } else if (location) {
             System.out.println("  Port   State       Pid  Location");
         } else {
             System.out.println("  Port   State       Pid  Name");
@@ -57,7 +62,9 @@ public class ListCommand extends AdminCommandSupport {
             }
             sb.append(s);
             sb.append("] ");
-            if (location) {
+            if (javaOpts) {
+                sb.append(instance.getJavaOpts());
+            } else if (location) {
                 sb.append(instance.getLocation());
             } else {
                 sb.append(instance.getName());

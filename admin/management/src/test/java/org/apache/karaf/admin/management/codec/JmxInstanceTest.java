@@ -51,6 +51,7 @@ public class JmxInstanceTest extends TestCase {
         EasyMock.expect(i.getPort()).andReturn(0);
         EasyMock.expect(i.getState()).andThrow(new Exception("gotcha"));
         EasyMock.expect(i.getLocation()).andReturn("somewhere");
+        EasyMock.expect(i.getJavaOpts()).andReturn("someopts");
         EasyMock.replay(i);
         
         JmxInstance ji = new JmxInstance(i);
@@ -65,6 +66,7 @@ public class JmxInstanceTest extends TestCase {
         Assert.assertEquals(0, cd.get("Port"));
         Assert.assertEquals("Error", cd.get("State"));
         Assert.assertEquals("somewhere", cd.get("Location"));
+        Assert.assertEquals("someopts", cd.get("JavaOpts"));
     }
 
     public void testJMXInstance2() throws Exception {
@@ -75,6 +77,7 @@ public class JmxInstanceTest extends TestCase {
         EasyMock.expect(i.getPort()).andReturn(0);
         EasyMock.expect(i.getState()).andReturn("Started");
         EasyMock.expect(i.getLocation()).andReturn(null);
+        EasyMock.expect(i.getJavaOpts()).andReturn(null);
         EasyMock.replay(i);
         
         JmxInstance ji = new JmxInstance(i);
@@ -89,5 +92,6 @@ public class JmxInstanceTest extends TestCase {
         Assert.assertEquals(0, cd.get("Port"));
         Assert.assertEquals("Started", cd.get("State"));
         Assert.assertNull(cd.get("Location"));
+        Assert.assertNull(cd.get("JavaOpts"));
     }
 }

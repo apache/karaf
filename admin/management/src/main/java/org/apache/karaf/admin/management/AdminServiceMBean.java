@@ -26,14 +26,15 @@ public interface AdminServiceMBean {
     String INSTANCE_PORT = "Port";
     String INSTANCE_STATE = "State";
     String INSTANCE_LOCATION = "Location";
+    String INSTANCE_JAVAOPTS = "JavaOpts";
 
     String[] INSTANCE = {INSTANCE_PID, INSTANCE_NAME, INSTANCE_IS_ROOT, INSTANCE_PORT,
-            INSTANCE_STATE, INSTANCE_LOCATION };
+            INSTANCE_STATE, INSTANCE_LOCATION, INSTANCE_JAVAOPTS };
 
     // Operations
-    int createInstance(String name, int port, String location, String features, String featureURLs)
-            throws Exception;
+    int createInstance(String name, int port, String location, String javaOpts, String features, String featureURLs) throws Exception;
     void changePort(String name, int port) throws Exception;
+    void changeJavaOpts(String name, String javaopts) throws Exception;
     void destroyInstance(String name) throws Exception;
     void startInstance(String name, String opts) throws Exception;
     void stopInstance(String name) throws Exception;

@@ -31,7 +31,7 @@ import org.junit.Assert;
 
 public class AdminServiceMBeanImplTest extends TestCase {
     public void testCreateInstance() throws Exception {
-        final InstanceSettings is = new InstanceSettings(123, "somewhere",
+        final InstanceSettings is = new InstanceSettings(123, "somewhere", "someopts",
                 Collections.<String>emptyList(), Arrays.asList("webconsole", "funfeat"));
         
         final Instance inst = EasyMock.createMock(Instance.class);
@@ -46,11 +46,11 @@ public class AdminServiceMBeanImplTest extends TestCase {
         ab.setAdminService(as);
         Assert.assertSame(as, ab.getAdminService());
         
-        assertEquals(42, ab.createInstance("t1", 123, "somewhere", " webconsole,  funfeat", ""));
+        assertEquals(42, ab.createInstance("t1", 123, "somewhere", "someopts", " webconsole,  funfeat", ""));
     }
     
     public void testCreateInstance2() throws Exception {
-        final InstanceSettings is = new InstanceSettings(0, null, 
+        final InstanceSettings is = new InstanceSettings(0, null, null,
                 Collections.<String>emptyList(), Collections.<String>emptyList());
         
         AdminService as = EasyMock.createMock(AdminService.class);
@@ -61,7 +61,7 @@ public class AdminServiceMBeanImplTest extends TestCase {
         ab.setAdminService(as);
         Assert.assertSame(as, ab.getAdminService());
         
-        assertEquals(-1, ab.createInstance("t1", 0, "", "", ""));
+        assertEquals(-1, ab.createInstance("t1", 0, "", "", "", ""));
     }
     
     public void testGetInstances() throws Exception {       
@@ -71,6 +71,7 @@ public class AdminServiceMBeanImplTest extends TestCase {
         EasyMock.expect(i1.getName()).andReturn("i1");
         EasyMock.expect(i1.isRoot()).andReturn(true);
         EasyMock.expect(i1.getLocation()).andReturn("somewhere");
+        EasyMock.expect(i1.getJavaOpts()).andReturn("someopts");
         EasyMock.expect(i1.getState()).andReturn("Stopped");
         EasyMock.replay(i1);
         Instance i2 = EasyMock.createNiceMock(Instance.class);
@@ -92,13 +93,14 @@ public class AdminServiceMBeanImplTest extends TestCase {
         Assert.assertTrue(cd1.containsValue(1234));
         Assert.assertTrue(cd1.containsValue(8818));
         Assert.assertTrue(cd1.containsValue("somewhere"));
+        Assert.assertTrue(cd1.containsValue("someopts"));
         Assert.assertTrue(cd1.containsValue("Stopped"));
 
         CompositeData cd2 = td.get(new Object [] {"i2"});
         Assert.assertTrue(cd2.containsValue("i2"));
     }
     
-    public void testStartInstance() throws Exception {
+    public void testStartInstanceWithJavaOpts() throws Exception {
         Instance inst = EasyMock.createMock(Instance.class);
         inst.start("-x -y -z");
         EasyMock.expectLastCall();
@@ -107,7 +109,7 @@ public class AdminServiceMBeanImplTest extends TestCase {
         AdminService as = EasyMock.createMock(AdminService.class);
         EasyMock.expect(as.getInstance("test instance")).andReturn(inst);
         EasyMock.replay(as);
-        
+
         AdminServiceMBeanImpl ab = new AdminServiceMBeanImpl();
         ab.setAdminService(as);
         Assert.assertSame(as, ab.getAdminService());
@@ -116,7 +118,26 @@ public class AdminServiceMBeanImplTest extends TestCase {
         EasyMock.verify(as);
         EasyMock.verify(inst);
     }
-    
+
+    public void testStartInstanceWithNoJavaOpts() throws Exception {
+        Instance inst = EasyMock.createMock(Instance.class);
+        inst.start(null);
+        EasyMock.expectLastCall();
+        EasyMock.replay(inst);
+
+        AdminService as = EasyMock.createMock(AdminService.class);
+        EasyMock.expect(as.getInstance("test instance")).andReturn(inst);
+        EasyMock.replay(as);
+
+        AdminServiceMBeanImpl ab = new AdminServiceMBeanImpl();
+        ab.setAdminService(as);
+        Assert.assertSame(as, ab.getAdminService());
+
+        ab.startInstance("test instance", null);
+        EasyMock.verify(as);
+        EasyMock.verify(inst);
+    }
+
     public void testStopInstance() throws Exception {
         Instance inst = EasyMock.createMock(Instance.class);
         inst.stop();
@@ -170,6 +191,25 @@ public class AdminServiceMBeanImplTest extends TestCase {
         Assert.assertSame(as, ab.getAdminService());
 
         ab.changePort("test instance", 7788);
+        EasyMock.verify(as);
+        EasyMock.verify(inst);
+    }
+
+    public void testChangeOptions() throws Exception {
+        Instance inst = EasyMock.createMock(Instance.class);
+        inst.changeJavaOpts("new opts");
+        EasyMock.expectLastCall();
+        EasyMock.replay(inst);
+
+        AdminService as = EasyMock.createMock(AdminService.class);
+        EasyMock.expect(as.getInstance("test instance")).andReturn(inst);
+        EasyMock.replay(as);
+
+        AdminServiceMBeanImpl ab = new AdminServiceMBeanImpl();
+        ab.setAdminService(as);
+        Assert.assertSame(as, ab.getAdminService());
+
+        ab.changeJavaOpts("test instance", "new opts");
         EasyMock.verify(as);
         EasyMock.verify(inst);
     }

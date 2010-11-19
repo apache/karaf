@@ -52,17 +52,19 @@ public class InstanceImpl implements Instance {
     private AdminServiceImpl service;
     private String name;
     private String location;
+    private String javaOpts;
     private Process process;
     private boolean root;
 
-    public InstanceImpl(AdminServiceImpl service, String name, String location) {
-        this(service, name, location, false);
+    public InstanceImpl(AdminServiceImpl service, String name, String location, String javaOpts) {
+        this(service, name, location, javaOpts, false);
     }
     
-    public InstanceImpl(AdminServiceImpl service, String name, String location, boolean root) {
+    public InstanceImpl(AdminServiceImpl service, String name, String location, String javaOpts, boolean root) {
         this.service = service;
         this.name = name;
         this.location = location;
+        this.javaOpts = javaOpts;
         this.root = root;
     }
 
@@ -139,12 +141,24 @@ public class InstanceImpl implements Instance {
         }
     }
 
+    public String getJavaOpts() {
+        return javaOpts;
+    }
+
+    public void changeJavaOpts(String javaOpts) throws Exception {
+        this.javaOpts = javaOpts;
+        this.service.saveState();
+    }
+
     public synchronized void start(String javaOpts) throws Exception {
         checkProcess();
         if (this.process != null) {
             throw new IllegalStateException("Instance already started");
         }
-        if (javaOpts == null) {
+        if (javaOpts == null || javaOpts.length() == 0) {
+            javaOpts = this.javaOpts;
+        }
+        if (javaOpts == null || javaOpts.length() == 0) {
             javaOpts = "-server -Xmx512M -Dcom.sun.management.jmxremote";
         }
         File libDir = new File(System.getProperty("karaf.home"), "lib");

@@ -14,37 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.admin;
+package org.apache.karaf.admin.command;
 
-public interface Instance {
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
-    String STOPPED = "Stopped";
-    String STARTING = "Starting";
-    String STARTED = "Started";
-    String ERROR = "Error";
+@Command(scope = "admin", name = "change-opts", description = "Changes the java options of an existing container instance.")
+public class ChangeOptsCommand extends AdminCommandSupport {
 
-    String getName();
-    
-    boolean isRoot();
+    @Argument(index = 0, name = "name", description="The name of the container instance", required = true, multiValued = false)
+    private String instance = null;
 
-    String getLocation();
+    @Argument(index = 1, name = "javaOpts", description = "The new java options to set", required = true, multiValued = false)
+    private String javaOpts;
 
-    int getPid();
-
-    int getPort();
-
-    void changePort(int port) throws Exception;
-
-    String getJavaOpts();
-
-    void changeJavaOpts(String javaOpts) throws Exception;
-
-    void start(String javaOpts) throws Exception;
-
-    void stop() throws Exception;
-
-    void destroy() throws Exception;
-
-    String getState() throws Exception;
-
+    protected Object doExecute() throws Exception {
+        getExistingInstance(instance).changeJavaOpts(javaOpts);
+        return null;
+    }
 }
