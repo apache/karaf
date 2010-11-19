@@ -26,8 +26,9 @@
     <description>Provides the OSGi ${scope} commands</description>
 
     <properties>
-        <junit.version>4.7_1</junit.version>
-        <osgi.version>4.2.0</osgi.version>
+        <junit.version>^junit.bundle.version^</junit.version>
+        <osgi.version>^osgi.version^</osgi.version>
+        <karaf.version>^project.version^</karaf.version>
     </properties>
 
     <dependencies>
