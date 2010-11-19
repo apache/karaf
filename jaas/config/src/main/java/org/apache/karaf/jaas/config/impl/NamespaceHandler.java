@@ -74,10 +74,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         if (rank != null && rank.length() > 0) {
             bean.addProperty("rank", createValue(context, rank));
         }
-        NodeList childElements = element.getElementsByTagNameNS("http://karaf.apache.org/xmlns/jaas/v1.1.0", "module");
-        if (childElements != null && childElements.getLength() > 0) {
-            childElements = element.getElementsByTagNameNS("http://karaf.apache.org/xmlns/jaas/v1.0.0", "module");
-        }
+        NodeList childElements = element.getElementsByTagNameNS(element.getNamespaceURI(), "module");
         if (childElements != null && childElements.getLength() > 0) {
             MutableCollectionMetadata children = context.createMetadata(MutableCollectionMetadata.class);
             for (int i = 0; i < childElements.getLength(); ++i) {
