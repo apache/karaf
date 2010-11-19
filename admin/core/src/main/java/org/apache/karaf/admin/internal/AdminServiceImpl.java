@@ -108,10 +108,11 @@ public class AdminServiceImpl implements AdminService {
             for (int i = 0; i < count; i++) {
                 String name = storage.getProperty("item." + i + ".name", null);
                 String loc = storage.getProperty("item." + i + ".loc", null);
+                String opts = storage.getProperty("item." + i + ".opts", null);
                 int pid = Integer.parseInt(storage.getProperty("item." + i + ".pid", "0"));
                 boolean root = Boolean.parseBoolean(storage.getProperty("item." + i + ".root", "false"));
                 if (name != null) {
-                    InstanceImpl instance = new InstanceImpl(this, name, loc, root);
+                    InstanceImpl instance = new InstanceImpl(this, name, loc, opts, root);
                     if (pid > 0) {
                         try {
                             instance.attach(pid);
@@ -188,8 +189,12 @@ public class AdminServiceImpl implements AdminService {
         }
         
         handleFeatures(new File(karafBase, FEATURES_CFG), settings);
-        
-        Instance instance = new InstanceImpl(this, name, karafBase.toString());
+
+        String javaOpts = settings.getJavaOpts();
+        if (javaOpts == null || javaOpts.length() == 0) {
+            javaOpts = "-server -Xmx512M -Dcom.sun.management.jmxremote";
+        }
+        Instance instance = new InstanceImpl(this, name, karafBase.toString(), settings.getJavaOpts());
         instances.put(name, instance);
         saveState();
         return instance;
@@ -238,6 +243,7 @@ public class AdminServiceImpl implements AdminService {
             storage.setProperty("item." + i + ".name", data[i].getName());
             storage.setProperty("item." + i + ".loc", data[i].getLocation());
             storage.setProperty("item." + i + ".pid", Integer.toString(data[i].getPid()));
+            storage.setProperty("item." + i + ".opts", data[i].getJavaOpts() != null ? data[i].getJavaOpts() : "");
         }
         saveStorage(storage, new File(storageLocation, STORAGE_FILE), "Admin Service storage");
     }

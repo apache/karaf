@@ -21,12 +21,14 @@ import java.util.List;
 public class InstanceSettings {
     private final int port;
     private final String location;
+    private final String javaOpts;
     private final List<String> featureURLs;
     private final List<String> features;
 
-    public InstanceSettings(int port, String location, List<String> featureURLs, List<String> features) {
+    public InstanceSettings(int port, String location, String javaOpts, List<String> featureURLs, List<String> features) {
         this.port = port;
         this.location = location;
+        this.javaOpts = javaOpts;
         this.featureURLs = featureURLs;
         this.features = features;
     }
@@ -37,6 +39,10 @@ public class InstanceSettings {
 
     public String getLocation() {
         return location;
+    }
+
+    public String getJavaOpts() {
+        return javaOpts;
     }
 
     public List<String> getFeatureURLs() {
@@ -58,25 +64,18 @@ public class InstanceSettings {
         InstanceSettings is = (InstanceSettings) o;
         return is.port == port &&
                (location == null ? is.location == null : location.equals(is.location)) &&
+               (javaOpts == null ? is.javaOpts == null : javaOpts.equals(is.javaOpts)) &&
                (featureURLs == null ? is.featureURLs == null : featureURLs.equals(is.featureURLs)) &&
                (features == null ? is.features == null : features.equals(is.features));
     }
 
     @Override
     public int hashCode() {
-        int rc = 17;
-        rc = 37 * port;
-        if (location != null) {
-            rc = 37 * location.hashCode();
-        }
-        if (featureURLs != null) {
-            rc = 37 * featureURLs.hashCode();
-        }
-        if (features != null) {
-            rc = 37 * features.hashCode();
-        }
-        return rc;
+        int result = port;
+        result = 31 * result + (location != null ? location.hashCode() : 0);
+        result = 31 * result + (javaOpts != null ? javaOpts.hashCode() : 0);
+        result = 31 * result + (featureURLs != null ? featureURLs.hashCode() : 0);
+        result = 31 * result + (features != null ? features.hashCode() : 0);
+        return result;
     }
-    
-    
 }

@@ -37,6 +37,9 @@ public class CreateCommand extends AdminCommandSupport
 
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the new container instance in the file system", required = false, multiValued = false)
     String location;
+
+    @Option(name = "-o", aliases = {"--java-opts"}, description = "JVM options to use when launching the instance", required = false, multiValued = false)
+    String javaOpts;
     
     @Option(name = "-f", aliases = {"--feature"}, 
             description = "Initial features. This option can be specified multiple times to enable multiple initial features", required = false, multiValued = true)
@@ -50,7 +53,7 @@ public class CreateCommand extends AdminCommandSupport
     String instance = null;
 
     protected Object doExecute() throws Exception {
-        InstanceSettings settings = new InstanceSettings(port, location, featureURLs, features);
+        InstanceSettings settings = new InstanceSettings(port, location, javaOpts, featureURLs, features);
         getAdminService().createInstance(instance, settings);
         return null;
     }

@@ -113,9 +113,10 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
         } else if ("create".equals(action)) {
             int port = parsePortNumber(req.getParameter("port"));
             String location = parseString(req.getParameter("location"));
+            String javaopts = parseString(req.getParameter("javaopts"));
             List<String> featureURLs = parseStringList(req.getParameter("featureURLs"));
             List<String> features = parseStringList(req.getParameter("features"));
-            InstanceSettings settings = new InstanceSettings(port, location, featureURLs, features); 
+            InstanceSettings settings = new InstanceSettings(port, location, javaopts, featureURLs, features);
             success = createInstance(name, settings);
         } else if ("destroy".equals(action)) {
             success = destroyInstance(name);
@@ -217,7 +218,9 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
             jw.key("instances");
             jw.array();
             for (Instance i : instances) {
-                instanceInfo(jw, i);
+//                if (!i.isRoot()) {
+                    instanceInfo(jw, i);
+//                }
             }
             jw.endArray();
             jw.endObject();
@@ -239,6 +242,8 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
         jw.key("state");
         jw.value(instance.getState());
         jw.key("location");
+        jw.value(instance.getJavaOpts() != null ? instance.getJavaOpts() : "");
+        jw.key("javaopts");
         jw.value(instance.getLocation());
         jw.key("actions");
         jw.array();
