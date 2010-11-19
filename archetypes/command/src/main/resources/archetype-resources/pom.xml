@@ -26,28 +26,29 @@
     <description>Provides the OSGi ${scope} commands</description>
 
     <properties>
-        <junit.version>4.7_1</junit.version>
-        <felix.osgi.version>1.4.0</felix.osgi.version>
+        <junit.version>^junit.bundle.version^</junit.version>
+        <osgi.version>4.2.0</osgi.version>
+        <karaf.version>^project.version^</karaf.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
-            <version>2.0.1-SNAPSHOT</version>
+            <version>${karaf.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>${felix.osgi.version}</version>
+            <version>${osgi.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>${felix.osgi.version}</version>
+            <version>${osgi.version}</version>
             <scope>provided</scope>
         </dependency>
 
