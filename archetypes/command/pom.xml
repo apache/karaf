@@ -16,38 +16,59 @@
   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>archetypes</artifactId>
         <version>2.1.2</version>
     </parent>
-    
-  <groupId>org.apache.karaf.archetypes</groupId>
-  <artifactId>archetypes-command</artifactId>
-  <version>2.1.2</version>
 
-  <name>Apache Karaf :: Command Archetype</name>
+    <groupId>org.apache.karaf.archetypes</groupId>
+    <artifactId>archetypes-command</artifactId>
+    <version>2.1.2</version>
 
-  <build>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.archetype</groupId>
-        <artifactId>archetype-packaging</artifactId>
-        <version>2.0-alpha-5</version>
-      </extension>
-    </extensions>
+    <name>Apache Karaf :: Command Archetype</name>
 
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-archetype-plugin</artifactId>
-          <version>2.0-alpha-5</version>
-          <extensions>true</extensions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.archetype</groupId>
+                <artifactId>archetype-packaging</artifactId>
+                <version>2.0-alpha-5</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <delimiters>
+                        <delimiter>^*^</delimiter>
+                    </delimiters>
+                </configuration>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-archetype-plugin</artifactId>
+                    <version>2.0-alpha-5</version>
+                    <extensions>true</extensions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>

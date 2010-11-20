@@ -133,16 +133,6 @@ public class Main {
     }
 
     private void run(final CommandShellImpl commandProcessor, String[] args, final InputStream in, final PrintStream out, final PrintStream err) throws Exception {
-        TerminalFactory terminalFactory = new TerminalFactory();
-        Terminal terminal = terminalFactory.getTerminal();
-        Console console = createConsole(commandProcessor, in, out, err, terminal);
-        CommandSession session = console.getSession();
-        session.put("USER", user);
-        session.put("APPLICATION", application);
-        session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
-        session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
-        session.put(".jline.terminal", terminal);
-        session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
 
         if (args.length > 0) {
             StringBuilder sb = new StringBuilder();
@@ -152,6 +142,13 @@ public class Main {
                 }
                 sb.append(args[i]);
             }
+
+            // Shell is directly executing a sub/command, we don't setup a terminal and console
+            // in this case, this avoids us reading from stdin un-necessarily.
+            CommandSession session = commandProcessor.createSession(in,out, err);
+            session.put("USER", user);
+            session.put("APPLICATION", application);
+            session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
             try {
                 session.execute(sb);
             } catch (Throwable t) {
@@ -164,10 +161,22 @@ public class Main {
                 }
             }
         } else {
-            console.run();
-        }
 
-        terminalFactory.destroy();
+            // We are going into full blown interactive shell mode.
+            TerminalFactory terminalFactory = new TerminalFactory();
+            Terminal terminal = terminalFactory.getTerminal();
+            Console console = createConsole(commandProcessor, in, out, err, terminal);
+            CommandSession session = console.getSession();
+            session.put("LINES", Integer.toString(terminal.getTerminalHeight()));
+            session.put("COLUMNS", Integer.toString(terminal.getTerminalWidth()));
+            session.put(".jline.terminal", terminal);
+            session.put("USER", user);
+            session.put("APPLICATION", application);
+            session.put(NameScoping.MULTI_SCOPE_MODE_KEY, Boolean.toString(isMultiScopeMode()));
+
+            console.run();
+            terminalFactory.destroy();
+        }
     }
 
     /**

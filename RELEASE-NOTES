@@ -31,6 +31,9 @@
     * [KARAF-273] - java.lang.NullPointerException: Inflater has been closed
     * [KARAF-277] - The bin/client script does not work anymore
     * [KARAF-262] - The command admin create new instance cannot create good script in bash language on cygwin
+    * [KARAF-284] - Remove snapshot dependency on org.apache.karaf.shell.console in archetypes/command/src/main/resources/archetype-resources/pom.xml
+    * [KARAF-285] - The bin/shell script should not read the input stream when a command is passed
+    * [KARAF-286] - When running in the plain shell console (using bin/shell), tab completion prints lots of exceptions
 
 ** Task
     * [KARAF-276] - upgrade to pax-url 1.2.1
