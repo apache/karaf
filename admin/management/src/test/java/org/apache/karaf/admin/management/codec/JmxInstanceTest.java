@@ -48,7 +48,8 @@ public class JmxInstanceTest extends TestCase {
         EasyMock.expect(i.getPid()).andReturn(1712);
         EasyMock.expect(i.getName()).andReturn("MyInstance");
         EasyMock.expect(i.isRoot()).andReturn(false);
-        EasyMock.expect(i.getPort()).andReturn(0);
+        EasyMock.expect(i.getSshPort()).andReturn(0);
+        EasyMock.expect(i.getRmiRegistryPort()).andReturn(0);
         EasyMock.expect(i.getState()).andThrow(new Exception("gotcha"));
         EasyMock.expect(i.getLocation()).andReturn("somewhere");
         EasyMock.expect(i.getJavaOpts()).andReturn("someopts");
@@ -63,7 +64,8 @@ public class JmxInstanceTest extends TestCase {
         Assert.assertEquals(1712, cd.get("Pid"));
         Assert.assertEquals("MyInstance", cd.get("Name"));
         Assert.assertEquals(false, cd.get("Is Root"));
-        Assert.assertEquals(0, cd.get("Port"));
+        Assert.assertEquals(0, cd.get("SSH Port"));
+        Assert.assertEquals(0, cd.get("RMI Port"));
         Assert.assertEquals("Error", cd.get("State"));
         Assert.assertEquals("somewhere", cd.get("Location"));
         Assert.assertEquals("someopts", cd.get("JavaOpts"));
@@ -74,7 +76,8 @@ public class JmxInstanceTest extends TestCase {
         EasyMock.expect(i.getPid()).andReturn(1712);
         EasyMock.expect(i.getName()).andReturn("MyInstance");
         EasyMock.expect(i.isRoot()).andReturn(true);
-        EasyMock.expect(i.getPort()).andReturn(0);
+        EasyMock.expect(i.getSshPort()).andReturn(0);
+        EasyMock.expect(i.getRmiRegistryPort()).andReturn(0);
         EasyMock.expect(i.getState()).andReturn("Started");
         EasyMock.expect(i.getLocation()).andReturn(null);
         EasyMock.expect(i.getJavaOpts()).andReturn(null);
@@ -89,7 +92,8 @@ public class JmxInstanceTest extends TestCase {
         Assert.assertEquals(1712, cd.get("Pid"));
         Assert.assertEquals("MyInstance", cd.get("Name"));
         Assert.assertEquals(true, cd.get("Is Root"));
-        Assert.assertEquals(0, cd.get("Port"));
+        Assert.assertEquals(0, cd.get("SSH Port"));
+        Assert.assertEquals(0, cd.get("RMI Port"));
         Assert.assertEquals("Started", cd.get("State"));
         Assert.assertNull(cd.get("Location"));
         Assert.assertNull(cd.get("JavaOpts"));

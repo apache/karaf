@@ -68,13 +68,22 @@
                 <null/>
             </completers>
         </command>
-        <command name="admin/change-port">
-            <action class="org.apache.karaf.admin.command.ChangePortCommand">
+        <command name="admin/change-ssh-port">
+            <action class="org.apache.karaf.admin.command.ChangeSshPortCommand">
                 <property name="adminService" ref="adminService" />
             </action>
             <completers>
                 <ref component-id="instanceCompleter" />
                 <null/>
+            </completers>
+        </command>
+        <command name="admin/change-rmi-registry-port">
+            <action class="org.apache.karaf.admin.command.ChangeRmiRegistryPortCommand">
+                <property name="adminService" ref="adminService" />
+            </action>
+            <completers>
+                <ref component-id="instanceCompleter" />
+                <null />
             </completers>
         </command>
         <command name="admin/change-opts">

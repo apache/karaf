@@ -44,7 +44,9 @@ public class AdminServiceImpl implements AdminService {
 
     private Map<String, Instance> instances = new HashMap<String, Instance>();
 
-    private int defaultPortStart = 8101;
+    private int defaultSshPortStart = 8101;
+
+    private int defaultRmiPortStart = 1099;
 
     private File storageLocation;
 
@@ -103,7 +105,8 @@ public class AdminServiceImpl implements AdminService {
             }
             Properties storage = loadStorage(storageFile);
             int count = Integer.parseInt(storage.getProperty("count", "0"));
-            defaultPortStart = Integer.parseInt(storage.getProperty("port", Integer.toString(defaultPortStart)));
+            defaultSshPortStart = Integer.parseInt(storage.getProperty("ssh.port", Integer.toString(defaultSshPortStart)));
+            defaultRmiPortStart = Integer.parseInt(storage.getProperty("rmi.port", Integer.toString(defaultRmiPortStart)));
             Map<String, Instance> newInstances = new HashMap<String, Instance>();
             for (int i = 0; i < count; i++) {
                 String name = storage.getProperty("item." + i + ".name", null);
@@ -138,11 +141,15 @@ public class AdminServiceImpl implements AdminService {
         if (!karafBase.isAbsolute()) {
             karafBase = new File(storageLocation, loc);
         }
-        int sshPort = settings.getPort();
+        int sshPort = settings.getSshPort();
         if (sshPort <= 0) {
-            sshPort = ++defaultPortStart;
+            sshPort = ++defaultSshPortStart;
         }
-        println(Ansi.ansi().a("Creating new instance on port ").a(sshPort).a(" at: ").a(Ansi.Attribute.INTENSITY_BOLD).a(karafBase).a(Ansi.Attribute.RESET).toString());
+        int rmiRegistryPort = settings.getRmiRegistryPort();
+        if (rmiRegistryPort <= 0) {
+            rmiRegistryPort = ++defaultRmiPortStart;
+        }
+        println(Ansi.ansi().a("Creating new instance on SSH port ").a(sshPort).a(" and RMI registry port ").a(rmiRegistryPort).a(" at: ").a(Ansi.Attribute.INTENSITY_BOLD).a(karafBase).a(Ansi.Attribute.RESET).toString());
 
         mkdir(karafBase, "bin");
         mkdir(karafBase, "etc");
@@ -157,7 +164,6 @@ public class AdminServiceImpl implements AdminService {
         copyResourceToDir(karafBase, "etc/org.apache.felix.fileinstall-deploy.cfg", true);
         copyResourceToDir(karafBase, "etc/org.apache.karaf.log.cfg", true);
         copyResourceToDir(karafBase, FEATURES_CFG, true);
-        copyResourceToDir(karafBase, "etc/org.apache.karaf.management.cfg", true);
         copyResourceToDir(karafBase, "etc/org.ops4j.pax.logging.cfg", true);
         copyResourceToDir(karafBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
         copyResourceToDir(karafBase, "etc/startup.properties", true);
@@ -168,8 +174,10 @@ public class AdminServiceImpl implements AdminService {
         props.put("${SUBST-KARAF-HOME}", System.getProperty("karaf.home"));
         props.put("${SUBST-KARAF-BASE}", karafBase.getPath());
         props.put("${SUBST-SSH-PORT}", Integer.toString(sshPort));
+        props.put("${SUBST-RMI-REGISTRY-PORT}", Integer.toString(rmiRegistryPort));
         copyFilteredResourceToDir(karafBase, "etc/system.properties", props);
         copyFilteredResourceToDir(karafBase, "etc/org.apache.karaf.shell.cfg", props);
+        copyFilteredResourceToDir(karafBase, "etc/org.apache.karaf.management.cfg", props);
         // If we use batch files, use batch files, else use bash scripts (even on cygwin)
         boolean windows = System.getProperty("os.name").startsWith("Win");
         boolean cygwin = windows && new File( System.getProperty("karaf.home"), "bin/admin" ).exists();
@@ -237,7 +245,8 @@ public class AdminServiceImpl implements AdminService {
     synchronized void saveState() throws IOException {
         Properties storage = new Properties();
         Instance[] data = getInstances();
-        storage.setProperty("port", Integer.toString(defaultPortStart));
+        storage.setProperty("ssh.port", Integer.toString(defaultSshPortStart));
+        storage.setProperty("rmi.port", Integer.toString(defaultRmiPortStart));
         storage.setProperty("count", Integer.toString(data.length));
         for (int i = 0; i < data.length; i++) {
             storage.setProperty("item." + i + ".name", data[i].getName());

@@ -14,41 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.admin;
+package org.apache.karaf.admin.command;
 
-public interface Instance {
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
-    String STOPPED = "Stopped";
-    String STARTING = "Starting";
-    String STARTED = "Started";
-    String ERROR = "Error";
+@Command(scope = "admin", name = "change-ssh-port", description = "Changes the secure shell port of an existing container instance.")
+public class ChangeSshPortCommand extends AdminCommandSupport {
 
-    String getName();
-    
-    boolean isRoot();
+    @Argument(index = 0, name = "name", description="The name of the container instance", required = true, multiValued = false)
+    private String instance = null;
 
-    String getLocation();
+    @Argument(index = 1, name = "port", description = "The new secure shell port to set", required = true, multiValued = false)
+    private int port = 0;
 
-    int getPid();
-
-    int getSshPort();
-
-    void changeSshPort(int port) throws Exception;
-
-    int getRmiRegistryPort();
-
-    void changeRmiRegistryPort(int port) throws Exception;
-
-    String getJavaOpts();
-
-    void changeJavaOpts(String javaOpts) throws Exception;
-
-    void start(String javaOpts) throws Exception;
-
-    void stop() throws Exception;
-
-    void destroy() throws Exception;
-
-    String getState() throws Exception;
-
+    protected Object doExecute() throws Exception {
+        getExistingInstance(instance).changeSshPort(port);
+        return null;
+    }
 }

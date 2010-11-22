@@ -31,7 +31,7 @@ import org.junit.Assert;
 
 public class AdminServiceMBeanImplTest extends TestCase {
     public void testCreateInstance() throws Exception {
-        final InstanceSettings is = new InstanceSettings(123, "somewhere", "someopts",
+        final InstanceSettings is = new InstanceSettings(123, 456, "somewhere", "someopts",
                 Collections.<String>emptyList(), Arrays.asList("webconsole", "funfeat"));
         
         final Instance inst = EasyMock.createMock(Instance.class);
@@ -46,11 +46,11 @@ public class AdminServiceMBeanImplTest extends TestCase {
         ab.setAdminService(as);
         Assert.assertSame(as, ab.getAdminService());
         
-        assertEquals(42, ab.createInstance("t1", 123, "somewhere", "someopts", " webconsole,  funfeat", ""));
+        assertEquals(42, ab.createInstance("t1", 123, 456, "somewhere", "someopts", " webconsole,  funfeat", ""));
     }
     
     public void testCreateInstance2() throws Exception {
-        final InstanceSettings is = new InstanceSettings(0, null, null,
+        final InstanceSettings is = new InstanceSettings(0, 0, null, null,
                 Collections.<String>emptyList(), Collections.<String>emptyList());
         
         AdminService as = EasyMock.createMock(AdminService.class);
@@ -61,13 +61,14 @@ public class AdminServiceMBeanImplTest extends TestCase {
         ab.setAdminService(as);
         Assert.assertSame(as, ab.getAdminService());
         
-        assertEquals(-1, ab.createInstance("t1", 0, "", "", "", ""));
+        assertEquals(-1, ab.createInstance("t1", 0, 0, "", "", "", ""));
     }
     
     public void testGetInstances() throws Exception {       
         Instance i1 = EasyMock.createMock(Instance.class);
         EasyMock.expect(i1.getPid()).andReturn(1234);
-        EasyMock.expect(i1.getPort()).andReturn(8818);
+        EasyMock.expect(i1.getSshPort()).andReturn(8818);
+        EasyMock.expect(i1.getRmiRegistryPort()).andReturn(1122);
         EasyMock.expect(i1.getName()).andReturn("i1");
         EasyMock.expect(i1.isRoot()).andReturn(true);
         EasyMock.expect(i1.getLocation()).andReturn("somewhere");
@@ -92,6 +93,7 @@ public class AdminServiceMBeanImplTest extends TestCase {
         Assert.assertTrue(cd1.containsValue(true));
         Assert.assertTrue(cd1.containsValue(1234));
         Assert.assertTrue(cd1.containsValue(8818));
+        Assert.assertTrue(cd1.containsValue(1122));
         Assert.assertTrue(cd1.containsValue("somewhere"));
         Assert.assertTrue(cd1.containsValue("someopts"));
         Assert.assertTrue(cd1.containsValue("Stopped"));
@@ -176,9 +178,9 @@ public class AdminServiceMBeanImplTest extends TestCase {
         EasyMock.verify(inst);
     }
 
-    public void testChangePort() throws Exception {
+    public void testSshChangePort() throws Exception {
         Instance inst = EasyMock.createMock(Instance.class);
-        inst.changePort(7788);
+        inst.changeSshPort(7788);
         EasyMock.expectLastCall();
         EasyMock.replay(inst);
 
@@ -190,7 +192,26 @@ public class AdminServiceMBeanImplTest extends TestCase {
         ab.setAdminService(as);
         Assert.assertSame(as, ab.getAdminService());
 
-        ab.changePort("test instance", 7788);
+        ab.changeSshPort("test instance", 7788);
+        EasyMock.verify(as);
+        EasyMock.verify(inst);
+    }
+    
+    public void testRmiRegistryChangePort() throws Exception {
+        Instance inst = EasyMock.createMock(Instance.class);
+        inst.changeRmiRegistryPort(1123);
+        EasyMock.expectLastCall();
+        EasyMock.replay(inst);
+        
+        AdminService as = EasyMock.createMock(AdminService.class);
+        EasyMock.expect(as.getInstance("test instance")).andReturn(inst);
+        EasyMock.replay(as);
+        
+        AdminServiceMBeanImpl ab = new AdminServiceMBeanImpl();
+        ab.setAdminService(as);
+        Assert.assertSame(as, ab.getAdminService());
+        
+        ab.changeRmiRegistryPort("test instance", 1123);
         EasyMock.verify(as);
         EasyMock.verify(inst);
     }

@@ -19,22 +19,28 @@ package org.apache.karaf.admin;
 import java.util.List;
 
 public class InstanceSettings {
-    private final int port;
+    private final int sshPort;
+    private final int rmiRegistryPort;
     private final String location;
     private final String javaOpts;
     private final List<String> featureURLs;
     private final List<String> features;
 
-    public InstanceSettings(int port, String location, String javaOpts, List<String> featureURLs, List<String> features) {
-        this.port = port;
+    public InstanceSettings(int sshPort, int rmiRegistryPort, String location, String javaOpts, List<String> featureURLs, List<String> features) {
+        this.sshPort = sshPort;
+        this.rmiRegistryPort = rmiRegistryPort;
         this.location = location;
         this.javaOpts = javaOpts;
         this.featureURLs = featureURLs;
         this.features = features;
     }
 
-    public int getPort() {
-        return port;
+    public int getSshPort() {
+        return sshPort;
+    }
+
+    public int getRmiRegistryPort() {
+        return rmiRegistryPort;
     }
 
     public String getLocation() {
@@ -62,7 +68,8 @@ public class InstanceSettings {
             return false;
         }
         InstanceSettings is = (InstanceSettings) o;
-        return is.port == port &&
+        return is.sshPort == sshPort &&
+               is.rmiRegistryPort == rmiRegistryPort &&
                (location == null ? is.location == null : location.equals(is.location)) &&
                (javaOpts == null ? is.javaOpts == null : javaOpts.equals(is.javaOpts)) &&
                (featureURLs == null ? is.featureURLs == null : featureURLs.equals(is.featureURLs)) &&
@@ -71,7 +78,7 @@ public class InstanceSettings {
 
     @Override
     public int hashCode() {
-        int result = port;
+        int result = sshPort + rmiRegistryPort;
         result = 31 * result + (location != null ? location.hashCode() : 0);
         result = 31 * result + (javaOpts != null ? javaOpts.hashCode() : 0);
         result = 31 * result + (featureURLs != null ? featureURLs.hashCode() : 0);

@@ -35,7 +35,7 @@ public class ConnectCommand extends AdminCommandSupport {
     private String password = "karaf";
 
     protected Object doExecute() throws Exception {
-        int port = getExistingInstance(instance).getPort();
+        int port = getExistingInstance(instance).getSshPort();
         session.execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost");
         return null;
     }

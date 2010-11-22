@@ -26,13 +26,8 @@ import java.util.TreeMap;
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
-import org.apache.karaf.admin.command.AdminCommandSupport;
-import org.apache.karaf.admin.command.ChangePortCommand;
-import org.apache.karaf.admin.command.CreateCommand;
-import org.apache.karaf.admin.command.DestroyCommand;
-import org.apache.karaf.admin.command.ListCommand;
-import org.apache.karaf.admin.command.StartCommand;
-import org.apache.karaf.admin.command.StopCommand;
+import org.apache.karaf.admin.command.*;
+import org.apache.karaf.admin.command.ChangeSshPortCommand;
 import org.apache.karaf.admin.internal.AdminServiceImpl;
 import org.fusesource.jansi.AnsiConsole;
 
@@ -44,7 +39,7 @@ public class Execute {
         StopCommand.class,
         DestroyCommand.class,
         ListCommand.class,
-        ChangePortCommand.class};
+        ChangeSshPortCommand.class};
     private static final Map<String, Class<?>> COMMANDS = new TreeMap<String, Class<?>>();
     static {
         for (Class<?> c : COMMAND_CLASSES) {
