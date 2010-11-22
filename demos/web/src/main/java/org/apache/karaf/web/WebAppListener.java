@@ -30,7 +30,7 @@ public class WebAppListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
 			System.err.println("contextInitialized");
-			String root = new File(sce.getServletContext().getRealPath("/") + "WEB-INF/karaf").getAbsolutePath();
+			String root = new File(sce.getServletContext().getRealPath("/") + "/WEB-INF/karaf").getAbsolutePath();
 			System.err.println("Root: " + root);
 			System.setProperty("karaf.home", root);
             System.setProperty("karaf.base", root);
