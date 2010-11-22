@@ -39,7 +39,8 @@ public class Execute {
         StopCommand.class,
         DestroyCommand.class,
         ListCommand.class,
-        ChangeSshPortCommand.class};
+        ChangeSshPortCommand.class,
+        ChangeRmiRegistryPortCommand.class};
     private static final Map<String, Class<?>> COMMANDS = new TreeMap<String, Class<?>>();
     static {
         for (Class<?> c : COMMAND_CLASSES) {
