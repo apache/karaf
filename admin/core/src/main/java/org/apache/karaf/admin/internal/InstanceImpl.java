@@ -97,7 +97,7 @@ public class InstanceImpl implements Instance {
         return this.process != null ? this.process.getPid() : 0;
     }
 
-    public int getPort() {
+    public int getSshPort() {
         InputStream is = null;
         try {
             File f = new File(location, "etc/org.apache.karaf.shell.cfg");
@@ -119,7 +119,7 @@ public class InstanceImpl implements Instance {
         }
     }
 
-    public void changePort(int port) throws Exception {
+    public void changeSshPort(int port) throws Exception {
         checkProcess();
         if (this.process != null) {
             throw new IllegalStateException("Instance not stopped");
@@ -133,6 +133,50 @@ public class InstanceImpl implements Instance {
             is.close();
         }
         props.setProperty("sshPort", Integer.toString(port));
+        OutputStream os = new FileOutputStream(f);
+        try {
+            props.store(os, null);
+        } finally {
+            os.close();
+        }
+    }
+
+    public int getRmiRegistryPort() {
+        InputStream is = null;
+        try {
+            File f = new File(location, "etc/org.apache.karaf.management.cfg");
+            is = new FileInputStream(f);
+            Properties props = new Properties();
+            props.load(is);
+            String loc = props.getProperty("rmiRegistryPort");
+            return Integer.parseInt(loc);
+        } catch (Exception e) {
+            return 0;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    public void changeRmiRegistryPort(int port) throws Exception {
+        checkProcess();
+        if (this.process != null) {
+            throw new IllegalStateException("Instance not stopped");
+        }
+        Properties props = new Properties();
+        File f = new File(location, "etc/org.apache.karaf.management.cfg");
+        InputStream is = new FileInputStream(f);
+        try {
+            props.load(is);
+        } finally {
+            is.close();
+        }
+        props.setProperty("rmiRegistryPort", Integer.toString(port));
         OutputStream os = new FileOutputStream(f);
         try {
             props.store(os, null);
@@ -217,7 +261,7 @@ public class InstanceImpl implements Instance {
 
 
     public synchronized String getState() {
-        int port = getPort();
+        int port = getSshPort();
         if (!exists() || port <= 0) {
             return ERROR;
         }

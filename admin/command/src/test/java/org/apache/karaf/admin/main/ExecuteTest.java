@@ -120,7 +120,8 @@ public class ExecuteTest extends TestCase {
     public void testExecute() throws Exception {
         final File tempFile = createTempDir(getName());
         Properties p = new Properties();
-        p.setProperty("port", "1302");
+        p.setProperty("ssh.port", "1302");
+        p.setProperty("rmi.port", "1122");
         FileOutputStream fos = new FileOutputStream(new File(tempFile, AdminServiceImpl.STORAGE_FILE));
         p.store(fos, "");
         fos.close();
@@ -143,9 +144,12 @@ public class ExecuteTest extends TestCase {
                     // The Admin Service should be initialized at this point.
                     // One way to find this out is by reading out the port number
                     AdminServiceImpl admin = admins.get(0);
-                    Field field = AdminServiceImpl.class.getDeclaredField("defaultPortStart");
-                    field.setAccessible(true);
-                    assertEquals(1302, field.get(admin));
+                    Field sshField = AdminServiceImpl.class.getDeclaredField("defaultSshPortStart");
+                    sshField.setAccessible(true);
+                    assertEquals(1302, sshField.get(admin));
+                    Field rmiField = AdminServiceImpl.class.getDeclaredField("defaultRmiPortStart");
+                    rmiField.setAccessible(true);
+                    assertEquals(1122, rmiField.get(admin));
                     return null;
                 }
             });

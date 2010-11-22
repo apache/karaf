@@ -19,17 +19,18 @@ package org.apache.karaf.admin.command;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "admin", name = "change-port", description = "Changes the port of an existing container instance.")
-public class ChangePortCommand extends AdminCommandSupport {
+@Command(scope = "admin", name = "change-rmi-registry-port", description = "Changes the RMI registry port (used by management layer) of an existing container instance.")
+public class ChangeRmiRegistryPortCommand extends AdminCommandSupport {
 
-    @Argument(index = 0, name = "name", description="The name of the container instance", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
-    @Argument(index = 1, name = "port", description = "The new port to set", required = true, multiValued = false)
+    @Argument(index = 1, name = "port", description = "The new RMI registry port to set", required = true, multiValued = false)
     private int port = 0;
 
     protected Object doExecute() throws Exception {
-        getExistingInstance(instance).changePort(port);
+        getExistingInstance(instance).changeRmiRegistryPort(port);
         return null;
     }
+
 }

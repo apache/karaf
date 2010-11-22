@@ -111,12 +111,13 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
         if (action == null) {
             success = true;
         } else if ("create".equals(action)) {
-            int port = parsePortNumber(req.getParameter("port"));
+            int sshPort = parsePortNumber(req.getParameter("sshPort"));
+            int rmiPort = parsePortNumber(req.getParameter("rmiPort"));
             String location = parseString(req.getParameter("location"));
             String javaopts = parseString(req.getParameter("javaopts"));
             List<String> featureURLs = parseStringList(req.getParameter("featureURLs"));
             List<String> features = parseStringList(req.getParameter("features"));
-            InstanceSettings settings = new InstanceSettings(port, location, javaopts, featureURLs, features);
+            InstanceSettings settings = new InstanceSettings(sshPort, rmiPort, location, javaopts, featureURLs, features);
             success = createInstance(name, settings);
         } else if ("destroy".equals(action)) {
             success = destroyInstance(name);
@@ -237,8 +238,10 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
         jw.value(instance.getPid());
         jw.key("name");
         jw.value(instance.getName());
-        jw.key("port");
-        jw.value(instance.getPort());
+        jw.key("sshPort");
+        jw.value(instance.getSshPort());
+        jw.key("rmiPort");
+        jw.value(instance.getRmiRegistryPort());
         jw.key("state");
         jw.value(instance.getState());
         jw.key("location");

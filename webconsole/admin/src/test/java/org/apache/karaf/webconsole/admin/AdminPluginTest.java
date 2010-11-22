@@ -54,7 +54,7 @@ public class AdminPluginTest extends TestCase {
     
     public void testDoPostCreate() throws Exception {
         InstanceSettings is = 
-            new InstanceSettings(1234, null, null, Collections.singletonList("http://someURL"), Arrays.asList("abc", "def"));
+            new InstanceSettings(1234, 5678, null, null, Collections.singletonList("http://someURL"), Arrays.asList("abc", "def"));
         AdminService adminService = EasyMock.createMock(AdminService.class);
         EasyMock.expect(adminService.createInstance("instance1", is)).andReturn(null);
         EasyMock.expect(adminService.getInstances()).andReturn(new Instance[] {}).anyTimes();
@@ -66,7 +66,8 @@ public class AdminPluginTest extends TestCase {
         final Map<String, String> params = new HashMap<String, String>();
         params.put("action", "create");
         params.put("name", "instance1");
-        params.put("port", "1234");
+        params.put("sshPort", "1234");
+        params.put("rmiPort", "5678");
         params.put("featureURLs", "http://someURL");
         params.put("features", "abc,def");
         HttpServletRequest req = EasyMock.createMock(HttpServletRequest.class);
