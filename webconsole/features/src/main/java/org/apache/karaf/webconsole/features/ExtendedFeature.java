@@ -105,6 +105,15 @@ public class ExtendedFeature implements Feature
         return this.feature.getResolver();
     }
 
+    public String getDescription() {
+        return this.feature.getDescription();
+    }
+
+    public String getDetails() {
+        return this.feature.getDetails();
+    }
+
+
     //
     // Additional methods
     //

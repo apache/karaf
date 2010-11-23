@@ -16,22 +16,20 @@
  */
 package org.apache.karaf.features.command;
 
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.Repository;
-import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Repository;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Command(scope = "features", name = "list", description = "Lists all existing features available from the defined repositories.")
 public class ListFeaturesCommand extends FeaturesCommandSupport {
 
-    @Option(name = "-i", aliases={"--installed"}, description="Display a list of all installed features only", required = false, multiValued = false)
+    @Option(name = "-i", aliases = {"--installed"}, description = "Display a list of all installed features only", required = false, multiValued = false)
     boolean installed;
 
     private static final String STATE = "State";
@@ -41,6 +39,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     private static final String VERSION = "Version";
     private static final String NAME = "Name";
     private static final String REPOSITORY = "Repository";
+    private static final String DESCRIPTION = "Description";
 
     protected void doExecute(FeaturesService admin) throws Exception {
 
@@ -59,8 +58,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         if (features.size() == 0) {
             if (installed) {
                 System.out.println("No features installed.");
-            }
-            else {
+            } else {
                 System.out.println("No features available.");
             }
             return;
@@ -75,6 +73,11 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         for (Feature f : features) {
             maxNameSize = Math.max(maxNameSize, f.getName().length());
         }
+        int maxRepositorySize = REPOSITORY.length();
+        for (Repository repository:repositories) {
+                maxRepositorySize = Math.max(maxRepositorySize,  repository.getName().length());
+        }
+
         StringBuilder sb = new StringBuilder();
         sb.append(STATE).append("         ").append(VERSION).append("   ");
         for (int i = VERSION.length(); i < maxVersionSize; i++) {
@@ -84,7 +87,12 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         for (int i = NAME.length(); i < maxNameSize; i++) {
             sb.append(" ");
         }
-        sb.append(REPOSITORY);
+        sb.append(REPOSITORY).append(" ");
+
+        for (int i = REPOSITORY.length(); i < maxRepositorySize; i++) {
+            sb.append(" ");
+        }
+        sb.append(DESCRIPTION);
         System.out.println(sb.toString());
 
         // Print the feature data.
@@ -117,11 +125,22 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
             String name = repositories.get(0).getName();
             sb.append(name);
             repositories.remove(0);
-            System.out.println(sb.toString());
+            
             if (name.charAt(name.length() - 1) == '*') {
                 needsLegend = true;
             }
 
+            for (int i = name.length(); i < maxRepositorySize; i++) {
+                sb.append(" ");
+            }
+
+            String description = "";
+            if(f.getDescription() != null) {
+            description = f.getDescription();
+            }
+            sb.append(description);
+
+            System.out.println(sb.toString());            
         }
 
         if (needsLegend) {
