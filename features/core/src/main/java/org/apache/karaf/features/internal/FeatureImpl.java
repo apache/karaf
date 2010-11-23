@@ -31,6 +31,8 @@ public class FeatureImpl implements Feature {
 
     private String id;
     private String name;
+    private String description;
+    private String details;
     private String version;
     private String resolver;
     private List<Feature> dependencies = new ArrayList<Feature>();
@@ -58,6 +60,22 @@ public class FeatureImpl implements Feature {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
     }
 
     public String getVersion() {

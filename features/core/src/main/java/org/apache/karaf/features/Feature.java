@@ -28,6 +28,10 @@ public interface Feature {
 
     String getName();
 
+    String getDescription();
+
+    String getDetails();
+
     String getVersion();
 
     String getResolver();

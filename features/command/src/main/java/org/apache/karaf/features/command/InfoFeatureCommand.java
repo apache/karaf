@@ -73,6 +73,10 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
 
         System.out.println("Description of " + feature.getName() + " " + feature.getVersion() + " feature");
         System.out.println("----------------------------------------------------------------");
+        if(feature.getDetails() != null && feature.getDetails().length() >0) {
+           System.out.print(feature.getDetails());
+           System.out.println("----------------------------------------------------------------");
+        }
         if (config) {
             displayConfigInformation(feature);
         }

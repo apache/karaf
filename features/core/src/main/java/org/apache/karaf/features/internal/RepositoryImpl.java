@@ -16,33 +16,26 @@
  */
 package org.apache.karaf.features.internal;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import org.apache.karaf.features.Repository;
-import org.apache.karaf.features.Feature;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLConnection;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The repository implementation.
@@ -85,24 +78,23 @@ public class RepositoryImpl implements Repository {
 
     public void load() throws IOException {
         try {
-        	valid = true;
+            valid = true;
             repositories = new ArrayList<URI>();
             features = new ArrayList<Feature>();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             URLConnection conn = uri.toURL().openConnection();
             conn.setDefaultUseCaches(false);
             Document doc = factory.newDocumentBuilder().parse(conn.getInputStream());
-            String temp = doc.getDocumentElement().getAttribute( "name" );
+            String temp = doc.getDocumentElement().getAttribute("name");
             if ("".equals(temp)) {
                 name = "repo-" + String.valueOf(unnamedRepoId++);
-            }
-            else {
+            } else {
                 name = temp;
             }
-            if ( uri.toString().startsWith( "bundle" ) ) {
+            if (uri.toString().startsWith("bundle")) {
                 name += "*";
             }
-            
+
             NodeList nodes = doc.getDocumentElement().getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node node = nodes.item(i);
@@ -133,14 +125,30 @@ public class RepositoryImpl implements Repository {
                         f.setResolver(resolver);
                     }
 
+                    String description = e.getAttribute("description");
+                    if (description != null && description.length() > 0) {
+                        f.setDescription(description);
+                    }
+
+                    NodeList detailsNodes = e.getElementsByTagName("details");
+                    StringBuffer detailsBuffer = new StringBuffer();
+                    for (int j = 0; j < detailsNodes.getLength(); j++) {
+                        Element b = (Element) detailsNodes.item(j);
+                        String detail = b.getTextContent().trim();
+                        detailsBuffer.append(detail).append("\n");
+                    }
+                    String details = detailsBuffer.toString();
+                    if (details != null && details.length() > 0)
+                        f.setDetails(details);
+
                     NodeList featureNodes = e.getElementsByTagName("feature");
                     for (int j = 0; j < featureNodes.getLength(); j++) {
                         Element b = (Element) featureNodes.item(j);
                         String dependencyFeatureVersion = b.getAttribute("version");
                         if (dependencyFeatureVersion != null && dependencyFeatureVersion.length() > 0) {
-                        	f.addDependency(new FeatureImpl(b.getTextContent(), dependencyFeatureVersion));
+                            f.addDependency(new FeatureImpl(b.getTextContent(), dependencyFeatureVersion));
                         } else {
-                        	f.addDependency(new FeatureImpl(b.getTextContent()));
+                            f.addDependency(new FeatureImpl(b.getTextContent()));
                         }
                     }
                     NodeList configNodes = e.getElementsByTagName("config");
@@ -167,7 +175,7 @@ public class RepositoryImpl implements Repository {
                         boolean bs = true;
                         boolean bd = false;
                         int bsl = 0;
-                        
+
                         // Check the value of the "start" attribute
                         if (bStart != null && bStart.length() > 0) {
                             bs = Boolean.parseBoolean(bStart);
@@ -178,10 +186,10 @@ public class RepositoryImpl implements Repository {
                         }
                         // Check start level
                         if (bStartLevel != null && bStartLevel.length() > 0) {
-                        	try {
+                            try {
                                 bsl = Integer.parseInt(bStartLevel);
-                        	} catch (Exception ex) {
-                        		LOGGER.error("The start-level is not an int value for the bundle : " + b.getTextContent());
+                            } catch (Exception ex) {
+                                LOGGER.error("The start-level is not an int value for the bundle : " + b.getTextContent());
                             }
                         }
                         f.addBundle(new BundleInfoImpl(b.getTextContent().trim(), bsl, bs, bd));
@@ -190,23 +198,23 @@ public class RepositoryImpl implements Repository {
                 }
             }
         } catch (SAXException e) {
-        	valid = false;
+            valid = false;
             throw (IOException) new IOException().initCause(e);
         } catch (ParserConfigurationException e) {
-        	valid = false;
-        	throw (IOException) new IOException().initCause(e);
+            valid = false;
+            throw (IOException) new IOException().initCause(e);
         } catch (IllegalArgumentException e) {
-        	valid = false;
-        	throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+            valid = false;
+            throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
         } catch (Exception e) {
-        	valid = false;
-        	throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+            valid = false;
+            throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
         }
     }
 
     protected void interpolation(Properties properties) {
         for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
-            String key = (String)e.nextElement();
+            String key = (String) e.nextElement();
             String val = properties.getProperty(key);
             Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);
             while (matcher.find()) {
@@ -220,8 +228,8 @@ public class RepositoryImpl implements Repository {
         }
     }
 
-	public boolean isValid() {
-		return this.valid;
-	}
+    public boolean isValid() {
+        return this.valid;
+    }
 
 }
