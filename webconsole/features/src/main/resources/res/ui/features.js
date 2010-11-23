@@ -25,11 +25,11 @@ function renderFeatures( data ) {
 function renderView() {
     renderStatusLine();
     renderTable( "Feature Repositories", "repository_table", ["Name", "URL", "Actions"] );
-    var txt = "<form method='post'><div class='table'><table id='repository_table_footer' class='tablelayout'><tbody>" +
+    var txt = "<form method='post'><table id='repository_table_footer' class='ui-widget-header nicetable noauto ui-widget'><tbody>" +
         "<tr><input type='hidden' name='action' value='addRepository'/>" +
         "<td><input id='url' type='text' name='url' style='width:100%' colspan='2'/></td>" +
         "<td class='col_Actions'><input type='button' value='Add URL' onclick='addRepositoryUrl()'/></td>" +
-        "</tr></tbody></table></div></form><br/>";
+        "</tr></tbody></table></form><br/>";
     $("#plugin_content").append( txt );
     renderTable( "Features", "feature_table", ["Name", "Version", "Repository", "Status", "Actions"] );
     renderStatusLine();
@@ -45,14 +45,14 @@ function renderStatusLine() {
 }
 
 function renderTable( /* String */ title, /* String */ id, /* array of Strings */ columns ) {
-    var txt = "<div class='table'><table class='tablelayout'><tbody><tr>" +
-        "<td style='color:#6181A9;background-color:#e6eeee'>" +
-        title + "</td></tr></tbody></table>" +
-        "<table id='" + id + "' class='tablelayout'><thead><tr>";
+    var txt = "<div class='ui-widget-header ui-corner-top buttonGroup'><table class='nicetable ui-widget'><thead><tr>" +
+        "<th>" +
+        title + "</th></tr></thead></table></div>" +
+        "<table id='" + id + "' class='nicetable ui-widget'><thead><tr>";
     for ( var name in columns ) {
-      txt = txt + "<th class='col_" + columns[name] + "' style='border-top:#e6eeee'>" + columns[name] + "</th>";
+      txt = txt + "<th class='col_" + columns[name] + " ui-widget-header header' >" + columns[name] + "</th>";
     }
-    txt = txt + "</tr></thead><tbody></tbody></table></div>";
+    txt = txt + "</tr></thead><tbody></tbody></table>";
     $("#plugin_content").append( txt );
 }
 
