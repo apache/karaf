@@ -24,20 +24,20 @@ function renderAdmin( data ) {
 
 function renderView() {
     renderStatusLine();
-    var txt = "<form method='post'><div class='table'><table id='create_instance_table' class='tablelayout'><tbody>" +
+    var txt = "<form method='post'><div class='ui-widget-header ui-corner-top buttonGroup'><table id='create_instance_table' class='nicetable ui-widget'><thead>" +
     "<tr><input type='hidden' name='action' value='create'/>" +
-    "<td>Name: <input id='name' type='text' name='name' style='width:70%' colspan='2'/></td>" +
-    "<td>SSH Port: <input id='sshPort' type='text' name='sshPort' style='width:70%' colspan='2'/></td>" +
-    "<td>RMI Port: <input id='rmiPort' type='text' name='rmiPort' style='width:70%' colspan='2'/></td>" +
-    "<td>Location: <input id='location' type='text' name='location' style='width:70%' colspan='2'/></td>" +
-    "<td>JavaOpts: <input id='javaopts' type='text' name='javaopts' style='width:70%' colspan='2'/></td>" +
-    "<td />" +
-    "</tr><tr><td>Features: <input id='features' type='text' name='features' style='width:70%' colspan='2'" + 
-    " title='Specify initial features separated by commas.'/></td>" + 
-    "<td colspan='2'>Feature URLs: <input id='featureURLs' type='text' name='featureURLs' style='width:80%' colspan='2'" + 
-    " title='Specify additional feature URLs separate by commas.'/></td>" +
-    "<td class='col_Actions'><input type='button' value='Create' onclick='createInstance()'/></td>" +
-    "</tr></tbody></table></div></form><br/>";
+    "<th>Name: <input id='name' type='text' name='name' style='width:70%' colspan='2'/></th>" +
+    "<th>SSH Port: <input id='sshPort' type='text' name='sshPort' style='width:70%' colspan='2'/></th>" +
+    "<th>RMI Port: <input id='rmiPort' type='text' name='rmiPort' style='width:70%' colspan='2'/></th>" +
+    "<th>Location: <input id='location' type='text' name='location' style='width:70%' colspan='2'/></th>" +
+    "<th>JavaOpts: <input id='javaopts' type='text' name='javaopts' style='width:70%' colspan='2'/></th>" +
+    "<th />" +
+    "</tr><tr><th>Features: <input id='features' type='text' name='features' style='width:70%' colspan='2'" + 
+    " title='Specify initial features separated by commas.'/></th>" + 
+    "<th colspan='2'>Feature URLs: <input id='featureURLs' type='text' name='featureURLs' style='width:80%' colspan='2'" + 
+    " title='Specify additional feature URLs separate by commas.'/></th>" +
+    "<th class='col_Actions'><input type='button' value='Create' onclick='createInstance()'/></th>" +
+    "</tr></thead></table></div></form>";
     $("#plugin_content").append( txt );
     renderTable( "Karaf Instances", "instances_table", ["Pid", "Name", "SSH Port", "RMI Port", "State", "JavaOpts", "Location", "Actions"] );
     renderStatusLine();
@@ -54,9 +54,9 @@ function createInstance() {
     postCreateInstance( name, sshPort, rmiPort, location, javaopts, features, featureURLs );
 }
 
-function postCreateInstance( /* String */ name, /* String */ sshPort, /* String */ rmiPort, /* String */ location,
+function postCreateInstance( /* String */ name, /* String */ sshPort, /* String */ rmiPort, /* String */ location, 
 		/* String */ javaopts, /* String */ features, /* String */ featureURLs ) {
-    $.post( pluginRoot, {"action": "create", "name": name, "sshPort": sshPort, "rmiPort": rmiPort, location": location, 
+    $.post( pluginRoot, {"action": "create", "name": name, "sshPort": sshPort, "rmiPort": rmiPort, "location": location, 
                              "javaopts": javaopts, "features": features, "featureURLs": featureURLs }, function( data ) {
         renderData( data );
     }, "json" );
@@ -67,14 +67,14 @@ function renderStatusLine() {
 }
 
 function renderTable( /* String */ title, /* String */ id, /* array of Strings */ columns ) {
-    var txt = "<div class='table'><table class='tablelayout'><tbody><tr>" +
-    "<td style='color:#6181A9;background-color:#e6eeee'>" +
-    title + "</td></tr></tbody></table>" +
-    "<table id='" + id + "' class='tablelayout'><thead><tr>";
+    var txt = "<table class='ui-widget-header nicetable noauto ui-widget'><thead><tr>" +
+    "<th>" +
+    title + "</th></tr></thead></table>" +
+    "<table id='" + id + "' class='tablesorter nicetable noauto ui-widget'><thead><tr>";
     for ( var name in columns ) {
-        txt = txt + "<th class='col_" + columns[name] + "' style='border-top:#e6eeee'>" + columns[name] + "</th>";
+        txt = txt + "<th class='col_" + columns[name] + " ui-widget-header header' >" + columns[name] + "</th>";
     }
-    txt = txt + "</tr></thead><tbody></tbody></table></div>";
+    txt = txt + "</tr></thead><tbody></tbody></table>";
     $("#plugin_content").append( txt );
 }
 
