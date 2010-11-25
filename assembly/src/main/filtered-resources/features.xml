@@ -125,6 +125,10 @@
         <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
         <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
     </feature>
+    <feature name="eventadmin" version="${project.version}" resolver="(obr)">
+		<bundle dependency="true">mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
+		<bundle dependency="true">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin-plugin.version}</bundle>
+    </feature>
     <feature name="jasypt-encryption" version="${project.version}" resolver="(obr)">
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-codec/${commons-codec.bundle.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/${commons-lang.bundle.version}</bundle>
