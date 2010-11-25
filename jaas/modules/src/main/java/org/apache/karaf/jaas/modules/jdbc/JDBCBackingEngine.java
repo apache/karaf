@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author iocanel
+ * @author iocanel, jbonofre
  */
 public class JDBCBackingEngine implements BackingEngine {
 
@@ -189,7 +189,7 @@ public class JDBCBackingEngine implements BackingEngine {
                 listUserStatement = connection.prepareStatement(selectUsersStatement);
                 usersResultSet = listUserStatement.executeQuery();
                 while (!usersResultSet.next()) {
-                    String username = usersResultSet.getString(0);
+                    String username = usersResultSet.getString("USERNAME");
                     users.add(new UserPrincipal(username));
                 }
             } catch (SQLException e) {
