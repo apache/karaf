@@ -580,7 +580,7 @@ public class Terminal {
                 // Alternate screen mode
                 if ((state && !vt100_mode_alt_screen) || (!state && vt100_mode_alt_screen)) {
                     int[] s = screen; screen = screen2; screen2 = s;
-                    Map<String, Object> map = vt100_saved; vt100_saved = vt100_saved2; vt100_saved = map;
+                    Map<String, Object> map = vt100_saved; vt100_saved = vt100_saved2; vt100_saved2 = map;
                 }
                 vt100_mode_alt_screen = state;
             // ?57 : DECNAKB: Greek keyboard mapping

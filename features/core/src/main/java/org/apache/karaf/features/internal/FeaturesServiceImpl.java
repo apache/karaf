@@ -16,13 +16,21 @@
  */
 package org.apache.karaf.features.internal;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
+import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.*;
+import org.osgi.framework.*;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.startlevel.StartLevel;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -32,33 +40,6 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.Feature;
-import org.apache.karaf.features.FeatureEvent;
-import org.apache.karaf.features.FeaturesListener;
-import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
-import org.apache.karaf.features.RepositoryEvent;
-import org.apache.felix.utils.manifest.Clause;
-import org.apache.felix.utils.manifest.Parser;
-import org.apache.felix.utils.version.VersionRange;
-import org.apache.karaf.features.Resolver;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.Version;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static java.lang.String.format;
 
@@ -307,11 +288,6 @@ public class FeaturesServiceImpl implements FeaturesService {
 	                        try {
 	                            b.start();
 	                        } catch (BundleException be) {
-	                            String[] msgdata = new String[]{
-	                                b.getLocation(),
-	                                getFeaturesContainingBundleList(b),
-	                                be.getMessage()
-	                            };
 	                            String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
 	                            throw new Exception(msg, be);
 	                        }
@@ -859,7 +835,6 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin,
                                                       String pid, String factoryPid) throws IOException, InvalidSyntaxException {
-        String key = (factoryPid == null ? pid : pid + "-" + factoryPid);
         String filter;
         if (factoryPid == null) {
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
@@ -1074,7 +1049,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         Set<Feature> features = new HashSet<Feature>();
         for (Map<String, Feature> featureMap : this.getFeatures().values()) {
             for (Feature f : featureMap.values()) {
-                if (f.getBundles().contains(bundle.getLocation())) {
+                if (f.getBundles().contains(bundle)) {
                     features.add(f);
                 }
             }

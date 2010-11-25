@@ -114,10 +114,10 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
             int sshPort = parsePortNumber(req.getParameter("sshPort"));
             int rmiPort = parsePortNumber(req.getParameter("rmiPort"));
             String location = parseString(req.getParameter("location"));
-            String javaopts = parseString(req.getParameter("javaopts"));
+            String javaOpts = parseString(req.getParameter("javaOpts"));
             List<String> featureURLs = parseStringList(req.getParameter("featureURLs"));
             List<String> features = parseStringList(req.getParameter("features"));
-            InstanceSettings settings = new InstanceSettings(sshPort, rmiPort, location, javaopts, featureURLs, features);
+            InstanceSettings settings = new InstanceSettings(sshPort, rmiPort, location, javaOpts, featureURLs, features);
             success = createInstance(name, settings);
         } else if ("destroy".equals(action)) {
             success = destroyInstance(name);

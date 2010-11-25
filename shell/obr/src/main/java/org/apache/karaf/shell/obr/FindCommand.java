@@ -16,22 +16,18 @@
  */
 package org.apache.karaf.shell.obr;
 
-import java.io.PrintStream;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.felix.bundlerepository.Capability;
-import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Requirement;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.Version;
+
+import java.io.PrintStream;
+import java.lang.reflect.Array;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 @Command(scope = "obr", name = "find", description = "Find OBR bundles for a given filter")
 public class FindCommand extends ObrCommandSupport {
@@ -40,7 +36,6 @@ public class FindCommand extends ObrCommandSupport {
     List<String> requirements;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-        List<Resource> matching = new ArrayList<Resource>();
         Resource[] resources = admin.discoverResources(parseRequirements(admin, requirements));
         if (resources == null)
         {

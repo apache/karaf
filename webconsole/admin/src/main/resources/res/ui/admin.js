@@ -30,7 +30,7 @@ function renderView() {
     "<th>SSH Port: <input id='sshPort' type='text' name='sshPort' style='width:70%' colspan='2'/></th>" +
     "<th>RMI Port: <input id='rmiPort' type='text' name='rmiPort' style='width:70%' colspan='2'/></th>" +
     "<th>Location: <input id='location' type='text' name='location' style='width:70%' colspan='2'/></th>" +
-    "<th>JavaOpts: <input id='javaopts' type='text' name='javaopts' style='width:70%' colspan='2'/></th>" +
+    "<th>JavaOpts: <input id='javaOpts' type='text' name='javaOpts' style='width:70%' colspan='2'/></th>" +
     "<th />" +
     "</tr><tr><th>Features: <input id='features' type='text' name='features' style='width:70%' colspan='2'" + 
     " title='Specify initial features separated by commas.'/></th>" + 
@@ -48,16 +48,16 @@ function createInstance() {
     var sshPort = document.getElementById( "sshPort" ).value;
     var rmiPort = document.getElementById("rmiPort").value;
     var location = document.getElementById( "location" ).value;
-    var javaopts = document.getElementById( "javaopts" ).value;
+    var javaPpts = document.getElementById( "javaOpts" ).value;
     var features = document.getElementById( "features" ).value;
     var featureURLs = document.getElementById( "featureURLs" ).value;
-    postCreateInstance( name, sshPort, rmiPort, location, javaopts, features, featureURLs );
+    postCreateInstance( name, sshPort, rmiPort, location, javaOpts, features, featureURLs );
 }
 
 function postCreateInstance( /* String */ name, /* String */ sshPort, /* String */ rmiPort, /* String */ location, 
-		/* String */ javaopts, /* String */ features, /* String */ featureURLs ) {
+		/* String */ javaOpts, /* String */ features, /* String */ featureURLs ) {
     $.post( pluginRoot, {"action": "create", "name": name, "sshPort": sshPort, "rmiPort": rmiPort, "location": location, 
-                             "javaopts": javaopts, "features": features, "featureURLs": featureURLs }, function( data ) {
+                             "javaOpts": javaOpts, "features": features, "featureURLs": featureURLs }, function( data ) {
         renderData( data );
     }, "json" );
 }
@@ -114,7 +114,7 @@ function renderInstanceData( /* Element */ parent, /* Object */ instance ) {
     parent.appendChild( td( null, null, [ text( instance.rmiPort ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.state ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.location ) ] ) );
-    parent.appendChild( td( null, null, [ text( instance.javaopts ) ] ) );
+    parent.appendChild( td( null, null, [ text( instance.javaOpts ) ] ) );
     var actionsTd = td( null, null );
     var div = createElement( "div", null, {
         style: { 
