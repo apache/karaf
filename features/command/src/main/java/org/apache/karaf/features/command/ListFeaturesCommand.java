@@ -134,6 +134,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
                 sb.append(" ");
             }
 
+            sb.append(" ");
             String description = "";
             if(f.getDescription() != null) {
             description = f.getDescription();
