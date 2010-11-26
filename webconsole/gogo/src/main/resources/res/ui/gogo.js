@@ -24,7 +24,6 @@ gogo = { };
 
 gogo.Terminal_ctor = function(div, width, height) {
 
-   var ie = (window.ActiveXObject) ? 0 : 1;
    var query0 = "w=" + width + "&h=" + height;
    var query1 = query0 + "&k=";
    var buf = "";
@@ -98,14 +97,14 @@ gogo.Terminal_ctor = function(div, width, height) {
        }
    }
 
-   function keypress(ev) {
+   function keypress(ev, fromkeydown) {
         // Translate to standard keycodes
         if (!ev)
             ev = window.event;
         var kc;
         if (ev.keyCode)
             kc = ev.keyCode;
-        if (ev.which)
+        if (!fromkeydown && ev.which)
             kc = ev.which;
         if (ev.ctrlKey) {
             if (kc >= 0 && kc <= 32)
@@ -124,7 +123,7 @@ gogo.Terminal_ctor = function(div, width, height) {
                     default: return true;
                 }
             }
-        } else if (ev.which == 0) {
+        } else if (fromkeydown) {
             switch(kc) {
                 case 8: break;			     // Backspace
                 case 9: break;               // Tab
@@ -154,8 +153,6 @@ gogo.Terminal_ctor = function(div, width, height) {
                 default: return true;
             }
         }
-        if (kc == 8)
-            kc = 127;
 
         var k = "";
         // Build character
@@ -185,6 +182,11 @@ gogo.Terminal_ctor = function(div, width, height) {
             case 63247: k = "~l"; break; // F12
             default:    k = String.fromCharCode(kc); break;
         }
+
+//        debug("fromkeydown=" + fromkeydown + ", ev.keyCode=" + ev.keyCode + ", " +
+//              "ev.which=" + ev.which + ", ev.ctrlKey=" + ev.ctrlKey + ", " +
+//              "kc=" + kc + ", k=" + k);
+
         queue(encodeURIComponent(k));
 
         ev.cancelBubble = true;
@@ -197,14 +199,11 @@ gogo.Terminal_ctor = function(div, width, height) {
    function keydown(ev) {
        if (!ev)
           ev = window.event;
-       if (ie) {
            o = { 9:1, 8:1, 27:1, 33:1, 34:1, 35:1, 36:1, 37:1, 38:1, 39:1, 40:1, 45:1, 46:1, 112:1,
                  113:1, 114:1, 115:1, 116:1, 117:1, 118:1, 119:1, 120:1, 121:1, 122:1, 123:1 };
            if (o[ev.keyCode] || ev.ctrlKey || ev.altKey) {
-               ev.which = 0;
-               return keypress(ev);
+               keypress(ev, true);
            }
-       }
    }
 
    function init() {
