@@ -1023,7 +1023,7 @@ public class Terminal {
         String[] values = new String[n];
         for (int i = 0; i < n; i++) {
             String value = null;
-            if (i < ps.length) {
+            if (i < ps.length && ps[i].length() > 0) {
                 value = prefix + ps[i];
             }
             if (value == null && i < defaults.length) {
