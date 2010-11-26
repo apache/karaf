@@ -37,6 +37,7 @@
         <module>command</module>
         <module>management</module>
         <module>obr</module>
+        <module>enterprise</module>
     </modules>
 
 </project>
