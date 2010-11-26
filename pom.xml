@@ -125,6 +125,8 @@
         <felix.utils.version>1.1.0</felix.utils.version>
         <felix.webconsole.version>3.1.6</felix.webconsole.version>
         <felix.metatype.version>1.0.4</felix.metatype.version>
+        <felix.eventadmin.version>1.2.6</felix.eventadmin.version>
+        <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <aries.blueprint.version>0.3-incubating-SNAPSHOT</aries.blueprint.version>
         <aries.jmx.version>0.3-incubating-SNAPSHOT</aries.jmx.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
