@@ -72,6 +72,14 @@
 	    <bundle>mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
     	<bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
 	</feature>
+	<feature name="jetty-jaas" version="${jetty.version}" resolver="(obr)">
+		<feature version="[7.0,8.0)">jetty</feature>
+		<bundle dependency='true'>mvn:javax.mail/mail/${javax.mail.version}</bundle>
+		<bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+		<bundle>mvn:org.eclipse.jetty/jetty-webapp/${jetty.version}</bundle>
+		<bundle>mvn:org.eclipse.jetty/jetty-jndi/${jetty.version}</bundle>
+		<bundle>mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle>
+	</feature>
     <feature name="http" version="${project.version}" resolver="(obr)">
         <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181

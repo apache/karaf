@@ -113,6 +113,7 @@
 
         <commons-logging.version>1.1.1</commons-logging.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
+        <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
         <depends-maven-plugin.version>1.0</depends-maven-plugin.version>
         <easymock.version>2.4</easymock.version>
         <equinox.version>3.6.0.v20100517</equinox.version>
@@ -149,6 +150,7 @@
         <spring.version>3.0.4.RELEASE</spring.version>
         <sshd.version>0.5.0</sshd.version>
         <xbean.version>3.7</xbean.version>
+        <javax.mail.version>1.4.3</javax.mail.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
