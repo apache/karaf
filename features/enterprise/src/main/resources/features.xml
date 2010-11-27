@@ -18,17 +18,17 @@
         limitations under the License.
     -->
 
-<fetures>
+<features>
         <feature name='transaction' description="OSGi Transaction Manager" version='${aries.blueprint.version}'>
             <details>The Aries JTA</details>
-            <bundle>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.transaction.version}</bundle>
+            <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
             <bundle>mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.blueprint.version}</bundle>
         </feature>
 
        <feature name='persistence' description="OSGi Persistence Container" version='${aries.blueprint.version}'>
-            <bundle>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.transaction.version}</bundle>
-            <bundle>mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.transaction.version}</bundle>            
+            <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+            <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
             <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.blueprint.aries/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.blueprint.version}</bundle>
@@ -36,9 +36,10 @@
         </feature>
 
         <feature name='jndi' description="OSGi Service Registry JNDI access" version='${aries.blueprint.version}'>
-            <bundle>mvn:org.osgi/org.osgi.enterprise/${osgi.version}</bundle>
-            <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.version}</bundle>
+            <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.bundle.version}</bundle>
+            <bundle>mvn:org.apache.aries/org.apache.aries.util/${aries.blueprint.version}</bundle>
+            <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.blueprint.version}</bundle>
         </feature>    
-</fetures>
+</features>

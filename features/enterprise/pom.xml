@@ -32,10 +32,7 @@
     <name>Apache Karaf :: Features :: Enterprise</name>
 
     <properties>
-         <features.file>features.xml</features.file>
-        <cglib.version>2.1_3_6</cglib.version>
-        <geronimo.transaction.version>1.1.1</geronimo.transaction.version>
-        <geronimo.persistence.version>1.1</geronimo.persistence.version>
+        <features.file>features.xml</features.file>        
     </properties>
 
     <build>
