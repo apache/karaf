@@ -22,6 +22,14 @@ import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.AnsiWindowsTerminal;
 import jline.NoInterruptUnixTerminal;
+import org.fusesource.jansi.internal.WindowsSupport;
+
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
 
 public class TerminalFactory {
 
@@ -43,7 +51,7 @@ public class TerminalFactory {
         boolean windows = System.getProperty("os.name").toLowerCase().contains("windows");
         try {
             if (windows) {
-                AnsiWindowsTerminal t = new AnsiWindowsTerminal();
+                AnsiWindowsTerminal t = new KarafWindowsTerminal();
                 t.setDirectConsole(true);
                 t.init();
                 term = t;
@@ -63,6 +71,49 @@ public class TerminalFactory {
             term.restore();
             term = null;
         }
+    }
+
+    public static class KarafWindowsTerminal extends AnsiWindowsTerminal {
+
+        public KarafWindowsTerminal() throws Exception {
+            super();
+        }
+
+        @Override
+        public int readCharacter(InputStream in) throws IOException {
+            if (isSystemIn(in)) {
+                return WindowsSupport.readByte();
+            }
+            else {
+                return super.readCharacter(in);
+            }
+        }
+
+        private boolean isSystemIn(InputStream in) throws IOException {
+            assert in != null;
+
+            if (in == System.in) {
+                return true;
+            }
+            while (in instanceof FilterInputStream) {
+                try {
+                    Field f = FilterInputStream.class.getDeclaredField("in");
+                    f.setAccessible(true);
+                    in = (InputStream) f.get(in);
+                } catch (Throwable t) {
+                    break;
+                }
+                if (in == System.in) {
+                    return true;
+                }
+            }
+            if (in instanceof FileInputStream && ((FileInputStream) in).getFD() == FileDescriptor.in) {
+                return true;
+            }
+
+            return false;
+        }
+
     }
 
 }
