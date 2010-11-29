@@ -49,6 +49,10 @@
             <artifactId>org.apache.karaf.main</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>tanukisoft</groupId>
             <artifactId>wrapper</artifactId>
         </dependency>
@@ -99,7 +103,9 @@
                             org.apache.karaf.shell.console,
                             *
                         </Import-Package>
-                        <Private-Package>!*</Private-Package>
+                        <Private-Package>
+                            org.apache.karaf.util.process
+                        </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

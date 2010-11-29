@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.shell.commands.utils.PumpStreamHandler;
 import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.util.process.PumpStreamHandler;
 
 /**
  * Execute system processes.
@@ -37,7 +37,7 @@ public class ExecuteAction extends AbstractAction {
     protected Object doExecute() throws Exception {
         ProcessBuilder builder = new ProcessBuilder(args);
 
-        PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err);
+        PumpStreamHandler handler = new PumpStreamHandler(System.in, System.out, System.err, "Command" + args.toString());
 
         log.info("Executing: {}", builder.command());
         Process p = builder.start();
