@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.karaf.shell.commands.utils;
+package org.apache.karaf.util.process;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,7 +47,7 @@ public class StreamPumper
 
     private boolean autoflush;
 
-    private Exception exception;
+    private Throwable exception;
 
     private int bufferSize = 128;
 
@@ -106,7 +106,7 @@ public class StreamPumper
         int length;
         try {
             do {
-                while (in.available() > 0 && !finish) {
+                while (in.available() > 0) {
                     length = in.read(buf);
                     if (length < 1 ) {
                         break;
@@ -118,11 +118,11 @@ public class StreamPumper
                 }
                 out.flush();
                 Thread.sleep(200);  // Pause to avoid tight loop if external proc is slow
-            } while (!finish && closeWhenExhausted);
+            } while (!finish);
         }
-        catch (Exception e) {
+        catch (Throwable t) {
             synchronized (this) {
-                exception = e;
+                exception = t;
             }
         }
         finally {
@@ -187,7 +187,7 @@ public class StreamPumper
      *
      * @return The Exception encountered; or null if there was none.
      */
-    public synchronized Exception getException() {
+    public synchronized Throwable getException() {
         return exception;
     }
 

@@ -49,6 +49,10 @@
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
@@ -89,6 +93,9 @@
                             org.apache.karaf.shell.console,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.util.process
+                        </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
