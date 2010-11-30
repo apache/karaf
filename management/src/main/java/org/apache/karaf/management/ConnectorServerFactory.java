@@ -98,6 +98,7 @@ public class ConnectorServerFactory {
                 Thread connectorThread = new Thread() {
                     public void run() {
                         try {
+                            Thread.currentThread().setContextClassLoader(ConnectorServerFactory.class.getClassLoader());
                             connectorServer.start();
                         } catch (IOException ex) {
                             throw new RuntimeException("Could not start JMX connector server", ex);
