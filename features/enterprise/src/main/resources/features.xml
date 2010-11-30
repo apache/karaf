@@ -40,6 +40,7 @@
             <bundle>mvn:org.apache.aries/org.apache.aries.util/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.blueprint.version}</bundle>
+            <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.blueprint.version}</bundle>
-        </feature>    
+        </feature>
 </features>
