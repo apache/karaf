@@ -24,7 +24,11 @@
         <bundle>mvn:org.springframework/spring-aop/${spring2.version}</bundle>
         <bundle>mvn:org.springframework/spring-context/${spring2.version}</bundle>
         <bundle>mvn:org.springframework/spring-context-support/${spring2.version}</bundle>
-		<bundle>mvn:org.springframework/spring-web/${spring2.version}</bundle>
+    </feature>
+    <feature name="spring-web" version="${spring2.version}" resolver="(obr)">
+    	<feature version="${spring2.version}">spring</feature>
+    	<feature version="${project.version}">http</feature>
+    	<bundle>mvn:org.springframework/spring-web/${spring2.version}</bundle>
 		<bundle>mvn:org.springframework/spring-webmvc/${spring2.version}</bundle>
     </feature>
     <feature name="spring" version="${spring.version}" resolver="(obr)">
@@ -36,7 +40,11 @@
         <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context-support/${spring.version}</bundle>
-		<bundle>mvn:org.springframework/spring-web/${spring.version}</bundle>
+    </feature>
+    <feature name="spring-web" version="${spring.version}" resolver="(obr)">
+    	<feature version="${spring.version}">spring</feature>
+    	<feature version="${project.version}">http</feature>
+    	<bundle>mvn:org.springframework/spring-web/${spring.version}</bundle>
 		<bundle>mvn:org.springframework/spring-webmvc/${spring.version}</bundle>
     </feature>
     <feature name="spring-dm" version="${spring.osgi.version}" resolver="(obr)">
@@ -46,8 +54,13 @@
         <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
-		<bundle>mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
         <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
+    </feature>
+    <feature name="spring-dm-web" version="${spring.osgi.version}" resolver="(obr)">
+    	<feature version="${spring.osgi.version}">spring-dm</feature>
+    	<feature version="[2.5.6,4)">spring-web</feature>
+    	<feature version="${project.version}">http</feature>
+		<bundle>mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
     </feature>
     <feature name="wrapper" version="${project.version}">
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
