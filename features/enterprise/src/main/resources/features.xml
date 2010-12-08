@@ -36,11 +36,11 @@
         </feature>
 
         <feature name='jndi' description='OSGi Service Registry JNDI access' version='${aries.blueprint.version}' resolver='(obr)'>
-            <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.bundle.version}</bundle>
             <bundle>mvn:org.apache.aries/org.apache.aries.util/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.blueprint.version}</bundle>
             <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.blueprint.version}</bundle>
+            <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.blueprint.version}</bundle>
         </feature>
 </features>
