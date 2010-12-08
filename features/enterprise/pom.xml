@@ -35,6 +35,21 @@
         <features.file>features.xml</features.file>        
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.aries.jndi</groupId>
+            <artifactId>org.apache.aries.jndi.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.jndi</groupId>
+            <artifactId>org.apache.aries.jndi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.jndi</groupId>
+            <artifactId>org.apache.aries.jndi.url</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <resources>
             <resource>
