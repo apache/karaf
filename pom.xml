@@ -131,6 +131,7 @@
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <aries.blueprint.version>0.3-incubating-SNAPSHOT</aries.blueprint.version>
         <aries.jmx.version>0.3-incubating-SNAPSHOT</aries.jmx.version>
+        <aries.jndi.version>0.3-incubating-SNAPSHOT</aries.jndi.version>
         <jansi.version>1.4</jansi.version>
         <jline.version>2.5</jline.version>
         <jsw.version>3.2.3</jsw.version>
@@ -814,6 +815,21 @@
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.blueprint</artifactId>
                 <version>${aries.jmx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jndi</groupId>
+                <artifactId>org.apache.aries.jndi.api</artifactId>
+                <version>${aries.jndi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jndi</groupId>
+                <artifactId>org.apache.aries.jndi.core</artifactId>
+                <version>${aries.jndi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.jndi</groupId>
+                <artifactId>org.apache.aries.jndi.url</artifactId>
+                <version>${aries.jndi.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
