@@ -48,8 +48,8 @@ public class JDBCBackingEngine implements BackingEngine {
     private String deleteRoleStatement = "DELETE FROM ROLES WHERE USERNAME=? AND ROLE=?";
     private String deleteAllUserRolesStatement = "DELETE FROM ROLES WHERE USERNAME=?";
     private String deleteUserStatement = "DELETE FROM USERS WHERE USERNAME=?";
-    private String selectUsersStatement = "SELECT USERNAME FROM USERS";
-    private String selectRolesStatement = "SELECT ROLE FROM ROLES WHERE USERNAME=?";
+    private String selectUsersQuery = "SELECT USERNAME FROM USERS";
+    private String selectRolesQuery = "SELECT ROLE FROM ROLES WHERE USERNAME=?";
 
 
     /**
@@ -186,7 +186,7 @@ public class JDBCBackingEngine implements BackingEngine {
                 connection = dataSource.getConnection();
 
                 //Remove from users
-                listUserStatement = connection.prepareStatement(selectUsersStatement);
+                listUserStatement = connection.prepareStatement(selectUsersQuery);
                 usersResultSet = listUserStatement.executeQuery();
                 while (!usersResultSet.next()) {
                     String username = usersResultSet.getString("USERNAME");
@@ -233,7 +233,7 @@ public class JDBCBackingEngine implements BackingEngine {
                 connection = dataSource.getConnection();
 
                 //Remove from roles
-                listRolesStatement = connection.prepareStatement(selectRolesStatement);
+                listRolesStatement = connection.prepareStatement(selectRolesQuery);
                 listRolesStatement.setString(1, user.getName());
 
                 rolesResultSet = listRolesStatement.executeQuery();
@@ -346,5 +346,61 @@ public class JDBCBackingEngine implements BackingEngine {
                 }
             }
         }
+    }
+
+    public String getAddUserStatement() {
+        return addUserStatement;
+    }
+
+    public void setAddUserStatement(String addUserStatement) {
+        this.addUserStatement = addUserStatement;
+    }
+
+    public String getAddRoleStatement() {
+        return addRoleStatement;
+    }
+
+    public void setAddRoleStatement(String addRoleStatement) {
+        this.addRoleStatement = addRoleStatement;
+    }
+
+    public String getDeleteRoleStatement() {
+        return deleteRoleStatement;
+    }
+
+    public void setDeleteRoleStatement(String deleteRoleStatement) {
+        this.deleteRoleStatement = deleteRoleStatement;
+    }
+
+    public String getDeleteAllUserRolesStatement() {
+        return deleteAllUserRolesStatement;
+    }
+
+    public void setDeleteAllUserRolesStatement(String deleteAllUserRolesStatement) {
+        this.deleteAllUserRolesStatement = deleteAllUserRolesStatement;
+    }
+
+    public String getDeleteUserStatement() {
+        return deleteUserStatement;
+    }
+
+    public void setDeleteUserStatement(String deleteUserStatement) {
+        this.deleteUserStatement = deleteUserStatement;
+    }
+
+    public String getSelectUsersQuery() {
+        return selectUsersQuery;
+    }
+
+    public void setSelectUsersQuery(String selectUsersQuery) {
+        this.selectUsersQuery = selectUsersQuery;
+    }
+
+    public String getSelectRolesQuery() {
+        return selectRolesQuery;
+    }
+
+    public void setSelectRolesQuery(String selectRolesQuery) {
+        this.selectRolesQuery = selectRolesQuery;
     }
 }

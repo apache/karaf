@@ -43,8 +43,13 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
 
     private static final Log LOG = LogFactory.getLog(PropertiesLoginModule.class);
 
-    private static final String PASSWORD_QUERY = "query.password";
-    private static final String ROLE_QUERY = "query.role";
+    public static final String PASSWORD_QUERY = "query.password";
+    public static final String ROLE_QUERY = "query.role";
+    public static final String INSERT_USER_STATEMENT = "insert.user";
+    public static final String INSERT_ROLE_STATEMENT = "insert.role";
+    public static final String DELETE_ROLE_STATEMENT = "delete.role";
+    public static final String DELETE_ROLES_STATEMENT = "delete.roles";
+    public static final String DELETE_USER_STATEMENT = "delete.roles";
 
     private String datasourceURL;
     protected String passwordQuery = "SELECT PASSWORD FROM USERS WHERE USERNAME=?";

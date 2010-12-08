@@ -43,10 +43,40 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
         JDBCBackingEngine instance = null;
         String datasourceURL = (String) options.get(JDBCUtils.DATASOURCE);
         BundleContext bundleContext = (BundleContext) options.get(BundleContext.class.getName());
+
+        String addUserStatement = (String) options.get(JDBCLoginModule.INSERT_USER_STATEMENT);
+        String addRoleStatement = (String) options.get(JDBCLoginModule.INSERT_ROLE_STATEMENT);
+        String deleteRoleStatement = (String) options.get(JDBCLoginModule.DELETE_ROLE_STATEMENT);
+        String deleteAllUserRolesStatement = (String) options.get(JDBCLoginModule.DELETE_ROLES_STATEMENT);
+        String deleteUserStatement = (String) options.get(JDBCLoginModule.DELETE_USER_STATEMENT);
+        String selectUsersQuery = (String) options.get(JDBCLoginModule.PASSWORD_QUERY);
+        String selectRolesQuery = (String) options.get(JDBCLoginModule.ROLE_QUERY);
+
         try {
             DataSource dataSource = (DataSource) JDBCUtils.createDatasource(bundleContext, datasourceURL);
             EncryptionSupport encryptionSupport = new EncryptionSupport(options);
             instance = new JDBCBackingEngine(dataSource, encryptionSupport);
+            if(addUserStatement != null) {
+                instance.setAddUserStatement(addUserStatement);
+            }
+            if(addRoleStatement != null) {
+                instance.setAddRoleStatement(addRoleStatement);
+            }
+            if(deleteRoleStatement != null) {
+                instance.setDeleteRoleStatement(deleteRoleStatement);
+            }
+            if(deleteAllUserRolesStatement != null) {
+                instance.setDeleteAllUserRolesStatement(deleteAllUserRolesStatement);
+            }
+            if(deleteUserStatement != null) {
+                instance.setDeleteUserStatement(deleteUserStatement);
+            }
+            if(selectUsersQuery != null) {
+                instance.setSelectUsersQuery(selectUsersQuery);
+            }
+            if(selectRolesQuery != null) {
+                instance.setSelectRolesQuery(selectRolesQuery);
+            }
         } catch (Exception e) {
             LOG.error("Error creating JDBCBackingEngine.", e);
         }
