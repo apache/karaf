@@ -41,6 +41,9 @@
         <command name="shell/history">
             <action class="org.apache.karaf.shell.commands.HistoryAction"/>
         </command>
+        <command name="shell/head">
+            <action class="org.apache.karaf.shell.commands.HeadAction"/>
+        </command>
         <command name="shell/if">
             <action class="org.apache.karaf.shell.commands.IfAction"/>
         </command>
@@ -77,6 +80,9 @@
         -->
         <command name="shell/tac">
             <action class="org.apache.karaf.shell.commands.TacAction"/>
+        </command>
+        <command name="shell/tail">
+            <action class="org.apache.karaf.shell.commands.TailAction"/>
         </command>
     </command-bundle>
 
