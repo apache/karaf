@@ -24,7 +24,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
@@ -39,46 +38,50 @@ public class TailAction extends AbstractAction {
     @Option(name = "-n", aliases = {}, description = "The number of lines to display, starting at 1.", required = false, multiValued = false)
     private int numberOfLines;
 
-    @Argument(index = 0, name = "paths or urls", description = "A list of file paths or urls to display separated by whitespaces.", required = false, multiValued = true)
-    private List<String> paths;
+    @Option(name = "-f", aliases = {}, description = "Follow file changes", required = false, multiValued = false)
+    private boolean continuous;
+
+    @Option(name = "-s", aliases = {}, description = "Sleep interval (used for follow)", required = false, multiValued = false)
+    private long sleepInterval;
+
+    @Argument(index = 0, name = "path or url", description = "A file path or url to display.", required = false, multiValued = false)
+    private String path;
 
     protected Object doExecute() throws Exception {
         //If no paths provided assume standar input
-        if (paths == null || paths.size() == 0) {
+        if (path == null || path.trim().length() == 0) {
             if (log.isDebugEnabled()) {
                 log.debug("Tailing STDIN");
             }
             tail(new BufferedReader(new InputStreamReader(System.in)));
         } else {
-            for (String filename : paths) {
-                BufferedReader reader;
+            BufferedReader reader;
 
-                // First try a URL
-                try {
-                    URL url = new URL(filename);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Tailing URL: " + url);
-                    }
-                    reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            // First try a URL
+            try {
+                URL url = new URL(path);
+                if (log.isDebugEnabled()) {
+                    log.debug("Tailing URL: " + url);
                 }
-                catch (MalformedURLException ignore) {
-                    // They try a file
-                    File file = new File(filename);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Tailing file: " + file);
-                    }
-                    reader = new BufferedReader(new FileReader(file));
+                reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            }
+            catch (MalformedURLException ignore) {
+                // They try a file
+                File file = new File(path);
+                if (log.isDebugEnabled()) {
+                    log.debug("Tailing file: " + file);
                 }
+                reader = new BufferedReader(new FileReader(file));
+            }
 
+            try {
+                tail(reader);
+            }
+            finally {
                 try {
-                    tail(reader);
-                }
-                finally {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        // Ignore
-                    }
+                    reader.close();
+                } catch (IOException e) {
+                    // Ignore
                 }
             }
         }
@@ -86,23 +89,41 @@ public class TailAction extends AbstractAction {
         return null;
     }
 
+    /**
+     * prints the tail of the file / url
+     * 
+     * @param reader
+     * @throws IOException
+     */
     private void tail(final BufferedReader reader) throws IOException {
-        List<String> lines = new LinkedList<String>();
-        String line;
-        int lineno = 1;
-
-        while ((line = reader.readLine()) != null) {
-            lines.add(line);
-        }
-
+        
         if (numberOfLines < 1) {
             numberOfLines = DEFAULT_NUMBER_OF_LINES;
         }
+        
+        LinkedList<String> lines = new LinkedList<String>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+                lines.add(line);
+                if (lines.size() > numberOfLines) {
+                    lines.removeFirst();
+                }
+            }
 
-        int startLine = lines.size() < numberOfLines ? 0 : lines.size() - numberOfLines;
+        for (String l : lines) {
+            System.out.println(l);
+        }
 
-        for (lineno = startLine; lineno < lines.size(); lineno++) {
-            System.out.println(lines.get(lineno));
+        //If command is running as continuous
+        while (continuous) {
+            try {
+                Thread.sleep(sleepInterval);
+                 while ((line = reader.readLine()) != null) {
+                   System.out.println(line);
+                 }
+            } catch (InterruptedException ex) {
+                return;
+            }
         }
     }
 }
