@@ -333,9 +333,21 @@ public abstract class MojoSupport extends AbstractMojo {
     protected String getLocalRepoUrl() {
          if (System.getProperty("os.name").startsWith("Windows")) {
              String baseDir = localRepo.getBasedir().replace('\\', '/').replaceAll(" ", "%20");
-             return localRepo.getProtocol() + ":///" + baseDir;
+             return extractProtocolFromLocalMavenRepo()  + ":///" + baseDir;
          } else {
-                 return localRepo.getUrl();
+             return localRepo.getUrl();
          }
+    }
+
+    /**
+     * Required because maven3 returns null in {@link ArtifactRepository#getProtocol()} (see KARAF-244)
+     */
+    private String extractProtocolFromLocalMavenRepo() {
+        try {
+            return new URL(localRepo.getUrl()).getProtocol();
+        } catch (MalformedURLException e) {
+            // Basically this should not happen; if though cancel the process
+            throw new RuntimeException("Repository URL is not valid", e);
+        }
     }
 }
