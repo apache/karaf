@@ -388,6 +388,11 @@ public class Console implements Runnable
             }
             return nb;
         }
+
+        @Override
+        public int available() throws IOException {
+            return queue.size();
+        }
     }
 
     private class Pipe implements Runnable
@@ -408,14 +413,16 @@ public class Console implements Runnable
                         else if (c == 4)
                         {
                             err.println("^D");
+                            queue.put(c);
                         }
                         else if (c == 3)
                         {
                             err.println("^C");
                             reader.getCursorBuffer().clear();
                             interrupt();
+                        } else {
+                            queue.put(c);
                         }
-                        queue.put(c);
                     }
                     catch (Throwable t) {
                         return;
