@@ -36,6 +36,8 @@ public class TailAction extends AbstractAction {
 
     private static final int DEFAULT_NUMBER_OF_LINES = 10;
 
+    private static final int DEFAULT_SLEEP_INTERVAL = 200;
+
     @Option(name = "-n", aliases = {}, description = "The number of lines to display, starting at 1.", required = false, multiValued = false)
     private int numberOfLines;
 
@@ -96,20 +98,23 @@ public class TailAction extends AbstractAction {
      * @param reader
      * @throws IOException
      */
-    private void tail(final BufferedReader reader) throws IOException {
+    private void tail(final BufferedReader reader) throws InterruptedException, IOException {
         
         if (numberOfLines < 1) {
             numberOfLines = DEFAULT_NUMBER_OF_LINES;
+        }
+        if (sleepInterval < 1) {
+            sleepInterval = DEFAULT_SLEEP_INTERVAL;
         }
         
         LinkedList<String> lines = new LinkedList<String>();
         String line;
         while ((line = reader.readLine()) != null) {
-                lines.add(line);
-                if (lines.size() > numberOfLines) {
-                    lines.removeFirst();
-                }
+            lines.add(line);
+            if (lines.size() > numberOfLines) {
+                lines.removeFirst();
             }
+        }
 
         for (String l : lines) {
             System.out.println(l);
@@ -117,13 +122,9 @@ public class TailAction extends AbstractAction {
 
         //If command is running as continuous
         while (continuous) {
-            try {
-                Thread.sleep(sleepInterval);
-                 while ((line = reader.readLine()) != null) {
-                   System.out.println(line);
-                 }
-            } catch (InterruptedException ex) {
-                return;
+            Thread.sleep(sleepInterval);
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
             }
         }
     }
