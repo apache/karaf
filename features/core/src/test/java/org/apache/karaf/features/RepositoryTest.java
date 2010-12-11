@@ -35,7 +35,7 @@ public class RepositoryTest extends TestCase {
         // Check features
         Feature[] features = r.getFeatures();
         assertNotNull(features);
-        assertEquals(2, features.length);
+        assertEquals(3, features.length);
         assertNotNull(features[0]);
         assertEquals("f1", features[0].getName());
         assertNotNull(features[0].getConfigurations());
@@ -59,6 +59,11 @@ public class RepositoryTest extends TestCase {
         assertNotNull(features[1].getBundles());
         assertEquals(1, features[1].getBundles().size());
         assertEquals("b3", features[1].getBundles().get(0).getLocation());
+        assertEquals("f3", features[2].getName());
+        assertNotNull(features[2].getConfigurationFiles());
+        assertEquals(1, features[2].getConfigurationFiles().size());
+        assertEquals("cf1", features[2].getConfigurationFiles().get(0).getFinalname());
+        assertEquals("cfloc", features[2].getConfigurationFiles().get(0).getLocation());
     }
     
     public void testShowWrongUriInException() throws Exception {

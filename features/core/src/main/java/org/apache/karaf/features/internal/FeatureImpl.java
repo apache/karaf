@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 
 /**
@@ -38,6 +39,7 @@ public class FeatureImpl implements Feature {
     private List<Feature> dependencies = new ArrayList<Feature>();
     private List<BundleInfo> bundles = new ArrayList<BundleInfo>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
+    private List<ConfigFileInfo> configurationFiles = new ArrayList<ConfigFileInfo>();
     public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
     public static String DEFAULT_VERSION = "0.0.0";
 
@@ -105,7 +107,10 @@ public class FeatureImpl implements Feature {
     public Map<String, Map<String, String>> getConfigurations() {
         return configs;
     }
-
+    
+	public List<ConfigFileInfo> getConfigurationFiles() {
+		return configurationFiles;
+	}
     public void addDependency(Feature dependency) {
         dependencies.add(dependency);
     }
@@ -116,6 +121,10 @@ public class FeatureImpl implements Feature {
 
     public void addConfig(String name, Map<String,String> properties) {
         configs.put(name, properties);
+    }
+    
+    public void addConfigurationFile(ConfigFileInfo configurationFileInfo) {
+    	configurationFiles.add(configurationFileInfo);
     }
 
     public String toString() {

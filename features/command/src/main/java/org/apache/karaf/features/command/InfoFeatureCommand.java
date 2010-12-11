@@ -23,6 +23,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 
@@ -79,6 +80,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
         if (config) {
             displayConfigInformation(feature);
+            displayConfigFileInformation(feature);
         }
 
         if (dependency) {
@@ -136,6 +138,18 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
                 System.out.println("  " + name);
             }
         }
+    }
+    
+    private void displayConfigFileInformation(Feature feature) {
+    	List<ConfigFileInfo> configurationFiles = feature.getConfigurationFiles();
+    	if (configurationFiles.isEmpty()) {
+    		System.out.println("Feature has no configuration files");
+    	} else {
+    		System.out.println("Feature configuration files: ");
+    		for (ConfigFileInfo configFileInfo : configurationFiles) {
+				System.out.println("  " + configFileInfo.getFinalname());
+			}
+    	}    	
     }
 
 

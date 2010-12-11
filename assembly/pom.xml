@@ -461,6 +461,11 @@
                                     <type>xml</type>
                                     <classifier>features</classifier>
                                 </artifact>
+                                <artifact>
+                                	<file>src/main/jettyconfig/jetty.xml</file>
+                                	<type>xml</type>
+                                	<classifier>jettyconfig</classifier>
+                                </artifact>
                             </artifacts>
                         </configuration>
                     </execution>
