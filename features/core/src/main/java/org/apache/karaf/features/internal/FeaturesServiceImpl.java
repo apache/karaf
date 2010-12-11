@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -401,6 +402,9 @@ public class FeaturesServiceImpl implements FeaturesService {
                 cfg.update(props);
             }
         }
+        for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
+        	installConfigurationFile(configFile.getLocation(), configFile.getFinalname());
+        }
         Set<Long> bundles = new TreeSet<Long>();
         for (BundleInfo bInfo : resolve(feature)) {
             Bundle b = installBundleIfNeeded(state, bInfo);
@@ -618,6 +622,57 @@ public class FeaturesServiceImpl implements FeaturesService {
         } finally {
             is.close();
         }
+    }
+    
+    public void installConfigurationFile(String fileLocation, String finalname) throws IOException {
+    	LOGGER.debug("Checking " + fileLocation);
+    	
+    	if (finalname.indexOf("${") != -1) {
+    		//found a leading place holder
+    		int marker = finalname.indexOf("}");
+    		String placeholder = finalname.substring(2, marker);
+    		finalname = finalname.substring(marker+1);
+    		String path = System.getProperty(placeholder);
+    		if (path == null) {
+    			path = System.getenv(placeholder);
+    		}
+    		if (path == null) { //ok this property wasn't found, take the default base dir then
+    			path = System.getProperty("karaf.base");
+    		}
+    		
+    		finalname = path + File.separator + finalname;
+    	}
+    	
+    	File file = new File(finalname); 
+    	
+    	if (!file.exists()) {
+    		file.createNewFile();
+    	}
+    	
+    	FileOutputStream fop = new FileOutputStream(file);
+        InputStream is = null;
+        try {
+            is = new BufferedInputStream(new URL(fileLocation).openStream());
+        
+            int bytesRead = 0;
+            byte[] buffer = new byte[1024];
+            
+            while ((bytesRead = is.read(buffer)) != -1) {
+                fop.write(buffer, 0, bytesRead);
+            }
+        } catch (RuntimeException e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        } catch (MalformedURLException e) {
+        	LOGGER.error(e.getMessage());
+            throw e;
+		} finally {
+			if (is != null)
+				is.close();
+			fop.flush();
+			fop.close();
+		}
+            
     }
 
     public void uninstallFeature(String name) throws Exception {

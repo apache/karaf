@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 
 
@@ -76,7 +77,10 @@ public class ExtendedFeature implements Feature
         return this.feature.getConfigurations();
     }
 
-
+    public List<ConfigFileInfo> getConfigurationFiles() {
+		return this.feature.getConfigurationFiles();
+	}
+    
     public List<Feature> getDependencies()
     {
         return this.feature.getDependencies();

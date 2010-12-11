@@ -28,4 +28,8 @@
         <feature>f1</feature>
         <bundle>b3</bundle>
     </feature>
+    <feature name="f3">
+    	<configfile finalname="cf1">cfloc</configfile>
+    	<bundle>b4</bundle> 
+    </feature>
 </features>

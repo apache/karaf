@@ -45,6 +45,8 @@ public interface FeaturesServiceMBean {
     String FEATURE_BUNDLES = "Bundles";
 
     String FEATURE_CONFIGURATIONS = "Configurations";
+    
+    String FEATURE_CONFIGURATIONFILES = "Configuration Files";
 
     String FEATURE_INSTALLED = "Installed";
 
@@ -52,6 +54,8 @@ public interface FeaturesServiceMBean {
     String FEATURE_CONFIG_ELEMENTS = "Elements";
     String FEATURE_CONFIG_ELEMENT_KEY = "Key";
     String FEATURE_CONFIG_ELEMENT_VALUE = "Value";
+    
+    String FEATURE_CONFIG_FILES_ELEMENTS = "Files";
 
     /**
      * The type of the event which is emitted for features events
@@ -68,11 +72,13 @@ public interface FeaturesServiceMBean {
      * The item names in the CompositeData representing a feature
      */
     String[] FEATURE = { FEATURE_NAME, FEATURE_VERSION, FEATURE_DEPENDENCIES, FEATURE_BUNDLES,
-                         FEATURE_CONFIGURATIONS, FEATURE_INSTALLED };
+                         FEATURE_CONFIGURATIONS, FEATURE_CONFIGURATIONFILES, FEATURE_INSTALLED };
 
     String[] FEATURE_IDENTIFIER = { FEATURE_NAME, FEATURE_VERSION };
 
     String[] FEATURE_CONFIG = { FEATURE_CONFIG_PID, FEATURE_CONFIG_ELEMENTS };
+    
+    String[] FEATURE_CONFIG_FILES = { FEATURE_CONFIG_FILES_ELEMENTS };
 
     String[] FEATURE_CONFIG_ELEMENT = { FEATURE_CONFIG_ELEMENT_KEY, FEATURE_CONFIG_ELEMENT_VALUE };
 

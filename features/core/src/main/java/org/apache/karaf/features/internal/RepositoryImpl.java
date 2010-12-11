@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal;
 
+import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.slf4j.Logger;
@@ -165,6 +166,13 @@ public class RepositoryImpl implements Repository {
                             hashtable.put(n, properties.getProperty(n));
                         }
                         f.addConfig(cfgName, hashtable);
+                    }
+                    NodeList configurationFiles = e.getElementsByTagName("configfile");
+                    for (int j = 0; j < configurationFiles.getLength(); j++) {
+                    	Element cf = (Element) configurationFiles.item(j);
+                    	String finalname = cf.getAttribute("finalname");
+                    	String location = cf.getTextContent().trim();
+                    	f.addConfigurationFile(new ConfigFileInfoImpl(location, finalname));
                     }
                     NodeList bundleNodes = e.getElementsByTagName("bundle");
                     for (int j = 0; j < bundleNodes.getLength(); j++) {
