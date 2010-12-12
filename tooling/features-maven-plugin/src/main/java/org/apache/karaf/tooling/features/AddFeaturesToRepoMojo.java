@@ -93,6 +93,8 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             Set<String> bundles = new HashSet<String>();
             for (String feature : transitiveFeatures) {
                 bundles.addAll(featuresMap.get(feature).getBundles());
+                //Treat the config files as bundles, since it is only copying
+                bundles.addAll(featuresMap.get(feature).getConfigFiles());
             }
             getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
@@ -225,6 +227,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         private List<String> dependencies = new ArrayList<String>();
         private List<String> bundles = new ArrayList<String>();
         private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
+        private List<String> configFiles = new ArrayList<String>();
 
         public Feature(String name) {
             this.name = name;
@@ -245,6 +248,10 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         public Map<String, Map<String, String>> getConfigurations() {
             return configs;
         }
+        
+        public List<String> getConfigFiles() {
+        	return configFiles;
+        }
 
         public void addDependency(String dependency) {
             dependencies.add(dependency);
@@ -256,6 +263,10 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
         public void addConfig(String name, Map<String,String> properties) {
             configs.put(name, properties);
+        }
+        
+        public void addConfigFile(String configFile) {
+        	configFiles.add(configFile);
         }
     }
 
@@ -311,6 +322,11 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                             hashtable.put(n, properties.getProperty(n));
                         }
                         f.addConfig(cfgName, hashtable);
+                    }
+                    NodeList configFileNodes = e.getElementsByTagName("configfile");
+                    for (int j = 0; j < configFileNodes.getLength(); j++) {
+                    	Element c = (Element) configFileNodes.item(j);
+                    	f.addConfigFile(c.getTextContent());
                     }
                     NodeList bundleNodes = e.getElementsByTagName("bundle");
                     for (int j = 0; j < bundleNodes.getLength(); j++) {
