@@ -627,25 +627,22 @@ public class FeaturesServiceImpl implements FeaturesService {
     public void installConfigurationFile(String fileLocation, String finalname) throws IOException {
     	LOGGER.debug("Checking " + fileLocation);
     	
+    	String basePath = System.getProperty("karaf.base");
+    	
     	if (finalname.indexOf("${") != -1) {
-    		//found a leading place holder
+    		//remove any placeholder or variable part, this is not valid.
     		int marker = finalname.indexOf("}");
-    		String placeholder = finalname.substring(2, marker);
     		finalname = finalname.substring(marker+1);
-    		String path = System.getProperty(placeholder);
-    		if (path == null) {
-    			path = System.getenv(placeholder);
-    		}
-    		if (path == null) { //ok this property wasn't found, take the default base dir then
-    			path = System.getProperty("karaf.base");
-    		}
-    		
-    		finalname = path + File.separator + finalname;
     	}
+    	
+    	finalname = basePath + File.separator + finalname;
     	
     	File file = new File(finalname); 
     	
     	if (!file.exists()) {
+    		File parentFile = file.getParentFile();
+    		if (parentFile != null)
+    			parentFile.mkdirs();
     		file.createNewFile();
     	}
     	
