@@ -96,6 +96,8 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             }
             getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
+                // get rid of of possible line-breaks KARAF-313
+                bundle = bundle.replace("\r\n", "").replace("\n", "").replace(" ", "");
                 final int index = bundle.indexOf("mvn:");
                 if (index < 0) {
                     if (skipNonMavenProtocols) {
