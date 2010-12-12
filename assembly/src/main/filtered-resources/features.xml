@@ -94,7 +94,7 @@
 		<bundle>mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle>
 	</feature>
     <feature name="http" version="${project.version}" resolver="(obr)">
-    	<configfile finalname="${karaf.base}/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
+    	<configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
 		<config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
             org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
