@@ -17,33 +17,34 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.HashSet;
-import java.io.File;
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.w3c.dom.*;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.artifact.Artifact;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -78,6 +79,11 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
      * @parameter
      */
     private boolean skipNonMavenProtocols = true;
+
+    /**
+     * @parameter
+     */
+    private boolean failOnArtifactResolutionError = false;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
@@ -128,7 +134,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 if (index3 > 0) {
                 	bundle = bundle.substring(0, index3);
                 }
-                              
+
                 String[] parts = bundle.substring("mvn:".length()).split("/");
                 String groupId = parts[0];
                 String artifactId = parts[1];
@@ -149,21 +155,25 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
                 Artifact artifact;
                 try {
-                    artifact = this.factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
+                    artifact = factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
                     getLog().info("Copying bundle: " + bundle);
-                    resolver.resolve(artifact, this.remoteRepos, this.localRepo);
+                    resolver.resolve(artifact, remoteRepos, localRepo);
                     copy(new FileInputStream(artifact.getFile()),
                          repository,
                          name,
                          dir,
                          new byte[8192]);
                 } catch (ArtifactResolutionException e) {
+                    if (failOnArtifactResolutionError) {
+                        throw new MojoFailureException("Can't resolve bundle " + bundle, e);
+                    }
                     getLog().error("Can't resolve bundle " + bundle, e);
                 } catch (ArtifactNotFoundException e) {
+                    if (failOnArtifactResolutionError) {
+                        throw new MojoFailureException("Can't resolve bundle " + bundle, e);
+                    }
                     getLog().error("Can't resolve bundle " + bundle, e);
                 }
-
-
             }
         } catch (MojoExecutionException e) {
             throw e;
