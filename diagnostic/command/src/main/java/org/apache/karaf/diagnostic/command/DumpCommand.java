@@ -66,7 +66,7 @@ public class DumpCommand extends OsgiCommandSupport {
         }
 
         // create default file name if none provided
-        if (fileName == null || fileName.isEmpty()) {
+        if (fileName == null || fileName.trim().length() == 0) {
             fileName = SimpleDateFormat.getDateTimeInstance().format(new Date());
             if (!directory) {
                 fileName += ".zip";
