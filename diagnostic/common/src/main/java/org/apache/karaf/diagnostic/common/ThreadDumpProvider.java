@@ -29,19 +29,22 @@ import org.apache.karaf.diagnostic.core.common.TextDumpProvider;
  */
 public class ThreadDumpProvider extends TextDumpProvider {
 
-	public ThreadDumpProvider() {
-		super("threads.txt");
-	}
+    /**
+     * Creates new dump entry which contains information about threads.
+     */
+    public ThreadDumpProvider() {
+        super("threads.txt");
+    }
 
-	@Override
-	protected void writeDump(OutputStreamWriter outputStream) throws Exception {
-		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-		
-		outputStream.write("Number of threads: " + threadMXBean.getDaemonThreadCount() + "\n");
-		ThreadInfo[] threadDump = threadMXBean.dumpAllThreads(true, true);
-		for (ThreadInfo threadInfo : threadDump) {
-			outputStream.write(threadInfo.toString() + "\n\n");
-		}
-	}
+    @Override
+    protected void writeDump(OutputStreamWriter outputStream) throws Exception {
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+
+        outputStream.write("Number of threads: " + threadMXBean.getDaemonThreadCount() + "\n");
+        ThreadInfo[] threadDump = threadMXBean.dumpAllThreads(true, true);
+        for (ThreadInfo threadInfo : threadDump) {
+            outputStream.write(threadInfo.toString() + "\n\n");
+        }
+    }
 
 }

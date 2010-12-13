@@ -52,6 +52,7 @@
         <module>itests</module>
         <module>tooling</module>
         <module>archetypes</module>
+        <module>diagnostic</module>
     </modules>
 
     <scm>
@@ -295,6 +296,26 @@
             <dependency>
                 <groupId>org.apache.karaf.features</groupId>
                 <artifactId>org.apache.karaf.features.obr</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.diagnostic</groupId>
+                <artifactId>org.apache.karaf.diagnostic.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.diagnostic</groupId>
+                <artifactId>org.apache.karaf.diagnostic.common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.diagnostic</groupId>
+                <artifactId>org.apache.karaf.diagnostic.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.diagnostic</groupId>
+                <artifactId>org.apache.karaf.diagnostic.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -23,9 +23,9 @@ package org.apache.karaf.diagnostic.core;
  */
 public interface DumpProvider {
 
-	/**
-	 * Creates dump.
-	 */
-	void createDump(DumpDestination destination) throws Exception;
+    /**
+     * Creates dump in given entry.
+     */
+    void createDump(DumpDestination destination) throws Exception;
 
 }

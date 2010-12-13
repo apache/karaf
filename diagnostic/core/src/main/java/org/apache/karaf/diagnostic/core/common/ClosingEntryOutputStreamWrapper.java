@@ -26,51 +26,52 @@ import java.util.zip.ZipOutputStream;
  */
 public class ClosingEntryOutputStreamWrapper extends OutputStream {
 
-	/**
-	 * Wrapped ZIP output stream. 
-	 */
-	private ZipOutputStream outputStream;
+    /**
+     * Wrapped ZIP output stream. 
+     */
+    private ZipOutputStream outputStream;
 
-	/**
-	 * Creates new OutputStream.
-	 * 
-	 * @param outputStream Wrapped output stream.
-	 */
-	public ClosingEntryOutputStreamWrapper(ZipOutputStream outputStream) {
-		this.outputStream = outputStream;
-	}
+    /**
+     * Creates new OutputStream.
+     * 
+     * @param outputStream Wrapped output stream.
+     */
+    public ClosingEntryOutputStreamWrapper(ZipOutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void write(int b) throws IOException {
-		outputStream.write(b);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void write(int b) throws IOException {
+        outputStream.write(b);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void write(byte[] b) throws IOException {
-		outputStream.write(b);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void write(byte[] b) throws IOException {
+        outputStream.write(b);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void write(byte[] b, int off, int len)
-		throws IOException {
-		outputStream.write(b, off, len);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void write(byte[] b, int off, int len)
+        throws IOException {
+        outputStream.write(b, off, len);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void close() throws IOException {
-		// close entry instead of closing stream.
-		outputStream.closeEntry();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() throws IOException {
+        // close entry instead of closing zip stream.
+        outputStream.closeEntry();
+    }
+
 }

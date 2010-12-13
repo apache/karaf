@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-           http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,45 +19,40 @@
         limitations under the License.
     -->
 
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.apache.karaf.diagnostic</groupId>
-        <artifactId>diagnostic</artifactId>
-        <version>2.1.99-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>org.apache.karaf.demos</groupId>
+    <artifactId>demos</artifactId>
+    <version>2.1.99-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>org.apache.karaf.diagnostic.core</artifactId>
-    <packaging>bundle</packaging>
-    <name>Apache Karaf :: Diagnostic :: Core</name>
+  <artifactId>dump</artifactId>
+  <packaging>bundle</packaging>
+  <name>Apache Karaf :: Demos :: Demo Dump provider</name>
 
-    <properties>
-        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
-    </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.karaf.diagnostic</groupId>
+      <artifactId>org.apache.karaf.diagnostic.core</artifactId>
+    </dependency>
+  </dependencies>
 
-    <build>
+  <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>
-                        	${project.artifactId};version=${project.version},
-                        	${project.artifactId}.common;version=${project.version};-noimport:=true,
-                       	</Export-Package>
-                        <Import-Package>
-                            !${project.artifactId}*,
-                            *
-                        </Import-Package>
-                        <Private-Package>
-                            org.apache.karaf.diagnostic.internal
-                        </Private-Package>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
-                    </instructions>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Import-Package>*</Import-Package>
+                        <Private-Package>!*</Private-Package>
+                    </instructions> 
                 </configuration>
             </plugin>
         </plugins>
-    </build>
+  </build>
+
 </project>

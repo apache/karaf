@@ -21,20 +21,42 @@ import java.io.OutputStreamWriter;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 
+/**
+ * Base class for dump providers which writes text to destination.
+ * 
+ * @author ldywicki
+ */
 public abstract class TextDumpProvider implements DumpProvider {
 
-	private final String name;
+    /**
+     * Name of the file.
+     */
+    private final String name;
 
-	protected TextDumpProvider(String name) {
-		this.name = name;
-	}
+    /**
+     * Creates new dump provider.
+     * 
+     * @param name Name of the file.
+     */
+    protected TextDumpProvider(String name) {
+        this.name = name;
+    }
 
-	public void createDump(DumpDestination destination) throws Exception {
-		OutputStream outputStream = destination.add(name);
-		writeDump(new OutputStreamWriter(outputStream));
-		outputStream.close();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public final void createDump(DumpDestination destination) throws Exception {
+        OutputStream outputStream = destination.add(name);
+        writeDump(new OutputStreamWriter(outputStream));
+        outputStream.close();
+    }
 
-	protected abstract void writeDump(OutputStreamWriter outputStream) throws Exception;
+    /**
+     * This method should create output.
+     * 
+     * @param outputStreamWriter Stream which points to file specified in constructor.
+     * @throws Exception If any problem occur.
+     */
+    protected abstract void writeDump(OutputStreamWriter outputStreamWriter) throws Exception;
 
 }
