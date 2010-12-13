@@ -17,9 +17,10 @@ package org.apache.karaf.diagnostic.common;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 
@@ -31,20 +32,37 @@ import org.apache.karaf.diagnostic.core.DumpProvider;
  */
 public class LogDumpProvider implements DumpProvider {
 
-	/**
-	 * Creates log entries in attached zip.
-	 */
-	public void createDump(DumpDestination destination) throws Exception {
-		File logDir = new File("data/log");
-		File[] listFiles = logDir.listFiles();
+    /**
+     * Attach log entries from directory.
+     */
+    public void createDump(DumpDestination destination) throws Exception {
+        File logDir = new File("data/log");
+        File[] listFiles = logDir.listFiles();
 
-		for (File file : listFiles) {
-			FileInputStream inputStream = new FileInputStream(file);
+        // ok, that's not the best way of doing that..
+        for (File file : listFiles) {
+            FileInputStream inputStream = new FileInputStream(file);
 
-			OutputStream outputStream = destination.add("log/" + file.getName());
+            OutputStream outputStream = destination.add("log/" + file.getName());
 
-			IOUtils.copy(inputStream, outputStream);
-		}
+            copy(inputStream, outputStream);
+        }
+    }
+
+    /**
+     * Rewrites data from input stream to output stream. This code is very common
+     * but we would avoid additional dependencies in diagnostic stuff.
+     * 
+     * @param inputStream Source stream.
+     * @param outputStream Destination stream.
+     * @throws IOException When IO operation fails.
+     */
+	private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+        byte[] buffer = new byte[4096];
+        int n = 0;
+        while (-1 != (n = inputStream.read(buffer))) {
+            outputStream.write(buffer, 0, n);
+        }
 	}
 
 }

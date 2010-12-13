@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.diagnostic.common;
+package org.apache.karaf.diagnostic.demo;
 
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
@@ -29,24 +29,34 @@ import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 
 /**
- * Create screenshot from all devices.
+ * This demo provider creates images in dump destination which
+ * contains screenshots from all attached displays.
  * 
  * @author ldywicki
  */
 public class ScreenshotDumpProvider implements DumpProvider {
 
-	public void createDump(DumpDestination destination) throws Exception {
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice[] gs = ge.getScreenDevices();
-		 
-		for (int i=0; i < gs.length; i++) {
-			DisplayMode mode = gs[i].getDisplayMode();
-			Rectangle bounds = new Rectangle(0, 0, mode.getWidth(), mode.getHeight());
-		    BufferedImage screenshot = new Robot(gs[i]).createScreenCapture(bounds);
-		    OutputStream outputStream = destination.add("screenshot/display_" + i + ".jpg");
-		    ImageIO.write(screenshot, "PNG", outputStream);
-		}
+	/**
+	 * {@inheritDoc}
+	 */
+    public void createDump(DumpDestination destination) throws Exception {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        // get all graphic devices attached to computer
+        GraphicsDevice[] gs = ge.getScreenDevices();
 
-	}
+        // create dump entry for each device  
+        for (int i=0; i < gs.length; i++) {
+            DisplayMode mode = gs[i].getDisplayMode();
+            Rectangle bounds = new Rectangle(0, 0, mode.getWidth(), mode.getHeight());
+            BufferedImage screenshot = new Robot(gs[i]).createScreenCapture(bounds);
+
+            // to attach your entry to destination you have to execute this line
+            OutputStream outputStream = destination.add("screenshot/display_" + i + ".png");
+            ImageIO.write(screenshot, "PNG", outputStream);
+
+            outputStream.close();
+        }
+
+    }
 
 }

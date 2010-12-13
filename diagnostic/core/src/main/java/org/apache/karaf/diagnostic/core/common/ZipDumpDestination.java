@@ -31,29 +31,51 @@ import org.apache.karaf.diagnostic.core.DumpDestination;
  */
 public class ZipDumpDestination implements DumpDestination {
 
-	private ZipOutputStream outputStream;
+    /**
+     * Destination streem.
+     */
+    private ZipOutputStream outputStream;
 
-	public ZipDumpDestination(File directory, String name) {
-		this(new File(directory, name));
-	}
+    /**
+     * Creates new dump in given directory.
+     * 
+     * @param directory Target directory.
+     * @param name Name of the archive.
+     */
+    public ZipDumpDestination(File directory, String name) {
+        this(new File(directory, name));
+    }
 
-	public ZipDumpDestination(File file) {
-		try {
-			outputStream = new ZipOutputStream(new FileOutputStream(
-				file));
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException("Unable to create dump destination", e);
-		}
-	}
+    /**
+     * Creates new dump in given file (zip archive). 
+     * 
+     * @param file Destination file.
+     */
+    public ZipDumpDestination(File file) {
+        try {
+            outputStream = new ZipOutputStream(new FileOutputStream(
+                file));
+        } catch (FileNotFoundException e) {
+            // sometimes this can occur, but we simply re throw and let 
+            // caller handle exception
+            throw new RuntimeException("Unable to create dump destination", e);
+        }
+    }
 
-	public OutputStream add(String name) throws Exception {
-		ZipEntry zipEntry = new ZipEntry(name);
-		outputStream.putNextEntry(zipEntry);
-		return new ClosingEntryOutputStreamWrapper(outputStream);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public OutputStream add(String name) throws Exception {
+        ZipEntry zipEntry = new ZipEntry(name);
+        outputStream.putNextEntry(zipEntry);
+        return new ClosingEntryOutputStreamWrapper(outputStream);
+    }
 
-	public void save() throws Exception {
-		outputStream.close();
-	}
-	
+    /**
+     * Closes archive handle.
+     */
+    public void save() throws Exception {
+        outputStream.close();
+    }
+
 }

@@ -15,12 +15,9 @@
  */
 package org.apache.karaf.diagnostic.common;
 
-import java.io.BufferedWriter;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import org.apache.karaf.diagnostic.core.DumpDestination;
-import org.apache.karaf.diagnostic.core.DumpProvider;
+import org.apache.karaf.diagnostic.core.common.TextDumpProvider;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -32,45 +29,53 @@ import org.apache.karaf.features.Repository;
  * 
  * @author ldywicki
  */
-public class FeaturesDumpProvider implements DumpProvider {
+public class FeaturesDumpProvider extends TextDumpProvider {
 
-	/**
-	 * Feature service.
-	 */
-	private final FeaturesService features;
+    /**
+     * Feature service.
+     */
+    private final FeaturesService features;
 
-	public FeaturesDumpProvider(FeaturesService features) {
-		this.features = features;
-	}
+    /**
+     * Creates new dump entry witch contains information about
+     * karaf features.
+     * 
+     * @param features Feature service.
+     */
+    public FeaturesDumpProvider(FeaturesService features) {
+        super("features.txt");
+        this.features = features;
+    }
 
-	public void createDump(DumpDestination destination) throws Exception {
-		writeDump(destination.add("features.txt"));
-	}
+    /**
+     * {@inheritDoc}
+     */
+    protected void writeDump(OutputStreamWriter outputStreamWriter) throws Exception {
+        // creates header
+        outputStreamWriter.write("Repositories:\n");
 
-	private void writeDump(OutputStream outputStream) throws Exception {
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
-		writer.write("Repositories:\n");
+        // list repositories
+        for (Repository repo : features.listRepositories()) {
+            outputStreamWriter.write(repo.getURI() + " (" + repo.getName() + ")\n");
+        }
 
-		for (Repository repo : features.listRepositories()) {
-			writer.write(repo.getURI() + " (" + repo.getName() + ")\n");
-		}
+        // list features
+        outputStreamWriter.write("\nfeatures:\n");
+        for (Feature feature : features.listFeatures()) {
+            outputStreamWriter.write(feature.getName() + " " + feature.getVersion());
+            outputStreamWriter.write(" installed: " + features.isInstalled(feature));
+            outputStreamWriter.write("\nBundles:\n");
+            for (BundleInfo bundle : feature.getBundles()) {
+                outputStreamWriter.write("\t" + bundle.getLocation());
+                if (bundle.getStartLevel() != 0) {
+                    outputStreamWriter.write(" start level " + bundle.getStartLevel());
+                }
+                outputStreamWriter.write("\n\n");
+            }
+        }
 
-		writer.write("\nfeatures:\n");
-		for (Feature feature : features.listFeatures()) {
-			writer.write(feature.getName() + " " + feature.getVersion());
-			writer.write(" installed: " + features.isInstalled(feature));
-			writer.write("\nBundles:\n");
-			for (BundleInfo bundle : feature.getBundles()) {
-				writer.write("\t" + bundle.getLocation());
-				if (bundle.getStartLevel() != 0) {
-					writer.write(" start level " + bundle.getStartLevel());
-				}
-				writer.write("\n");
-			}
-		}
-
-		// flush & close stream
-		writer.close();
-	}
+        // flush & close stream
+        outputStreamWriter.close();
+    }
 
 }

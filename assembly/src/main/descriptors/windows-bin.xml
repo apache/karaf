@@ -195,6 +195,20 @@
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>
+                org/apache/karaf/diagnostic/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
+            </outputFileNameMapping>
+            <includes>
+                <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.core</include>
+                <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.common</include>
+                <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.command</include>
+                <include>org.apache.karaf.diagnostic:org.apache.karaf.diagnostic.management</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>
                 org/apache/karaf/admin/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
