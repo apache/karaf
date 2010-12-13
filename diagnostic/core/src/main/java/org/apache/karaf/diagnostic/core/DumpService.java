@@ -15,17 +15,43 @@
  */
 package org.apache.karaf.diagnostic.core;
 
-import java.io.InputStream;
+import java.util.List;
 
 /**
- * Base class which represents dumped data.
+ * Dump service which allows to customize dump creation process.
  * 
  * @author ldywicki
  */
-public interface Dump {
+public interface DumpService {
 
-	InputStream createResource() throws Exception;
+	/**
+	 * Return registered providers.
+	 * 
+	 * @return Providers registered in OSGi service registry.
+	 */
+	List<DumpProvider> listProviders();
 
-	String getName();
+	/**
+	 * List destinations where dumps can be stored.
+	 * 
+	 * @return Destinations registered in OSGi service registry.
+	 */
+	List<DumpDestination> listDestinations();
 
+	/**
+	 * Make dump using given providers.
+	 * 
+	 * @param destination Store destination.
+	 * @param providers Dump providers to use.
+	 * @return True if dump was created.
+	 */
+	boolean dump(DumpDestination destination, DumpProvider ... providers);
+
+	/**
+	 * Creates data witch all dump providers.
+	 * 
+	 * @param destination Store destination.
+	 * @return True if dump was created.
+	 */
+	boolean dumpAll(DumpDestination destination);
 }

@@ -15,35 +15,32 @@
  */
 package org.apache.karaf.diagnostic.common;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.karaf.diagnostic.core.DumpDestination;
-import org.apache.karaf.diagnostic.core.DumpProvider;
+import org.apache.karaf.diagnostic.core.common.TextDumpProvider;
 
 /**
- * Dump provider which copies log files from data/log directory to
- * destination.
+ * Provider which dumps thread info to file named threads.txt.
  * 
  * @author ldywicki
  */
-public class LogDumpProvider implements DumpProvider {
+public class ThreadDumpProvider extends TextDumpProvider {
 
-	/**
-	 * Creates log entries in attached zip.
-	 */
-	public void createDump(DumpDestination destination) throws Exception {
-		File logDir = new File("data/log");
-		File[] listFiles = logDir.listFiles();
+	public ThreadDumpProvider() {
+		super("threads.txt");
+	}
 
-		for (File file : listFiles) {
-			FileInputStream inputStream = new FileInputStream(file);
-
-			OutputStream outputStream = destination.add("log/" + file.getName());
-
-			IOUtils.copy(inputStream, outputStream);
+	@Override
+	protected void writeDump(OutputStreamWriter outputStream) throws Exception {
+		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+		
+		outputStream.write("Number of threads: " + threadMXBean.getDaemonThreadCount() + "\n");
+		ThreadInfo[] threadDump = threadMXBean.dumpAllThreads(true, true);
+		for (ThreadInfo threadInfo : threadDump) {
+			outputStream.write(threadInfo.toString() + "\n\n");
 		}
 	}
 

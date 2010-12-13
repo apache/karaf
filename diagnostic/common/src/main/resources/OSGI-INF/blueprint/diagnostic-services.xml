@@ -30,4 +30,15 @@
 	<bean id="logs" class="org.apache.karaf.diagnostic.common.LogDumpProvider" />
 	<service ref="logs" auto-export="interfaces" />	
 
+	<bean id="bundles" class="org.apache.karaf.diagnostic.common.BundleDumpProvider">
+		<argument ref="blueprintBundleContext" />
+	</bean>
+	<service ref="bundles" auto-export="interfaces" />	
+
+	<bean id="threads" class="org.apache.karaf.diagnostic.common.ThreadDumpProvider" />
+	<service ref="threads" auto-export="interfaces" />	
+
+	<bean id="screens" class="org.apache.karaf.diagnostic.common.ScreenshotDumpProvider" />
+	<service ref="screens" auto-export="interfaces" />	
+
 </blueprint>
