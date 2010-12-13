@@ -40,11 +40,12 @@ public class ThreadDumpProvider extends TextDumpProvider {
     protected void writeDump(OutputStreamWriter outputStream) throws Exception {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
-        outputStream.write("Number of threads: " + threadMXBean.getDaemonThreadCount() + "\n");
-        ThreadInfo[] threadDump = threadMXBean.dumpAllThreads(true, true);
-        for (ThreadInfo threadInfo : threadDump) {
+        outputStream.write("Number of threads: " + threadMXBean.getThreadCount() + "\n");
+
+        for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), Integer.MAX_VALUE)) {
             outputStream.write(threadInfo.toString() + "\n\n");
         }
+
     }
 
 }
