@@ -15,36 +15,38 @@
  */
 package org.apache.karaf.diagnostic.common;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.Robot;
+import java.awt.image.BufferedImage;
 import java.io.OutputStream;
 
-import org.apache.commons.io.IOUtils;
+import javax.imageio.ImageIO;
+
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 
 /**
- * Dump provider which copies log files from data/log directory to
- * destination.
+ * Create screenshot from all devices.
  * 
  * @author ldywicki
  */
-public class LogDumpProvider implements DumpProvider {
+public class ScreenshotDumpProvider implements DumpProvider {
 
-	/**
-	 * Creates log entries in attached zip.
-	 */
 	public void createDump(DumpDestination destination) throws Exception {
-		File logDir = new File("data/log");
-		File[] listFiles = logDir.listFiles();
-
-		for (File file : listFiles) {
-			FileInputStream inputStream = new FileInputStream(file);
-
-			OutputStream outputStream = destination.add("log/" + file.getName());
-
-			IOUtils.copy(inputStream, outputStream);
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] gs = ge.getScreenDevices();
+		 
+		for (int i=0; i < gs.length; i++) {
+			DisplayMode mode = gs[i].getDisplayMode();
+			Rectangle bounds = new Rectangle(0, 0, mode.getWidth(), mode.getHeight());
+		    BufferedImage screenshot = new Robot(gs[i]).createScreenCapture(bounds);
+		    OutputStream outputStream = destination.add("screenshot/display_" + i + ".jpg");
+		    ImageIO.write(screenshot, "PNG", outputStream);
 		}
+
 	}
 
 }

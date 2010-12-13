@@ -15,45 +15,26 @@
  */
 package org.apache.karaf.diagnostic.core.common;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.io.OutputStreamWriter;
 
 import org.apache.karaf.diagnostic.core.DumpDestination;
+import org.apache.karaf.diagnostic.core.DumpProvider;
 
-/**
- * Class which packages dumps to ZIP archive.
- * 
- * @author ldywicki
- */
-public class ZipDumpDestination implements DumpDestination {
+public abstract class TextDumpProvider implements DumpProvider {
 
-	private ZipOutputStream outputStream;
+	private final String name;
 
-	public ZipDumpDestination(File directory, String name) {
-		this(new File(directory, name));
+	protected TextDumpProvider(String name) {
+		this.name = name;
 	}
 
-	public ZipDumpDestination(File file) {
-		try {
-			outputStream = new ZipOutputStream(new FileOutputStream(
-				file));
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException("Unable to create dump destination", e);
-		}
-	}
-
-	public OutputStream add(String name) throws Exception {
-		ZipEntry zipEntry = new ZipEntry(name);
-		outputStream.putNextEntry(zipEntry);
-		return new ClosingEntryOutputStreamWrapper(outputStream);
-	}
-
-	public void save() throws Exception {
+	public void createDump(DumpDestination destination) throws Exception {
+		OutputStream outputStream = destination.add(name);
+		writeDump(new OutputStreamWriter(outputStream));
 		outputStream.close();
 	}
-	
+
+	protected abstract void writeDump(OutputStreamWriter outputStream) throws Exception;
+
 }

@@ -59,7 +59,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
                         	${project.artifactId};version=${project.version},
-                        	${project.artifactId}.common;version=${project.version},
+                        	${project.artifactId}.common;version=${project.version};-noimport:=true,
                        	</Export-Package>
                         <Import-Package>
                             !${project.artifactId}*,

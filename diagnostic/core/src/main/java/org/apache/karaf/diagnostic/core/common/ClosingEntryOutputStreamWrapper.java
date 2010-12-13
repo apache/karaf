@@ -15,45 +15,62 @@
  */
 package org.apache.karaf.diagnostic.core.common;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.karaf.diagnostic.core.DumpDestination;
-
 /**
- * Class which packages dumps to ZIP archive.
+ * Output stream which closes entry instead closing whole stream.
  * 
  * @author ldywicki
  */
-public class ZipDumpDestination implements DumpDestination {
+public class ClosingEntryOutputStreamWrapper extends OutputStream {
 
+	/**
+	 * Wrapped ZIP output stream. 
+	 */
 	private ZipOutputStream outputStream;
 
-	public ZipDumpDestination(File directory, String name) {
-		this(new File(directory, name));
+	/**
+	 * Creates new OutputStream.
+	 * 
+	 * @param outputStream Wrapped output stream.
+	 */
+	public ClosingEntryOutputStreamWrapper(ZipOutputStream outputStream) {
+		this.outputStream = outputStream;
 	}
 
-	public ZipDumpDestination(File file) {
-		try {
-			outputStream = new ZipOutputStream(new FileOutputStream(
-				file));
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException("Unable to create dump destination", e);
-		}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void write(int b) throws IOException {
+		outputStream.write(b);
 	}
 
-	public OutputStream add(String name) throws Exception {
-		ZipEntry zipEntry = new ZipEntry(name);
-		outputStream.putNextEntry(zipEntry);
-		return new ClosingEntryOutputStreamWrapper(outputStream);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void write(byte[] b) throws IOException {
+		outputStream.write(b);
 	}
 
-	public void save() throws Exception {
-		outputStream.close();
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void write(byte[] b, int off, int len)
+		throws IOException {
+		outputStream.write(b, off, len);
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void close() throws IOException {
+		// close entry instead of closing stream.
+		outputStream.closeEntry();
+	}
 }

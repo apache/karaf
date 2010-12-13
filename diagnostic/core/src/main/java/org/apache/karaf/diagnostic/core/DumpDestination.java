@@ -1,5 +1,7 @@
 package org.apache.karaf.diagnostic.core;
 
+import java.io.OutputStream;
+
 /**
  * Destination for created dumps.
  * 
@@ -7,7 +9,7 @@ package org.apache.karaf.diagnostic.core;
  */
 public interface DumpDestination {
 
-	void add(Dump ... dump) throws Exception;
+	OutputStream add(String name) throws Exception;
 
 	void save() throws Exception;
 
