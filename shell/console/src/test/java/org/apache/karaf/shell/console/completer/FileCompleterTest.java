@@ -37,9 +37,9 @@ public class FileCompleterTest extends CompleterTestSupport {
         Completer comp = new ArgumentCompleter(session, new SimpleCommand(MyAction.class), "my:action");
 
         // arg 0
-        assertEquals(Arrays.asList("src/"), complete(comp, "action s"));
-        assertEquals(Arrays.asList("main/"), complete(comp, "action src/m"));
-        assertEquals(Arrays.asList("java/"), complete(comp, "action src/main/j"));
+        assertEquals(Arrays.asList("src"+File.separator), complete(comp, "action s"));
+        assertEquals(Arrays.asList("main"+File.separator), complete(comp, "action src/m"));
+        assertEquals(Arrays.asList("java"+File.separator), complete(comp, "action src/main/j"));
     }
 
     public static class MyAction implements Action {
