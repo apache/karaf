@@ -137,7 +137,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
                 principals.add(new RolePrincipal(role));
             }
         } catch (Exception ex) {
-            throw new LoginException("Error has occured while retrieving credentials from databse:" + ex.getMessage());
+            throw new LoginException("Error has occured while retrieving credentials from database:" + ex.getMessage());
         } finally {
             try {
                 if (passwordResultSet != null) {
