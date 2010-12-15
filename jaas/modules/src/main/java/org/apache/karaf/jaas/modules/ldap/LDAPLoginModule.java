@@ -1,385 +1,218 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
  */
 package org.apache.karaf.jaas.modules.ldap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.RolePrincipal;
+import org.apache.karaf.jaas.modules.UserPrincipal;
 
-import javax.naming.*;
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
 import javax.naming.directory.*;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
-import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
 import java.io.IOException;
 import java.security.Principal;
-import java.text.MessageFormat;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
- * @version $Rev: $ $Date: $
+ * <p>
+ * Karaf JAAS login module which uses a LDAP backend.
+ * </p>
+ *
+ * @author jbonofre
  */
-public class LDAPLoginModule implements LoginModule {
+public class LDAPLoginModule extends AbstractKarafLoginModule {
 
-    private static final String INITIAL_CONTEXT_FACTORY = "initialContextFactory";
-    private static final String CONNECTION_URL = "connectionURL";
-    private static final String CONNECTION_USERNAME = "connectionUsername";
-    private static final String CONNECTION_PASSWORD = "connectionPassword";
-    private static final String CONNECTION_PROTOCOL = "connectionProtocol";
-    private static final String AUTHENTICATION = "authentication";
-    private static final String USER_BASE = "userBase";
-    private static final String USER_SEARCH_MATCHING = "userSearchMatching";
-    private static final String USER_SEARCH_SUBTREE = "userSearchSubtree";
-    private static final String ROLE_BASE = "roleBase";
-    private static final String ROLE_NAME = "roleName";
-    private static final String ROLE_SEARCH_MATCHING = "roleSearchMatching";
-    private static final String ROLE_SEARCH_SUBTREE = "roleSearchSubtree";
-    private static final String USER_ROLE_NAME = "userRoleName";
+    private final static transient Log LOG = LogFactory.getLog(LDAPLoginModule.class);
 
-    private static Log log = LogFactory.getLog(LDAPLoginModule.class);
+    public final static String CONNECTION_URL = "connection.url";
+    public final static String CONNECTION_USERNAME = "connection.username";
+    public final static String CONNECTION_PASSWORD = "connection.password";
+    public final static String USER_BASE_DN = "user.base.dn";
+    public final static String USER_FILTER = "user.filter";
+    public final static String USER_SEARCH_SUBTREE = "user.search.subtree";
+    public final static String ROLE_BASE_DN = "role.base.dn";
+    public final static String ROLE_FILTER = "role.filter";
+    public final static String ROLE_NAME_ATTRIBUTE = "role.name.attribute";
+    public final static String ROLE_SEARCH_SUBTREE = "role.search.subtree";
+    public final static String AUTHENTICATION = "authentication";
+    public final static String INITIAL_CONTEXT_FACTORY = "initial.context.factory";
 
-    protected DirContext context;
+    public final static String DEFAULT_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
 
-    private Subject subject;
-    private CallbackHandler handler;  
-    private LDAPLoginProperty [] config;
-    private String username;
-    private Set<GroupPrincipal> groups = new HashSet<GroupPrincipal>();
+    private String connectionURL;
+    private String connectionUsername;
+    private String connectionPassword;
+    private String userBaseDN;
+    private String userFilter;
+    private boolean userSearchSubtree = true;
+    private String roleBaseDN;
+    private String roleFilter;
+    private String roleNameAttribute;
+    private boolean roleSearchSubtree = true;
+    private String authentication = "simple";
+    private String initialContextFactory = null;
 
-    public void initialize(Subject subject, CallbackHandler callbackHandler, Map sharedState, Map options) {
-        this.subject = subject;
-        this.handler = callbackHandler;
-        
-        config = new LDAPLoginProperty [] {
-        		new LDAPLoginProperty (INITIAL_CONTEXT_FACTORY, (String)options.get(INITIAL_CONTEXT_FACTORY)),
-        		new LDAPLoginProperty (CONNECTION_URL, (String)options.get(CONNECTION_URL)),
-        		new LDAPLoginProperty (CONNECTION_USERNAME, (String)options.get(CONNECTION_USERNAME)),
-        		new LDAPLoginProperty (CONNECTION_PASSWORD, (String)options.get(CONNECTION_PASSWORD)),
-        		new LDAPLoginProperty (CONNECTION_PROTOCOL, (String)options.get(CONNECTION_PROTOCOL)),
-        		new LDAPLoginProperty (AUTHENTICATION, (String)options.get(AUTHENTICATION)),
-        		new LDAPLoginProperty (USER_BASE, (String)options.get(USER_BASE)),
-        		new LDAPLoginProperty (USER_SEARCH_MATCHING, (String)options.get(USER_SEARCH_MATCHING)),
-        		new LDAPLoginProperty (USER_SEARCH_SUBTREE, (String)options.get(USER_SEARCH_SUBTREE)),
-        		new LDAPLoginProperty (ROLE_BASE, (String)options.get(ROLE_BASE)),
-        		new LDAPLoginProperty (ROLE_NAME, (String)options.get(ROLE_NAME)),
-        		new LDAPLoginProperty (ROLE_SEARCH_MATCHING, (String)options.get(ROLE_SEARCH_MATCHING)),
-        		new LDAPLoginProperty (ROLE_SEARCH_SUBTREE, (String)options.get(ROLE_SEARCH_SUBTREE)),
-        		new LDAPLoginProperty (USER_ROLE_NAME, (String)options.get(USER_ROLE_NAME)),
-        		};
+    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+        super.initialize(subject, callbackHandler, options);
+        connectionURL = (String) options.get(CONNECTION_URL);
+        connectionUsername = (String) options.get(CONNECTION_USERNAME);
+        connectionPassword = (String) options.get(CONNECTION_PASSWORD);
+        userBaseDN =  (String) options.get(USER_BASE_DN);
+        userFilter = (String) options.get(USER_FILTER);
+        if (options.get(USER_SEARCH_SUBTREE) != null) {
+            userSearchSubtree = Boolean.getBoolean((String) options.get(USER_SEARCH_SUBTREE));
+        }
+        roleBaseDN = (String) options.get(ROLE_BASE_DN);
+        roleFilter = (String) options.get(ROLE_FILTER);
+        roleNameAttribute = (String) options.get(ROLE_NAME_ATTRIBUTE);
+        if (options.get(ROLE_SEARCH_SUBTREE) != null) {
+            roleSearchSubtree = Boolean.getBoolean((String) options.get(ROLE_SEARCH_SUBTREE));
+        }
+        initialContextFactory = (String) options.get(INITIAL_CONTEXT_FACTORY);
+        if (initialContextFactory == null) {
+            initialContextFactory = DEFAULT_INITIAL_CONTEXT_FACTORY;
+        }
+        authentication = (String) options.get(AUTHENTICATION);
+        if (connectionURL == null || connectionURL.trim().length() == 0) {
+            LOG.error("No LDAP URL specified.");
+        } else if (!connectionURL.startsWith("ldap:")) {
+            LOG.error("Invalid LDAP URL.");
+        }
     }
 
     public boolean login() throws LoginException {
-
         Callback[] callbacks = new Callback[2];
+        callbacks[0] = new NameCallback("Username: ");
+        callbacks[1] = new PasswordCallback("Password: ", false);
 
-        callbacks[0] = new NameCallback("User name");
-        callbacks[1] = new PasswordCallback("Password", false);
         try {
-            handler.handle(callbacks);
-        } catch (IOException ioe) {
-            throw (LoginException)new LoginException().initCause(ioe);
-        } catch (UnsupportedCallbackException uce) {
-            throw (LoginException)new LoginException().initCause(uce);
+            callbackHandler.handle(callbacks);
+        } catch (IOException ioException) {
+            throw new LoginException(ioException.getMessage());
+        } catch (UnsupportedCallbackException unsupportedCallbackException) {
+            throw new LoginException(unsupportedCallbackException.getMessage() + " not available to obtain information from user.");
         }
-        
-        String password;
-        
-        username = ((NameCallback)callbacks[0]).getName();
-        if (username == null)
-        	return false;
-        	
-        if (((PasswordCallback)callbacks[1]).getPassword() != null)
-        	password = new String(((PasswordCallback)callbacks[1]).getPassword());
-        else
-        	password="";
 
+        user = ((NameCallback) callbacks[0]).getName();
+
+        char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
+        if (tmpPassword == null) {
+            tmpPassword = new char[0];
+        }
+        String password = new String(tmpPassword);
+        principals = new HashSet<Principal>();
+
+        // step 1: get the user DN
+        Hashtable env = new Hashtable();
+        LOG.debug("Create the LDAP initial context.");
+        env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
+        env.put(Context.PROVIDER_URL, connectionURL);
+        if (connectionUsername != null && connectionUsername.trim().length() > 0) {
+            LOG.debug("Bound access requested.");
+            env.put(Context.SECURITY_AUTHENTICATION, authentication);
+            env.put(Context.SECURITY_PRINCIPAL, connectionUsername);
+            env.put(Context.SECURITY_CREDENTIALS, connectionPassword);
+        }
+        LOG.debug("Get the user DN.");
+        String userDN = null;
         try {
-            boolean result = authenticate(username, password);
-            if (!result) {
-                throw new FailedLoginException();
+            LOG.debug("Initialize the JNDI LDAP Dir Context.");
+            DirContext context = new InitialDirContext(env);
+            LOG.debug("Define the subtree scope search control.");
+            SearchControls controls = new SearchControls();
+            if (userSearchSubtree) {
+                controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
             } else {
-                return true;
+                controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+            }
+            LOG.debug("Looking for the user in LDAP with ");
+            LOG.debug("  base DN: " + userBaseDN);
+            userFilter = userFilter.replaceAll("%u", user);
+            LOG.debug("  filter: " + userFilter);
+            NamingEnumeration namingEnumeration = context.search(userBaseDN, userFilter, controls);
+            if (!namingEnumeration.hasMore()) {
+                LOG.warn("User " + user + " not found in LDAP.");
+                return false;
+            }
+            LOG.debug("Get the user DN.");
+            SearchResult result = (SearchResult) namingEnumeration.next();
+            userDN = (String) result.getName();
+        } catch (Exception e) {
+            throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
+        }
+        // step 2: bind the user using the DN
+        try {
+            LOG.debug("Bind user (authentication).");
+            env.put(Context.SECURITY_AUTHENTICATION, authentication);
+            LOG.debug("Set the security principal for " + userDN + "," + userBaseDN);
+            env.put(Context.SECURITY_PRINCIPAL, userDN + "," + userBaseDN);
+            env.put(Context.SECURITY_CREDENTIALS, password);
+            LOG.debug("Binding the user.");
+            DirContext context = new InitialDirContext(env);
+            LOG.debug("User " + user + " successfully bound.");
+            context.close();
+        } catch (Exception e) {
+            LOG.warn("User " + user + " authentication failed.", e);
+            return false;
+        }
+        principals.add(new UserPrincipal(user));
+        // step 3: retrieving user roles
+        try {
+            LOG.debug("Get user roles.");
+            DirContext context = new InitialDirContext(env);
+            SearchControls controls = new SearchControls();
+            if (roleSearchSubtree) {
+                controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            } else {
+                controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+            }
+            LOG.debug("Looking for the user roles in LDAP with ");
+            LOG.debug("  base DN: " + roleBaseDN);
+            roleFilter = roleFilter.replaceAll("%u", user);
+            LOG.debug("  filter: " + roleFilter);
+            NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
+            while (namingEnumeration.hasMore()) {
+                SearchResult result = (SearchResult) namingEnumeration.next();
+                Attributes attributes = result.getAttributes();
+                String role = (String) attributes.get(roleNameAttribute).get();
+                if (role != null) {
+                    principals.add(new RolePrincipal(role));
+                }
             }
         } catch (Exception e) {
-            throw (LoginException)new LoginException("LDAP Error").initCause(e);
-        }
-    }
-
-    public boolean logout() throws LoginException {
-        username = null;
-        return true;
-    }
-
-    public boolean commit() throws LoginException {
-        Set<Principal> principals = subject.getPrincipals();
-        principals.add(new UserPrincipal(username));
-        Iterator<GroupPrincipal> iter = groups.iterator();
-        while (iter.hasNext()) {
-            principals.add(iter.next());
+            throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
         }
         return true;
     }
 
     public boolean abort() throws LoginException {
-        username = null;
         return true;
     }
 
-    protected void close(DirContext context) {
-        try {
-            context.close();
-        } catch (Exception e) {
-            log.error(e);
-        }
-    }
-
-    protected boolean authenticate(String username, String password) throws Exception {
-
-        MessageFormat userSearchMatchingFormat;
-        boolean userSearchSubtreeBool;
-        
-        DirContext context = null;
-        context = open();
-        
-        if (!isLoginPropertySet(USER_SEARCH_MATCHING))
-        	return false;
-
-        userSearchMatchingFormat = new MessageFormat(getLDAPPropertyValue(USER_SEARCH_MATCHING));
-        userSearchSubtreeBool = Boolean.valueOf(getLDAPPropertyValue(USER_SEARCH_SUBTREE)).booleanValue();
-
-        try {
-
-            String filter = userSearchMatchingFormat.format(new String[] {
-                username
-            });
-            SearchControls constraints = new SearchControls();
-            if (userSearchSubtreeBool) {
-                constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            } else {
-                constraints.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-            }
-
-            // setup attributes
-            ArrayList<String> list = new ArrayList<String>();
-            if (isLoginPropertySet(USER_ROLE_NAME)) {
-                list.add(getLDAPPropertyValue(USER_ROLE_NAME));
-            }
-            String[] attribs = new String[list.size()];
-            list.toArray(attribs);
-            constraints.setReturningAttributes(attribs);
-
-            NamingEnumeration results = context.search(getLDAPPropertyValue(USER_BASE), filter, constraints);
-
-            if (results == null || !results.hasMore()) {
-                return false;
-            }
-
-            SearchResult result = (SearchResult)results.next();
-
-            if (results.hasMore()) {
-                // ignore for now
-            }
-            NameParser parser = context.getNameParser("");
-            Name contextName = parser.parse(context.getNameInNamespace());
-            Name baseName = parser.parse(getLDAPPropertyValue(USER_BASE));
-            Name entryName = parser.parse(result.getName());
-            Name name = contextName.addAll(baseName);
-            name = name.addAll(entryName);
-            String dn = name.toString();
-
-            Attributes attrs = result.getAttributes();
-            if (attrs == null) {
-                return false;
-            }
-            ArrayList<String> roles = null;
-            if (isLoginPropertySet(USER_ROLE_NAME)) {
-                roles = addAttributeValues(getLDAPPropertyValue(USER_ROLE_NAME), attrs, roles);
-            }
-
-            // check the credentials by binding to server
-            if (bindUser(context, dn, password)) {
-                // if authenticated add more roles
-                roles = getRoles(context, dn, username, roles);
-                for (int i = 0; i < roles.size(); i++) {
-                    groups.add(new GroupPrincipal(roles.get(i)));
-                }
-            } else {
-                return false;
-            }
-        } catch (CommunicationException e) {
-
-        } catch (NamingException e) {
-            if (context != null) {
-                close(context);
-            }
-            return false;
-        }
-
+    public boolean logout() throws LoginException {
+        subject.getPrincipals().removeAll(principals);
+        principals.clear();
         return true;
-    }
-
-    protected ArrayList<String> getRoles(DirContext context, String dn, String username, ArrayList<String> currentRoles) throws NamingException {
-        ArrayList<String> list = currentRoles;
-        MessageFormat roleSearchMatchingFormat;
-        boolean roleSearchSubtreeBool;
-        roleSearchMatchingFormat = new MessageFormat(getLDAPPropertyValue(ROLE_SEARCH_MATCHING));
-        roleSearchSubtreeBool = Boolean.valueOf(getLDAPPropertyValue(ROLE_SEARCH_SUBTREE)).booleanValue();
-        
-        if (list == null) {
-            list = new ArrayList<String>();
-        }
-        if (!isLoginPropertySet(ROLE_NAME)) {
-            return list;
-        }
-        String filter = roleSearchMatchingFormat.format(new String[] {
-            doRFC2254Encoding(dn), username
-        });
-
-        SearchControls constraints = new SearchControls();
-        if (roleSearchSubtreeBool) {
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        } else {
-            constraints.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-        }
-        NamingEnumeration results = context.search(getLDAPPropertyValue(ROLE_BASE), filter, constraints);
-        while (results.hasMore()) {
-            SearchResult result = (SearchResult)results.next();
-            Attributes attrs = result.getAttributes();
-            if (attrs == null) {
-                continue;
-            }
-            list = addAttributeValues(getLDAPPropertyValue(ROLE_NAME), attrs, list);
-        }
-        return list;
-
-    }
-
-    protected String doRFC2254Encoding(String inputString) {
-        StringBuffer buf = new StringBuffer(inputString.length());
-        for (int i = 0; i < inputString.length(); i++) {
-            char c = inputString.charAt(i);
-            switch (c) {
-            case '\\':
-                buf.append("\\5c");
-                break;
-            case '*':
-                buf.append("\\2a");
-                break;
-            case '(':
-                buf.append("\\28");
-                break;
-            case ')':
-                buf.append("\\29");
-                break;
-            case '\0':
-                buf.append("\\00");
-                break;
-            default:
-                buf.append(c);
-                break;
-            }
-        }
-        return buf.toString();
-    }
-
-    protected boolean bindUser(DirContext context, String dn, String password) throws NamingException {
-        boolean isValid = false;
-
-        context.addToEnvironment(Context.SECURITY_PRINCIPAL, dn);
-        context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
-        try {
-            context.getAttributes("", null);
-            isValid = true;
-        } catch (AuthenticationException e) {
-            isValid = false;
-            log.debug("Authentication failed for dn=" + dn);
-        }
-
-        if (isLoginPropertySet(CONNECTION_USERNAME)) {
-            context.addToEnvironment(Context.SECURITY_PRINCIPAL, getLDAPPropertyValue(CONNECTION_USERNAME));
-        } else {
-            context.removeFromEnvironment(Context.SECURITY_PRINCIPAL);
-        }
-
-        if (isLoginPropertySet(CONNECTION_PASSWORD)) {
-            context.addToEnvironment(Context.SECURITY_CREDENTIALS, getLDAPPropertyValue(CONNECTION_PASSWORD));
-        } else {
-            context.removeFromEnvironment(Context.SECURITY_CREDENTIALS);
-        }
-
-        return isValid;
-    }
-
-    private ArrayList<String> addAttributeValues(String attrId, Attributes attrs, ArrayList<String> values) throws NamingException {
-
-        if (attrId == null || attrs == null) {
-            return values;
-        }
-        if (values == null) {
-            values = new ArrayList<String>();
-        }
-        Attribute attr = attrs.get(attrId);
-        if (attr == null) {
-            return values;
-        }
-        NamingEnumeration e = attr.getAll();
-        while (e.hasMore()) {
-            String value = (String)e.next();
-            values.add(value);
-        }
-        return values;
-    }
-
-    protected DirContext open() throws NamingException {
-        try {
-            Hashtable<String, String> env = new Hashtable<String, String>();
-            env.put(Context.INITIAL_CONTEXT_FACTORY, getLDAPPropertyValue(INITIAL_CONTEXT_FACTORY));
-            if (isLoginPropertySet(CONNECTION_USERNAME)) {
-                env.put(Context.SECURITY_PRINCIPAL, getLDAPPropertyValue(CONNECTION_USERNAME));
-            }
-            if (isLoginPropertySet(CONNECTION_PASSWORD)) {
-                env.put(Context.SECURITY_CREDENTIALS, getLDAPPropertyValue(CONNECTION_PASSWORD));
-            }
-            env.put(Context.SECURITY_PROTOCOL, getLDAPPropertyValue(CONNECTION_PROTOCOL));
-            env.put(Context.PROVIDER_URL, getLDAPPropertyValue(CONNECTION_URL));
-            env.put(Context.SECURITY_AUTHENTICATION, getLDAPPropertyValue(AUTHENTICATION));
-            context = new InitialDirContext(env);
-
-        } catch (NamingException e) {
-            log.error(e);
-            throw e;
-        }
-        return context;
-    }
-    
-    private String getLDAPPropertyValue (String propertyName){
-    	for (int i=0; i < config.length; i++ )
-    		if (config[i].getPropertyName() == propertyName)
-    			return config[i].getPropertyValue();
-    	return null;
-    }
-    
-    private boolean isLoginPropertySet(String propertyName) {
-    	for (int i=0; i < config.length; i++ ) {
-    		if (config[i].getPropertyName() == propertyName && config[i].getPropertyValue() != null)
-    				return true;
-    	}
-    	return false;
     }
 
 }
