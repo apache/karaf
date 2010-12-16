@@ -104,11 +104,11 @@
     <properties>
         <!-- Apache ServiceMix Bundles -->
         <aopalliance.bundle.version>1.0_4</aopalliance.bundle.version>
-        <asm.bundle.version>3.1_1-SNAPSHOT</asm.bundle.version>
+        <asm.bundle.version>3.1_1</asm.bundle.version>
         <cglib.bundle.version>2.1_3_6</cglib.bundle.version>
         <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
         <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
-        <jasypt.bundle.version>1.7_1-SNAPSHOT</jasypt.bundle.version>
+        <jasypt.bundle.version>1.7_1</jasypt.bundle.version>
         <jetty.version>7.1.6.v20100715</jetty.version>
         <junit.bundle.version>4.7_2</junit.bundle.version>
 
