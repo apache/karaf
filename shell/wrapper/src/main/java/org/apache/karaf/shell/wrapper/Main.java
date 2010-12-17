@@ -16,15 +16,18 @@
  */
 package org.apache.karaf.shell.wrapper;
 
+import org.apache.karaf.main.ShutdownCallback;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 /**
  * Java Service Wrapper Main class
  */
-public class Main implements WrapperListener {
+public class Main implements WrapperListener, ShutdownCallback {
 
-    private org.apache.karaf.main.Main main;
+    private static final int TIMEOUT = 1000; //wainting timeout for a second should be enough
+	private static final int TIMEOUT_OFFSET = 500; // the offset for the wrapper, to leave us some time to breath
+	private org.apache.karaf.main.Main main;
 
     /*---------------------------------------------------------------
      * Constructors
@@ -85,7 +88,7 @@ public class Main implements WrapperListener {
     {
         try
         {
-            main.destroy(false);
+            main.destroy(true, TIMEOUT, this);
         }
         catch (Throwable ex)
         {
@@ -95,6 +98,14 @@ public class Main implements WrapperListener {
         }
 
         return exitCode;
+    }
+    
+    /**
+     * Call-back method is called by the @{link org.apache.karaf.main.Main} for Signaling 
+     * that the stopping process is in progress and the wrapper doesn't kill the JVM.  
+     */
+    public void waitingForShutdown() {
+    	WrapperManager.signalStopping(TIMEOUT + TIMEOUT_OFFSET);
     }
 
     /**
