@@ -454,6 +454,10 @@
                         <groupId>net.sf.kxml</groupId>
                         <artifactId>kxml2</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -465,6 +469,12 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.utils</artifactId>
                 <version>${felix.utils.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -475,6 +485,12 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.fileinstall</artifactId>
                 <version>${felix.fileinstall.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
