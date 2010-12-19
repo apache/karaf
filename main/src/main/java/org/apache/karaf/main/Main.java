@@ -249,14 +249,29 @@ public class Main {
     }
 
     public void destroy(boolean await) throws Exception {
+		destroy(await, 0, null);
+	}
+
+	public void destroy(boolean await, int timeout, ShutdownCallback callback) throws Exception {
         if (framework == null) {
             return;
         }
         try {
             if (await) {
                 while (true) {
-                    FrameworkEvent event = framework.waitForStop(0);
-                    if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
+                	FrameworkEvent event;
+	                if (callback != null) {
+	                	callback.waitingForShutdown();
+	                	framework.stop();
+	                	do {
+	                		callback.waitingForShutdown();
+	                		event = framework.waitForStop(timeout);
+	                	} while(event.getType() == FrameworkEvent.WAIT_TIMEDOUT);
+	                	break;
+                	} else {
+                		event = framework.waitForStop(0);
+                	}
+                	if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
                         break;
                     }
                 }
