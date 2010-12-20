@@ -64,12 +64,24 @@ public class SshTerminal extends TerminalSupport {
 
     @Override
     public int getWidth() {
-        return Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
+        int width = 0;
+        try {
+            width = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
+        } catch (Throwable t) {
+            // Ignore
+        }
+        return width > 0 ? width : super.getWidth();
     }
 
     @Override
     public int getHeight() {
-        return Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
+        int height = 0;
+        try {
+            height = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
+        } catch (Throwable t) {
+            // Ignore
+        }
+        return height > 0 ? height : super.getHeight();
     }
 
     @Override
