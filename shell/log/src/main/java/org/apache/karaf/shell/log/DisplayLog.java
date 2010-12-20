@@ -16,11 +16,14 @@
  */
 package org.apache.karaf.shell.log;
 
+import java.io.PrintStream;
+
 import org.apache.karaf.shell.log.layout.PatternConverter;
 import org.apache.karaf.shell.log.layout.PatternParser;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
+import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
@@ -123,38 +126,42 @@ public class DisplayLog extends OsgiCommandSupport {
     }
 
     protected Object doExecute() throws Exception {
-        PatternConverter cnv = new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
+        final PatternConverter cnv = new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
+        final PrintStream out = System.out;
 
         Iterable<PaxLoggingEvent> le = events.getElements(entries == 0 ? Integer.MAX_VALUE : entries);
-        StringBuffer sb = new StringBuffer();
         for (PaxLoggingEvent event : le) {
-            String color = getColor(event);
-            sb.setLength(0);
-            if (color != null) {
-                sb.append(FIRST_ESC_CHAR);
-                sb.append(SECOND_ESC_CHAR);
-                sb.append(color);
-                sb.append(COMMAND_CHAR);
-            }
-            for (PatternConverter pc = cnv; pc != null; pc = pc.next) {
-                pc.format(sb, event);
-            }
-            if (event.getThrowableStrRep() != null) {
-                for (String r : event.getThrowableStrRep()) {
-                    sb.append(r).append('\n');
-                }
-            }
-            if (color != null) {
-                sb.append(FIRST_ESC_CHAR);
-                sb.append(SECOND_ESC_CHAR);
-                sb.append("0");
-                sb.append(COMMAND_CHAR);
-            }
-            System.out.print(sb.toString());
+            display(cnv, event, out);
         }
-        System.out.println();
-        
+        out.println();
         return null;
+    }
+
+    protected void display(PatternConverter cnv, PaxLoggingEvent event, PrintStream stream) {
+        String color = getColor(event);
+        StringBuffer sb = new StringBuffer();
+        sb.setLength(0);
+        if (color != null) {
+            sb.append(FIRST_ESC_CHAR);
+            sb.append(SECOND_ESC_CHAR);
+            sb.append(color);
+            sb.append(COMMAND_CHAR);
+        }
+        for (PatternConverter pc = cnv; pc != null; pc = pc.next) {
+            pc.format(sb, event);
+        }
+        if (event.getThrowableStrRep() != null) {
+            for (String r : event.getThrowableStrRep()) {
+                sb.append(r).append('\n');
+            }
+        }
+        if (color != null) {
+            sb.append(FIRST_ESC_CHAR);
+            sb.append(SECOND_ESC_CHAR);
+            sb.append("0");
+            sb.append(COMMAND_CHAR);
+        }
+        stream.print(sb.toString());
     }
 
     private String getColor(PaxLoggingEvent event) {
