@@ -557,15 +557,17 @@ public class Main {
                 }
                 while (location != null);
                 // Now loop through and start the installed bundles.
-                for (Bundle b : bundlesLevel) {
-                    try {
-                        String fragmentHostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
-                        if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
-                            b.start();
+                if (start) {
+                    for (Bundle b : bundlesLevel) {
+                        try {
+                            String fragmentHostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
+                            if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
+                                b.start();
+                            }
                         }
-                    }
-                    catch (Exception ex) {
-                        System.err.println("Error starting bundle " + b.getSymbolicName() + ": " + ex);
+                        catch (Exception ex) {
+                            System.err.println("Error starting bundle " + b.getSymbolicName() + ": " + ex);
+                        }
                     }
                 }
             }
