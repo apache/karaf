@@ -500,28 +500,19 @@ public class Main {
         // the start level to which the bundles are assigned is specified by
         // appending a ".n" to the auto-install property name, where "n" is
         // the desired start level for the list of bundles.
-        autoInstall(PROPERTY_AUTO_INSTALL, context, sl, convertToMavenUrls);
+        autoInstall(PROPERTY_AUTO_INSTALL, context, sl, convertToMavenUrls, false);
 
         // The auto-start property specifies a space-delimited list of
         // bundle URLs to be automatically installed and started into each
         // new profile; the start level to which the bundles are assigned
         // is specified by appending a ".n" to the auto-start property name,
         // where "n" is the desired start level for the list of bundles.
-        // The following code starts bundles in two passes, first it installs
-        // them, then it starts them.
-            List<Bundle> bundlesToStart = autoInstall(PROPERTY_AUTO_START, context, sl, convertToMavenUrls);
-        // Now loop through and start the installed bundles.
-        for (Bundle b : bundlesToStart) {
-            try {
-                b.start();
-            }
-            catch (Exception ex) {
-                System.err.println("Auto-properties start: " + ex);
-            }
-        }
+        // The following code starts bundles in one pass, installing bundles
+        // for a given level, then starting them, then moving to the next level.
+        autoInstall(PROPERTY_AUTO_START, context, sl, convertToMavenUrls, true);
     }
 
-    private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, StartLevel sl, boolean convertToMavenUrls) {
+    private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, StartLevel sl, boolean convertToMavenUrls, boolean start) {
         Map<Integer, String> autoStart = new TreeMap<Integer, String>();
         List<Bundle> bundles = new ArrayList<Bundle>();
         for (Iterator i = configProps.keySet().iterator(); i.hasNext();) {
@@ -547,7 +538,8 @@ public class Main {
         for (Integer startLevel : autoStart.keySet()) {
             StringTokenizer st = new StringTokenizer(autoStart.get(startLevel), "\" ", true);
             if (st.countTokens() > 0) {
-                String location = null;
+                List<Bundle> bundlesLevel = new ArrayList<Bundle>();
+                String location;
                 do {
                     location = nextLocation(st);
                     if (location != null) {
@@ -556,13 +548,26 @@ public class Main {
                             Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
                             sl.setBundleStartLevel(b, startLevel);
                             bundles.add(b);
+                            bundlesLevel.add(b);
                         }
                         catch (Exception ex) {
-                            System.err.println("Auto-properties install:" + ex);
+                            System.err.println("Error installing bundle  " + location + ": " + ex);
                         }
                     }
                 }
                 while (location != null);
+                // Now loop through and start the installed bundles.
+                for (Bundle b : bundlesLevel) {
+                    try {
+                        String fragmentHostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
+                        if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
+                            b.start();
+                        }
+                    }
+                    catch (Exception ex) {
+                        System.err.println("Error starting bundle " + b.getSymbolicName() + ": " + ex);
+                    }
+                }
             }
         }
         return bundles;
