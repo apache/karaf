@@ -121,6 +121,7 @@
         <felix.framework.version>3.0.2</felix.framework.version>
         <felix.gogo.version>0.4.0</felix.gogo.version>
         <felix.osgi.version>1.4.0</felix.osgi.version>
+        <osgi.version>4.2.0</osgi.version>
         <felix.plugin.version>2.1.0</felix.plugin.version>
         <felix.utils.version>1.0.0</felix.utils.version>
         <felix.webconsole.version>3.1.2</felix.webconsole.version>
@@ -411,6 +412,16 @@
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.compendium</artifactId>
+                <version>${osgi.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

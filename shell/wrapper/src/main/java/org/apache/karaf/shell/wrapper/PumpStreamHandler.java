@@ -34,15 +34,17 @@ import java.io.IOException;
  */
 public class PumpStreamHandler
 {
-    private InputStream in;
+    private final InputStream in;
 
-    private OutputStream out;
+    private final OutputStream out;
 
-    private OutputStream err;
+    private final OutputStream err;
 
-    private Thread outputThread;
+    private final String name;
 
-    private Thread errorThread;
+    private StreamPumper outputPump;
+
+    private StreamPumper errorPump;
 
     private StreamPumper inputPump;
 
@@ -50,14 +52,20 @@ public class PumpStreamHandler
     // NOTE: May want to use a ThreadPool here, 3 threads per/pair seems kinda expensive :-(
     //
 
-    public PumpStreamHandler(final InputStream in, final OutputStream out, final OutputStream err) {
+    public PumpStreamHandler(final InputStream in, final OutputStream out, final OutputStream err, String name) {
         assert in != null;
         assert out != null;
         assert err != null;
+        assert name != null;
 
         this.in = in;
         this.out = out;
         this.err = err;
+        this.name = name;
+    }
+
+    public PumpStreamHandler(final InputStream in, final OutputStream out, final OutputStream err) {
+        this(in, out, err, "<unknown>");
     }
 
     public PumpStreamHandler(final OutputStream out, final OutputStream err) {
@@ -120,18 +128,25 @@ public class PumpStreamHandler
      * Start pumping the streams.
      */
     public void start() {
-        if (outputThread != null) {
-            outputThread.start();
+        if (outputPump != null) {
+            Thread thread = new Thread(outputPump);
+            thread.setDaemon(true);
+            thread.setName("Output pump for " + this.name);
+            thread.start();
         }
 
-        if (errorThread != null) {
-            errorThread.start();
+        if (errorPump != null) {
+            Thread thread = new Thread(errorPump);
+            thread.setDaemon(true);
+            thread.setName("Error pump for " + this.name);
+            thread.start();
         }
 
         if (inputPump != null) {
-            Thread inputThread = new Thread(inputPump);
-            inputThread.setDaemon(true);
-            inputThread.start();
+            Thread thread = new Thread(inputPump);
+            thread.setDaemon(true);
+            thread.setName("Input pump for " + this.name);
+            thread.start();
         }
     }
 
@@ -139,18 +154,20 @@ public class PumpStreamHandler
      * Stop pumping the streams.
      */
     public void stop() {
-        if (outputThread != null) {
+        if (outputPump != null) {
             try {
-                outputThread.join();
+                outputPump.stop();
+                outputPump.waitFor();
             }
             catch (InterruptedException e) {
                 // ignore
             }
         }
 
-        if (errorThread != null) {
+        if (errorPump != null) {
             try {
-                errorThread.join();
+                errorPump.stop();
+                errorPump.waitFor();
             }
             catch (InterruptedException e) {
                 // ignore
@@ -176,7 +193,7 @@ public class PumpStreamHandler
         assert in != null;
         assert out != null;
 
-        outputThread = createPump(in, out);
+        outputPump = createPump(in, out);
     }
 
     /**
@@ -186,13 +203,13 @@ public class PumpStreamHandler
         assert in != null;
         assert out != null;
 
-        errorThread = createPump(in, out);
+        errorPump = createPump(in, out);
     }
 
     /**
      * Creates a stream pumper to copy the given input stream to the given output stream.
      */
-    protected Thread createPump(final InputStream in, final OutputStream out) {
+    protected StreamPumper createPump(final InputStream in, final OutputStream out) {
         assert in != null;
         assert out != null;
 
@@ -208,13 +225,12 @@ public class PumpStreamHandler
      * @param closeWhenExhausted    If true close the inputstream.
      * @return                      A thread object that does the pumping.
      */
-    protected Thread createPump(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
+    protected StreamPumper createPump(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
         assert in != null;
         assert out != null;
 
-        final Thread result = new Thread(new StreamPumper(in, out, closeWhenExhausted));
-        result.setDaemon(true);
-        return result;
+        StreamPumper pumper = new StreamPumper(in, out, closeWhenExhausted);
+        return pumper;
     }
 
     /**
