@@ -70,6 +70,7 @@ public class Console implements Runnable
     private boolean interrupt;
     private Thread pipe;
     volatile private boolean running;
+    volatile private boolean eof;
     private Runnable closeCallback;
     private Terminal terminal;
     private InputStream consoleInput;
@@ -338,6 +339,9 @@ public class Console implements Runnable
                 return -1;
             }
             checkInterrupt();
+            if (eof && queue.isEmpty()) {
+                return -1;
+            }
             Integer i;
             if (wait) {
                 try {
@@ -407,7 +411,6 @@ public class Console implements Runnable
                         int c = terminal.readCharacter(in);
                         if (c == -1)
                         {
-                            queue.put(c);
                             return;
                         }
                         else if (c == 4)
@@ -431,7 +434,14 @@ public class Console implements Runnable
             }
             finally
             {
-                close();
+                eof = true;
+                try
+                {
+                    queue.put(-1);
+                }
+                catch (InterruptedException e)
+                {
+                }
             }
         }
     }
