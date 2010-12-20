@@ -74,11 +74,23 @@ public class SshTerminal extends Terminal {
     }
 
     public int getTerminalWidth() {
-        return Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
+        int width = 0;
+        try {
+            width = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
+        } catch (Throwable t) {
+            // Ignore
+        }
+        return width > 0 ? width : 80;
     }
 
     public int getTerminalHeight() {
-        return Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
+        int height = 0;
+        try {
+            height = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
+        } catch (Throwable t) {
+            // Ignore
+        }
+        return height > 0 ? height : 25;
     }
 
     public boolean isSupported() {
