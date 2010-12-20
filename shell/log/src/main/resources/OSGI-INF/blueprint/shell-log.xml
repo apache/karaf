@@ -68,6 +68,18 @@
             	<null/>
             </completers>
         </command>
+        <command name="log/tail">
+            <action class="org.apache.karaf.shell.log.LogTail">
+                <property name="events" ref="events"/>
+                <property name="pattern" value="${pattern}"/>
+                <property name="fatalColor" value="${fatalColor}"/>
+                <property name="errorColor" value="${errorColor}"/>
+                <property name="warnColor" value="${warnColor}"/>
+                <property name="infoColor" value="${infoColor}"/>
+                <property name="debugColor" value="${debugColor}"/>
+                <property name="traceColor" value="${traceColor}"/>
+            </action>
+        </command>
     </command-bundle>
 
     <bean id="vmLogAppender" class="org.apache.karaf.shell.log.VmLogAppender">

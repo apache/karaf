@@ -18,8 +18,11 @@
  */
 package org.apache.karaf.shell.log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
@@ -32,6 +35,7 @@ public class LruList {
     private transient int end = 0;
     private transient boolean full = false;
     private final int maxElements;
+    private final List<PaxAppender> appenders;
 
     public LruList(int size) {
         if (size <= 0) {
@@ -39,71 +43,77 @@ public class LruList {
         }
         elements = new PaxLoggingEvent[size];
         maxElements = elements.length;
+        appenders = new ArrayList<PaxAppender>();
     }
 
-    public int size() {
-        synchronized (elements) {
-            int size = 0;
-            if (end < start) {
-                size = maxElements - start + end;
-            } else if (end == start) {
-                size = (full ? maxElements : 0);
-            } else {
-                size = end - start;
-            }
-            return size;
+    public synchronized int size() {
+        int size = 0;
+        if (end < start) {
+            size = maxElements - start + end;
+        } else if (end == start) {
+            size = (full ? maxElements : 0);
+        } else {
+            size = end - start;
         }
+        return size;
     }
 
-    public void clear() {
-        synchronized (elements) {
-            start = 0;
-            end = 0;
-            elements = new PaxLoggingEvent[maxElements];
+    public synchronized void clear() {
+        start = 0;
+        end = 0;
+        elements = new PaxLoggingEvent[maxElements];
+    }
+
+    public synchronized void add(PaxLoggingEvent element) {
+        if (null == element) {
+             throw new NullPointerException("Attempted to add null object to buffer");
         }
-    }
-
-    public void add(PaxLoggingEvent element) {
-        synchronized (elements) {
-            if (null == element) {
-                 throw new NullPointerException("Attempted to add null object to buffer");
-            }
-            if (size() == maxElements) {
-                Object e = elements[start];
-                if (null != e) {
-                    elements[start++] = null;
-                    if (start >= maxElements) {
-                        start = 0;
-                    }
-                    full = false;
+        if (size() == maxElements) {
+            Object e = elements[start];
+            if (null != e) {
+                elements[start++] = null;
+                if (start >= maxElements) {
+                    start = 0;
                 }
+                full = false;
             }
-            elements[end++] = element;
-            if (end >= maxElements) {
-                end = 0;
-            }
-            if (end == start) {
-                full = true;
+        }
+        elements[end++] = element;
+        if (end >= maxElements) {
+            end = 0;
+        }
+        if (end == start) {
+            full = true;
+        }
+        for (PaxAppender appender : appenders) {
+            try {
+                appender.doAppend(element);
+            } catch (Throwable t) {
+                // Ignore
             }
         }
     }
 
-    public Iterable<PaxLoggingEvent> getElements() {
-        synchronized (elements) {
-            return getElements(size());
-        }
+    public synchronized Iterable<PaxLoggingEvent> getElements() {
+        return getElements(size());
     }
 
-    public Iterable<PaxLoggingEvent> getElements(int nb) {
-        synchronized (elements) {
-            int s = size();
-            nb = Math.min(Math.max(0, nb), s);
-            PaxLoggingEvent[] e = new PaxLoggingEvent[nb];
-            for (int i = 0; i < nb; i++) {
-                e[i] = elements[(i + s - nb + start) % maxElements];
-            }
-            return Arrays.asList(e);
+    public synchronized Iterable<PaxLoggingEvent> getElements(int nb) {
+        int s = size();
+        nb = Math.min(Math.max(0, nb), s);
+        PaxLoggingEvent[] e = new PaxLoggingEvent[nb];
+        for (int i = 0; i < nb; i++) {
+            e[i] = elements[(i + s - nb + start) % maxElements];
         }
+        return Arrays.asList(e);
+    }
+
+    public synchronized void addAppender(PaxAppender appender) {
+        this.appenders.add(appender);
+    }
+
+    public synchronized void removeAppender(PaxAppender appender) {
+        this.appenders.remove(appender);
     }
 
 }
