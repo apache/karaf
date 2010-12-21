@@ -130,9 +130,9 @@
         <felix.metatype.version>1.0.4</felix.metatype.version>
         <felix.eventadmin.version>1.2.6</felix.eventadmin.version>
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
-        <aries.blueprint.version>0.3-incubating-SNAPSHOT</aries.blueprint.version>
-        <aries.jmx.version>0.3-incubating-SNAPSHOT</aries.jmx.version>
-        <aries.jndi.version>0.3-incubating-SNAPSHOT</aries.jndi.version>
+        <aries.blueprint.version>0.3-SNAPSHOT</aries.blueprint.version>
+        <aries.jmx.version>0.3-SNAPSHOT</aries.jmx.version>
+        <aries.jndi.version>0.3-SNAPSHOT</aries.jndi.version>
         <jansi.version>1.4</jansi.version>
         <jline.version>2.5</jline.version>
         <jsw.version>3.2.3</jsw.version>
@@ -500,16 +500,22 @@
                         <groupId>net.sf.kxml</groupId>
                         <artifactId>kxml2</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.core</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.metatype</artifactId>
                 <version>${felix.metatype.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>org.osgi.compendium</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
