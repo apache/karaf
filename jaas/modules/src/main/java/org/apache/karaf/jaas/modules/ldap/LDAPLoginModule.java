@@ -17,17 +17,21 @@ package org.apache.karaf.jaas.modules.ldap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.karaf.jaas.config.KeystoreManager;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
+import org.osgi.framework.ServiceReference;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.*;
+import javax.net.ssl.SSLSocketFactory;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -39,6 +43,7 @@ import java.util.Map;
  * </p>
  *
  * @author jbonofre
+ * @author gnodet
  */
 public class LDAPLoginModule extends AbstractKarafLoginModule {
 
@@ -56,6 +61,13 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     public final static String ROLE_SEARCH_SUBTREE = "role.search.subtree";
     public final static String AUTHENTICATION = "authentication";
     public final static String INITIAL_CONTEXT_FACTORY = "initial.context.factory";
+    public final static String SSL = "ssl";
+    public final static String SSL_PROVIDER = "ssl.provider";
+    public final static String SSL_PROTOCOL = "ssl.protocol";
+    public final static String SSL_ALGORITHM = "ssl.algorithm";
+    public final static String SSL_KEYSTORE = "ssl.keystore";
+    public final static String SSL_KEYALIAS = "ssl.keyalias";
+    public final static String SSL_TRUSTSTORE = "ssl.truststore";
 
     public final static String DEFAULT_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
 
@@ -71,6 +83,13 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     private boolean roleSearchSubtree = true;
     private String authentication = "simple";
     private String initialContextFactory = null;
+    private boolean ssl;
+    private String sslProvider;
+    private String sslProtocol;
+    private String sslAlgorithm;
+    private String sslKeystore;
+    private String sslKeyAlias;
+    private String sslTrustStore;
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
@@ -79,15 +98,11 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         connectionPassword = (String) options.get(CONNECTION_PASSWORD);
         userBaseDN =  (String) options.get(USER_BASE_DN);
         userFilter = (String) options.get(USER_FILTER);
-        if (options.get(USER_SEARCH_SUBTREE) != null) {
-            userSearchSubtree = Boolean.getBoolean((String) options.get(USER_SEARCH_SUBTREE));
-        }
+        userSearchSubtree = Boolean.parseBoolean((String) options.get(USER_SEARCH_SUBTREE));
         roleBaseDN = (String) options.get(ROLE_BASE_DN);
         roleFilter = (String) options.get(ROLE_FILTER);
         roleNameAttribute = (String) options.get(ROLE_NAME_ATTRIBUTE);
-        if (options.get(ROLE_SEARCH_SUBTREE) != null) {
-            roleSearchSubtree = Boolean.getBoolean((String) options.get(ROLE_SEARCH_SUBTREE));
-        }
+        roleSearchSubtree = Boolean.parseBoolean((String) options.get(ROLE_SEARCH_SUBTREE));
         initialContextFactory = (String) options.get(INITIAL_CONTEXT_FACTORY);
         if (initialContextFactory == null) {
             initialContextFactory = DEFAULT_INITIAL_CONTEXT_FACTORY;
@@ -98,9 +113,30 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         } else if (!connectionURL.startsWith("ldap:")) {
             LOG.error("Invalid LDAP URL.");
         }
+        if (options.get(SSL) != null) {
+            ssl = Boolean.parseBoolean((String) options.get(SSL));
+        } else {
+            ssl = connectionURL.startsWith("ldaps:");
+        }
+        sslProvider = (String) options.get(SSL_PROVIDER);
+        sslProtocol = (String) options.get(SSL_PROTOCOL);
+        sslAlgorithm = (String) options.get(SSL_ALGORITHM);
+        sslKeystore = (String) options.get(SSL_KEYSTORE);
+        sslKeyAlias = (String) options.get(SSL_KEYALIAS);
+        sslTrustStore = (String) options.get(SSL_TRUSTSTORE);
     }
 
     public boolean login() throws LoginException {
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+        try {
+            return doLogin();
+        } finally {
+            ManagedSSLSocketFactory.setSocketFactory(null);
+            Thread.currentThread().setContextClassLoader(tccl);
+        }
+    }
+
+    protected boolean doLogin() throws LoginException {
         Callback[] callbacks = new Callback[2];
         callbacks[0] = new NameCallback("Username: ");
         callbacks[1] = new PasswordCallback("Password: ", false);
@@ -133,8 +169,11 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             env.put(Context.SECURITY_PRINCIPAL, connectionUsername);
             env.put(Context.SECURITY_CREDENTIALS, connectionPassword);
         }
+        if (ssl) {
+            setupSsl(env);
+        }
         LOG.debug("Get the user DN.");
-        String userDN = null;
+        String userDN;
         try {
             LOG.debug("Initialize the JNDI LDAP Dir Context.");
             DirContext context = new InitialDirContext(env);
@@ -205,6 +244,24 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         return true;
     }
 
+    protected void setupSsl(Hashtable env) throws LoginException {
+        ServiceReference ref = null;
+        try {
+            LOG.debug("Setting up SSL");
+            env.put(Context.SECURITY_PROTOCOL, "ssl");
+            env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
+            ref = bundleContext.getServiceReference(KeystoreManager.class.getName());
+            KeystoreManager manager = (KeystoreManager) bundleContext.getService(ref);
+            SSLSocketFactory factory = manager.createSSLFactory(sslProvider, sslProtocol, sslAlgorithm, sslKeystore, sslKeyAlias, sslTrustStore);
+            ManagedSSLSocketFactory.setSocketFactory(factory);
+            Thread.currentThread().setContextClassLoader(ManagedSSLSocketFactory.class.getClassLoader());
+        } catch (Exception e) {
+            throw new LoginException("Unable to setup SSL support for LDAP: " + e.getMessage());
+        } finally {
+            bundleContext.ungetService(ref);
+        }
+    }
+
     public boolean abort() throws LoginException {
         return true;
     }
@@ -213,6 +270,24 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         subject.getPrincipals().removeAll(principals);
         principals.clear();
         return true;
+    }
+
+    public static abstract class ManagedSSLSocketFactory extends SSLSocketFactory {
+
+        private static final ThreadLocal<SSLSocketFactory> factories = new ThreadLocal<SSLSocketFactory>();
+
+        public static void setSocketFactory(SSLSocketFactory factory) {
+            factories.set(factory);
+        }
+
+        public static SSLSocketFactory getDefault() {
+            SSLSocketFactory factory = factories.get();
+            if (factory == null) {
+                throw new IllegalStateException("No SSLSocketFactory parameters have been set!");
+            }
+            return factory;
+        }
+
     }
 
 }
