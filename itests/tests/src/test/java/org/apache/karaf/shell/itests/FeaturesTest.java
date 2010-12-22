@@ -81,7 +81,10 @@ public class FeaturesTest extends AbstractIntegrationTest {
             waitForFrameworkStartup(),
             
             // Test on both equinox and felix
-            equinox(), felix(),
+            // TODO: pax-exam does not support the latest felix version :-(
+            // TODO: so we use the higher supported which should be the same
+            // TODO: as the one specified in itests/dependencies/pom.xml
+            equinox(), felix().version("3.0.2"),
 
             felixProvisionalApis()
         );
