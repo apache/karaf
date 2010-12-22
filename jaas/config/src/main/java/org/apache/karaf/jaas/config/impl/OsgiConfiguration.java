@@ -29,30 +29,26 @@ import org.apache.karaf.jaas.config.JaasRealm;
 
 public class OsgiConfiguration extends Configuration {
 
-    private final List<JaasRealm> realms = new ArrayList<JaasRealm>();
+    private final List<JaasRealm> realms = new CopyOnWriteArrayList<JaasRealm>();
 
-    public synchronized void init() {
+    public void init() {
         Configuration.setConfiguration(this);
     }
 
-    public synchronized void close() {
+    public void close() {
         realms.clear();
         Configuration.setConfiguration(null);
     }
 
-    public synchronized void register(JaasRealm realm, Map<String,?> properties) {
+    public void register(JaasRealm realm, Map<String,?> properties) {
         realms.add(realm);
     }
 
-    public synchronized void unregister(JaasRealm realm, Map<String,?> properties) {
-        for (Iterator<JaasRealm> it = realms.iterator(); it.hasNext();) {
-            if (it.next() == realm) {
-                it.remove();
-            }
-        }
+    public void unregister(JaasRealm realm, Map<String,?> properties) {
+        realms.remove(realm);
     }
 
-    public synchronized AppConfigurationEntry[] getAppConfigurationEntry(String name) {
+    public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
         JaasRealm realm = null;
         for (JaasRealm r : realms) {
             if (r.getName().equals(name)) {
@@ -67,7 +63,7 @@ public class OsgiConfiguration extends Configuration {
         return null;
     }
 
-    public synchronized void refresh() {
+    public void refresh() {
         // Nothing to do, as we auto-update the configuration
     }
 }
