@@ -189,6 +189,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.webconsole</groupId>
+            <artifactId>org.apache.karaf.webconsole.console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.webconsole</groupId>
             <artifactId>org.apache.karaf.webconsole.features</artifactId>
         </dependency>
         <dependency>

@@ -33,9 +33,10 @@
   <name>Apache Karaf :: Web Console</name>
   
   <modules>
+    <module>console</module>
+    <module>branding</module>
     <module>features</module>
     <module>gogo</module>
-    <module>branding</module>
     <module>admin</module>
   </modules>
   

@@ -123,7 +123,7 @@
         <feature>http</feature>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.branding/${project.version}</bundle>
-        <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}</bundle>
+        <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
     </feature>
     <feature name="webconsole" version="${project.version}">
         <feature version="${project.version}">webconsole-base</feature>
