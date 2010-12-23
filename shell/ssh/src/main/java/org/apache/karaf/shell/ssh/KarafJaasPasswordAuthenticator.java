@@ -19,12 +19,14 @@
 package org.apache.karaf.shell.ssh;
 
 import java.io.IOException;
+import java.security.Principal;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
 import org.apache.sshd.common.Session;
@@ -40,34 +42,63 @@ public class KarafJaasPasswordAuthenticator implements PasswordAuthenticator {
 
     public static final Session.AttributeKey<Subject> SUBJECT_ATTRIBUTE_KEY = new Session.AttributeKey<Subject>();
 
-    private String domain;
+    private String realm;
+    private String role;
 
-    public String getDomain() {
-        return domain;
+    public String getRealm() {
+        return realm;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setRealm(String realm) {
+        this.realm = realm;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public boolean authenticate(final String username, final String password, final ServerSession session) {
         try {
             Subject subject = new Subject();
-            LoginContext loginContext = new LoginContext(domain, subject, new CallbackHandler() {
+            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
                 public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-                    for (int i = 0; i < callbacks.length; i++) {
-                        if (callbacks[i] instanceof NameCallback) {
-                            ((NameCallback) callbacks[i]).setName(username);
-                        } else if (callbacks[i] instanceof PasswordCallback) {
-                            ((PasswordCallback) callbacks[i]).setPassword(password.toCharArray());
+                    for (Callback callback : callbacks) {
+                        if (callback instanceof NameCallback) {
+                            ((NameCallback) callback).setName(username);
+                        } else if (callback instanceof PasswordCallback) {
+                            ((PasswordCallback) callback).setPassword(password.toCharArray());
                         } else {
-                            throw new UnsupportedCallbackException(callbacks[i]);
+                            throw new UnsupportedCallbackException(callback);
                         }
                     }
                 }
             });
             loginContext.login();
-            session.setAttribute(SUBJECT_ATTRIBUTE_KEY, loginContext.getSubject());
+            if (role != null && role.length() > 0) {
+                String clazz = "org.apache.karaf.jaas.modules.RolePrincipal";
+                String name = role;
+                int idx = role.indexOf(':');
+                if (idx > 0) {
+                    clazz = role.substring(0, idx);
+                    name = role.substring(idx + 1);
+                }
+                boolean found = false;
+                for (Principal p : subject.getPrincipals()) {
+                    if (p.getClass().getName().equals(clazz)
+                            && p.getName().equals(name)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new FailedLoginException("User does not have the required role " + role);
+                }
+            }
+            session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
         } catch (Exception e) {
             return false;

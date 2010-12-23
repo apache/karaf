@@ -17,6 +17,7 @@
 package org.apache.karaf.management;
 
 import java.io.IOException;
+import java.security.Principal;
 
 import javax.management.remote.JMXAuthenticator;
 import javax.security.auth.Subject;
@@ -25,12 +26,14 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 public class JaasAuthenticator implements JMXAuthenticator {
 
     private String realm;
+    private String role;
 
     public String getRealm() {
         return realm;
@@ -38,6 +41,14 @@ public class JaasAuthenticator implements JMXAuthenticator {
 
     public void setRealm(String realm) {
         this.realm = realm;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public Subject authenticate(Object credentials) throws SecurityException {
@@ -50,7 +61,8 @@ public class JaasAuthenticator implements JMXAuthenticator {
             throw new IllegalArgumentException("Expected String[2] but length was " + params.length);
         }
         try {
-            LoginContext loginContext = new LoginContext(realm, new CallbackHandler() {
+            Subject subject = new Subject();
+            LoginContext loginContext = new LoginContext(realm, subject, new CallbackHandler() {
                 public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
                     for (int i = 0; i < callbacks.length; i++) {
                         if (callbacks[i] instanceof NameCallback) {
@@ -64,7 +76,27 @@ public class JaasAuthenticator implements JMXAuthenticator {
                 }
             });
             loginContext.login();
-            return loginContext.getSubject();
+            if (role != null && role.length() > 0) {
+                String clazz = "org.apache.karaf.jaas.modules.RolePrincipal";
+                String name = role;
+                int idx = role.indexOf(':');
+                if (idx > 0) {
+                    clazz = role.substring(0, idx);
+                    name = role.substring(idx + 1);
+                }
+                boolean found = false;
+                for (Principal p : subject.getPrincipals()) {
+                    if (p.getClass().getName().equals(clazz)
+                            && p.getName().equals(name)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    throw new FailedLoginException("User does not have the required role " + role);
+                }
+            }
+            return subject;
         } catch (LoginException e) {
             throw new SecurityException("Authentication failed", e);
         }
