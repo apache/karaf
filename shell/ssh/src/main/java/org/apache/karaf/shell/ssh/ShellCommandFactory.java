@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import javax.security.auth.Subject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
@@ -30,6 +33,8 @@ import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.SessionAware;
+import org.apache.sshd.server.session.ServerSession;
 
 public class ShellCommandFactory implements CommandFactory {
 
@@ -43,13 +48,14 @@ public class ShellCommandFactory implements CommandFactory {
         return new ShellCommand(command);
     }
 
-    public class ShellCommand implements Command {
+    public class ShellCommand implements Command, SessionAware {
 
         private String command;
         private InputStream in;
         private OutputStream out;
         private OutputStream err;
         private ExitCallback callback;
+        private ServerSession session;
 
         public ShellCommand(String command) {
             this.command = command;
@@ -71,10 +77,28 @@ public class ShellCommandFactory implements CommandFactory {
             this.callback = callback;
         }
 
+        public void setSession(ServerSession session) {
+            this.session = session;
+        }
+
         public void start(final Environment env) throws IOException {
             try {
-                CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
-                session.execute(command);
+                final CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
+                Subject subject = this.session != null ? this.session.getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                if (subject != null) {
+                    try {
+                        Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
+                            public Object run() throws Exception {
+                                session.execute(command);
+                                return null;
+                            }
+                        });
+                    } catch (PrivilegedActionException e) {
+                        throw e.getException();
+                    }
+                } else {
+                    session.execute(command);
+                }
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
             } finally {
