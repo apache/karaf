@@ -110,8 +110,8 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         authentication = (String) options.get(AUTHENTICATION);
         if (connectionURL == null || connectionURL.trim().length() == 0) {
             LOG.error("No LDAP URL specified.");
-        } else if (!connectionURL.startsWith("ldap:")) {
-            LOG.error("Invalid LDAP URL.");
+        } else if (!connectionURL.startsWith("ldap:") && !connectionURL.startsWith("ldaps:")) {
+            LOG.error("Invalid LDAP URL: " + connectionURL);
         }
         if (options.get(SSL) != null) {
             ssl = Boolean.parseBoolean((String) options.get(SSL));
