@@ -538,7 +538,6 @@ public class Main {
         for (Integer startLevel : autoStart.keySet()) {
             StringTokenizer st = new StringTokenizer(autoStart.get(startLevel), "\" ", true);
             if (st.countTokens() > 0) {
-                List<Bundle> bundlesLevel = new ArrayList<Bundle>();
                 String location;
                 do {
                     location = nextLocation(st);
@@ -548,7 +547,6 @@ public class Main {
                             Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
                             sl.setBundleStartLevel(b, startLevel);
                             bundles.add(b);
-                            bundlesLevel.add(b);
                         }
                         catch (Exception ex) {
                             System.err.println("Error installing bundle  " + location + ": " + ex);
@@ -556,19 +554,19 @@ public class Main {
                     }
                 }
                 while (location != null);
-                // Now loop through and start the installed bundles.
-                if (start) {
-                    for (Bundle b : bundlesLevel) {
-                        try {
-                            String fragmentHostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
-                            if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
-                                b.start();
-                            }
-                        }
-                        catch (Exception ex) {
-                            System.err.println("Error starting bundle " + b.getSymbolicName() + ": " + ex);
-                        }
+            }
+        }
+        // Now loop through and start the installed bundles.
+        if (start) {
+            for (Bundle b : bundles) {
+                try {
+                    String fragmentHostHeader = (String) b.getHeaders().get(Constants.FRAGMENT_HOST);
+                    if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
+                        b.start();
                     }
+                }
+                catch (Exception ex) {
+                    System.err.println("Error starting bundle " + b.getSymbolicName() + ": " + ex);
                 }
             }
         }
