@@ -82,7 +82,7 @@
     <bean id="keyPairProvider" class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
         <property name="path" value="${hostKey}"/>
     </bean>
-    <bean id="passwordAuthenticator" class="org.apache.sshd.server.jaas.JaasPasswordAuthenticator">
+    <bean id="passwordAuthenticator" class="org.apache.karaf.shell.ssh.KarafJaasPasswordAuthenticator">
         <property name="domain" value="${sshRealm}"/>
     </bean>
 

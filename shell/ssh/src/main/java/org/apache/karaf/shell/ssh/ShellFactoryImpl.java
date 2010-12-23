@@ -25,24 +25,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.PrivilegedAction;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Callable;
+import javax.security.auth.Subject;
 
 import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.sshd.common.Factory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
-import org.apache.sshd.server.Signal;
-import org.apache.sshd.server.SignalListener;
+import org.apache.sshd.server.SessionAware;
+import org.apache.sshd.server.session.ServerSession;
 import org.osgi.service.blueprint.container.ReifiedType;
 
 /**
@@ -62,7 +60,7 @@ public class ShellFactoryImpl implements Factory<Command>
         return new ShellImpl();
     }
 
-    public class ShellImpl implements Command
+    public class ShellImpl implements Command, SessionAware
     {
         private InputStream in;
 
@@ -71,6 +69,8 @@ public class ShellFactoryImpl implements Factory<Command>
         private OutputStream err;
 
         private ExitCallback callback;
+
+        private ServerSession session;
 
         private boolean closed;
 
@@ -88,6 +88,10 @@ public class ShellFactoryImpl implements Factory<Command>
 
         public void setExitCallback(ExitCallback callback) {
             this.callback = callback;
+        }
+
+        public void setSession(ServerSession session) {
+            this.session = session;
         }
 
         public void start(final Environment env) throws IOException {
@@ -119,7 +123,25 @@ public class ShellFactoryImpl implements Factory<Command>
                     }
                 });
                 session.put(".jline.terminal", terminal);
-                new Thread(console).start();
+                new Thread(console) {
+                    @Override
+                    public void run() {
+                        Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session.getAttribute(KarafJaasPasswordAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                        if (subject != null) {
+                            Subject.doAs(subject, new PrivilegedAction<Object>() {
+                                public Object run() {
+                                    doRun();
+                                    return null;
+                                }
+                            });
+                        } else {
+                            doRun();
+                        }
+                    }
+                    protected void doRun() {
+                        super.run();
+                    }
+                }.start();
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
             }
