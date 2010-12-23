@@ -42,9 +42,13 @@
 
     <dependencies>
         <dependency>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.apache.felix.webconsole</artifactId>
-          <scope>provided</scope>
+          <groupId>org.apache.karaf.webconsole</groupId>
+          <artifactId>org.apache.karaf.webconsole.console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.webconsole</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -64,8 +68,9 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-DocURL>http://felix.apache.org/site/apache-karaf.html</Bundle-DocURL>
-                        <Fragment-Host>org.apache.felix.webconsole;bundle-version="[3,4)"</Fragment-Host>
+                        <Fragment-Host>org.apache.karaf.webconsole.console;bundle-version="[2,3)"</Fragment-Host>
                         <Export-Package>!*</Export-Package>
+                        <Import-Package>!org.apache.felix.webconsole*,*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

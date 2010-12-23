@@ -417,6 +417,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.webconsole</groupId>
+                <artifactId>org.apache.karaf.webconsole.console</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.webconsole</groupId>
                 <artifactId>org.apache.karaf.webconsole.features</artifactId>
                 <version>${project.version}</version>
             </dependency>
