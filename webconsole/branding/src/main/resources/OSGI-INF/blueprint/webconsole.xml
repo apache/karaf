@@ -22,16 +22,23 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
-    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
+        <ext:default-properties>
+            <ext:property name="karaf.admin.role" value="admin" />
+        </ext:default-properties>
+    </ext:property-placeholder>
+
 
     <cm:property-placeholder persistent-id="org.apache.karaf.webconsole">
         <cm:default-properties>
             <cm:property name="realm" value="karaf"/>
+            <cm:property name="role" value="$[karaf.admin.role]"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
     <bean id="securityProvider" class="org.apache.karaf.webconsole.JaasSecurityProvider">
         <property name="realm" value="${realm}"/>
+        <property name="role" value="${role}"/>
     </bean>
 
     <service auto-export="interfaces" ref="securityProvider" />
