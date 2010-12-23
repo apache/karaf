@@ -19,10 +19,9 @@
 package org.apache.karaf.main;
 
 import java.io.File;
-import java.net.URL;
 
 import junit.framework.Assert;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.launch.Framework;
@@ -30,6 +29,7 @@ import org.osgi.framework.launch.Framework;
 public class MainStartTest {
 
 	@Test
+    @Ignore("Unit test for KARAF-334 disabled for now")
     public void testAutoStart() throws Exception {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
         File home = new File(basedir, "test-karaf-home");
