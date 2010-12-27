@@ -75,8 +75,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
                             !${project.artifactId}*,
                             org.apache.felix.service.command,
@@ -85,7 +83,6 @@
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

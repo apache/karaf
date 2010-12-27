@@ -74,10 +74,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>
-                            ${project.artifactId}*;version=${project.version}
-                        </Export-Package>
                         <Import-Package>
                             !${project.artifactId}*,
                             javax.management,
@@ -88,7 +84,6 @@
                             *
                         </Import-Package>
                         <Private-Package>org.apache.karaf.admin.management.internal</Private-Package>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

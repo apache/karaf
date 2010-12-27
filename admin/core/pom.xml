@@ -152,7 +152,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
                             org.apache.karaf.admin;version=${project.version},
                             org.apache.karaf.jpm;version=${project.version}
@@ -173,7 +172,6 @@
                             org.apache.karaf.admin.internal,
                             org.apache.karaf.jpm.impl,
                         </Private-Package>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

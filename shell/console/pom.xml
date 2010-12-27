@@ -100,7 +100,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
                             !org.apache.karaf.shell.console*,
                             !org.apache.felix.gogo.commands*,
@@ -136,7 +135,6 @@
                         <Main-Class>
                             org.apache.karaf.shell.console.Main
                         </Main-Class>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
