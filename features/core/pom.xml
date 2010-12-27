@@ -97,7 +97,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.karaf.features;version=${project.version}</Export-Package>
                         <Import-Package>
                             !org.apache.karaf.features,
@@ -114,7 +113,6 @@
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

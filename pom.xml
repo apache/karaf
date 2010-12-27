@@ -1025,6 +1025,13 @@
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>${felix.plugin.version}</version>
                     <extensions>true</extensions>
+                    <configuration>
+                    	<instructions>                    	
+                        	<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        	<Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
+                        	<_versionpolicy>${bnd.version.policy}</_versionpolicy>
+                    	</instructions>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

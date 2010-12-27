@@ -66,7 +66,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-DocURL>http://felix.apache.org/site/apache-karaf.html</Bundle-DocURL>
                         <Fragment-Host>org.apache.karaf.webconsole.console;bundle-version="[2,3)"</Fragment-Host>
                         <Export-Package>!*</Export-Package>

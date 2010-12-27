@@ -74,7 +74,6 @@
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>!${project.artifactId}*,*</Import-Package>
                         <Private-Package>org.apache.karaf.deployer.blueprint</Private-Package>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

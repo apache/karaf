@@ -63,7 +63,6 @@
                         <Main-Class>org.apache.karaf.main.Main</Main-Class>
                         <Bundle-Name>Apache Karaf</Bundle-Name>
                         <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package></Export-Package>
                         <!--
                         <Private-Package>
