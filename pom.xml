@@ -146,7 +146,7 @@
         <pax.logging.version>1.5.3</pax.logging.version>
         <pax.runner.version>1.5.0</pax.runner.version>
         <pax.url.version>1.2.1</pax.url.version>
-        <pax.web.version>0.8.1</pax.web.version>
+        <pax.web.version>0.8.2-SNAPSHOT</pax.web.version>
         <pax.tinybundles.version>1.3.0</pax.tinybundles.version>
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
@@ -208,7 +208,18 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <!-- Springsource repository -->
+        <!-- OPS4J SNAPSHOT repository -->
+        <repository>
+            <id>ops4j.sonatype.snapshots.deploy</id>
+            <name>OPS4J snapshot repository</name>
+            <url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <dependencyManagement>
