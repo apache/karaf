@@ -83,7 +83,7 @@ public class ConsoleFactory {
                                        terminal,
                                        callback);
             CommandSession session = console.getSession();
-            session.put("USER", "karaf");
+            session.put("USER", System.getProperty("user.name", "karaf"));
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
             session.put("#LINES", new Function() {
                 public Object execute(CommandSession session, List<Object> arguments) throws Exception {
