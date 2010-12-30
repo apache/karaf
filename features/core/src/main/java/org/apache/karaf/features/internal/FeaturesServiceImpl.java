@@ -1030,8 +1030,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         Set<Feature> features = new HashSet<Feature>();
         for (Map<String, Feature> featureMap : this.getFeatures().values()) {
             for (Feature f : featureMap.values()) {
-                if (f.getBundles().contains(bundle)) {
-                    features.add(f);
+                for (BundleInfo bi : f.getBundles()) {
+                    if (bi.getLocation().equals(bundle.getLocation())) {
+                        features.add(f);
+                        break;
+                    }
                 }
             }
         }
