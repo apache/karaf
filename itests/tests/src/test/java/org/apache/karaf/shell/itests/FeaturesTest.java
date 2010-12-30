@@ -16,35 +16,24 @@
  */
 package org.apache.karaf.shell.itests;
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.jar.Manifest;
-
-import org.apache.karaf.testing.AbstractIntegrationTest;
-import org.apache.karaf.testing.Helper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Customizer;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.osgi.framework.Constants;
-import org.osgi.service.blueprint.container.BlueprintContainer;
-import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.command.CommandSession;
-
 import static org.apache.karaf.testing.Helper.felixProvisionalApis;
 import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
-
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.modifyBundle;
+
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.testing.AbstractIntegrationTest;
+import org.apache.karaf.testing.Helper;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.osgi.service.blueprint.container.BlueprintContainer;
 
 @RunWith(JUnit4TestRunner.class)
 public class FeaturesTest extends AbstractIntegrationTest {
@@ -68,18 +57,15 @@ public class FeaturesTest extends AbstractIntegrationTest {
             // Default karaf environment
             Helper.getDefaultOptions(
                 // this is how you set the default log level when using pax logging (logProfile)
-                systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("DEBUG")),
+                Helper.setLogLevel("DEBUG")),
 
             // add two features
-            scanFeatures(
-                    maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("xml").classifier("features").versionAsInProject(),
-                    "obr", "wrapper"
-            ),
+            Helper.loadKarafFeatures("obr", "wrapper"),
 
             workingDirectory("target/paxrunner/features/"),
 
             waitForFrameworkStartup(),
-            
+
             // Test on both equinox and felix
             // TODO: pax-exam does not support the latest felix version :-(
             // TODO: so we use the higher supported which should be the same
