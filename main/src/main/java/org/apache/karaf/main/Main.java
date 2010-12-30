@@ -794,7 +794,6 @@ public class Main {
                         	f = new File(karafHome, location);
                         } else {
                         	f = new File(karafBase, location);
-                        	f = new File(karafHome, location);
                         }
                         if (f.exists() && f.isDirectory()) {
                             bundleDirs.add(f);
