@@ -16,6 +16,14 @@
  */
 package org.apache.karaf.shell.itests;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.equinox;
+import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
+
 import org.apache.karaf.testing.AbstractIntegrationTest;
 import org.apache.karaf.testing.Helper;
 import org.junit.Test;
@@ -26,16 +34,6 @@ import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.equinox;
-import static org.ops4j.pax.exam.CoreOptions.felix;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
 
 @RunWith(JUnit4TestRunner.class)
 public class CoreTest extends AbstractIntegrationTest {
@@ -114,7 +112,7 @@ public class CoreTest extends AbstractIntegrationTest {
             // Default karaf environment
             Helper.getDefaultOptions(
                 // this is how you set the default log level when using pax logging (logProfile)
-                systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("TRACE")),
+                Helper.setLogLevel("TRACE")),
 
             workingDirectory("target/paxrunner/core/"),
 
@@ -123,7 +121,7 @@ public class CoreTest extends AbstractIntegrationTest {
             // Test on both equinox and felix
             equinox(), felix()
         );
-        // Stop the shell log bundle 
+        // Stop the shell log bundle
         Helper.findMaven(options, "org.apache.karaf.shell", "org.apache.karaf.shell.log").noStart();
         return options;
     }
