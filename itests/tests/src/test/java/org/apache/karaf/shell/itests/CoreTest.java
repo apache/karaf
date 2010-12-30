@@ -16,35 +16,25 @@
  */
 package org.apache.karaf.shell.itests;
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.jar.Manifest;
-
-import org.apache.karaf.testing.AbstractIntegrationTest;
-import org.apache.karaf.testing.HeaderParser;
-import org.apache.karaf.testing.Helper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Customizer;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.osgi.framework.Bundle;
-import org.apache.felix.service.command.CommandProcessor;
-import org.apache.felix.service.command.CommandSession;
-import org.osgi.framework.Constants;
-
 import static org.apache.karaf.testing.Helper.felixProvisionalApis;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
 import static org.ops4j.pax.exam.OptionUtils.combine;
-
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.modifyBundle;
+
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.testing.AbstractIntegrationTest;
+import org.apache.karaf.testing.Helper;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.Configuration;
+import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.osgi.framework.Bundle;
 
 @RunWith(JUnit4TestRunner.class)
 public class CoreTest extends AbstractIntegrationTest {
@@ -123,7 +113,7 @@ public class CoreTest extends AbstractIntegrationTest {
             // Default karaf environment
             Helper.getDefaultOptions(
                 // this is how you set the default log level when using pax logging (logProfile)
-                systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("TRACE")),
+                Helper.setLogLevel("TRACE")),
 
             workingDirectory("target/paxrunner/core/"),
 
@@ -137,7 +127,7 @@ public class CoreTest extends AbstractIntegrationTest {
 
             felixProvisionalApis()
         );
-        // Stop the shell log bundle 
+        // Stop the shell log bundle
         Helper.findMaven(options, "org.apache.karaf.shell", "org.apache.karaf.shell.log").noStart();
         return options;
     }
