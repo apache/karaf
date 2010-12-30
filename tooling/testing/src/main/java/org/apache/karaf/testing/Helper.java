@@ -33,14 +33,17 @@ import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.options.JUnitBundlesOption;
 import org.ops4j.pax.exam.options.MavenArtifactProvisionOption;
+import org.ops4j.pax.exam.container.def.options.FeaturesScannerProvisionOption;
 import org.ops4j.pax.exam.options.SystemPropertyOption;
 
 import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
 import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackages;
 import static org.ops4j.pax.exam.CoreOptions.frameworkStartLevel;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.CoreOptions.wrappedBundle;
 import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
 
 /**
@@ -298,6 +301,39 @@ public final class Helper {
      */
     public static Option[] getDefaultOptions(SystemPropertyOption... sysOptions) {
         return combine(getDefaultConfigOptions(sysOptions), getDefaultProvisioningOptions());
+    }
+
+    /**
+     * Configures the required system property to set the log-level in Karaf.
+     *
+     * @param logLevel the log level which should be used for pax-logging. Possible values are TRACE, DEBUG, INFO, WARN,
+     *        ERROR and FATAL
+     * @return a pax-exam option
+     */
+    public static SystemPropertyOption setLogLevel(String logLevel) {
+        return systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value(logLevel);
+    }
+
+    /**
+     * Method to directly register Karaf features.
+     *
+     * @param features a list of features which should be loaded from the Karaf feature file.
+     * @return a pax-exam option
+     */
+    public static FeaturesScannerProvisionOption loadKarafFeatures(String... features) {
+        return scanFeatures(
+            maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("xml").classifier("features")
+                .versionAsInProject(), features);
+    }
+
+    /**
+     * Returns the vmOption to configure pax exam with debugging support.
+     *
+     * @param debuggingPort the port where the remote debugger should be allowed to be attached
+     * @return the option to enable debugging
+     */
+    public static Option activateDebugging(String debuggingPort) {
+        return vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=" + debuggingPort);
     }
 
     /**
