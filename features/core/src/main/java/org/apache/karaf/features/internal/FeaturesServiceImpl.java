@@ -547,9 +547,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo) throws IOException, BundleException {
-        LOGGER.debug("Checking " + bundleInfo.getLocation());
         InputStream is;
         String bundleLocation = bundleInfo.getLocation();
+        LOGGER.debug("Checking " + bundleLocation);
         try {
             is = new BufferedInputStream(new URL(bundleLocation).openStream());
         } catch (RuntimeException e) {
@@ -561,7 +561,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             JarInputStream jar = new JarInputStream(is);
             Manifest m = jar.getManifest();
             if(m == null) {
-                throw new BundleException("Manifest not present in the first entry of the zip");
+                throw new BundleException("Manifest not present in the first entry of the zip " + bundleLocation);
             }
             String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
             String vStr = m.getMainAttributes().getValue(Constants.BUNDLE_VERSION);
