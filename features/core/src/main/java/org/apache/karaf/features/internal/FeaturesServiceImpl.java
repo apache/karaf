@@ -355,6 +355,8 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected void doInstallFeature(InstallationState state, Feature feature) throws Exception {
+        LOGGER.info("Installing feature " + feature.getName() + " " + feature.getVersion());
+        System.out.println("Installing feature " + feature.getName() + " " + feature.getVersion());
         for (Feature dependency : feature.getDependencies()) {
             VersionRange range = FeatureImpl.DEFAULT_VERSION.equals(dependency.getVersion())
                         ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
@@ -595,7 +597,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                     vStr = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
                     Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
                     if (v.equals(bv)) {
-                        LOGGER.debug("  found installed bundle: " + b);
+                        LOGGER.info("Found installed bundle: " + b);
+                        System.out.println("Found installed bundle: " + b);
                         state.bundles.add(b);
                         return b;
                     }
@@ -607,7 +610,8 @@ public class FeaturesServiceImpl implements FeaturesService {
                 is.close();
                 is = new BufferedInputStream(new URL(bundleLocation).openStream());
             }
-            LOGGER.debug("Installing bundle " + bundleLocation);
+            System.out.println("Installing bundle " + bundleLocation);
+            LOGGER.info("Installing bundle " + bundleLocation);
             Bundle b = getBundleContext().installBundle(bundleLocation, is);
             
             // Define the startLevel for the bundle when defined
@@ -625,7 +629,8 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
     
     public void installConfigurationFile(String fileLocation, String finalname) throws IOException {
-    	LOGGER.debug("Checking " + fileLocation);
+    	LOGGER.info("Checking configuration file " + fileLocation);
+        System.out.println("Checking configuration file " + fileLocation);
     	
     	String basePath = System.getProperty("karaf.base");
     	
