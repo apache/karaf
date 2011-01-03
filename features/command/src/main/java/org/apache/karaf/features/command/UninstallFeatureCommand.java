@@ -20,20 +20,28 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 
+import java.util.List;
+
 @Command(scope = "features", name = "uninstall", description = "Uninstalls a feature with the specified name and version.")
 public class UninstallFeatureCommand extends FeaturesCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
-    String name;
-    
-    @Argument(index = 1, name = "version", description = "The version of the feature", required = false, multiValued = false)
-    String version;
+    @Argument(index = 0, name = "features", description = "The name and version of the features to uninstall. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
+    List<String> features;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-    	if (version != null && version.length() > 0) {
-    		admin.uninstallFeature(name, version);
-    	} else {
-    		admin.uninstallFeature(name );
-    	}
+        // iterate in the provided feature
+        for (String feature : features) {
+            String[] split = feature.split("/");
+            String name = split[0];
+            String version = null;
+            if (split.length == 2) {
+                version = split[1];
+            }
+    	    if (version != null && version.length() > 0) {
+    		    admin.uninstallFeature(name, version);
+    	    } else {
+    		    admin.uninstallFeature(name );
+    	    }
+        }
     }
 }
