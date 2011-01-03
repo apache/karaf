@@ -17,6 +17,7 @@
 package org.apache.karaf.features.command;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.FeaturesService;
@@ -28,10 +29,8 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
 
     private static String DEFAULT_VERSION = "0.0.0";
 
-    @Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
-    String name;
-    @Argument(index = 1, name = "version", description = "The version of the feature", required = false, multiValued = false)
-    String version;
+    @Argument(index = 0, name = "feature", description = "The name and version of the features to uninstall. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
+    List<String> features;
     @Option(name = "-c", aliases = "--no-clean", description = "Do not uninstall bundles on failure", required = false, multiValued = false)
     boolean noClean;
     @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)
@@ -40,19 +39,27 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     boolean verbose;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-    	if (version == null || version.length() == 0) {
-            version = DEFAULT_VERSION;
-    	}
-        EnumSet<FeaturesService.Option> options = EnumSet.of(FeaturesService.Option.PrintBundlesToRefresh);
-        if (noRefresh) {
-            options.add(FeaturesService.Option.NoAutoRefreshBundles);
+        for (String feature : features) {
+            String[] split = feature.split("/");
+            String name = split[0];
+            String version = null;
+            if (split.length == 2) {
+                version = split[1];
+            }
+    	    if (version == null || version.length() == 0) {
+                version = DEFAULT_VERSION;
+    	    }
+            EnumSet<FeaturesService.Option> options = EnumSet.of(FeaturesService.Option.PrintBundlesToRefresh);
+            if (noRefresh) {
+                options.add(FeaturesService.Option.NoAutoRefreshBundles);
+            }
+            if (noClean) {
+                options.add(FeaturesService.Option.NoCleanIfFailure);
+            }
+            if (verbose) {
+                options.add(FeaturesService.Option.Verbose);
+            }
+            admin.installFeature(name, version, options);
         }
-        if (noClean) {
-            options.add(FeaturesService.Option.NoCleanIfFailure);
-        }
-        if (verbose) {
-            options.add(FeaturesService.Option.Verbose);
-        }
-        admin.installFeature(name, version, options);
     }
 }
