@@ -138,7 +138,7 @@
         <pax.exam.version>1.2.3</pax.exam.version>
         <pax.logging.version>1.5.3</pax.logging.version>
         <pax.runner.version>1.5.0</pax.runner.version>
-        <pax.url.version>1.2.1</pax.url.version>
+        <pax.url.version>1.2.4</pax.url.version>
         <pax.web.version>0.7.4</pax.web.version>
         <servlet.api.version>2.5</servlet.api.version>
         <slf4j.version>1.5.8</slf4j.version>
