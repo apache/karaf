@@ -36,6 +36,8 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
     boolean noClean;
     @Option(name = "-r", aliases = "--no-auto-refresh", description = "Do not automatically refresh bundles", required = false, multiValued = false)
     boolean noRefresh;
+    @Option(name = "-v", aliases = "--verbose", description = "Explain what is being done", required = false, multiValued = false)
+    boolean verbose;
 
     protected void doExecute(FeaturesService admin) throws Exception {
     	if (version == null || version.length() == 0) {
@@ -47,6 +49,9 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
         }
         if (noClean) {
             options.add(FeaturesService.Option.NoCleanIfFailure);
+        }
+        if (verbose) {
+            options.add(FeaturesService.Option.Verbose);
         }
         admin.installFeature(name, version, options);
     }
