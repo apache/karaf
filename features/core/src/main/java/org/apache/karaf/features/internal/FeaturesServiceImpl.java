@@ -224,12 +224,13 @@ public class FeaturesServiceImpl implements FeaturesService {
     public void installFeatures(Set<Feature> features, EnumSet<Option> options) throws Exception {
         InstallationState state = new InstallationState();
         InstallationState failure = new InstallationState();
+        boolean verbose = options.contains(FeaturesService.Option.Verbose);
         try {
             // Install everything
             for (Feature f : features) {
                 InstallationState s = new InstallationState();
             	try {
-                    doInstallFeature(s, f);
+                    doInstallFeature(s, f, verbose);
                     state.bundleInfos.putAll(s.bundleInfos);
                     state.bundles.addAll(s.bundles);
                     state.features.putAll(s.features);
@@ -354,9 +355,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         final Map<Feature, Set<Long>> features = new HashMap<Feature, Set<Long>>();
     }
 
-    protected void doInstallFeature(InstallationState state, Feature feature) throws Exception {
+    protected void doInstallFeature(InstallationState state, Feature feature, boolean verbose) throws Exception {
         LOGGER.info("Installing feature " + feature.getName() + " " + feature.getVersion());
-        System.out.println("Installing feature " + feature.getName() + " " + feature.getVersion());
+        if (verbose) {
+            System.out.println("Installing feature " + feature.getName() + " " + feature.getVersion());
+        }
         for (Feature dependency : feature.getDependencies()) {
             VersionRange range = FeatureImpl.DEFAULT_VERSION.equals(dependency.getVersion())
                         ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
@@ -388,7 +391,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 throw new Exception("No feature named '" + dependency.getName()
                         + "' with version '" + dependency.getVersion() + "' available");
             }
-            doInstallFeature(state, fi);
+            doInstallFeature(state, fi, verbose);
         }
         for (String config : feature.getConfigurations().keySet()) {
             Dictionary<String,String> props = new Hashtable<String, String>(feature.getConfigurations().get(config));
@@ -405,11 +408,11 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-        	installConfigurationFile(configFile.getLocation(), configFile.getFinalname());
+        	installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), verbose);
         }
         Set<Long> bundles = new TreeSet<Long>();
         for (BundleInfo bInfo : resolve(feature)) {
-            Bundle b = installBundleIfNeeded(state, bInfo);
+            Bundle b = installBundleIfNeeded(state, bInfo, verbose);
             bundles.add(b.getBundleId());
             state.bundleInfos.put(b.getBundleId(), bInfo);
         }
@@ -572,7 +575,7 @@ public class FeaturesServiceImpl implements FeaturesService {
         return result;
     }
 
-    protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo) throws IOException, BundleException {
+    protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, boolean verbose) throws IOException, BundleException {
         InputStream is;
         String bundleLocation = bundleInfo.getLocation();
         LOGGER.debug("Checking " + bundleLocation);
@@ -598,7 +601,9 @@ public class FeaturesServiceImpl implements FeaturesService {
                     Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
                     if (v.equals(bv)) {
                         LOGGER.info("Found installed bundle: " + b);
-                        System.out.println("Found installed bundle: " + b);
+                        if (verbose) {
+                            System.out.println("Found installed bundle: " + b);
+                        }
                         state.bundles.add(b);
                         return b;
                     }
@@ -610,8 +615,10 @@ public class FeaturesServiceImpl implements FeaturesService {
                 is.close();
                 is = new BufferedInputStream(new URL(bundleLocation).openStream());
             }
-            System.out.println("Installing bundle " + bundleLocation);
             LOGGER.info("Installing bundle " + bundleLocation);
+            if (verbose) {
+                System.out.println("Installing bundle " + bundleLocation);
+            }
             Bundle b = getBundleContext().installBundle(bundleLocation, is);
             
             // Define the startLevel for the bundle when defined
@@ -628,9 +635,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         }
     }
     
-    public void installConfigurationFile(String fileLocation, String finalname) throws IOException {
+    public void installConfigurationFile(String fileLocation, String finalname, boolean verbose) throws IOException {
     	LOGGER.info("Checking configuration file " + fileLocation);
-        System.out.println("Checking configuration file " + fileLocation);
+        if (verbose) {
+            System.out.println("Checking configuration file " + fileLocation);
+        }
     	
     	String basePath = System.getProperty("karaf.base");
     	
