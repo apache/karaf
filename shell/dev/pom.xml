@@ -48,6 +48,11 @@
     </dependency>
 
     <dependency>
+        <groupId>org.ops4j.pax.url</groupId>
+        <artifactId>pax-url-mvn</artifactId>
+    </dependency>
+
+    <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.core</artifactId>
         <scope>provided</scope>
@@ -73,6 +78,7 @@
               <artifactId>maven-bundle-plugin</artifactId>
               <configuration>
                   <instructions>
+                      <Embed-Dependency>pax-url-mvn</Embed-Dependency>
                       <Import-Package>
                           !${project.artifactId}*,
                           org.apache.felix.service.command,
@@ -83,6 +89,7 @@
                       <Private-Package>
                           org.apache.felix.utils.version,
                           org.apache.karaf.util,
+                          org.ops4j.pax.url.mvn,
                           !*
                       </Private-Package>
                   </instructions>
