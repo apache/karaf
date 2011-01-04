@@ -35,6 +35,9 @@
         <command name="dev/restart">
             <action class="org.apache.karaf.shell.dev.Restart" />
         </command>
+        <command name="dev/watch">
+            <action class="org.apache.karaf.shell.dev.Watch" />
+        </command>
     </command-bundle>
 
 </blueprint>
