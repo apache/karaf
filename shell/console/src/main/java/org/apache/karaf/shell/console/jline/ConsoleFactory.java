@@ -22,12 +22,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.security.PrivilegedExceptionAction;
 import java.util.List;
+import javax.security.auth.Subject;
 
 import jline.Terminal;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
+import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.fusesource.jansi.AnsiConsole;
 import org.osgi.framework.BundleContext;
 
@@ -63,41 +66,53 @@ public class ConsoleFactory {
 
     protected void start() throws Exception {
         if (start) {
-            InputStream in = unwrap(System.in);
-            PrintStream out = unwrap(System.out);
-            PrintStream err = unwrap(System.err);
-            Runnable callback = new Runnable() {
-                public void run() {
-                    try {
-                        bundleContext.getBundle(0).stop();
-                    } catch (Exception e) {
-                        // Ignore
-                    }
-                }
-            };
-            final Terminal terminal = terminalFactory.getTerminal();
-            this.console = new Console(commandProcessor,
-                                       in,
-                                       wrap(out),
-                                       wrap(err),
-                                       terminal,
-                                       callback);
-            CommandSession session = console.getSession();
-            session.put("USER", System.getProperty("user.name", "karaf"));
-            session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-            session.put("#LINES", new Function() {
-                public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-                    return Integer.toString(terminal.getHeight());
+            Subject subject = new Subject();
+            final String user = System.getProperty("user.name", "karaf");
+            subject.getPrincipals().add(new UserPrincipal(user));
+            Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
+                public Object run() throws Exception {
+                    doStart(user);
+                    return null;
                 }
             });
-            session.put("#COLUMNS", new Function() {
-                public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-                    return Integer.toString(terminal.getWidth());
-                }
-            });
-            session.put(".jline.terminal", terminal);
-            new Thread(console, "Karaf Shell Console Thread").start();
         }
+    }
+
+    protected void doStart(String user) throws Exception {
+        InputStream in = unwrap(System.in);
+        PrintStream out = unwrap(System.out);
+        PrintStream err = unwrap(System.err);
+        Runnable callback = new Runnable() {
+            public void run() {
+                try {
+                    bundleContext.getBundle(0).stop();
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        };
+        final Terminal terminal = terminalFactory.getTerminal();
+        this.console = new Console(commandProcessor,
+                                   in,
+                                   wrap(out),
+                                   wrap(err),
+                                   terminal,
+                                   callback);
+        CommandSession session = console.getSession();
+        session.put("USER", user);
+        session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+        session.put("#LINES", new Function() {
+            public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                return Integer.toString(terminal.getHeight());
+            }
+        });
+        session.put("#COLUMNS", new Function() {
+            public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+                return Integer.toString(terminal.getWidth());
+            }
+        });
+        session.put(".jline.terminal", terminal);
+        new Thread(console, "Karaf Shell Console Thread").start();
     }
 
     protected void stop() throws Exception {
