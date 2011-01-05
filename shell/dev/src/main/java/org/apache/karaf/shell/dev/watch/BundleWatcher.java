@@ -19,6 +19,7 @@ package org.apache.karaf.shell.dev.watch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ops4j.pax.url.maven.commons.MavenConfiguration;
 import org.ops4j.pax.url.maven.commons.MavenConfigurationImpl;
 import org.ops4j.pax.url.maven.commons.MavenRepositoryURL;
 import org.ops4j.pax.url.mvn.ServiceConstants;
@@ -28,15 +29,17 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleReference;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -50,54 +53,45 @@ public class BundleWatcher implements Runnable {
 
     private static Log logger = LogFactory.getLog(BundleWatcher.class);
 
-    private static BundleWatcher instance = null;
-
     private ConfigurationAdmin configurationAdmin;
 
-    private Boolean running = true;
+    private Boolean running = false;
     private Long interval = 10000L;
+    private List<String> watchURLs = new ArrayList<String>();
     private Map<Bundle, Long> lastModificationTimes = new HashMap<Bundle, Long>();
+
 
     /**
      * Construcotr
      */
-    private BundleWatcher() {
-        Thread thread = new Thread(this);
-        thread.start();
-    }
-
-    /**
-     * Returns the singleton instance.
-     *
-     * @return
-     */
-    public static synchronized BundleWatcher getInstance() {
-        if (instance == null)
-            instance = new BundleWatcher();
-        return instance;
+    public BundleWatcher() {
     }
 
     public void run() {
         if (logger.isDebugEnabled()) {
             logger.debug("Bundle watcher thread started");
         }
-        running = true;
         while (running) {
-            for (Bundle bundle : lastModificationTimes.keySet()) {
-                try {
-                    Long lastModifiedTime = getBundleLastModifiedTime(bundle);
-                    Long oldLastModifiedTime = lastModificationTimes.get(bundle);
-                    if (!lastModifiedTime.equals(oldLastModifiedTime)) {
-                        URL bundleLocation = new URL(bundle.getLocation());
-                        InputStream is = bundleLocation.openStream();
-                        bundle.update(is);
-                        is.close();
-                        lastModificationTimes.put(bundle, lastModifiedTime);
+            for (String bundleURL : watchURLs) {
+                for (Bundle bundle : getBundlesByURL(bundleURL)) {
+                    try {
+                        Long lastModifiedTime = getBundleLastModifiedTime(bundle);
+                        Long oldLastModifiedTime = lastModificationTimes.get(bundle);
+                        if (!lastModifiedTime.equals(oldLastModifiedTime)) {
+                            String externalLocation = getBundleExternalLocation(bundle);
+                            if (externalLocation != null) {
+                                File f = new File(externalLocation);
+                                InputStream is = new FileInputStream(f);
+                                bundle.update(is);
+                                is.close();
+                                lastModificationTimes.put(bundle, lastModifiedTime);
+                            }
+                        }
+                    } catch (IOException ex) {
+                        logger.error("Error watching bundle.", ex);
+                    } catch (BundleException ex) {
+                        logger.error("Error updating bundle.", ex);
                     }
-                } catch (IOException ex) {
-                    logger.error("Error watching bundle.", ex);
-                } catch (BundleException ex) {
-                    logger.error("Error updating bundle.", ex);
                 }
             }
             try {
@@ -112,99 +106,175 @@ public class BundleWatcher implements Runnable {
         }
     }
 
-
     /**
-     * Adds a Bundle to the watch list.
-     *
-     * @param bundleList
+     * Adds a Bundle URLs to the watch list.
+     * @param urls
      */
-    public void add(List<Bundle> bundleList) {
-        for (Bundle bundle : bundleList) {
+    public void add(String urls) {
+        watchURLs.add(urls);
+        for (Bundle bundle : getBundlesByURL(urls)) {
             lastModificationTimes.put(bundle, getBundleLastModifiedTime(bundle));
         }
     }
 
     /**
-     * Removes a bundle from the watch list.
-     *
-     * @param bundleList
+     * Removes a bundle URLs from the watch list.
+     * @param urls
      */
-    public void remove(List<Bundle> bundleList) {
-        for (Bundle bundle : bundleList) {
+    public void remove(String urls) {
+        watchURLs.remove(urls);
+        for (Bundle bundle : getBundlesByURL(urls)) {
             lastModificationTimes.remove(bundle);
         }
     }
 
     /**
      * Returns the last modification time of the bundle artifact as Long.
-     *
      * @param bundle
      * @return
      */
     private Long getBundleLastModifiedTime(Bundle bundle) {
-        BundleContext bundleContext = null;
-        ServiceReference ref = null;
-
-        String localRepository = null;
         Long lastModificationTime = 0L;
-
-        try {
-            bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
-            //Get a reference to the configuration admin.
-            ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
-            configurationAdmin = (ConfigurationAdmin) bundleContext.getService(ref);
-
-            Configuration configuration = configurationAdmin.getConfiguration(ServiceConstants.PID);
-
-            //Attempt to retrieve local repository location from MavenConfiguration
-            if (configuration != null) {
-                Dictionary dictionary = configuration.getProperties();
-                MavenConfigurationImpl config = new MavenConfigurationImpl(new DictionaryPropertyResolver(dictionary), ServiceConstants.PID);
-
-                MavenRepositoryURL localRepositoryURL = config.getLocalRepository();
-                if (localRepositoryURL != null) {
-                    localRepository = localRepositoryURL.getFile().getAbsolutePath();
-                }
-            }
-
-            //If local repository not found assume default.
-            if (localRepository == null) {
-                localRepository = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
-            }
-
-            Parser p = new Parser(bundle.getLocation().substring(4));
-            p.getArtifactPath();
-
-            String bundlePath = localRepository + File.separator + p.getArtifactPath();
-            File bundleFile = new File(bundlePath);
+        String bundleExternalLocation = getBundleExternalLocation(bundle);
+        if (bundleExternalLocation != null) {
+            File bundleFile = new File(bundleExternalLocation);
             lastModificationTime = bundleFile.lastModified();
-
-        } catch (MalformedURLException e) {
-            logger.warn("ConfigAdmin service is unavailable.");
-        } catch (IOException e) {
-            logger.warn("ConfigAdmin service is unavailable.");
-        } finally {
-            bundleContext.ungetService(ref);
         }
         return lastModificationTime;
     }
 
+    /**
+     * Returns the location of the Bundle inside the local maven repository.
+     * @param bundle
+     * @return
+     */
+    public String getBundleExternalLocation(Bundle bundle) {
+        Parser p = null;
+        String bundleExternalLocation = null;
+        String localRepository = null;
+
+        //Attempt to retrieve local repository location from MavenConfiguration
+        MavenConfiguration configuration = retrieveMavenConfiguration();
+        if (configuration != null) {
+            MavenRepositoryURL localRepositoryURL = configuration.getLocalRepository();
+            if (localRepositoryURL != null) {
+                localRepository = localRepositoryURL.getFile().getAbsolutePath();
+            }
+        }
+
+        //If local repository not found assume default.
+        if (localRepository == null) {
+            localRepository = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
+        }
+
+        try {
+            p = new Parser(bundle.getLocation().substring(4));
+            bundleExternalLocation = localRepository + File.separator + p.getArtifactPath();
+        } catch (MalformedURLException e) {
+            logger.error("Could not parse artifact path for bundle" + bundle.getSymbolicName(), e);
+        }
+        return bundleExternalLocation;
+    }
+
+
+    public MavenConfiguration retrieveMavenConfiguration() {
+        MavenConfiguration mavenConfiguration=null;
+
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration(ServiceConstants.PID);
+            if(configuration != null){
+              Dictionary dictonary = configuration.getProperties();
+              if(dictonary != null) {
+                  DictionaryPropertyResolver resolver = new DictionaryPropertyResolver(dictonary);
+                  mavenConfiguration = new MavenConfigurationImpl(resolver,ServiceConstants.PID);
+              }
+            }
+
+        } catch (IOException e) {
+            logger.error("Error retrieving maven configuration",e);
+        }
+        return mavenConfiguration;
+    }
+
+    /**
+     * Returns the bundles that match
+     * @param url
+     * @return
+     */
+    public List<Bundle> getBundlesByURL(String url) {
+        BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
+        List<Bundle> bundleList = new ArrayList<Bundle>();
+        try {
+            Long id = Long.parseLong(url);
+            Bundle bundle = bundleContext.getBundle(id);
+            if (bundle != null) {
+                bundleList.add(bundle);
+            }
+        } catch (NumberFormatException e) {
+
+            for (int i = 0; i < bundleContext.getBundles().length; i++) {
+                Bundle bundle = bundleContext.getBundles()[i];
+                if (wildCardMatch(bundle.getLocation(), url)) {
+                    bundleList.add(bundle);
+                }
+            }
+        }
+        return bundleList;
+    }
+
+    /**
+     * Matches text using a pattern containing wildchards.
+     *
+     * @param text
+     * @param pattern
+     * @return
+     */
+    protected boolean wildCardMatch(String text, String pattern) {
+        String[] cards = pattern.split("\\*");
+        // Iterate over the cards.
+        for (String card : cards) {
+            int idx = text.indexOf(card);
+            // Card not detected in the text.
+            if (idx == -1) {
+                return false;
+            }
+
+            // Move ahead, towards the right of the text.
+            text = text.substring(idx + card.length());
+        }
+        return true;
+    }
+
+
+    public void start() {
+        if (!running) {
+            Thread thread = new Thread(this);
+            setRunning(true);
+            thread.start();
+        }
+    }
 
     /**
      * Stops the execution of the thread and releases the singleton instance
      */
     public void stop() {
         setRunning(false);
-        this.instance = null;
     }
 
-    /**
-     * Returns the list of bundles that are being watched.
-     *
-     * @return
-     */
-    public List<Bundle> getWatchList() {
-        return new ArrayList(lastModificationTimes.keySet());
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
+    }
+
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
+
+    public List<String> getWatchURLs() {
+        return watchURLs;
+    }
+
+    public void setWatchURLs(List<String> watchURLs) {
+        this.watchURLs = watchURLs;
     }
 
     public Long getInterval() {
