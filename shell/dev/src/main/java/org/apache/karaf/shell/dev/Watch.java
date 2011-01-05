@@ -24,7 +24,6 @@ import org.apache.karaf.shell.dev.watch.BundleWatcher;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Command(scope = "dev", name = "watch", description = "Watch and Update bundles")
@@ -36,6 +35,9 @@ public class Watch extends OsgiCommandSupport {
     @Option(name = "-i", aliases = {}, description = "Watch interval", required = false, multiValued = false)
     private long interval;
 
+    @Option(name = "--start", description = "Starts watching the selcted bundles", required = false, multiValued = false)
+    protected boolean start;
+
     @Option(name = "--stop", description = "Stops watching all bundles", required = false, multiValued = false)
     protected boolean stop;
 
@@ -45,94 +47,53 @@ public class Watch extends OsgiCommandSupport {
     @Option(name = "--list", description = "Displays the watch list", required = false, multiValued = false)
     protected boolean list;
 
+    private BundleWatcher watcher;
 
     @Override
     protected Object doExecute() throws Exception {
-        //Set the interval if exists.
-        if (interval > 0) {
-            BundleWatcher.getInstance().setInterval(interval);
+        if (urls == null && (interval == 0 && !stop && !start && !list)) {
+            System.out.println("No option specified. Bundle id/url is required.");
+            return null;
         }
 
-        if (stop || list) {
-            doExecute(null);
-            return null;
-        } else if (urls != null && urls.trim().length() > 0) {
+        if (interval > 0) { //Set the interval if exists.
+            watcher.setInterval(interval);
+        }
 
-            List<Bundle> bundleList = new ArrayList<Bundle>();
-            //Check if an id is passed instead of URLs
-            try {
-                Long id = Long.parseLong(urls);
-                Bundle bundle = getBundleContext().getBundle(id);
-                if (bundle != null) {
-                    bundleList.add(bundle);
-                }
-            } catch (NumberFormatException e) {
+        if (list) { //List the watched bundles.
+            String format = "%-40s %6s %-80s";
+            System.out.println(String.format(format, "URL", "ID", "Bundle Name"));
+            for (String url : watcher.getWatchURLs()) {
 
-                for (int i = 0; i < getBundleContext().getBundles().length; i++) {
-                    Bundle bundle = getBundleContext().getBundles()[i];
-                    if (wildCardMatch(bundle.getLocation(), urls)) {
-                        bundleList.add(bundle);
+                List<Bundle> bundleList = watcher.getBundlesByURL(url);
+                if (bundleList != null && bundleList.size() > 0) {
+                    for (Bundle bundle : bundleList) {
+                        System.out.println(String.format(format, url, bundle.getBundleId(), (String) bundle.getHeaders().get(Constants.BUNDLE_NAME)));
                     }
+                } else {
+                    System.out.println(String.format(format, url, "", ""));
                 }
             }
-            if (bundleList.size() > 0) {
-                doExecute(bundleList);
-            }
-            return null;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Exectues watch/stop watching the passed bundles.
-     *
-     * @param bundleList
-     */
-    public void doExecute(List<Bundle> bundleList) {
-        BundleWatcher watcher = BundleWatcher.getInstance();
-        if (stop) {
+        } else if (start) {
+            watcher.start();
+        } else if (stop) {
             watcher.stop();
-        } else if (list) {
-            List<Bundle> watchList = watcher.getWatchList();
-            if (watchList != null && watchList.size() > 0) {
-                String format = "%6s %-40s";
-                System.out.println(String.format(format, "ID", "Name"));
-                for (Bundle bundle : watcher.getWatchList()) {
-                    System.out.println(String.format(format, bundle.getBundleId(), (String) bundle.getHeaders().get(Constants.BUNDLE_NAME)));
-                }
-            } else System.out.println("No bundle is being watched.");
+        } else if (remove) {
+            watcher.remove(urls);
         } else {
-            if (remove) {
-                watcher.remove(bundleList);
-            } else {
-                watcher.add(bundleList);
-            }
+            watcher.start();
+            watcher.add(urls);
         }
+
+        return null;
     }
 
+    public BundleWatcher getWatcher() {
+        return watcher;
+    }
 
-    /**
-     * Matches text using a pattern containing wildchards.
-     *
-     * @param text
-     * @param pattern
-     * @return
-     */
-    public static boolean wildCardMatch(String text, String pattern) {
-        String[] cards = pattern.split("\\*");
-        // Iterate over the cards.
-        for (String card : cards) {
-            int idx = text.indexOf(card);
-            // Card not detected in the text.
-            if (idx == -1) {
-                return false;
-            }
-
-            // Move ahead, towards the right of the text.
-            text = text.substring(idx + card.length());
-        }
-        return true;
+    public void setWatcher(BundleWatcher watcher) {
+        this.watcher = watcher;
     }
 }
 
