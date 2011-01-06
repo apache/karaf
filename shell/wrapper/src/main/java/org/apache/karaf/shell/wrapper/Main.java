@@ -23,11 +23,10 @@ import org.tanukisoftware.wrapper.WrapperManager;
 /**
  * Java Service Wrapper Main class
  */
-public class Main implements WrapperListener, ShutdownCallback {
+public class Main extends Thread implements WrapperListener, ShutdownCallback {
 
-    private static final int TIMEOUT = 1000; //wainting timeout for a second should be enough
-	private static final int TIMEOUT_OFFSET = 500; // the offset for the wrapper, to leave us some time to breath
-	private org.apache.karaf.main.Main main;
+   	private org.apache.karaf.main.Main main;
+    private volatile boolean destroying;
 
     /*---------------------------------------------------------------
      * Constructors
@@ -57,6 +56,8 @@ public class Main implements WrapperListener, ShutdownCallback {
         try
         {
             main.launch();
+            main.setShutdownCallback(this);
+            start();
             return null;
         }
         catch (Throwable ex)
@@ -65,7 +66,17 @@ public class Main implements WrapperListener, ShutdownCallback {
             ex.printStackTrace();
             return -1;
         }
+    }
 
+    public void run() {
+        try {
+            main.awaitShutdown();
+            if (!destroying) {
+                WrapperManager.stop(main.getExitCode());
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
     /**
@@ -88,7 +99,8 @@ public class Main implements WrapperListener, ShutdownCallback {
     {
         try
         {
-            main.destroy(true, TIMEOUT, this);
+            destroying = true;
+            main.destroy();
         }
         catch (Throwable ex)
         {
@@ -97,15 +109,15 @@ public class Main implements WrapperListener, ShutdownCallback {
             return -2;
         }
 
-        return exitCode;
+        return main.getExitCode();
     }
     
     /**
      * Call-back method is called by the @{link org.apache.karaf.main.Main} for Signaling 
      * that the stopping process is in progress and the wrapper doesn't kill the JVM.  
      */
-    public void waitingForShutdown() {
-    	WrapperManager.signalStopping(TIMEOUT + TIMEOUT_OFFSET);
+    public void waitingForShutdown(int delay) {
+    	WrapperManager.signalStopping(delay);
     }
 
     /**

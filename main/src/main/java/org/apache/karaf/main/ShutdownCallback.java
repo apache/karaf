@@ -32,6 +32,6 @@ public interface ShutdownCallback {
 	 * The callback method invoked to inform anyone listening that the 
 	 * Main class is still waiting for the completion of the shutdown. 
 	 */
-	void waitingForShutdown();
-	
+	void waitingForShutdown(int delay);
+
 }
