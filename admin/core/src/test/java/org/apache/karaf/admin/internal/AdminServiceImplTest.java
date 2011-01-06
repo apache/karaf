@@ -88,6 +88,22 @@ public class AdminServiceImplTest extends TestCase {
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
     }
 
+    /**
+     * <p>
+     * Test the renaming of an existing instance.
+     * </p>
+     */
+    public void testRenameInstance() throws Exception {
+        AdminServiceImpl service = new AdminServiceImpl();
+        service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
+
+        InstanceSettings settings = new InstanceSettings(8122, 1122, getName(), null, null, null);
+        Instance instance = service.createInstance(getName(), settings);
+
+        service.renameInstance(getName(), getName() + "b");
+        assertNotNull(service.getInstance(getName() + "b"));
+    }
+
     private void assertFileExists(String path, String name) throws IOException {
         File file = new File(path, name);
         assertTrue("Expected " + file.getCanonicalPath() + " to exist",

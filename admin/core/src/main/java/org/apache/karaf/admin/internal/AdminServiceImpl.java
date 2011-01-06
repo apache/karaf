@@ -242,6 +242,40 @@ public class AdminServiceImpl implements AdminService {
         instances.remove(name);
     }
 
+    public synchronized void renameInstance(String name, String newName) throws Exception {
+        if (instances.get(newName) != null) {
+            throw new IllegalArgumentException("Instance " + newName + " already exists");
+        }
+        Instance instance = instances.get(name);
+        if (instance == null) {
+            throw new IllegalArgumentException("Instance " + name + " not found");
+        }
+
+        println(Ansi.ansi().a("Renaming instance ").a(Ansi.Attribute.INTENSITY_BOLD).a(name).a(Ansi.Attribute.RESET).a(" to ").a(Ansi.Attribute.INTENSITY_BOLD).a(newName).toString());
+        // remote the old instance
+        instances.remove(name);
+        // update instance name
+        instance.setName(newName);
+        // rename directory
+        File currentLocation = new File(instance.getLocation());
+        String basedir = currentLocation.getParent();
+        File newLocation = new File(basedir, newName);
+        currentLocation.renameTo(newLocation);
+        // update the instance location
+        instance.setLocation(newLocation.getPath());
+        // load the etc/system.properties
+        // TODO use Karaf util Properties to preserve the comment and format of the original properties file
+        Properties systemProperties = new Properties();
+        systemProperties.load(new FileInputStream(new File(newLocation, "etc/system.properties")));
+        systemProperties.setProperty("karaf.name", newName);
+        systemProperties.store(new FileOutputStream(new File(newLocation, "etc/system.properties")), null);
+        // TODO update the bin/karaf, bin/start and bin/stop scripts (and/or corresponding .bat scripts)
+        // add the renamed instances
+        instances.put(newName, instance);
+        // save instance definition in the instances.properties
+        saveState();
+    }
+
     synchronized void saveState() throws IOException {
         Properties storage = new Properties();
         Instance[] data = getInstances();

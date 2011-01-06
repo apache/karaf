@@ -28,6 +28,7 @@ import org.apache.karaf.admin.Instance;
 import org.apache.karaf.jpm.Process;
 import org.apache.karaf.jpm.ProcessBuilderFactory;
 import org.apache.karaf.jpm.impl.ScriptUtils;
+import org.fusesource.jansi.Ansi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +80,10 @@ public class InstanceImpl implements Instance {
     public String getName() {
         return this.name;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     
     public boolean isRoot() {
         return root;
@@ -86,6 +91,10 @@ public class InstanceImpl implements Instance {
 
     public String getLocation() {
         return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public boolean exists() {
@@ -258,7 +267,6 @@ public class InstanceImpl implements Instance {
         this.service.forget(name);
         this.service.saveState();
     }
-
 
     public synchronized String getState() {
         int port = getSshPort();
