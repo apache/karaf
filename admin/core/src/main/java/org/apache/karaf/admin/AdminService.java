@@ -20,6 +20,8 @@ public interface AdminService {
 
     Instance createInstance(String name, InstanceSettings settings) throws Exception;
 
+    void renameInstance(String name, String newName) throws Exception;
+
     Instance[] getInstances();
 
     Instance getInstance(String name);    

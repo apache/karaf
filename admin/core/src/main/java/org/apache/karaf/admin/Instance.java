@@ -24,10 +24,14 @@ public interface Instance {
     String ERROR = "Error";
 
     String getName();
+
+    void setName(String name);
     
     boolean isRoot();
 
     String getLocation();
+
+    void setLocation(String location);
 
     int getPid();
 
