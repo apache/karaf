@@ -33,13 +33,11 @@ import java.security.Security;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceReference;
@@ -148,6 +146,8 @@ public class Main {
     
     public static final String KARAF_FRAMEWORK = "karaf.framework";
 
+    public static final String KARAF_SHUTDOWN_TIMEOUT = "karaf.shutdown.timeout";
+
     public static final String KARAF_SHUTDOWN_PORT = "karaf.shutdown.port";
 
     public static final String KARAF_SHUTDOWN_HOST = "karaf.shutdown.host";
@@ -178,11 +178,16 @@ public class Main {
     private int defaultStartLevel = 100;
     private int lockStartLevel = 1;
     private int lockDelay = 1000;
+    private int shutdownTimeout = 5 * 60 * 1000;
     private boolean exiting = false;
-    private boolean cmProcessed;
+    private ShutdownCallback shutdownCallback;
 
     public Main(String[] args) {
         this.args = args;
+    }
+
+    public void setShutdownCallback(ShutdownCallback shutdownCallback) {
+        this.shutdownCallback = shutdownCallback;
     }
 
     public void launch() throws Exception {
@@ -231,6 +236,7 @@ public class Main {
         lockStartLevel = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
         lockDelay = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
         configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
+        shutdownTimeout = Integer.parseInt(configProps.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
         // Start up the OSGI framework
 
         InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
@@ -249,52 +255,48 @@ public class Main {
         }.start();
     }
 
-    public void destroy(boolean await) throws Exception {
-		destroy(await, 0, null);
-	}
+    public void awaitShutdown() throws Exception {
+        while (true) {
+            FrameworkEvent event = framework.waitForStop(0);
+            if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
+                return;
+            }
+        }
+    }
 
-	public void destroy(boolean await, int timeout, ShutdownCallback callback) throws Exception {
+	public boolean destroy() throws Exception {
         if (framework == null) {
-            return;
+            return true;
         }
         try {
-            if (await) {
-                while (true) {
-                	FrameworkEvent event;
-	                if (callback != null) {
-	                	callback.waitingForShutdown();
-	                	event = framework.waitForStop(timeout);
-	                	//do the stoping in an extra thread
-	                	Runnable stopper = new Runnable() {
-							
-							public void run() {
-								try {
-									
-									framework.stop();
-								} catch (BundleException e) {
-									System.err.println("Exception while stoping framework: " + e);
-								}
-							}
-						};
-	                	Thread t = new Thread(stopper);
-	                	t.start();
-	                	while (t.getState() != Thread.State.TERMINATED && event.getType() == FrameworkEvent.WAIT_TIMEDOUT) {
-	                		callback.waitingForShutdown();
-	                		event = framework.waitForStop(timeout);
-	                	} 
-	                	break;
-                	} else {
-                		event = framework.waitForStop(0);
-                	}
-                	if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
-                        break;
-                    }
-                }
+            int step = 5000;
+
+            // Notify the callback asap
+            if (shutdownCallback != null) {
+                shutdownCallback.waitingForShutdown(step);
             }
+
+            // Stop the framework in case it's still active
             exiting = true;
             if (framework.getState() == Bundle.ACTIVE) {
                 framework.stop();
             }
+
+            int timeout = shutdownTimeout;
+            if (shutdownTimeout <= 0) {
+                timeout = Integer.MAX_VALUE;
+            }
+            while (timeout > 0) {
+                timeout -= step;
+                if (shutdownCallback != null) {
+                    shutdownCallback.waitingForShutdown(step * 2);
+                }
+                FrameworkEvent event = framework.waitForStop(step);
+                if (event.getType() != FrameworkEvent.WAIT_TIMEDOUT) {
+                    return true;
+                }
+            }
+            return false;
         } finally {
             unlock();
         }
@@ -396,8 +398,17 @@ public class Main {
                 ex.printStackTrace();
             }
             try {
-                main.destroy(true);
+                main.awaitShutdown();
+                boolean stopped = main.destroy();
                 restart = Boolean.getBoolean("karaf.restart");
+                if (!stopped) {
+                    if (restart) {
+                        System.err.println("Timeout waiting for framework to stop.  Restarting now.");
+                    } else {
+                        System.err.println("Timeout waiting for framework to stop.  Exiting VM.");
+                        main.setExitCode(-3);
+                    }
+                }
             } catch (Throwable ex) {
                 main.setExitCode(-2);
                 System.err.println("Error occured shutting down framework: " + ex);
