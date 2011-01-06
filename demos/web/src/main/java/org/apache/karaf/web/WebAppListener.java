@@ -24,9 +24,9 @@ import javax.servlet.ServletContextListener;
 import org.apache.karaf.main.Main;
 
 public class WebAppListener implements ServletContextListener {
-	
+
 	private Main main;
-	
+
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
 			System.err.println("contextInitialized");
@@ -52,7 +52,7 @@ public class WebAppListener implements ServletContextListener {
 		try {
 			System.err.println("contextDestroyed");
 			if (main != null) {
-				main.destroy(false);
+                main.destroy();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
