@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceReference;
@@ -262,11 +263,25 @@ public class Main {
                 	FrameworkEvent event;
 	                if (callback != null) {
 	                	callback.waitingForShutdown();
-	                	framework.stop();
-	                	do {
+	                	event = framework.waitForStop(timeout);
+	                	//do the stoping in an extra thread
+	                	Runnable stopper = new Runnable() {
+							
+							public void run() {
+								try {
+									
+									framework.stop();
+								} catch (BundleException e) {
+									System.err.println("Exception while stoping framework: " + e);
+								}
+							}
+						};
+	                	Thread t = new Thread(stopper);
+	                	t.start();
+	                	while (t.getState() != Thread.State.TERMINATED && event.getType() == FrameworkEvent.WAIT_TIMEDOUT) {
 	                		callback.waitingForShutdown();
 	                		event = framework.waitForStop(timeout);
-	                	} while(event.getType() == FrameworkEvent.WAIT_TIMEDOUT);
+	                	} 
 	                	break;
                 	} else {
                 		event = framework.waitForStop(0);
