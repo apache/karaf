@@ -23,8 +23,12 @@ import java.io.File;
 import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
+
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
 public class MainStartTest {
 
@@ -56,6 +60,38 @@ public class MainStartTest {
 		Assert.assertEquals(mvnUrl, bundles[2].getLocation());
 		Assert.assertEquals(Bundle.ACTIVE, bundles[1].getState());
 		Assert.assertEquals(Bundle.ACTIVE, bundles[2].getState());
-		main.destroy(false);
+		main.destroy();
 	}
+
+    @Test
+    public void testStopWithTimeout() throws Exception {
+        File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
+        File home = new File(basedir, "test-karaf-home");
+        File data = new File(home, "data");
+
+        Utils.deleteDirectory(data);
+
+		String[] args = new String[0];
+		System.setProperty("karaf.home", home.toString());
+		System.setProperty("karaf.data", data.toString());
+
+        Main main = new Main(args);
+        main.launch();
+        Thread.sleep(1000);
+        Framework framework = main.getFramework();
+        String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
+        Bundle bundle = framework.getBundleContext().installBundle("foo",
+                TinyBundles.newBundle()
+                    .set( Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName() )
+                    .add( activatorName, getClass().getClassLoader().getResourceAsStream( activatorName ) )
+                    .build( withBnd() )
+        );
+        bundle.start();
+
+        long t0 = System.currentTimeMillis();
+        main.destroy();
+        long t1 = System.currentTimeMillis();
+//        System.err.println("Shutdown duration: " + (t1 - t0) + " ms");
+        Assert.assertTrue((t1 - t0) > TimeoutShutdownActivator.TIMEOUT / 2);
+    }
 }
