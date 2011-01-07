@@ -100,7 +100,11 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
         try
         {
             destroying = true;
-            main.destroy();
+            if (!main.destroy())
+            {
+                System.err.println("Timeout waiting for Karaf to shutdown");
+                return -3;
+            }
         }
         catch (Throwable ex)
         {
