@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 public class AdminServiceImpl implements AdminService {
     public static final String STORAGE_FILE = "instance.properties";
+    public static final String BACKUP_EXTENSION = ".bak";
     private static final String FEATURES_CFG = "etc/org.apache.karaf.features.cfg";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminServiceImpl.class);
@@ -242,34 +243,48 @@ public class AdminServiceImpl implements AdminService {
         instances.remove(name);
     }
 
-    public synchronized void renameInstance(String name, String newName) throws Exception {
+    public synchronized void renameInstance(String oldName, String newName) throws Exception {
         if (instances.get(newName) != null) {
             throw new IllegalArgumentException("Instance " + newName + " already exists");
         }
-        Instance instance = instances.get(name);
+        Instance instance = instances.get(oldName);
         if (instance == null) {
-            throw new IllegalArgumentException("Instance " + name + " not found");
+            throw new IllegalArgumentException("Instance " + oldName + " not found");
+        }
+        if (instance.isRoot()) {
+            throw new IllegalArgumentException("You can't rename the root instance");
+        }
+        if (instance.getPid() != 0) {
+            throw new IllegalStateException("Instance not stopped");
         }
 
-        println(Ansi.ansi().a("Renaming instance ").a(Ansi.Attribute.INTENSITY_BOLD).a(name).a(Ansi.Attribute.RESET).a(" to ").a(Ansi.Attribute.INTENSITY_BOLD).a(newName).toString());
-        // remote the old instance
-        instances.remove(name);
-        // update instance name
+        println(Ansi.ansi().a("Renaming instance ").a(Ansi.Attribute.INTENSITY_BOLD).a(oldName).a(Ansi.Attribute.RESET).a(" to ").a(Ansi.Attribute.INTENSITY_BOLD).a(newName).toString());
+        // remove the old instance
+        instances.remove(oldName);
+        // update instance
         instance.setName(newName);
         // rename directory
-        File currentLocation = new File(instance.getLocation());
-        String basedir = currentLocation.getParent();
+        String oldLocationPath = instance.getLocation();
+        File oldLocation = new File(oldLocationPath);
+        String basedir = oldLocation.getParent();
         File newLocation = new File(basedir, newName);
-        currentLocation.renameTo(newLocation);
+        oldLocation.renameTo(newLocation);
         // update the instance location
         instance.setLocation(newLocation.getPath());
-        // load the etc/system.properties
-        // TODO use Karaf util Properties to preserve the comment and format of the original properties file
-        Properties systemProperties = new Properties();
-        systemProperties.load(new FileInputStream(new File(newLocation, "etc/system.properties")));
-        systemProperties.setProperty("karaf.name", newName);
-        systemProperties.store(new FileOutputStream(new File(newLocation, "etc/system.properties")), null);
-        // TODO update the bin/karaf, bin/start and bin/stop scripts (and/or corresponding .bat scripts)
+        // create the properties map including the instance name and instance location
+        HashMap<String, String> props = new HashMap<String, String>();
+        props.put(oldName, newName);
+        props.put(oldLocationPath, newLocation.getPath());
+        // replace all references to the "old" name by the new one in etc/system.properties
+        // NB: it's replacement to avoid to override the user's changes
+        filterResource(newLocation, "etc/system.properties", props);
+        // replace all references to the "old" name by the new one in bin/karaf
+        filterResource(newLocation, "bin/karaf", props);
+        filterResource(newLocation, "bin/start", props);
+        filterResource(newLocation, "bin/stop", props);
+        filterResource(newLocation, "bin/karaf.bat", props);
+        filterResource(newLocation, "bin/start.bat", props);
+        filterResource(newLocation, "bin/stop.bat", props);
         // add the renamed instances
         instances.put(newName, instance);
         // save instance definition in the instances.properties
@@ -331,27 +346,45 @@ public class AdminServiceImpl implements AdminService {
         System.out.println(st);
     }
 
+    private void filterResource(File basedir, String path, HashMap<String, String> props) throws Exception {
+        File file = new File(basedir, path);
+        File bak = new File(basedir, path + BACKUP_EXTENSION);
+        if (!file.exists()) {
+            return;
+        }
+        // rename the file to the backup one
+        file.renameTo(bak);
+        // copy and filter the bak file back to the original name
+        copyAndFilterResource(new FileInputStream(bak), new FileOutputStream(file), props);
+        // remove the bak file
+        bak.delete();
+    }
+
     private void copyFilteredResourceToDir(File target, String resource, HashMap<String, String> props) throws Exception {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
             println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
             InputStream is = getClass().getClassLoader().getResourceAsStream("org/apache/karaf/admin/" + resource);
+            copyAndFilterResource(is, new FileOutputStream(outFile), props);
+        }
+    }
+
+    private void copyAndFilterResource(InputStream source, OutputStream target, HashMap<String, String> props) throws Exception {
+        try {
+            // read it line at a time so that we can use the platform line ending when we write it out.
+            PrintStream out = new PrintStream(target);
             try {
-                // Read it line at a time so that we can use the platform line ending when we write it out.
-                PrintStream out = new PrintStream(new FileOutputStream(outFile));
-                try {
-                    Scanner scanner = new Scanner(is);
-                    while (scanner.hasNextLine() ) {
-                        String line = scanner.nextLine();
-                        line = filter(line, props);
-                        out.println(line);
-                    }
-                } finally {
-                    safeClose(out);
+                Scanner scanner = new Scanner(source);
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    line = filter(line, props);
+                    out.println(line);
                 }
             } finally {
-                safeClose(is);
+                safeClose(out);
             }
+        } finally {
+            safeClose(source);
         }
     }
 
