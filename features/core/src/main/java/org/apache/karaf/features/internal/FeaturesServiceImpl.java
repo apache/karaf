@@ -74,7 +74,7 @@ import static java.lang.String.format;
  * installing the needed bundles.
  *
  */
-public class FeaturesServiceImpl implements FeaturesService {
+public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
 
@@ -94,6 +94,8 @@ public class FeaturesServiceImpl implements FeaturesService {
     private List<FeaturesListener> listeners = new CopyOnWriteArrayList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
+    private final Object refreshLock = new Object();
+    private long refreshTimeout = 5000;
 
     public FeaturesServiceImpl() {
     }
@@ -136,6 +138,14 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setResolverTimeout(long resolverTimeout) {
         this.resolverTimeout = resolverTimeout;
+    }
+
+    public long getRefreshTimeout() {
+        return refreshTimeout;
+    }
+
+    public void setRefreshTimeout(long refreshTimeout) {
+        this.refreshTimeout = refreshTimeout;
     }
 
     public void registerListener(FeaturesListener listener) {
@@ -291,7 +301,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     }
                     if (refresh) {
                         LOGGER.info("Refreshing bundles: {}", sb.toString());
-                        getPackageAdmin().refreshPackages(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
+                        refreshPackages(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
                     }
                 }
             }
@@ -644,9 +654,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 b.uninstall();
             }
         }
-        if (getPackageAdmin() != null) {
-            getPackageAdmin().refreshPackages(null);
-        }
+        refreshPackages(null);
         callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, false));
         saveState();
     }
@@ -735,6 +743,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void start() throws Exception {
+        // Register FrameworkEventListener
+        bundleContext.addFrameworkListener(this);
+        // Register EventAdmin listener
         EventAdminListener listener = null;
         try {
             getClass().getClassLoader().loadClass("org.osgi.service.event.EventAdmin");
@@ -744,6 +755,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             LOGGER.debug("EventAdmin package is not available, just don't use it");
         }
         this.eventAdminListener = listener;
+        // Load State
         if (!loadState()) {
             if (uris != null) {
                 for (URI uri : uris) {
@@ -756,6 +768,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
             saveState();
         }
+        // Install boot features
         if (boot != null && !bootFeaturesInstalled) {
             new Thread() {
                 public void run() {
@@ -788,9 +801,27 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void stop() throws Exception {
+        bundleContext.removeFrameworkListener(this);
         uris = new HashSet<URI>(repositories.keySet());
         while (!repositories.isEmpty()) {
             internalRemoveRepository(repositories.keySet().iterator().next());
+        }
+    }
+
+    public void frameworkEvent(FrameworkEvent event) {
+        if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+            synchronized (refreshLock) {
+                refreshLock.notifyAll();
+            }
+        }
+    }
+
+    protected void refreshPackages(Bundle[] bundles) throws InterruptedException {
+        if (getPackageAdmin() != null) {
+            synchronized (refreshLock) {
+                getPackageAdmin().refreshPackages(bundles);
+                refreshLock.wait(refreshTimeout);
+            }
         }
     }
 

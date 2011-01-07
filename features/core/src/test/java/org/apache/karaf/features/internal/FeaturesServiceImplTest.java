@@ -27,6 +27,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.felix.utils.manifest.Clause;
 import org.easymock.EasyMock;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkListener;
 
 import static org.easymock.EasyMock.*;
 
@@ -102,6 +103,8 @@ public class FeaturesServiceImplTest extends TestCase {
     public void testStartDoesNotFailWithOneInvalidUri()  {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        bundleContext.addFrameworkListener(EasyMock.<FrameworkListener>anyObject());
+        bundleContext.removeFrameworkListener(EasyMock.<FrameworkListener>anyObject());
         replay(bundleContext);
         FeaturesServiceImpl service = new FeaturesServiceImpl();
         service.setBundleContext(bundleContext);
