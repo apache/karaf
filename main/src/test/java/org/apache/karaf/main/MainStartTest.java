@@ -74,6 +74,8 @@ public class MainStartTest {
 		String[] args = new String[0];
 		System.setProperty("karaf.home", home.toString());
 		System.setProperty("karaf.data", data.toString());
+        System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
+
 
         Main main = new Main(args);
         main.launch();
