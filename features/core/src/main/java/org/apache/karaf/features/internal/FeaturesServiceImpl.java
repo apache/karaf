@@ -16,21 +16,13 @@
  */
 package org.apache.karaf.features.internal;
 
-import org.apache.felix.utils.manifest.Clause;
-import org.apache.felix.utils.manifest.Parser;
-import org.apache.felix.utils.version.VersionRange;
-import org.apache.felix.utils.version.VersionTable;
-import org.apache.karaf.features.*;
-import org.osgi.framework.*;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,6 +34,36 @@ import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
+import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeatureEvent;
+import org.apache.karaf.features.FeaturesListener;
+import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.RepositoryEvent;
+import org.apache.karaf.features.Resolver;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.startlevel.StartLevel;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static java.lang.String.format;
 
 /**
@@ -51,7 +73,7 @@ import static java.lang.String.format;
  * installing the needed bundles.
  *
  */
-public class FeaturesServiceImpl implements FeaturesService {
+public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
 
@@ -71,6 +93,8 @@ public class FeaturesServiceImpl implements FeaturesService {
     private List<FeaturesListener> listeners = new CopyOnWriteArrayList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
+    private final Object refreshLock = new Object();
+    private long refreshTimeout = 5000;
 
     public FeaturesServiceImpl() {
     }
@@ -113,6 +137,14 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setResolverTimeout(long resolverTimeout) {
         this.resolverTimeout = resolverTimeout;
+    }
+
+    public long getRefreshTimeout() {
+        return refreshTimeout;
+    }
+
+    public void setRefreshTimeout(long refreshTimeout) {
+        this.refreshTimeout = refreshTimeout;
     }
 
     public void registerListener(FeaturesListener listener) {
@@ -269,7 +301,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                     }
                     if (refresh) {
                         LOGGER.info("Refreshing bundles: {}", sb.toString());
-                        getPackageAdmin().refreshPackages(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
+                        refreshPackages(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
                     }
                 }
             }
@@ -729,9 +761,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 b.uninstall();
             }
         }
-        if (getPackageAdmin() != null) {
-            getPackageAdmin().refreshPackages(null);
-        }
+        refreshPackages(null);
         callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, false));
         saveState();
     }
@@ -820,6 +850,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void start() throws Exception {
+        // Register FrameworkEventListener
+        bundleContext.addFrameworkListener(this);
+        // Register EventAdmin listener
         EventAdminListener listener = null;
         try {
             getClass().getClassLoader().loadClass("org.osgi.service.event.EventAdmin");
@@ -829,6 +862,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             LOGGER.debug("EventAdmin package is not available, just don't use it");
         }
         this.eventAdminListener = listener;
+        // Load State
         if (!loadState()) {
             if (uris != null) {
                 for (URI uri : uris) {
@@ -841,6 +875,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             }
             saveState();
         }
+        // Install boot features
         if (boot != null && !bootFeaturesInstalled) {
             new Thread() {
                 public void run() {
@@ -873,9 +908,27 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void stop() throws Exception {
+        bundleContext.removeFrameworkListener(this);
         uris = new HashSet<URI>(repositories.keySet());
         while (!repositories.isEmpty()) {
             internalRemoveRepository(repositories.keySet().iterator().next());
+        }
+    }
+
+    public void frameworkEvent(FrameworkEvent event) {
+        if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED) {
+            synchronized (refreshLock) {
+                refreshLock.notifyAll();
+            }
+        }
+    }
+
+    protected void refreshPackages(Bundle[] bundles) throws InterruptedException {
+        if (getPackageAdmin() != null) {
+            synchronized (refreshLock) {
+                getPackageAdmin().refreshPackages(bundles);
+                refreshLock.wait(refreshTimeout);
+            }
         }
     }
 
