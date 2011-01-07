@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.ServiceReference;
@@ -146,6 +147,8 @@ public class Main {
     
     public static final String KARAF_FRAMEWORK = "karaf.framework";
 
+    public static final String KARAF_FRAMEWORK_FACTORY = "karaf.framework.factory";
+
     public static final String KARAF_SHUTDOWN_TIMEOUT = "karaf.shutdown.timeout";
 
     public static final String KARAF_SHUTDOWN_PORT = "karaf.shutdown.port";
@@ -239,10 +242,13 @@ public class Main {
         shutdownTimeout = Integer.parseInt(configProps.getProperty(KARAF_SHUTDOWN_TIMEOUT, Integer.toString(shutdownTimeout)));
         // Start up the OSGI framework
 
-        InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
-        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        String factoryClass = br.readLine();
-        br.close();
+        String factoryClass = configProps.getProperty(KARAF_FRAMEWORK_FACTORY);
+        if (factoryClass == null) {
+            InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            factoryClass = br.readLine();
+            br.close();
+        }
         FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
         framework = factory.newFramework(new StringMap(configProps, false));
         framework.start();
@@ -279,7 +285,15 @@ public class Main {
             // Stop the framework in case it's still active
             exiting = true;
             if (framework.getState() == Bundle.ACTIVE) {
-                framework.stop();
+                new Thread() {
+                    public void run() {
+                        try {
+                            framework.stop();
+                        } catch (BundleException e) {
+                            System.err.println("Error stopping karaf: " + e.getMessage());
+                        }
+                    }
+                }.start();
             }
 
             int timeout = shutdownTimeout;
