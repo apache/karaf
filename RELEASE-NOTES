@@ -15,6 +15,48 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.1.3
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.1.x series branch, representing an update to Apache Karaf 2.1.2. It contains several bug fixes identified in the prior release, and updates the versions of SLF4j, pax-url-mvn, spring, and pax-exam. For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-244] - features-maven-plugin does not work with maven 3
+    * [KARAF-282] - The shell:exec does not always capture the whole output
+    * [KARAF-292] - Maven filtering issue for Windows batch files in kit
+    * [KARAF-299] - [patch] miscellaneous cleanups
+    * [KARAF-300] - Incorrect behavior of backspace/delete keys in web console Gogo plugin
+    * [KARAF-304] - Startup problems: javax.naming.NoInitialContextException: Unable to determine caller'sBundleContext
+    * [KARAF-313] - feature.xml is not read correct if it contains linebreaks
+    * [KARAF-319] - Pom hierarchy error
+    * [KARAF-321] - karaf shell script does not work with mingw and whitespaces in path
+    * [KARAF-326] - eclipse:eclipse importing error
+    * [KARAF-327] - Graceful shutdown of Windows service, revisited
+    * [KARAF-331] - Failure to execute script against Karaf sshd. 
+    * [KARAF-344] - Deploying a new JAAS config requires to restart the framework
+    * [KARAF-347] - org.ops4j.pax.url.mvn.cfg contains incorrect comment on last property
+    * [KARAF-357] - shell.bat won't start with NoClassDefFoundError and NPE
+    * [KARAF-358] - When the feature service calls refresh(), it should wait for the refresh to happen before returning
+    * [KARAF-360] - Empty comment in some config files
+
+** Improvement
+    * [KARAF-314] - feature-maven-plugin does not fail if component couldn't be found
+    * [KARAF-320] - Missing svn:ignores
+    * [KARAF-329] - improve test-util methods
+    * [KARAF-349] - Upgrade to SLF4j 1.5.8
+
+** Task
+    * [KARAF-333] - Update karaf to use pax-url-mvn ver 1.2.4
+    * [KARAF-345] - upgrade to spring 3.0.5.RELEASE
+    * [KARAF-351] - Upgrade to pax-exam 1.2.3
+
+
                     Apache Karaf 2.1.2
                     ==================
 
