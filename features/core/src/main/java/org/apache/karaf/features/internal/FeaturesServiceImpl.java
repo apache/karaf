@@ -16,17 +16,12 @@
  */
 package org.apache.karaf.features.internal;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.JarInputStream;
@@ -63,6 +58,16 @@ import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.XMLConstants;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Schema;
+import javax.xml.validation.Validator;
+
+import org.w3c.dom.Document;
 
 import static java.lang.String.format;
 
@@ -173,6 +178,39 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         this.boot = boot;
     }
 
+    /**
+     * Validate repository.
+     */
+    public void validateRepository(URI uri) throws Exception {
+        URLConnection conn = uri.toURL().openConnection();
+        conn.setDefaultUseCaches(false);
+
+        InputStream stream = conn.getInputStream();
+
+        // load document and check the root element for namespace declaration
+        DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
+        dFactory.setNamespaceAware(true);
+        Document doc = dFactory.newDocumentBuilder().parse(stream);
+
+        if (doc.getDocumentElement().getNamespaceURI() == null) {
+            return;
+        }
+
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        // root element has namespace - we can use schema validation
+        Schema schema = factory.newSchema(new StreamSource(getClass().getResourceAsStream(
+            "/org/apache/karaf/features/karaf-features-1.0.0.xsd")));
+
+        // create schema by reading it from an XSD file:
+        Validator validator = schema.newValidator();
+
+        try {
+            validator.validate(new DOMSource(doc));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to validate " + uri, e);
+        }
+    }
+
     public void addRepository(URI uri) throws Exception {
         if (!repositories.containsKey(uri)) {
             internalAddRepository(uri);
@@ -181,7 +219,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     protected RepositoryImpl internalAddRepository(URI uri) throws Exception {
-    	RepositoryImpl repo = null;
+        validateRepository(uri);
+        RepositoryImpl repo = null;
         repo = new RepositoryImpl(uri);
         repositories.put(uri, repo);
         repo.load();
