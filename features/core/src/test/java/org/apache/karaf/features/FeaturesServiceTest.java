@@ -43,7 +43,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
-import org.slf4j.Logger;
 
 import static org.easymock.EasyMock.*;
 
@@ -61,7 +60,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\">");
         pw.println("    <bundle>" + name + "</bundle>");
         pw.println("  </feature>");
@@ -128,7 +127,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <bundle>" + name + "</bundle>");
         pw.println("  </feature>");
@@ -217,7 +216,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <bundle>" + name + "</bundle>");
         pw.println("  </feature>");
@@ -257,7 +256,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <bundle>" + name + "</bundle>");
         pw.println("  </feature>");
@@ -349,7 +348,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("  <feature version=\"0.1\">f2</feature>");
         pw.println("    <bundle>" + name + "</bundle>");
@@ -419,7 +418,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature version=\"0.1\">f2</feature>");
         pw.println("  </feature>");
@@ -454,7 +453,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature>f2</feature>");
         pw.println("  </feature>");
@@ -488,7 +487,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
         pw.println("  </feature>");
@@ -522,7 +521,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
         pw.println("  </feature>");
@@ -605,7 +604,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
@@ -657,7 +656,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
@@ -710,7 +709,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
@@ -767,7 +766,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
@@ -890,6 +889,59 @@ public class FeaturesServiceTest extends TestCase {
                             EnumSet.noneOf(FeaturesService.Option.class));
 
 //        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle1, installedBundle2);
+    }
+
+    /**
+     * This test checks schema validation of submited uri.
+     */
+    public void testSchemaValidation() throws Exception {
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("  <featur>");
+        pw.println("    <bundle>somebundle</bundle>");
+        pw.println("  </featur>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+
+        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setBundleContext(bundleContext);
+        try {
+            svc.addRepository(uri);
+            fail("exception expected");
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains("Unable to validate"));
+        }
+    }
+
+    /**
+     * This test checks feature service behavior with old, non namespaced descriptor.
+     */
+    public void testNoSchemaValidation() throws Exception {
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <featur>");
+        pw.println("    <bundle>anotherBundle</bundle>");
+        pw.println("  </featur>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
+        replay(bundleContext);
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setBundleContext(bundleContext);
+        svc.addRepository(uri);
     }
 
     private String getJarUrl(Class cl) {

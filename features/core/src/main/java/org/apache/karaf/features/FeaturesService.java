@@ -33,6 +33,14 @@ public interface FeaturesService {
         Verbose
     }
 
+    /**
+     * Validate repository contents.
+     * 
+     * @param uri Repository uri.
+     * @throws Exception When validation fails.
+     */
+    void validateRepository(URI uri) throws Exception;
+
     void addRepository(URI url) throws Exception;
 
     void removeRepository(URI url);
