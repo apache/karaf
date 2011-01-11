@@ -16,7 +16,7 @@
       See the License for the specific language governing permissions and
       limitations under the License.
 -->
-<features name="karaf-${project.version}">
+<features name="karaf-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
     <feature name="spring" version="${spring2.version}" resolver="(obr)">
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
         <bundle>mvn:org.springframework/spring-core/${spring2.version}</bundle>
@@ -26,10 +26,10 @@
         <bundle>mvn:org.springframework/spring-context-support/${spring2.version}</bundle>
     </feature>
     <feature name="spring-web" version="${spring2.version}" resolver="(obr)">
-    	<feature version="${spring2.version}">spring</feature>
-    	<feature version="${project.version}">http</feature>
-    	<bundle>mvn:org.springframework/spring-web/${spring2.version}</bundle>
-		<bundle>mvn:org.springframework/spring-webmvc/${spring2.version}</bundle>
+        <feature version="${spring2.version}">spring</feature>
+        <feature version="${project.version}">http</feature>
+        <bundle>mvn:org.springframework/spring-web/${spring2.version}</bundle>
+        <bundle>mvn:org.springframework/spring-webmvc/${spring2.version}</bundle>
     </feature>
     <feature name="spring" version="${spring.version}" resolver="(obr)">
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
@@ -42,10 +42,10 @@
         <bundle>mvn:org.springframework/spring-context-support/${spring.version}</bundle>
     </feature>
     <feature name="spring-web" version="${spring.version}" resolver="(obr)">
-    	<feature version="${spring.version}">spring</feature>
-    	<feature version="${project.version}">http</feature>
-    	<bundle>mvn:org.springframework/spring-web/${spring.version}</bundle>
-		<bundle>mvn:org.springframework/spring-webmvc/${spring.version}</bundle>
+        <feature version="${spring.version}">spring</feature>
+        <feature version="${project.version}">http</feature>
+        <bundle>mvn:org.springframework/spring-web/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-webmvc/${spring.version}</bundle>
     </feature>
     <feature name="spring-dm" version="${spring.osgi.version}" resolver="(obr)">
         <feature version="[2.5.6,4)">spring</feature>
@@ -57,10 +57,10 @@
         <bundle>mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
     <feature name="spring-dm-web" version="${spring.osgi.version}" resolver="(obr)">
-    	<feature version="${spring.osgi.version}">spring-dm</feature>
-    	<feature version="[2.5.6,4)">spring-web</feature>
-    	<feature version="${project.version}">http</feature>
-		<bundle>mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
+        <feature version="${spring.osgi.version}">spring-dm</feature>
+        <feature version="[2.5.6,4)">spring-web</feature>
+        <feature version="${project.version}">http</feature>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
     </feature>
     <feature name="wrapper" version="${project.version}">
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
@@ -73,35 +73,35 @@
     <feature name="config" version="${project.version}">
         <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
     </feature>
-	<feature name="jetty" version="${jetty.version}" resolver="(obr)">
-		<bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
+    <feature name="jetty" version="${jetty.version}" resolver="(obr)">
+        <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm.bundle.version}</bundle>
-	    <bundle>mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
-	    <bundle>mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
-	    <bundle>mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
-	    <bundle>mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
-	    <bundle>mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle>
-	    <bundle>mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle>
-	    <bundle>mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
-    	<bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
-	</feature>
-	<feature name="jetty-jaas" version="${jetty.version}" resolver="(obr)">
-		<feature version="[7.0,8.0)">jetty</feature>
-		<bundle dependency='true'>mvn:javax.mail/mail/${javax.mail.version}</bundle>
-		<bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-		<bundle>mvn:org.eclipse.jetty/jetty-webapp/${jetty.version}</bundle>
-		<bundle>mvn:org.eclipse.jetty/jetty-jndi/${jetty.version}</bundle>
-		<bundle>mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle>
-	</feature>
+        <bundle>mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
+    </feature>
+    <feature name="jetty-jaas" version="${jetty.version}" resolver="(obr)">
+        <feature version="[7.0,8.0)">jetty</feature>
+        <bundle dependency='true'>mvn:javax.mail/mail/${javax.mail.version}</bundle>
+        <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-webapp/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-jndi/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle>
+    </feature>
     <feature name="http" version="${project.version}" resolver="(obr)">
-    	<configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
-		<config name="org.ops4j.pax.web">
+        <configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
+        <config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
             org.ops4j.pax.web.config.file=${karaf.base}/etc/jetty.xml
         </config>
         <feature version="[7.0,8.0)">jetty</feature>
-    	<bundle>mvn:org.ops4j.pax.web/pax-web-api/${pax.web.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-api/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${pax.web.version}</bundle>
@@ -131,7 +131,7 @@
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.admin/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
-		<bundle>mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin-plugin.version}</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin-plugin.version}</bundle>
     </feature>
     <feature name="ssh" version="${project.version}">
         <config name="org.apache.karaf.shell">
@@ -150,7 +150,7 @@
         <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
     </feature>
     <feature name="eventadmin" version="${project.version}">
-		<bundle>mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
     </feature>
     <feature name="jasypt-encryption" version="${project.version}" resolver="(obr)">
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-codec/${commons-codec.bundle.version}</bundle>
