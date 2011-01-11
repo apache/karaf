@@ -90,6 +90,11 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
      */
     private boolean failOnArtifactResolutionError = true;
 
+    /**
+     * @parameter
+     */
+    private boolean addTransitiveFeatures = true;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             Set<String> bundles = new HashSet<String>();
@@ -103,13 +108,24 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                     featuresMap.put(f.getName(), f);
                 }
             }
+            Set<String> featuresBundles = new HashSet<String>();
             Set<String> transitiveFeatures = new HashSet<String>();
-            addFeatures(features, transitiveFeatures, featuresMap);
-            for (String feature : transitiveFeatures) {
-                bundles.addAll(featuresMap.get(feature).getBundles());
-                //Treat the config files as bundles, since it is only copying
-                bundles.addAll(featuresMap.get(feature).getConfigFiles());
+            addFeatures(features, featuresBundles, transitiveFeatures, featuresMap);
+
+            // add the bundles of the configured features to the bundles list
+            bundles.addAll(featuresBundles);
+
+            // if transitive features are enabled we add the contents of those
+            // features to the bundles list
+            if (this.addTransitiveFeatures) {
+                for (String feature : transitiveFeatures) {
+                    getLog().info("Adding contents of transitive feature: " + feature);
+                    bundles.addAll(featuresMap.get(feature).getBundles());
+                    //Treat the config files as bundles, since it is only copying
+                    bundles.addAll(featuresMap.get(feature).getConfigFiles());
+                }
             }
+            
             getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
                 // get rid of of possible line-breaks KARAF-313
@@ -194,14 +210,24 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         }
     }
 
-    private void addFeatures(List<String> features, Set<String> transitiveFeatures, Map<String, Feature> featuresMap) {
+    private void addFeatures(List<String> features, Set<String> featuresBundles, Set<String> transitiveFeatures, Map<String, Feature> featuresMap) {
         for (String feature : features) {
             Feature f = featuresMap.get(feature);
             if (f == null) {
                 throw new IllegalArgumentException("Unable to find the feature '" + feature + "'");
             }
-            transitiveFeatures.add(feature);
-            addFeatures(f.getDependencies(), transitiveFeatures, featuresMap);
+            // only add the feature to transitives if it is not
+            // listed in the features list defined by the config
+            if (!this.features.contains(feature)) {
+                transitiveFeatures.add(feature);
+            } else {
+                // add the bundles of the feature to the bundle set
+                getLog().info("Adding contents for feature: " + feature);
+                featuresBundles.addAll(featuresMap.get(feature).getBundles());
+                //Treat the config files as bundles, since it is only copying
+                featuresBundles.addAll(featuresMap.get(feature).getConfigFiles());
+            }
+            addFeatures(f.getDependencies(), featuresBundles, transitiveFeatures, featuresMap);
         }
     }
 
