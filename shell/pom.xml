@@ -43,6 +43,7 @@
         <module>ssh</module>
         <module>wrapper</module>
         <module>dev</module>
+        <module>web</module>
     </modules>
 
 </project>
