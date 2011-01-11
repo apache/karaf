@@ -16,22 +16,64 @@
  */
 package org.apache.karaf.features.command;
 
+import java.net.URI;
+
+import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
-import org.apache.felix.gogo.commands.Command;
 
+/**
+ * Command which lists feature URLs.
+ * 
+ */
 @Command(scope = "features", name = "listUrl", description = "Displays a list of all defined repository URLs.")
 public class ListUrlCommand extends FeaturesCommandSupport {
 
+    @Option(name = "-v", aliases = "-validate", description = "Validate current version of descriptors", required = false, multiValued = false)
+    boolean validation = false;
+
+    @Option(name = "-vo", aliases = "-verbose", description = "Shows validation output", required = false, multiValued = false)
+    boolean verbose = false;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         Repository[] repos = admin.listRepositories();
+
+        String header;
+        if (validation) {
+            header = " Loaded   Now valid   URI ";
+        } else {
+            header = " Loaded   URI ";
+        }
+
+        session.getConsole().println(header);
+
+        String verboseOutput = "";
+
         if ((repos != null) && (repos.length > 0)) {
             for (int i = 0; i < repos.length; i++) {
-            	String status = repos[i].isValid() ? "    valid" : "    invalid";
-            	System.out.println(repos[i].getURI().toString() + status);
+                URI uri = repos[i].getURI();
+
+                String line = "";
+                line += repos[i].isValid() ? "  true " : "  false";
+
+                try {
+                    admin.validateRepository(uri);
+                    // append valid flag if validation mode is tuned on
+                    line += !validation ? "" : "     true   ";
+                } catch (Exception e) {
+                    line += !validation ? "" : "     false  ";
+                    verboseOutput += uri + ":" + e.getMessage() + "\n";
+                }
+
+                session.getConsole().println(line + "   " + uri);
+            }
+
+            if (verbose) {
+                session.getConsole().println("Validation output:\n" + verboseOutput);
             }
         } else {
-            System.out.println("No repository URLs are set.");
+            session.getConsole().println("No repository URLs are set.");
         }
     }
 }
