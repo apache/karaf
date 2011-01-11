@@ -78,6 +78,11 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     /**
      * @parameter
      */
+    private boolean includeMvnBasedDescriptors = false;
+
+    /**
+     * @parameter
+     */
     private boolean skipNonMavenProtocols = true;
 
     /**
@@ -87,8 +92,12 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
+            Set<String> bundles = new HashSet<String>();
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
             for (String uri : descriptors) {
+                if (includeMvnBasedDescriptors) {
+                    bundles.add(uri);
+                }
                 Repository repo = new Repository(URI.create(translateFromMaven(uri)));
                 for (Feature f : repo.getFeatures()) {
                     featuresMap.put(f.getName(), f);
@@ -96,7 +105,6 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             }
             Set<String> transitiveFeatures = new HashSet<String>();
             addFeatures(features, transitiveFeatures, featuresMap);
-            Set<String> bundles = new HashSet<String>();
             for (String feature : transitiveFeatures) {
                 bundles.addAll(featuresMap.get(feature).getBundles());
                 //Treat the config files as bundles, since it is only copying
@@ -260,7 +268,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         public Map<String, Map<String, String>> getConfigurations() {
             return configs;
         }
-        
+
         public List<String> getConfigFiles() {
         	return configFiles;
         }
@@ -276,7 +284,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         public void addConfig(String name, Map<String,String> properties) {
             configs.put(name, properties);
         }
-        
+
         public void addConfigFile(String configFile) {
         	configFiles.add(configFile);
         }
