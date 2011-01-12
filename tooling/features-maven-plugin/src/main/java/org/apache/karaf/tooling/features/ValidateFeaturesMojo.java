@@ -33,6 +33,7 @@ import java.util.zip.ZipFile;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
+import org.apache.karaf.features.internal.FeatureValidationUtil;
 import org.apache.karaf.features.internal.RepositoryImpl;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.maven.artifact.Artifact;
@@ -140,7 +141,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             prepare();
-            Repository repository = new RepositoryImpl(file.toURI());
+            URI uri = file.toURI();
+            Repository repository = new RepositoryImpl(uri);
+            schemaCheck(repository, uri);
             analyze(repository);
             validate(repository);
         } catch (Exception e) {
@@ -148,6 +151,21 @@ public class ValidateFeaturesMojo extends MojoSupport {
             throw new MojoExecutionException(String.format("Unable to validate %s: %s", file.getAbsolutePath(), e.getMessage()), e);
         }
 
+    }
+
+    /**
+     * Checks feature repository with XML Schema.
+     * @param repository Repository object.
+     * @param uri Display URI.
+     */
+    private void schemaCheck(Repository repository, URI uri) {
+        try {
+            info(" - validation of %s", uri);
+            FeatureValidationUtil.validate(repository.getURI());
+        } catch (Exception e) {
+            error("Failed to validate repository %s. Schema validation fails. Fix errors to continue validation",
+                e, uri);
+        }
     }
 
     /*
@@ -173,18 +191,21 @@ public class ValidateFeaturesMojo extends MojoSupport {
         
         // add the repositories from the plugin configuration
         if (repositories != null) {
-        	for (String uri : repositories) {
-        		getLog().info(String.format(" - adding repository from %s", uri));
-        		Repository dependency = new RepositoryImpl(URI.create(translateFromMaven(uri)));
-        		features.add(dependency.getFeatures());
-        		validateBundlesAvailable(dependency);
-        		analyzeExports(dependency);
-        	}
+            for (String uri : repositories) {
+                getLog().info(String.format(" - adding repository from %s", uri));
+                Repository dependency = new RepositoryImpl(URI.create(translateFromMaven(uri)));
+                schemaCheck(dependency, URI.create(uri));
+                features.add(dependency.getFeatures());
+                validateBundlesAvailable(dependency);
+                analyzeExports(dependency);
+            }
         }
 
         for (URI uri : repository.getRepositories()) {
             Artifact artifact = (Artifact) resolve(uri.toString());
             Repository dependency  = new RepositoryImpl(new File(localRepo.getBasedir(), localRepo.pathOf(artifact)).toURI());
+
+            schemaCheck(dependency, uri);
             getLog().info(String.format(" - adding %d known features from %s", dependency.getFeatures().length, uri));
             features.add(dependency.getFeatures());
             // we need to do this to get all the information ready for further processing
@@ -259,9 +280,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
     private void readSystemPackages() throws IOException {
         Properties properties = new Properties();
         if (karafConfig.equals("config.properties")) {
-        	properties.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
+            properties.load(getClass().getClassLoader().getResourceAsStream("config.properties"));
         } else {
-        	properties.load(new FileInputStream(new File(karafConfig)));
+            properties.load(new FileInputStream(new File(karafConfig)));
         }
 
         String packages = (String) properties.get(jreVersion);
@@ -281,7 +302,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
         for (Feature feature : repository.getFeatures()) {
             Set<Clause> exports = new HashSet<Clause>();
             for (String bundle : getBundleLocations(feature)) {
-            	exports.addAll(getExports(getManifest(bundle, bundles.get(bundle))));
+                exports.addAll(getExports(getManifest(bundle, bundles.get(bundle))));
             }
             info("    scanning feature %s for exports", feature.getName());
             featureExports.put(feature.getName(), exports);
@@ -294,9 +315,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
     private void validateBundlesAvailable(Repository repository) throws Exception {
         for (Feature feature : repository.getFeatures()) {
             for (String bundle : getBundleLocations(feature)) {
-            	if (!isMavenProtocol(bundle) && skipNonMavenProtocols) {
-            		continue;
-            	}
+                if (!isMavenProtocol(bundle) && skipNonMavenProtocols) {
+                    continue;
+                }
                 // this will throw an exception if the artifact can not be resolved
                 final Object artifact = resolve(bundle);
                 bundles.put(bundle, artifact);
@@ -394,7 +415,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
      * Check if the artifact is an OSGi bundle
      */
     private boolean isBundle(String bundle, Object artifact) {
-    	if (artifact instanceof Artifact && "bundle".equals(((Artifact) artifact).getArtifactHandler().getPackaging())) {
+        if (artifact instanceof Artifact && "bundle".equals(((Artifact) artifact).getArtifactHandler().getPackaging())) {
             return true;
         } else {
             try {
@@ -415,17 +436,17 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private Manifest getManifest(String bundle, Object artifact) throws ArtifactResolutionException, ArtifactNotFoundException, 
                                                            ZipException, IOException {
-    	ZipFile file = null;
-    	if (!(artifact instanceof Artifact)) {
-    		//not resolved as mvn artifact, so it's non-mvn protocol, just use the CustomBundleURLStreamHandlerFactory
-    		// to open stream
-    		InputStream is = null;
-			try {
-				is = new BufferedInputStream(new URL(bundle).openStream());
-			} catch (Exception e){
-				e.printStackTrace();
-			}
-			try {
+        ZipFile file = null;
+        if (!(artifact instanceof Artifact)) {
+            //not resolved as mvn artifact, so it's non-mvn protocol, just use the CustomBundleURLStreamHandlerFactory
+            // to open stream
+            InputStream is = null;
+            try {
+                is = new BufferedInputStream(new URL(bundle).openStream());
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            try {
                 is.mark(256 * 1024);
                 JarInputStream jar = new JarInputStream(is);
                 Manifest m = jar.getManifest();
@@ -437,39 +458,39 @@ public class ValidateFeaturesMojo extends MojoSupport {
             } finally {
                 is.close();
             }
-    	} else {
-    		Artifact mvnArtifact = (Artifact) artifact;
-			File localFile = new File(localRepo.pathOf(mvnArtifact));
-			if (localFile.exists()) {
-				// avoid going over to the repository if the file is already on
-				// the disk
-				file = new ZipFile(localFile);
-			} else {
-				resolver.resolve(mvnArtifact, remoteRepos, localRepo);
-				file = new ZipFile(mvnArtifact.getFile());
-			}
-			// let's replace syserr for now to hide warnings being issues by the Manifest reading process
-	        PrintStream original = System.err;
-	        try {
-	            System.setErr(new PrintStream(new ByteArrayOutputStream()));
-	            Manifest manifest = new Manifest(file.getInputStream(file.getEntry("META-INF/MANIFEST.MF")));
-	            return manifest; 
-	        } finally {
-	            System.setErr(original);
-	        }
-    	}
+        } else {
+            Artifact mvnArtifact = (Artifact) artifact;
+            File localFile = new File(localRepo.pathOf(mvnArtifact));
+            if (localFile.exists()) {
+                // avoid going over to the repository if the file is already on
+                // the disk
+                file = new ZipFile(localFile);
+            } else {
+                resolver.resolve(mvnArtifact, remoteRepos, localRepo);
+                file = new ZipFile(mvnArtifact.getFile());
+            }
+            // let's replace syserr for now to hide warnings being issues by the Manifest reading process
+            PrintStream original = System.err;
+            try {
+                System.setErr(new PrintStream(new ByteArrayOutputStream()));
+                Manifest manifest = new Manifest(file.getInputStream(file.getEntry("META-INF/MANIFEST.MF")));
+                return manifest; 
+            } finally {
+                System.setErr(original);
+            }
+        }
     }
 
     /*
      * Resolve an artifact, downloading it from remote repositories when necessary
      */
     private Object resolve(String bundle) throws Exception, ArtifactNotFoundException {
-    	if (!isMavenProtocol(bundle)) {
-    		return bundle;
-    	}
+        if (!isMavenProtocol(bundle)) {
+            return bundle;
+        }
         Artifact artifact = getArtifact(bundle);
         if (bundle.indexOf(MVN_REPO_SEPARATOR) >= 0) {
-        	if (bundle.startsWith(MVN_URI_PREFIX)) {
+            if (bundle.startsWith(MVN_URI_PREFIX)) {
                 bundle = bundle.substring(MVN_URI_PREFIX.length());
             }
             String repo = bundle.substring(0, bundle.indexOf(MVN_REPO_SEPARATOR));
@@ -482,7 +503,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
             resolver.resolve(artifact, remoteRepos, localRepo);
         }
         if (artifact == null) {
-        	throw new Exception("Unable to resolve artifact for uri " + bundle);
+            throw new Exception("Unable to resolve artifact for uri " + bundle);
         } else {
             return artifact;
         }
@@ -493,7 +514,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
      */
     private Artifact getArtifact(String uri) {
         // remove the mvn: prefix when necessary
-    	if (uri.startsWith(MVN_URI_PREFIX)) {
+        if (uri.startsWith(MVN_URI_PREFIX)) {
             uri = uri.substring(MVN_URI_PREFIX.length());
         }
         // remove the repository url when specified
@@ -517,7 +538,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
      * see if bundle url is start with mvn protocol
      */
     private boolean isMavenProtocol(String bundle) {
-    	return bundle.startsWith(MVN_URI_PREFIX);
+        return bundle.startsWith(MVN_URI_PREFIX);
     }
 
     /*
