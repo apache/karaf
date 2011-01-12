@@ -36,22 +36,22 @@ name of repository. This name will be used in shell to display source repository
 of given feature.
             ]]></xs:documentation>
         </xs:annotation>
-        <xs:sequence>
-            <xs:element name="repository" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="repository" type="xs:anyURI">
                 <xs:annotation>
                     <xs:documentation><![CDATA[
 Additional repositories where dependencies are stored.
                     ]]></xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="feature" type="tns:feature" maxOccurs="unbounded">
+            <xs:element name="feature" type="tns:feature">
                 <xs:annotation>
                     <xs:documentation><![CDATA[
 Feature definition.
                     ]]></xs:documentation>
                 </xs:annotation>
             </xs:element>
-        </xs:sequence>
+        </xs:choice>
         <xs:attribute name="name" type="xs:string" />
     </xs:complexType>
 

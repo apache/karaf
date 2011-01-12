@@ -182,33 +182,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
      * Validate repository.
      */
     public void validateRepository(URI uri) throws Exception {
-        URLConnection conn = uri.toURL().openConnection();
-        conn.setDefaultUseCaches(false);
-
-        InputStream stream = conn.getInputStream();
-
-        // load document and check the root element for namespace declaration
-        DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
-        dFactory.setNamespaceAware(true);
-        Document doc = dFactory.newDocumentBuilder().parse(stream);
-
-        if (doc.getDocumentElement().getNamespaceURI() == null) {
-            return;
-        }
-
-        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        // root element has namespace - we can use schema validation
-        Schema schema = factory.newSchema(new StreamSource(getClass().getResourceAsStream(
-            "/org/apache/karaf/features/karaf-features-1.0.0.xsd")));
-
-        // create schema by reading it from an XSD file:
-        Validator validator = schema.newValidator();
-
-        try {
-            validator.validate(new DOMSource(doc));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Unable to validate " + uri, e);
-        }
+        FeatureValidationUtil.validate(uri);
     }
 
     public void addRepository(URI uri) throws Exception {
