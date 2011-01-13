@@ -215,6 +215,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%1" == "server" goto :EXECUTE_SERVER
     if "%1" == "client" goto :EXECUTE_CLIENT
     if "%1" == "clean" goto :EXECUTE_CLEAN
+    if "%1" == "debug" goto :EXECUTE_DEBUG
     goto :EXECUTE
 
 :EXECUTE_STOP
@@ -241,6 +242,11 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     shift
     goto :RUN_LOOP
 
+:EXECUTE_DEBUG
+    if "%JAVA_DEBUG_OPTS%" == "" set JAVA_DEBUG_OPTS=%DEFAULT_JAVA_DEBUG_OPTS%
+    set "JAVA_OPTS=%JAVA_DEBUG_OPTS% %JAVA_OPTS%"
+    shift
+    goto :RUN_LOOP
 
 :EXECUTE
     SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8

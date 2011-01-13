@@ -329,6 +329,13 @@ run() {
             rm -Rf $KARAF_DATA
             shift
             ;;
+        'debug')
+            if [ "x$JAVA_DEBUG_OPTS" = "x" ]; then
+                JAVA_DEBUG_OPTS="$DEFAULT_JAVA_DEBUG_OPTS"
+            fi
+            JAVA_OPTS="$JAVA_DEBUG_OPTS $JAVA_OPTS"
+            shift
+            ;;
     esac
 
     SEP=":"
