@@ -772,12 +772,32 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         if (boot != null && !bootFeaturesInstalled) {
             new Thread() {
                 public void run() {
+                    // splitting the features
                     String[] list = boot.split(",");
                     Set<Feature> features = new LinkedHashSet<Feature>();
                     for (String f : list) {
                         if (f.length() > 0) {
+                            String featureVersion = null;
+
+                            // first we split the parts of the feature string to gain access to the version info
+                            // if specified
+                            String[] parts = f.split(";");
+                            String featureName = parts[0];
+                            for (String part : parts) {
+                                // if the part starts with "version=" it contains the version info
+                                if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
+                                    featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
+                                }
+                            }
+
+                            if (featureVersion == null) {
+                                // no version specified - use default version
+                                featureVersion = FeatureImpl.DEFAULT_VERSION;
+                            }
+
                             try {
-                                Feature feature = getFeature(f, FeatureImpl.DEFAULT_VERSION);
+                                // try to grab specific feature version
+                                Feature feature = getFeature(featureName, featureVersion);
                                 if (feature != null) {
                                     features.add(feature);
                                 } else {

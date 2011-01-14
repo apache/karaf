@@ -16,14 +16,19 @@
  */
 package org.apache.karaf.features.internal;
 
+import static org.easymock.EasyMock.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 import org.apache.karaf.features.Feature;
+
 import org.apache.felix.utils.manifest.Clause;
 import org.easymock.EasyMock;
 import org.osgi.framework.BundleContext;
@@ -111,6 +116,51 @@ public class FeaturesServiceImplTest extends TestCase {
         try {
             service.setUrls("mvn:inexistent/features/1.0/xml/features");
             service.start();
+        } catch (Exception e) {
+            fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
+        }
+    }
+
+    /**
+     * This test checks KARAF-388 which allows you to specify version of boot feature.
+     */
+    public void testStartDoesNotFailWithNonExistentVersion()  {
+        BundleContext bundleContext = createMock(BundleContext.class);
+
+        final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
+        Map<String, Feature> versions = new HashMap<String, Feature>();
+        versions.put("1.0.0", new FeatureImpl("transaction", "1.0.0"));
+        versions.put("2.0.0", new FeatureImpl("transaction", "2.0.0"));
+        features.put("transaction", versions);
+
+        Map<String, Feature> versions2 = new HashMap<String, Feature>();
+        versions2.put("1.0.0", new FeatureImpl("ssh", "1.0.0"));
+        features.put("ssh", versions2);
+
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+            protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
+                return features;
+            };
+
+            // override methods which refers to bundle context to avoid mocking everything
+            @Override
+            protected boolean loadState() {
+                return true;
+            }
+            @Override
+            protected void saveState() {
+            }
+        };
+        impl.setBundleContext(bundleContext);
+
+        try {
+            Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
+            impl.setBoot("transaction;version=1.2,ssh;version=1.0.0");
+            impl.start();
+
+            assertFalse("Feature transaction 1.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "1.0.0")));
+            assertFalse("Feature transaction 2.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "2.0.0")));
+            assertFalse("Feature ssh should be installed", impl.isInstalled(impl.getFeature("ssh", "1.0.0")));
         } catch (Exception e) {
             fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
         }

@@ -40,6 +40,7 @@ public class FeatureImpl implements Feature {
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
     public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
     public static String DEFAULT_VERSION = "0.0.0";
+    public static String VERSION_PREFIX = "version=";
 
     public FeatureImpl() {
     }
