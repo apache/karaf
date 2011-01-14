@@ -59,6 +59,12 @@
       <dependency>
         <groupId>org.apache.karaf.features</groupId>
         <artifactId>org.apache.karaf.features.core</artifactId>
+        <exclusions>
+        	<exclusion>
+        		<artifactId>org.apache.karaf.shell.console</artifactId>
+        		<groupId>org.apache.karaf.shell</groupId>
+        	</exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.ops4j.pax.url</groupId>
