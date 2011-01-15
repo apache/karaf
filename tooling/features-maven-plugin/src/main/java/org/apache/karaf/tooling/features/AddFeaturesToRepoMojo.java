@@ -88,12 +88,21 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     /**
      * @parameter
      */
+    private boolean includeMvnBasedDescriptors = false;
+
+    /**
+     * @parameter
+     */
     private boolean addTransitiveFeatures = true;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
+            Set<String> bundles = new HashSet<String>();
             for (String uri : descriptors) {
+                if (includeMvnBasedDescriptors) {
+                    bundles.add(uri);
+                }
                 Repository repo = new Repository(URI.create(translateFromMaven(uri)));
                 for (Feature f : repo.getFeatures()) {
                     featuresMap.put(f.getName(), f);
@@ -101,7 +110,6 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             }
             Set<String> featuresBundles = new HashSet<String>();
             Set<String> transitiveFeatures = new HashSet<String>();
-            Set<String> bundles = new HashSet<String>();
             addFeatures(features, featuresBundles, transitiveFeatures, featuresMap);
 
             // add the bundles of the configured features to the bundles list
@@ -109,13 +117,13 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
             // if transitive features are enabled we add the contents of those
             // features to the bundles list
-            if (this.addTransitiveFeatures) {
+            if (addTransitiveFeatures) {
                 for (String feature : transitiveFeatures) {
                     getLog().info("Adding contents of transitive feature: " + feature);
                     bundles.addAll(featuresMap.get(feature).getBundles());
                 }
             }
-            
+
             getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
                 // get rid of of possible line-breaks KARAF-313
