@@ -22,8 +22,11 @@
 	<reference id="slService" interface="org.osgi.service.startlevel.StartLevel" availability="optional" />
 
 	<bean id="eaHandler" class="org.apache.karaf.shell.web.WebEventHandler" />
-
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+	<service id="webListener"
+		interface="org.ops4j.pax.web.service.spi.WebListener"
+		ref="eaHandler" />
+		
+	<command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="web/list">
             <action class="org.apache.karaf.shell.web.WebListCommand">
             	<property name="startLevelService" ref="slService" />
@@ -32,13 +35,4 @@
         </command>
     </command-bundle>
 
-	<!--  right not blueprint dosn't take account of start level so it might happen after a restart that this 
-	handler doesn't get all events :( -->
-	<service id="eaHandlerSrvc" interface="org.osgi.service.event.EventHandler" ref="eaHandler">
-		<service-properties>
-			<entry key="event.topics" value="org/osgi/service/web/*"/>
-		</service-properties>
-	</service>
-	 
-	
 </blueprint>
