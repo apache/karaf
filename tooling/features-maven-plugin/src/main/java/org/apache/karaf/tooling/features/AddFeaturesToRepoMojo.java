@@ -88,6 +88,11 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     /**
      * @parameter
      */
+    private List<CopyFileBasedDescriptor> copyFileBasedDescriptors;
+
+    /**
+     * @parameter
+     */
     private boolean includeMvnBasedDescriptors = false;
 
     /**
@@ -197,6 +202,15 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                         throw new MojoFailureException("Can't resolve bundle " + bundle, e);
                     }
                     getLog().error("Can't resolve bundle " + bundle, e);
+                }
+            }
+            if (copyFileBasedDescriptors != null) {
+                for (CopyFileBasedDescriptor fileBasedDescritpor : copyFileBasedDescriptors) {
+                    copy(new FileInputStream(fileBasedDescritpor.getSourceFile()),
+                        repository,
+                        fileBasedDescritpor.getTargetFileName(),
+                        fileBasedDescritpor.getTargetDirectory(),
+                        new byte[8192]);
                 }
             }
         } catch (MojoExecutionException e) {
