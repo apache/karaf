@@ -83,6 +83,11 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     /**
      * @parameter
      */
+    private List<CopyFileBasedDescriptor> copyFileBasedDescriptors;
+
+    /**
+     * @parameter
+     */
     private boolean skipNonMavenProtocols = true;
 
     /**
@@ -117,7 +122,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
             // if transitive features are enabled we add the contents of those
             // features to the bundles list
-            if (this.addTransitiveFeatures) {
+            if (addTransitiveFeatures) {
                 for (String feature : transitiveFeatures) {
                     getLog().info("Adding contents of transitive feature: " + feature);
                     bundles.addAll(featuresMap.get(feature).getBundles());
@@ -125,7 +130,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                     bundles.addAll(featuresMap.get(feature).getConfigFiles());
                 }
             }
-            
+
             getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
                 // get rid of of possible line-breaks KARAF-313
@@ -199,6 +204,15 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                         throw new MojoFailureException("Can't resolve bundle " + bundle, e);
                     }
                     getLog().error("Can't resolve bundle " + bundle, e);
+                }
+            }
+            if (copyFileBasedDescriptors != null) {
+                for (CopyFileBasedDescriptor fileBasedDescritpor : copyFileBasedDescriptors) {
+                    copy(new FileInputStream(fileBasedDescritpor.getSourceFile()),
+                        repository,
+                        fileBasedDescritpor.getTargetFileName(),
+                        fileBasedDescritpor.getTargetDirectory(),
+                        new byte[8192]);
                 }
             }
         } catch (MojoExecutionException e) {
