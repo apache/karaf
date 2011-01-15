@@ -33,21 +33,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
-            <optional>true</optional>
+        	<groupId>org.ops4j.pax.web</groupId>
+        	<artifactId>pax-web-spi</artifactId>
+            <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-extender</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
+	</dependencies>
     <build>
         <plugins>
             <plugin>
@@ -62,7 +52,6 @@
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
-                            org.springframework*;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>

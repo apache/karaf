@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.ops4j.pax.web.service.spi.WebEvent;
+import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.startlevel.StartLevel;
@@ -37,12 +39,12 @@ public class WebListCommand extends OsgiCommandSupport {
 	@Override
 	protected Object doExecute() {
 		Bundle[] bundles = getBundleContext().getBundles();
-		Map<Long, String> bundleEvents = eventHandler.getBundleEvents();
+		Map<Long, WebEvent> bundleEvents = eventHandler.getBundleEvents();
 		if (bundles != null) {
 			String level = (startLevelService == null) ? "" : "  Level ";
 			String webState = (bundleEvents == null || bundleEvents.isEmpty()) ? "" : "  Web-State     ";
 			String headers = "   ID   State       ";
-			headers += webState + level + "  Web-ContextPath           Name";
+			headers += webState + level + " Web-ContextPath           Name";
             System.out.println(headers);
             for (int i = 0; i < bundles.length; i++) {
             	//First check if this bundle contains  a webapp ctxt
@@ -119,23 +121,40 @@ public class WebListCommand extends OsgiCommandSupport {
     public String getWebStateString(Bundle bundle) {
     	
     	long bundleId = bundle.getBundleId();
-    	Map<Long, String> bundleEvents = eventHandler.getBundleEvents();
-		if (bundleEvents.containsKey(bundleId)) {
-    		String topic = bundleEvents.get(bundleId);
-    		topic = topic.substring(21);
-    		if ("UNDEPLOYING".equalsIgnoreCase(topic))
-    			return "Undeploying ";
-    		else if ("DEPLOYING".equalsIgnoreCase(topic))
-    			return "Deploying   ";
-    		else if ("DEPLOYED".equalsIgnoreCase(topic))
-    			return "Deployed    ";
-    		else if ("FAILED".equalsIgnoreCase(topic))
-    			return "Failed      ";
-    		else if ("UNDEPLOYED".equalsIgnoreCase(topic))
-    			return "Undeployed  ";
-    	}
     	
-    	return "Unknown     ";
+    	Map<Long, WebEvent> bundleEvents = eventHandler.getBundleEvents();
+    	String topic = "Unknown    ";
+    	
+		if (bundleEvents.containsKey(bundleId)) {
+    		WebEvent webEvent = bundleEvents.get(bundleId);
+
+    		switch(webEvent.getType()) {
+    		case WebEvent.DEPLOYING:
+    			topic = "Deploying  ";
+    			break;
+    		case WebEvent.DEPLOYED:
+    			topic = "Deployed   ";
+    			break;
+    		case WebEvent.UNDEPLOYING:
+    			topic = "Undeploying";
+    			break;
+    		case WebEvent.UNDEPLOYED:
+    			topic = "Undeployed ";
+    			break;
+    		case WebEvent.FAILED:
+    			topic = "Unknown    ";
+    			topic = "Failed     ";
+    			break;
+    		default:
+    			topic = "Failed     ";
+    		}
+		}
+		
+		while (topic.length() < 11) {
+        	topic += " ";
+        }
+    	
+    	return topic;
     }
 
 	/**

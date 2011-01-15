@@ -19,30 +19,23 @@ package org.apache.karaf.shell.web;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import org.ops4j.pax.web.service.spi.WebEvent;
+import org.ops4j.pax.web.service.spi.WebListener;
 
 /**
- * Class implementing {@link EventHandler} service to retrieve "org/osgi/service/web/*" specific Events
+ * Class implementing {@link WebListener} service to retrieve {@link WebEvent}
  */
-public class WebEventHandler implements EventHandler {
+//public class WebEventHandler implements WebListener {
+public class WebEventHandler implements WebListener {
 	
-	private final Map<Long, String> bundleEvents = new HashMap<Long, String>();
+	private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();
 
-	/* (non-Javadoc)
-	 * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
-	 */
-	public void handleEvent(Event event) {
-		String topic = event.getTopic();
-		Long bundleID = (Long) event.getProperty("bundle.id");
-		getBundleEvents().put(bundleID, topic);
-	}
-
-	/**
-	 * @return the bundleEvents
-	 */
-	public Map<Long, String> getBundleEvents() {
+	public Map<Long, WebEvent> getBundleEvents() {
 		return bundleEvents;
+	}
+		
+	public void webEvent(WebEvent event) {
+		getBundleEvents().put(event.getBundle().getBundleId(), event);
 	}
 
 }
