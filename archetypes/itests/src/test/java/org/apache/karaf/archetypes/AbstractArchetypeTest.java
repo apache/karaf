@@ -49,6 +49,7 @@ public abstract class AbstractArchetypeTest extends TestCase {
     private Properties sysProps = System.getProperties();
     private String version;
 
+    @Override
     protected void setUp() throws Exception {
         maven = new MavenEmbedder();
         maven.setOffline(false);
@@ -73,6 +74,7 @@ public abstract class AbstractArchetypeTest extends TestCase {
         version = project.getVersion();
     }
 
+    @Override
     protected void tearDown() throws Exception {
         maven.stop();
         maven = null;

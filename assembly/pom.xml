@@ -485,14 +485,9 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>target/classes/features.xml</file>
-                                    <type>xml</type>
-                                    <classifier>features</classifier>
-                                </artifact>
-                                <artifact>
-                                	<file>src/main/configfiles/jetty.xml</file>
-                                	<type>xml</type>
-                                	<classifier>jettyconfig</classifier>
+                                  <file>src/main/configfiles/jetty.xml</file>
+                                  <type>xml</type>
+                                  <classifier>jettyconfig</classifier>
                                 </artifact>
                             </artifacts>
                         </configuration>
@@ -605,20 +600,15 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>file:${basedir}/target/classes/features.xml</descriptor>
+                              <descriptor>mvn:org.apache.karaf.features.assembly/standard/${project.version}/xml/features</descriptor>
+                              <descriptor>mvn:org.apache.karaf.features.assembly/enterprise/${project.version}/xml/features</descriptor>
                             </descriptors>
                             <features>
                                 <feature>config</feature>
                                 <feature>ssh</feature>
                                 <feature>management</feature>
                             </features>
-                            <copyFileBasedDescriptors>
-                              <copyFileBasedDescriptor>
-                                <sourceFile>${basedir}/target/classes/features.xml</sourceFile>
-                                <targetDirectory>org/apache/karaf/apache-karaf/${project.version}</targetDirectory>
-                                <targetFileName>${project.artifactId}-${project.version}-features.xml</targetFileName>
-                              </copyFileBasedDescriptor>
-                            </copyFileBasedDescriptors>
+                            <includeMvnBasedDescriptors>true</includeMvnBasedDescriptors>
                             <repository>target/features-repo</repository>
                         </configuration>
                     </execution>
