@@ -113,6 +113,12 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                     featuresMap.put(f.getName(), f);
                 }
             }
+            
+            // no features specified, handle all of them
+            if(features == null) {
+                features = new ArrayList<String>(featuresMap.keySet());
+            }
+            
             Set<String> featuresBundles = new HashSet<String>();
             Set<String> transitiveFeatures = new HashSet<String>();
             addFeatures(features, featuresBundles, transitiveFeatures, featuresMap);
