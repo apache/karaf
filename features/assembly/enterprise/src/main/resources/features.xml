@@ -52,7 +52,7 @@
     <feature name="application-without-isolation" version="${aries.application.version}">
         <!-- pre-requisites-->
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
-        <bundle>mvn:org.apache.aries.proxy/org.apache.aries.proxy/aries.proxy.version</bundle>
+        <bundle>mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
         <bundle>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <feature version="${project.version}">obr</feature>
         <!-- commom -->
