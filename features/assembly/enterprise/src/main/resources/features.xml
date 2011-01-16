@@ -18,7 +18,7 @@
         limitations under the License.
     -->
 
-<features>
+<features name="karaf-enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
         <feature name='transaction' description='OSGi Transaction Manager' version='${aries.blueprint.version}' resolver='(obr)'>
             <details>The Aries JTA</details>
             <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
