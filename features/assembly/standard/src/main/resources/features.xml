@@ -108,7 +108,6 @@
     </feature>
     <feature name="war" version="${project.version}" resolver="(obr)">
         <feature>http</feature>
-        <feature>eventadmin</feature>
         <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.web/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-extender-war/${pax.web.version}</bundle>
