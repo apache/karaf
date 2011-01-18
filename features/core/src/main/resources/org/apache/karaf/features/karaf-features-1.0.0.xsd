@@ -62,15 +62,6 @@ Definition of the Feature.
             ]]></xs:documentation>
         </xs:annotation>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
-            <!-- Tags with info -->
-            <xs:element name="description" type="xs:string">
-                <xs:annotation>
-                    <xs:documentation><![CDATA[
-Short description displayed in features:list command results.
-                    ]]>
-                    </xs:documentation>
-                </xs:annotation>
-            </xs:element>
             <xs:element name="details" minOccurs="0" type="xs:string">
                 <xs:annotation>
                     <xs:documentation><![CDATA[
@@ -86,6 +77,7 @@ Long info displayed in features:info command result.
         </xs:choice>
         <xs:attribute name="name" type="tns:featureName" use="required" />
         <xs:attribute name="version" type="xs:string" default="0.0.0" />
+        <xs:attribute name="description" type="xs:string" />
         <xs:attribute name="resolver" type="tns:resolver">
             <xs:annotation>
                 <xs:documentation><![CDATA[
