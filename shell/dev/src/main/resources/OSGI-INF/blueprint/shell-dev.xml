@@ -47,7 +47,8 @@
     <!-- Referenace to the Configuration Admin Service -->
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
-    <bean id="watcher" class="org.apache.karaf.shell.dev.watch.BundleWatcher">
+    <bean id="watcher" class="org.apache.karaf.shell.dev.watch.BundleWatcher" init-method="start" destroy-method="stop">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 

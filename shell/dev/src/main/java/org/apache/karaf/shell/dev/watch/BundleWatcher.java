@@ -17,6 +17,20 @@
 package org.apache.karaf.shell.dev.watch;
 
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ops4j.pax.url.maven.commons.MavenConfiguration;
@@ -27,38 +41,26 @@ import org.ops4j.pax.url.mvn.internal.Parser;
 import org.ops4j.util.property.DictionaryPropertyResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.BundleReference;
-import org.osgi.framework.Constants;
+import org.osgi.framework.BundleListener;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A Runnable singleton which watches at the defined location for bundle updates.
  */
-public class BundleWatcher implements Runnable {
+public class BundleWatcher implements Runnable, BundleListener {
 
     private static Log logger = LogFactory.getLog(BundleWatcher.class);
 
+    private BundleContext bundleContext;
     private ConfigurationAdmin configurationAdmin;
 
-    private Boolean running = false;
-    private Long interval = 10000L;
-    private List<String> watchURLs = new ArrayList<String>();
-    private Map<Bundle, Long> lastModificationTimes = new HashMap<Bundle, Long>();
+    private AtomicBoolean running = new AtomicBoolean(false);
+    private long interval = 1000L;
+    private List<String> watchURLs = new CopyOnWriteArrayList<String>();
+    private AtomicInteger counter = new AtomicInteger(0);
 
 
     /**
@@ -67,24 +69,44 @@ public class BundleWatcher implements Runnable {
     public BundleWatcher() {
     }
 
+    public void bundleChanged(BundleEvent event) {
+        if (event.getType() == BundleEvent.INSTALLED
+                || event.getType() == BundleEvent.UNINSTALLED) {
+            counter.incrementAndGet();
+        }
+    }
+
     public void run() {
         if (logger.isDebugEnabled()) {
             logger.debug("Bundle watcher thread started");
         }
-        while (running) {
-            for (String bundleURL : watchURLs) {
-                for (Bundle bundle : getBundlesByURL(bundleURL)) {
+        int oldCounter = -1;
+        Set<Bundle> watchedBundles = new HashSet<Bundle>();
+        while (running.get() && !watchURLs.isEmpty()) {
+            if (oldCounter != counter.get()) {
+                oldCounter = counter.get();
+                watchedBundles.clear();
+                for (String bundleURL : watchURLs) {
+                    for (Bundle bundle : getBundlesByURL(bundleURL)) {
+                        watchedBundles.add(bundle);
+                    }
+                }
+            }
+            if (!watchedBundles.isEmpty()) {
+                File localRepository = getLocalRepository();
+                for (Bundle bundle : watchedBundles) {
                     try {
-                        Long lastModifiedTime = getBundleLastModifiedTime(bundle);
-                        Long oldLastModifiedTime = lastModificationTimes.get(bundle);
-                        if (!lastModifiedTime.equals(oldLastModifiedTime)) {
-                            String externalLocation = getBundleExternalLocation(bundle);
-                            if (externalLocation != null) {
-                                File f = new File(externalLocation);
-                                InputStream is = new FileInputStream(f);
+                        File location = getBundleExternalLocation(localRepository, bundle);
+                        if (location != null
+                                && location.exists()
+                                && location.lastModified() > bundle.getLastModified())
+                        {
+                            InputStream is = new FileInputStream(location);
+                            try {
+                                System.out.println("[Watch] Updating watched bundle: " + bundle.getSymbolicName() + " (" + bundle.getVersion() + ")");
                                 bundle.update(is);
+                            } finally {
                                 is.close();
-                                lastModificationTimes.put(bundle, lastModifiedTime);
                             }
                         }
                     } catch (IOException ex) {
@@ -96,8 +118,8 @@ public class BundleWatcher implements Runnable {
             }
             try {
                 Thread.sleep(interval);
-            } catch (Exception ex) {
-                running = false;
+            } catch (InterruptedException ex) {
+                running.set(false);
             }
         }
 
@@ -108,39 +130,27 @@ public class BundleWatcher implements Runnable {
 
     /**
      * Adds a Bundle URLs to the watch list.
-     * @param urls
+     * @param url
      */
-    public void add(String urls) {
-        watchURLs.add(urls);
-        for (Bundle bundle : getBundlesByURL(urls)) {
-            lastModificationTimes.put(bundle, getBundleLastModifiedTime(bundle));
+    public void add(String url) {
+        boolean shouldStart = running.get() && watchURLs.isEmpty();
+        if (!watchURLs.contains(url)) {
+            watchURLs.add(url);
+            counter.incrementAndGet();
+        }
+        if (shouldStart) {
+            Thread thread = new Thread(this);
+            thread.start();
         }
     }
 
     /**
      * Removes a bundle URLs from the watch list.
-     * @param urls
+     * @param url
      */
-    public void remove(String urls) {
-        watchURLs.remove(urls);
-        for (Bundle bundle : getBundlesByURL(urls)) {
-            lastModificationTimes.remove(bundle);
-        }
-    }
-
-    /**
-     * Returns the last modification time of the bundle artifact as Long.
-     * @param bundle
-     * @return
-     */
-    private Long getBundleLastModifiedTime(Bundle bundle) {
-        Long lastModificationTime = 0L;
-        String bundleExternalLocation = getBundleExternalLocation(bundle);
-        if (bundleExternalLocation != null) {
-            File bundleFile = new File(bundleExternalLocation);
-            lastModificationTime = bundleFile.lastModified();
-        }
-        return lastModificationTime;
+    public void remove(String url) {
+        watchURLs.remove(url);
+        counter.incrementAndGet();
     }
 
     /**
@@ -148,48 +158,41 @@ public class BundleWatcher implements Runnable {
      * @param bundle
      * @return
      */
-    public String getBundleExternalLocation(Bundle bundle) {
-        Parser p = null;
-        String bundleExternalLocation = null;
-        String localRepository = null;
+    public File getBundleExternalLocation(File localRepository, Bundle bundle) {
+        try {
+            Parser p = new Parser(bundle.getLocation().substring(4));
+            return new File(localRepository.getPath() + File.separator + p.getArtifactPath());
+        } catch (MalformedURLException e) {
+            logger.error("Could not parse artifact path for bundle" + bundle.getSymbolicName(), e);
+        }
+        return null;
+    }
 
-        //Attempt to retrieve local repository location from MavenConfiguration
+    public File getLocalRepository() {
+        // Attempt to retrieve local repository location from MavenConfiguration
         MavenConfiguration configuration = retrieveMavenConfiguration();
         if (configuration != null) {
             MavenRepositoryURL localRepositoryURL = configuration.getLocalRepository();
             if (localRepositoryURL != null) {
-                localRepository = localRepositoryURL.getFile().getAbsolutePath();
+                return localRepositoryURL.getFile().getAbsoluteFile();
             }
         }
-
-        //If local repository not found assume default.
-        if (localRepository == null) {
-            localRepository = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
-        }
-
-        try {
-            p = new Parser(bundle.getLocation().substring(4));
-            bundleExternalLocation = localRepository + File.separator + p.getArtifactPath();
-        } catch (MalformedURLException e) {
-            logger.error("Could not parse artifact path for bundle" + bundle.getSymbolicName(), e);
-        }
-        return bundleExternalLocation;
+        // If local repository not found assume default.
+        String localRepo = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
+        return new File(localRepo).getAbsoluteFile();
     }
 
-
-    public MavenConfiguration retrieveMavenConfiguration() {
-        MavenConfiguration mavenConfiguration=null;
-
+    protected MavenConfiguration retrieveMavenConfiguration() {
+        MavenConfiguration mavenConfiguration = null;
         try {
             Configuration configuration = configurationAdmin.getConfiguration(ServiceConstants.PID);
-            if(configuration != null){
-              Dictionary dictonary = configuration.getProperties();
-              if(dictonary != null) {
-                  DictionaryPropertyResolver resolver = new DictionaryPropertyResolver(dictonary);
-                  mavenConfiguration = new MavenConfigurationImpl(resolver,ServiceConstants.PID);
-              }
+            if (configuration != null) {
+                Dictionary dictonary = configuration.getProperties();
+                if (dictonary != null) {
+                    DictionaryPropertyResolver resolver = new DictionaryPropertyResolver(dictonary);
+                    mavenConfiguration = new MavenConfigurationImpl(resolver, ServiceConstants.PID);
+                }
             }
-
         } catch (IOException e) {
             logger.error("Error retrieving maven configuration",e);
         }
@@ -202,7 +205,6 @@ public class BundleWatcher implements Runnable {
      * @return
      */
     public List<Bundle> getBundlesByURL(String url) {
-        BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
         List<Bundle> bundleList = new ArrayList<Bundle>();
         try {
             Long id = Long.parseLong(url);
@@ -211,10 +213,9 @@ public class BundleWatcher implements Runnable {
                 bundleList.add(bundle);
             }
         } catch (NumberFormatException e) {
-
             for (int i = 0; i < bundleContext.getBundles().length; i++) {
                 Bundle bundle = bundleContext.getBundles()[i];
-                if (wildCardMatch(bundle.getLocation(), url)) {
+                if (isMavenSnapshotUrl(bundle.getLocation()) && wildCardMatch(bundle.getLocation(), url)) {
                     bundleList.add(bundle);
                 }
             }
@@ -222,8 +223,12 @@ public class BundleWatcher implements Runnable {
         return bundleList;
     }
 
+    protected boolean isMavenSnapshotUrl(String url) {
+        return url.startsWith("mvn:") && url.contains("-SNAPSHOT");
+    }
+
     /**
-     * Matches text using a pattern containing wildchards.
+     * Matches text using a pattern containing wildcards.
      *
      * @param text
      * @param pattern
@@ -247,10 +252,11 @@ public class BundleWatcher implements Runnable {
 
 
     public void start() {
-        if (!running) {
-            Thread thread = new Thread(this);
-            setRunning(true);
-            thread.start();
+        if (running.compareAndSet(false, true)) {
+            if (!watchURLs.isEmpty()) {
+                Thread thread = new Thread(this);
+                thread.start();
+            }
         }
     }
 
@@ -258,7 +264,7 @@ public class BundleWatcher implements Runnable {
      * Stops the execution of the thread and releases the singleton instance
      */
     public void stop() {
-        setRunning(false);
+        running.set(false);
     }
 
     public ConfigurationAdmin getConfigurationAdmin() {
@@ -269,6 +275,14 @@ public class BundleWatcher implements Runnable {
         this.configurationAdmin = configurationAdmin;
     }
 
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
     public List<String> getWatchURLs() {
         return watchURLs;
     }
@@ -277,19 +291,16 @@ public class BundleWatcher implements Runnable {
         this.watchURLs = watchURLs;
     }
 
-    public Long getInterval() {
+    public long getInterval() {
         return interval;
     }
 
-    public void setInterval(Long interval) {
+    public void setInterval(long interval) {
         this.interval = interval;
     }
 
-    public Boolean isRunning() {
-        return running;
+    public boolean isRunning() {
+        return running.get();
     }
 
-    public void setRunning(Boolean running) {
-        this.running = running;
-    }
 }

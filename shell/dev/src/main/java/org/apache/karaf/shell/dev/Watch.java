@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.shell.dev;
 
+import java.util.List;
+
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
@@ -24,9 +26,7 @@ import org.apache.karaf.shell.dev.watch.BundleWatcher;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
-import java.util.List;
-
-@Command(scope = "dev", name = "watch", description = "Watch and Update bundles")
+@Command(scope = "dev", name = "watch", description = "Watch and Update bundles", detailedDescription="classpath:watch.txt")
 public class Watch extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "The bundle URLs", required = false)
@@ -35,7 +35,7 @@ public class Watch extends OsgiCommandSupport {
     @Option(name = "-i", aliases = {}, description = "Watch interval", required = false, multiValued = false)
     private long interval;
 
-    @Option(name = "--start", description = "Starts watching the selcted bundles", required = false, multiValued = false)
+    @Option(name = "--start", description = "Starts watching the selected bundles", required = false, multiValued = false)
     protected boolean start;
 
     @Option(name = "--stop", description = "Stops watching all bundles", required = false, multiValued = false)
@@ -51,13 +51,31 @@ public class Watch extends OsgiCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        if (urls == null && (interval == 0 && !stop && !start && !list)) {
-            System.out.println("No option specified. Bundle id/url is required.");
+        if (start && stop) {
+            System.err.println("Please use only one of --start and --stop options!");
             return null;
         }
 
-        if (interval > 0) { //Set the interval if exists.
+        if (interval > 0) {
+            System.out.println("Setting watch interval to " + interval + " ms");
             watcher.setInterval(interval);
+        }
+        if (stop) {
+            System.out.println("Stopping watch");
+            watcher.stop();
+        }
+        if (urls != null && !urls.isEmpty()) {
+            if (remove) {
+                System.out.println("Removing watched urls");
+                watcher.remove(urls);
+            } else {
+                System.out.println("Adding watched urls");
+                watcher.add(urls);
+            }
+        }
+        if (start) {
+            System.out.println("Starting watch");
+            watcher.start();
         }
 
         if (list) { //List the watched bundles.
@@ -68,21 +86,22 @@ public class Watch extends OsgiCommandSupport {
                 List<Bundle> bundleList = watcher.getBundlesByURL(url);
                 if (bundleList != null && bundleList.size() > 0) {
                     for (Bundle bundle : bundleList) {
-                        System.out.println(String.format(format, url, bundle.getBundleId(), (String) bundle.getHeaders().get(Constants.BUNDLE_NAME)));
+                        System.out.println(String.format(format, url, bundle.getBundleId(), bundle.getHeaders().get(Constants.BUNDLE_NAME)));
                     }
                 } else {
                     System.out.println(String.format(format, url, "", ""));
                 }
             }
-        } else if (start) {
-            watcher.start();
-        } else if (stop) {
-            watcher.stop();
-        } else if (remove) {
-            watcher.remove(urls);
         } else {
-            watcher.start();
-            watcher.add(urls);
+            List<String> urls = watcher.getWatchURLs();
+            if (urls != null && !urls.isEmpty()) {
+                System.out.println("Watched urls:");
+                for (String url : watcher.getWatchURLs()) {
+                    System.out.println(url);
+                }
+            } else {
+                System.out.println("No watched urls");
+            }
         }
 
         return null;
