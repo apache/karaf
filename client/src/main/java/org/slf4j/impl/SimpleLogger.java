@@ -184,21 +184,21 @@ public class SimpleLogger extends MarkerIgnoringBase {
 
     protected void log(int level, String format, Object arg) {
         if (isLogEnabled(level)) {
-            String msg = MessageFormatter.format(format, arg);
+            String msg = MessageFormatter.format(format, arg).getMessage();
             doLog(level, msg, null);
         }
     }
 
     protected void log(int level, String format, Object arg1, Object arg2) {
         if (isLogEnabled(level)) {
-            String msg = MessageFormatter.format(format, arg1, arg2);
+            String msg = MessageFormatter.format(format, arg1, arg2).getMessage();
             doLog(level, msg, null);
         }
     }
 
     protected void log(int level, String format, Object[] args) {
         if (isLogEnabled(level)) {
-            String msg = MessageFormatter.format(format, args);
+            String msg = MessageFormatter.format(format, args).getMessage();
             doLog(level, msg, null);
         }
     }
