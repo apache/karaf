@@ -26,6 +26,9 @@
         <command name="osgi/headers">
             <action class="org.apache.karaf.shell.osgi.Headers"/>
         </command>
+        <command name="osgi/info">
+            <action class="org.apache.karaf.shell.osgi.Info"/>
+        </command>
         <command name="osgi/install">
             <action class="org.apache.karaf.shell.osgi.InstallBundle"/>
         </command>
