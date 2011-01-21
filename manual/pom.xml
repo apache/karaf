@@ -41,7 +41,7 @@
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
         <jetty-port>8080</jetty-port>
         <jetty-war-dir>${project.build.directory}/webapp/</jetty-war-dir>
-        <scalate.version>1.3.1</scalate.version>
+        <scalate.version>1.4.0-SNAPSHOT</scalate.version>
         <wikitext.version>1.1</wikitext.version>
         <scalate.editor>${env.SCALATE_EDITOR}</scalate.editor>
         <scalate.mode>production</scalate.mode>
