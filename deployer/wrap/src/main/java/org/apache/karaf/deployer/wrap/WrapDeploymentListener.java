@@ -36,6 +36,10 @@ public class WrapDeploymentListener implements ArtifactUrlTransformer {
 
     public boolean canHandle(File artifact) {
         try {
+            // only handle .jar files
+            if (!artifact.getPath().endsWith(".jar")) {
+                return false;
+            }
             JarFile jar = new JarFile(artifact);
             // only handle non OSGi jar
             Manifest manifest = jar.getManifest();
