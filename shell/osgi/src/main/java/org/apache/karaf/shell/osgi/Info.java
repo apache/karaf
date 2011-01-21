@@ -19,7 +19,7 @@ package org.apache.karaf.shell.osgi;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.util.StringEscapeUtils;
 import org.osgi.framework.Bundle;
 
 import java.io.BufferedReader;
@@ -69,7 +69,7 @@ public class Info extends OsgiCommandSupport {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(bundleInfo.openStream()));
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
+                    System.out.println(StringEscapeUtils.unescapeJava(line));
                 }
                 reader.close();
             } catch (Exception e) {
