@@ -82,7 +82,7 @@ public class BundleWatcher implements Runnable, BundleListener {
         }
         int oldCounter = -1;
         Set<Bundle> watchedBundles = new HashSet<Bundle>();
-        while (running.get() && !watchURLs.isEmpty()) {
+        while (running.get() && watchURLs.size()>0) {
             if (oldCounter != counter.get()) {
                 oldCounter = counter.get();
                 watchedBundles.clear();
@@ -92,7 +92,7 @@ public class BundleWatcher implements Runnable, BundleListener {
                     }
                 }
             }
-            if (!watchedBundles.isEmpty()) {
+            if (watchedBundles.size()>0) {
                 File localRepository = getLocalRepository();
                 for (Bundle bundle : watchedBundles) {
                     try {
@@ -133,7 +133,7 @@ public class BundleWatcher implements Runnable, BundleListener {
      * @param url
      */
     public void add(String url) {
-        boolean shouldStart = running.get() && watchURLs.isEmpty();
+        boolean shouldStart = running.get() && (watchURLs.size()==0);
         if (!watchURLs.contains(url)) {
             watchURLs.add(url);
             counter.incrementAndGet();
@@ -253,7 +253,7 @@ public class BundleWatcher implements Runnable, BundleListener {
 
     public void start() {
         if (running.compareAndSet(false, true)) {
-            if (!watchURLs.isEmpty()) {
+            if (watchURLs.size()>0) {
                 Thread thread = new Thread(this);
                 thread.start();
             }

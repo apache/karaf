@@ -64,7 +64,7 @@ public class Watch extends OsgiCommandSupport {
             System.out.println("Stopping watch");
             watcher.stop();
         }
-        if (urls != null && !urls.isEmpty()) {
+        if (urls != null && urls.length()>0) {
             if (remove) {
                 System.out.println("Removing watched urls");
                 watcher.remove(urls);
@@ -94,7 +94,7 @@ public class Watch extends OsgiCommandSupport {
             }
         } else {
             List<String> urls = watcher.getWatchURLs();
-            if (urls != null && !urls.isEmpty()) {
+            if (urls != null && urls.size()>0) {
                 System.out.println("Watched urls:");
                 for (String url : watcher.getWatchURLs()) {
                     System.out.println(url);
