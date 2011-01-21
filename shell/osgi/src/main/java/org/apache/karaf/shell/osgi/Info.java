@@ -62,7 +62,7 @@ public class Info extends OsgiCommandSupport {
     protected void printInfo(Bundle bundle) {
         String title = Util.getBundleName(bundle);
         System.out.println("\n" + title);
-        System.out.println(Util.getUnderlineString(title));g
+        System.out.println(Util.getUnderlineString(title));
         URL bundleInfo = bundle.getEntry("OSGI-INF/bundle.info");
         if (bundleInfo != null) {
             try {
