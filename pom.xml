@@ -109,7 +109,7 @@
         <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
         <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
         <jasypt.bundle.version>1.7_1</jasypt.bundle.version>
-        <jetty.version>7.1.6.v20100715</jetty.version>
+        <jetty.version>7.2.2.v20101205</jetty.version>
         <junit.bundle.version>4.7_2</junit.bundle.version>
 
         <commons-logging.version>1.1.1</commons-logging.version>
