@@ -459,6 +459,7 @@
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf</artifactId>
                 <version>${project.version}</version>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
@@ -473,11 +474,18 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf</groupId>
-                <artifactId>apache-karaf</artifactId>
-                <classifier>features</classifier>
-                <type>xml</type>
-                <version>${project.version}</version>
+              <groupId>org.apache.karaf.features.assembly</groupId>
+              <artifactId>standard</artifactId>
+              <type>xml</type>
+              <classifier>features</classifier>
+              <version>${project.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.karaf.features.assembly</groupId>
+              <artifactId>enterprise</artifactId>
+              <type>xml</type>
+              <classifier>features</classifier>
+              <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.tooling</groupId>

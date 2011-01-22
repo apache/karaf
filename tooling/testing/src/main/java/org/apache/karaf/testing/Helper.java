@@ -354,15 +354,27 @@ public final class Helper {
     }
 
     /**
-     * Method to directly register Karaf features.
+     * Method to directly register Karaf standard features.
      *
-     * @param features a list of features which should be loaded from the Karaf feature file.
+     * @param features a list of features which should be loaded from the Karaf standard feature file.
      * @return a pax-exam option
      */
-    public static FeaturesScannerProvisionOption loadKarafFeatures(String... features) {
+    public static FeaturesScannerProvisionOption loadKarafStandardFeatures(String... features) {
         return scanFeatures(
-            maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("xml").classifier("features")
-                .versionAsInProject(), features);
+            maven().groupId("org.apache.karaf.features.assembly").artifactId("standard").type("xml")
+                .classifier("features").versionAsInProject(), features);
+    }
+
+    /**
+     * Method to directly register Karaf enterprise features.
+     * 
+     * @param features a list of features which should be loaded from the Karaf enterprise feature file.
+     * @return a pax-exam option
+     */
+    public static FeaturesScannerProvisionOption loadKarafEnterpriseFeatures(String... features) {
+        return scanFeatures(
+            maven().groupId("org.apache.karaf.features.assembly").artifactId("enterprise").type("xml")
+                .classifier("features").versionAsInProject(), features);
     }
 
     /**
