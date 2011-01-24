@@ -24,6 +24,7 @@
 
     <reference id="wrapUrlHandlerRef" interface="org.osgi.service.url.URLStreamHandlerService" filter="url.handler.protocol=wrap"/>
 
-    <service ref="wrapDeploymentListener" auto-export="interfaces" depends-on="wrapDeploymentListener"/>
+    <service ref="wrapDeploymentListener" auto-export="interfaces" depends-on="wrapDeploymentListener" ranking="-1"/>
+
 
 </blueprint>
