@@ -30,7 +30,7 @@
 	</bean>
 			
 	<service id="karArtifactInstallerService" 
-		ref="karArtifactInstaller" 
-		interface="org.apache.felix.fileinstall.ArtifactInstaller"/>
+		ref="karArtifactInstaller"
+		auto-export="interfaces"/>
 
 </blueprint>
