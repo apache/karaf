@@ -131,11 +131,22 @@ public class ShellFactoryImpl implements Factory<Command>
         public void destroy() {
             if (!closed) {
                 closed = true;
+                ShellFactoryImpl.flush(out, err);
                 ShellFactoryImpl.close(in, out, err);
                 callback.onExit(0);
             }
         }
 
+    }
+
+    private static void flush(OutputStream... streams) {
+        for (OutputStream s : streams) {
+            try {
+                s.flush();
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
     }
 
     private static void close(Closeable... closeables) {
