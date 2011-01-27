@@ -25,12 +25,9 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.jar.JarInputStream;
-
 import javax.xml.transform.dom.DOMSource;
 
 import junit.framework.TestCase;
-import org.apache.karaf.deployer.spring.SpringDeploymentListener;
-import org.apache.karaf.deployer.spring.SpringTransformer;
 
 public class SpringDeploymentListenerTest extends TestCase {
 
@@ -57,29 +54,6 @@ public class SpringDeploymentListenerTest extends TestCase {
             is.close();
         } finally {
             f.delete();
-        }
-    }
-
-    public void testVersions() {
-        assertVersion("org.apache.servicemix.bundles.ant-1.7.0-1.0-m3-SNAPSHOT.jar",
-                      "org.apache.servicemix.bundles.ant-1.7.0", "1.0.0.m3-SNAPSHOT", "jar");
-        assertVersion("org.apache.activemq.core-1.0-SNAPSHOT.xml",
-                      "org.apache.activemq.core", "1.0.0.SNAPSHOT", "xml");
-        assertVersion("org.apache.activemq.core-1.0.0-SNAPSHOT.xml",
-                      "org.apache.activemq.core", "1.0.0.SNAPSHOT", "xml");
-        assertVersion("org.apache.activemq.core-1.0.0.xml",
-                      "org.apache.activemq.core", "1.0.0", "xml");
-        assertVersion("geronimo-servlet_2.5_spec-1.1.2.jar",
-                      "geronimo-servlet_2.5_spec", "1.1.2", "jar");
-        assertVersion("spring-aop-2.5.1.jar",
-                      "spring-aop", "2.5.1", "jar");
-    }
-
-    private void assertVersion(String s, String... expectedParts) {
-        String[] parts = SpringTransformer.extractNameVersionType(s);
-        assertEquals(expectedParts.length, parts.length);
-        for (int i = 0; i < expectedParts.length; i++) {
-            assertEquals(expectedParts[i], parts[i]);
         }
     }
 
