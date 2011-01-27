@@ -107,6 +107,9 @@
         <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${pax.web.version}</bundle>
     </feature>
     <feature name="war" version="${project.version}" resolver="(obr)">
+        <config name="org.ops4j.pax.url.war">
+            org.ops4j.pax.url.war.importPaxLoggingPackages=true
+        </config>
         <feature>http</feature>
         <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.web/${project.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/${pax.web.version}</bundle>
