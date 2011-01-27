@@ -45,6 +45,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.karaf.util.DeployerUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -67,7 +69,7 @@ public class BlueprintTransformer {
         if (idx >= 0) {
             name = name.substring(idx + 1);
         }
-        String[] str = extractNameVersionType(name);
+        String[] str = DeployerUtils.extractNameVersionType(name);
         // Create manifest
         Manifest m = new Manifest();
         m.getMainAttributes().putValue("Manifest-Version", "2");
@@ -116,67 +118,6 @@ public class BlueprintTransformer {
         tf.newTransformer().transform(new DOMSource(doc), new StreamResult(out));
         out.closeEntry();
         out.close();
-    }
-
-    private static final String DEFAULT_VERSION = "0.0.0";
-
-    private static final Pattern ARTIFACT_MATCHER = Pattern.compile("(.+)(?:-(\\d+)(?:\\.(\\d+)(?:\\.(\\d+))?)?(?:[^a-zA-Z0-9](.*))?)(?:\\.([^\\.]+))", Pattern.DOTALL);
-    private static final Pattern FUZZY_MODIFIDER = Pattern.compile("(?:\\d+[.-])*(.*)", Pattern.DOTALL);
-
-    public static String[] extractNameVersionType(String url) {
-        Matcher m = ARTIFACT_MATCHER.matcher(url);
-        if (!m.matches()) {
-            return new String[] { url, DEFAULT_VERSION };
-        }
-        else {
-            //System.err.println(m.groupCount());
-            //for (int i = 1; i <= m.groupCount(); i++) {
-            //    System.err.println("Group " + i + ": " + m.group(i));
-            //}
-
-            StringBuffer v = new StringBuffer();
-            String d1 = m.group(1);
-            String d2 = m.group(2);
-            String d3 = m.group(3);
-            String d4 = m.group(4);
-            String d5 = m.group(5);
-            String d6 = m.group(6);
-            if (d2 != null) {
-                v.append(d2);
-                if (d3 != null) {
-                    v.append('.');
-                    v.append(d3);
-                    if (d4 != null) {
-                        v.append('.');
-                        v.append(d4);
-                        if (d5 != null) {
-                            v.append(".");
-                            cleanupModifier(v, d5);
-                        }
-                    } else if (d5 != null) {
-                        v.append(".0.");
-                        cleanupModifier(v, d5);
-                    }
-                } else if (d5 != null) {
-                    v.append(".0.0.");
-                    cleanupModifier(v, d5);
-                }
-            }
-            return new String[] { d1, v.toString(), d6 };
-        }
-    }
-
-    private static void cleanupModifier(StringBuffer result, String modifier) {
-        Matcher m = FUZZY_MODIFIDER.matcher(modifier);
-        if (m.matches()) {
-            modifier = m.group(1);
-        }
-        for (int i = 0; i < modifier.length(); i++) {
-            char c = modifier.charAt(i);
-            if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-') {
-                result.append(c);
-            }
-        }
     }
 
     public static Set<String> analyze(Source source) throws Exception {

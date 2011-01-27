@@ -39,6 +39,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
@@ -73,7 +77,10 @@
                         <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=false</Bundle-SymbolicName>
                         <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>!${project.artifactId}*,*</Import-Package>
-                        <Private-Package>org.apache.karaf.deployer.blueprint</Private-Package>
+                        <Private-Package>
+                            org.apache.karaf.deployer.blueprint,
+                            org.apache.karaf.util
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
