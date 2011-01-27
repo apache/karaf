@@ -17,13 +17,14 @@
  */
 package org.apache.karaf.deployer.wrap;
 
-import org.apache.felix.fileinstall.ArtifactUrlTransformer;
-
 import java.io.File;
 import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import org.apache.felix.fileinstall.ArtifactUrlTransformer;
+import org.apache.karaf.util.DeployerUtils;
 
 /**
  * <p>
@@ -55,11 +56,15 @@ public class WrapDeploymentListener implements ArtifactUrlTransformer {
     }
 
     public URL transform(URL artifact) throws Exception {
-        String path = artifact.getPath();
-        String protocol = artifact.getProtocol();
-
-        // TODO add Bundle-SymbolicName and Bundle-Version to the wrap URL
-        return new URL("wrap", null, protocol + ":" + path);
+        try
+        {
+            String path = artifact.getPath();
+            String name = path.substring( path.lastIndexOf('/') + 1);
+            String[] nv = DeployerUtils.extractNameVersionType( name );
+            return new URL("wrap", null, artifact.toExternalForm() + "$Bundle-SymbolicName=" + nv[0] + "&Bundle-Version=" + nv[1]);
+        } catch (Exception e) {
+            return new URL("wrap", null, artifact.toExternalForm());
+        }
     }
 
 }
