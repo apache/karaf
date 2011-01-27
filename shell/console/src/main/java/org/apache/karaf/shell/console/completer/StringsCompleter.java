@@ -60,7 +60,8 @@ public class StringsCompleter
             buffer = "";
         }
 
-        SortedSet<String> matches = strings.tailSet(buffer);
+        // KARAF-421, use getStrings() instead strings field.
+        SortedSet<String> matches = new TreeSet<String>(getStrings()).tailSet(buffer);
 
         for (String match : matches) {
             if (!match.startsWith(buffer)) {
