@@ -48,7 +48,7 @@ public class StringsCompleter
         this(Arrays.asList(strings));
     }
 
-    public Collection<String> getStrings() {
+    public SortedSet<String> getStrings() {
         return strings;
     }
 
@@ -61,7 +61,7 @@ public class StringsCompleter
         }
 
         // KARAF-421, use getStrings() instead strings field.
-        SortedSet<String> matches = new TreeSet<String>(getStrings()).tailSet(buffer);
+        SortedSet<String> matches = getStrings().tailSet(buffer);
 
         for (String match : matches) {
             if (!match.startsWith(buffer)) {
