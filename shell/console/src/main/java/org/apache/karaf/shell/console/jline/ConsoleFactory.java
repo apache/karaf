@@ -67,7 +67,7 @@ public class ConsoleFactory {
     protected void start() throws Exception {
         if (start) {
             Subject subject = new Subject();
-            final String user = System.getProperty("user.name", "karaf");
+            final String user = "karaf";
             subject.getPrincipals().add(new UserPrincipal(user));
             Subject.doAs(subject, new PrivilegedExceptionAction<Object>() {
                 public Object run() throws Exception {
