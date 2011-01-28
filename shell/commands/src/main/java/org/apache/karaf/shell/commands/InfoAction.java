@@ -16,20 +16,29 @@
  */
 package org.apache.karaf.shell.commands;
 
-import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.shell.commands.info.InfoProvider;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.fusesource.jansi.Ansi;
-
-import java.lang.management.*;
+import java.lang.management.ClassLoadingMXBean;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.info.InfoProvider;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.fusesource.jansi.Ansi;
 
 @Command(scope = "shell", name = "info", description = "Prints system informations")
 public class InfoAction extends OsgiCommandSupport {
@@ -105,13 +114,22 @@ public class InfoAction extends OsgiCommandSupport {
         }
 
         //Display Information from external information providers.
+        Map<String, Map<Object, Object>> properties = new HashMap<String, Map<Object, Object>>();
         if (infoProviders != null) {
+
+            // dump all properties to Map, KARAF-425
             for (InfoProvider provider : infoProviders) {
-                System.out.println(provider.getName());
-				Iterator propertyNames =  provider.getProperties().keySet().iterator();
-                while(propertyNames.hasNext()) {
-					Object propertyKey = propertyNames.next();
-                    printValue(String.valueOf(propertyKey), maxNameLen, provider.getProperties().getProperty(String.valueOf(propertyKey)));
+                if (!properties.containsKey(provider.getName())) {
+                    properties.put(provider.getName(), new Properties());
+                }
+                properties.get(provider.getName()).putAll(provider.getProperties());
+            }
+
+            for (String section : properties.keySet()) {
+                System.out.println(section);
+
+                for (Object key : properties.get(section).keySet()) {
+                    printValue(String.valueOf(key), maxNameLen, String.valueOf(properties.get(section).get(key)));
                 }
             }
         }
