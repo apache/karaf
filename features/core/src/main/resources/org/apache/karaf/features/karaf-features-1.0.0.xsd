@@ -28,7 +28,7 @@ Karaf features mechanism. For documentation please visit
         ]]></xs:documentation>
     </xs:annotation>
 
-    <xs:complexType name="featuresRoot">
+    <xs:complexType name="features">
         <xs:annotation>
             <xs:documentation><![CDATA[
 Root element of Feature definition. It contains optional attribute which allow
@@ -194,6 +194,6 @@ name: the value
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:element name="features" type="tns:featuresRoot" />
+    <xs:element name="features" type="tns:features" />
 
 </xs:schema>
