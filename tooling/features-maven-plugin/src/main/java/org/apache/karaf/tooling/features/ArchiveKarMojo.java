@@ -44,7 +44,7 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
  *
  * @version $Revision: 1.1 $
  * @goal archive-kar
- * @phase compile
+ * @phase package
  * @execute phase="package"
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
@@ -125,7 +125,7 @@ public class ArchiveKarMojo extends MojoSupport {
      *
      * @parameter default-value="${repositoryPath}"
      */
-    private String repositoryPath;
+    private String repositoryPath = "repository/";
 
     
     //

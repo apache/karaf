@@ -690,6 +690,17 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.ant</artifactId>
+                <version>1.7.0_3</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.junit</artifactId>
                 <version>${junit.bundle.version}</version>
             </dependency>

@@ -106,13 +106,14 @@
                             <compile>
                             </compile>
                             <package>
+                                org.apache.karaf.tooling:features-maven-plugin:archive-server
                             </package>
-                            <!--<install>-->
-                                <!--org.apache.maven.plugins:maven-install-plugin:install-->
-                            <!--</install>-->
-                            <!--<deploy>-->
-                                <!--org.apache.maven.plugins:maven-deploy-plugin:deploy-->
-                            <!--</deploy>-->
+                            <install>
+                                org.apache.maven.plugins:maven-install-plugin:install
+                            </install>
+                            <deploy>
+                                org.apache.maven.plugins:maven-deploy-plugin:deploy
+                            </deploy>
                         </phases>
                     </lifecycle>
                 </lifecycles>
