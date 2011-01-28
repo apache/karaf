@@ -45,7 +45,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
-@XmlRootElement
+@XmlRootElement(name = "features")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "featuresRoot", propOrder = {
     "repository",
