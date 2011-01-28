@@ -107,7 +107,7 @@ public class ArchiveKarMojo extends MojoSupport {
     /**
      * Location of resources directory for additional content to include in the car.
      *
-     * @parameter expression="${project.build.directory}/resources"
+     * @parameter expression="${project.build.directory}/classes/resources"
      */
     private File resourcesDir;
 
@@ -118,6 +118,16 @@ public class ArchiveKarMojo extends MojoSupport {
      * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
     private File featuresFile;
+
+
+    /**
+     * The internal repository in the kar.
+     *
+     * @parameter default-value="${repositoryPath}"
+     */
+    private String repositoryPath;
+
+    
     //
     // Mojo
     //
@@ -155,26 +165,6 @@ public class ArchiveKarMojo extends MojoSupport {
         }
     }
 
-    private File getArtifactInRepositoryDir() {
-        //
-        // HACK: Generate the filename in the repo... really should delegate this to the repo impl
-        //
-
-        String groupId = project.getGroupId().replace('.', '/');
-        String artifactId = project.getArtifactId();
-        String version = project.getVersion();
-        String type = "car";
-
-
-        File dir = new File(targetRepository, groupId);
-        dir = new File(dir, artifactId);
-        dir = new File(dir, version);
-        dir = new File(dir, artifactId + "-" + version + "." + type);
-
-        return dir;
-    }
-
-
     /**
      * Generates the configuration archive.
      * @param bundles
@@ -206,12 +196,15 @@ public class ArchiveKarMojo extends MojoSupport {
 
             //include the feature.xml
             Artifact featureArtifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), "xml", "feature");
-            jarArchiver.addFile(featuresFile, "repository/" + layout.pathOf(featureArtifact));
+            jarArchiver.addFile(featuresFile, repositoryPath + layout.pathOf(featureArtifact));
 
             for (Artifact artifact: bundles) {
                 resolver.resolve(artifact, remoteRepos, localRepo);
                 File localFile = artifact.getFile();
-                String targetFileName = "repository/" + layout.pathOf(artifact);
+                //TODO this may not be reasonable, but... resolved snapshot artifacts have timestamped versions
+                //which do not work in startup.properties.
+                artifact.setVersion(artifact.getBaseVersion());
+                String targetFileName = repositoryPath + layout.pathOf(artifact);
                 jarArchiver.addFile(localFile, targetFileName);
             }
 
@@ -222,16 +215,17 @@ public class ArchiveKarMojo extends MojoSupport {
 //                archiver.addArchivedFileSet(artifactDirectory);
 //            }
 
-//            if (resourcesDir.isDirectory()) {
-//                archiver.getArchiver().addDirectory(resourcesDir);
-//            }
-//
-            for (Resource resource: (List<Resource>)project.getResources()) {
-                File resourceDir = new File(resource.getDirectory());
-                if (resourceDir.exists()) {
-                    jarArchiver.addDirectory(resourceDir, resource.getTargetPath());
-                }
+            if (resourcesDir.isDirectory()) {
+                archiver.getArchiver().addDirectory(resourcesDir, "resources/");
             }
+//
+//            for (Resource resource: (List<Resource>)project.getResources()) {
+//                File resourceDir = new File(resource.getDirectory());
+//                if (resourceDir.exists()) {
+//                    jarArchiver.addDirectory(resourceDir, resource.getTargetPath());
+//                }
+//            }
+
 
             //
             // HACK: Include legal files here for sanity

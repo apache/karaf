@@ -90,6 +90,34 @@
                 </lifecycles>
             </configuration>
         </component>
+        <component>
+            <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+            <role-hint>karaf-assembly</role-hint>
+            <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+            <configuration>
+                <lifecycles>
+                    <lifecycle>
+                        <id>default</id>
+                        <phases>
+                            <process-resources>
+                                org.apache.maven.plugins:maven-resources-plugin:resources,
+                                org.apache.karaf.tooling:features-maven-plugin:install-kars
+                            </process-resources>
+                            <compile>
+                            </compile>
+                            <package>
+                            </package>
+                            <!--<install>-->
+                                <!--org.apache.maven.plugins:maven-install-plugin:install-->
+                            <!--</install>-->
+                            <!--<deploy>-->
+                                <!--org.apache.maven.plugins:maven-deploy-plugin:deploy-->
+                            <!--</deploy>-->
+                        </phases>
+                    </lifecycle>
+                </lifecycles>
+            </configuration>
+        </component>
 
         <!--
         FIXME: For some crazy reason, when the following are enabled it causes other packagings
