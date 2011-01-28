@@ -34,13 +34,10 @@ import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.model.License;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
-import org.osgi.framework.Constants;
 
 /**
  * assembles a kar archive from a features.xml file
@@ -143,7 +140,7 @@ public class ArchiveKarMojo extends MojoSupport {
                 for (Feature feature : features.getFeature()) {
                     for (Bundle bundle : feature.getBundle()) {
                         if (bundle.isDependency() == null || !bundle.isDependency()) {
-                            bundles.add(bundleToArtifact(bundle.getValue()));
+                            bundles.add(bundleToArtifact(bundle.getValue(), false));
                         }
                     }
                 }
