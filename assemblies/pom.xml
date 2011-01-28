@@ -32,8 +32,13 @@
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies</name>
 
-    <modules>
-        <module>apache-karaf</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>full</id>
+            <modules>
+                <module>apache-karaf</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
