@@ -33,6 +33,7 @@ import org.apache.karaf.features.internal.FeaturesRoot;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.archiver.ArchiverException;
@@ -200,6 +201,10 @@ public class ArchiveKarMojo extends MojoSupport {
 
         try {
 
+            //include the feature.xml
+
+            jarArchiver.addFile(featuresFile, "feature.xml");
+
             for (Artifact artifact: bundles) {
                 resolver.resolve(artifact, remoteRepos, localRepo);
                 File localFile = artifact.getFile();
@@ -221,6 +226,13 @@ public class ArchiveKarMojo extends MojoSupport {
                 archiver.getArchiver().addDirectory(resourcesDir);
             }
 
+            for (Resource resource: (List<Resource>)project.getResources()) {
+                File resourceDir = new File(resource.getDirectory());
+                if (resourceDir.exists()) {
+                    jarArchiver.addDirectory(resourceDir, resource.getTargetPath());
+                }
+            }
+
             //
             // HACK: Include legal files here for sanity
             //
@@ -228,17 +240,17 @@ public class ArchiveKarMojo extends MojoSupport {
             //
             // NOTE: Would be nice to share this with the copy-legal-files mojo
             //
-            String[] includes = {
-                    "LICENSE.txt",
-                    "LICENSE",
-
-                    "NOTICE.txt",
-                    "NOTICE",
-                    "DISCLAIMER.txt",
-                    "DISCLAIMER"
-            };
-
-            archiver.getArchiver().addDirectory(baseDirectory, "META-INF/", includes, new String[0]);
+//            String[] includes = {
+//                    "LICENSE.txt",
+//                    "LICENSE",
+//
+//                    "NOTICE.txt",
+//                    "NOTICE",
+//                    "DISCLAIMER.txt",
+//                    "DISCLAIMER"
+//            };
+//
+//            archiver.getArchiver().addDirectory(baseDirectory, "META-INF/", includes, new String[0]);
 
             //For no plan car, do nothing
 //            if (artifactDirectory.exists()) {
