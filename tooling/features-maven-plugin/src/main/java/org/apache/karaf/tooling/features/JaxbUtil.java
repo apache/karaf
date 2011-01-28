@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -34,7 +35,12 @@ import javax.xml.bind.ValidationEventHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.sax.SAXSource;
+import org.apache.karaf.features.internal.Features;
+import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLFilter;
@@ -45,6 +51,25 @@ import org.xml.sax.helpers.XMLFilterImpl;
  * @version $Rev:$ $Date:$
  */
 public class JaxbUtil {
+
+    public static final XMLInputFactory XMLINPUT_FACTORY = XMLInputFactory.newInstance();
+    private static final JAXBContext FEATURES_CONTEXT;
+    static {
+        try {
+            FEATURES_CONTEXT = JAXBContext.newInstance(Features.class);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Features unmarshal(InputStream in, boolean validate) throws XMLStreamException, JAXBException {
+        XMLStreamReader xmlStream = XMLINPUT_FACTORY.createXMLStreamReader(in);
+        Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
+        JAXBElement<Features> element = unmarshaller.unmarshal(xmlStream, Features.class);
+        Features features = element.getValue();
+        return features;
+
+    }
 
     public static <T> void marshal(Class<T> type, Object object, OutputStream out) throws JAXBException {
         JAXBContext ctx2 = JAXBContext.newInstance(type);
@@ -103,6 +128,16 @@ public class JaxbUtil {
         @Override
         public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
             return EMPTY_INPUT_SOURCE;
+        }
+
+        @Override
+        public void startElement(String uri, String localName, String qname, Attributes atts) throws SAXException {
+            super.startElement("http://karaf.apache.org/xmlns/features/v1.0.0", localName, qname, atts);
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            super.endElement("http://karaf.apache.org/xmlns/features/v1.0.0", localName, qName);
         }
     }
 
