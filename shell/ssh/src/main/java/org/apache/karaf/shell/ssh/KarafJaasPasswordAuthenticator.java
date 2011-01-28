@@ -20,6 +20,7 @@ package org.apache.karaf.shell.ssh;
 
 import java.io.IOException;
 import java.security.Principal;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -29,6 +30,8 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
@@ -41,6 +44,7 @@ import org.apache.sshd.server.session.ServerSession;
 public class KarafJaasPasswordAuthenticator implements PasswordAuthenticator {
 
     public static final Session.AttributeKey<Subject> SUBJECT_ATTRIBUTE_KEY = new Session.AttributeKey<Subject>();
+    private static final Log LOGGER = LogFactory.getLog(KarafJaasPasswordAuthenticator.class);
 
     private String realm;
     private String role;
@@ -101,6 +105,7 @@ public class KarafJaasPasswordAuthenticator implements PasswordAuthenticator {
             session.setAttribute(SUBJECT_ATTRIBUTE_KEY, subject);
             return true;
         } catch (Exception e) {
+            LOGGER.debug("User authentication failed with " + e.getMessage(), e);
             return false;
         }
     }
