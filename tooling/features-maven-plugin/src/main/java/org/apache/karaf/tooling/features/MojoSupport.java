@@ -34,6 +34,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.DefaultArtifactRepository;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
@@ -90,7 +92,7 @@ public abstract class MojoSupport extends AbstractMojo {
     /**
      * @parameter default-value="${project.remoteArtifactRepositories}"
      */
-    protected List remoteRepos;
+    protected List<ArtifactRepository> remoteRepos;
 
     /**
      * @component
@@ -351,28 +353,27 @@ public abstract class MojoSupport extends AbstractMojo {
         }
     }
 
-    protected Artifact bundleToArtifact(String bundle) throws MojoExecutionException {
+    protected Artifact bundleToArtifact(String bundle, boolean skipNonMavenProtocols) throws MojoExecutionException {
         bundle = bundle.replace("\r\n", "").replace("\n", "").replace(" ", "");
         final int index = bundle.indexOf("mvn:");
         if (index < 0) {
-//                    if (skipNonMavenProtocols) {
-//                        continue;
-//                    }
+            if (skipNonMavenProtocols) {
+                return null;
+            }
             throw new MojoExecutionException("Bundle url is not a maven url: " + bundle);
-        }
-        else {
-            bundle = bundle.substring(index);
+        } else {
+            bundle = bundle.substring(index + "mvn:".length());
         }
         // Truncate the URL when a '#', a '?' or a '$' is encountered
         final int index1 = bundle.indexOf('?');
         final int index2 = bundle.indexOf('#');
         int endIndex = -1;
         if (index1 > 0) {
-             if (index2 > 0) {
-                 endIndex = Math.min(index1, index2);
-             } else {
-                 endIndex = index1;
-             }
+            if (index2 > 0) {
+                endIndex = Math.min(index1, index2);
+            } else {
+                endIndex = index1;
+            }
         } else if (index2 > 0) {
             endIndex = index2;
         }
@@ -384,7 +385,20 @@ public abstract class MojoSupport extends AbstractMojo {
             bundle = bundle.substring(0, index3);
         }
 
-        String[] parts = bundle.substring("mvn:".length()).split("/");
+        //check if the bundle descriptor contains also remote repository information.
+        ArtifactRepository repo = null;
+        if (bundle.startsWith("http://")) {
+            final int repoDelimIntex = bundle.indexOf('!');
+            String repoUrl = bundle.substring(0, repoDelimIntex);
+
+            repo = new DefaultArtifactRepository(
+                    repoUrl,
+                    repoUrl,
+                    new DefaultRepositoryLayout());
+            bundle = bundle.substring(repoDelimIntex + 1);
+
+        }
+        String[] parts = bundle.split("/");
         String groupId = parts[0];
         String artifactId = parts[1];
         String version = null;
@@ -400,6 +414,7 @@ public abstract class MojoSupport extends AbstractMojo {
             }
         }
         Artifact artifact = factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
+        artifact.setRepository(repo);
         return artifact;
     }
 }
