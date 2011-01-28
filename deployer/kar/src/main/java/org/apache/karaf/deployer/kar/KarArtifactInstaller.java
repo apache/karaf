@@ -190,7 +190,11 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 	}
 
 	protected File getArchiveTimestampFile(File karafArchive) {
-		return new File(localRepoPath + File.separator + ".timestamps" + File.separator + karafArchive.getName());
+        File timestampDir = new File(new File(localRepoPath), ".timestamps");
+        if (!timestampDir.exists()) {
+            timestampDir.mkdirs();
+        }
+		return new File(timestampDir, karafArchive.getName());
 	}
 
 	protected boolean isFeaturesRepository(File artifact)  {

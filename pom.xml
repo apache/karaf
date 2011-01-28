@@ -47,6 +47,7 @@
         <module>management</module>
         <module>webconsole</module>
         <module>exception</module>
+        <module>assemblies</module>
         <module>assembly</module>
         <module>demos</module>
         <module>itests</module>

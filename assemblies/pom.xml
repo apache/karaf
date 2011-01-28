@@ -22,20 +22,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.features</groupId>
-        <artifactId>features</artifactId>
+        <groupId>org.apache.karaf</groupId>
+        <artifactId>karaf</artifactId>
         <version>2.1.99-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.karaf.features.assembly</groupId>
-    <artifactId>assembly</artifactId>
+    <groupId>org.apache.karaf.assemblies</groupId>
+    <artifactId>assemblies</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Features :: Assembly</name>
+    <name>Apache Karaf :: Assemblies</name>
 
     <modules>
-        <module>framework</module>
-        <module>standard</module>
-        <module>enterprise</module>
+        <module>apache-karaf</module>
     </modules>
 
 </project>
