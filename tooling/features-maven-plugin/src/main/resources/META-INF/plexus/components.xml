@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<!-- $Rev: 900657 $ $Date: 2010-01-18 19:39:45 -0800 (Mon, 18 Jan 2010) $ -->
+
+<component-set>
+    <components>
+        <!--<component>-->
+            <!--<role>org.codehaus.plexus.archiver.UnArchiver</role>-->
+            <!--<role-hint>car</role-hint>           -->
+            <!--<implementation>org.codehaus.plexus.archiver.zip.ZipUnArchiver</implementation>-->
+            <!--<instantiation-strategy>per-lookup</instantiation-strategy>-->
+        <!--</component>-->
+        <!--
+        Deprecated, use geronimo-module instead.
+        -->
+        <component>
+            <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+            <role-hint>feature</role-hint>
+            <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+            <configuration>
+                <lifecycles>
+                    <lifecycle>
+                        <id>default</id>
+                        <phases>
+                            <process-resources>
+                                org.apache.maven.plugins:maven-resources-plugin:resources
+                            </process-resources>
+                            <compile>
+                                org.apache.karaf.tooling:features-maven-plugin:generate-features-xml2
+                            </compile>
+                            <!--<package>-->
+                                <!--org.apache.geronimo.buildsupport:car-maven-plugin:package,-->
+                                <!--org.apache.geronimo.buildsupport:car-maven-plugin:archive-car-->
+                            <!--</package>-->
+                            <install>
+                                org.apache.maven.plugins:maven-install-plugin:install,
+                            </install>
+                            <deploy>
+                                org.apache.maven.plugins:maven-deploy-plugin:deploy
+                            </deploy>
+                        </phases>
+                    </lifecycle>
+                </lifecycles>
+            </configuration>
+        </component>
+
+        <!--
+        FIXME: For some crazy reason, when the following are enabled it causes other packagings
+               picked up from tools-maven-plugin to now configure their artifact handlers?!?!!
+        -->
+
+        <!--
+        Custom packaging for geronimo modules.
+        -->
+        <!--
+        <component>
+            <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+            <role-hint>geronimo-module</role-hint>
+            <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+            <configuration>
+                <lifecycles>
+                    <lifecycle>
+                        <id>default</id>
+                        <phases>
+                            <process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>
+                            <compile>org.apache.geronimo.buildsupport:car-maven-plugin:prepare-plan</compile>
+                            <package>org.apache.geronimo.buildsupport:car-maven-plugin:package</package>
+                            <install>org.apache.maven.plugins:maven-install-plugin:install</install>
+                            <deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>
+                        </phases>
+                    </lifecycle>
+                </lifecycles>
+            </configuration>
+        </component>
+        -->
+
+        <!--
+        Install geronimo-module artifact files as .car files
+        -->
+        <!--
+        <component>
+            <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+            <role-hint>geronimo-module</role-hint>
+            <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+            <configuration>
+                <type>geronimo-module</type>
+                <extension>car</extension>
+                <packaging>geronimo-module</packaging>
+                <addedToClasspath>false</addedToClasspath>
+                <language>java</language>
+            </configuration>
+        </component>
+        -->
+
+        <!--
+        Custom packaging for server assembly modules.
+        -->
+        <!--<component>-->
+            <!--<role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>-->
+            <!--<role-hint>server-assembly</role-hint>-->
+            <!--<implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>-->
+            <!--<configuration>-->
+                <!--<lifecycles>-->
+                    <!--<lifecycle>-->
+                        <!--<id>default</id>-->
+                        <!--<phases>-->
+                            <!--<process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>-->
+                            <!--<compile>org.apache.geronimo.buildsupport:car-maven-plugin:install-modules</compile>-->
+                            <!--<package>org.apache.geronimo.buildsupport:car-maven-plugin:archive</package>-->
+                            <!--<install>org.apache.maven.plugins:maven-install-plugin:install</install>-->
+                            <!--<deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>-->
+                        <!--</phases>-->
+                    <!--</lifecycle>-->
+                <!--</lifecycles>-->
+            <!--</configuration>-->
+        <!--</component>-->
+
+        <!--
+        Install server-assembly artifact files as .pom xml files
+        -->
+        <!--<component>-->
+            <!--<role>org.apache.maven.artifact.handler.ArtifactHandler</role>-->
+            <!--<role-hint>application-assembly</role-hint>-->
+            <!--<implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>-->
+            <!--<configuration>-->
+                <!--<type>application-assembly</type>-->
+                <!--<extension>pom</extension>-->
+                <!--<packaging>application-assembly</packaging>-->
+                <!--<addedToClasspath>false</addedToClasspath>-->
+                <!--<language>xml</language>-->
+            <!--</configuration>-->
+        <!--</component>-->
+
+        <!--<component>-->
+            <!--<role>org.apache.maven.artifact.handler.ArtifactHandler</role>-->
+            <!--<role-hint>plugin-metadata</role-hint>-->
+            <!--<implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>-->
+            <!--<configuration>-->
+                <!--<type>plugin-metadata</type>-->
+                <!--<extension>plugin-metadata</extension>-->
+                <!--<language>xml</language>-->
+            <!--</configuration>-->
+        <!--</component>-->
+    </components>
+</component-set>
+
