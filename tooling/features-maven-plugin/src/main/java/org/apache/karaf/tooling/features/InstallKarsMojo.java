@@ -74,8 +74,6 @@ public class InstallKarsMojo extends MojoSupport {
      */
     protected String localRepoDirectory;
 
-    private Properties featuresCfgProperties;
-
     public void execute() throws MojoExecutionException, MojoFailureException {
         KarArtifactInstaller installer = new KarArtifactInstaller();
         installer.setBasePath(workDirectory);
