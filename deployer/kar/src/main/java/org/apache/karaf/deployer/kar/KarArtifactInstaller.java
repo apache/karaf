@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -99,7 +100,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 			if (repoEntryName != null) {
                 File extract = extract(zipFile, buffer, entry, repoEntryName, localRepoPath);
                 if (isFeaturesRepository(extract)) {
-                    addToFeaturesRepositories(extract);
+                    addToFeaturesRepositories(repoEntryName);
                 }
 			}
             if (entry.getName().startsWith("resource")) {
@@ -228,17 +229,36 @@ public class KarArtifactInstaller implements ArtifactInstaller {
         return db.parse(artifact);
     }
 
-	private void addToFeaturesRepositories(File file)  {
+	private void addToFeaturesRepositories(String path)  {
+        URI mvnUri = pathToMvnUri(path);
 		try {
-			featuresService.addRepository(file.toURI());
+			featuresService.addRepository(mvnUri);
 			if (logger.isInfoEnabled())
-				logger.info("Added feature repository '" + file.toURI() + "'.");
+				logger.info("Added feature repository '" + mvnUri + "'.");
 		} catch (Exception e) {
-			logger.error("Unable to add repository '" + file.getName() + "'", e);
+			logger.error("Unable to add repository '" + mvnUri + "'", e);
 		}
 	}
 
-	public boolean canHandle(File file) {
+    static URI pathToMvnUri(String path) {
+        String[] bits = path.split("/");
+        String classifier = "feature";
+        String artifactType = "xml";
+        String version = bits[bits.length - 2];
+        String artifactId = bits[bits.length - 3];
+        StringBuilder buf = new StringBuilder("mvn:");
+        for (int i = 0; i < bits.length - 3; i++) {
+            buf.append(bits[i]);
+            if (i < bits.length - 4) {
+                buf.append(".");
+            }
+        }
+        buf.append("/").append(artifactId).append("/").append(version).append("/").append(artifactType).append("/").append(classifier);
+        URI mvnUri = URI.create(buf.toString());
+        return mvnUri;
+    }
+
+    public boolean canHandle(File file) {
 		// If the file ends with .kar, then we can handle it!
 		//
 		if (file.isFile() && file.getName().endsWith(KAR_SUFFIX)) {
