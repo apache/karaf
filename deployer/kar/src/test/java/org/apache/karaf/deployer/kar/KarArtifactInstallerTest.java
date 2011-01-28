@@ -48,8 +48,9 @@ public class KarArtifactInstallerTest {
 		karArtifactInstaller = new KarArtifactInstaller();
 
 		karArtifactInstaller.setFeaturesService(featuresService);
+		karArtifactInstaller.setBasePath("./target");
 		karArtifactInstaller.setLocalRepoPath("./target/local-repo");
-		
+
 		karArtifactInstaller.init();
 		
 		goodKarFile = getClass().getClassLoader().getResource("goodKarFile.kar").toURI();

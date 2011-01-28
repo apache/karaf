@@ -22,7 +22,6 @@ package org.apache.karaf.tooling.features;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,15 +32,15 @@ import org.apache.karaf.features.internal.FeaturesRoot;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
+import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.model.License;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
-import org.codehaus.plexus.archiver.manager.ArchiverManager;
-import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
-import org.codehaus.plexus.util.FileUtils;
+import org.osgi.framework.Constants;
 
 /**
  * assembles a kar archive from a features.xml file
@@ -74,15 +73,6 @@ public class ArchiveKarMojo extends MojoSupport {
      * @readonly
      */
     private JarArchiver jarArchiver = null;
-
-    /**
-     * The Jar archiver.
-     *
-     * @component role="org.codehaus.plexus.archiver.manager.ArchiverManager"
-     * @required
-     * @readonly
-     */
-    private ArchiverManager archiverManager = null;
 
     /**
      * The module base directory.
@@ -193,39 +183,52 @@ public class ArchiveKarMojo extends MojoSupport {
      * @param bundles
      */
     private File createArchive(List<Artifact> bundles) throws MojoExecutionException {
+        ArtifactRepositoryLayout layout = new DefaultRepositoryLayout();
         File archiveFile = getArchiveFile(outputDirectory, finalName, null);
 
-        GeronimoArchiver archiver = new GeronimoArchiver(archiverManager);
+        MavenArchiver archiver = new MavenArchiver();
         archiver.setArchiver(jarArchiver);
         archiver.setOutputFile(archiveFile);
 
         try {
+//            archive.addManifestEntry(Constants.BUNDLE_NAME, project.getName());
+//            archive.addManifestEntry(Constants.BUNDLE_VENDOR, project.getOrganization().getName());
+//            ArtifactVersion version = project.getArtifact().getSelectedVersion();
+//            String versionString = "" + version.getMajorVersion() + "." + version.getMinorVersion() + "." + version.getIncrementalVersion();
+//            if (version.getQualifier() != null) {
+//                versionString += "." + version.getQualifier();
+//            }
+//            archive.addManifestEntry(Constants.BUNDLE_VERSION, versionString);
+//            archive.addManifestEntry(Constants.BUNDLE_MANIFESTVERSION, "2");
+//            archive.addManifestEntry(Constants.BUNDLE_DESCRIPTION, project.getDescription());
+//            // NB, no constant for this one
+//            archive.addManifestEntry("Bundle-License", ((License) project.getLicenses().get(0)).getUrl());
+//            archive.addManifestEntry(Constants.BUNDLE_DOCURL, project.getUrl());
+//            //TODO this might need some help
+//            archive.addManifestEntry(Constants.BUNDLE_SYMBOLICNAME, project.getArtifactId());
 
             //include the feature.xml
-
-            jarArchiver.addFile(featuresFile, "feature.xml");
+            Artifact featureArtifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), "xml", "feature");
+            jarArchiver.addFile(featuresFile, "repository/" + layout.pathOf(featureArtifact));
 
             for (Artifact artifact: bundles) {
                 resolver.resolve(artifact, remoteRepos, localRepo);
                 File localFile = artifact.getFile();
-                //TODO isn't there a maven class that can do this better?
-                String dir = artifact.getGroupId().replace('.', '/') + "/" + artifact.getArtifactId() + "/" + artifact.getVersion() + "/";
-                String name = artifact.getArtifactId() + "-" + artifact.getVersion() + (artifact.getClassifier() != null ? "-" + artifact.getClassifier() : "") + "." + artifact.getType();
-                String targetFileName = dir + name;
+                String targetFileName = "repository/" + layout.pathOf(artifact);
                 jarArchiver.addFile(localFile, targetFileName);
             }
 
-            // Include the generated artifact contents
-            File artifactDirectory = this.getArtifactInRepositoryDir();
+//            // Include the generated artifact contents
+//            File artifactDirectory = this.getArtifactInRepositoryDir();
+//
+//            if (artifactDirectory.exists()) {
+//                archiver.addArchivedFileSet(artifactDirectory);
+//            }
 
-            if (artifactDirectory.exists()) {
-                archiver.addArchivedFileSet(artifactDirectory);
-            }
-
-            if (resourcesDir.isDirectory()) {
-                archiver.getArchiver().addDirectory(resourcesDir);
-            }
-
+//            if (resourcesDir.isDirectory()) {
+//                archiver.getArchiver().addDirectory(resourcesDir);
+//            }
+//
             for (Resource resource: (List<Resource>)project.getResources()) {
                 File resourceDir = new File(resource.getDirectory());
                 if (resourceDir.exists()) {
@@ -323,8 +326,8 @@ public class ArchiveKarMojo extends MojoSupport {
             return archiveFile;
         } catch (Exception e) {
             throw new MojoExecutionException("Failed to create archive", e);
-        } finally {
-            archiver.cleanup();
+//        } finally {
+//            archiver.cleanup();
         }
     }
 
@@ -338,55 +341,55 @@ public class ArchiveKarMojo extends MojoSupport {
         return new File(basedir, finalName + classifier + ".kar");
     }
 
-    private static class GeronimoArchiver extends MavenArchiver {
-
-        private ArchiverManager archiverManager;
-        private List<File> tmpDirs = new ArrayList<File>();
-
-        public GeronimoArchiver(ArchiverManager archiverManager) {
-            this.archiverManager = archiverManager;
-        }
-
-        public void addArchivedFileSet(File archiveFile) throws ArchiverException {
-            UnArchiver unArchiver;
-            try {
-                unArchiver = archiverManager.getUnArchiver(archiveFile);
-            } catch (NoSuchArchiverException e) {
-                throw new ArchiverException(
-                        "Error adding archived file-set. UnArchiver not found for: " + archiveFile,
-                        e);
-            }
-
-            File tempDir = FileUtils.createTempFile("archived-file-set.", ".tmp", null);
-
-            tempDir.mkdirs();
-
-            tmpDirs.add(tempDir);
-
-            unArchiver.setSourceFile(archiveFile);
-            unArchiver.setDestDirectory(tempDir);
-
-            try {
-                unArchiver.extract();
-            } catch (IOException e) {
-                throw new ArchiverException("Error adding archived file-set. Failed to extract: "
-                        + archiveFile, e);
-            }
-
-            getArchiver().addDirectory(tempDir, null, null, null);
-        }
-
-        public void cleanup() {
-            for (File dir : tmpDirs) {
-                try {
-                    FileUtils.deleteDirectory(dir);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            tmpDirs.clear();
-        }
-
-    }
+//    private static class GeronimoArchiver extends MavenArchiver {
+//
+//        private ArchiverManager archiverManager;
+//        private List<File> tmpDirs = new ArrayList<File>();
+//
+//        public GeronimoArchiver(ArchiverManager archiverManager) {
+//            this.archiverManager = archiverManager;
+//        }
+//
+//        public void addArchivedFileSet(File archiveFile) throws ArchiverException {
+//            UnArchiver unArchiver;
+//            try {
+//                unArchiver = archiverManager.getUnArchiver(archiveFile);
+//            } catch (NoSuchArchiverException e) {
+//                throw new ArchiverException(
+//                        "Error adding archived file-set. UnArchiver not found for: " + archiveFile,
+//                        e);
+//            }
+//
+//            File tempDir = FileUtils.createTempFile("archived-file-set.", ".tmp", null);
+//
+//            tempDir.mkdirs();
+//
+//            tmpDirs.add(tempDir);
+//
+//            unArchiver.setSourceFile(archiveFile);
+//            unArchiver.setDestDirectory(tempDir);
+//
+//            try {
+//                unArchiver.extract();
+//            } catch (IOException e) {
+//                throw new ArchiverException("Error adding archived file-set. Failed to extract: "
+//                        + archiveFile, e);
+//            }
+//
+//            getArchiver().addDirectory(tempDir, null, null, null);
+//        }
+//
+//        public void cleanup() {
+//            for (File dir : tmpDirs) {
+//                try {
+//                    FileUtils.deleteDirectory(dir);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            tmpDirs.clear();
+//        }
+//
+//    }
 
 }
