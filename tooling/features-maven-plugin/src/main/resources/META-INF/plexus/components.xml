@@ -51,7 +51,36 @@
                                 <!--org.apache.geronimo.buildsupport:car-maven-plugin:archive-car-->
                             <!--</package>-->
                             <install>
-                                org.apache.maven.plugins:maven-install-plugin:install,
+                                org.apache.maven.plugins:maven-install-plugin:install
+                            </install>
+                            <deploy>
+                                org.apache.maven.plugins:maven-deploy-plugin:deploy
+                            </deploy>
+                        </phases>
+                    </lifecycle>
+                </lifecycles>
+            </configuration>
+        </component>
+        <component>
+            <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+            <role-hint>kar</role-hint>
+            <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+            <configuration>
+                <lifecycles>
+                    <lifecycle>
+                        <id>default</id>
+                        <phases>
+                            <process-resources>
+                                org.apache.maven.plugins:maven-resources-plugin:resources
+                            </process-resources>
+                            <compile>
+                                org.apache.karaf.tooling:features-maven-plugin:generate-features-xml2
+                            </compile>
+                            <package>
+                                org.apache.karaf.tooling:features-maven-plugin:archive-kar
+                            </package>
+                            <install>
+                                org.apache.maven.plugins:maven-install-plugin:install
                             </install>
                             <deploy>
                                 org.apache.maven.plugins:maven-deploy-plugin:deploy

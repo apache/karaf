@@ -142,66 +142,24 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             }
             
             // bundles with explicitely specified remote repos. key -> bundle, value -> remote repo
-            Map<String, ArtifactRepository> explicitRepoBundles = new HashMap<String, ArtifactRepository>();
+            List<Artifact> explicitRepoBundles = new ArrayList<Artifact>();
 
             getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
-                // get rid of of possible line-breaks KARAF-313
-                bundle = bundle.replace("\r\n", "").replace("\n", "").replace(" ", "");
-                final int index = bundle.indexOf("mvn:");
-                if (index < 0) {
-                    if (skipNonMavenProtocols) {
-                        continue;
-                    }
-                    throw new MojoExecutionException("Bundle url is not a maven url: " + bundle);
+                Artifact artifact = bundleToArtifact(bundle, skipNonMavenProtocols);
+                if (artifact == null) {
+                    continue;
                 }
-                else {
-                    bundle = bundle.substring(index);
+                if (artifact.getRepository() != null) {
+                    explicitRepoBundles.add(artifact);
+                } else {
+                    //bundle URL without repository information are resolved now
+                    resolveBundle(artifact, remoteRepos);
                 }
-                // Truncate the URL when a '#', a '?' or a '$' is encountered
-                final int index1 = bundle.indexOf('?');
-                final int index2 = bundle.indexOf('#');
-                int endIndex = -1;
-                if (index1 > 0) {
-                     if (index2 > 0) {
-                         endIndex = Math.min(index1, index2);
-                     } else {
-                         endIndex = index1;
-                     }
-                } else if (index2 > 0) {
-                    endIndex = index2;
-                }
-                if (endIndex >= 0) {
-                    bundle = bundle.substring(0, endIndex);
-                }
-                final int index3 = bundle.indexOf('$');
-                if (index3 > 0) {
-                	bundle = bundle.substring(0, index3);
-                }
-                if (index1 > 0 || index2 > 0 || endIndex > 0 || index3 > 0)
-                	getLog().debug("Bundle URL truncated: "+bundle);
-
-                String bundleDescriptor = bundle.substring("mvn:".length());
-                //check if the bundle descriptor contains also remote repository information.
-                if(bundleDescriptor.startsWith("http://")) {
-                	final int repoDelimIntex = bundleDescriptor.indexOf('!');
-                	String repoUrl = bundleDescriptor.substring(0, repoDelimIntex);
-
-                	ArtifactRepository repo = new DefaultArtifactRepository(
-                			repoUrl,
-                			repoUrl,
-                			new DefaultRepositoryLayout());
-                	bundleDescriptor = bundleDescriptor.substring(repoDelimIntex + 1);
-
-                	explicitRepoBundles.put(bundleDescriptor, repo);
-                	continue;
-                }
-                //bundle URL without repository information are resolved now
-                resolveBundle(bundleDescriptor, remoteRepos);
             }
             // resolving all bundles with explicitly specified remote repository
-            for(Map.Entry<String, ArtifactRepository> explicitBundle : explicitRepoBundles.entrySet()) {
-                resolveBundle(explicitBundle.getKey(), Collections.singletonList(explicitBundle.getValue()));
+            for(Artifact explicitBundle : explicitRepoBundles) {
+                resolveBundle(explicitBundle, Collections.singletonList(explicitBundle.getRepository()));
             }
             if (copyFileBasedDescriptors != null) {
                 for (CopyFileBasedDescriptor fileBasedDescritpor : copyFileBasedDescriptors) {
@@ -221,31 +179,17 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         }
     }
     
-    // resolves the bundle in question 
-    private void resolveBundle(String bundle, List<ArtifactRepository> remoteRepos) throws IOException, MojoFailureException {
-    	String[] parts = bundle.split("/");
-    	String groupId = parts[0];
-    	String artifactId = parts[1];
-    	String version = null;
-    	String classifier = null;
-    	String type = "jar";
-    	if (parts.length > 2) {
-    		version = parts[2];
-    		if (parts.length > 3) {
-    			type = parts[3];
-    			if (parts.length > 4) {
-    				classifier = parts[4];
-    			}
-    		}
-    	}
-    	String dir = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/";
-    	String name = artifactId + "-" + version + (classifier != null ? "-" + classifier : "") + "." + type;
+    // resolves the bundle in question
+    //TODO neither remoteRepos nor bundle's Repository are used, only the local repo?????
+    private void resolveBundle(Artifact bundle, List<ArtifactRepository> remoteRepos) throws IOException, MojoFailureException {
+        //TODO consider DefaultRepositoryLayout
+    	String dir = bundle.getGroupId().replace('.', '/') + "/" + bundle.getArtifactId() + "/" + bundle.getBaseVersion() + "/";
+    	String name = bundle.getArtifactId() + "-" + bundle.getBaseVersion() + (bundle.getClassifier() != null ? "-" + bundle.getClassifier() : "") + "." + bundle.getType();
 
-    	Artifact artifact = factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
     	try {
     		getLog().info("Copying bundle: " + bundle);
-    		resolver.resolve(artifact, remoteRepos, localRepo);
-    		copy(new FileInputStream(artifact.getFile()),
+    		resolver.resolve(bundle, remoteRepos, localRepo);
+    		copy(new FileInputStream(bundle.getFile()),
     				repository,
     				name,
     				dir,

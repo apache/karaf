@@ -31,9 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.zip.ZipException;
 
+import javax.xml.bind.JAXBException;
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.karaf.features.internal.Bundle;
+import org.apache.karaf.features.internal.Feature;
+import org.apache.karaf.features.internal.FeaturesRoot;
+import org.apache.karaf.features.internal.ObjectFactory;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -83,7 +87,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     /**
      * The file to generate
      * 
-     * @parameter default-value="${project.build.directory}/classes/feature.xml"
+     * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
     private File outputFile;
 
@@ -168,6 +172,8 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     public void execute() throws MojoExecutionException, MojoFailureException {
         PrintStream out = null;
         try {
+            File dir = outputFile.getParentFile();
+            dir.mkdirs();
             out = new PrintStream(new FileOutputStream(outputFile));
             readSystemPackages();
 //            readKernelBundles();
@@ -306,28 +312,46 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      * Write all project dependencies as feature
      */
     private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
-        ZipException, IOException {
+            IOException, JAXBException {
         getLogger().info("Step 4 : Generating " + outputFile.getAbsolutePath());
-        out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        out.println("<features>");
-        out.println("  <feature name='" + project.getArtifactId() + "' version='"
-                + project.getArtifact().getBaseVersion() + "'>");
-
-        for (Artifact artifact : localDependencies) {
+        ObjectFactory objectFactory = new ObjectFactory();
+        FeaturesRoot featuresRoot = objectFactory.createFeaturesRoot();
+        Feature feature = objectFactory.createFeature();
+        featuresRoot.getFeature().add(feature);
+        feature.setName(project.getArtifactId());
+        feature.setVersion(project.getArtifact().getBaseVersion());
+        for (Artifact artifact: localDependencies) {
+            String bundleName;
             if (artifact.getType().equals("jar")) {
-                out.println(String.format("    <bundle>mvn:%s/%s/%s</bundle>", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion()));
+                bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
             } else {
-                out.println(String.format("    <bundle>mvn:%s/%s/%s/%s</bundle>", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType()));
+                bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType());
             }
-//            if (!artifact.getScope().equals(Artifact.SCOPE_PROVIDED) && !artifact.getType().equals("pom")) {
-//                getLogger().info(" Generating feature " + artifact.getArtifactId() + " from " + artifact);
-//                Feature feature = getFeature(artifact);
-//                feature.write(out);
-////                registerFeature(artifact, feature);
-//            }
+            Bundle bundle = objectFactory.createBundle();
+            bundle.setValue(bundleName);
+            feature.getBundle().add(bundle);
         }
-        out.println("  </feature>");
-        out.println("</features>");
+        JaxbUtil.marshal(FeaturesRoot.class, featuresRoot, out);
+//        out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+//        out.println("<features>");
+//        out.println("  <feature name='" + project.getArtifactId() + "' version='"
+//                + project.getArtifact().getBaseVersion() + "'>");
+//
+//        for (Artifact artifact : localDependencies) {
+//            if (artifact.getType().equals("jar")) {
+//                out.println(String.format("    <bundle>mvn:%s/%s/%s</bundle>", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion()));
+//            } else {
+//                out.println(String.format("    <bundle>mvn:%s/%s/%s/%s</bundle>", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType()));
+//            }
+////            if (!artifact.getScope().equals(Artifact.SCOPE_PROVIDED) && !artifact.getType().equals("pom")) {
+////                getLogger().info(" Generating feature " + artifact.getArtifactId() + " from " + artifact);
+////                Feature feature = getFeature(artifact);
+////                feature.write(out);
+//////                registerFeature(artifact, feature);
+////            }
+//        }
+//        out.println("  </feature>");
+//        out.println("</features>");
         getLogger().info("...done!");
     }
 
