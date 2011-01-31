@@ -26,9 +26,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.deployer.blueprint.BlueprintTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * As org.apache.karaf.deployer.blueprint.BlueprintURLHandler need run with OSGi container
@@ -36,7 +36,7 @@ import org.apache.karaf.deployer.blueprint.BlueprintTransformer;
  */
 public class BlueprintURLHandler extends URLStreamHandler {
 
-	private static Log logger = LogFactory.getLog(BlueprintURLHandler.class);
+	private final Logger logger = LoggerFactory.getLogger(BlueprintURLHandler.class);
 
 	private static String SYNTAX = "blueprint: bp-xml-uri";
 

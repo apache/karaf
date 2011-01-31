@@ -31,8 +31,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -40,6 +38,8 @@ import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -51,11 +51,11 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
     /** Pseudo class version ID to keep the IDE quite. */
     private static final long serialVersionUID = 1L;
 
+    private final Logger log = LoggerFactory.getLogger(FeaturesPlugin.class);
+
     public static final String NAME = "features";
 
     public static final String LABEL = "Features";
-
-    private Log log = LogFactory.getLog(FeaturesPlugin.class);
 
     private ClassLoader classLoader;
 

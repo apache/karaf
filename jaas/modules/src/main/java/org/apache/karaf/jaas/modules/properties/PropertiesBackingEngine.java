@@ -16,13 +16,13 @@
 
 package org.apache.karaf.jaas.modules.properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.apache.karaf.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class PropertiesBackingEngine implements BackingEngine {
 
-    private static final Log LOG = LogFactory.getLog(PropertiesBackingEngine.class);
+    private final Logger logger = LoggerFactory.getLogger(PropertiesBackingEngine.class);
 
     private Properties users;
     private EncryptionSupport encryptionSupport;
@@ -89,7 +89,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         try {
             users.save();
         } catch (Exception ex) {
-            LOG.error("Cannot update users file,", ex);
+            logger.error("Cannot update users file,", ex);
         }
     }
 
@@ -149,7 +149,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         try {
             users.save();
         } catch (Exception ex) {
-            LOG.error("Cannot update users file,", ex);
+            logger.error("Cannot update users file,", ex);
         }
     }
 
@@ -184,7 +184,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         try {
             users.save();
         } catch (Exception ex) {
-            LOG.error("Cannot update users file,", ex);
+            logger.error("Cannot update users file,", ex);
         }
     }
 }

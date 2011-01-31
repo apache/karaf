@@ -31,8 +31,6 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 
 import org.apache.karaf.jaas.modules.RolePrincipal;
@@ -43,8 +41,6 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
 
     public static final String PID = "pid";
     public static final String USER_PREFIX = "user.";
-
-    private static final Log LOG = LogFactory.getLog(OsgiConfigLoginModule.class);
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);

@@ -15,13 +15,13 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.config.KeystoreManager;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -31,7 +31,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -47,7 +46,7 @@ import java.util.Map;
  */
 public class LDAPLoginModule extends AbstractKarafLoginModule {
 
-    private final static transient Log LOG = LogFactory.getLog(LDAPLoginModule.class);
+    private static Logger logger = LoggerFactory.getLogger(LDAPLoginModule.class);
 
     public final static String CONNECTION_URL = "connection.url";
     public final static String CONNECTION_USERNAME = "connection.username";
@@ -109,9 +108,9 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         }
         authentication = (String) options.get(AUTHENTICATION);
         if (connectionURL == null || connectionURL.trim().length() == 0) {
-            LOG.error("No LDAP URL specified.");
+            logger.error("No LDAP URL specified.");
         } else if (!connectionURL.startsWith("ldap:") && !connectionURL.startsWith("ldaps:")) {
-            LOG.error("Invalid LDAP URL: " + connectionURL);
+            logger.error("Invalid LDAP URL: " + connectionURL);
         }
         if (options.get(SSL) != null) {
             ssl = Boolean.parseBoolean((String) options.get(SSL));
@@ -160,11 +159,11 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
 
         // step 1: get the user DN
         Hashtable env = new Hashtable();
-        LOG.debug("Create the LDAP initial context.");
+        logger.debug("Create the LDAP initial context.");
         env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
         env.put(Context.PROVIDER_URL, connectionURL);
         if (connectionUsername != null && connectionUsername.trim().length() > 0) {
-            LOG.debug("Bound access requested.");
+            logger.debug("Bound access requested.");
             env.put(Context.SECURITY_AUTHENTICATION, authentication);
             env.put(Context.SECURITY_PRINCIPAL, connectionUsername);
             env.put(Context.SECURITY_CREDENTIALS, connectionPassword);
@@ -172,28 +171,28 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         if (ssl) {
             setupSsl(env);
         }
-        LOG.debug("Get the user DN.");
+        logger.debug("Get the user DN.");
         String userDN;
         try {
-            LOG.debug("Initialize the JNDI LDAP Dir Context.");
+            logger.debug("Initialize the JNDI LDAP Dir Context.");
             DirContext context = new InitialDirContext(env);
-            LOG.debug("Define the subtree scope search control.");
+            logger.debug("Define the subtree scope search control.");
             SearchControls controls = new SearchControls();
             if (userSearchSubtree) {
                 controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
             } else {
                 controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
             }
-            LOG.debug("Looking for the user in LDAP with ");
-            LOG.debug("  base DN: " + userBaseDN);
+            logger.debug("Looking for the user in LDAP with ");
+            logger.debug("  base DN: " + userBaseDN);
             userFilter = userFilter.replaceAll("%u", user);
-            LOG.debug("  filter: " + userFilter);
+            logger.debug("  filter: " + userFilter);
             NamingEnumeration namingEnumeration = context.search(userBaseDN, userFilter, controls);
             if (!namingEnumeration.hasMore()) {
-                LOG.warn("User " + user + " not found in LDAP.");
+                logger.warn("User " + user + " not found in LDAP.");
                 return false;
             }
-            LOG.debug("Get the user DN.");
+            logger.debug("Get the user DN.");
             SearchResult result = (SearchResult) namingEnumeration.next();
             userDN = (String) result.getName();
         } catch (Exception e) {
@@ -201,23 +200,23 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         }
         // step 2: bind the user using the DN
         try {
-            LOG.debug("Bind user (authentication).");
+            logger.debug("Bind user (authentication).");
             env.put(Context.SECURITY_AUTHENTICATION, authentication);
-            LOG.debug("Set the security principal for " + userDN + "," + userBaseDN);
+            logger.debug("Set the security principal for " + userDN + "," + userBaseDN);
             env.put(Context.SECURITY_PRINCIPAL, userDN + "," + userBaseDN);
             env.put(Context.SECURITY_CREDENTIALS, password);
-            LOG.debug("Binding the user.");
+            logger.debug("Binding the user.");
             DirContext context = new InitialDirContext(env);
-            LOG.debug("User " + user + " successfully bound.");
+            logger.debug("User " + user + " successfully bound.");
             context.close();
         } catch (Exception e) {
-            LOG.warn("User " + user + " authentication failed.", e);
+            logger.warn("User " + user + " authentication failed.", e);
             return false;
         }
         principals.add(new UserPrincipal(user));
         // step 3: retrieving user roles
         try {
-            LOG.debug("Get user roles.");
+            logger.debug("Get user roles.");
             DirContext context = new InitialDirContext(env);
             SearchControls controls = new SearchControls();
             if (roleSearchSubtree) {
@@ -225,10 +224,10 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             } else {
                 controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
             }
-            LOG.debug("Looking for the user roles in LDAP with ");
-            LOG.debug("  base DN: " + roleBaseDN);
+            logger.debug("Looking for the user roles in LDAP with ");
+            logger.debug("  base DN: " + roleBaseDN);
             roleFilter = roleFilter.replaceAll("%u", user);
-            LOG.debug("  filter: " + roleFilter);
+            logger.debug("  filter: " + roleFilter);
             NamingEnumeration namingEnumeration = context.search(roleBaseDN, roleFilter, controls);
             while (namingEnumeration.hasMore()) {
                 SearchResult result = (SearchResult) namingEnumeration.next();
@@ -247,7 +246,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
     protected void setupSsl(Hashtable env) throws LoginException {
         ServiceReference ref = null;
         try {
-            LOG.debug("Setting up SSL");
+            logger.debug("Setting up SSL");
             env.put(Context.SECURITY_PROTOCOL, "ssl");
             env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
             ref = bundleContext.getServiceReference(KeystoreManager.class.getName());

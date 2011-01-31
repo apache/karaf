@@ -30,11 +30,11 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO Add javadoc
@@ -44,7 +44,7 @@ import org.apache.sshd.server.session.ServerSession;
 public class KarafJaasPasswordAuthenticator implements PasswordAuthenticator {
 
     public static final Session.AttributeKey<Subject> SUBJECT_ATTRIBUTE_KEY = new Session.AttributeKey<Subject>();
-    private static final Log LOGGER = LogFactory.getLog(KarafJaasPasswordAuthenticator.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(KarafJaasPasswordAuthenticator.class);
 
     private String realm;
     private String role;

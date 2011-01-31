@@ -28,10 +28,10 @@ import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -51,7 +51,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
 
     public static final String FEATURE_PATH = "org.apache.karaf.shell.features";
 
-    private static final Log LOGGER = LogFactory.getLog(FeatureDeploymentListener.class);
+    private final Logger logger = LoggerFactory.getLogger(FeatureDeploymentListener.class);
 
     private DocumentBuilderFactory dbf;
     private FeaturesService featuresService;
@@ -97,7 +97,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Unable to parse deployed file " + artifact.getAbsolutePath(), e);
+            logger.error("Unable to parse deployed file " + artifact.getAbsolutePath(), e);
         }
         return false;
     }
@@ -112,7 +112,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         try {
             return new URL("feature", null, artifact.toString());
         } catch (Exception e) {
-            LOGGER.error("Unable to build feature bundle", e);
+            logger.error("Unable to build feature bundle", e);
             return null;
         }
     }
@@ -135,7 +135,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                             }
                             urls.add(url);
                         } catch (Exception e) {
-                            LOGGER.error("Unable to install features", e);
+                            logger.error("Unable to install features", e);
                         }
                     }
                     synchronized (this) {
@@ -164,7 +164,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Unable to install deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
+                    logger.error("Unable to install deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
                 }
             } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
                 try {
@@ -193,18 +193,18 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                                                     try {
                                                         featuresService.uninstallFeature(f.getName(), f.getVersion());
                                                     } catch (Exception e) {
-                                                        LOGGER.error("Unable to uninstall feature: " + f.getName(), e);
+                                                        logger.error("Unable to uninstall feature: " + f.getName(), e);
                                                     }
                                                 }
                                             }
                                         } catch (Exception e) {
-                                            LOGGER.error("Unable to uninstall features: " + url, e);
+                                            logger.error("Unable to uninstall features: " + url, e);
                                         }
                                     }
                                     try {
                                         featuresService.removeRepository(url.toURI());
                                     } catch (URISyntaxException e) {
-                                        LOGGER.error("Unable to remove repository: " + url, e);
+                                        logger.error("Unable to remove repository: " + url, e);
                                     }
                                 }
                             }
@@ -222,7 +222,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Unable to uninstall deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
+                    logger.error("Unable to uninstall deployed features for bundle: " + bundle.getSymbolicName() + " - " + bundle.getVersion(), e);
                 }
             }
     }

@@ -25,9 +25,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.deployer.features.FeatureTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -36,7 +36,7 @@ import org.apache.karaf.deployer.features.FeatureTransformer;
  */
 public class FeatureURLHandler extends URLStreamHandler {
 
-    private static Log logger = LogFactory.getLog(FeatureURLHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(FeatureURLHandler.class);
 
     private static String SYNTAX = "feature: xml-uri";
 

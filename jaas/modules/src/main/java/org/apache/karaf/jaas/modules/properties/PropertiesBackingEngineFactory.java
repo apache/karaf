@@ -16,12 +16,12 @@
 
 package org.apache.karaf.jaas.modules.properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.apache.karaf.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +32,9 @@ import java.util.Map;
  */
 public class PropertiesBackingEngineFactory implements BackingEngineFactory {
 
+    private final Logger logger = LoggerFactory.getLogger(PropertiesBackingEngineFactory.class);
+
     private static final String USER_FILE = "users";
-    private static final Log LOG = LogFactory.getLog(PropertiesBackingEngineFactory.class);
 
     /**
      * Builds the Backing Engine
@@ -52,7 +53,7 @@ public class PropertiesBackingEngineFactory implements BackingEngineFactory {
             EncryptionSupport encryptionSupport = new EncryptionSupport(options);
             engine = new PropertiesBackingEngine(users, encryptionSupport);
         } catch (IOException ioe) {
-            LOG.warn("Cannot open users file:" + usersFile);
+            logger.warn("Cannot open users file:" + usersFile);
         } finally {
             return engine;
         }

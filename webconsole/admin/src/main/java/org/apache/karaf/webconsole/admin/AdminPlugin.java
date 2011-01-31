@@ -29,8 +29,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.admin.AdminService;
 import org.apache.karaf.admin.Instance;
 import org.apache.karaf.admin.InstanceSettings;
@@ -38,18 +36,20 @@ import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.framework.BundleContext;
+import org.slf4j.LoggerFactory;
 
 /**
  * Felix Web Console plugin for interacting with the {@link AdminService}
  */
 public class AdminPlugin extends AbstractWebConsolePlugin {
 
+    private final org.slf4j.Logger logger = LoggerFactory.getLogger(AdminPlugin.class);
+
     public static final String NAME = "admin";
     public static final String LABEL = "Admin";
     private String adminJs = "/admin/res/ui/admin.js";
     private BundleContext bundleContext;
     private AdminService adminService;
-    private Log log = LogFactory.getLog(AdminPlugin.class);
     private ClassLoader classLoader;
 
     /**
@@ -58,11 +58,11 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
     public void start() {
         super.activate(bundleContext);
         this.classLoader = this.getClass().getClassLoader();
-        this.log.info(LABEL + " plugin activated");
+        this.logger.info(LABEL + " plugin activated");
     }
 
     public void stop() {
-        this.log.info(LABEL + " plugin deactivated");
+        this.logger.info(LABEL + " plugin deactivated");
         super.deactivate();
     }
 
@@ -182,18 +182,18 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
             try {
                 ins = url.openStream();
                 if (ins == null) {
-                    this.log.error("failed to open " + url);
+                    this.logger.error("failed to open " + url);
                     url = null;
                 }
             } catch (IOException e) {
-                this.log.error(e.getMessage(), e);
+                this.logger.error(e.getMessage(), e);
                 url = null;
             } finally {
                 if (ins != null) {
                     try {
                         ins.close();
                     } catch (IOException e) {
-                        this.log.error(e.getMessage(), e);
+                        this.logger.error(e.getMessage(), e);
                     }
                 }
             }

@@ -108,12 +108,13 @@
         <asm.bundle.version>3.3_1</asm.bundle.version>
         <cglib.bundle.version>2.1_3_6</cglib.bundle.version>
         <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
+        <commons-collections.bundle.version>3.2.1_1</commons-collections.bundle.version>
+        <commons-fileupload.version>1.1.1</commons-fileupload.version>
         <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
         <jasypt.bundle.version>1.7_1</jasypt.bundle.version>
         <jetty.version>7.2.2.v20101205</jetty.version>
         <junit.bundle.version>4.7_2</junit.bundle.version>
 
-        <commons-logging.version>1.1.1</commons-logging.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
@@ -765,11 +766,6 @@
                 <version>${jansi.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.maven.artifact</groupId>
                 <artifactId>maven-artifact</artifactId>
                 <version>3.0-alpha-1</version>
@@ -1005,6 +1001,11 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.commons-codec</artifactId>
                 <version>${commons-codec.bundle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.commons-collections</artifactId>
+                <version>${commons-collections.bundle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>

@@ -28,9 +28,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.url.AbstractURLStreamHandlerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A URL handler that will transform a JBI artifact to an OSGi bundle
@@ -38,7 +38,7 @@ import org.osgi.service.url.AbstractURLStreamHandlerService;
  */
 public class SpringURLHandler extends AbstractURLStreamHandlerService {
 
-	private static Log logger = LogFactory.getLog(SpringURLHandler.class);
+	private final Logger logger = LoggerFactory.getLogger(SpringURLHandler.class);
 
 	private static String SYNTAX = "spring: spring-xml-uri";
 
