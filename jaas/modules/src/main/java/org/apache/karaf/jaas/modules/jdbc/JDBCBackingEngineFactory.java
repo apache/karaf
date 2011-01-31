@@ -16,12 +16,12 @@
 
 package org.apache.karaf.jaas.modules.jdbc;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class JDBCBackingEngineFactory implements BackingEngineFactory {
 
-    private static final Log LOG = LogFactory.getLog(JDBCBackingEngineFactory.class);
+    private final Logger logger = LoggerFactory.getLogger(JDBCBackingEngineFactory.class);
 
     /**
      * Build a Backing engine for the JDBCLoginModule.
@@ -78,7 +78,7 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
                 instance.setSelectRolesQuery(selectRolesQuery);
             }
         } catch (Exception e) {
-            LOG.error("Error creating JDBCBackingEngine.", e);
+            logger.error("Error creating JDBCBackingEngine.", e);
         }
         return instance;
     }

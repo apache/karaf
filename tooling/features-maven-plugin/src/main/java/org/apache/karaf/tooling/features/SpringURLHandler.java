@@ -26,9 +26,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.deployer.spring.SpringTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * As org.apache.karaf.deployer.spring.SpringURLHandler need run with OSGi container
@@ -36,7 +36,7 @@ import org.apache.karaf.deployer.spring.SpringTransformer;
  */
 public class SpringURLHandler extends URLStreamHandler {
 
-	private static Log logger = LogFactory.getLog(SpringURLHandler.class);
+	private final Logger logger = LoggerFactory.getLogger(SpringURLHandler.class);
 
 	private static String SYNTAX = "spring: spring-xml-uri";
 

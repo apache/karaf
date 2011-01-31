@@ -32,21 +32,19 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.jline.Console;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The <code>GogoPlugin</code>
@@ -56,6 +54,8 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     /** Pseudo class version ID to keep the IDE quite. */
     private static final long serialVersionUID = 1L;
 
+    private final Logger logger = LoggerFactory.getLogger(GogoPlugin.class);
+
     public static final String NAME = "gogo";
 
     public static final String LABEL = "Gogo";
@@ -63,7 +63,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     public static final int TERM_WIDTH = 120;
     public static final int TERM_HEIGHT = 39;
 
-    private Log log = LogFactory.getLog(GogoPlugin.class);
+
 
     private BundleContext bundleContext;
 
@@ -86,12 +86,12 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     public void start()
     {
         super.activate( bundleContext );
-        this.log.info( LABEL + " plugin activated" );
+        this.logger.info( LABEL + " plugin activated" );
     }
 
     public void stop()
     {
-        this.log.info( LABEL + " plugin deactivated" );
+        this.logger.info( LABEL + " plugin deactivated" );
         super.deactivate();
     }
 
@@ -132,18 +132,18 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
             try {
                 ins = url.openStream();
                 if (ins == null) {
-                    this.log.error("failed to open " + url);
+                    this.logger.error("failed to open " + url);
                     url = null;
                 }
             } catch (IOException e) {
-                this.log.error(e.getMessage(), e);
+                this.logger.error(e.getMessage(), e);
                 url = null;
             } finally {
                 if (ins != null) {
                     try {
                         ins.close();
                     } catch (IOException e) {
-                        this.log.error(e.getMessage(), e);
+                        this.logger.error(e.getMessage(), e);
                     }
                 }
             }

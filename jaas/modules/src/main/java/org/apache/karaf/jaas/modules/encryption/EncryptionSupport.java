@@ -14,13 +14,13 @@
  */
 package org.apache.karaf.jaas.modules.encryption;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.EncryptionService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class EncryptionSupport {
 
-    private static final Log LOG = LogFactory.getLog(EncryptionSupport.class);
+    private final Logger logger = LoggerFactory.getLogger(EncryptionSupport.class);
 
     private BundleContext bundleContext;
 
@@ -64,15 +64,15 @@ public class EncryptionSupport {
 
             if (!enabled) {
                 if (debug) {
-                    LOG.debug("Encryption is disabled.");
+                    logger.debug("Encryption is disabled.");
                 }
             } else {
                 String name = encOpts.remove("name");
                 if (debug) {
                     if (name != null && name.length() > 0) {
-                        LOG.debug("Encryption is enabled. Using service " + name + " with options " + encOpts);
+                        logger.debug("Encryption is enabled. Using service " + name + " with options " + encOpts);
                     } else {
-                        LOG.debug("Encryption is enabled. Using options " + encOpts);
+                        logger.debug("Encryption is enabled. Using options " + encOpts);
                     }
                 }
                 // lookup the encryption service reference

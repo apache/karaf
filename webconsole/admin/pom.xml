@@ -63,11 +63,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20070829</version>
@@ -79,7 +74,7 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>${commons-logging.version}</version>
+            <version>${commons-fileupload.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

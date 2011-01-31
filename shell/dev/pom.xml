@@ -45,11 +45,13 @@
     <dependency>
         <groupId>org.ops4j.pax.url</groupId>
         <artifactId>pax-url-wrap</artifactId>
+        <scope>provided</scope>
     </dependency>
 
     <dependency>
         <groupId>org.ops4j.pax.url</groupId>
         <artifactId>pax-url-mvn</artifactId>
+        <scope>provided</scope>
     </dependency>
 
     <dependency>

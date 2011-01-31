@@ -30,12 +30,12 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -46,8 +46,9 @@ import org.apache.karaf.util.Properties;
  */
 public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
+    private final Logger LOG = LoggerFactory.getLogger(PropertiesLoginModule.class);
+
     private static final String USER_FILE = "users";
-    private static final Log LOG = LogFactory.getLog(PropertiesLoginModule.class);
 
     private String usersFile;
 

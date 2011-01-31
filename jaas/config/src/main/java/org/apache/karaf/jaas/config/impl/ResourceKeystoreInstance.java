@@ -41,17 +41,18 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.config.KeystoreInstance;
 import org.apache.karaf.jaas.config.KeystoreIsLocked;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class ResourceKeystoreInstance implements KeystoreInstance {
 
-    private static final Log LOG = LogFactory.getLog(ResourceKeystoreInstance.class);
+    private final Logger logger = LoggerFactory.getLogger(ResourceKeystoreInstance.class);
+
     private static final String JKS = "JKS";
 
     private String name;
@@ -141,7 +142,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         try {
             return keystore.getCertificate(alias);
         } catch (KeyStoreException e) {
-            LOG.error("Unable to read certificate from keystore", e);
+            logger.error("Unable to read certificate from keystore", e);
         }
         return null;
     }
@@ -153,7 +154,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         try {
             return keystore.getCertificateAlias(cert);
         } catch (KeyStoreException e) {
-            LOG.error("Unable to read retrieve alias for given certificate from keystore", e);
+            logger.error("Unable to read retrieve alias for given certificate from keystore", e);
         }
         return null;
     }
@@ -165,7 +166,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
         try {
             return keystore.getCertificateChain(alias);
         } catch (KeyStoreException e) {
-            LOG.error("Unable to read certificate chain from keystore", e);
+            logger.error("Unable to read certificate chain from keystore", e);
         }
         return null;
     }
@@ -196,11 +197,11 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
                 return (PrivateKey) key;
             }
         } catch (KeyStoreException e) {
-            LOG.error("Unable to read private key from keystore", e);
+            logger.error("Unable to read private key from keystore", e);
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Unable to read private key from keystore", e);
+            logger.error("Unable to read private key from keystore", e);
         } catch (UnrecoverableKeyException e) {
-            LOG.error("Unable to read private key from keystore", e);
+            logger.error("Unable to read private key from keystore", e);
         }
         return null;
     }
@@ -277,13 +278,13 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
             }
             return true;
         } catch (KeyStoreException e) {
-            LOG.error("Unable to open keystore with provided password", e);
+            logger.error("Unable to open keystore with provided password", e);
         } catch (IOException e) {
-            LOG.error("Unable to open keystore with provided password", e);
+            logger.error("Unable to open keystore with provided password", e);
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Unable to open keystore with provided password", e);
+            logger.error("Unable to open keystore with provided password", e);
         } catch (CertificateException e) {
-            LOG.error("Unable to open keystore with provided password", e);
+            logger.error("Unable to open keystore with provided password", e);
         }
         return false;
     }

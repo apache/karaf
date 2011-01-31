@@ -15,12 +15,12 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.jaas.modules.properties.PropertiesLoginModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public class JDBCLoginModule extends AbstractKarafLoginModule {
 
-    private static final Log LOG = LogFactory.getLog(PropertiesLoginModule.class);
+    private final Logger logger = LoggerFactory.getLogger(PropertiesLoginModule.class);
 
     public static final String PASSWORD_QUERY = "query.password";
     public static final String ROLE_QUERY = "query.role";
@@ -61,9 +61,9 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         passwordQuery = (String) options.get(PASSWORD_QUERY);
         roleQuery = (String) options.get(ROLE_QUERY);
         if (datasourceURL == null || datasourceURL.trim().length() == 0) {
-            LOG.error("No datasource was specified ");
+            logger.error("No datasource was specified ");
         } else if (!datasourceURL.startsWith(JDBCUtils.JNDI) && !datasourceURL.startsWith(JDBCUtils.OSGI)) {
-            LOG.error("Invalid datasource lookup protocol");
+            logger.error("Invalid datasource lookup protocol");
         }
     }
 
@@ -156,7 +156,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
                     connection.close();
                 }
             } catch (SQLException ex) {
-                LOG.warn("Failed to clearly close connection to the database:", ex);
+                logger.warn("Failed to clearly close connection to the database:", ex);
             }
         }
         return true;
@@ -170,7 +170,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         subject.getPrincipals().removeAll(principals);
         principals.clear();
         if (debug) {
-            LOG.debug("logout");
+            logger.debug("logout");
         }
         return true;
     }

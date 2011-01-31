@@ -24,16 +24,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.url.AbstractURLStreamHandlerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * URL handler for features
  */
 public class FeatureURLHandler extends AbstractURLStreamHandlerService {
 
-    private static Log logger = LogFactory.getLog(FeatureURLHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(FeatureURLHandler.class);
 
     private static String SYNTAX = "feature: xml-uri";
 

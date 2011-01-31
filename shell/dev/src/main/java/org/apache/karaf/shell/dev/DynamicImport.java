@@ -23,8 +23,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
@@ -34,16 +32,17 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command for enabling/disabling debug logging on a bundle and calculating the difference in
  * wired imports.
  */
-@Command(scope = "dev", name = "dynamic-import",
-         description = "Enable/disable dynamic-import for a given bundle")
+@Command(scope = "dev", name = "dynamic-import", description = "Enable/disable dynamic-import for a given bundle")
 public class DynamicImport extends AbstractBundleCommand {
 
-    private static final Log LOG = LogFactory.getLog(DynamicImport.class);
+    private final Logger LOG = LoggerFactory.getLogger(DynamicImport.class);
 
     /**
      * The header key where we store the active wires when we enable DynamicImport=*

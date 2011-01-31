@@ -18,17 +18,15 @@
 package org.apache.karaf.deployer.spring;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.felix.fileinstall.ArtifactTransformer;
 import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXParseException;
@@ -40,7 +38,7 @@ import org.xml.sax.SAXException;
  */
 public class SpringDeploymentListener implements ArtifactUrlTransformer {
 
-    private static final Log LOGGER = LogFactory.getLog(SpringDeploymentListener.class);
+    private final Logger logger = LoggerFactory.getLogger(SpringDeploymentListener.class);
 
     private DocumentBuilderFactory dbf;
 
@@ -55,7 +53,7 @@ public class SpringDeploymentListener implements ArtifactUrlTransformer {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Unable to parse deployed file " + artifact.getAbsolutePath(), e);
+            logger.error("Unable to parse deployed file " + artifact.getAbsolutePath(), e);
         }
         return false;
     }
@@ -64,7 +62,7 @@ public class SpringDeploymentListener implements ArtifactUrlTransformer {
         try {
             return new URL("spring", null, artifact.toString());
         } catch (Exception e) {
-            LOGGER.error("Unable to build spring application bundle", e);
+            logger.error("Unable to build spring application bundle", e);
             return null;
         }
     }

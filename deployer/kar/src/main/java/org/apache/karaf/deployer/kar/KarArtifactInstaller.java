@@ -31,10 +31,10 @@ import java.util.zip.ZipFile;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.karaf.features.FeaturesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -42,7 +42,7 @@ import org.xml.sax.SAXParseException;
 
 public class KarArtifactInstaller implements ArtifactInstaller {
 
-	private static Log logger = LogFactory.getLog(KarArtifactInstaller.class);
+	private final Logger logger = LoggerFactory.getLogger(KarArtifactInstaller.class);
 
 	private static final String KAR_SUFFIX = ".kar";
 	private static final String ZIP_SUFFIX = ".zip";

@@ -16,12 +16,12 @@
 
 package org.apache.karaf.jaas.modules.jdbc;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.RolePrincipal;
 import org.apache.karaf.jaas.modules.UserPrincipal;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class JDBCBackingEngine implements BackingEngine {
 
-    private static final Log LOG = LogFactory.getLog(JDBCBackingEngine.class);
+    private final Logger logger = LoggerFactory.getLogger(JDBCBackingEngine.class);
 
     private DataSource dataSource;
     private EncryptionSupport encryptionSupport;
@@ -95,11 +95,11 @@ public class JDBCBackingEngine implements BackingEngine {
                 if (!connection.getAutoCommit()) {
                     connection.commit();
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Executiong [%s], USERNAME=%s, PASSWORD=%s. %i rows affected.", addUserStatement, username, newPassword, rows));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(String.format("Executiong [%s], USERNAME=%s, PASSWORD=%s. %i rows affected.", addUserStatement, username, newPassword, rows));
                 }
             } catch (SQLException e) {
-                LOG.error("Error executiong statement", e);
+                logger.error("Error executiong statement", e);
             } finally {
                 try {
                     if (statement != null) {
@@ -109,7 +109,7 @@ public class JDBCBackingEngine implements BackingEngine {
                         connection.close();
                     }
                 } catch (SQLException e) {
-                    LOG.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
                 }
             }
         }
@@ -144,11 +144,11 @@ public class JDBCBackingEngine implements BackingEngine {
                     connection.commit();
                 }
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Executiong [%s], USERNAME=%s. %i userRows affected.", deleteUserStatement, username, userRows));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(String.format("Executiong [%s], USERNAME=%s. %i userRows affected.", deleteUserStatement, username, userRows));
                 }
             } catch (SQLException e) {
-                LOG.error("Error executiong statement", e);
+                logger.error("Error executiong statement", e);
             } finally {
                 try {
                     if (userStatement != null) {
@@ -161,7 +161,7 @@ public class JDBCBackingEngine implements BackingEngine {
                         connection.close();
                     }
                 } catch (SQLException e) {
-                    LOG.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
                 }
             }
         }
@@ -193,7 +193,7 @@ public class JDBCBackingEngine implements BackingEngine {
                     users.add(new UserPrincipal(username));
                 }
             } catch (SQLException e) {
-                LOG.error("Error executiong statement", e);
+                logger.error("Error executiong statement", e);
             } finally {
                 try {
                     if (usersResultSet != null) {
@@ -206,7 +206,7 @@ public class JDBCBackingEngine implements BackingEngine {
                         connection.close();
                     }
                 } catch (SQLException e) {
-                    LOG.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
                 }
             }
         }
@@ -244,7 +244,7 @@ public class JDBCBackingEngine implements BackingEngine {
                 }
 
             } catch (SQLException e) {
-                LOG.error("Error executiong statement", e);
+                logger.error("Error executiong statement", e);
             } finally {
                 try {
                     if (rolesResultSet != null) {
@@ -257,7 +257,7 @@ public class JDBCBackingEngine implements BackingEngine {
                         connection.close();
                     }
                 } catch (SQLException e) {
-                    LOG.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
                 }
             }
         }
@@ -286,11 +286,11 @@ public class JDBCBackingEngine implements BackingEngine {
                 if (!connection.getAutoCommit()) {
                     connection.commit();
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Executiong [%s], USERNAME=%s, ROLE=%s. %i rows affected.", addRoleStatement, username, role, rows));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(String.format("Executiong [%s], USERNAME=%s, ROLE=%s. %i rows affected.", addRoleStatement, username, role, rows));
                 }
             } catch (SQLException e) {
-                LOG.error("Error executiong statement", e);
+                logger.error("Error executiong statement", e);
             } finally {
                 try {
                     if (statement != null) {
@@ -300,7 +300,7 @@ public class JDBCBackingEngine implements BackingEngine {
                         connection.close();
                     }
                 } catch (SQLException e) {
-                    LOG.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
                 }
             }
         }
@@ -328,11 +328,11 @@ public class JDBCBackingEngine implements BackingEngine {
                 if (!connection.getAutoCommit()) {
                     connection.commit();
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Executiong [%s], USERNAME=%s, ROLE=%s. %i rows affected.", deleteRoleStatement, username, role, rows));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(String.format("Executiong [%s], USERNAME=%s, ROLE=%s. %i rows affected.", deleteRoleStatement, username, role, rows));
                 }
             } catch (SQLException e) {
-                LOG.error("Error executing statement", e);
+                logger.error("Error executing statement", e);
             } finally {
                 try {
                     if (statement != null) {
@@ -342,7 +342,7 @@ public class JDBCBackingEngine implements BackingEngine {
                         connection.close();
                     }
                 } catch (SQLException e) {
-                    LOG.warn(MSG_CONNECTION_CLOSE_FAILED, e);
+                    logger.warn(MSG_CONNECTION_CLOSE_FAILED, e);
                 }
             }
         }
