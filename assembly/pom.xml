@@ -397,6 +397,7 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
     <build>
         <resources>
             <resource>
@@ -496,7 +497,7 @@
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                  <file>src/main/configfiles/jetty.xml</file>
+                                  <file>src/main/resources/extra/jetty.xml</file>
                                   <type>xml</type>
                                   <classifier>jettyconfig</classifier>
                                 </artifact>
