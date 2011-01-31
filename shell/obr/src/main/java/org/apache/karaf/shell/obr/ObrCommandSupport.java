@@ -258,7 +258,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
             StringBuilder sb = new StringBuilder();
             for (Repository repo : admin.listRepositories()) {
                 if (sb.length() > 0) {
-                    sb.append(",");
+                    sb.append(" ");
                 }
                 sb.append(repo.getURI());
             }
