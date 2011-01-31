@@ -301,7 +301,19 @@ public class Console implements Runnable
             String prompt;
             try {
                 Object p = session.get(PROMPT);
-                prompt = p != null ? p.toString() : DEFAULT_PROMPT;
+                if (p != null) {
+                    prompt = p.toString();
+                } else {
+                    Properties properties = loadBrandingProperties();
+                    if (properties.getProperty("prompt") != null) {
+                        prompt = properties.getProperty("prompt");
+                        // we put the PROMPT in ConsoleSession to avoid to read
+                        // the properties file each time.
+                        session.put(PROMPT, prompt);
+                    } else {
+                        prompt = DEFAULT_PROMPT;
+                    }
+                }
             } catch (Throwable t) {
                 prompt = DEFAULT_PROMPT;
             }
