@@ -406,6 +406,13 @@
                     <include>**/*</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources/extra</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*</exclude>
+                </excludes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
