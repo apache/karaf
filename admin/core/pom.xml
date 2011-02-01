@@ -30,6 +30,7 @@
     <artifactId>org.apache.karaf.admin.core</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Admin :: Core</name>
+    <description>Core implementation of the admin feature to manipulate Karaf child instances.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -91,6 +92,13 @@
                 <directory>${project.basedir}/src/main/resources</directory>
                 <includes>
                     <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
                 </includes>
             </resource>
         </resources>

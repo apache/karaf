@@ -1,0 +1,26 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle provides JMX MBeans related to the Karaf admin feature.
+
+    Especially, you have a AdminServiceMBean that you can manipulate remotely using a JMX client (for instance
+    JConsole).
+
+    On this AdminServiceMBean, you have the following operations available:
+    - \u001B[36mcreateInstance\u001B[0m
+    - \u001B[36mchangeSshPort\u001B[0m
+    - \u001B[36mchangeRmiRegistryPort\u001B[0m
+    - \u001B[36mchangeJavaOpts\u001B[0m
+    - \u001B[36mdestroyInstance\u001B[0m
+    - \u001B[36mstartInstance\u001B[0m
+    - \u001B[36mstopInstance\u001B[0m
+    - \u001B[36mrenameInstance\u001B[0m
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[31mRemote Management via JMX\u001B[0m in the Karaf User Guide.

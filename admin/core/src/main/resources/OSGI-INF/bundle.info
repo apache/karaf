@@ -1,0 +1,17 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle is the core implementation of the Karaf admin feature.
+
+    Karaf admin allows you to manage Karaf child instances.
+
+    You can create new Karaf instances, configure attributes, rename instances, stop instances, etc.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[31mManaging child instances\u001B[0m of the Karaf User Guide.

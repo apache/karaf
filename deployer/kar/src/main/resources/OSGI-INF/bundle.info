@@ -1,0 +1,16 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    The Karaf KAR is an archive (similar to JAR) containing a set of bundles jar files and features descriptors.
+
+    Karaf deployer explodes the KAR archive and deploy the features descriptors and bundles.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[36mDeployer\u001B[0m section of the Karaf User Guide.
+    \u001B[36mKAR\u001B[0m section of the Karaf User Guide.

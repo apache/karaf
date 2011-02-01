@@ -30,6 +30,7 @@
     <artifactId>org.apache.karaf.client</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Client</name>
+    <description>Karaf client to connect remotely to a running Karaf instance.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
@@ -53,7 +54,14 @@
             <artifactId>slf4j-simple</artifactId>
         </dependency>
     </dependencies>
+
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -116,12 +124,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
     </build>
     
 
