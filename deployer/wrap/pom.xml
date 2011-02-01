@@ -31,7 +31,7 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Deployer :: Wrap Non OSGi Jar</name>
 
-    <description>This deployer transforms non OSGi jar files to a deployable bundle</description>
+    <description>This deployer transforms non OSGi jar files to a deployable bundle.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -60,6 +60,21 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

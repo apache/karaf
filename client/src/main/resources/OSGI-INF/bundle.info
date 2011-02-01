@@ -1,0 +1,27 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    The Karaf client allows you to connect remotely to a running Karaf instance.
+
+    It acts as a SSH client and send commands to the running Karaf instance. If no commands are provided, the Karaf
+    client display the Karaf instance shell on which you can interact.
+
+    To start the Karaf client, you can use the following arguments:
+        \u001B[36m-a [port]     specify the port to connect to\u001B[0m
+        \u001B[36m-h [host]     specify the host to connect to\u001B[0m
+        \u001B[36m-u [user]     specify the user name\u001B[0m
+        \u001B[36m-p [password] specify the password\u001B[0m
+        \u001B[36m--help        show help\u001B[0m
+        \u001B[36m-v            raise verbosity\u001B[0m
+        \u001B[36m-r [attempts] retry connection establishment (up to attempts time)\u001B[0m
+        \u001B[36m-d [delay]    intra-retry delay (default is 2 secondes)\u001B[0m
+        \u001B[36m[commands]    commands to run\u001B[0m
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[31mUsing remote instances\u001B[0m section of the Karaf User Guide.

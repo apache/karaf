@@ -1,0 +1,15 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    The blueprint deployer allows you to drop Blueprint XML file directory in the deploy directory.
+
+    Karaf will load the Blueprint descriptor and transforms it into a deployable bundle.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[31mDeployer\u001B[0m section of the Karaf User Guide.

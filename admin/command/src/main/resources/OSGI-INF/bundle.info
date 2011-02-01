@@ -1,0 +1,25 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle contains all Karaf shell commands related to admin feature.
+
+    Admin commands available are:
+    - \u001B[36madmin:create\u001B[0m
+    - \u001B[36madmin:connect\u001B[0m
+    - \u001B[36madmin:list\u001B[0m
+    - \u001B[36madmin:start\u001B[0m
+    - \u001B[36madmin:stop\u001B[0m
+    - \u001B[36madmin:destroy\u001B[0m
+    - \u001B[36madmin:rename\u001B[0m
+    - \u001B[36madmin:change-ssh-port\u001B[0m
+    - \u001B[36madmin:change-rmi-registry-port\u001B[0m
+    - \u001B[36madmin:change-opts\u001B[0m
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[31mCommands\u001B[0m section of the Karaf User Guide.
