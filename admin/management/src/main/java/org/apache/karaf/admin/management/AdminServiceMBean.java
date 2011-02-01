@@ -40,6 +40,7 @@ public interface AdminServiceMBean {
     void destroyInstance(String name) throws Exception;
     void startInstance(String name, String opts) throws Exception;
     void stopInstance(String name) throws Exception;
+    void renameInstance(String originalName, String newName) throws Exception;
 
     // Attributes
     TabularData getInstances() throws Exception;

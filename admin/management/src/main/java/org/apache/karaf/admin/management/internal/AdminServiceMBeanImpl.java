@@ -90,6 +90,10 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         getExistingInstance(name).stop();
     }
 
+    public void renameInstance(String originalName, String newName) throws Exception {
+        adminService.renameInstance(originalName, newName);
+    }
+
     public TabularData getInstances() throws Exception {
         List<Instance> allInstances = Arrays.asList(adminService.getInstances());
         List<JmxInstance> instances = new ArrayList<JmxInstance>();
