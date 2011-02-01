@@ -947,9 +947,12 @@ public class Main {
 
         List<URL> urls = new ArrayList<URL>();
         urls.add( bundleFile.toURI().toURL() );
-        for (File f : new File(karafHome, "lib").listFiles()) {
-            if (f.isFile() && f.canRead() && f.getName().endsWith(".jar")) {
-                urls.add(f.toURI().toURL());
+        File[] libs = new File(karafHome, "lib").listFiles();
+        if (libs != null) {
+            for (File f : libs) {
+                if (f.isFile() && f.canRead() && f.getName().endsWith(".jar")) {
+                    urls.add(f.toURI().toURL());
+                }
             }
         }
 
