@@ -26,7 +26,7 @@ public interface FeaturesServiceMBean {
 
     void addRepository(String url) throws Exception;
 
-    void removeRepositroy(String url) throws Exception;
+    void removeRepository(String url) throws Exception;
 
     void installFeature(String name) throws Exception;
 
