@@ -26,7 +26,7 @@ import org.apache.karaf.shell.dev.watch.BundleWatcher;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
-@Command(scope = "dev", name = "watch", description = "Watch and Update bundles", detailedDescription="classpath:watch.txt")
+@Command(scope = "dev", name = "watch", description = "Watches and updates bundles.", detailedDescription="classpath:watch.txt")
 public class Watch extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "The bundle URLs", required = false)

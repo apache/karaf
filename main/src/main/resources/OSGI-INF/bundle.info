@@ -1,0 +1,15 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle is responsible of the main Karaf startup.
+
+    Especially it manages the bootstrap of the low level Karaf services such as the embedded Derby database, locking
+    facilities, etc.
+
+\u001B[1mSEE ALSO\u001B[0m

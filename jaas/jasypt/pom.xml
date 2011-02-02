@@ -30,12 +30,7 @@
     <artifactId>org.apache.karaf.jaas.jasypt</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: JAAS :: Jasypt Encryption</name>
-    
-    <description>
-        This bundle provides the default encryption implementation for password
-        encryption used in login module.
-        This implementation uses Jasypt encryption tool.
-    </description>
+    <description>This bundle provide Jasypt service for the encryption support in the JAAS security framework.</description>
     
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -63,6 +58,21 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

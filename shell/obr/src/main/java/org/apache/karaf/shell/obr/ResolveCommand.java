@@ -30,7 +30,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 
-@Command(scope = "obr", name = "resolve", description = "Show the resolution output for a given set of requirements")
+@Command(scope = "obr", name = "resolve", description = "Shows the resolution output for a given set of requirements.")
 public class ResolveCommand extends ObrCommandSupport {
 
     @Option(name = "-w", aliases = "--why", description = "Display the reason of the inclusion of the resource")

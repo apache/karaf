@@ -24,7 +24,7 @@ import org.fusesource.jansi.Ansi;
 /**
  * History command
  */
-@Command(scope = "shell", name="history", description="Prints command history")
+@Command(scope = "shell", name="history", description="Prints command history.")
 public class HistoryAction extends AbstractAction {
 
     @Override

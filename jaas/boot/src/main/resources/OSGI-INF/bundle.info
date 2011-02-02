@@ -1,0 +1,22 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle provides JAAS classes loaded during Karaf boot process.
+
+    Especially, it provides the ProxyLoginModule.
+
+    The ProxyLoginModule is an OSGi proxy login module that should be used instead of a plain reference to
+    a given login module. It takes two properties, the name of the login module class, and the bundle to be used
+    to load it.
+    This class must be available from all modules, so it has to be either in a fragment bundle attached to the
+    system bundle or be made available through the boot delegation class path.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[36mSecurity\u001B[0m section of the Karaf User Guide.
+    \u001B[36mSecurity Framework\u001B[0m section of the Karaf Developer Guide.

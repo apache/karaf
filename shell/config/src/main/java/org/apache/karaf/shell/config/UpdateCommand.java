@@ -26,7 +26,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "config", name = "update", description = "Save and propagate changes from the configuration being edited.")
+@Command(scope = "config", name = "update", description = "Saves and propagates changes from the configuration being edited.")
 public class UpdateCommand extends ConfigCommandSupport {
 
     @Option(name = "-b", aliases = { "--bypass-storage" }, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")

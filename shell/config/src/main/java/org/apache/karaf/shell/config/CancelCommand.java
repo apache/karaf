@@ -19,7 +19,7 @@ package org.apache.karaf.shell.config;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "config", name = "cancel", description = "Cancel the changes to the configuration being edited.")
+@Command(scope = "config", name = "cancel", description = "Cancels the changes to the configuration being edited.")
 public class CancelCommand extends ConfigCommandSupport {
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

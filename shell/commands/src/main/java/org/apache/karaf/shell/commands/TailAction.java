@@ -31,7 +31,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
-@Command(scope = "shell", name = "tail", description = "Displays the last lines of a file")
+@Command(scope = "shell", name = "tail", description = "Displays the last lines of a file.")
 public class TailAction extends AbstractAction {
 
     private static final int DEFAULT_NUMBER_OF_LINES = 10;

@@ -40,7 +40,7 @@ import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.fusesource.jansi.Ansi;
 
-@Command(scope = "shell", name = "info", description = "Prints system informations")
+@Command(scope = "shell", name = "info", description = "Prints system information.")
 public class InfoAction extends OsgiCommandSupport {
 
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));

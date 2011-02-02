@@ -37,7 +37,7 @@ import org.apache.felix.gogo.commands.Option;
  *
  * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
  */
-@Command(scope = "shell", name = "tac", description = "Captures the STDIN and returns it as a string. Optionally writes the content to a file")
+@Command(scope = "shell", name = "tac", description = "Captures the STDIN and returns it as a string. Optionally writes the content to a file.")
 public class TacAction extends AbstractAction {
 
     @Option(name = "-f", aliases = {}, description = "Outputs the content to the given file", required = false, multiValued = false)

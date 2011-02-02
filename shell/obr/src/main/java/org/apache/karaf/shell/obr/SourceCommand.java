@@ -27,7 +27,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.obr.util.FileUtil;
 
-@Command(scope = "obr", name = "source", description = "Download the sources for an OBR bundle.")
+@Command(scope = "obr", name = "source", description = "Downloads the sources for an OBR bundle.")
 public class SourceCommand extends ObrCommandSupport {
 
     @Option(name = "-x", aliases = {}, description = "Extract the archive", required = false, multiValued = false)

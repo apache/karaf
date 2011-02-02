@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-@Command(scope = "obr", name = "find", description = "Find OBR bundles for a given filter")
+@Command(scope = "obr", name = "find", description = "Find OBR bundles for a given filter.")
 public class FindCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "requirements", description = "Requirement", required = true, multiValued = true)

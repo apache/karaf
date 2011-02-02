@@ -33,7 +33,7 @@ import org.apache.karaf.shell.console.AbstractAction;
  *
  * @version $Rev: 593392 $ $Date: 2007-11-09 03:14:15 +0100 (Fri, 09 Nov 2007) $
  */
-@Command(scope = "shell", name = "java", description = "Execute a Java standard application")
+@Command(scope = "shell", name = "java", description = "Executes a Java standard application.")
 public class JavaAction extends AbstractAction {
 
     @Option(name = "-m", aliases = {"--method"}, description = "Invoke a named method", required = false, multiValued = false)
