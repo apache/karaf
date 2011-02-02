@@ -123,7 +123,7 @@ public class FeaturesServiceMBeanImpl extends StandardEmitterMBean implements
         featuresService.addRepository(new URI(uri));
     }
 
-    public void removeRepositroy(String uri) throws Exception {
+    public void removeRepository(String uri) throws Exception {
         featuresService.removeRepository(new URI(uri));
     }
 
