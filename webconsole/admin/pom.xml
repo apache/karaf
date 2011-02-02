@@ -20,7 +20,7 @@
     -->
 
     <modelVersion>4.0.0</modelVersion>
-  
+
     <parent>
         <groupId>org.apache.karaf.webconsole</groupId>
         <artifactId>webconsole</artifactId>
@@ -30,7 +30,8 @@
     <artifactId>org.apache.karaf.webconsole.admin</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Web Console :: Admin Plugin</name>
-  
+    <description>This bundle provides Karaf admin support in the Web Console.</description>
+
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
@@ -69,7 +70,7 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
-        
+
         <!-- Only needed while running the unit tests -->
         <dependency>
             <groupId>commons-fileupload</groupId>
@@ -78,24 +79,39 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-  
+
     <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions>
-            <Import-Package>!${project.artifactId}*,*</Import-Package>
-            <Embed-Dependency>
-               <!-- Required for JSON data transfer -->
-               <!-- TODO: this needs to be put in a common place for reuse. -->
-               json
-            </Embed-Dependency>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Import-Package>!${project.artifactId}*,*</Import-Package>
+                        <Embed-Dependency>
+                            <!-- Required for JSON data transfer -->
+                            <!-- TODO: this needs to be put in a common place for reuse. -->
+                            json
+                        </Embed-Dependency>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

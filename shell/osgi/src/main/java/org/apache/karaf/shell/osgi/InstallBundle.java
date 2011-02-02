@@ -27,7 +27,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-@Command(scope = "osgi", name = "install", description = "Installs one or more bundles")
+@Command(scope = "osgi", name = "install", description = "Installs one or more bundles.")
 public class InstallBundle extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "Bundle URLs separated by whitespaces", required = true, multiValued = true)

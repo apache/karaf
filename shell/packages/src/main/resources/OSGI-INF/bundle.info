@@ -1,0 +1,19 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle provides Karaf shell commands to manipulate the PackageAdmin service.
+
+    It allows you to get the export/import packages present in the OSGi framework.
+
+    The following commands are available:
+    \u001B[36mpackages:exports\u001B[0m Displays exported packages.
+    \u001B[36mpackages:imports\u001B[0m Displays imported packages.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[36mCommands\u001B[0m section of the Karaf User Guide.

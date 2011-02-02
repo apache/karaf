@@ -1,0 +1,30 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle provides the low level OSGi shell commands.
+
+    The following commands are available:
+    \u001B[36mosgi:bundle-level\u001B[0m Gets or sets the start level of a given bundle.
+    \u001B[36mosgi:headers\u001B[0m Displays OSGi headers of a given bundle.
+    \u001B[36mosgi:info\u001B[0m Displays detailed information of a given bundle.
+    \u001B[36mosgi:installs\u001B[0m Installs one or more bundles.
+    \u001B[36mosgi:list\u001B[0m Lists all installed bundles.
+    \u001B[36mosgi:ls\u001B[0m Lists OSGi services.
+    \u001B[36mosgi:refresh\u001B[0m Refresh a bundle.
+    \u001B[36mosgi:resolve\u001B[0m Resolve bundle(s).
+    \u001B[36mosgi:restart\u001B[0m Stops and restarts bundle(s).
+    \u001B[36mosgi:shutdown\u001B[0m Shuts the framework down.
+    \u001B[36mosgi:start\u001B[0m Starts bundle(s).
+    \u001B[36mosgi:start-level\u001B[0m Gets or sets the system start level.
+    \u001B[36mosgi:stop\u001B[0m Stop bundle(s).
+    \u001B[36mosgi:uninstall\u001B[0m Uninstall bundle(s).
+    \u001B[36mosgi:update\u001B[0m Update bundle.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[36mCommands\u001B[0m and \u001B[36mUsing the console\u001B[0m sections of the Karaf User Guide.

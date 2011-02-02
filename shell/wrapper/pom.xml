@@ -30,10 +30,7 @@
     <artifactId>org.apache.karaf.shell.wrapper</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Shell :: Service Wrapper</name>
-
-    <description>
-        Provides the Service Wrapper Shell integration.
-    </description>
+    <description>This bundle provides support of service wrapper.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -69,6 +66,13 @@
                 <directory>${project.basedir}/src/main/resources</directory>
                 <includes>
                     <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
                 </includes>
             </resource>
             <resource>

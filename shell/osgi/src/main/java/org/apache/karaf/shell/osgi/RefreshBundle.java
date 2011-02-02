@@ -25,7 +25,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-@Command(scope = "osgi", name = "refresh", description = "Refresh a bundle")
+@Command(scope = "osgi", name = "refresh", description = "Refresh a bundle.")
 public class RefreshBundle extends BundlesCommandOptional {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {

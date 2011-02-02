@@ -30,11 +30,7 @@
     <artifactId>org.apache.karaf.webconsole.branding</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Web Console :: Branding</name>
-
-    <description>Apache Karaf branding for the Apache Felix Web Console. This fragment
-        attaches to the org.apache.felix.webconsole bundle to provide branding
-        through the /META-INF/webconsole.properties.
-    </description>
+    <description>This bundle provides Karaf branding for the Felix web console.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -58,6 +54,21 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -76,5 +87,4 @@
         </plugins>
     </build>
 
-  
 </project>

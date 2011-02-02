@@ -28,7 +28,7 @@ import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-@Command(scope = "packages", name = "exports", description = "Display exported packages")
+@Command(scope = "packages", name = "exports", description = "Displays exported packages.")
 public class ExportsCommand extends PackageCommandSupport {
 
     @Option(name = "-i", aliases = {"--imports"}, description = "List bundles importing the specified packages")

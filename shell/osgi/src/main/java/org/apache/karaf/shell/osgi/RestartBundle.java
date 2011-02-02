@@ -21,7 +21,7 @@ import java.util.List;
 import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "osgi", name = "restart", description = "Stop and restart bundle(s)")
+@Command(scope = "osgi", name = "restart", description = "Stops and restarts bundle(s).")
 public class RestartBundle extends BundlesCommand {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {

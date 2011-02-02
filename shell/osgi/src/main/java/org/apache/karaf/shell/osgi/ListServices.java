@@ -26,7 +26,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
-@Command(scope = "osgi", name = "ls", description = "Lists OSGi services")
+@Command(scope = "osgi", name = "ls", description = "Lists OSGi services.")
 public class ListServices extends OsgiCommandSupport {
 
     @Option(name = "-a", aliases = {}, description = "Shows all services", required = false, multiValued = false)

@@ -26,7 +26,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.startlevel.StartLevel;
 
-@Command(scope = "web", name = "list", description = "Lists details for war bundles")
+@Command(scope = "web", name = "list", description = "Lists details for war bundles.")
 public class WebListCommand extends OsgiCommandSupport {
 	
 	private StartLevel startLevelService;

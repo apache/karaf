@@ -30,10 +30,7 @@
     <artifactId>org.apache.karaf.shell.packages</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Shell :: PackageAdmin Commands</name>
-
-    <description>
-        Provides the PackageAdmin Shell commands.
-    </description>
+    <description>This bundle provides Karaf shell commands to manipulate the PackageAdmin service.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -59,6 +56,21 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

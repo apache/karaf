@@ -23,7 +23,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 
-@Command(scope = "osgi", name = "update", description = "Update bundle")
+@Command(scope = "osgi", name = "update", description = "Update bundle.")
 public class UpdateBundle extends BundleCommand {
 
 	@Argument(index = 1, name = "location", description = "The bundles update location", required = false, multiValued = false)

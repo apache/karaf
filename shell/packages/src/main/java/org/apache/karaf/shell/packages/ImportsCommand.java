@@ -30,7 +30,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 
-@Command(scope = "packages", name = "imports", description = "Display imported packages")
+@Command(scope = "packages", name = "imports", description = "Displays imported packages.")
 public class ImportsCommand extends PackageCommandSupport {
 
 	@Argument(index = 0, name = "ids", description = "The IDs of bundles to check", required = false, multiValued = true)

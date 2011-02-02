@@ -27,7 +27,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
 
-@Command(scope = "osgi", name = "info", description = "Displays detailed information of a given bundle")
+@Command(scope = "osgi", name = "info", description = "Displays detailed information of a given bundle.")
 public class Info extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "ids", description = "A list of bundle IDs separated by whitespaces", required = false, multiValued = true)
