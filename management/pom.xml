@@ -30,6 +30,8 @@
     <artifactId>org.apache.karaf.management</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Management</name>
+    <description>This bundle starts the Karaf embedded MBean server and RMI registry allowing users
+    to use JMX to manage Karaf.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
@@ -65,6 +67,21 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

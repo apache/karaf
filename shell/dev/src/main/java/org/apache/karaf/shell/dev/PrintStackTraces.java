@@ -30,8 +30,7 @@ import static java.lang.String.format;
  * Command for showing the full tree of bundles that have been used to resolve
  * a given bundle.
  */
-@Command(scope = "dev", name = "print-stack-traces",
-         description = "Print the full stack trace in the console when the execution of a command throws an exception")
+@Command(scope = "dev", name = "print-stack-traces", description = "Prints the full stack trace in the console when the execution of a command throws an exception.")
 public class PrintStackTraces extends OsgiCommandSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrintStackTraces.class);

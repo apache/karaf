@@ -23,7 +23,7 @@ import org.apache.karaf.admin.Instance;
 /**
  * List available instances
  */
-@Command(scope = "admin", name = "list", description = "List all existing container instances.")
+@Command(scope = "admin", name = "list", description = "Lists all existing container instances.")
 public class ListCommand extends AdminCommandSupport {
 
     @Option(name = "-l", aliases = { "--location" }, description = "Displays the location of the container instances", required = false, multiValued = false)

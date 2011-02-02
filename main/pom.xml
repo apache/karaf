@@ -30,6 +30,8 @@
     <artifactId>org.apache.karaf.main</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Main</name>
+    <description>This bundle is the main Karaf launcher. It's responsible of the Karaf startup including
+    the console, branding, etc bootstrap.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
@@ -63,7 +65,23 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

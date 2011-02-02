@@ -24,7 +24,7 @@ import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-@Command(scope = "config", name = "edit", description = "Create or edit a configuration.")
+@Command(scope = "config", name = "edit", description = "Creates or edits a configuration.")
 public class EditCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "pid", description = "PID of the configuration", required = true, multiValued = false)

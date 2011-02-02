@@ -23,8 +23,7 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 /**
  * A command to restart karaf
  */
-@Command(scope = "dev", name = "restart",
-         description = "Restart Karaf")
+@Command(scope = "dev", name = "restart", description = "Restart Karaf.")
 public class Restart  extends OsgiCommandSupport {
 
     @Option(name = "-c", aliases = { "--clean" }, description = "Force a clean restart by deleteting the working directory")

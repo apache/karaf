@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * Command for enabling/disabling debug logging on a bundle and calculating the difference in
  * wired imports.
  */
-@Command(scope = "dev", name = "dynamic-import", description = "Enable/disable dynamic-import for a given bundle")
+@Command(scope = "dev", name = "dynamic-import", description = "Enables/disables dynamic-import for a given bundle.")
 public class DynamicImport extends AbstractBundleCommand {
 
     private final Logger LOG = LoggerFactory.getLogger(DynamicImport.class);

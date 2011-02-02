@@ -24,7 +24,7 @@ import org.osgi.framework.Version;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "list", description = "Lists OBR bundles")
+@Command(scope = "obr", name = "list", description = "Lists OBR bundles.")
 public class ListCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "args", description = "The arguments", required = false, multiValued = true)

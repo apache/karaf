@@ -22,7 +22,7 @@ import org.apache.karaf.shell.console.AbstractAction;
 /**
  * A command to clear the console buffer
  */
-@Command(scope = "shell", name = "clear", description = "Clears the console buffer")
+@Command(scope = "shell", name = "clear", description = "Clears the console buffer.")
 public class ClearAction extends AbstractAction {
 
 	protected Object doExecute() throws Exception {

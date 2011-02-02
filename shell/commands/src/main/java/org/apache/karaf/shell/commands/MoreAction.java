@@ -29,7 +29,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
-@Command(scope = "shell", name = "more", description = "file pager")
+@Command(scope = "shell", name = "more", description = "File pager.")
 public class MoreAction extends AbstractAction {
 
     @Option(name = "--lines", description = "stop after N lines")

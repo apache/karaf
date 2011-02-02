@@ -30,8 +30,7 @@ import org.apache.karaf.util.Properties;
 /**
  * Command for enabling/disabling debug logging on the OSGi framework
  */
-@Command(scope = "dev", name = "framework",
-         description = "OSGi Framework options")
+@Command(scope = "dev", name = "framework", description = "OSGi Framework options.")
 public class FrameworkOptions extends OsgiCommandSupport {
 
     private static final String KARAF_BASE = System.getProperty("karaf.base");

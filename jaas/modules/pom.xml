@@ -30,10 +30,7 @@
     <artifactId>org.apache.karaf.jaas.modules</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: JAAS :: Modules</name>
-
-    <description>
-        Provides the JAAS Modules.
-    </description>
+    <description>This bundle provides JAAS modules which can be used in Karaf (LDAP, JDBC, etc).</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -86,6 +83,21 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

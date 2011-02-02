@@ -22,7 +22,7 @@ import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "shell", name = "printf", description = "Format and print arguments")
+@Command(scope = "shell", name = "printf", description = "Formats and prints arguments.")
 public class PrintfAction extends AbstractAction {
 
     @Argument(index = 0, name = "format", description = "The format pattern to use", required = true, multiValued = false)

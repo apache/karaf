@@ -9,17 +9,17 @@
 \u001B[1mDESCRIPTION\u001B[0m
     This bundle contains all Karaf shell commands related to admin feature.
 
-    Admin commands available are:
-    - \u001B[36madmin:create\u001B[0m
-    - \u001B[36madmin:connect\u001B[0m
-    - \u001B[36madmin:list\u001B[0m
-    - \u001B[36madmin:start\u001B[0m
-    - \u001B[36madmin:stop\u001B[0m
-    - \u001B[36madmin:destroy\u001B[0m
-    - \u001B[36madmin:rename\u001B[0m
-    - \u001B[36madmin:change-ssh-port\u001B[0m
-    - \u001B[36madmin:change-rmi-registry-port\u001B[0m
-    - \u001B[36madmin:change-opts\u001B[0m
+    The following commands are available:
+    \u001B[36madmin:create\u001B[0m Creates a new container instance.
+    \u001B[36madmin:connect\u001B[0m Connects to an existing container instance.
+    \u001B[36madmin:list\u001B[0m Lists all existing container instances.
+    \u001B[36madmin:start\u001B[0m Starts an existing container instance.
+    \u001B[36madmin:stop\u001B[0m Stops an existing container instance.
+    \u001B[36madmin:destroy\u001B[0m Destroys an existing container instance.
+    \u001B[36madmin:rename\u001B[0m Renames an existing container instance.
+    \u001B[36madmin:change-ssh-port\u001B[0m Changes the secure shell port of an existing container instance.
+    \u001B[36madmin:change-rmi-registry-port\u001B[0m Changes the RMI registry port (used by management layer) of an existing container instance.
+    \u001B[36madmin:change-opts\u001B[0m Changes the java options of an existing container instance.
 
 \u001B[1mSEE ALSO\u001B[0m
     \u001B[31mCommands\u001B[0m section of the Karaf User Guide.

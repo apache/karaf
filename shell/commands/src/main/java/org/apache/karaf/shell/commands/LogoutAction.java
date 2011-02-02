@@ -20,7 +20,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.shell.console.CloseShellException;
 
-@Command(scope = "shell", name = "logout", description = "Disconnect shell from current session")
+@Command(scope = "shell", name = "logout", description = "Disconnects shell from current session.")
 public class LogoutAction extends AbstractAction {
 
     protected Object doExecute() throws Exception {

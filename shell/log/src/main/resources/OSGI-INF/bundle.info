@@ -1,0 +1,21 @@
+\u001B[1mSYNOPSIS\u001B[0m
+    ${project.name}
+
+    ${project.description}
+
+    Maven URL:
+        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+
+\u001B[1mDESCRIPTION\u001B[0m
+    This bundle provides Karaf shell commands to manipulate the Log service.
+
+    The following commands are available:
+    \u001B[36mlog:clear\u001B[0m Clear log entries.
+    \u001B[36mlog:display-exception\u001B[0m Displays the last occurred exception from the log.
+    \u001B[36mlog:display\u001B[0m Displays log entries.
+    \u001B[36mlog:get\u001B[0m Shows the currently set log level.
+    \u001B[36mlog:tail\u001B[0m Continuously display log entries.
+    \u001B[36mlog:set\u001B[0m Sets the log level.
+
+\u001B[1mSEE ALSO\u001B[0m
+    \u001B[36mCommands\u001B[0m and \u001B[36mLogging system\u001B[0m sections of the Karaf User Guide.

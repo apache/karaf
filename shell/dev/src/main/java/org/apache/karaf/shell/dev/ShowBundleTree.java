@@ -42,8 +42,7 @@ import org.slf4j.LoggerFactory;
  * Command for showing the full tree of bundles that have been used to resolve
  * a given bundle.
  */
-@Command(scope = "dev", name = "show-tree",
-         description = "Show the tree of bundles based on the wiring information")
+@Command(scope = "dev", name = "show-tree", description = "Shows the tree of bundles based on the wiring information.")
 public class ShowBundleTree extends AbstractBundleCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowBundleTree.class);

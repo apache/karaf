@@ -29,7 +29,7 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "info", description = "Prints information about OBR bundles")
+@Command(scope = "obr", name = "info", description = "Prints information about OBR bundles.")
 public class InfoCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "bundles", description = "Specify bundles to query for information (separated by whitespaces)", required = true, multiValued = true)

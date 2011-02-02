@@ -44,7 +44,7 @@ import org.apache.karaf.shell.console.AbstractAction;
  *
  * @version $Rev: 722776 $ $Date: 2008-12-03 05:59:59 +0100 (Wed, 03 Dec 2008) $
  */
-@Command(scope = "shell", name = "sort", description = "Write sorted concatenation of all files to standard output.")
+@Command(scope = "shell", name = "sort", description = "Writes sorted concatenation of all files to standard output.")
 public class SortAction extends AbstractAction {
 
     @Option(name = "-f", aliases = { "-ignore-case" }, description = "fold lower case to upper case characters", required = false, multiValued = false)

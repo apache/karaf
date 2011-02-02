@@ -13,14 +13,14 @@
     JConsole).
 
     On this AdminServiceMBean, you have the following operations available:
-    - \u001B[36mcreateInstance\u001B[0m
-    - \u001B[36mchangeSshPort\u001B[0m
-    - \u001B[36mchangeRmiRegistryPort\u001B[0m
-    - \u001B[36mchangeJavaOpts\u001B[0m
-    - \u001B[36mdestroyInstance\u001B[0m
-    - \u001B[36mstartInstance\u001B[0m
-    - \u001B[36mstopInstance\u001B[0m
-    - \u001B[36mrenameInstance\u001B[0m
+    \u001B[36mcreateInstance(name, sshPort, rmiPort, location, javaOpts, features, featureURLs)\u001B[0m Creates a new Karaf instance.
+    \u001B[36mchangeSshPort(name, port)\u001B[0m Changes the SSH port number of an existing Karaf instance.
+    \u001B[36mchangeRmiRegistryPort(name, port)\u001B[0m Changes the RMI registry port number of an existing Karaf instance.
+    \u001B[36mchangeJavaOpts(name, javaopts)\u001B[0m Changes the Java options of an existing Karaf instance.
+    \u001B[36mdestroyInstance(name)\u001B[0m Destroys an existing Karaf instance.
+    \u001B[36mstartInstance(name)\u001B[0m Starts an existing Karaf instance.
+    \u001B[36mstopInstance(name)\u001B[0m Stops an existing Karaf instance.
+    \u001B[36mrenameInstance(originalName, newName)\u001B[0m Renames an existing Karaf instance.
 
 \u001B[1mSEE ALSO\u001B[0m
     \u001B[31mRemote Management via JMX\u001B[0m in the Karaf User Guide.
