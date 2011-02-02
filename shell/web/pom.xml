@@ -1,26 +1,25 @@
 <?xml version="1.0"?>
-<project
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <parent>
-    <artifactId>shell</artifactId>
-    <groupId>org.apache.karaf.shell</groupId>
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>shell</artifactId>
+        <groupId>org.apache.karaf.shell</groupId>
+        <version>2.1.99-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>org.apache.karaf.shell.web</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Shell :: Web Commands</name>
     <version>2.1.99-SNAPSHOT</version>
-  </parent>
+    <description>This bundle provides Karaf shell commands to manipulate web application bundles.</description>
 
-  <artifactId>org.apache.karaf.shell.web</artifactId>
-  <packaging>bundle</packaging>
-  <name>Apache Karaf :: Shell :: Web Commands</name>
-  <version>2.1.99-SNAPSHOT</version>
-  <description>Provides the web Shell commands.</description>
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
 
-  <properties>
-    <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
-  </properties>
-
-  <dependencies>
+    <dependencies>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
@@ -37,12 +36,28 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-          <groupId>org.ops4j.pax.web</groupId>
-          <artifactId>pax-web-spi</artifactId>
-          <scope>provided</scope>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-spi</artifactId>
+            <scope>provided</scope>
         </dependency>
-	</dependencies>
+    </dependencies>
+
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

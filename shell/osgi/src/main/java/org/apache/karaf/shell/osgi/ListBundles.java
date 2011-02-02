@@ -27,7 +27,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
-@Command(scope = "osgi", name = "list", description = "Lists all installed bundles")
+@Command(scope = "osgi", name = "list", description = "Lists all installed bundles.")
 public class ListBundles extends OsgiCommandSupport {
 
     @Option(name = "-l", aliases = {}, description = "Show the locations", required = false, multiValued = false)

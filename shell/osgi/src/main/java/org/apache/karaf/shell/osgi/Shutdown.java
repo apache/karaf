@@ -23,7 +23,7 @@ import org.osgi.framework.Bundle;
 /**
  * Command to shut down Karaf
  */
-@Command(scope = "osgi", name = "shutdown", description = "Shuts the framework down")
+@Command(scope = "osgi", name = "shutdown", description = "Shuts the framework down.")
 public class Shutdown extends OsgiCommandSupport {
 
     protected Object doExecute() throws Exception {

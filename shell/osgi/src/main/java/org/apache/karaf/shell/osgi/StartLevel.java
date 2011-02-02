@@ -21,7 +21,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.ServiceReference;
 
-@Command(scope = "osgi", name = "start-level", description = "Get or set the system start level")
+@Command(scope = "osgi", name = "start-level", description = "Gets or sets the system start level.")
 public class StartLevel extends OsgiCommandSupport {
 
     @Argument(index = 0, name = "level", description = "The new system start level to set", required = false, multiValued = false)

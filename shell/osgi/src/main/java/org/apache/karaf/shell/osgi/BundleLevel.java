@@ -22,7 +22,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
 
-@Command(scope = "osgi", name = "bundle-level", description = "Get or set the start level of a given bundle")
+@Command(scope = "osgi", name = "bundle-level", description = "Gets or sets the start level of a given bundle.")
 public class BundleLevel extends BundleCommand {
 
     @Argument(index = 1, name = "startLevel", description = "The bundles new start level", required = false, multiValued = false)

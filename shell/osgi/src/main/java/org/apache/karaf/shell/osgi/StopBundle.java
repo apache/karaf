@@ -21,7 +21,7 @@ import java.util.List;
 import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "osgi", name = "stop", description = "Stop bundle(s)")
+@Command(scope = "osgi", name = "stop", description = "Stop bundle(s).")
 public class StopBundle extends BundlesCommand {
 	
 	protected void doExecute(List<Bundle> bundles) throws Exception {
