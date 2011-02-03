@@ -655,7 +655,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         }
         refreshPackages(null);
-        callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, false));
+        callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureUninstalled, false));
         saveState();
     }
 
