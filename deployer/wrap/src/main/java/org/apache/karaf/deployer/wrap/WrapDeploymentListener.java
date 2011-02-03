@@ -42,14 +42,18 @@ public class WrapDeploymentListener implements ArtifactUrlTransformer {
                 return false;
             }
             JarFile jar = new JarFile(artifact);
-            // only handle non OSGi jar
-            Manifest manifest = jar.getManifest();
-            if (manifest != null &&
-                manifest.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null &&
-                manifest.getMainAttributes().getValue(new Attributes.Name("Bundle-Version")) != null) {
-                return false;
+            try {
+                // only handle non OSGi jar
+                Manifest manifest = jar.getManifest();
+                if (manifest != null &&
+                    manifest.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null &&
+                    manifest.getMainAttributes().getValue(new Attributes.Name("Bundle-Version")) != null) {
+                    return false;
+                }
+                return true;
+            } finally {
+                jar.close();
             }
-            return true;
         } catch (Exception e) {
             return false;
         }
