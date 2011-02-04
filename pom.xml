@@ -48,7 +48,6 @@
         <module>webconsole</module>
         <module>exception</module>
         <module>assemblies</module>
-        <module>assembly</module>
         <module>demos</module>
         <module>itests</module>
         <module>tooling</module>
@@ -1363,7 +1362,7 @@
         <profile>
             <id>setup.eclipse</id>
             <modules>
-                <module>assembly</module>
+                <module>assemblies</module>
             </modules>
             <properties>
                 <eclipse.workspace.dir>${basedir}/../workspace</eclipse.workspace.dir>

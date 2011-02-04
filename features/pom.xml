@@ -37,7 +37,6 @@
         <module>command</module>
         <module>management</module>
         <module>obr</module>
-        <module>assembly</module>
     </modules>
 
 </project>
