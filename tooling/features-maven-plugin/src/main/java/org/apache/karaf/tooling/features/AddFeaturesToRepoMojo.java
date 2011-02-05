@@ -207,8 +207,8 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             			classifier = dep.getClassifier();
                 	}
                 }
-                if (version == null || version.isEmpty()) {
-                	throw new MojoExecutionException("Cannot found version for: " + bundle);
+                if (version == null || version.length() == 0) {
+                    throw new MojoExecutionException("Cannot find version for: " + bundle);
                 }
                 String dir = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/";
                 String name = artifactId + "-" + version + (classifier != null ? "-" + classifier : "") + "." + type;
