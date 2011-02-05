@@ -40,6 +40,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.w3c.dom.Document;
@@ -60,6 +61,13 @@ import org.xml.sax.SAXException;
  */
 public class AddFeaturesToRepoMojo extends MojoSupport {
 
+    /**
+     * The artifact type of a feature
+     * 
+     * @parameter default-value="xml"
+     */
+    private String featureArtifactType = "xml";
+    
     /**
      * @parameter
      */
@@ -100,6 +108,17 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
      */
     private boolean addTransitiveFeatures = true;
 
+    private Dependency findDependency(List<Dependency> dependencies, String artifactId, String groupId) {
+    	for(Dependency dep : dependencies) {
+    		if (artifactId.equals(dep.getArtifactId()) && groupId.equals(dep.getGroupId()) &&
+    				featureArtifactType.equals(dep.getType())) {
+    			if (dep.getVersion() != null) 
+    				return dep;
+    		}
+    	}
+    	return null;
+    }
+    
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
@@ -178,6 +197,18 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                             classifier = parts[4];
                         }
                     }
+                } else {
+                	Dependency dep = findDependency(project.getDependencies(), artifactId, groupId);
+                	if (dep == null && project.getDependencyManagement() != null) {
+                		dep = findDependency(project.getDependencyManagement().getDependencies(), artifactId, groupId);
+                	}
+                	if (dep != null) {
+                		version = dep.getVersion();
+            			classifier = dep.getClassifier();
+                	}
+                }
+                if (version == null || version.isEmpty()) {
+                	throw new MojoExecutionException("Cannot found version for: " + bundle);
                 }
                 String dir = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/";
                 String name = artifactId + "-" + version + (classifier != null ? "-" + classifier : "") + "." + type;
