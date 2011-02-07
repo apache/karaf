@@ -110,6 +110,13 @@ public abstract class MojoSupport extends AbstractMojo {
      * @component
      */
     protected ArtifactFactory factory;
+    
+    /**
+     * The artifact type of a feature
+     * 
+     * @parameter default-value="xml"
+     */
+    private String featureArtifactType = "xml";
 
     protected MavenProject getProject() {
         return project;
@@ -352,6 +359,17 @@ public abstract class MojoSupport extends AbstractMojo {
             throw new RuntimeException("Repository URL is not valid", e);
         }
     }
+    
+    private Dependency findDependency(List<Dependency> dependencies, String artifactId, String groupId) {
+        for(Dependency dep : dependencies) {
+            if (artifactId.equals(dep.getArtifactId()) && groupId.equals(dep.getGroupId()) &&
+                    featureArtifactType.equals(dep.getType())) {
+                if (dep.getVersion() != null) 
+                    return dep;
+            }
+        }
+        return null;
+    }
 
     protected Artifact bundleToArtifact(String bundle, boolean skipNonMavenProtocols) throws MojoExecutionException {
         bundle = bundle.replace("\r\n", "").replace("\n", "").replace(" ", "");
@@ -412,6 +430,19 @@ public abstract class MojoSupport extends AbstractMojo {
                     classifier = parts[4];
                 }
             }
+        } else {
+            Dependency dep = findDependency(project.getDependencies(), artifactId, groupId);
+            if (dep == null && project.getDependencyManagement() != null) {
+                dep = findDependency(project.getDependencyManagement().getDependencies(), artifactId, groupId);
+            }
+            if (dep != null) {
+                version = dep.getVersion();
+                classifier = dep.getClassifier();
+                type = dep.getType();
+            }
+        }
+        if (version == null || version.length() == 0) {
+            throw new MojoExecutionException("Cannot find version for: " + bundle);
         }
         Artifact artifact = factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
         artifact.setRepository(repo);
