@@ -44,14 +44,14 @@
         <!-- This is required to be first so that pax-exam classloader is not messed up with a newer version of felix
               which would lead to java.lang.RuntimeException: Could not create [service.obr] -->
         <dependency>
-            <groupId>org.apache.karaf</groupId>
+            <groupId>org.apache.karaf.assemblies</groupId>
             <artifactId>apache-karaf</artifactId>
             <type>tar.gz</type>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.karaf</groupId>
+            <groupId>org.apache.karaf.assemblies</groupId>
             <artifactId>apache-karaf</artifactId>
             <type>zip</type>
             <scope>test</scope>
@@ -109,7 +109,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.karaf</groupId>
+                                    <groupId>org.apache.karaf.assemblies</groupId>
                                     <artifactId>apache-karaf</artifactId>
                                     <type>tar.gz</type>
                                     <outputDirectory>target/distributions</outputDirectory>
@@ -127,7 +127,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.karaf</groupId>
+                                    <groupId>org.apache.karaf.assemblies</groupId>
                                     <artifactId>apache-karaf</artifactId>
                                     <type>zip</type>
                                     <outputDirectory>target/distributions</outputDirectory>

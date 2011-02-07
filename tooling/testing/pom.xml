@@ -42,19 +42,19 @@
     <dependencies>
         <!-- The assembly and all the dependencies -->
         <dependency>
-          <groupId>org.apache.karaf</groupId>
+          <groupId>org.apache.karaf.assemblies</groupId>
           <artifactId>apache-karaf</artifactId>
           <type>pom</type>
         </dependency>
         <!-- Feature Files -->
         <dependency>
-          <groupId>org.apache.karaf.features.assembly</groupId>
+          <groupId>org.apache.karaf.assemblies.features</groupId>
           <artifactId>standard</artifactId>
           <type>xml</type>
           <classifier>features</classifier>
         </dependency>
         <dependency>
-          <groupId>org.apache.karaf.features.assembly</groupId>
+          <groupId>org.apache.karaf.assemblies.features</groupId>
           <artifactId>enterprise</artifactId>
           <type>xml</type>
           <classifier>features</classifier>
@@ -111,7 +111,7 @@
                             <outputDirectory>${basedir}/target/classes/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../../assembly/src/main/filtered-resources/etc</directory>
+                                    <directory>../../assemblies/apache-karaf/src/main/filtered-resources/etc</directory>
                                     <filtering>true</filtering>
                                     <includes>
                                         <include>config.properties</include>
