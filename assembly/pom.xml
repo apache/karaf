@@ -37,6 +37,7 @@
     </properties>
 
     <dependencies>
+        <!--
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>manual</artifactId>
@@ -47,6 +48,7 @@
             <artifactId>manual</artifactId>
             <type>html</type>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
@@ -461,6 +463,7 @@
                                     <outputDirectory>target/dependencies/lib</outputDirectory>
                                     <destFileName>karaf-jaas-boot.jar</destFileName>
                                 </artifactItem>
+                                <!--
                                 <artifactItem>
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>manual</artifactId>
@@ -475,6 +478,7 @@
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>karaf-manual-${project.version}.html</destFileName>
                                 </artifactItem>
+                                -->
                             </artifactItems>
                         </configuration>
                     </execution>
