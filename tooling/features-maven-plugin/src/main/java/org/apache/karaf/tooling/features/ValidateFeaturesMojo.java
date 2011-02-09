@@ -39,6 +39,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.DefaultArtifactCollector;
@@ -74,6 +75,15 @@ public class ValidateFeaturesMojo extends MojoSupport {
      * @readonly
      */
     private DependencyTreeBuilder dependencyTreeBuilder;
+
+    /**
+     * The ArtifactCollector provided by Maven at runtime
+     *
+     * @component
+     * @required
+     * @readonly
+     */
+    private ArtifactCollector collector;
 
     /**
      * The file to generate
@@ -220,7 +230,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
                 return true;
             }
 
-        }, new DefaultArtifactCollector());
+        }, collector);
         tree.accept(new DependencyNodeVisitor() {
             public boolean endVisit(DependencyNode node) {
                 // we want the next sibling too
