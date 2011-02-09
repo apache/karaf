@@ -81,10 +81,6 @@
             <!--<groupId>org.apache.karaf.deployer</groupId>-->
             <!--<artifactId>org.apache.karaf.deployer.kar</artifactId>-->
         <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.karaf.deployer</groupId>-->
-            <!--<artifactId>org.apache.karaf.deployer.war</artifactId>-->
-        <!--</dependency>-->
         <!--&lt;!&ndash;<dependency>&ndash;&gt;-->
             <!--&lt;!&ndash;<groupId>org.apache.karaf.deployer</groupId>&ndash;&gt;-->
             <!--&lt;!&ndash;<artifactId>org.apache.karaf.deployer.wrap</artifactId>&ndash;&gt;-->
