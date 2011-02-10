@@ -497,7 +497,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         }
     }
 
-    private String loadDescription(Class clazz, String desc) {
+    protected String loadDescription(Class clazz, String desc) {
         if (desc.startsWith("classpath:")) {
             InputStream is = clazz.getResourceAsStream(desc.substring("classpath:".length()));
             if (is == null) {
