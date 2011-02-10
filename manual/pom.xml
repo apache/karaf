@@ -171,11 +171,6 @@
                     <!-- Commands for help generation -->
                     <dependency>
                         <groupId>org.apache.karaf.shell</groupId>
-                        <artifactId>org.apache.karaf.shell.console</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.karaf.shell</groupId>
                         <artifactId>org.apache.karaf.shell.commands</artifactId>
                         <version>${project.version}</version>
                     </dependency>
@@ -186,12 +181,22 @@
                     </dependency>
                     <dependency>
                         <groupId>org.apache.karaf.shell</groupId>
+                        <artifactId>org.apache.karaf.shell.console</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.karaf.shell</groupId>
                         <artifactId>org.apache.karaf.shell.dev</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.apache.karaf.shell</groupId>
                         <artifactId>org.apache.karaf.shell.log</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.karaf.shell</groupId>
+                        <artifactId>org.apache.karaf.shell.obr</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
@@ -211,7 +216,32 @@
                     </dependency>
                     <dependency>
                         <groupId>org.apache.karaf.shell</groupId>
+                        <artifactId>org.apache.karaf.shell.web</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.karaf.shell</groupId>
                         <artifactId>org.apache.karaf.shell.wrapper</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.karaf.admin</groupId>
+                        <artifactId>org.apache.karaf.admin.command</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.karaf.diagnostic</groupId>
+                        <artifactId>org.apache.karaf.diagnostic.command</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.karaf.features</groupId>
+                        <artifactId>org.apache.karaf.features.command</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.karaf.jaas</groupId>
+                        <artifactId>org.apache.karaf.jaas.command</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
