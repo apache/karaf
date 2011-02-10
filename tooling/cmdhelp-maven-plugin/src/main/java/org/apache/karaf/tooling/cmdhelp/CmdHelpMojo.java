@@ -336,7 +336,7 @@ public class CmdHelpMojo extends AbstractMojo {
                 if (arguments.size() > 0) {
                     syntax.append(' ');
                     for (Argument argument : arguments) {
-                        syntax.append(String.format(argument.required() ? "%s " : "[%s] ", argument.name()));
+                        syntax.append(String.format(argument.required() ? "%s " : "\\[%s\\] ", argument.name()));
                     }
                 }
                 out.println("h2. Syntax");
@@ -346,6 +346,7 @@ public class CmdHelpMojo extends AbstractMojo {
                 if (arguments.size() > 0)
                 {
                     out.println("h2. Arguments");
+                    out.println("|| Name || Description ||");
                     for (Argument argument : arguments)
                     {
                         String description = argument.description();
@@ -369,6 +370,7 @@ public class CmdHelpMojo extends AbstractMojo {
                 if (options.size() > 0)
                 {
                     out.println("h2. Options");
+                    out.println("|| Name || Description ||");
                     for (Option option : options)
                     {
                         String opt = option.name();
