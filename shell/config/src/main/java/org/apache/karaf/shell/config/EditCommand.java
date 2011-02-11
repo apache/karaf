@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Properties;
 
-@Command(scope = "config", name = "edit", description = "Creates or edits a configuration.")
+@Command(scope = "config", name = "edit", description = "Creates or edits a configuration.", detailedDescription="classpath:edit.txt")
 public class EditCommand extends ConfigCommandSupport {
 
 	private static final String PID_FILTER="(service.pid=%s*)";
@@ -43,7 +43,7 @@ public class EditCommand extends ConfigCommandSupport {
     @Option(name = "--force", aliases = {}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)
     boolean force;
 
-	@Option(name = "-f", aliases = {"--use-file"}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)
+	@Option(name = "-f", aliases = {"--use-file"}, description = "Configuration lookup using the filename instead of the pid", required = false, multiValued = false)
     boolean useFile;
 
 	 private File storage;
