@@ -49,6 +49,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.xbean.finder.ClassFinder;
 import org.apache.felix.service.command.CommandSession;
+import org.fusesource.jansi.Ansi;
 
 /**
  * Generates docbook for Karaf commands
@@ -393,6 +394,11 @@ public class CmdHelpMojo extends AbstractMojo {
                         out.println("| " + opt + " | " + desc + " |");
                     }
                     out.println();
+                }
+                if (command.detailedDescription().length() > 0) {
+                    out.println("h2. Details");
+                    String desc = loadDescription(action.getClass(), command.detailedDescription());
+                    out.println(desc);
                 }
                 out.println();
             }
