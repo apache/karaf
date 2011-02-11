@@ -27,7 +27,9 @@
             <action class="org.apache.karaf.shell.config.CancelCommand"/>
         </command>
         <command name="config/edit">
-            <action class="org.apache.karaf.shell.config.EditCommand"/>
+            <action class="org.apache.karaf.shell.config.EditCommand">
+                <property name="storage" value="${storage}" />
+            </action>
             <completers>
                 <ref component-id="configCompleter" />
                 <null/>
