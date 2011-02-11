@@ -76,9 +76,12 @@ body {
   padding: 0px 50px 0px 50px;
   min-height: 0em;
   text-align: center;
-  color: #5b8fbe;
+  color: white;
   font-size: 65%;
   font-family: Verdana, arial, sans-serif;
+}
+#site-footer {
+  margin: 5px;
 }
 #footer a:link, #footer a:visited {
   color: white;
