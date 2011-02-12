@@ -15,6 +15,38 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.1.4
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.1.x series branch, representing an update to Apache Karaf 2.1.3. It contains several bug fixes identified in the prior release, and introduces several improvements including; better behavior of the features-maven-plugin, documentation for making multiple configuration files available to the bundle context, and a more efficient bundle description for header display. For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-8] - Improve error reporting for features installer
+    * [KARAF-384] - Cannot find some jar in ext directory
+    * [KARAF-421] - StringCompleter extension cannot return own strings
+    * [KARAF-428] - obr:addurl/removeurl generate incorrect "obr.repository.url" property
+    * [KARAF-436] - Typo mistake in the FeaturesServiceMBean
+    * [KARAF-440] - features-maven-plugin throws NullPointerException maven 3.0.2
+    * [KARAF-442] - Wrong EventType called in FeaturesService.uninstallFeature
+
+** Improvement
+    * [KARAF-375] - features-maven-plugin always uses transitive features
+    * [KARAF-388] - allow specifying a version for a boot feature in etc/org.apache.karaf.features.cfg
+    * [KARAF-403] - Improve Bundle-Description header display
+    * [KARAF-412] - Documentation: Add notes on how to make multiple configuration files available to the bundle context.
+    * [KARAF-422] - If no version was found, features-maven-plugin try to create an artifact with a null version
+    * [KARAF-430] - don't force a karaf deploy to have a lib directory
+
+** New Feature
+    * [KARAF-373] - Add option to features-maven-plugin to automatically include <descriptors> into <repository>
+
+
                     Apache Karaf 2.1.3
                     ==================
 
