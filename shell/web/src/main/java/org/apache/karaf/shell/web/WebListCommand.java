@@ -21,7 +21,6 @@ import java.util.Map;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.ops4j.pax.web.service.spi.WebEvent;
-import org.ops4j.pax.web.service.spi.WebEvent.WebTopic;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.startlevel.StartLevel;
@@ -142,8 +141,10 @@ public class WebListCommand extends OsgiCommandSupport {
     			topic = "Undeployed ";
     			break;
     		case WebEvent.FAILED:
-    			topic = "Unknown    ";
     			topic = "Failed     ";
+    			break;
+    		case WebEvent.WAITING:
+    			topic = "Waiting    ";
     			break;
     		default:
     			topic = "Failed     ";
