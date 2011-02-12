@@ -21,6 +21,8 @@
 
 	<reference id="slService" interface="org.osgi.service.startlevel.StartLevel" availability="optional" />
 
+	<reference id="warManager" interface="org.ops4j.pax.web.service.spi.WarManager" />
+
 	<bean id="eaHandler" class="org.apache.karaf.shell.web.WebEventHandler" />
 	<service id="webListener"
 		interface="org.ops4j.pax.web.service.spi.WebListener"
@@ -32,6 +34,18 @@
             	<property name="startLevelService" ref="slService" />
             	<property name="eventHandler" ref="eaHandler" />
             </action>
+        </command>
+        <command name="web/deploy">
+        	<action class="org.apache.karaf.shell.web.WebDeploymentCommand">
+        		<property name="eventHandler" ref="eaHandler" />
+        		<property name="warManager" ref="warManager" />
+        	</action>
+        </command>
+        <command name="web/undeploy">
+        	<action class="org.apache.karaf.shell.web.WebUnDeploymentCommand">
+        		<property name="eventHandler" ref="eaHandler" />
+        		<property name="warManager" ref="warManager" />
+        	</action>
         </command>
     </command-bundle>
 
