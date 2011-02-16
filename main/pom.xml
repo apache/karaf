@@ -180,7 +180,7 @@
                                             <classifier>sources</classifier>
                                         </artifactItem>
                                         <artifactItem>
-                                            <groupId>org.osgi</groupId>
+                                            <groupId>org.apache.felix</groupId>
                                             <artifactId>org.apache.felix.framework</artifactId>
                                             <classifier>sources</classifier>
                                         </artifactItem>
