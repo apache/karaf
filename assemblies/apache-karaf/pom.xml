@@ -28,7 +28,7 @@
         <version>2.1.99-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.karaf.assemblies.apache-karaf</groupId>
+    <groupId>org.apache.karaf</groupId>
     <artifactId>apache-karaf</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assembly</name>
