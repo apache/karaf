@@ -24,7 +24,8 @@
   This release of Apache Karaf contains a multitude of new features, improvements, and
 bug fixes.  Some highlights include many new or updated commands, a LDAP JAAS module
 with login support, an updated feature service, a feature for Aries transaction, JPA &
-JNDI modules, expanded documentation, and new versions of most dependencies.
+JNDI modules, expanded documentation, and new versions of most dependencies.  The help
+system and manual have also undergone major updates.
   For more detail please see the change log below.
 
   Changelog
