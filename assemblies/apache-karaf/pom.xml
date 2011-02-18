@@ -42,13 +42,11 @@
             <groupId>org.apache.karaf</groupId>
             <artifactId>manual</artifactId>
             <type>pdf</type>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>manual</artifactId>
             <type>html</type>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
