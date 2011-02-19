@@ -372,7 +372,7 @@ public abstract class MojoSupport extends AbstractMojo {
     }
 
     protected Artifact bundleToArtifact(String bundle, boolean skipNonMavenProtocols) throws MojoExecutionException {
-        bundle = bundle.replace("\r\n", "").replace("\n", "").replace(" ", "");
+        bundle = bundle.replace("\r\n", "").replace("\n", "").replace(" ", "").replace("\t", "");
         final int index = bundle.indexOf("mvn:");
         if (index < 0) {
             if (skipNonMavenProtocols) {
