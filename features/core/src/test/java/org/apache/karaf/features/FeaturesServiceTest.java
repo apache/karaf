@@ -16,6 +16,14 @@
  */
 package org.apache.karaf.features;
 
+import static org.easymock.EasyMock.aryEq;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,6 +43,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.JarInputStream;
 
 import junit.framework.TestCase;
+
 import org.apache.karaf.features.internal.FeatureImpl;
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
 import org.easymock.EasyMock;
@@ -571,6 +580,46 @@ public class FeaturesServiceTest extends TestCase {
         // Uninstall repository
         svc.uninstallFeature("f1", "0.1");
         svc.uninstallFeature("f2", "0.1");
+    }
+
+    public void testGetFeaturesShouldHandleDifferentVersionPatterns() throws Exception {
+
+        String name = getJarUrl(Bundle.class);
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("  <feature name=\"f1\" version=\"0.1\">");
+        pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.1\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f2\" version=\"0.2\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.addRepository(uri);
+
+        Feature feature = svc.getFeature("f2", "[0.1,0.3)");
+        assertEquals("f2", feature.getName());
+        assertEquals("0.2", feature.getVersion());
+
+        Feature feature2 = svc.getFeature("f2", "0.0.0");
+        assertEquals("f2", feature2.getName());
+        assertEquals("0.2", feature2.getVersion());
+
+        Feature feature3 = svc.getFeature("f2", "0.2");
+        assertEquals("f2", feature3.getName());
+        assertEquals("0.2", feature3.getVersion());
+
+        Feature feature4 = svc.getFeature("f2", "0.3");
+        assertNull(feature4);
     }
 
     private BundleContext prepareBundleContextForInstallUninstall() throws Exception {
