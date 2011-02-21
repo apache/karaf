@@ -16,12 +16,37 @@
  */
 package org.apache.karaf.features.internal;
 
-import java.io.*;
+import static java.lang.String.format;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
@@ -800,13 +825,25 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             return null;
         } else {
             Feature feature = versions.get(version);
-            if (feature == null && FeatureImpl.DEFAULT_VERSION.equals(version)) {
-                Version latest = new Version(cleanupVersion(version));
-                for (String available : versions.keySet()) {
-                    Version availableVersion = new Version(cleanupVersion(available));
-                    if (availableVersion.compareTo(latest) > 0) {
-                        feature = versions.get(available);
-                        latest = availableVersion;
+            if (feature == null) {
+                if (FeatureImpl.DEFAULT_VERSION.equals(version)) {
+                    Version latest = new Version(cleanupVersion(version));
+                    for (String available : versions.keySet()) {
+                        Version availableVersion = new Version(cleanupVersion(available));
+                        if (availableVersion.compareTo(latest) > 0) {
+                            feature = versions.get(available);
+                            latest = availableVersion;
+                        }
+                    }
+                } else {
+                    Version latest = new Version(cleanupVersion(FeatureImpl.DEFAULT_VERSION));
+                    VersionRange versionRange = new VersionRange(version, true, true);
+                    for (String available : versions.keySet()) {
+                        Version availableVersion = new Version(cleanupVersion(available));
+                        if (availableVersion.compareTo(latest) > 0 && versionRange.contains(availableVersion)) {
+                            feature = versions.get(available);
+                            latest = availableVersion;
+                        }
                     }
                 }
             }
