@@ -147,6 +147,25 @@
                             </sources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${manual}.pdf</file>
+                                    <type>pdf</type>
+                                </artifact>
+                                <artifact>
+                                    <file>${manual}.html</file>
+                                    <type>html</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -323,32 +342,6 @@
                                     </catch>
                                 </trycatch>
                             </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${manual}.pdf</file>
-                                    <type>pdf</type>
-                                </artifact>
-                                <artifact>
-                                    <file>${manual}.html</file>
-                                    <type>html</type>
-                                </artifact>
-                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
