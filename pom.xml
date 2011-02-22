@@ -488,6 +488,11 @@
                 <artifactId>org.apache.karaf.tooling.testing</artifactId>
                 <version>${project.version}</version>
             </dependency>
+			<dependency>
+			    <groupId>org.apache.karaf.archetypes</groupId>
+                <artifactId>archetypes-command</artifactId>
+                <version>${project.version}</version>
+			</dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
@@ -1307,6 +1312,29 @@
             </modules>
             <build>
                 <plugins>
+		            <plugin>
+		                <groupId>org.apache.maven.plugins</groupId>
+		                <artifactId>maven-enforcer-plugin</artifactId>
+		                <version>1.0</version>
+		                <executions>
+		                    <execution>
+		                        <id>enforce-versions</id>
+		                        <goals>
+		                            <goal>enforce</goal>
+		                        </goals>
+		                        <configuration>
+		                            <rules>
+		                                <requireMavenVersion>
+		                                    <version>[2.2.1,3)</version>
+		                                </requireMavenVersion>
+		                                <requireJavaVersion>
+		                                    <version>1.6</version>
+		                                </requireJavaVersion>
+		                            </rules>
+		                        </configuration>
+		                    </execution>
+		                </executions>
+			        </plugin>
                     <!-- We want to deploy the artifact to a staging location for perusal -->
                     <plugin>
                         <inherited>true</inherited>

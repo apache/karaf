@@ -31,6 +31,11 @@
     <name>Apache Karaf :: Archetypes :: ITests</name>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.archetypes</groupId>
+            <artifactId>archetypes-command</artifactId>
+        </dependency>
+
         <dependency> 
             <groupId>classworlds</groupId>
             <artifactId>classworlds</artifactId>
