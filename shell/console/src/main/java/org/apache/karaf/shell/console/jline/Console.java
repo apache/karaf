@@ -103,7 +103,38 @@ public class Console implements Runnable
 
         final File file = getHistoryFile();
         file.getParentFile().mkdirs();
-        reader.setHistory(new FileHistory(file));
+
+        // We may not have the perms to read the history file...
+        if( file.exists() && file.canRead() ) {
+            // Override the FileHistory impl to trap failures due to the
+            // user does not having write access to the history file.
+            reader.setHistory(new FileHistory(file) {
+                boolean failed = false;
+                @Override
+                public void flush() throws IOException {
+                    if( !failed ) {
+                        try {
+                            super.flush();
+                        } catch (IOException e) {
+                            failed = true;
+                            LOGGER.debug("Cold not write history file: "+file, e);
+                        }
+                    }
+                }
+
+                @Override
+                public void purge() throws IOException {
+                    if( !failed ) {
+                        try {
+                            super.purge();
+                        } catch (IOException e) {
+                            failed = true;
+                            LOGGER.debug("Cold not delete history file: "+file, e);
+                        }
+                    }
+                }
+            });
+        }
         session.put(".jline.history", reader.getHistory());
         Completer completer = createCompleter();
         if (completer != null) {
