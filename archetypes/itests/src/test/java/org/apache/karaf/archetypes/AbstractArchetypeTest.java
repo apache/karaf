@@ -61,6 +61,7 @@ public abstract class AbstractArchetypeTest extends TestCase {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         maven.setClassLoader(classLoader);
         MavenEmbedderLogger logger = new MavenEmbedderConsoleLogger();
+//        logger.setThreshold(MavenEmbedderConsoleLogger.LEVEL_DEBUG);
         maven.setLogger(logger);
         maven.start();
 
@@ -93,10 +94,16 @@ public abstract class AbstractArchetypeTest extends TestCase {
         File targetDir = new File(baseDir, "target/archetypes/" + artifactId);
         FileUtils.deleteDirectory(targetDir);
         targetDir.mkdirs();
-        EventMonitor eventMonitor = new DefaultEventMonitor(new PlexusLoggerAdapter(
-                new MavenEmbedderConsoleLogger()));
+        MavenEmbedderConsoleLogger logger = new MavenEmbedderConsoleLogger();
+//        logger.setThreshold(MavenEmbedderConsoleLogger.LEVEL_DEBUG);
+        EventMonitor eventMonitor = new DefaultEventMonitor(new PlexusLoggerAdapter(logger));
+
+        String catalog = "file://" + new File(maven.getLocalRepositoryDirectory().getParent(), "archetype-catalog.xml").getAbsolutePath();
+        System.err.println("Catalog: " + catalog);
 
         Properties props = new Properties();
+        props.setProperty("archetypeCatalog", catalog);
+        props.setProperty("archetypeRepository", "file://" + maven.getLocalRepositoryDirectory().getAbsolutePath());
         props.setProperty("archetypeGroupId", groupId);
         props.setProperty("archetypeArtifactId", artifactId);
         props.setProperty("archetypeVersion", version);

@@ -272,9 +272,9 @@
                 <executions>
                     <execution>
                         <id>generate-htmls</id>
-                        <phase>compile</phase>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>sitegen</goal>
+                            <goal>sitegen-no-fork</goal>
                         </goals>
                         <configuration>
                             <warSourceDirectory>${project.build.directory}/webapp</warSourceDirectory>
@@ -283,8 +283,7 @@
                 </executions>
                 <configuration>
                     <remoteServerId>people.apache.org</remoteServerId>
-                    <remoteServerUrl>scp://people.apache.org/www/karaf.apache.org/manual/${karaf.version}
-                    </remoteServerUrl>
+                    <remoteServerUrl>scp://people.apache.org/www/karaf.apache.org/manual/${karaf.version}</remoteServerUrl>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -305,7 +304,7 @@
                 <executions>
                     <execution>
                         <id>create-manual</id>
-                        <phase>install</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
