@@ -96,6 +96,7 @@ pax-exam with scanFeatures that you also have to upgrade pax-exam to the latest 
     * [KARAF-453] - Manual war contains two web.xml files - cannot be served by pax-web
     * [KARAF-458] - Fix the karaf shell to look nice within Eclipse console
     * [KARAF-472] - features-maven-plugin: TAB-characters in feature-repository lead to resolution-errors in add-features-to-repo
+    * [KARAF-480] - Minor ansi issue with admin:rename command
 
 ** Improvement
     * [KARAF-5] - [karaf] admin:create should support a -r, --rmi-registry-port option to allow the RMI registry port to be configured 
@@ -189,6 +190,8 @@ pax-exam with scanFeatures that you also have to upgrade pax-exam to the latest 
     * [KARAF-391] - Ability to use features-maven-plugin:add-features-to-repo without specifying features
     * [KARAF-426] - Manage Karaf shell.name by branding
     * [KARAF-473] - Support version resolving in FeatureService#getFeatures(name/version)
+    * [KARAF-477] - Karaf console should gracefully handle errors due to the history file being read only
+    * [KARAF-478] - Subclasses of Console should be able to change the history file
 
 ** Task
     * [KARAF-42] - Use an svn based mechanism  for Karaf's manual
