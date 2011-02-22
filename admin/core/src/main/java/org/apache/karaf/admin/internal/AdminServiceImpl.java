@@ -258,7 +258,10 @@ public class AdminServiceImpl implements AdminService {
             throw new IllegalStateException("Instance not stopped");
         }
 
-        println(Ansi.ansi().a("Renaming instance ").a(Ansi.Attribute.INTENSITY_BOLD).a(oldName).a(Ansi.Attribute.RESET).a(" to ").a(Ansi.Attribute.INTENSITY_BOLD).a(newName).toString());
+        println(Ansi.ansi().a("Renaming instance ")
+                .a(Ansi.Attribute.INTENSITY_BOLD).a(oldName).a(Ansi.Attribute.RESET)
+                .a(" to ")
+                .a(Ansi.Attribute.INTENSITY_BOLD).a(newName).a(Ansi.Attribute.RESET).toString());
         // remove the old instance
         instances.remove(oldName);
         // update instance
