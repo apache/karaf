@@ -101,8 +101,7 @@ public class Console implements Runnable
                                    getClass().getResourceAsStream("keybinding.properties"),
                                    this.terminal);
 
-        File file = new File(System.getProperty("karaf.history",
-                             new File(System.getProperty("user.home"), ".karaf/karaf.history").toString()));
+        final File file = getHistoryFile();
         file.getParentFile().mkdirs();
         reader.setHistory(new FileHistory(file));
         session.put(".jline.history", reader.getHistory());
@@ -116,6 +115,14 @@ public class Console implements Runnable
         pipe = new Thread(new Pipe());
         pipe.setName("gogo shell pipe thread");
         pipe.setDaemon(true);
+    }
+
+    /**
+     * Subclasses can override to use a different history file.
+     * @return
+     */
+    protected File getHistoryFile() {
+        return new File(System.getProperty("karaf.history", new File(System.getProperty("user.home"), ".karaf/karaf.history").toString()));
     }
 
     public CommandSession getSession() {
