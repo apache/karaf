@@ -34,7 +34,6 @@
     <packaging>war</packaging>
 
     <properties>
-        <must-succeed>false</must-succeed>
         <manual.dir>${project.build.directory}/manual</manual.dir>
         <manual>${manual.dir}/manual-${project.version}</manual>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
@@ -144,25 +143,6 @@
                             <sources>
                                 <source>${project.build.directory}/webapp</source>
                             </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${manual}.pdf</file>
-                                    <type>pdf</type>
-                                </artifact>
-                                <artifact>
-                                    <file>${manual}.html</file>
-                                    <type>html</type>
-                                </artifact>
-                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
@@ -298,8 +278,9 @@
                 </dependencies>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.2</version>
+                <version>1.6</version>
                 <executions>
                     <execution>
                         <id>create-manual</id>
@@ -309,35 +290,17 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <taskdef name="trycatch" classname="net.sf.antcontrib.logic.TryCatchTask" classpathref="maven.plugin.classpath" />
                                 <mkdir dir="${manual.dir}" />
                                 <move file="${project.build.directory}/sitegen/manual.html" tofile="${manual}.html" />
-                                <trycatch property="error">
-                                    <try>
-                                        <echo message="Generating PDF using Prince XML (http://www.princexml.com/)" />
-                                        <exec executable="prince">
-                                            <arg value="${manual}.html" />
-                                            <arg value="${manual}.pdf" />
-                                            <arg value="--log" />
-                                            <arg value="${project.build.directory}/prince.log" />
-                                        </exec>
-                                    </try>
-                                    <catch>
-                                        <if>
-                                            <equals arg1="${must-succeed}" arg2="true" />
-                                            <then>
-                                                <echo>ERROR: ${error}</echo>
-                                                <fail>${error}</fail>
-                                            </then>
-                                            <else>
-                                                <echo>ERROR: ${error}</echo>
-                                                <echo>Falling back to dummy manuals</echo>
-                                                <copy file="src/fallback/manual.html" tofile="${manual}.html" />
-                                                <copy file="src/fallback/manual.pdf" tofile="${manual}.pdf" />
-                                            </else>
-                                        </if>
-                                    </catch>
-                                </trycatch>
+                                <echo message="Generating PDF using Prince XML (http://www.princexml.com/)" />
+                                <exec executable="prince">
+                                    <arg value="${manual}.html" />
+                                    <arg value="${manual}.pdf" />
+                                    <arg value="--log" />
+                                    <arg value="${project.build.directory}/prince.log" />
+                                </exec>
+                                <attachartifact file="${manual}.html" type="html" />
+                                <attachartifact file="${manual}.pdf" type="pdf" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -440,12 +403,6 @@
             <properties>
                 <jetty-war-dir>${basedir}/src/main/webapp/</jetty-war-dir>
                 <scalate.mode>development</scalate.mode>
-            </properties>
-        </profile>
-        <profile>
-            <id>release</id>
-            <properties>
-                <must-succeed>true</must-succeed>
             </properties>
         </profile>
     </profiles>
