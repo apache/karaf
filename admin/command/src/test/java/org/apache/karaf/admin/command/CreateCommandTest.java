@@ -33,7 +33,8 @@ public class CreateCommandTest extends TestCase {
         CreateCommand cc = new CreateCommand();
         cc.setAdminService(adminService);
         cc.sshPort = 9941;
-        cc.rmiPort = 1122;
+        cc.rmiRegistryPort = 1122;
+        cc.rmiServerPort = 44444;
         cc.location = "top";
         cc.javaOpts = "foo";
         cc.features = Arrays.asList("abc", "def");
@@ -43,7 +44,7 @@ public class CreateCommandTest extends TestCase {
         EasyMock.verify(adminService); // check precondition
         EasyMock.reset(adminService);
         InstanceSettings expectedIS =
-            new InstanceSettings(9941, 1122, "top", "foo", Collections.singletonList("http://something"), Arrays.asList("abc", "def"));
+            new InstanceSettings(9941, 1122, 44444, "top", "foo", Collections.singletonList("http://something"), Arrays.asList("abc", "def"));
         EasyMock.expect(adminService.createInstance("myInstance", expectedIS)).andReturn(null);
         EasyMock.replay(adminService);
         

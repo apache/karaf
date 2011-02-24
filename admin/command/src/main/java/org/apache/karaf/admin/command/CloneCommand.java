@@ -20,7 +20,6 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.admin.InstanceSettings;
-import org.apache.karaf.admin.command.AdminCommandSupport;
 
 /**
  * <p>
@@ -33,8 +32,11 @@ public class CloneCommand extends AdminCommandSupport {
     @Option(name = "-s", aliases = {"--ssh-port"}, description = "Port number for remote secure shell connection", required = false, multiValued = false)
     int sshPort = 0;
 
-    @Option(name = "-r", aliases = {"--rmi-port", "--rmi-registry-port"}, description = "Port number for RMI registry connection", required = false, multiValued = false)
-    int rmiPort = 0;
+    @Option(name = "-r", aliases = {"-rr", "--rmi-port", "--rmi-registry-port"}, description = "Port number for RMI registry connection", required = false, multiValued = false)
+    int rmiRegistryPort = 0;
+
+    @Option(name = "-rs", aliases = {"--rmi-server-port"}, description = "Port number for RMI server connection", required = false, multiValued = false)
+    int rmiServerPort = 0;
 
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the clone container instance in the file system", required = false, multiValued = false)
     String location;
@@ -49,7 +51,7 @@ public class CloneCommand extends AdminCommandSupport {
     String cloneName;
 
     protected Object doExecute() throws Exception {
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiPort, location, javaOpts, null, null);
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null);
         getAdminService().cloneInstance(name, cloneName, settings);
         return null;
     }
