@@ -19,16 +19,13 @@ package org.apache.karaf.admin.internal;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
+import org.apache.felix.utils.properties.InterpolationHelper;
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.admin.Instance;
 import org.apache.karaf.jpm.Process;
 import org.apache.karaf.jpm.ProcessBuilderFactory;
 import org.apache.karaf.jpm.impl.ScriptUtils;
-import org.fusesource.jansi.Ansi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,24 +104,11 @@ public class InstanceImpl implements Instance {
     }
 
     public int getSshPort() {
-        InputStream is = null;
         try {
-            File f = new File(location, "etc/org.apache.karaf.shell.cfg");
-            is = new FileInputStream(f);
-            Properties props = new Properties();
-            props.load(is);
-            String loc = props.getProperty("sshPort");
+            String loc = this.getConfiguration(new File(location, "etc/org.apache.karaf.shell.cfg"), "sshPort");
             return Integer.parseInt(loc);
         } catch (Exception e) {
             return 0;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
         }
     }
 
@@ -133,42 +117,16 @@ public class InstanceImpl implements Instance {
         if (this.process != null) {
             throw new IllegalStateException("Instance not stopped");
         }
-        Properties props = new Properties();
-        File f = new File(location, "etc/org.apache.karaf.shell.cfg");
-        InputStream is = new FileInputStream(f);
-        try {
-            props.load(is);
-        } finally {
-            is.close();
-        }
-        props.setProperty("sshPort", Integer.toString(port));
-        OutputStream os = new FileOutputStream(f);
-        try {
-            props.store(os, null);
-        } finally {
-            os.close();
-        }
+        this.changeConfiguration(new File(location, "etc/org.apache.karaf.shell.cfg"),
+                "sshPort", Integer.toString(port));
     }
 
     public int getRmiRegistryPort() {
-        InputStream is = null;
         try {
-            File f = new File(location, "etc/org.apache.karaf.management.cfg");
-            is = new FileInputStream(f);
-            Properties props = new Properties();
-            props.load(is);
-            String loc = props.getProperty("rmiRegistryPort");
+            String loc = this.getConfiguration(new File(location, "etc/org.apache.karaf.management.cfg"), "rmiRegistryPort");
             return Integer.parseInt(loc);
         } catch (Exception e) {
             return 0;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
         }
     }
 
@@ -177,20 +135,78 @@ public class InstanceImpl implements Instance {
         if (this.process != null) {
             throw new IllegalStateException("Instance not stopped");
         }
+        this.changeConfiguration(new File(location, "etc/org.apache.karaf.management.cfg"),
+                "rmiRegistryPort", Integer.toString(port));
+    }
+
+    public int getRmiServerPort() {
+        try {
+            String loc = this.getConfiguration(new File(location, "etc/org.apache.karaf.management.cfg"), "rmiServerPort");
+            return Integer.parseInt(loc);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public void changeRmiServerPort(int port) throws Exception {
+        checkProcess();
+        if (this.process != null) {
+            throw new IllegalStateException("Instance not stopped");
+        }
+        this.changeConfiguration(new File(location, "etc/org.apache.karaf.management.cfg"),
+                "rmiServerPort", Integer.toString(port));
+    }
+
+    /**
+     * Change a configuration property in a given configuration file.
+     *
+     * @param configurationFile the configuration file where to update the configuration property.
+     * @param propertyName the property name.
+     * @param propertyValue the property value.
+     * @throws Exception if a failure occurs.
+     */
+    private void changeConfiguration(File configurationFile, String propertyName, String propertyValue) throws Exception {
         Properties props = new Properties();
-        File f = new File(location, "etc/org.apache.karaf.management.cfg");
-        InputStream is = new FileInputStream(f);
+        InputStream is = new FileInputStream(configurationFile);
         try {
             props.load(is);
         } finally {
             is.close();
         }
-        props.setProperty("rmiRegistryPort", Integer.toString(port));
-        OutputStream os = new FileOutputStream(f);
+        props.put(propertyName, propertyValue);
+        OutputStream os = new FileOutputStream(configurationFile);
         try {
-            props.store(os, null);
+            props.save(os);
         } finally {
             os.close();
+        }
+    }
+
+    /**
+     * Read a given configuration file to get the value of a given property.
+     *
+     * @param configurationFile the configuration file where to lookup property.
+     * @param propertyName the property name to look for.
+     * @return the property value.
+     * @throws Exception in case of read failure.
+     */
+    private String getConfiguration(File configurationFile, String propertyName) throws Exception {
+        InputStream is = null;
+        try {
+            is = new FileInputStream(configurationFile);
+            Properties props = new Properties();
+            props.load(is);
+            return props.get(propertyName);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
         }
     }
 
@@ -307,15 +323,20 @@ public class InstanceImpl implements Instance {
             props.put("karaf.base", new File(location).getCanonicalPath());
             props.put("karaf.home", System.getProperty("karaf.home"));
             props.put("karaf.data", new File(new File(location), "data").getCanonicalPath());
-            for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
-                String name = (String) e.nextElement();
-                props.setProperty(name,
-                        substVars(props.getProperty(name), name, null, props));
+            for (String name : props.keySet()) {
+                props.put(name,
+                        InterpolationHelper.substVars(props.get(name), name, null, props, null));
             }
-            int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
-            String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
-            String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
-            String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
+            int port = 0;
+            if (props.get(KARAF_SHUTDOWN_PORT) != null)
+                port = Integer.parseInt(props.get(KARAF_SHUTDOWN_PORT));
+            String host = "localhost";
+            if (props.get(KARAF_SHUTDOWN_HOST) != null)
+                host = props.get(KARAF_SHUTDOWN_HOST);
+            String portFile = props.get(KARAF_SHUTDOWN_PORT_FILE);
+            String shutdown = DEFAULT_SHUTDOWN_COMMAND;
+            if (props.get(KARAF_SHUTDOWN_COMMAND) != null)
+                shutdown = props.get(KARAF_SHUTDOWN_COMMAND);
             if (port == 0 && portFile != null) {
                 BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
                 String portStr = r.readLine();
@@ -387,99 +408,6 @@ public class InstanceImpl implements Instance {
             return null;
         }
         return configProps;
-    }
-
-    private static final String DELIM_START = "${";
-    private static final String DELIM_STOP = "}";
-
-    protected static String substVars(String val, String currentKey,
-                                      Map<String, String> cycleMap, Properties configProps)
-            throws IllegalArgumentException {
-        // If there is currently no cycle map, then create
-        // one for detecting cycles for this invocation.
-        if (cycleMap == null) {
-            cycleMap = new HashMap<String, String>();
-        }
-
-        // Put the current key in the cycle map.
-        cycleMap.put(currentKey, currentKey);
-
-        // Assume we have a value that is something like:
-        // "leading ${foo.${bar}} middle ${baz} trailing"
-
-        // Find the first ending '}' variable delimiter, which
-        // will correspond to the first deepest nested variable
-        // placeholder.
-        int stopDelim = val.indexOf(DELIM_STOP);
-
-        // Find the matching starting "${" variable delimiter
-        // by looping until we find a start delimiter that is
-        // greater than the stop delimiter we have found.
-        int startDelim = val.indexOf(DELIM_START);
-        while (stopDelim >= 0) {
-            int idx = val.indexOf(DELIM_START, startDelim + DELIM_START.length());
-            if ((idx < 0) || (idx > stopDelim)) {
-                break;
-            } else if (idx < stopDelim) {
-                startDelim = idx;
-            }
-        }
-
-        // If we do not have a start or stop delimiter, then just
-        // return the existing value.
-        if ((startDelim < 0) && (stopDelim < 0)) {
-            return val;
-        }
-        // At this point, we found a stop delimiter without a start,
-        // so throw an exception.
-        else if (((startDelim < 0) || (startDelim > stopDelim))
-                && (stopDelim >= 0)) {
-            throw new IllegalArgumentException(
-                    "stop delimiter with no start delimiter: "
-                            + val);
-        }
-
-        // At this point, we have found a variable placeholder so
-        // we must perform a variable substitution on it.
-        // Using the start and stop delimiter indices, extract
-        // the first, deepest nested variable placeholder.
-        String variable =
-                val.substring(startDelim + DELIM_START.length(), stopDelim);
-
-        // Verify that this is not a recursive variable reference.
-        if (cycleMap.get(variable) != null) {
-            throw new IllegalArgumentException(
-                    "recursive variable reference: " + variable);
-        }
-
-        // Get the value of the deepest nested variable placeholder.
-        // Try to configuration properties first.
-        String substValue = (configProps != null)
-                ? configProps.getProperty(variable, null)
-                : null;
-        if (substValue == null) {
-            // Ignore unknown property values.
-            substValue = System.getProperty(variable, "");
-        }
-
-        // Remove the found variable from the cycle map, since
-        // it may appear more than once in the value and we don't
-        // want such situations to appear as a recursive reference.
-        cycleMap.remove(variable);
-
-        // Append the leading characters, the substituted value of
-        // the variable, and the trailing characters to get the new
-        // value.
-        val = val.substring(0, startDelim)
-                + substValue
-                + val.substring(stopDelim + DELIM_STOP.length(), val.length());
-
-        // Now perform substitution again, since there could still
-        // be substitutions to make.
-        val = substVars(val, currentKey, cycleMap, configProps);
-
-        // Return the value.
-        return val;
     }
 
 }

@@ -43,6 +43,10 @@ public interface Instance {
 
     void changeRmiRegistryPort(int port) throws Exception;
 
+    int getRmiServerPort();
+
+    void changeRmiServerPort(int port) throws Exception;
+
     String getJavaOpts();
 
     void changeJavaOpts(String javaOpts) throws Exception;
