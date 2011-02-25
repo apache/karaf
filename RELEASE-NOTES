@@ -98,6 +98,7 @@ pax-exam with scanFeatures that you also have to upgrade pax-exam to the latest 
     * [KARAF-472] - features-maven-plugin: TAB-characters in feature-repository lead to resolution-errors in add-features-to-repo
     * [KARAF-480] - Minor ansi issue with admin:rename command
     * [KARAF-481] - Karaf 2.2.x manuals do not get signature files created
+    * [KARAF-485] - Karaf MBeans are not registered
 
 ** Improvement
     * [KARAF-5] - [karaf] admin:create should support a -r, --rmi-registry-port option to allow the RMI registry port to be configured 
