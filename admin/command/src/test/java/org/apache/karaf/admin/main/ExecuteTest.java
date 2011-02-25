@@ -121,7 +121,8 @@ public class ExecuteTest extends TestCase {
         final File tempFile = createTempDir(getName());
         Properties p = new Properties();
         p.setProperty("ssh.port", "1302");
-        p.setProperty("rmi.port", "1122");
+        p.setProperty("rmi.registry.port", "1122");
+        p.setProperty("rmi.server.port", "44444");
         FileOutputStream fos = new FileOutputStream(new File(tempFile, AdminServiceImpl.STORAGE_FILE));
         p.store(fos, "");
         fos.close();
@@ -147,9 +148,12 @@ public class ExecuteTest extends TestCase {
                     Field sshField = AdminServiceImpl.class.getDeclaredField("defaultSshPortStart");
                     sshField.setAccessible(true);
                     assertEquals(1302, sshField.get(admin));
-                    Field rmiField = AdminServiceImpl.class.getDeclaredField("defaultRmiPortStart");
-                    rmiField.setAccessible(true);
-                    assertEquals(1122, rmiField.get(admin));
+                    Field rmiRegistryField = AdminServiceImpl.class.getDeclaredField("defaultRmiRegistryPortStart");
+                    rmiRegistryField.setAccessible(true);
+                    assertEquals(1122, rmiRegistryField.get(admin));
+                    Field rmiServerField = AdminServiceImpl.class.getDeclaredField("defaultRmiServerPortStart");
+                    rmiServerField.setAccessible(true);
+                    assertEquals(44444, rmiServerField.get(admin));
                     return null;
                 }
             });

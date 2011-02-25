@@ -47,7 +47,9 @@ public class AdminServiceImpl implements AdminService {
 
     private int defaultSshPortStart = 8101;
 
-    private int defaultRmiPortStart = 1099;
+    private int defaultRmiRegistryPortStart = 1099;
+
+    private int defaultRmiServerPortStart = 44444;
 
     private File storageLocation;
 
@@ -107,7 +109,8 @@ public class AdminServiceImpl implements AdminService {
             Properties storage = loadStorage(storageFile);
             int count = Integer.parseInt(storage.getProperty("count", "0"));
             defaultSshPortStart = Integer.parseInt(storage.getProperty("ssh.port", Integer.toString(defaultSshPortStart)));
-            defaultRmiPortStart = Integer.parseInt(storage.getProperty("rmi.port", Integer.toString(defaultRmiPortStart)));
+            defaultRmiRegistryPortStart = Integer.parseInt(storage.getProperty("rmi.registry.port", Integer.toString(defaultRmiRegistryPortStart)));
+            defaultRmiServerPortStart = Integer.parseInt(storage.getProperty("rmi.server.port", Integer.toString(defaultRmiServerPortStart)));
             Map<String, Instance> newInstances = new HashMap<String, Instance>();
             for (int i = 0; i < count; i++) {
                 String name = storage.getProperty("item." + i + ".name", null);
@@ -148,9 +151,13 @@ public class AdminServiceImpl implements AdminService {
         }
         int rmiRegistryPort = settings.getRmiRegistryPort();
         if (rmiRegistryPort <= 0) {
-            rmiRegistryPort = ++defaultRmiPortStart;
+            rmiRegistryPort = ++defaultRmiRegistryPortStart;
         }
-        println(Ansi.ansi().a("Creating new instance on SSH port ").a(sshPort).a(" and RMI registry port ").a(rmiRegistryPort).a(" at: ").a(Ansi.Attribute.INTENSITY_BOLD).a(karafBase).a(Ansi.Attribute.RESET).toString());
+        int rmiServerPort = settings.getRmiServerPort();
+        if (rmiServerPort <= 0) {
+            rmiServerPort = ++defaultRmiServerPortStart;
+        }
+        println(Ansi.ansi().a("Creating new instance on SSH port ").a(sshPort).a(" and RMI ports ").a(rmiRegistryPort).a("/").a(rmiServerPort).a(" at: ").a(Ansi.Attribute.INTENSITY_BOLD).a(karafBase).a(Ansi.Attribute.RESET).toString());
 
         mkdir(karafBase, "bin");
         mkdir(karafBase, "etc");
@@ -176,6 +183,7 @@ public class AdminServiceImpl implements AdminService {
         props.put("${SUBST-KARAF-BASE}", karafBase.getPath());
         props.put("${SUBST-SSH-PORT}", Integer.toString(sshPort));
         props.put("${SUBST-RMI-REGISTRY-PORT}", Integer.toString(rmiRegistryPort));
+        props.put("${SUBST-RMI-SERVER-PORT}", Integer.toString(rmiServerPort));
         copyFilteredResourceToDir(karafBase, "etc/system.properties", props);
         copyFilteredResourceToDir(karafBase, "etc/org.apache.karaf.shell.cfg", props);
         copyFilteredResourceToDir(karafBase, "etc/org.apache.karaf.management.cfg", props);
@@ -298,7 +306,8 @@ public class AdminServiceImpl implements AdminService {
         Properties storage = new Properties();
         Instance[] data = getInstances();
         storage.setProperty("ssh.port", Integer.toString(defaultSshPortStart));
-        storage.setProperty("rmi.port", Integer.toString(defaultRmiPortStart));
+        storage.setProperty("rmi.registry.port", Integer.toString(defaultRmiRegistryPortStart));
+        storage.setProperty("rmi.server.port", Integer.toString(defaultRmiServerPortStart));
         storage.setProperty("count", Integer.toString(data.length));
         for (int i = 0; i < data.length; i++) {
             storage.setProperty("item." + i + ".name", data[i].getName());

@@ -50,6 +50,7 @@ public class JmxInstanceTest extends TestCase {
         EasyMock.expect(i.isRoot()).andReturn(false);
         EasyMock.expect(i.getSshPort()).andReturn(0);
         EasyMock.expect(i.getRmiRegistryPort()).andReturn(0);
+        EasyMock.expect(i.getRmiServerPort()).andReturn(0);
         EasyMock.expect(i.getState()).andThrow(new Exception("gotcha"));
         EasyMock.expect(i.getLocation()).andReturn("somewhere");
         EasyMock.expect(i.getJavaOpts()).andReturn("someopts");
@@ -65,7 +66,8 @@ public class JmxInstanceTest extends TestCase {
         Assert.assertEquals("MyInstance", cd.get("Name"));
         Assert.assertEquals(false, cd.get("Is Root"));
         Assert.assertEquals(0, cd.get("SSH Port"));
-        Assert.assertEquals(0, cd.get("RMI Port"));
+        Assert.assertEquals(0, cd.get("RMI Registry Port"));
+        Assert.assertEquals(0, cd.get("RMI Server Port"));
         Assert.assertEquals("Error", cd.get("State"));
         Assert.assertEquals("somewhere", cd.get("Location"));
         Assert.assertEquals("someopts", cd.get("JavaOpts"));
@@ -78,6 +80,7 @@ public class JmxInstanceTest extends TestCase {
         EasyMock.expect(i.isRoot()).andReturn(true);
         EasyMock.expect(i.getSshPort()).andReturn(0);
         EasyMock.expect(i.getRmiRegistryPort()).andReturn(0);
+        EasyMock.expect(i.getRmiServerPort()).andReturn(0);
         EasyMock.expect(i.getState()).andReturn("Started");
         EasyMock.expect(i.getLocation()).andReturn(null);
         EasyMock.expect(i.getJavaOpts()).andReturn(null);
@@ -93,7 +96,8 @@ public class JmxInstanceTest extends TestCase {
         Assert.assertEquals("MyInstance", cd.get("Name"));
         Assert.assertEquals(true, cd.get("Is Root"));
         Assert.assertEquals(0, cd.get("SSH Port"));
-        Assert.assertEquals(0, cd.get("RMI Port"));
+        Assert.assertEquals(0, cd.get("RMI Registry Port"));
+        Assert.assertEquals(0, cd.get("RMI Server Port"));
         Assert.assertEquals("Started", cd.get("State"));
         Assert.assertNull(cd.get("Location"));
         Assert.assertNull(cd.get("JavaOpts"));

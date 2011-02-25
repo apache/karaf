@@ -16,6 +16,7 @@
     \u001B[36mcreateInstance(name, sshPort, rmiPort, location, javaOpts, features, featureURLs)\u001B[0m Creates a new Karaf instance.
     \u001B[36mchangeSshPort(name, port)\u001B[0m Changes the SSH port number of an existing Karaf instance.
     \u001B[36mchangeRmiRegistryPort(name, port)\u001B[0m Changes the RMI registry port number of an existing Karaf instance.
+    \u001B[36mchangeRmiServerPort(name, port)\u001B[0m Changes the RMI server port number of an existing Karaf instance.
     \u001B[36mchangeJavaOpts(name, javaopts)\u001B[0m Changes the Java options of an existing Karaf instance.
     \u001B[36mdestroyInstance(name)\u001B[0m Destroys an existing Karaf instance.
     \u001B[36mstartInstance(name)\u001B[0m Starts an existing Karaf instance.

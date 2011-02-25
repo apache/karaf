@@ -21,14 +21,16 @@ import java.util.List;
 public class InstanceSettings {
     private final int sshPort;
     private final int rmiRegistryPort;
+    private final int rmiServerPort;
     private final String location;
     private final String javaOpts;
     private final List<String> featureURLs;
     private final List<String> features;
 
-    public InstanceSettings(int sshPort, int rmiRegistryPort, String location, String javaOpts, List<String> featureURLs, List<String> features) {
+    public InstanceSettings(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features) {
         this.sshPort = sshPort;
         this.rmiRegistryPort = rmiRegistryPort;
+        this.rmiServerPort = rmiServerPort;
         this.location = location;
         this.javaOpts = javaOpts;
         this.featureURLs = featureURLs;
@@ -41,6 +43,10 @@ public class InstanceSettings {
 
     public int getRmiRegistryPort() {
         return rmiRegistryPort;
+    }
+
+    public int getRmiServerPort() {
+        return rmiServerPort;
     }
 
     public String getLocation() {
@@ -70,6 +76,7 @@ public class InstanceSettings {
         InstanceSettings is = (InstanceSettings) o;
         return is.sshPort == sshPort &&
                is.rmiRegistryPort == rmiRegistryPort &&
+               is.rmiServerPort == rmiServerPort &&
                (location == null ? is.location == null : location.equals(is.location)) &&
                (javaOpts == null ? is.javaOpts == null : javaOpts.equals(is.javaOpts)) &&
                (featureURLs == null ? is.featureURLs == null : featureURLs.equals(is.featureURLs)) &&
@@ -78,7 +85,7 @@ public class InstanceSettings {
 
     @Override
     public int hashCode() {
-        int result = sshPort + rmiRegistryPort;
+        int result = sshPort + rmiRegistryPort + rmiServerPort;
         result = 31 * result + (location != null ? location.hashCode() : 0);
         result = 31 * result + (javaOpts != null ? javaOpts.hashCode() : 0);
         result = 31 * result + (featureURLs != null ? featureURLs.hashCode() : 0);

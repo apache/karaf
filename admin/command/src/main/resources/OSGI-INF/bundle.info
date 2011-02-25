@@ -19,6 +19,7 @@
     \u001B[36madmin:rename\u001B[0m Renames an existing container instance.
     \u001B[36madmin:change-ssh-port\u001B[0m Changes the secure shell port of an existing container instance.
     \u001B[36madmin:change-rmi-registry-port\u001B[0m Changes the RMI registry port (used by management layer) of an existing container instance.
+    \u001B[36madmin:change-rmi-server-port\u001B[0m Changes the RMI server port (used by management layer) of an existing container instance.
     \u001B[36madmin:change-opts\u001B[0m Changes the java options of an existing container instance.
 
 \u001B[1mSEE ALSO\u001B[0m

@@ -35,11 +35,11 @@ public class ListCommand extends AdminCommandSupport {
     protected Object doExecute() throws Exception {
         Instance[] instances = getAdminService().getInstances();
         if (javaOpts) {
-            System.out.println("  SSH Port   RMI Port   State       Pid  JavaOpts");
+            System.out.println("  SSH Port   RMI Ports         State       Pid  JavaOpts");
         } else if (location) {
-            System.out.println("  SSH Port   RMI Port   State       Pid  Location");
+            System.out.println("  SSH Port   RMI Ports         State       Pid  Location");
         } else {
-            System.out.println("  SSH Port   RMI Port   State       Pid  Name");
+            System.out.println("  SSH Port   RMI Ports         State       Pid  Name");
         }
         for (Instance instance : instances) {
             StringBuilder sb = new StringBuilder();
@@ -50,11 +50,12 @@ public class ListCommand extends AdminCommandSupport {
             }
             sb.append(s);
             sb.append("] [");
-            String r = Integer.toString(instance.getRmiRegistryPort());
-            for (int i = r.length(); i < 8; i++) {
+            String rmiRegistryPort = Integer.toString(instance.getRmiRegistryPort());
+            String rmiServerPort = Integer.toString(instance.getRmiServerPort());
+            sb.append(rmiRegistryPort).append("/").append(rmiServerPort);
+            for (int i = rmiRegistryPort.length() + rmiServerPort.length() + 1; i < 15; i++) {
                 sb.append(' ');
             }
-            sb.append(r);
             sb.append("] [");
             String state = instance.getState();
             while (state.length() < "starting".length()) {

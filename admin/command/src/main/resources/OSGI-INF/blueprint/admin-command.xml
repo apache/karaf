@@ -94,6 +94,15 @@
                 <null />
             </completers>
         </command>
+        <command name="admin/change-rmi-server-port">
+            <action class="org.apache.karaf.admin.command.ChangeRmiServerPortCommand">
+                <property name="adminService" ref="adminService" />
+            </action>
+            <completers>
+                <ref component-id="instanceCompleter" />
+                <null />
+            </completers>
+        </command>
         <command name="admin/change-opts">
             <action class="org.apache.karaf.admin.command.ChangeOptsCommand">
                 <property name="adminService" ref="adminService" />
