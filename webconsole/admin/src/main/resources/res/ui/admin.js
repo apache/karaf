@@ -28,7 +28,8 @@ function renderView() {
     "<tr><input type='hidden' name='action' value='create'/>" +
     "<th>Name: <input id='name' type='text' name='name' style='width:70%' colspan='2'/></th>" +
     "<th>SSH Port: <input id='sshPort' type='text' name='sshPort' style='width:70%' colspan='2'/></th>" +
-    "<th>RMI Port: <input id='rmiPort' type='text' name='rmiPort' style='width:70%' colspan='2'/></th>" +
+    "<th>RMI Registry Port: <input id='rmiRegistryPort' type='text' name='rmiRegistryPort' style='width:70%' colspan='2'/></th>" +
+    "<th>RMI Server Port: <input id='rmiServerPort' type='text' name='rmiServerPort' style='width:70%' colspan='2'/></th>" +
     "<th>Location: <input id='location' type='text' name='location' style='width:70%' colspan='2'/></th>" +
     "<th>JavaOpts: <input id='javaOpts' type='text' name='javaOpts' style='width:70%' colspan='2'/></th>" +
     "<th />" +
@@ -39,24 +40,25 @@ function renderView() {
     "<th class='col_Actions'><input type='button' value='Create' onclick='createInstance()'/></th>" +
     "</tr></thead></table></div></form>";
     $("#plugin_content").append( txt );
-    renderTable( "Karaf Instances", "instances_table", ["Pid", "Name", "SSH Port", "RMI Port", "State", "JavaOpts", "Location", "Actions"] );
+    renderTable( "Karaf Instances", "instances_table", ["Pid", "Name", "SSH Port", "RMI Registry Port", "RMI Server Port", "State", "JavaOpts", "Location", "Actions"] );
     renderStatusLine();
 }
 
 function createInstance() {
     var name = document.getElementById( "name" ).value;
     var sshPort = document.getElementById( "sshPort" ).value;
-    var rmiPort = document.getElementById("rmiPort").value;
+    var rmiRegistryPort = document.getElementById("rmiRegistryPort").value;
+    var rmiServerPort = document.getElementById("rmiServerPort").value;
     var location = document.getElementById( "location" ).value;
     var javaPpts = document.getElementById( "javaOpts" ).value;
     var features = document.getElementById( "features" ).value;
     var featureURLs = document.getElementById( "featureURLs" ).value;
-    postCreateInstance( name, sshPort, rmiPort, location, javaOpts, features, featureURLs );
+    postCreateInstance( name, sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, features, featureURLs );
 }
 
-function postCreateInstance( /* String */ name, /* String */ sshPort, /* String */ rmiPort, /* String */ location, 
+function postCreateInstance( /* String */ name, /* String */ sshPort, /* String */ rmiRegistryPort, /* String */ rmiServerPort,  /* String */ location,
 		/* String */ javaOpts, /* String */ features, /* String */ featureURLs ) {
-    $.post( pluginRoot, {"action": "create", "name": name, "sshPort": sshPort, "rmiPort": rmiPort, "location": location, 
+    $.post( pluginRoot, {"action": "create", "name": name, "sshPort": sshPort, "rmiRegistryPort": rmiRegistryPort, "rmiServerPort": rmiServerPort, "location": location,
                              "javaOpts": javaOpts, "features": features, "featureURLs": featureURLs }, function( data ) {
         renderData( data );
     }, "json" );
@@ -111,7 +113,8 @@ function renderInstanceData( /* Element */ parent, /* Object */ instance ) {
     parent.appendChild( td( null, null, [ text( instance.pid ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.name ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.sshPort ) ] ) );
-    parent.appendChild( td( null, null, [ text( instance.rmiPort ) ] ) );
+    parent.appendChild( td( null, null, [ text( instance.rmiRegistryPort ) ] ) );
+    parent.appendChild( td( null, null, [ text( instance.rmiServerPort ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.state ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.location ) ] ) );
     parent.appendChild( td( null, null, [ text( instance.javaOpts ) ] ) );
