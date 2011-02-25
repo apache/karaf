@@ -16,10 +16,8 @@
  */
 package org.apache.karaf.features.command;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.features.FeaturesService;
@@ -39,15 +37,7 @@ public class RefreshUrlCommand extends FeaturesCommandSupport {
             }
         }
         for (String strUri : urls) {
-            try {
-                URI uri = new URI(strUri);
-                admin.removeRepository(uri);
-                admin.addRepository(uri);
-            } catch (Exception e) {
-                System.out.println("Could not refresh Feature Repository:\n" + e.getMessage() );
-                //get chance to restore previous, fix for KARAF-4
-                admin.restoreRepository(new URI(strUri));
-            }
+            refreshUrl(admin, strUri);
         }
     }
 }

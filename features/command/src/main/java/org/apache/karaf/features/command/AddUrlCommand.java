@@ -18,10 +18,10 @@ package org.apache.karaf.features.command;
 
 import java.net.URI;
 import java.util.List;
-
-import org.apache.karaf.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Repository;
 
 @Command(scope = "features", name = "addUrl", description = "Adds a list of repository URLs to the features service.")
 public class AddUrlCommand extends FeaturesCommandSupport {
@@ -32,7 +32,20 @@ public class AddUrlCommand extends FeaturesCommandSupport {
     protected void doExecute(FeaturesService admin) throws Exception {
         for (String url : urls) {
             try {
-                admin.addRepository(new URI(url));
+	             Boolean alreadyInstalled = Boolean.FALSE;
+	             Repository[] repositories = admin.listRepositories();
+	             for(Repository repository:repositories) {
+		             String repositoryUrl = repository.getURI().toURL().toString();
+		             //Check if the repository is already installed.
+		             if(repositoryUrl.equals(url)) {
+		                 alreadyInstalled=Boolean.TRUE;
+		             }
+	             }
+	             if(!alreadyInstalled) {
+                    admin.addRepository(new URI(url));
+	             } else {
+		              refreshUrl(admin, url);
+	             }
             } catch (Exception e) {
                 System.out.println("Could not add Feature Repository:\n" + e );  
             }

@@ -16,8 +16,9 @@
  */
 package org.apache.karaf.features.command;
 
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import java.net.URI;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
 
 public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
@@ -43,6 +44,25 @@ public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
         }
         return null;
     }
+
+
+	/**
+	 * Refreshes the url.
+	 * @param admin
+	 * @param url
+	 * @throws Exception
+	 */
+	protected void refreshUrl(FeaturesService admin,String url) throws Exception {
+		try {
+                URI uri = new URI(url);
+                admin.removeRepository(uri);
+                admin.addRepository(uri);
+            } catch (Exception e) {
+                System.out.println("Could not refresh Feature Repository:\n" + e.getMessage() );
+                //get chance to restore previous, fix for KARAF-4
+                admin.restoreRepository(new URI(url));
+            }
+	}
 
     protected abstract void doExecute(FeaturesService admin) throws Exception;
 
