@@ -35,8 +35,11 @@ public class CreateCommand extends AdminCommandSupport
     @Option(name = "-s", aliases = {"--ssh-port"}, description = "Port number for remote secure shell connection", required = false, multiValued = false)
     int sshPort = 0;
 
-    @Option(name = "-r", aliases = {"--rmi-port", "--rmi-registry-port"}, description = "Port number for RMI registry connection", required = false, multiValued = false)
-    int rmiPort = 0;
+    @Option(name = "-r", aliases = {"-rr", "--rmi-port", "--rmi-registry-port"}, description = "Port number for RMI registry connection", required = false, multiValued = false)
+    int rmiRegistryPort = 0;
+
+    @Option(name = "-rs", aliases = {"--rmi-server-port"}, description = "Port number for RMI server connection", required = false, multiValued = false)
+    int rmiServerPort = 0;
 
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the new container instance in the file system", required = false, multiValued = false)
     String location;
@@ -56,7 +59,7 @@ public class CreateCommand extends AdminCommandSupport
     String instance = null;
 
     protected Object doExecute() throws Exception {
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiPort, location, javaOpts, featureURLs, features);
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features);
         getAdminService().createInstance(instance, settings);
         return null;
     }

@@ -46,7 +46,7 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
         this.adminService = adminService;
     }
 
-    public int createInstance(String name, int sshPort, int rmiPort, String location, String javaOpts, String features, String featureURLs)
+    public int createInstance(String name, int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, String features, String featureURLs)
             throws Exception {
         if ("".equals(location)) {
             location = null;
@@ -55,7 +55,7 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
             javaOpts = null;
         }
 
-        InstanceSettings settings = new InstanceSettings(sshPort, rmiPort, location, javaOpts,
+        InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts,
                 parseStringList(featureURLs), parseStringList(features));
 
         Instance inst = adminService.createInstance(name, settings);
@@ -72,6 +72,10 @@ public class AdminServiceMBeanImpl extends StandardMBean implements AdminService
 
     public void changeRmiRegistryPort(String name, int port) throws Exception {
         getExistingInstance(name).changeRmiRegistryPort(port);
+    }
+
+    public void changeRmiServerPort(String name, int port) throws Exception {
+        getExistingInstance(name).changeRmiServerPort(port);
     }
 
     public void changeJavaOpts(String name, String javaOpts) throws Exception {

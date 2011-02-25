@@ -46,7 +46,7 @@ public class AdminServiceImplTest extends TestCase {
                 os.close();
             }
             
-            InstanceSettings s = new InstanceSettings(8122, 1122, null, null, null, Arrays.asList("test"));
+            InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null, Arrays.asList("test"));
             as.handleFeatures(f, s);
             
             Properties p2 = new Properties();
@@ -72,7 +72,7 @@ public class AdminServiceImplTest extends TestCase {
         AdminServiceImpl service = new AdminServiceImpl();
         service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
 
-        InstanceSettings settings = new InstanceSettings(8122, 1122, getName(), null, null, null);
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         Instance instance = service.createInstance(getName(), settings);
 
         assertFileExists(instance.getLocation(), "etc/config.properties");
@@ -97,7 +97,7 @@ public class AdminServiceImplTest extends TestCase {
         AdminServiceImpl service = new AdminServiceImpl();
         service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
 
-        InstanceSettings settings = new InstanceSettings(8122, 1122, getName(), null, null, null);
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         Instance instance = service.createInstance(getName(), settings);
 
         service.renameInstance(getName(), getName() + "b");

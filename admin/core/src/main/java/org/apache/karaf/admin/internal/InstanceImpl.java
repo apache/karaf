@@ -194,6 +194,50 @@ public class InstanceImpl implements Instance {
         }
     }
 
+    public int getRmiServerPort() {
+        InputStream is = null;
+        try {
+            File f = new File(location, "etc/org.apache.karaf.management.cfg");
+            is = new FileInputStream(f);
+            Properties props = new Properties();
+            props.load(is);
+            String loc = props.getProperty("rmiServerPort");
+            return Integer.parseInt(loc);
+        } catch (Exception e) {
+            return 0;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    public void changeRmiServerPort(int port) throws Exception {
+        checkProcess();
+        if (this.process != null) {
+            throw new IllegalStateException("Instance not stopped");
+        }
+        Properties props = new Properties();
+        File f = new File(location, "etc/org.apache.karaf.management.cfg");
+        InputStream is = new FileInputStream(f);
+        try {
+            props.load(is);
+        } finally {
+            is.close();
+        }
+        props.setProperty("rmiServerPort", Integer.toString(port));
+        OutputStream os = new FileOutputStream(f);
+        try {
+            props.store(os, null);
+        } finally {
+            os.close();
+        }
+    }
+
     public String getJavaOpts() {
         return javaOpts;
     }
