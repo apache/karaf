@@ -50,7 +50,7 @@ function createInstance() {
     var rmiRegistryPort = document.getElementById("rmiRegistryPort").value;
     var rmiServerPort = document.getElementById("rmiServerPort").value;
     var location = document.getElementById( "location" ).value;
-    var javaPpts = document.getElementById( "javaOpts" ).value;
+    var javaOpts = document.getElementById( "javaOpts" ).value;
     var features = document.getElementById( "features" ).value;
     var featureURLs = document.getElementById( "featureURLs" ).value;
     postCreateInstance( name, sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, features, featureURLs );
