@@ -37,11 +37,10 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
     <!-- example).                                                   -->
     <!-- =========================================================== -->
     <!-- Enable this after jetty-jaas feature has been installed -->
-    <!-- 
-	<Call name="addBean">
+    <Call name="addBean">
       <Arg>
         <New class="org.eclipse.jetty.plus.jaas.JAASLoginService">
-		  <Set name="name">karaf</Set>
+		  <Set name="name">default</Set>
           <Set name="loginModuleName">karaf</Set>
 		  <Set name="roleClassNames">
 			<Array type="java.lang.String">
@@ -51,5 +50,4 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
         </New>
       </Arg>
     </Call>
-     -->
 </Configure>
