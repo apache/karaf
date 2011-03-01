@@ -24,17 +24,17 @@ import org.osgi.framework.Version;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "list", description = "Lists OBR bundles.")
+@Command(scope = "obr", name = "list", description = "Lists OBR bundles, optionally providing the given packages.")
 public class ListCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "args", description = "The arguments", required = false, multiValued = true)
-    List<String> args;
+    @Argument(index = 0, name = "packages", description = "A list of packages separated by whitespaces.", required = false, multiValued = true)
+    List<String> packages;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
         String substr = null;
 
-        if (args != null) {
-            for (String arg : args)
+        if (packages != null) {
+            for (String arg : packages)
             {
                 // Add a space in between tokens.
                 if (substr == null)
