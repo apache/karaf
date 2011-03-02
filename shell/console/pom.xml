@@ -43,12 +43,18 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.sonatype.jline</groupId>
-            <artifactId>jline</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.fusesource.jansi</groupId>
             <artifactId>jansi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.jline</groupId>
+            <artifactId>jline</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.fusesource.jansi</groupId>
+                    <artifactId>jansi</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -123,14 +129,14 @@
                             org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
                             org.apache.felix.service.threadio;version=${felix.gogo.version};status=provisional;mandatory:=status,
                             org.apache.karaf.shell.console*;version=${project.version},
-                            org.fusesource.jansi;version=${jansi.version},
+                            org.fusesource.jansi;version=${jansi.version};-split-package:=first,
                             jline*;version=${jline.version},
-                            org.fusesource.hawtjni*;version=1.0
+                            org.fusesource.hawtjni*;version=1.0;-split-package:=first
                         </Export-Package>
                         <Private-Package>
-                            org.fusesource.jansi.internal,
-                            org.apache.felix.gogo.runtime*,
-                            META-INF.native.*
+                            org.fusesource.jansi.internal;-split-package:=first,
+                            org.apache.felix.gogo.runtime*;-split-package:=first,
+                            META-INF.native.*;-split-package:=first
                         </Private-Package>
                         <Bundle-NativeCode>
                             META-INF/native/windows32/jansi.dll;osname=Win32;processor=x86,
