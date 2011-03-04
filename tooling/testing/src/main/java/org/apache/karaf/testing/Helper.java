@@ -361,7 +361,7 @@ public final class Helper {
      */
     public static FeaturesScannerProvisionOption loadKarafStandardFeatures(String... features) {
         return scanFeatures(
-            maven().groupId("org.apache.karaf.features.assembly").artifactId("standard").type("xml")
+            maven().groupId("org.apache.karaf.assemblies.features").artifactId("standard").type("xml")
                 .classifier("features").versionAsInProject(), features);
     }
 
@@ -373,7 +373,7 @@ public final class Helper {
      */
     public static FeaturesScannerProvisionOption loadKarafEnterpriseFeatures(String... features) {
         return scanFeatures(
-            maven().groupId("org.apache.karaf.features.assembly").artifactId("enterprise").type("xml")
+            maven().groupId("org.apache.karaf.assemblies.features").artifactId("enterprise").type("xml")
                 .classifier("features").versionAsInProject(), features);
     }
 
