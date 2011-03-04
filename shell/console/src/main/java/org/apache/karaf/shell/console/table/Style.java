@@ -141,7 +141,8 @@ public class Style {
      * @return Styled text - with ansi espace codes.
      */
     public String apply(String text) {
-        return new Ansi(style).a(text).reset().toString();
+//        return new Ansi(style).a(text).reset().toString();
+		return "";
     }
 
     /**
@@ -151,10 +152,9 @@ public class Style {
         clean = false;
         return style;
     }
-
     @Override
     public String toString() {
-        return isClean() ? "[no style]" : "[ansi: " + new Ansi(style).a("x").reset() + "]";
+//        return isClean() ? "[no style]" : "[ansi: " + new Ansi(style).a("x").reset() + "]";
+		return "";
     }
-
 }
