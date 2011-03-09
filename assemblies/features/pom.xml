@@ -35,6 +35,7 @@
     <modules>
         <module>standard</module>
         <module>enterprise</module>
+        <module>framework</module>
     </modules>
 
     <profiles>

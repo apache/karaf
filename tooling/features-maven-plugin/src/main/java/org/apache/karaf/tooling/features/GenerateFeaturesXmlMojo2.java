@@ -33,10 +33,11 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import org.apache.karaf.features.internal.Bundle;
-import org.apache.karaf.features.internal.Feature;
-import org.apache.karaf.features.internal.Features;
-import org.apache.karaf.features.internal.ObjectFactory;
+import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.internal.model.ObjectFactory;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -54,7 +55,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
-import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeResolutionListener;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.xml.sax.SAXException;
@@ -180,6 +180,9 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         } else {
             featuresRoot = objectFactory.createFeaturesRoot();
         }
+        if (featuresRoot.getName() == null) {
+            featuresRoot.setName(project.getArtifactId());
+        }
 
         Feature feature = null;
         for (Feature test: featuresRoot.getFeature()) {
@@ -202,7 +205,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
                 bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType());
             }
             Bundle bundle = objectFactory.createBundle();
-            bundle.setValue(bundleName);
+            bundle.setLocation(bundleName);
             if ("runtime".equals(artifact.getScope())) {
                 bundle.setDependency(true);
             }

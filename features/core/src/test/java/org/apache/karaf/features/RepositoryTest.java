@@ -20,7 +20,6 @@ import java.net.URI;
 
 import junit.framework.TestCase;
 import org.apache.karaf.features.internal.RepositoryImpl;
-import org.apache.karaf.features.internal.FeatureImpl;
 
 
 public class RepositoryTest extends TestCase {
@@ -55,7 +54,7 @@ public class RepositoryTest extends TestCase {
         assertEquals(0, features[1].getConfigurations().size());
         assertNotNull(features[1].getDependencies());
         assertEquals(1, features[1].getDependencies().size());
-        assertEquals("f1" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + FeatureImpl.DEFAULT_VERSION, features[1].getDependencies().get(0).toString());
+        assertEquals("f1" + org.apache.karaf.features.internal.model.Feature.SPLIT_FOR_NAME_AND_VERSION + org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, features[1].getDependencies().get(0).toString());
         assertNotNull(features[1].getBundles());
         assertEquals(1, features[1].getBundles().size());
         assertEquals("b3", features[1].getBundles().get(0).getLocation());

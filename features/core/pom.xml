@@ -126,6 +126,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.karaf.features.internal,
+                            org.apache.karaf.features.internal.model,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest
                         </Private-Package>

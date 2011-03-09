@@ -141,7 +141,8 @@ Dependency of feature.
         <xs:annotation>
             <xs:documentation><![CDATA[
 Configuration entries which should be created during feature installation. This
-configuration may be used with OSGi Configuration Admin.
+configuration may be used with OSGi Configuration Admin. The element content is
+read in as a properties file.
             ]]></xs:documentation>
         </xs:annotation>
         <xs:simpleContent>

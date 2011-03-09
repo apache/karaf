@@ -17,8 +17,9 @@
  * under the License.
  */
 
-package org.apache.karaf.features.internal;
+package org.apache.karaf.features.internal.model;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -27,6 +28,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import org.apache.karaf.features.Repository;
 
 
 /**
@@ -68,7 +70,7 @@ public class Features {
     protected List<String> repository;
     protected List<Feature> feature;
     @XmlAttribute
-    protected String name;
+    protected String name ="<unnamed>";
 
     /**
      * Gets the value of the repository property.
