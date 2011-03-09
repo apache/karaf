@@ -26,7 +26,7 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
 import org.apache.felix.bundlerepository.impl.ReasonImpl;
 import org.apache.karaf.features.BundleInfo;
-import org.apache.karaf.features.internal.FeatureImpl;
+import org.apache.karaf.features.internal.model.Bundle;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -45,9 +45,9 @@ public class ObrResolverTest {
     public void testResolver() throws Exception {
         final String requirement = "bundle:(&(symbolicname=org.apache.camel.camel-blueprint)(version>=2.4.0)(version<2.4.1))";
 
-        final FeatureImpl f = new FeatureImpl("f1", "1.0");
+        final org.apache.karaf.features.internal.model.Feature f = new org.apache.karaf.features.internal.model.Feature("f1", "1.0");
         f.setResolver("obr");
-        f.addBundle(new BundleInfoImpl(requirement));
+        f.getBundle().add(new Bundle(requirement));
         final RepositoryAdmin admin = createMock(RepositoryAdmin.class);
         final Resolver resolver = createMock(Resolver.class);
         final Resource resource = createMock(Resource.class);

@@ -26,7 +26,8 @@ import java.io.InputStream;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import org.apache.karaf.features.internal.Features;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 

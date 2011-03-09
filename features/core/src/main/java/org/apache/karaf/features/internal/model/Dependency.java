@@ -17,30 +17,34 @@
  * under the License.
  */
 
-package org.apache.karaf.features.internal;
+
+package org.apache.karaf.features.internal.model;
+
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import org.apache.karaf.features.*;
 
 
 /**
  * 
- * Configuration entries which should be created during feature installation. This
- * configuration may be used with OSGi Configuration Admin.
+ * Dependency of feature.
  *             
  * 
- * <p>Java class for config complex type.
+ * <p>Java class for dependency complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="config">
+ * &lt;complexType name="dependency">
  *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *     &lt;extension base="&lt;http://karaf.apache.org/xmlns/features/v1.0.0>featureName">
+ *       &lt;attribute name="version" type="{http://www.w3.org/2001/XMLSchema}string" default="0.0.0" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -49,26 +53,40 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "config", propOrder = {
+@XmlType(name = "dependency", propOrder = {
     "value"
 })
-public class Config {
+public class Dependency implements org.apache.karaf.features.Feature {
 
     @XmlValue
     protected String value;
-    @XmlAttribute(required = true)
-    protected String name;
+    @XmlAttribute
+    protected String version;
+
+    public String getId() {
+        return null;
+    }
 
     /**
-     * Gets the value of the value property.
+     * 
+     * Feature name should be non empty string.
+     *             
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getValue() {
+    public String getName() {
         return value;
+    }
+
+    public String getDescription() {
+        return null;
+    }
+
+    public String getDetails() {
+        return null;
     }
 
     /**
@@ -79,32 +97,62 @@ public class Config {
      *     {@link String }
      *     
      */
-    public void setValue(String value) {
+    public void setName(String value) {
         this.value = value;
     }
 
     /**
-     * Gets the value of the name property.
+     * Gets the value of the version property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getName() {
-        return name;
+    public String getVersion() {
+        if (version == null) {
+            return "0.0.0";
+        } else {
+            return version;
+        }
+    }
+
+    //Following are unimplemented methods of Feature interface.
+    public String getResolver() {
+        return null;
+    }
+
+    public List<org.apache.karaf.features.Feature> getDependencies() {
+        return null;
+    }
+
+    public List<BundleInfo> getBundles() {
+        return null;
+    }
+
+    public Map<String, Map<String, String>> getConfigurations() {
+        return null;
+    }
+
+    public List<ConfigFileInfo> getConfigurationFiles() {
+        return null;
     }
 
     /**
-     * Sets the value of the name property.
+     * Sets the value of the version property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setName(String value) {
-        this.name = value;
+    public void setVersion(String value) {
+        this.version = value;
+    }
+
+    public String toString() {
+    	String ret = getName() + Feature.SPLIT_FOR_NAME_AND_VERSION + getVersion();
+    	return ret;
     }
 
 }

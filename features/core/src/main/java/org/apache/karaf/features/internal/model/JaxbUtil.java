@@ -18,7 +18,7 @@
  */
 
 
-package org.apache.karaf.tooling.features;
+package org.apache.karaf.features.internal.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,7 +39,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.sax.SAXSource;
-import org.apache.karaf.features.internal.Features;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

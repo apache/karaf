@@ -44,7 +44,6 @@ import java.util.jar.JarInputStream;
 
 import junit.framework.TestCase;
 
-import org.apache.karaf.features.internal.FeatureImpl;
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
 import org.easymock.EasyMock;
 import org.osgi.framework.Bundle;
@@ -123,7 +122,7 @@ public class FeaturesServiceTest extends TestCase {
 
         replay(bundleContext, installedBundle);
 
-        svc.installFeature("f1", FeatureImpl.DEFAULT_VERSION, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        svc.installFeature("f1", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION, EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         
         Feature[] installed = svc.listInstalledFeatures();
         assertEquals(1, installed.length);

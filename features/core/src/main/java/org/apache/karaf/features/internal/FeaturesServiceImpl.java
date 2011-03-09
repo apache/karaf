@@ -95,6 +95,7 @@ import static java.lang.String.format;
 public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public static final String CONFIG_KEY = "org.apache.karaf.features.configKey";
+    public static String VERSION_PREFIX = "version=";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
@@ -260,7 +261,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     public void installFeature(String name) throws Exception {
-    	installFeature(name, FeatureImpl.DEFAULT_VERSION);
+    	installFeature(name, org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
     }
 
     public void installFeature(String name, String version) throws Exception {
@@ -420,7 +421,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             System.out.println("Installing feature " + feature.getName() + " " + feature.getVersion());
         }
         for (Feature dependency : feature.getDependencies()) {
-            VersionRange range = FeatureImpl.DEFAULT_VERSION.equals(dependency.getVersion())
+            VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency.getVersion())
                         ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
             Feature fi = null;
             for (Feature f : installed.keySet()) {
@@ -813,7 +814,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
     public Feature getFeature(String name) throws Exception {
-        return getFeature(name, FeatureImpl.DEFAULT_VERSION);
+        return getFeature(name, org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
     }
 
     public Feature getFeature(String name, String version) throws Exception {
@@ -826,7 +827,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         } else {
             Feature feature = versions.get(version);
             if (feature == null) {
-                if (FeatureImpl.DEFAULT_VERSION.equals(version)) {
+                if (org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(version)) {
                     Version latest = new Version(cleanupVersion(version));
                     for (String available : versions.keySet()) {
                         Version availableVersion = new Version(cleanupVersion(available));
@@ -836,7 +837,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                         }
                     }
                 } else {
-                    Version latest = new Version(cleanupVersion(FeatureImpl.DEFAULT_VERSION));
+                    Version latest = new Version(cleanupVersion(org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
                     VersionRange versionRange = new VersionRange(version, true, true);
                     for (String available : versions.keySet()) {
                         Version availableVersion = new Version(cleanupVersion(available));
@@ -931,14 +932,14 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                             String featureName = parts[0];
                             for (String part : parts) {
                                 // if the part starts with "version=" it contains the version info
-                                if (part.startsWith(FeatureImpl.VERSION_PREFIX)) {
-                                    featureVersion = part.substring(FeatureImpl.VERSION_PREFIX.length());
+                                if (part.startsWith(VERSION_PREFIX)) {
+                                    featureVersion = part.substring(VERSION_PREFIX.length());
                                 }
                             }
 
                             if (featureVersion == null) {
                                 // no version specified - use default version
-                                featureVersion = FeatureImpl.DEFAULT_VERSION;
+                                featureVersion = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION;
                             }
 
                             try {
@@ -1117,7 +1118,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             if (key.startsWith(prefix)) {
                 String val = (String) props.get(key);
                 Set<Long> set = readValue(val);
-                map.put(FeatureImpl.valueOf(key.substring(prefix.length())), set);
+                map.put(org.apache.karaf.features.internal.model.Feature.valueOf(key.substring(prefix.length())), set);
             }
         }
         return map;

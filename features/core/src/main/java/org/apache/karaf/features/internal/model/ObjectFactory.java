@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.karaf.features.internal;
+package org.apache.karaf.features.internal.model;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;

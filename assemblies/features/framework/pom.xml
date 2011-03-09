@@ -28,7 +28,7 @@
     </parent>
 
     <artifactId>karaf-framework</artifactId>
-    <packaging>kar</packaging>
+    <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Framework KAR</name>
 
     <properties>
@@ -325,10 +325,25 @@
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>features-maven-plugin</artifactId>
                 <version>${project.version}</version>
-                <extensions>true</extensions>
+                <!--<extensions>true</extensions>-->
                 <configuration>
                     <repositoryPath>resources/system/</repositoryPath>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>generate-features-xml2</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>package</id>
+                        <goals>
+                            <goal>archive-kar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

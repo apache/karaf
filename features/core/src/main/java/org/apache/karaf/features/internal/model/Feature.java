@@ -17,14 +17,27 @@
  * under the License.
  */
 
-package org.apache.karaf.features.internal;
+package org.apache.karaf.features.internal.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
+import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
 
 
 /**
@@ -66,7 +79,9 @@ import javax.xml.bind.annotation.XmlType;
     "feature",
     "bundle"
 })
-public class Feature {
+public class Feature implements org.apache.karaf.features.Feature {
+    public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
+    public static String DEFAULT_VERSION = "0.0.0";
 
     protected List<String> details;
     protected List<Config> config;
@@ -81,6 +96,33 @@ public class Feature {
     protected String description;
     @XmlAttribute
     protected String resolver;
+
+
+    public Feature() {
+    }
+
+    public Feature(String name) {
+        this.name = name;
+    }
+
+    public Feature(String name, String version) {
+        this.name = name;
+        this.version = version;
+    }
+
+
+    public static org.apache.karaf.features.Feature valueOf(String str) {
+    	if (str.indexOf(SPLIT_FOR_NAME_AND_VERSION) >= 0) {
+    		String strName = str.substring(0, str.indexOf(SPLIT_FOR_NAME_AND_VERSION));
+        	String strVersion = str.substring(str.indexOf(SPLIT_FOR_NAME_AND_VERSION)
+        			+ SPLIT_FOR_NAME_AND_VERSION.length(), str.length());
+        	return new Feature(strName, strVersion);
+    	} else {
+    		return new Feature(str);
+    	}
+
+
+    }
 
     /**
      * Gets the value of the details property.
@@ -104,7 +146,7 @@ public class Feature {
      * 
      * 
      */
-    public List<String> getDetails() {
+    public List<String> getDetailsList() {
         if (details == null) {
             details = new ArrayList<String>();
         }
@@ -227,6 +269,10 @@ public class Feature {
         return this.bundle;
     }
 
+    public String getId() {
+        return getName() + "-" + getVersion();
+    }
+
     /**
      * Gets the value of the name property.
      * 
@@ -291,6 +337,10 @@ public class Feature {
         return description;
     }
 
+    public String getDetails() {
+        return null;
+    }
+
     /**
      * Sets the value of the description property.
      * 
@@ -315,6 +365,39 @@ public class Feature {
         return resolver;
     }
 
+    public List<org.apache.karaf.features.Feature> getDependencies() {
+        return Collections.<org.apache.karaf.features.Feature>unmodifiableList(getFeature());
+    }
+
+    public List<BundleInfo> getBundles() {
+        return Collections.<BundleInfo>unmodifiableList(getBundle());
+    }
+
+    public Map<String, Map<String, String>> getConfigurations() {
+        Map<String, Map<String, String>> result = new HashMap<String, Map<String, String>>();
+        for (Config config: getConfig()) {
+            String name = config.getName();
+            StringReader propStream = new StringReader(config.getValue());
+            Properties props = new Properties();
+            try {
+                props.load(propStream);
+            } catch (IOException e) {
+                //ignore??
+            }
+            interpolation(props);
+            Map<String, String> propMap = new HashMap<String, String>();
+            for (Map.Entry<Object, Object> entry: props.entrySet()) {
+                propMap.put((String)entry.getKey(), (String)entry.getValue());
+            }
+            result.put(name, propMap);
+        }
+        return result;
+    }
+
+    public List<ConfigFileInfo> getConfigurationFiles() {
+        return Collections.<ConfigFileInfo>unmodifiableList(getConfigfile());
+    }
+
     /**
      * Sets the value of the resolver property.
      * 
@@ -325,6 +408,47 @@ public class Feature {
      */
     public void setResolver(String value) {
         this.resolver = value;
+    }
+
+    public String toString() {
+    	String ret = getName() + SPLIT_FOR_NAME_AND_VERSION + getVersion();
+    	return ret;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Feature feature = (Feature) o;
+
+        if (name != null ? !name.equals(feature.name) : feature.name != null) return false;
+        if (version != null ? !version.equals(feature.version) : feature.version != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        return result;
+    }
+
+    protected void interpolation(Properties properties) {
+        for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
+            String key = (String) e.nextElement();
+            String val = properties.getProperty(key);
+            Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);
+            while (matcher.find()) {
+                String rep = System.getProperty(matcher.group(1));
+                if (rep != null) {
+                    val = val.replace(matcher.group(0), rep);
+                    matcher.reset(val);
+                }
+            }
+            properties.put(key, val);
+        }
     }
 
 }

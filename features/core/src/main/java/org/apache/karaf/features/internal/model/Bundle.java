@@ -18,7 +18,7 @@
  */
 
 
-package org.apache.karaf.features.internal;
+package org.apache.karaf.features.internal.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import org.apache.karaf.features.BundleInfo;
 
 
 /**
@@ -55,17 +56,25 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlType(name = "bundle", propOrder = {
     "value"
 })
-public class Bundle {
+public class Bundle implements BundleInfo {
 
     @XmlValue
     @XmlSchemaType(name = "anyURI")
     protected String value;
     @XmlAttribute(name = "start-level")
-    protected Integer startLevel;
+    protected int startLevel;
     @XmlAttribute
-    protected Boolean start;
+    protected boolean start = true;
     @XmlAttribute
-    protected Boolean dependency;
+    protected boolean dependency;
+
+
+    public Bundle() {
+    }
+
+    public Bundle(String value) {
+        this.value = value;
+    }
 
     /**
      * Gets the value of the value property.
@@ -75,7 +84,7 @@ public class Bundle {
      *     {@link String }
      *     
      */
-    public String getValue() {
+    public String getLocation() {
         return value;
     }
 
@@ -87,7 +96,7 @@ public class Bundle {
      *     {@link String }
      *     
      */
-    public void setValue(String value) {
+    public void setLocation(String value) {
         this.value = value;
     }
 
@@ -99,7 +108,7 @@ public class Bundle {
      *     {@link Integer }
      *     
      */
-    public Integer getStartLevel() {
+    public int getStartLevel() {
         return startLevel;
     }
 
@@ -123,7 +132,7 @@ public class Bundle {
      *     {@link Boolean }
      *     
      */
-    public Boolean isStart() {
+    public boolean isStart() {
         return start;
     }
 
@@ -147,7 +156,7 @@ public class Bundle {
      *     {@link Boolean }
      *     
      */
-    public Boolean isDependency() {
+    public boolean isDependency() {
         return dependency;
     }
 

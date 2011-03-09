@@ -17,13 +17,14 @@
  * under the License.
  */
 
-package org.apache.karaf.features.internal;
+package org.apache.karaf.features.internal.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import org.apache.karaf.features.ConfigFileInfo;
 
 
 /**
@@ -51,7 +52,7 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlType(name = "configFile", propOrder = {
     "value"
 })
-public class ConfigFile {
+public class ConfigFile implements ConfigFileInfo {
 
     @XmlValue
     protected String value;
@@ -66,7 +67,7 @@ public class ConfigFile {
      *     {@link String }
      *     
      */
-    public String getValue() {
+    public String getLocation() {
         return value;
     }
 
@@ -78,7 +79,7 @@ public class ConfigFile {
      *     {@link String }
      *     
      */
-    public void setValue(String value) {
+    public void setLocation(String value) {
         this.value = value;
     }
 

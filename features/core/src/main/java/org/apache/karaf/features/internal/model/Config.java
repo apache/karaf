@@ -17,8 +17,7 @@
  * under the License.
  */
 
-
-package org.apache.karaf.features.internal;
+package org.apache.karaf.features.internal.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -29,18 +28,19 @@ import javax.xml.bind.annotation.XmlValue;
 
 /**
  * 
- * Dependency of feature.
+ * Configuration entries which should be created during feature installation. This
+ * configuration may be used with OSGi Configuration Admin.
  *             
  * 
- * <p>Java class for dependency complex type.
+ * <p>Java class for config complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="dependency">
+ * &lt;complexType name="config">
  *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://karaf.apache.org/xmlns/features/v1.0.0>featureName">
- *       &lt;attribute name="version" type="{http://www.w3.org/2001/XMLSchema}string" default="0.0.0" />
+ *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -49,20 +49,18 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "dependency", propOrder = {
+@XmlType(name = "config", propOrder = {
     "value"
 })
-public class Dependency {
+public class Config {
 
     @XmlValue
     protected String value;
-    @XmlAttribute
-    protected String version;
+    @XmlAttribute(required = true)
+    protected String name;
 
     /**
-     * 
-     * Feature name should be non empty string.
-     *             
+     * Gets the value of the value property.
      * 
      * @return
      *     possible object is
@@ -86,31 +84,27 @@ public class Dependency {
     }
 
     /**
-     * Gets the value of the version property.
+     * Gets the value of the name property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getVersion() {
-        if (version == null) {
-            return "0.0.0";
-        } else {
-            return version;
-        }
+    public String getName() {
+        return name;
     }
 
     /**
-     * Sets the value of the version property.
+     * Sets the value of the name property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setVersion(String value) {
-        this.version = value;
+    public void setName(String value) {
+        this.name = value;
     }
 
 }

@@ -48,7 +48,7 @@ public class FeaturesServiceImplTest extends TestCase {
     public void testGetFeature() throws Exception {
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
-        FeatureImpl feature = new FeatureImpl("transaction");
+        org.apache.karaf.features.internal.model.Feature feature = new org.apache.karaf.features.internal.model.Feature("transaction");
         versions.put("1.0.0", feature);
         features.put("transaction", versions);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
@@ -56,14 +56,14 @@ public class FeaturesServiceImplTest extends TestCase {
                 return features;
             };
         };
-        assertNotNull(impl.getFeature("transaction", FeatureImpl.DEFAULT_VERSION));
-        assertSame(feature, impl.getFeature("transaction", FeatureImpl.DEFAULT_VERSION));
+        assertNotNull(impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertSame(feature, impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
     }
     
     public void testGetFeatureStripVersion() throws Exception {
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
-        FeatureImpl feature = new FeatureImpl("transaction");
+        org.apache.karaf.features.internal.model.Feature feature = new org.apache.karaf.features.internal.model.Feature("transaction");
         versions.put("1.0.0", feature);
         features.put("transaction", versions);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
@@ -78,29 +78,29 @@ public class FeaturesServiceImplTest extends TestCase {
     public void testGetFeatureNotAvailable() throws Exception {
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
-        versions.put("1.0.0", new FeatureImpl("transaction"));
+        versions.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("transaction"));
         features.put("transaction", versions);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
         };
-        assertNull(impl.getFeature("activemq", FeatureImpl.DEFAULT_VERSION));
+        assertNull(impl.getFeature("activemq", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
     }
     
     public void testGetFeatureHighestAvailable() throws Exception {
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
-        versions.put("1.0.0", new FeatureImpl("transaction", "1.0.0"));
-        versions.put("2.0.0", new FeatureImpl("transaction", "2.0.0"));
+        versions.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "1.0.0"));
+        versions.put("2.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "2.0.0"));
         features.put("transaction", versions);
         final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
                 return features;
             };
         };
-        assertNotNull(impl.getFeature("transaction", FeatureImpl.DEFAULT_VERSION));
-        assertSame("2.0.0", impl.getFeature("transaction", FeatureImpl.DEFAULT_VERSION).getVersion());
+        assertNotNull(impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
+        assertSame("2.0.0", impl.getFeature("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION).getVersion());
     }
 
     public void testStartDoesNotFailWithOneInvalidUri()  {
@@ -127,12 +127,12 @@ public class FeaturesServiceImplTest extends TestCase {
 
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
-        versions.put("1.0.0", new FeatureImpl("transaction", "1.0.0"));
-        versions.put("2.0.0", new FeatureImpl("transaction", "2.0.0"));
+        versions.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "1.0.0"));
+        versions.put("2.0.0", new org.apache.karaf.features.internal.model.Feature("transaction", "2.0.0"));
         features.put("transaction", versions);
 
         Map<String, Feature> versions2 = new HashMap<String, Feature>();
-        versions2.put("1.0.0", new FeatureImpl("ssh", "1.0.0"));
+        versions2.put("1.0.0", new org.apache.karaf.features.internal.model.Feature("ssh", "1.0.0"));
         features.put("ssh", versions2);
 
         final FeaturesServiceImpl impl = new FeaturesServiceImpl() {

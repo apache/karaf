@@ -17,17 +17,16 @@
 package org.apache.karaf.features;
 
 import junit.framework.TestCase;
-import org.apache.karaf.features.internal.FeatureImpl;
 
 public class FeatureTest extends TestCase {
 	
 	public void testValueOf() {
-		Feature feature = FeatureImpl.valueOf("name" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + "version");
+		Feature feature = org.apache.karaf.features.internal.model.Feature.valueOf("name" + org.apache.karaf.features.internal.model.Feature.SPLIT_FOR_NAME_AND_VERSION + "version");
 		assertEquals(feature.getName(), "name");
 		assertEquals(feature.getVersion(), "version");
-		feature = FeatureImpl.valueOf("name");
+		feature = org.apache.karaf.features.internal.model.Feature.valueOf("name");
 		assertEquals(feature.getName(), "name");
-		assertEquals(feature.getVersion(), FeatureImpl.DEFAULT_VERSION);
+		assertEquals(feature.getVersion(), org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION);
 	}
 	
 }
