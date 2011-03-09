@@ -17,25 +17,34 @@
  */
 package org.apache.karaf.tooling.features;
 
-import static org.apache.karaf.tooling.features.ManifestUtils.getExports;
-import static org.apache.karaf.tooling.features.ManifestUtils.getMandatoryImports;
-import static org.apache.karaf.tooling.features.ManifestUtils.matches;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import org.apache.felix.utils.manifest.Clause;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.FeatureValidationUtil;
 import org.apache.karaf.features.internal.RepositoryImpl;
-import org.apache.felix.utils.manifest.Clause;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -43,14 +52,16 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.DefaultArtifactCollector;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.traversal.DependencyNodeVisitor;
-import org.osgi.framework.Constants;
+
+import static org.apache.karaf.tooling.features.ManifestUtils.getExports;
+import static org.apache.karaf.tooling.features.ManifestUtils.getMandatoryImports;
+import static org.apache.karaf.tooling.features.ManifestUtils.matches;
 
 /**
  * Validates a features XML file
@@ -371,7 +382,7 @@ public class ValidateFeaturesMojo extends MojoSupport {
     private void validateImportsExports(Feature feature) throws Exception {
         Map<Clause, String> imports = new HashMap<Clause, String>();
         Set<Clause> exports = new HashSet<Clause>();
-        for (Feature dependency : feature.getDependencies()) {
+        for (Dependency dependency : feature.getDependencies()) {
             if (featureExports.containsKey(dependency.getName())) {
                 exports.addAll(featureExports.get(dependency.getName()));
             } else {

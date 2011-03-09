@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.features.internal;
 
-import static java.lang.String.format;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,6 +57,7 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesListener;
@@ -209,8 +208,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     protected RepositoryImpl internalAddRepository(URI uri) throws Exception {
         validateRepository(uri);
-        RepositoryImpl repo = null;
-        repo = new RepositoryImpl(uri);
+        RepositoryImpl repo = new RepositoryImpl(uri);
         repositories.put(uri, repo);
         repo.load();
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryAdded, false));
@@ -420,7 +418,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         if (verbose) {
             System.out.println("Installing feature " + feature.getName() + " " + feature.getVersion());
         }
-        for (Feature dependency : feature.getDependencies()) {
+        for (Dependency dependency : feature.getDependencies()) {
             VersionRange range = org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION.equals(dependency.getVersion())
                         ? VersionRange.ANY_VERSION : new VersionRange(dependency.getVersion(), true, true);
             Feature fi = null;
@@ -626,10 +624,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     protected List<Clause> getOptionalImports(String importsStr) {
         Clause[] imports = Parser.parseHeader(importsStr);
         List<Clause> result = new LinkedList<Clause>();
-        for (int i = 0; i < imports.length; i++) {
-            String resolution = imports[i].getDirective(Constants.RESOLUTION_DIRECTIVE);
+        for (Clause anImport : imports) {
+            String resolution = anImport.getDirective(Constants.RESOLUTION_DIRECTIVE);
             if (Constants.RESOLUTION_OPTIONAL.equals(resolution)) {
-                result.add(imports[i]);
+                result.add(anImport);
             }
         }
         return result;
@@ -725,7 +723,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         try {
             is = new BufferedInputStream(new URL(fileLocation).openStream());
         
-            int bytesRead = 0;
+            int bytesRead;
             byte[] buffer = new byte[1024];
             
             while ((bytesRead = is.read(buffer)) != -1) {
@@ -1173,8 +1171,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
      * the version syntax. This method cleans up such a version to match an OSGi
      * version.
      *
-     * @param version
-     * @return
+     * @param version possibly osgi-non-compliant version
+     * @return osgi compliant version
      */
     static public String cleanupVersion(String version) {
         Matcher m = fuzzyVersion.matcher(version);

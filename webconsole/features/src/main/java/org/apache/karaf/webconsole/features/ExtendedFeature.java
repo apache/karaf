@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 
 
@@ -42,7 +43,7 @@ public class ExtendedFeature implements Feature
             String s = super.toString();
             return s.substring( 0, 1 ) + s.substring( 1 ).toLowerCase();
         }
-    };
+    }
 
     protected State state;
     protected String repository;
@@ -81,7 +82,7 @@ public class ExtendedFeature implements Feature
 		return this.feature.getConfigurationFiles();
 	}
     
-    public List<Feature> getDependencies()
+    public List<Dependency> getDependencies()
     {
         return this.feature.getDependencies();
     }

@@ -56,16 +56,12 @@ import org.apache.karaf.features.*;
 @XmlType(name = "dependency", propOrder = {
     "value"
 })
-public class Dependency implements org.apache.karaf.features.Feature {
+public class Dependency implements org.apache.karaf.features.Dependency {
 
     @XmlValue
     protected String value;
     @XmlAttribute
     protected String version;
-
-    public String getId() {
-        return null;
-    }
 
     /**
      * 
@@ -79,14 +75,6 @@ public class Dependency implements org.apache.karaf.features.Feature {
      */
     public String getName() {
         return value;
-    }
-
-    public String getDescription() {
-        return null;
-    }
-
-    public String getDetails() {
-        return null;
     }
 
     /**
@@ -115,27 +103,6 @@ public class Dependency implements org.apache.karaf.features.Feature {
         } else {
             return version;
         }
-    }
-
-    //Following are unimplemented methods of Feature interface.
-    public String getResolver() {
-        return null;
-    }
-
-    public List<org.apache.karaf.features.Feature> getDependencies() {
-        return null;
-    }
-
-    public List<BundleInfo> getBundles() {
-        return null;
-    }
-
-    public Map<String, Map<String, String>> getConfigurations() {
-        return null;
-    }
-
-    public List<ConfigFileInfo> getConfigurationFiles() {
-        return null;
     }
 
     /**

@@ -33,6 +33,7 @@ import javax.management.openmbean.TabularDataSupport;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
 
@@ -72,7 +73,7 @@ public class JmxFeature {
             Object[] itemValues = new Object[itemNames.length];
             itemValues[0] = feature.getName();
             itemValues[1] = feature.getVersion();
-            itemValues[2] = getFeatureIdentifierTable(feature.getDependencies());
+            itemValues[2] = getDependencyIdentifierTable(feature.getDependencies());
             itemValues[3] = getBundleUris(feature.getBundles());
             itemValues[4] = getConfigTable(feature.getConfigurations());
             itemValues[5] = getConfigFileList(feature.getConfigurationFiles());
@@ -95,9 +96,9 @@ public class JmxFeature {
         return table;
     }
 
-    static TabularData getFeatureIdentifierTable(List<Feature> features) throws OpenDataException {
+     private static TabularData getDependencyIdentifierTable(List<Dependency> features) throws OpenDataException {
         TabularDataSupport table = new TabularDataSupport(FEATURE_IDENTIFIER_TABLE);
-        for (Feature feature : features) {
+        for (Dependency feature : features) {
             String[] itemNames = new String[] { FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION };
             Object[] itemValues = new Object[] { feature.getName(), feature.getVersion() };
             CompositeData ident = new CompositeDataSupport(FEATURE_IDENTIFIER, itemNames, itemValues);
