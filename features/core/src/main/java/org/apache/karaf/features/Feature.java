@@ -36,7 +36,7 @@ public interface Feature {
 
     String getResolver();
 
-    List<Feature> getDependencies();
+    List<Dependency> getDependencies();
 
     List<BundleInfo> getBundles();
 

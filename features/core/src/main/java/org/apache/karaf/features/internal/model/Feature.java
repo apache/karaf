@@ -19,7 +19,6 @@
 
 package org.apache.karaf.features.internal.model;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -54,7 +53,7 @@ import org.apache.karaf.features.ConfigFileInfo;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="details" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="details" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="config" type="{http://karaf.apache.org/xmlns/features/v1.0.0}config" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="configfile" type="{http://karaf.apache.org/xmlns/features/v1.0.0}configFile" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="feature" type="{http://karaf.apache.org/xmlns/features/v1.0.0}dependency" maxOccurs="unbounded" minOccurs="0"/>
@@ -83,7 +82,7 @@ public class Feature implements org.apache.karaf.features.Feature {
     public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
     public static String DEFAULT_VERSION = "0.0.0";
 
-    protected List<String> details;
+    protected String details;
     protected List<Config> config;
     protected List<ConfigFile> configfile;
     protected List<Dependency> feature;
@@ -122,35 +121,6 @@ public class Feature implements org.apache.karaf.features.Feature {
     	}
 
 
-    }
-
-    /**
-     * Gets the value of the details property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the details property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getDetails().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link String }
-     * 
-     * 
-     */
-    public List<String> getDetailsList() {
-        if (details == null) {
-            details = new ArrayList<String>();
-        }
-        return this.details;
     }
 
     /**
@@ -337,10 +307,6 @@ public class Feature implements org.apache.karaf.features.Feature {
         return description;
     }
 
-    public String getDetails() {
-        return null;
-    }
-
     /**
      * Sets the value of the description property.
      * 
@@ -351,6 +317,14 @@ public class Feature implements org.apache.karaf.features.Feature {
      */
     public void setDescription(String value) {
         this.description = value;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
     }
 
     /**
@@ -365,8 +339,8 @@ public class Feature implements org.apache.karaf.features.Feature {
         return resolver;
     }
 
-    public List<org.apache.karaf.features.Feature> getDependencies() {
-        return Collections.<org.apache.karaf.features.Feature>unmodifiableList(getFeature());
+    public List<org.apache.karaf.features.Dependency> getDependencies() {
+        return Collections.<org.apache.karaf.features.Dependency>unmodifiableList(getFeature());
     }
 
     public List<BundleInfo> getBundles() {

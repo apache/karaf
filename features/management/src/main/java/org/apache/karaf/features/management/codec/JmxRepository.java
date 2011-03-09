@@ -19,6 +19,7 @@ package org.apache.karaf.features.management.codec;
 import java.util.Collection;
 import java.util.Arrays;
 import java.net.URI;
+import java.util.List;
 
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.CompositeType;
@@ -31,6 +32,7 @@ import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.CompositeDataSupport;
 
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.management.FeaturesServiceMBean;
 
@@ -49,7 +51,7 @@ public class JmxRepository {
             itemValues[0] = repository.getName();
             itemValues[1] = repository.getURI().toString();
             itemValues[2] = toStringArray(repository.getRepositories());
-            itemValues[3] = JmxFeature.getFeatureIdentifierTable(Arrays.asList(repository.getFeatures()));
+            itemValues[3] = getFeatureIdentifierTable(Arrays.asList(repository.getFeatures()));
             data = new CompositeDataSupport(REPOSITORY, itemNames, itemValues);
         } catch (Exception e) {
             throw new IllegalStateException("Cannot form repository open data", e);
@@ -77,6 +79,17 @@ public class JmxRepository {
             res[i] = uris[i].toString();
         }
         return res;
+    }
+
+    static TabularData getFeatureIdentifierTable(List<Feature> features) throws OpenDataException {
+        TabularDataSupport table = new TabularDataSupport(JmxFeature.FEATURE_IDENTIFIER_TABLE);
+        for (Feature feature : features) {
+            String[] itemNames = new String[] { FeaturesServiceMBean.FEATURE_NAME, FeaturesServiceMBean.FEATURE_VERSION };
+            Object[] itemValues = new Object[] { feature.getName(), feature.getVersion() };
+            CompositeData ident = new CompositeDataSupport(JmxFeature.FEATURE_IDENTIFIER, itemNames, itemValues);
+            table.put(ident);
+        }
+        return table;
     }
 
     static {

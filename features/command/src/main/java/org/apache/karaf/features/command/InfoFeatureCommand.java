@@ -24,6 +24,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 
@@ -96,10 +97,10 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
                 System.out.println("\nFeature tree");
             }
 
-            int unresolved = displayFeatureTree(admin, feature, 0, false);
+            int unresolved = displayFeatureTree(admin, feature.getName(), feature.getVersion(), "");
             if (unresolved > 0) {
                 System.out.println("Tree contains " + unresolved + " unresolved dependencies");
-                System.out.println(" * means that node declares dependency but the dependant feature is not available.");
+                System.out.println(" * means that node declares dependency but the dependent feature is not available.");
             }
         }
     }
@@ -117,12 +118,12 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     }
 
     private void displayDependencyInformation(Feature feature) {
-        List<Feature> dependencies = feature.getDependencies();
+        List<Dependency> dependencies = feature.getDependencies();
         if (dependencies.isEmpty()) {
             System.out.println("Feature has no dependencies.");
         } else {
             System.out.println("Feature depends on:");
-            for (Feature featureDependency : dependencies) {
+            for (Dependency featureDependency : dependencies) {
                 System.out.println("  " + featureDependency.getName() + " " + featureDependency.getVersion());
             }
         }
@@ -152,50 +153,44 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     	}    	
     }
 
-
-    private int displayFeatureTree(FeaturesService admin, Feature feature, int level, boolean last) throws Exception {
+    /**
+     * Called originally with featureName and featureVersion that have already been resolved successfully.
+     *
+     *
+     * @param admin
+     * @param featureName
+     * @param featureVersion
+     * @param prefix
+     * @return
+     * @throws Exception
+     */
+    private int displayFeatureTree(FeaturesService admin, String featureName, String featureVersion, String prefix) throws Exception {
         int unresolved = 0;
-        String prefix = repeat("   ", level);
 
-        Feature resolved = resolveFeature(admin, feature);
+        Feature resolved = admin.getFeature(featureName, featureVersion);
         if (resolved != null) {
             System.out.println(prefix + " " + resolved.getName() + " " + resolved.getVersion());
         } else {
-            System.out.println(prefix + " " + feature.getName() + " " + feature.getVersion() + " *");
+            System.out.println(prefix + " " + featureName + " " + featureVersion + " *");
             unresolved++;
         }
 
-        if (bundle) {
-            List<BundleInfo> bundles = resolved != null ? resolved.getBundles() : feature.getBundles();
-            for (int i = 0, j = bundles.size(); i < j; i++) {
-                System.out.println(prefix + " " + (i+1 == j ? "\\" : "+") + " " + bundles.get(i).getLocation());
+        if (resolved != null) {
+            if (bundle) {
+                List<BundleInfo> bundles = resolved.getBundles();
+                for (int i = 0, j = bundles.size(); i < j; i++) {
+                    System.out.println(prefix + " " + (i+1 == j ? "\\" : "+") + " " + bundles.get(i).getLocation());
+                }
             }
-        }
-        List<Feature> dependencies = resolved != null ? resolved.getDependencies() : feature.getDependencies();
-        for (int i = 0, j = dependencies.size(); i < j; i++) {
-            Feature toDisplay = resolveFeature(admin, dependencies.get(i));
-            if (toDisplay == null) {
-                toDisplay = dependencies.get(i);
+            prefix += "   ";
+            List<Dependency> dependencies = resolved.getDependencies();
+            for (int i = 0, j = dependencies.size(); i < j; i++) {
+                Dependency toDisplay =  dependencies.get(i);
+                unresolved += displayFeatureTree(admin, toDisplay.getName(), toDisplay.getVersion(), prefix +1);
             }
-            unresolved += displayFeatureTree(admin, toDisplay, level+1, i + 1 == j);
         }
 
         return unresolved;
     }
 
-    private Feature resolveFeature(FeaturesService admin, Feature feature) throws Exception {
-        return admin.getFeature(feature.getName(), feature.getVersion());
-    }
-
-    private static String repeat(String string, int times) {
-        if (times <= 0) {
-            return "";
-        }
-        else if (times % 2 == 0) {
-            return repeat(string+string, times/2);
-        }
-        else {
-           return string + repeat(string+string, times/2);
-        }
-    }
 }
