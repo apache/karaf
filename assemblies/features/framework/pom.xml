@@ -29,6 +29,7 @@
 
     <artifactId>karaf-framework</artifactId>
     <packaging>pom</packaging>
+    <!--<packaging>kar</packaging>-->
     <name>Apache Karaf :: Assemblies :: Framework KAR</name>
 
     <properties>
