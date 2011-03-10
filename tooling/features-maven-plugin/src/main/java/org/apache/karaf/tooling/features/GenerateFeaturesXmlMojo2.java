@@ -33,6 +33,7 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Features;
@@ -73,6 +74,7 @@ import org.xml.sax.SAXException;
  */
 @SuppressWarnings("unchecked")
 public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo {
+    private static final String FEATURE_CLASSIFIER = "feature";
 
     /**
      * The dependency tree builder to use.
@@ -118,6 +120,14 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      */
     private String attachmentArtifactClassifier = "features";
 
+    /**
+     * If false, feature dependencies are added to the assembled feature as dependencies.
+     * If true, feature dependencies xml descriptors are read and their contents added to the features descriptor under assembly.
+     *
+     * @parameter default-value="${aggregateFeatures}"
+     */
+    private boolean aggregateFeatures = false;
+
     //new
 
     /**
@@ -137,86 +147,6 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      * @readonly
      */
     protected MavenProjectHelper projectHelper;
-
-    //maven log
-    private Log log;
-
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        PrintStream out = null;
-        try {
-            File dir = outputFile.getParentFile();
-            dir.mkdirs();
-            out = new PrintStream(new FileOutputStream(outputFile));
-            getDependencies(project, true);
-            writeFeatures(out);
-            // now lets attach it
-            projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
-        } catch (Exception e) {
-            getLogger().error(e.getMessage());
-            throw new MojoExecutionException("Unable to create features.xml file: " + e, e);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
-    }
-
-    /*
-     * Write all project dependencies as feature
-     */
-    private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
-            IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException {
-        getLogger().info("Step 4 : Generating " + outputFile.getAbsolutePath());
-        //read in an existing feature.xml
-        ObjectFactory objectFactory = new ObjectFactory();
-        Features featuresRoot;
-        if (inputFile.exists()) {
-            InputStream in = new FileInputStream(inputFile);
-            try {
-                featuresRoot = JaxbUtil.unmarshal(in, false);
-            } finally {
-                in.close();
-            }
-        } else {
-            featuresRoot = objectFactory.createFeaturesRoot();
-        }
-        if (featuresRoot.getName() == null) {
-            featuresRoot.setName(project.getArtifactId());
-        }
-
-        Feature feature = null;
-        for (Feature test: featuresRoot.getFeature()) {
-            if (test.getName().equals(project.getArtifactId())) {
-                feature = test;
-            }
-        }
-        if (feature == null) {
-            feature = objectFactory.createFeature();
-        }
-        featuresRoot.getFeature().add(feature);
-        feature.setName(project.getArtifactId());
-        feature.setVersion(project.getArtifact().getBaseVersion());
-        feature.setResolver(resolver);
-        for (Artifact artifact : localDependencies) {
-            String bundleName;
-            if (artifact.getType().equals("jar")) {
-                bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
-            } else {
-                bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType());
-            }
-            Bundle bundle = objectFactory.createBundle();
-            bundle.setLocation(bundleName);
-            if ("runtime".equals(artifact.getScope())) {
-                bundle.setDependency(true);
-            }
-            feature.getBundle().add(bundle);
-        }
-        JaxbUtil.marshal(Features.class, featuresRoot, out);
-        getLogger().info("...done!");
-    }
-
-
-    //artifact search code adapted from geronimo car plugin
 
     /**
      * The artifact factory to use.
@@ -261,6 +191,117 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     protected String treeListing;
 
 
+    //maven log
+    private Log log;
+
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        try {
+            getDependencies(project, true);
+            File dir = outputFile.getParentFile();
+            if (dir.mkdirs()) {
+                PrintStream out = new PrintStream(new FileOutputStream(outputFile));
+                try {
+                    writeFeatures(out);
+                } finally {
+                    out.close();
+                }
+                // now lets attach it
+                projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+
+            } else {
+                throw new MojoExecutionException("Could not create directory for features file: " + dir);
+            }
+        } catch (Exception e) {
+            getLogger().error(e.getMessage());
+            throw new MojoExecutionException("Unable to create features.xml file: " + e, e);
+        }
+    }
+
+    /*
+     * Write all project dependencies as feature
+     */
+    private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
+            IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException, MojoExecutionException {
+        getLogger().info("Step 4 : Generating " + outputFile.getAbsolutePath());
+        //read in an existing feature.xml
+        ObjectFactory objectFactory = new ObjectFactory();
+        Features features;
+        if (inputFile.exists()) {
+            features = readFeaturesFile(inputFile);
+        } else {
+            features = objectFactory.createFeaturesRoot();
+        }
+        if (features.getName() == null) {
+            features.setName(project.getArtifactId());
+        }
+
+        Feature feature = null;
+        for (Feature test : features.getFeature()) {
+            if (test.getName().equals(project.getArtifactId())) {
+                feature = test;
+            }
+        }
+        if (feature == null) {
+            feature = objectFactory.createFeature();
+            feature.setName(project.getArtifactId());
+        }
+        feature.setVersion(project.getArtifact().getBaseVersion());
+        feature.setResolver(resolver);
+        for (Artifact artifact : localDependencies) {
+            if (isFeature(artifact)) {
+                if (aggregateFeatures && FEATURE_CLASSIFIER.equals(artifact.getClassifier())) {
+                    File featuresFile = artifact.getFile();
+                    if (featuresFile == null || !featuresFile.exists()) {
+                        throw new MojoExecutionException("Cannot locate file for feature: " + artifact + " at " + featuresFile);
+                    }
+                    Features includedFeatures = readFeaturesFile(inputFile);
+                    //TODO check for duplicates?
+                    features.getFeature().addAll(includedFeatures.getFeature());
+                } else {
+                    Dependency dependency = objectFactory.createDependency();
+                    dependency.setName(artifact.getArtifactId());
+                    //TODO convert to osgi version?
+                    dependency.setVersion(artifact.getVersion());
+                    feature.getDependencies().add(dependency);
+                }
+            } else {
+                String bundleName;
+                if (artifact.getType().equals("jar")) {
+                    bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
+                } else {
+                    bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType());
+                }
+                Bundle bundle = objectFactory.createBundle();
+                bundle.setLocation(bundleName);
+                if ("runtime".equals(artifact.getScope())) {
+                    bundle.setDependency(true);
+                }
+                feature.getBundle().add(bundle);
+
+            }
+        }
+
+        if ((!feature.getBundle().isEmpty() || !feature.getDependencies().isEmpty()) && !features.getFeature().contains(feature)) {
+            features.getFeature().add(feature);
+        }
+
+        JaxbUtil.marshal(Features.class, features, out);
+        getLogger().info("...done!");
+    }
+
+    private Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
+        Features features;InputStream in = new FileInputStream(featuresFile);
+        try {
+            features = JaxbUtil.unmarshal(in, false);
+        } finally {
+            in.close();
+        }
+        return features;
+    }
+
+
+    //artifact search code adapted from geronimo car plugin
+
     protected void getDependencies(MavenProject project, boolean useTransitiveDependencies) throws MojoExecutionException {
 
         DependencyTreeResolutionListener listener = new DependencyTreeResolutionListener(getLogger());
@@ -280,11 +321,9 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
 
             this.dependencyArtifacts = result.getArtifacts();
             rootNode = listener.getRootNode();
-        }
-        catch (ArtifactResolutionException exception) {
+        } catch (ArtifactResolutionException exception) {
             throw new MojoExecutionException("Cannot build project dependency tree", exception);
-        }
-        catch (InvalidDependencyVersionException e) {
+        } catch (InvalidDependencyVersionException e) {
             throw new MojoExecutionException("Invalid dependency version for artifact "
                     + project.getArtifact());
         }
@@ -381,10 +420,6 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
             }
         }
 
-        private boolean isFeature(Artifact artifact) {
-            return artifact.getType().equals("kar") || "feature".equals(artifact.getClassifier());
-        }
-
         public String getLog() {
             return log.toString();
         }
@@ -408,6 +443,10 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
             return Accept.STOP;
         }
 
+    }
+
+    private static boolean isFeature(Artifact artifact) {
+        return artifact.getType().equals("kar") || FEATURE_CLASSIFIER.equals(artifact.getClassifier());
     }
 
 }
