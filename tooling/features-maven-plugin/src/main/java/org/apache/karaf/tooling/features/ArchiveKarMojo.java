@@ -46,7 +46,6 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
  * @version $Revision: 1.1 $
  * @goal archive-kar
  * @phase package
- * @execute phase="package"
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Assemble a kar archive from a features.xml file

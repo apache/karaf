@@ -172,4 +172,27 @@ public class Bundle implements BundleInfo {
         this.dependency = value;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Bundle bundle = (Bundle) o;
+
+        if (dependency != bundle.dependency) return false;
+        if (start != bundle.start) return false;
+        if (startLevel != bundle.startLevel) return false;
+        if (value != null ? !value.equals(bundle.value) : bundle.value != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = value != null ? value.hashCode() : 0;
+        result = 31 * result + startLevel;
+        result = 31 * result + (start ? 1 : 0);
+        result = 31 * result + (dependency ? 1 : 0);
+        return result;
+    }
 }

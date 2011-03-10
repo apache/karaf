@@ -17,13 +17,20 @@
  */
 package org.apache.karaf.tooling.features;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,6 +54,7 @@ import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -57,7 +65,12 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeResolutionListener;
+import org.apache.maven.shared.filtering.MavenFileFilter;
+import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
+import org.codehaus.plexus.util.ReaderFactory;
+import org.codehaus.plexus.util.StringUtils;
 import org.xml.sax.SAXException;
 
 
@@ -67,7 +80,6 @@ import org.xml.sax.SAXException;
  * @version $Revision: 1.1 $
  * @goal generate-features-xml2
  * @phase compile
- * @execute phase="compile"
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Generates the features XML file
@@ -198,7 +210,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         try {
             getDependencies(project, true);
             File dir = outputFile.getParentFile();
-            if (dir.mkdirs()) {
+            if (dir.isDirectory() || dir.mkdirs()) {
                 PrintStream out = new PrintStream(new FileOutputStream(outputFile));
                 try {
                     writeFeatures(out);
@@ -286,11 +298,17 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         }
 
         JaxbUtil.marshal(Features.class, features, out);
+        try {
+            checkChanges(features, objectFactory);
+        } catch (Exception e) {
+            throw new MojoExecutionException("Features contents have changed", e);
+        }
         getLogger().info("...done!");
     }
 
     private Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
-        Features features;InputStream in = new FileInputStream(featuresFile);
+        Features features;
+        InputStream in = new FileInputStream(featuresFile);
         try {
             features = JaxbUtil.unmarshal(in, false);
         } finally {
@@ -448,5 +466,271 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     private static boolean isFeature(Artifact artifact) {
         return artifact.getType().equals("kar") || FEATURE_CLASSIFIER.equals(artifact.getClassifier());
     }
+
+    //------------------------------------------------------------------------//
+    // dependency change detection
+
+    /**
+     * Whether to look for changed dependencies at all
+     *
+     * @parameter
+     */
+    private boolean checkDependencyChange;
+
+    /**
+     * Whether to fail on changed dependencies
+     *
+     * @parameter
+     */
+    private boolean warnOnDependencyChange;
+
+    /**
+     * Whether to show changed dependencies in log
+     *
+     * @parameter
+     */
+    private boolean logDependencyChanges;
+
+    /**
+     * Whether to overwrite dependencies.xml if it has changed
+     *
+     * @parameter
+     */
+    private boolean overwriteChangedDependencies;
+
+    /**
+     * Location of existing dependency file.
+     *
+     * @parameter expression="${basedir}/src/main/history/dependencies.xml"
+     * @required
+     */
+    private File dependencyFile;
+
+    /**
+     * Location of filtered dependency file.
+     *
+     * @parameter expression="${basedir}/target/history/dependencies.xml"
+     * @required
+     */
+    private File filteredDependencyFile;
+
+    //filtering support
+    /**
+     * The character encoding scheme to be applied when filtering resources.
+     *
+     * @parameter expression="${encoding}" default-value="${project.build.sourceEncoding}"
+     */
+    protected String encoding;
+
+    /**
+     * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
+     * @required
+     */
+    protected MavenResourcesFiltering mavenResourcesFiltering;
+
+    /**
+     * @parameter expression="${session}"
+     * @readonly
+     * @required
+     */
+    protected MavenSession session;
+
+    /**
+     * Expression preceded with the String won't be interpolated
+     * \${foo} will be replaced with ${foo}
+     *
+     * @parameter expression="${maven.resources.escapeString}"
+     * @since 2.3
+     */
+    protected String escapeString = "\\";
+
+    /**
+     * @plexus.requirement role-hint="default"
+     * @component
+     * @required
+     */
+    protected MavenFileFilter mavenFileFilter;
+    /**
+     * System properties.
+     *
+     * @parameter
+     */
+    protected Map<String, String> systemProperties;
+    private Map<String, String> previousSystemProperties;
+
+    private void checkChanges(Features newFeatures, ObjectFactory objectFactory) throws Exception, IOException, JAXBException, XMLStreamException {
+        if (checkDependencyChange) {
+            //combine all the dependencies to one feature and strip out versions
+            Features features = objectFactory.createFeaturesRoot();
+            features.setName(newFeatures.getName());
+            Feature feature = objectFactory.createFeature();
+            features.getFeature().add(feature);
+            for (Feature f : newFeatures.getFeature()) {
+                for (Bundle b : f.getBundle()) {
+                    Bundle bundle = objectFactory.createBundle();
+                    bundle.setLocation(b.getLocation());
+                    feature.getBundle().add(bundle);
+                }
+                for (Dependency d : f.getFeature()) {
+                    Dependency dependency = objectFactory.createDependency();
+                    dependency.setName(d.getName());
+                    feature.getFeature().add(dependency);
+                }
+            }
+
+            Collections.sort(feature.getBundle(), new Comparator<Bundle>() {
+
+                public int compare(Bundle bundle, Bundle bundle1) {
+                    return bundle.getLocation().compareTo(bundle1.getLocation());
+                }
+            });
+            Collections.sort(feature.getFeature(), new Comparator<Dependency>() {
+                public int compare(Dependency dependency, Dependency dependency1) {
+                    return dependency.getName().compareTo(dependency1.getName());
+                }
+            });
+
+            if (dependencyFile.exists()) {
+                //filter dependencies file
+                filter(dependencyFile, filteredDependencyFile);
+                //read dependency types, convert to dependencies, compare.
+                Features oldfeatures = readFeaturesFile(filteredDependencyFile);
+                Feature oldFeature = oldfeatures.getFeature().get(0);
+
+                List<Bundle> addedBundles = new ArrayList<Bundle>(feature.getBundle());
+                List<Bundle> removedBundles = new ArrayList<Bundle>();
+                for (Bundle test : oldFeature.getBundle()) {
+                    boolean t1 = addedBundles.contains(test);
+                    int s1 = addedBundles.size();
+                    boolean t2 = addedBundles.remove(test);
+                    int s2 = addedBundles.size();
+                    if (t1 != t2) {
+                        getLogger().warn("dependencies.contains: " + t1 + ", dependencies.remove(test): " + t2);
+                    }
+                    if (t1 == (s1 == s2)) {
+                        getLogger().warn("dependencies.contains: " + t1 + ", size before: " + s1 + ", size after: " + s2);
+                    }
+                    if (!t2) {
+                        removedBundles.add(test);
+                    }
+                }
+
+                List<Dependency> addedDependencys = new ArrayList<Dependency>(feature.getFeature());
+                List<Dependency> removedDependencys = new ArrayList<Dependency>();
+                for (Dependency test : oldFeature.getFeature()) {
+                    boolean t1 = addedDependencys.contains(test);
+                    int s1 = addedDependencys.size();
+                    boolean t2 = addedDependencys.remove(test);
+                    int s2 = addedDependencys.size();
+                    if (t1 != t2) {
+                        getLogger().warn("dependencies.contains: " + t1 + ", dependencies.remove(test): " + t2);
+                    }
+                    if (t1 == (s1 == s2)) {
+                        getLogger().warn("dependencies.contains: " + t1 + ", size before: " + s1 + ", size after: " + s2);
+                    }
+                    if (!t2) {
+                        removedDependencys.add(test);
+                    }
+                }
+                if (!addedBundles.isEmpty() || !removedBundles.isEmpty() || !addedDependencys.isEmpty() || !removedDependencys.isEmpty()) {
+                    saveDependencyChanges(addedBundles, removedBundles, addedDependencys, removedDependencys, objectFactory);
+                    if (overwriteChangedDependencies) {
+                        writeDependencies(features, dependencyFile);
+                    }
+                }
+
+            } else {
+                writeDependencies(features, dependencyFile);
+            }
+
+        }
+    }
+
+    protected void saveDependencyChanges(Collection<Bundle> addedBundles, Collection<Bundle> removedBundles, Collection<Dependency> addedDependencys, Collection<Dependency> removedDependencys, ObjectFactory objectFactory)
+            throws Exception {
+        File addedFile = new File(filteredDependencyFile.getParentFile(), "dependencies.added.xml");
+        Features added = toFeatures(addedBundles, addedDependencys, objectFactory);
+        writeDependencies(added,  addedFile);
+
+        File removedFile = new File(filteredDependencyFile.getParentFile(), "dependencies.removed.xml");
+        Features removed = toFeatures(removedBundles, removedDependencys, objectFactory);
+        writeDependencies(removed,  removedFile);
+
+        File treeListing = saveTreeListing();
+
+        StringWriter out = new StringWriter();
+        out.write("Dependencies have changed:\n");
+        if (!addedBundles.isEmpty() || ! addedDependencys.isEmpty()) {
+            out.write("\tAdded dependencies are saved here: " + addedFile.getAbsolutePath() + "\n");
+            if (logDependencyChanges) {
+                JaxbUtil.marshal(Features.class, added, out);
+            }
+        }
+        if (!removedBundles.isEmpty() || !removedDependencys.isEmpty()) {
+            out.write("\tRemoved dependencies are saved here: " + removedFile.getAbsolutePath() + "\n");
+            if (logDependencyChanges) {
+                JaxbUtil.marshal(Features.class, removed, out);
+            }
+        }
+        out.write("\tTree listing is saved here: " + treeListing.getAbsolutePath() + "\n");
+        out.write("Delete " + dependencyFile.getAbsolutePath()
+                + " if you are happy with the dependency changes.");
+
+        if (warnOnDependencyChange) {
+            getLog().warn(out.toString());
+        } else {
+            throw new MojoFailureException(out.toString());
+        }
+    }
+
+    private Features toFeatures(Collection<Bundle> addedBundles, Collection<Dependency> addedDependencys, ObjectFactory objectFactory) {
+        Features features = objectFactory.createFeaturesRoot();
+        Feature feature = objectFactory.createFeature();
+        feature.getBundle().addAll(addedBundles);
+        feature.getFeature().addAll(addedDependencys);
+        features.getFeature().add(feature);
+        return features;
+    }
+
+
+    private void writeDependencies(Features features, File file) throws JAXBException, IOException {
+        FileOutputStream out = new FileOutputStream(file);
+        try {
+            JaxbUtil.marshal(Features.class, features, out);
+        } finally {
+            out.close();
+        }
+    }
+
+    protected void filter(File sourceFile, File targetFile)
+            throws MojoExecutionException {
+        try {
+
+            if (StringUtils.isEmpty(encoding)) {
+                getLog().warn(
+                        "File encoding has not been set, using platform encoding " + ReaderFactory.FILE_ENCODING
+                                + ", i.e. build is platform dependent!");
+            }
+            targetFile.getParentFile().mkdirs();
+            List filters = mavenFileFilter.getDefaultFilterWrappers(project, null, true, session, null);
+            mavenFileFilter.copyFile(sourceFile, targetFile, true, filters, encoding, true);
+        } catch (MavenFilteringException e) {
+            throw new MojoExecutionException(e.getMessage(), e);
+        }
+    }
+
+
+    protected File saveTreeListing() throws IOException {
+        File treeListFile = new File(filteredDependencyFile.getParentFile(), "treeListing.txt");
+        OutputStream os = new FileOutputStream(treeListFile);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+        try {
+            writer.write(treeListing);
+        } finally {
+            writer.close();
+        }
+        return treeListFile;
+    }
+
 
 }

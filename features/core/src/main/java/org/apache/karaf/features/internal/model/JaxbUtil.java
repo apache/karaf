@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -71,6 +72,15 @@ public class JaxbUtil {
     }
 
     public static <T> void marshal(Class<T> type, Object object, OutputStream out) throws JAXBException {
+        JAXBContext ctx2 = JAXBContext.newInstance(type);
+        Marshaller marshaller = ctx2.createMarshaller();
+
+        marshaller.setProperty("jaxb.formatted.output", true);
+
+        marshaller.marshal(object, out);
+    }
+
+    public static <T> void marshal(Class<T> type, Object object, Writer out) throws JAXBException {
         JAXBContext ctx2 = JAXBContext.newInstance(type);
         Marshaller marshaller = ctx2.createMarshaller();
 
