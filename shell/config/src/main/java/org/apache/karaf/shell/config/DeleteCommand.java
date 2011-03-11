@@ -16,17 +16,14 @@
  */
 package org.apache.karaf.shell.config;
 
-import java.util.Dictionary;
-import java.util.Properties;
-
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-@Command(scope = "config", name = "edit", description = "Creates or edits a configuration.", detailedDescription="classpath:edit.txt")
-public class EditCommand extends ConfigCommandSupport {
+@Command(scope = "config", name = "delete", description = "Delete a configuration.")
+public class DeleteCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "pid", description = "PID of the configuration", required = true, multiValued = false)
     String pid;
@@ -34,34 +31,32 @@ public class EditCommand extends ConfigCommandSupport {
     @Option(name = "--force", aliases = {}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)
     boolean force;
 
-	@Option(name = "-f", aliases = {"--use-file"}, description = "Configuration lookup using the filename instead of the pid", required = false, multiValued = false)
+    @Option(name = "-f", aliases = {"--use-file"}, description = "Configuration lookup using the filename instead of the pid", required = false, multiValued = false)
     boolean useFile;
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         String oldPid = (String) this.session.get(PROPERTY_CONFIG_PID);
-        if (oldPid != null && !oldPid.equals(pid) && !force) {
-            System.err.println("Another config is being edited.  Cancel / update first, or use the --force option");
+        if (oldPid != null && oldPid.equals(pid) && !force) {
+            System.err.println("This config is being edited.  Cancel / update first, or use the --force option");
             return;
         }
-	    Dictionary props;
 
-	    //User selected to use file instead.
-	    if (useFile) {
-		    Configuration configuration = this.findConfigurationByFileName(admin, pid);
-		    if(configuration == null) {
-			    System.err.println("Could not find configuration with file install property set to: " + pid);
-			    return;
-		    }
-		    props = configuration.getProperties();
-		    pid = configuration.getPid();
-	    } else {
-		    props = admin.getConfiguration(pid).getProperties();
-		    if (props == null) {
-			    props = new Properties();
-		    }
-	    }
-        this.session.put(PROPERTY_CONFIG_PID, pid);
-        this.session.put(PROPERTY_CONFIG_PROPS, props);
+        // User selected to use file instead.
+        if (useFile) {
+            Configuration configuration = this.findConfigurationByFileName(admin, pid);
+            if(configuration == null) {
+                System.err.println("Could not find configuration with file install property set to: " + pid);
+                return;
+            }
+            configuration.delete();
+        } else {
+            Configuration configuration = admin.getConfiguration(pid);
+            configuration.delete();
+        }
+        if (oldPid != null && oldPid.equals(pid) && !force) {
+            this.session.put(PROPERTY_CONFIG_PID, null);
+            this.session.put(PROPERTY_CONFIG_PROPS, null);
+        }
     }
 
 }
