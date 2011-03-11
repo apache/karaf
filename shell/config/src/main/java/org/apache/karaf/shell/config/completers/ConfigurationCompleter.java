@@ -58,17 +58,11 @@ public class ConfigurationCompleter implements Completer, ConfigurationListener 
         }
 
         Collection<String> pids = new ArrayList<String>();
-
         for (Configuration config : configs) {
-            if (config.getFactoryPid() != null) {
-                pids.add(config.getFactoryPid());
-            } else {
-                pids.add(config.getPid());
-            }
+            pids.add(config.getPid());
         }
 
         delegate.getStrings().addAll(pids);
-
     }
 
     public int complete(final String buffer, final int cursor, final List candidates) {
@@ -76,7 +70,7 @@ public class ConfigurationCompleter implements Completer, ConfigurationListener 
     }
 
     public void configurationEvent(ConfigurationEvent configurationEvent) {
-        String pid = configurationEvent.getFactoryPid()!=null ? configurationEvent.getFactoryPid() : configurationEvent.getPid();
+        String pid = configurationEvent.getPid();
         if (configurationEvent.getType() == ConfigurationEvent.CM_DELETED) {
             delegate.getStrings().remove(pid);
         } else if (configurationEvent.getType() == ConfigurationEvent.CM_UPDATED) {
