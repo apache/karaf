@@ -40,6 +40,7 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
+import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Bundle;
@@ -86,16 +87,6 @@ import org.xml.sax.SAXException;
  */
 @SuppressWarnings("unchecked")
 public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo {
-    private static final String FEATURE_CLASSIFIER = "feature";
-
-    /**
-     * The dependency tree builder to use.
-     *
-     * @component
-     * @required
-     * @readonly
-     */
-//    private DependencyTreeBuilder dependencyTreeBuilder;
 
     /**
      * The (optional) input feature.file to extend
@@ -139,6 +130,13 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      * @parameter default-value="${aggregateFeatures}"
      */
     private boolean aggregateFeatures = false;
+
+    /**
+     * If present, the bundles added to the feature constructed from the dependencies will be marked with this startlevel.
+     *
+     * @parameter
+     */
+    private Integer startLevel;
 
     //new
 
@@ -261,12 +259,12 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         feature.setResolver(resolver);
         for (Artifact artifact : localDependencies) {
             if (isFeature(artifact)) {
-                if (aggregateFeatures && FEATURE_CLASSIFIER.equals(artifact.getClassifier())) {
+                if (aggregateFeatures && KarArtifactInstaller.FEATURE_CLASSIFIER.equals(artifact.getClassifier())) {
                     File featuresFile = artifact.getFile();
                     if (featuresFile == null || !featuresFile.exists()) {
                         throw new MojoExecutionException("Cannot locate file for feature: " + artifact + " at " + featuresFile);
                     }
-                    Features includedFeatures = readFeaturesFile(inputFile);
+                    Features includedFeatures = readFeaturesFile(featuresFile);
                     //TODO check for duplicates?
                     features.getFeature().addAll(includedFeatures.getFeature());
                 } else {
@@ -274,7 +272,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
                     dependency.setName(artifact.getArtifactId());
                     //TODO convert to osgi version?
                     dependency.setVersion(artifact.getVersion());
-                    feature.getDependencies().add(dependency);
+                    feature.getFeature().add(dependency);
                 }
             } else {
                 String bundleName;
@@ -288,12 +286,15 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
                 if ("runtime".equals(artifact.getScope())) {
                     bundle.setDependency(true);
                 }
+                if (startLevel != null) {
+                    bundle.setStartLevel(startLevel);
+                }
                 feature.getBundle().add(bundle);
 
             }
         }
 
-        if ((!feature.getBundle().isEmpty() || !feature.getDependencies().isEmpty()) && !features.getFeature().contains(feature)) {
+        if ((!feature.getBundle().isEmpty() || !feature.getFeature().isEmpty()) && !features.getFeature().contains(feature)) {
             features.getFeature().add(feature);
         }
 
@@ -464,7 +465,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     }
 
     private static boolean isFeature(Artifact artifact) {
-        return artifact.getType().equals("kar") || FEATURE_CLASSIFIER.equals(artifact.getClassifier());
+        return artifact.getType().equals("kar") || KarArtifactInstaller.FEATURE_CLASSIFIER.equals(artifact.getClassifier());
     }
 
     //------------------------------------------------------------------------//
@@ -694,6 +695,10 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
 
 
     private void writeDependencies(Features features, File file) throws JAXBException, IOException {
+        file.getParentFile().mkdirs();
+        if (!file.getParentFile().exists() || !file.getParentFile().isDirectory()) {
+            throw new IOException("Cannot create directory at " + file.getParent());
+        }
         FileOutputStream out = new FileOutputStream(file);
         try {
             JaxbUtil.marshal(Features.class, features, out);
