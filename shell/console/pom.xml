@@ -45,6 +45,7 @@
         <dependency>
             <groupId>org.fusesource.jansi</groupId>
             <artifactId>jansi</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.sonatype.jline</groupId>
@@ -55,6 +56,7 @@
                     <artifactId>jansi</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -75,6 +77,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
