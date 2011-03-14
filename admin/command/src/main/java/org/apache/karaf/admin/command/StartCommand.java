@@ -16,9 +16,10 @@
  */
 package org.apache.karaf.admin.command;
 
-import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.admin.Instance;
 
 @Command(scope = "admin", name = "start", description = "Starts an existing container instance.")
 public class StartCommand extends AdminCommandSupport {
@@ -26,11 +27,28 @@ public class StartCommand extends AdminCommandSupport {
     @Option(name = "-o", aliases = { "--java-opts"}, description = "Java options when launching the instance", required = false, multiValued = false)
     private String javaOpts;
 
+    @Option(name = "-w", aliases = { "--wait"}, description = "Wait for the instance to be fully started", required = false, multiValued = false)
+    private boolean wait;
+
     @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
     protected Object doExecute() throws Exception {
-        getExistingInstance(instance).start(javaOpts);
+        Instance child = getExistingInstance(instance);
+        if (wait) {
+            String state = child.getState();
+            if (Instance.STOPPED.equals(state)) {
+                child.start(javaOpts);
+            }
+            if (!Instance.STARTED.equals(state)) {
+                do {
+                    Thread.sleep(500);
+                    state = child.getState();
+                } while (Instance.STARTING.equals(state));
+            }
+        } else {
+            child.start(javaOpts);
+        }
         return null;
     }
 }
