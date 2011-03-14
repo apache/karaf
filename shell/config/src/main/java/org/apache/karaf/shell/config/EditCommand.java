@@ -46,7 +46,7 @@ public class EditCommand extends ConfigCommandSupport {
 	    Dictionary props;
 
 	    //User selected to use file instead.
-	    if (useFile) {
+        if (useFile) {
 		    Configuration configuration = this.findConfigurationByFileName(admin, pid);
 		    if(configuration == null) {
 			    System.err.println("Could not find configuration with file install property set to: " + pid);
@@ -55,11 +55,12 @@ public class EditCommand extends ConfigCommandSupport {
 		    props = configuration.getProperties();
 		    pid = configuration.getPid();
 	    } else {
-		    props = admin.getConfiguration(pid).getProperties();
-		    if (props == null) {
-			    props = new Properties();
-		    }
-	    }
+            Configuration configuration = admin.getConfiguration(pid, null);
+            props = configuration.getProperties();
+            if (props == null) {
+                props = new Properties();
+            }
+        }
         this.session.put(PROPERTY_CONFIG_PID, pid);
         this.session.put(PROPERTY_CONFIG_PROPS, props);
     }
