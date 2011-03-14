@@ -20,14 +20,17 @@ import java.io.File;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.util.Properties;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "config", name = "update", description = "Saves and propagates changes from the configuration being edited.")
 public class UpdateCommand extends ConfigCommandSupport {
+
+    private final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
 
     @Option(name = "-b", aliases = { "--bypass-storage" }, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")
     private boolean bypassStorage;
@@ -48,24 +51,34 @@ public class UpdateCommand extends ConfigCommandSupport {
             System.err.println("No configuration is being edited. Run the edit command first");
         } else if (!bypassStorage && storage != null) {
         	String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
-        	File storageFile = new File(storage, pid + ".cfg");
+            File storageFile = new File(storage, pid + ".cfg");
+            Configuration cfg = admin.getConfiguration(pid, null);
+            if (cfg != null) {
+                Object val = cfg.getProperties().get(FELIX_FILEINSTALL_FILENAME);
+                if (val instanceof String) {
+                    if (((String) val).startsWith("file:")) {
+                        val = ((String) val).substring("file:".length());
+                    }
+                    storageFile = new File((String) val);
+                }
+            }
             Properties p = new Properties(storageFile);
             for (Enumeration keys = props.keys(); keys.hasMoreElements();) {
                 Object key = keys.nextElement();
-                if (!"service.pid".equals(key) && !"felix.fileinstall.filename".equals(key)) {
+                if (!Constants.SERVICE_PID.equals(key)
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
                     p.put((String) key, (String) props.get(key));
                 }
             }
             storage.mkdirs();
             p.save();
-            this.session.put(PROPERTY_CONFIG_PID, null);
-            this.session.put(PROPERTY_CONFIG_PROPS, null);
         } else {
             String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
             Configuration cfg = admin.getConfiguration(pid, null);
             cfg.update(props);
-            this.session.put(PROPERTY_CONFIG_PID, null);
-            this.session.put(PROPERTY_CONFIG_PROPS, null);
         }
+        this.session.put(PROPERTY_CONFIG_PID, null);
+        this.session.put(PROPERTY_CONFIG_PROPS, null);
     }
 }
