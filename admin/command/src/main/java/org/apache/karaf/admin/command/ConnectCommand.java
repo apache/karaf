@@ -18,6 +18,8 @@
  */
 package org.apache.karaf.admin.command;
 
+import java.util.List;
+
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
@@ -25,18 +27,31 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "admin", name = "connect", description = "Connects to an existing container instance.")
 public class ConnectCommand extends AdminCommandSupport {
 
-    @Argument(index = 0, name="name", description="The name of the container instance", required = true, multiValued = false)
-    private String instance = null;
-
     @Option(name="-u", aliases={"--username"}, description="Remote user name (Default: karaf)", required = false, multiValued = false)
     private String username = "karaf";
 
     @Option(name="-p", aliases={"--password"}, description="Remote user password (Default: karaf)", required = false, multiValued = false)
     private String password = "karaf";
 
+    @Argument(index = 0, name="name", description="The name of the container instance", required = true, multiValued = false)
+    private String instance = null;
+
+    @Argument(index = 1, name = "command", description = "Optional command to execute", required = false, multiValued = true)
+    private List<String> command;
+
     protected Object doExecute() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        if (command != null) {
+            for (String cmd : command) {
+                if (sb.length() > 0) {
+                    sb.append(' ');
+                }
+                sb.append(cmd);
+            }
+        }
+
         int port = getExistingInstance(instance).getSshPort();
-        session.execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost");
+        session.execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost " + sb);
         return null;
     }
 }
