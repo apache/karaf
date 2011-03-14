@@ -23,6 +23,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.Configuration;
 
 @Command(scope = "config", name = "edit", description = "Create or edit a configuration.")
 public class EditCommand extends ConfigCommandSupport {
@@ -39,7 +40,8 @@ public class EditCommand extends ConfigCommandSupport {
             System.err.println("Another config is being edited.  Cancel / update first, or use the --force option");
             return;
         }
-        Dictionary props = admin.getConfiguration(pid).getProperties();
+        Configuration configuration = admin.getConfiguration(pid, null);
+        Dictionary props = configuration.getProperties();
         if (props == null) {
             props = new Properties();
         }
