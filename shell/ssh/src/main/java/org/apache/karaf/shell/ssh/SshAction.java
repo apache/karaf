@@ -19,8 +19,15 @@
 
 package org.apache.karaf.shell.ssh;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.console.BlueprintContainerAware;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -28,14 +35,9 @@ import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.common.util.NoCloseInputStream;
 import org.apache.sshd.common.util.NoCloseOutputStream;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.shell.console.BlueprintContainerAware;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.osgi.service.blueprint.container.BlueprintContainer;
 
 /**
  * Connect to a SSH server.
@@ -54,11 +56,14 @@ public class SshAction
     @Option(name="-P", aliases={"--password"}, description = "The password for remote login", required = false, multiValued = false)
     private String password;
 
+    @Option(name="-p", aliases={"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
+    private int port = 22;
+
     @Argument(index = 0, name = "hostname", description = "The host name to connect to via SSH", required = true, multiValued = false)
     private String hostname;
 
-    @Option(name="-p", aliases={"--port"}, description = "The port to use for SSH connection", required = false, multiValued = false)
-    private int port = 22;
+    @Argument(index = 1, name = "command", description = "Optional command to execute", required = false, multiValued = true)
+    private List<String> command;
 
     private BlueprintContainer container;
 
@@ -113,9 +118,25 @@ public class SshAction
                     return null;
                 }
 
+                StringBuilder sb = new StringBuilder();
+                if (command != null) {
+                    for (String cmd : command) {
+                        if (sb.length() > 0) {
+                            sb.append(' ');
+                        }
+                        sb.append(cmd);
+                    }
+                }
+
                 ClientChannel channel = session.createChannel("shell");
-                channel.setIn(new NoCloseInputStream(System.in));
-                ((ChannelShell) channel).setupSensibleDefaultPty();
+                if (sb.length() > 0) {
+                    channel = session.createChannel("exec", sb.append("\n").toString());
+                    channel.setIn(new ByteArrayInputStream(new byte[0]));
+                } else {
+                    channel = session.createChannel("shell");
+                    channel.setIn(new NoCloseInputStream(System.in));
+                    ((ChannelShell) channel).setupSensibleDefaultPty();
+                }
                 channel.setOut(new NoCloseOutputStream(System.out));
                 channel.setErr(new NoCloseOutputStream(System.err));
                 channel.open();
