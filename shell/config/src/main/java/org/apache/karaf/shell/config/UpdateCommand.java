@@ -49,11 +49,14 @@ public class UpdateCommand extends ConfigCommandSupport {
         Dictionary props = getEditedProps();
         if (props == null) {
             System.err.println("No configuration is being edited. Run the edit command first");
-        } else if (!bypassStorage && storage != null) {
-        	String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
+            return;
+        }
+
+        String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
+        if (!bypassStorage && storage != null) {
             File storageFile = new File(storage, pid + ".cfg");
             Configuration cfg = admin.getConfiguration(pid, null);
-            if (cfg != null) {
+            if (cfg != null && cfg.getProperties() != null) {
                 Object val = cfg.getProperties().get(FELIX_FILEINSTALL_FILENAME);
                 if (val instanceof String) {
                     if (((String) val).startsWith("file:")) {
@@ -74,11 +77,32 @@ public class UpdateCommand extends ConfigCommandSupport {
             storage.mkdirs();
             p.save();
         } else {
-            String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
             Configuration cfg = admin.getConfiguration(pid, null);
+            if (cfg.getProperties() == null) {
+                String[] pids = parsePid(pid);
+                if (pids[1] != null) {
+                    cfg = admin.createFactoryConfiguration(pids[0], null);
+                }
+            }
+            if (cfg.getBundleLocation() != null) {
+                cfg.setBundleLocation(null);
+            }
             cfg.update(props);
         }
         this.session.put(PROPERTY_CONFIG_PID, null);
         this.session.put(PROPERTY_CONFIG_PROPS, null);
     }
+
+    private String[] parsePid(String pid) {
+        int n = pid.indexOf('-');
+        if (n > 0) {
+            String factoryPid = pid.substring(n + 1);
+            pid = pid.substring(0, n);
+            return new String[] { pid, factoryPid };
+        } else {
+            return new String[] { pid, null };
+        }
+    }
+
+
 }

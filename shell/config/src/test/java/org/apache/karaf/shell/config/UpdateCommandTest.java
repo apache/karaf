@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.shell.config;
 
-import java.util.Dictionary;
+
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -34,73 +34,55 @@ import static org.easymock.EasyMock.replay;
 /**
  * Test cases for {@link EditCommand}
  */
-public class EditCommandTest extends TestCase {
+public class UpdateCommandTest extends TestCase {
 
-    private static final String PID = "my.test.persistent.id";
+    private static final String PID = "my.test.persistent.id-other";
 
-    private EditCommand command;
+    private UpdateCommand command;
     private BundleContext context;
     private ConfigurationAdmin admin;
     private CommandSession session;
-    
+
     @Override
     protected void setUp() throws Exception {
-        command = new EditCommand();
-        
+        command = new UpdateCommand();
+
         context = EasyMock.createMock(BundleContext.class);
         command.setBundleContext(context);
-        
+
         ServiceReference reference = createMock(ServiceReference.class);
         expect(context.getServiceReference(ConfigurationAdmin.class.getName())).andReturn(reference);
-        
+
         admin = createMock(ConfigurationAdmin.class);
         expect(context.getService(reference)).andReturn(admin);
         expect(context.ungetService(reference)).andReturn(Boolean.TRUE);
-        
+
         replay(context);
-        
+
         session = new MockCommandSession();
     }
-    
-    public void testExecuteOnExistingPid() throws Exception {        
-        Configuration config = createMock(Configuration.class);
-        expect(admin.getConfiguration(PID, null)).andReturn(config);
-        replay(admin);
-        
-        // the ConfigAdmin service returns a Dictionary for an existing PID
+
+    public void testupdateOnNewFactoryPid() throws Exception {
         Properties props = new Properties();
-        expect(config.getProperties()).andReturn(props);
-        replay(config);
-        
-        command.pid = PID; 
-        command.execute(session);
-        
-        // the PID and Dictionary should have been set on the session
-        assertEquals("The PID should be set on the session",
-                     PID, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID));
-        assertSame("The Dictionary returned by the ConfigAdmin service should be set on the session",
-                   props, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS));
-    }
-    
-    @SuppressWarnings("unchecked")
-    public void testExecuteOnNewPid() throws Exception {        
-        Configuration config = createMock(Configuration.class);
-        expect(admin.getConfiguration(PID, null)).andReturn(config);
+
+        session.put(ConfigCommandSupport.PROPERTY_CONFIG_PID, PID);
+        session.put(ConfigCommandSupport.PROPERTY_CONFIG_PROPS, props);
+
+        Configuration configNew = createMock(Configuration.class);
+        expect(admin.getConfiguration(PID, null)).andReturn(configNew);
+        expect(configNew.getProperties()).andReturn(null);
+
+
+        Configuration configFac = createMock(Configuration.class);
+        expect(admin.createFactoryConfiguration(PID.substring(0, PID.indexOf('-')), null)).andReturn(configFac);
+        configFac.update(props);
+        expect(configFac.getBundleLocation()).andReturn(null);
         replay(admin);
-        
-        // the ConfigAdmin service does not return a Dictionary for a new PID
-        expect(config.getProperties()).andReturn(null);
-        replay(config);
-        
-        command.pid = PID; 
+        replay(configNew);
+        replay(configFac);
+
         command.execute(session);
 
-        // the PID and an empty Dictionary should have been set on the session        
-        assertEquals("The PID should be set on the session",
-                     PID, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID));
-        Dictionary props = (Dictionary) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS);
-        assertNotNull("Should have a Dictionary on the session", props);
-        assertTrue("Should have an empty Dictionary on the session", props.isEmpty());
     }
 
 }
