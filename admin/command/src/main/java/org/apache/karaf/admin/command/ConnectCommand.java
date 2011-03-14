@@ -40,18 +40,20 @@ public class ConnectCommand extends AdminCommandSupport {
     private List<String> command;
 
     protected Object doExecute() throws Exception {
-        StringBuilder sb = new StringBuilder();
+        String cmdStr = "";
         if (command != null) {
+            StringBuilder sb = new StringBuilder();
             for (String cmd : command) {
                 if (sb.length() > 0) {
                     sb.append(' ');
                 }
                 sb.append(cmd);
             }
+            cmdStr = "'" + sb.toString().replaceAll("'", "\\'") + "'";
         }
 
         int port = getExistingInstance(instance).getSshPort();
-        session.execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost " + sb);
+        session.execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost " + cmdStr);
         return null;
     }
 }
