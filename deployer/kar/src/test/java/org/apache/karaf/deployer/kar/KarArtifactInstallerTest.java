@@ -202,7 +202,6 @@ public class KarArtifactInstallerTest {
     @Test
     public void testPathToMvnUri() throws Exception {
         URI uri = KarArtifactInstaller.pathToMvnUri("org/apache/geronimo/features/org.apache.geronimo.transaction.kar/3.1.1-SNAPSHOT/org.apache.geronimo.transaction.kar-3.1.1-SNAPSHOT-features.xml");
-        System.out.println(uri.toString());
         assert "mvn:org.apache.geronimo.features/org.apache.geronimo.transaction.kar/3.1.1-SNAPSHOT/xml/features".equals(uri.toString());
     }
 			
