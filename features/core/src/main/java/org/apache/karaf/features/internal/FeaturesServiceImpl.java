@@ -425,13 +425,31 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         if (resolver == null || resolver.length() == 0) {
         	return feature.getBundles();
         }
+        boolean optional = false;
+        if (resolver.startsWith("(") && resolver.endsWith(")")) {
+            resolver = resolver.substring(1, resolver.length() - 1);
+            optional = true;
+        }
         // Else, find the resolver
         String filter = "(&(" + Constants.OBJECTCLASS + "=" + Resolver.class.getName() + ")(name=" + resolver + "))";
         ServiceTracker tracker = new ServiceTracker(bundleContext, FrameworkUtil.createFilter(filter), null);
         tracker.open();
         try {
-            Resolver r = (Resolver) tracker.waitForService(resolverTimeout);
-            return r.resolve(feature);
+            if (optional) {
+                Resolver r = (Resolver) tracker.getService();
+                if (r != null) {
+                    return r.resolve(feature);
+                } else {
+                    LOGGER.debug("Optional resolver '{}' not found, using the default resolver", resolver);
+                    return feature.getBundles();
+                }
+            } else {
+                Resolver r = (Resolver) tracker.waitForService(resolverTimeout);
+                if (r == null) {
+                    throw new Exception("Unable to find required resolver '" + resolver + "'");
+                }
+                return r.resolve(feature);
+            }
         } finally {
             tracker.close();
         }
