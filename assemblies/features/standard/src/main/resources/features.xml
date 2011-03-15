@@ -79,10 +79,13 @@
 	    <bundle>mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-jmx/${jetty.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
+        <bundle>mvn:org.eclipse.jetty/jetty-servlets/${jetty.version}</bundle>
     	<bundle>mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
 	</feature>
 	<feature name="jetty-jaas" version="${jetty.version}" resolver="(obr)">
@@ -127,6 +130,7 @@
             realm=karaf
         </config>
         <feature>http</feature>
+        <feature version="[7.0,8.0)">jetty-jaas</feature>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.branding/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
