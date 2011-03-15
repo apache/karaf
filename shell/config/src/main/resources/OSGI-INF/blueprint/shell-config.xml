@@ -27,9 +27,7 @@
             <action class="org.apache.karaf.shell.config.CancelCommand"/>
         </command>
         <command name="config/delete">
-            <action class="org.apache.karaf.shell.config.DeleteCommand">
-                <property name="storage" value="${storage}" />
-            </action>
+            <action class="org.apache.karaf.shell.config.DeleteCommand"/>
             <completers>
                 <ref component-id="configCompleter" />
                 <null/>
