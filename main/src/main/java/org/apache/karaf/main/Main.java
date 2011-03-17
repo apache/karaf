@@ -1054,19 +1054,37 @@ public class Main {
     }
 
     private static File findFile(File dir, String name) {
+        if (name.indexOf(':') > -1) {
+            name = fromMaven(name);
+        }
         File theFile = new File(dir, name);
 
         if (theFile.exists() && !theFile.isDirectory()) {
             return theFile;
         }
+        return null;
+    }
 
-        for (File file : dir.listFiles()) {
-            if (file.isDirectory()) {
-                return findFile(file, name);
+    private static String fromMaven(String name) {
+        String[] bits = name.split(":");
+        StringBuilder b = new StringBuilder(bits[0]);
+        for (int i = 0; i < b.length(); i++) {
+            if (b.charAt(i) == '.') {
+                b.setCharAt(i, '/');
             }
         }
-
-        return null;
+        b.append('/').append(bits[1]); //artifactId
+        b.append('/').append(bits[2]);//version
+        b.append('/').append(bits[1]).append('-').append(bits[2]);
+        if (bits.length == 5) {
+            b.append('-').append(bits[4]); //classifier
+        }
+        if (bits.length >=4) {
+            b.append('.').append(bits[3]);
+        } else {
+            b.append(".jar");
+        }
+        return b.toString();
     }
 
     private static void findJars(File dir, ArrayList<File> jars) {
