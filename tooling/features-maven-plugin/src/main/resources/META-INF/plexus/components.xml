@@ -22,15 +22,12 @@
 
 <component-set>
     <components>
-        <!--<component>-->
-            <!--<role>org.codehaus.plexus.archiver.UnArchiver</role>-->
-            <!--<role-hint>car</role-hint>           -->
-            <!--<implementation>org.codehaus.plexus.archiver.zip.ZipUnArchiver</implementation>-->
-            <!--<instantiation-strategy>per-lookup</instantiation-strategy>-->
-        <!--</component>-->
-        <!--
-        Deprecated, use geronimo-module instead.
-        -->
+        <component>
+            <role>org.codehaus.plexus.archiver.UnArchiver</role>
+            <role-hint>kar</role-hint>
+            <implementation>org.codehaus.plexus.archiver.zip.ZipUnArchiver</implementation>
+            <instantiation-strategy>per-lookup</instantiation-strategy>
+        </component>
         <component>
             <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
             <role-hint>feature</role-hint>
@@ -90,6 +87,18 @@
                 </lifecycles>
             </configuration>
         </component>
+        <component>
+             <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+             <role-hint>kar</role-hint>
+             <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+             <configuration>
+                 <type>kar</type>
+                 <extension>kar</extension>
+                 <packaging>kar</packaging>
+                 <addedToClasspath>false</addedToClasspath>
+                 <language>java</language>
+             </configuration>
+         </component>
         <component>
             <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
             <role-hint>karaf-assembly</role-hint>
