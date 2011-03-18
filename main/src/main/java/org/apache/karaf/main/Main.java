@@ -259,8 +259,13 @@ public class Main {
         }
         FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
         framework = factory.newFramework(new StringMap(configProps, false));
+        framework.init();
+        // If we have a clean state, install everything
+        if (framework.getBundleContext().getBundles().length == 1) {
+            loadStartupProperties(configProps);
+            processAutoProperties(framework.getBundleContext());
+        }
         framework.start();
-        processAutoProperties(framework.getBundleContext());
         // Start lock monitor
         new Thread() {
             public void run() {
@@ -292,7 +297,7 @@ public class Main {
 
             // Stop the framework in case it's still active
             exiting = true;
-            if (framework.getState() == Bundle.ACTIVE) {
+            if (framework.getState() == Bundle.ACTIVE || framework.getState() == Bundle.STARTING) {
                 new Thread() {
                     public void run() {
                         try {
@@ -415,6 +420,7 @@ public class Main {
             try {
                 main.launch();
             } catch (Throwable ex) {
+                main.destroy();
                 main.setExitCode(-1);
                 System.err.println("Could not create framework: " + ex);
                 ex.printStackTrace();
@@ -797,24 +803,12 @@ public class Main {
      * @throws Exception if something wrong occurs
      */
     private Properties loadConfigProperties() throws Exception {
-        // The config properties file is either specified by a system
-        // property or it is in the conf/ directory of the Felix
-        // installation directory.  Try to load it from one of these
-        // places.
-
-        List<File> bundleDirs = new ArrayList<File>();
-
         // See if the property URL was specified as a property.
         URL configPropURL;
-        URL startupPropURL;
 
         try {
             File file = new File(new File(karafBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
             configPropURL = file.toURI().toURL();
-
-            file = new File(new File(karafBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
-            startupPropURL = file.toURI().toURL();
-
         }
         catch (MalformedURLException ex) {
             System.err.print("Main: " + ex);
@@ -823,19 +817,40 @@ public class Main {
 
 
         Properties configProps = loadPropertiesFile(configPropURL, false);
+
+        // Perform variable substitution for system properties.
+        for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
+            String name = (String) e.nextElement();
+            configProps.setProperty(name,
+                    substVars(configProps.getProperty(name), name, null, configProps));
+        }
+
+        return configProps;
+    }
+
+    private void loadStartupProperties(Properties configProps) throws Exception {
+        // The config properties file is either specified by a system
+        // property or it is in the conf/ directory of the Felix
+        // installation directory.  Try to load it from one of these
+        // places.
+
+        List<File> bundleDirs = new ArrayList<File>();
+
+        // See if the property URL was specified as a property.
+        URL startupPropURL;
+
+        File file = new File(new File(karafBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
+        startupPropURL = file.toURI().toURL();
         Properties startupProps = loadPropertiesFile(startupPropURL, true);
 
         String defaultRepo = System.getProperty(DEFAULT_REPO, "system");
-
         if (karafBase.equals(karafHome)) {
             bundleDirs.add(new File(karafHome, defaultRepo));
         } else {
             bundleDirs.add(new File(karafBase, defaultRepo));
             bundleDirs.add(new File(karafHome, defaultRepo));
         }
-
         String locations = configProps.getProperty(BUNDLE_LOCATIONS);
-
         if (locations != null) {
             StringTokenizer st = new StringTokenizer(locations, "\" ", true);
             if (st.countTokens() > 0) {
@@ -862,17 +877,8 @@ public class Main {
             }
         }
 
-        // Perform variable substitution for system properties.
-        for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
-            String name = (String) e.nextElement();
-            configProps.setProperty(name,
-                    substVars(configProps.getProperty(name), name, null, configProps));
-        }
-
         // Mutate properties
         Main.processConfigurationProperties(configProps, startupProps, bundleDirs);
-
-        return configProps;
     }
 
     protected static Properties loadPropertiesFile(URL configPropURL, boolean failIfNotFound) throws Exception {
@@ -980,10 +986,11 @@ public class Main {
      * @param startupProps properties loaded from etc/startup.properties
      * @param bundleDirs location to load bundles from (usually system/)
      */
-    private static void processConfigurationProperties(Properties configProps, Properties startupProps, List<File> bundleDirs) {
+    private static void processConfigurationProperties(Properties configProps, Properties startupProps, List<File> bundleDirs) throws Exception {
         if (bundleDirs == null) {
             return;
         }
+        boolean hasErrors = false;
         if ("all".equals(configProps.getProperty(PROPERTY_AUTO_START, "").trim())) {
             configProps.remove(PROPERTY_AUTO_START);
             ArrayList<File> jars = new ArrayList<File>();
@@ -1033,6 +1040,7 @@ public class Main {
                     }
                 } else {
                     System.err.println("Bundle listed in " + STARTUP_PROPERTIES_FILE_NAME + " configuration not found: " + name);
+                    hasErrors = true;
                 }
             }
 
@@ -1040,7 +1048,9 @@ public class Main {
                 configProps.setProperty(PROPERTY_AUTO_START + "." + entry.getKey(), entry.getValue().toString());
             }
         }
-
+        if (hasErrors) {
+            throw new Exception("Aborting due to missing startup bundles");
+        }
     }
 
     private static File findFile(List<File> bundleDirs, String name) {
