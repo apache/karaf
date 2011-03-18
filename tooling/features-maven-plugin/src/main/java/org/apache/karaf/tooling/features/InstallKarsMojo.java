@@ -27,12 +27,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -155,19 +156,19 @@ public class InstallKarsMojo extends MojoSupport {
                     } finally {
                         in.close();
                     }
-                    String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES)? properties.getProperty(FEATURES_REPOSITORIES) + ",": "";
+                    String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES)? properties.get(FEATURES_REPOSITORIES) + ",": "";
                     existingFeatureRepos = existingFeatureRepos + url.toString();
-                    properties.setProperty(FEATURES_REPOSITORIES, existingFeatureRepos);
+                    properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
                     FileOutputStream out = new FileOutputStream(featuresCfgFile);
                     try {
-                        properties.store(out, "Features Service config");
+                        properties.save(out);
                     } finally {
                         out.close();
                     }
                 }
             } else {
                 getLog().info("Installing feature to system and startup.properties");
-                OrderedProperties startupProperties = new OrderedProperties();
+                Properties startupProperties = new Properties();
                 if (startupPropertiesFile.exists()) {
                     InputStream in = new FileInputStream(startupPropertiesFile);
                     try {
@@ -176,6 +177,7 @@ public class InstallKarsMojo extends MojoSupport {
                         in.close();
                     }
                 } else {
+                    startupProperties.setHeader(Collections.singletonList("#Bundles to be started on startup, with startlevel"));
                     if (!startupPropertiesFile.getParentFile().exists()) {
                         startupPropertiesFile.getParentFile().mkdirs();
                     }
@@ -209,7 +211,7 @@ public class InstallKarsMojo extends MojoSupport {
 
                 OutputStream out = new FileOutputStream(startupPropertiesFile);
                 try {
-                    startupProperties.store(out, "startup bundles");
+                    startupProperties.save(out);
                 } finally {
                     out.close();
                 }
