@@ -1064,9 +1064,7 @@ public class Main {
     }
 
     private static File findFile(File dir, String name) {
-        if (name.indexOf(':') > -1) {
-            name = fromMaven(name);
-        }
+        name = fromMaven(name);
         File theFile = new File(dir, name);
 
         if (theFile.exists() && !theFile.isDirectory()) {
@@ -1075,22 +1073,40 @@ public class Main {
         return null;
     }
 
+    /**
+     * Returns a path for an srtifact.
+     * Input: path (no ':') returns path
+     * Input: mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to default repo location path
+     * Input:  <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default repo location path
+     * type and classifier are optional.
+     *
+     *
+     * @param name input artifact info
+     * @return path as supplied or a default maven repo path
+     */
     private static String fromMaven(String name) {
-        String[] bits = name.split(":");
-        StringBuilder b = new StringBuilder(bits[0]);
+        if (name.indexOf(':') == -1) {
+            return name;
+        }
+        int firstBit = 0;
+        if (name.startsWith("mvn:")) {
+            firstBit = 1;
+        }
+        String[] bits = name.split("[:/]");
+        StringBuilder b = new StringBuilder(bits[firstBit]);
         for (int i = 0; i < b.length(); i++) {
             if (b.charAt(i) == '.') {
                 b.setCharAt(i, '/');
             }
         }
-        b.append('/').append(bits[1]); //artifactId
-        b.append('/').append(bits[2]);//version
-        b.append('/').append(bits[1]).append('-').append(bits[2]);
-        if (bits.length == 5) {
-            b.append('-').append(bits[4]); //classifier
+        b.append('/').append(bits[firstBit + 1]); //artifactId
+        b.append('/').append(bits[firstBit + 2]); //version
+        b.append('/').append(bits[firstBit + 1]).append('-').append(bits[firstBit + 2]);
+        if (bits.length == firstBit + 5 && !bits[firstBit + 4].isEmpty()) {
+            b.append('-').append(bits[firstBit + 4]); //classifier
         }
-        if (bits.length >=4) {
-            b.append('.').append(bits[3]);
+        if (bits.length >= firstBit + 4 && !bits[firstBit + 3].isEmpty()) {
+            b.append('.').append(bits[firstBit + 3]);
         } else {
             b.append(".jar");
         }
