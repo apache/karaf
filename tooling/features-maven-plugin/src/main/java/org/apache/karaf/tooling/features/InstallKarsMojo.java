@@ -28,6 +28,8 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -165,7 +167,7 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             } else {
                 getLog().info("Installing feature to system and startup.properties");
-                Properties startupProperties = new Properties();
+                OrderedProperties startupProperties = new OrderedProperties();
                 if (startupPropertiesFile.exists()) {
                     InputStream in = new FileInputStream(startupPropertiesFile);
                     try {
@@ -194,14 +196,14 @@ public class InstallKarsMojo extends MojoSupport {
                     for (Bundle bundle: feature.getBundle()) {
                         String location = bundle.getLocation();
                         String startLevel = Integer.toString(bundle.getStartLevel());
-                        bits = location.toString().split("[:/]");
-                        if (bits.length < 4) {
-                            getLog().warn("bad bundle: " + location);
-                        } else {
-                        Artifact bundleArtifact = factory.createArtifact(bits[1], bits[2], bits[3], null, bits.length == 4? "jar": bits[4]);
-                        String bundlePath = layout.pathOf(bundleArtifact);
+//                        bits = location.toString().split("[:/]");
+//                        if (bits.length < 4) {
+//                            getLog().warn("bad bundle: " + location);
+//                        } else {
+//                        Artifact bundleArtifact = factory.createArtifact(bits[1], bits[2], bits[3], null, bits.length == 4? "jar": bits[4]);
+                        String bundlePath = location.startsWith("mvn:")? location.substring("mvn:".length()).replaceAll("/", ":"): location;
+                        //layout.pathOf(bundleArtifact);
                         startupProperties.put(bundlePath, startLevel);
-                        }
                     }
                 }
 
@@ -266,4 +268,5 @@ public class InstallKarsMojo extends MojoSupport {
             return null;
         }
     }
+
 }
