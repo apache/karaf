@@ -25,11 +25,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,9 +45,6 @@ import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -168,7 +168,7 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             } else {
                 getLog().info("Installing feature to system and startup.properties");
-                Properties startupProperties = new Properties();
+                CommentProperties startupProperties = new CommentProperties();
                 if (startupPropertiesFile.exists()) {
                     InputStream in = new FileInputStream(startupPropertiesFile);
                     try {
@@ -195,6 +195,7 @@ public class InstallKarsMojo extends MojoSupport {
                     in.close();
                 }
                 for (Feature feature: features.getFeature()) {
+                    List<String> comment = Arrays.asList(new String[] {"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
                     for (Bundle bundle: feature.getBundle()) {
                         String location = bundle.getLocation();
                         String startLevel = Integer.toString(bundle.getStartLevel());
@@ -203,9 +204,21 @@ public class InstallKarsMojo extends MojoSupport {
 //                            getLog().warn("bad bundle: " + location);
 //                        } else {
 //                        Artifact bundleArtifact = factory.createArtifact(bits[1], bits[2], bits[3], null, bits.length == 4? "jar": bits[4]);
-                        String bundlePath = location.startsWith("mvn:")? location.substring("mvn:".length()).replaceAll("/", ":"): location;
+//                        String bundlePath = location.startsWith("mvn:")? location.substring("mvn:".length()).replaceAll("/", ":"): location;
                         //layout.pathOf(bundleArtifact);
-                        startupProperties.put(bundlePath, startLevel);
+                        if (startupProperties.containsKey(location)) {
+                            int oldStartLevel = Integer.decode(startupProperties.get(location));
+                            if (oldStartLevel > bundle.getStartLevel()) {
+                                startupProperties.put(location, startLevel);
+                            }
+                        } else {
+                            if (comment == null) {
+                                startupProperties.put(location, startLevel);
+                            } else {
+                                startupProperties.put(location, comment, startLevel);
+                                comment = null;
+                            }
+                        }
                     }
                 }
 
@@ -269,6 +282,110 @@ public class InstallKarsMojo extends MojoSupport {
         public org.apache.karaf.features.Feature getFeature(String name) throws Exception {
             return null;
         }
+    }
+
+    // when FELIX-2887 is ready we can use plain Properties again
+    private static class CommentProperties extends Properties {
+
+        private Map<String, Layout> layout;
+        private Map<String, String> storage;
+
+        public CommentProperties() {
+            this.layout = (Map<String, Layout>) getField("layout");
+            storage = (Map<String, String>) getField("storage");
+        }
+
+        private Object getField(String fieldName)  {
+            try {
+                Field l = Properties.class.getDeclaredField(fieldName);
+                boolean old = l.isAccessible();
+                l.setAccessible(true);
+                Object layout = l.get(this);
+                l.setAccessible(old);
+                return layout;
+            } catch (Exception e) {
+                throw new RuntimeException("Could not access field " + fieldName, e);
+            }
+        }
+
+        public String put(String key, List<String> commentLines, List<String> valueLines) {
+            commentLines = new ArrayList<String>(commentLines);
+            valueLines = new ArrayList<String>(valueLines);
+            String escapedKey = escapeKey(key);
+            int lastLine = valueLines.size() - 1;
+            if (valueLines.isEmpty()) {
+                valueLines.add(escapedKey + "=");
+            } else if (!valueLines.get(0).trim().startsWith(escapedKey)) {
+                valueLines.set(0, escapedKey + " = " + escapeJava(valueLines.get(0)) + (0 < lastLine? "\\": ""));
+            }
+            for (int i = 1; i < valueLines.size(); i++) {
+                valueLines.set(i, escapeJava(valueLines.get(i)) + (i < lastLine? "\\": ""));
+            }
+            StringBuilder value = new StringBuilder();
+            for (String line: valueLines) {
+                value.append(line);
+            }
+            this.layout.put(key, new Layout(commentLines, valueLines));
+            return storage.put(key, unescapeJava(value.toString()));
+        }
+
+        public String put(String key, List<String> commentLines, String value) {
+            commentLines = new ArrayList<String>(commentLines);
+            this.layout.put(key, new Layout(commentLines, null));
+            return storage.put(key, value);
+        }
+
+        public String put(String key, String comment, String value) {
+            return put(key, Collections.singletonList(comment), value);
+        }
+
+        public List<String> getRaw(String key) {
+            if (layout.containsKey(key)) {
+                if (layout.get(key).getValueLines() != null) {
+                    return new ArrayList<String>(layout.get(key).getValueLines());
+                }
+            }
+            List<String> result = new ArrayList<String>();
+            if (storage.containsKey(key)) {
+                result.add(storage.get(key));
+            }
+            return result;
+        }
+
+        /** The list of possible key/value separators */
+        private static final char[] SEPARATORS = new char[] {'=', ':'};
+
+        /** The white space characters used as key/value separators. */
+        private static final char[] WHITE_SPACE = new char[] {' ', '\t', '\f'};
+        /**
+         * Escape the separators in the key.
+         *
+         * @param key the key
+         * @return the escaped key
+         */
+        private static String escapeKey(String key)
+        {
+            StringBuffer newkey = new StringBuffer();
+
+            for (int i = 0; i < key.length(); i++)
+            {
+                char c = key.charAt(i);
+
+                if (contains(SEPARATORS, c) || contains(WHITE_SPACE, c))
+                {
+                    // escape the separator
+                    newkey.append('\\');
+                    newkey.append(c);
+                }
+                else
+                {
+                    newkey.append(c);
+                }
+            }
+
+            return newkey.toString();
+        }
+
     }
 
 }
