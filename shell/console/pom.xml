@@ -143,6 +143,11 @@
                         <Main-Class>
                             org.apache.karaf.shell.console.Main
                         </Main-Class>
+                        <Export-Service>
+                            org.apache.felix.service.threadio.ThreadIO,
+                            org.apache.felix.service.command.CommandProcessor,
+                            org.apache.felix.service.command.Converter
+                        </Export-Service>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
