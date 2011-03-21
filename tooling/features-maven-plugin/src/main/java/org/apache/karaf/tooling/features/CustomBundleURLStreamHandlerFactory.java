@@ -27,8 +27,9 @@ public class CustomBundleURLStreamHandlerFactory implements
     private static final String FEATURE_URI_PREFIX = "feature";
     private static final String SPRING_URI_PREFIX = "spring";
     private static final String BLUEPRINT_URI_PREFIX = "blueprint";
-	
-	public URLStreamHandler createURLStreamHandler(String protocol) {
+    private static final String WAR_URI_PREFIX = "war";
+
+    public URLStreamHandler createURLStreamHandler(String protocol) {
 		if (protocol.equals(MVN_URI_PREFIX)) {
 			return new org.ops4j.pax.url.mvn.Handler();
 		} else if (protocol.equals(WRAP_URI_PREFIX)){
@@ -39,6 +40,8 @@ public class CustomBundleURLStreamHandlerFactory implements
 			return new SpringURLHandler();
 		} else if (protocol.equals(BLUEPRINT_URI_PREFIX)){
 			return new BlueprintURLHandler();
+        } else if (protocol.equals(WAR_URI_PREFIX)) {
+            return new WarURLHandler();
 		} else {
 			return null;
 		}

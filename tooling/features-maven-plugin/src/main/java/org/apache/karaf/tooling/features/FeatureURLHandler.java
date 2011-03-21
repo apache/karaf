@@ -56,7 +56,7 @@ public class FeatureURLHandler extends URLStreamHandler {
         }
         featureXmlURL = new URL(url.getPath());
 
-        logger.debug("Blueprint xml URL is: [" + featureXmlURL + "]");
+        logger.debug("Feature xml URL is: [" + featureXmlURL + "]");
         return new Connection(url);
     }
 
@@ -82,8 +82,8 @@ public class FeatureURLHandler extends URLStreamHandler {
                 os.close();
                 return new ByteArrayInputStream(os.toByteArray());
             } catch (Exception e) {
-                logger.error("Error opening blueprint xml url", e);
-                throw (IOException) new IOException("Error opening blueprint xml url").initCause(e);
+                logger.error("Error opening feature xml url", e);
+                throw (IOException) new IOException("Error opening features xml url").initCause(e);
             }
         }
     }
