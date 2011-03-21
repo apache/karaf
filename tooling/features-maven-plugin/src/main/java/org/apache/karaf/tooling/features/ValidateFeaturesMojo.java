@@ -157,7 +157,6 @@ public class ValidateFeaturesMojo extends MojoSupport {
             analyze(repository);
             validate(repository);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new MojoExecutionException(String.format("Unable to validate %s: %s", file.getAbsolutePath(), e.getMessage()), e);
         }
 
@@ -454,8 +453,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
             try {
                 is = new BufferedInputStream(new URL(bundle).openStream());
             } catch (Exception e){
-                e.printStackTrace();
+                getLog().warn("Error while opening artifact", e);
             }
+
             try {
                 is.mark(256 * 1024);
                 JarInputStream jar = new JarInputStream(is);
@@ -466,7 +466,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
                 
                 return m;
             } finally {
-                is.close();
+                if (is != null) { // just in case when we did not open bundle
+                    is.close();
+                }
             }
         } else {
             Artifact mvnArtifact = (Artifact) artifact;
