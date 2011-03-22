@@ -242,7 +242,8 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         ObjectFactory objectFactory = new ObjectFactory();
         Features features;
         if (inputFile.exists()) {
-            features = readFeaturesFile(inputFile);
+            filter(inputFile, outputFile);
+            features = readFeaturesFile(outputFile);
         } else {
             features = objectFactory.createFeaturesRoot();
         }

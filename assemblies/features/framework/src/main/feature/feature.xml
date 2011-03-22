@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="&lt;unnamed&gt;">
     <feature version="2.99.99-SNAPSHOT" name="karaf-framework">
-        <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-mvn/1.2.5</bundle>
-        <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/1.2.5</bundle>
-        <bundle dependency="false" start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/1.6.1</bundle>
-        <bundle dependency="false" start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-service/1.6.1</bundle>
-        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/1.2.8</bundle>
-        <bundle dependency="false" start="true" start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/3.1.10</bundle>
-        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/3.3_1</bundle>
-        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/0.3</bundle>
-        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/0.3</bundle>
-        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/0.3</bundle>
+        <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-mvn/${pax.url.version}</bundle>
+        <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}</bundle>
+        <bundle dependency="false" start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
+        <bundle dependency="false" start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-service/${pax.logging.version}</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
+        <bundle dependency="false" start="true" start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
+        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm.bundle.version}</bundle>
+        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
+        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
+        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
 
 
 <!--
