@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.assemblies</groupId>
         <artifactId>assemblies</artifactId>
-        <version>2.99.99-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>apache-karaf</artifactId>
@@ -553,7 +553,7 @@
                             </descriptors>
                             <finalName>${project.artifactId}-${project.version}</finalName>
                             <appendAssemblyId>true</appendAssemblyId>
-                            <assemblyId/>
+                            <assemblyId />
                         </configuration>
                     </execution>
                     <execution>
@@ -568,7 +568,7 @@
                             </descriptors>
                             <finalName>${project.artifactId}-${project.version}</finalName>
                             <appendAssemblyId>true</appendAssemblyId>
-                            <assemblyId/>
+                            <assemblyId />
                         </configuration>
                     </execution>
                     <execution>

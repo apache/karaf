@@ -30,7 +30,7 @@
     <groupId>org.apache.karaf</groupId>
     <artifactId>karaf</artifactId>
     <packaging>pom</packaging>
-    <version>2.99.99-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <name>Apache Karaf</name>
     <inceptionYear>2007</inceptionYear>
 
@@ -452,19 +452,19 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf</groupId>
+                <groupId>org.apache.karaf.assemblies</groupId>
                 <artifactId>apache-karaf</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf</groupId>
+                <groupId>org.apache.karaf.assemblies</groupId>
                 <artifactId>apache-karaf</artifactId>
                 <type>tar.gz</type>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf</groupId>
+                <groupId>org.apache.karaf.assemblies</groupId>
                 <artifactId>apache-karaf</artifactId>
                 <type>zip</type>
                 <version>${project.version}</version>
@@ -1188,8 +1188,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <tasks>
-                                <copy file="NOTICE" todir="target/maven-shared-archive-resources/META-INF"
-                                      failonerror="false" overwrite="true"/>
+                                <copy file="NOTICE" todir="target/maven-shared-archive-resources/META-INF" failonerror="false" overwrite="true" />
                             </tasks>
                         </configuration>
                         <goals>
