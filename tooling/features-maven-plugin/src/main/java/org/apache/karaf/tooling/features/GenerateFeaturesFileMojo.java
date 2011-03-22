@@ -371,7 +371,7 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
 
     protected String getBestVersionForArtifact(Artifact artifact, List<ArtifactVersion> versions) throws ArtifactMetadataRetrievalException {
         if (versions.size() == 0) {
-            throw new ArtifactMetadataRetrievalException("No wrapper bundle available for " + artifact);
+            throw new ArtifactMetadataRetrievalException("No wrapper bundle available for ", null, artifact);
         }
         Collections.sort(versions, Collections.reverseOrder());
         //check for same version
@@ -387,7 +387,7 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
                 return version.toString();
             }
         }
-        throw new ArtifactMetadataRetrievalException("No suitable version found for " + artifact + " wrapper bundle");
+        throw new ArtifactMetadataRetrievalException("No suitable version found for " + artifact + " wrapper bundle", null, artifact);
     }
 
     private boolean isProvided(Artifact bundle) {

@@ -23,12 +23,6 @@
 <component-set>
     <components>
         <component>
-            <role>org.codehaus.plexus.archiver.UnArchiver</role>
-            <role-hint>kar</role-hint>
-            <implementation>org.codehaus.plexus.archiver.zip.ZipUnArchiver</implementation>
-            <instantiation-strategy>per-lookup</instantiation-strategy>
-        </component>
-        <component>
             <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
             <role-hint>feature</role-hint>
             <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
@@ -43,10 +37,6 @@
                             <compile>
                                 org.apache.karaf.tooling:features-maven-plugin:generate-features-xml2
                             </compile>
-                            <!--<package>-->
-                                <!--org.apache.geronimo.buildsupport:car-maven-plugin:package,-->
-                                <!--org.apache.geronimo.buildsupport:car-maven-plugin:archive-car-->
-                            <!--</package>-->
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
                             </install>
@@ -58,6 +48,19 @@
                 </lifecycles>
             </configuration>
         </component>
+        <component>
+             <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+             <role-hint>feature</role-hint>
+             <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+             <configuration>
+                 <type>xml</type>
+                 <extension>xml</extension>
+                 <packaging>feature</packaging>
+                 <addedToClasspath>false</addedToClasspath>
+                 <language>java</language>
+             </configuration>
+         </component>
+
         <component>
             <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
             <role-hint>kar</role-hint>
@@ -100,6 +103,13 @@
              </configuration>
          </component>
         <component>
+            <role>org.codehaus.plexus.archiver.UnArchiver</role>
+            <role-hint>kar</role-hint>
+            <implementation>org.codehaus.plexus.archiver.zip.ZipUnArchiver</implementation>
+            <instantiation-strategy>per-lookup</instantiation-strategy>
+        </component>
+
+        <component>
             <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
             <role-hint>karaf-assembly</role-hint>
             <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
@@ -129,103 +139,6 @@
             </configuration>
         </component>
 
-        <!--
-        FIXME: For some crazy reason, when the following are enabled it causes other packagings
-               picked up from tools-maven-plugin to now configure their artifact handlers?!?!!
-        -->
-
-        <!--
-        Custom packaging for geronimo modules.
-        -->
-        <!--
-        <component>
-            <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
-            <role-hint>geronimo-module</role-hint>
-            <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
-            <configuration>
-                <lifecycles>
-                    <lifecycle>
-                        <id>default</id>
-                        <phases>
-                            <process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>
-                            <compile>org.apache.geronimo.buildsupport:car-maven-plugin:prepare-plan</compile>
-                            <package>org.apache.geronimo.buildsupport:car-maven-plugin:package</package>
-                            <install>org.apache.maven.plugins:maven-install-plugin:install</install>
-                            <deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>
-                        </phases>
-                    </lifecycle>
-                </lifecycles>
-            </configuration>
-        </component>
-        -->
-
-        <!--
-        Install geronimo-module artifact files as .car files
-        -->
-        <!--
-        <component>
-            <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
-            <role-hint>geronimo-module</role-hint>
-            <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
-            <configuration>
-                <type>geronimo-module</type>
-                <extension>car</extension>
-                <packaging>geronimo-module</packaging>
-                <addedToClasspath>false</addedToClasspath>
-                <language>java</language>
-            </configuration>
-        </component>
-        -->
-
-        <!--
-        Custom packaging for server assembly modules.
-        -->
-        <!--<component>-->
-            <!--<role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>-->
-            <!--<role-hint>server-assembly</role-hint>-->
-            <!--<implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>-->
-            <!--<configuration>-->
-                <!--<lifecycles>-->
-                    <!--<lifecycle>-->
-                        <!--<id>default</id>-->
-                        <!--<phases>-->
-                            <!--<process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>-->
-                            <!--<compile>org.apache.geronimo.buildsupport:car-maven-plugin:install-modules</compile>-->
-                            <!--<package>org.apache.geronimo.buildsupport:car-maven-plugin:archive</package>-->
-                            <!--<install>org.apache.maven.plugins:maven-install-plugin:install</install>-->
-                            <!--<deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>-->
-                        <!--</phases>-->
-                    <!--</lifecycle>-->
-                <!--</lifecycles>-->
-            <!--</configuration>-->
-        <!--</component>-->
-
-        <!--
-        Install server-assembly artifact files as .pom xml files
-        -->
-        <!--<component>-->
-            <!--<role>org.apache.maven.artifact.handler.ArtifactHandler</role>-->
-            <!--<role-hint>application-assembly</role-hint>-->
-            <!--<implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>-->
-            <!--<configuration>-->
-                <!--<type>application-assembly</type>-->
-                <!--<extension>pom</extension>-->
-                <!--<packaging>application-assembly</packaging>-->
-                <!--<addedToClasspath>false</addedToClasspath>-->
-                <!--<language>xml</language>-->
-            <!--</configuration>-->
-        <!--</component>-->
-
-        <!--<component>-->
-            <!--<role>org.apache.maven.artifact.handler.ArtifactHandler</role>-->
-            <!--<role-hint>plugin-metadata</role-hint>-->
-            <!--<implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>-->
-            <!--<configuration>-->
-                <!--<type>plugin-metadata</type>-->
-                <!--<extension>plugin-metadata</extension>-->
-                <!--<language>xml</language>-->
-            <!--</configuration>-->
-        <!--</component>-->
     </components>
 </component-set>
 

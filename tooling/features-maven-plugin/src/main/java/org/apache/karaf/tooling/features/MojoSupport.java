@@ -104,8 +104,6 @@ public abstract class MojoSupport extends AbstractMojo {
      */
     protected ArtifactResolver resolver;
 
-    protected ArtifactCollector collector = new GraphArtifactCollector();
-
     /**
      * @component
      */
@@ -206,36 +204,6 @@ public abstract class MojoSupport extends AbstractMojo {
         return finalIncludes;
     }
 
-    protected ResolutionListenerImpl resolveProject() {
-        Map managedVersions = null;
-        try {
-            managedVersions = createManagedVersionMap(project.getId(), project
-                    .getDependencyManagement());
-        } catch (ProjectBuildingException e) {
-            getLog().error(
-                    "An error occurred while resolving project dependencies.",
-                    e);
-        }
-        ResolutionListenerImpl listener = new ResolutionListenerImpl();
-        listener.setLog(getLog());
-        try {
-            collector.collect(project.getDependencyArtifacts(), project
-                    .getArtifact(), managedVersions, localRepo, remoteRepos,
-                    artifactMetadataSource, null, Collections
-                            .singletonList(listener));
-        } catch (ArtifactResolutionException e) {
-            getLog().error(
-                    "An error occurred while resolving project dependencies.",
-                    e);
-        }
-        if (getLog().isDebugEnabled()) {
-            getLog().debug("Dependency graph");
-            getLog().debug("================");
-            print(listener.getRootNode());
-            getLog().debug("================");
-        }
-        return listener;
-    }
 
     protected Map createManagedVersionMap(String projectId,
             DependencyManagement dependencyManagement) throws ProjectBuildingException {
