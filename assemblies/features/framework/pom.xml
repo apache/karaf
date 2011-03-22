@@ -40,15 +40,64 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.exception</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.client</artifactId>
+            <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.boot</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>osgi</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- ???? -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- listed in source feature.xml with explicit startlevel -->
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-service</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-mvn</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-wrap</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <!-- to be added automatically to feature.xml -->
         <dependency>
             <groupId>org.apache.karaf.deployer</groupId>
             <artifactId>org.apache.karaf.deployer.spring</artifactId>
@@ -151,10 +200,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.boot</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.config</artifactId>
         </dependency>
         <dependency>
@@ -182,10 +227,6 @@
             <artifactId>mina-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
         </dependency>
@@ -198,32 +239,8 @@
             <artifactId>org.apache.felix.metatype</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
-            <artifactId>pax-logging-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
-            <artifactId>pax-logging-service</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-mvn</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-wrap</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
@@ -317,6 +334,24 @@
                                     <outputDirectory>target/classes/resources/lib</outputDirectory>
                                     <destFileName>karaf-jaas-boot.jar</destFileName>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf</groupId>
+                                    <artifactId>org.apache.karaf.exception</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
+                                    <!--<destFileName>karaf-jaas-boot.jar</destFileName>-->
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse</groupId>
+                                    <artifactId>osgi</artifactId>
+                                    <outputDirectory>target/classes/resources/system/org/eclipse/osgi/${equinox.version}</outputDirectory>
+                                    <!--<destFileName>karaf-jaas-boot.jar</destFileName>-->
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.framework</artifactId>
+                                    <outputDirectory>target/classes/resources/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}</outputDirectory>
+                                    <!--<destFileName>karaf-jaas-boot.jar</destFileName>-->
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -328,7 +363,11 @@
                 <version>${project.version}</version>
                 <!--<extensions>true</extensions>-->
                 <configuration>
-                    <repositoryPath>resources/system/</repositoryPath>
+                    <startLevel>30</startLevel>
+                    <checkDependencyChange>true</checkDependencyChange>
+                    <overwriteChangedDependencies>true</overwriteChangedDependencies>
+                    <warnOnDependencyChange>true</warnOnDependencyChange>
+                    <!--<repositoryPath>resources/system/</repositoryPath>-->
                 </configuration>
                 <executions>
                     <execution>

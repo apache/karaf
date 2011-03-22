@@ -33,18 +33,9 @@
     <name>Apache Karaf :: Assemblies :: Features</name>
 
     <modules>
+        <module>framework</module>
         <module>standard</module>
         <module>enterprise</module>
-        <module>framework</module>
     </modules>
-
-    <profiles>
-        <profile>
-            <id>full</id>
-            <modules>
-                <module>framework</module>
-            </modules>
-        </profile>
-    </profiles>
 
 </project>
