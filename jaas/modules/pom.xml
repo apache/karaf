@@ -44,6 +44,7 @@
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.boot</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

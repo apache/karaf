@@ -531,6 +531,14 @@
                         <groupId>net.sf.kxml</groupId>
                         <artifactId>kxml2</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.easymock</groupId>
+                        <artifactId>easymock</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -545,6 +553,10 @@
                     <exclusion>
                         <groupId>org.apache.felix</groupId>
                         <artifactId>org.osgi.compendium</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>net.sf.kxml</groupId>
+                        <artifactId>kxml2</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -577,12 +589,30 @@
                         <groupId>org.osgi</groupId>
                         <artifactId>org.osgi.core</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.compendium</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.eventadmin</artifactId>
                 <version>${felix.eventadmin.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.compendium</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>concurrent</groupId>
+                        <artifactId>concurrent</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -781,6 +811,10 @@
                         <groupId>org.easymock</groupId>
                         <artifactId>easymockclassextension</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -893,12 +927,34 @@
                         <groupId>org.apache.felix</groupId>
                         <artifactId>javax.servlet</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.aries.testsupport</groupId>
+                        <artifactId>org.apache.aries.testsupport.unit</artifactId>
+                    </exclusion>
+                    <exclusion>
+                         <groupId>org.apache.aries.proxy</groupId>
+                         <artifactId>org.apache.aries.proxy.api</artifactId>
+                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.proxy</groupId>
                 <artifactId>org.apache.aries.proxy</artifactId>
                 <version>${aries.proxy.version}</version>
+                <exclusions>
+                    <exclusion>
+                         <groupId>org.apache.aries.proxy</groupId>
+                         <artifactId>org.apache.aries.proxy.api</artifactId>
+                     </exclusion>
+                     <exclusion>
+                         <groupId>org.apache.aries.proxy</groupId>
+                         <artifactId>org.apache.aries.proxy.impl</artifactId>
+                     </exclusion>
+                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries</groupId>
@@ -914,6 +970,12 @@
                 <groupId>org.apache.aries.jmx</groupId>
                 <artifactId>org.apache.aries.jmx.blueprint</artifactId>
                 <version>${aries.jmx.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.jndi</groupId>

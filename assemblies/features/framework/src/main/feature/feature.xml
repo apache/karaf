@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="&lt;unnamed&gt;">
+    <feature version="2.99.99-SNAPSHOT" name="karaf-framework">
+        <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-mvn/1.2.5</bundle>
+        <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/1.2.5</bundle>
+        <bundle dependency="false" start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/1.6.1</bundle>
+        <bundle dependency="false" start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-service/1.6.1</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/1.2.8</bundle>
+        <bundle dependency="false" start="true" start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/3.1.10</bundle>
+        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/3.3_1</bundle>
+        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/0.3</bundle>
+        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/0.3</bundle>
+        <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/0.3</bundle>
+
+
+<!--
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf/org.apache.karaf.util/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.features/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.features/org.apache.karaf.features.core/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.bundlerepository/1.6.4</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.console/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.utils/1.1.0</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.obr/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.features/org.apache.karaf.features.command/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.features/org.apache.karaf.features.management/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf/org.apache.karaf.management/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.features/org.apache.karaf.features.obr/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.core/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.common/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.command/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.diagnostic/org.apache.karaf.diagnostic.management/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.admin/org.apache.karaf.admin.management/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.osgi/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.log/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.packages/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.gogo.runtime/0.6.1</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.sshd/sshd-core/0.5.0</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.mina/mina-core/2.0.1</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.shell/org.apache.karaf.shell.dev/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.command/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.boot/2.99.99-SNAPSHOT</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.eventadmin/1.2.10</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.felix/org.apache.felix.metatype/1.0.4</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.aries.jmx/org.apache.aries.jmx/0.3</bundle>
+        <bundle dependency="false" start="true" start-level="10">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/0.3</bundle>
+-->
+    </feature>
+</features>
