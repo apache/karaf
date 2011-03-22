@@ -20,9 +20,11 @@
 
 package org.apache.karaf.tooling.features;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -48,6 +50,13 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.repository.RemoteRepository;
+import org.sonatype.aether.resolution.ArtifactRequest;
+import org.sonatype.aether.resolution.ArtifactResolutionException;
+import org.sonatype.aether.resolution.ArtifactResult;
+import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
@@ -108,9 +117,52 @@ public class InstallKarsMojo extends MojoSupport {
      * @required
      */
     protected String systemDirectory;
+
+    //Aether support
+    /**
+     * The entry point to Aether, i.e. the component doing all the work.
+     *
+     * @component
+     */
+    private RepositorySystem repoSystem;
+
+    /**
+     * The current repository/network configuration of Maven.
+     *
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
+     */
+    private RepositorySystemSession repoSession;
+
+    /**
+     * The project's remote repositories to use for the resolution of plugins and their dependencies.
+     *
+     * @parameter default-value="${project.remoteProjectRepositories}"
+     * @readonly
+     */
+    private List<RemoteRepository> remoteRepos;
+
     private String repoPath;
+    private CommentProperties startupProperties = new CommentProperties();
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (startupPropertiesFile.exists()) {
+            try {
+                InputStream in = new FileInputStream(startupPropertiesFile);
+                try {
+                    startupProperties.load(in);
+                } finally {
+                    in.close();
+                }
+            } catch (IOException e) {
+                throw new MojoFailureException("Could not open existing startup.properties file at " + startupPropertiesFile, e);
+            }
+        } else {
+            startupProperties.setHeader(Collections.singletonList("#Bundles to be started on startup, with startlevel"));
+            if (!startupPropertiesFile.getParentFile().exists()) {
+                startupPropertiesFile.getParentFile().mkdirs();
+            }
+        }
         KarArtifactInstaller installer = new KarArtifactInstaller();
         installer.setBasePath(workDirectory);
         repoPath = unpackToLocalRepo ? localRepoDirectory : systemDirectory;
@@ -131,12 +183,119 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             }
             if ("features".equals(artifact.getClassifier()) && "compile".equals(artifact.getScope())) {
-                //TODO
+                File file = artifact.getFile();
+                try {
+                    featuresService.addRepository(file.toURI());
+                } catch (Exception e) {
+                    buf.append("Could not install feature: ").append(artifact.toString()).append("\n");
+                    buf.append(e.getMessage()).append("\n\n");
+                }
             }
+        }
+
+        byte[] buffer = new byte[4096];
+        for (String key: startupProperties.keySet()) {
+            String path = fromMaven(key);
+            File target = new File(repoPath + "/" + path);
+            if (!target.exists()) {
+                target.getParentFile().mkdirs();
+                File source = resolve(key);
+                try {
+                    InputStream is = new FileInputStream(source);
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(target));
+                    int count = 0;
+                    while ((count = is.read(buffer)) > 0)
+                    {
+                        bos.write(buffer, 0, count);
+                    }
+                    bos.close();
+                } catch (IOException e) {
+                    getLog().error("Could not copy bundle " + key, e);
+                }
+
+            }
+        }
+
+        try {
+            OutputStream out = new FileOutputStream(startupPropertiesFile);
+            try {
+                startupProperties.save(out);
+            } finally {
+                out.close();
+            }
+        } catch (IOException e) {
+            throw new MojoFailureException("Could not write startup.properties file at " + startupPropertiesFile, e);
         }
         if (buf.length() > 0) {
             throw new MojoExecutionException("Could not unpack all dependencies:\n" + buf.toString());
         }
+    }
+
+    /**
+     * Copied from Main class
+     * Returns a path for an srtifact.
+     * Input: path (no ':') returns path
+     * Input: mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to default repo location path
+     * Input:  <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default repo location path
+     * type and classifier are optional.
+     *
+     *
+     * @param name input artifact info
+     * @return path as supplied or a default maven repo path
+     */
+    private static String fromMaven(String name) {
+        if (name.indexOf(':') == -1) {
+            return name;
+        }
+        int firstBit = 0;
+        if (name.startsWith("mvn:")) {
+            firstBit = 1;
+        }
+        String[] bits = name.split("[:/]");
+        StringBuilder b = new StringBuilder(bits[firstBit]);
+        for (int i = 0; i < b.length(); i++) {
+            if (b.charAt(i) == '.') {
+                b.setCharAt(i, '/');
+            }
+        }
+        b.append('/').append(bits[firstBit + 1]); //artifactId
+        b.append('/').append(bits[firstBit + 2]); //version
+        b.append('/').append(bits[firstBit + 1]).append('-').append(bits[firstBit + 2]);
+        if (bits.length == firstBit + 5 && !bits[firstBit + 4].isEmpty()) {
+            b.append('-').append(bits[firstBit + 4]); //classifier
+        }
+        if (bits.length >= firstBit + 4 && !bits[firstBit + 3].isEmpty()) {
+            b.append('.').append(bits[firstBit + 3]);
+        } else {
+            b.append(".jar");
+        }
+        return b.toString();
+    }
+
+    public File resolve(String id) {
+        if (id.startsWith("mvn:")) {
+            id = id.substring("mvn:".length()).replaceAll("/", ":");
+        }
+        ArtifactRequest request = new ArtifactRequest();
+        request.setArtifact(
+                new DefaultArtifact(id));
+        request.setRepositories(remoteRepos);
+
+        getLog().debug("Resolving artifact " + id +
+                " from " + remoteRepos);
+
+        ArtifactResult result;
+        try {
+            result = repoSystem.resolveArtifact(repoSession, request);
+        } catch (ArtifactResolutionException e) {
+            getLog().warn("could not resolve " + id, e);
+            return null;
+        }
+
+        getLog().debug("Resolved artifact " + id + " to " +
+                result.getArtifact().getFile() + " from "
+                + result.getRepository());
+        return result.getArtifact().getFile();
     }
 
     private class OfflineFeaturesService implements FeaturesService {
@@ -168,25 +327,16 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             } else {
                 getLog().info("Installing feature to system and startup.properties");
-                CommentProperties startupProperties = new CommentProperties();
-                if (startupPropertiesFile.exists()) {
-                    InputStream in = new FileInputStream(startupPropertiesFile);
-                    try {
-                        startupProperties.load(in);
-                    } finally {
-                        in.close();
-                    }
+                File repoFile;
+                if (url.toString().startsWith("mvn:")) {
+                    DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
+                    String[] bits = url.toString().split("[:/]");
+                    Artifact artifact = factory.createArtifactWithClassifier(bits[1], bits[2], bits[3], bits[4], bits[5]);
+                    String featuresPath = repoPath + "/" + layout.pathOf(artifact);
+                    repoFile = new File(featuresPath);
                 } else {
-                    startupProperties.setHeader(Collections.singletonList("#Bundles to be started on startup, with startlevel"));
-                    if (!startupPropertiesFile.getParentFile().exists()) {
-                        startupPropertiesFile.getParentFile().mkdirs();
-                    }
+                    repoFile = new File(url);
                 }
-                DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
-                String[] bits = url.toString().split("[:/]");
-                Artifact artifact = factory.createArtifactWithClassifier(bits[1], bits[2], bits[3], bits[4], bits[5]);
-                String featuresPath = repoPath + "/" + layout.pathOf(artifact);
-                File repoFile = new File(featuresPath);
                 InputStream in = new FileInputStream(repoFile);
                 Features features;
                 try {
@@ -199,13 +349,6 @@ public class InstallKarsMojo extends MojoSupport {
                     for (Bundle bundle: feature.getBundle()) {
                         String location = bundle.getLocation();
                         String startLevel = Integer.toString(bundle.getStartLevel());
-//                        bits = location.toString().split("[:/]");
-//                        if (bits.length < 4) {
-//                            getLog().warn("bad bundle: " + location);
-//                        } else {
-//                        Artifact bundleArtifact = factory.createArtifact(bits[1], bits[2], bits[3], null, bits.length == 4? "jar": bits[4]);
-//                        String bundlePath = location.startsWith("mvn:")? location.substring("mvn:".length()).replaceAll("/", ":"): location;
-                        //layout.pathOf(bundleArtifact);
                         if (startupProperties.containsKey(location)) {
                             int oldStartLevel = Integer.decode(startupProperties.get(location));
                             if (oldStartLevel > bundle.getStartLevel()) {
@@ -222,12 +365,6 @@ public class InstallKarsMojo extends MojoSupport {
                     }
                 }
 
-                OutputStream out = new FileOutputStream(startupPropertiesFile);
-                try {
-                    startupProperties.save(out);
-                } finally {
-                    out.close();
-                }
 
             }
         }

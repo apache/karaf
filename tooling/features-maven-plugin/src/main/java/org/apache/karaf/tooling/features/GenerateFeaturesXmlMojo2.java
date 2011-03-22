@@ -40,21 +40,15 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
-import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.model.ObjectFactory;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -63,20 +57,36 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
-import org.apache.maven.project.artifact.InvalidDependencyVersionException;
-import org.apache.maven.shared.dependency.tree.DependencyNode;
-import org.apache.maven.shared.dependency.tree.DependencyTreeResolutionListener;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.StringUtils;
+import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.collection.CollectRequest;
+import org.sonatype.aether.collection.CollectResult;
+import org.sonatype.aether.collection.DependencyCollectionException;
+import org.sonatype.aether.collection.DependencyGraphTransformer;
+import org.sonatype.aether.graph.DependencyNode;
+import org.sonatype.aether.repository.RemoteRepository;
+import org.sonatype.aether.resolution.ArtifactRequest;
+import org.sonatype.aether.resolution.ArtifactResult;
+import org.sonatype.aether.util.DefaultRepositorySystemSession;
+import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
+import org.sonatype.aether.util.graph.transformer.ConflictMarker;
+import org.sonatype.aether.util.graph.transformer.JavaDependencyContextRefiner;
+import org.sonatype.aether.util.graph.transformer.JavaEffectiveScopeCalculator;
 import org.xml.sax.SAXException;
+
+import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
 
 /**
  * Generates the features XML file
+ * NB this requires a recent maven-install-plugin such as 2.3.1
  *
  * @version $Revision: 1.1 $
  * @goal generate-features-xml2
@@ -91,7 +101,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     /**
      * The (optional) input feature.file to extend
      *
-     * @parameter default-value="${project.build.directory}/src/main/feature/feature.xml"
+     * @parameter default-value="${project.basedir}/src/main/feature/feature.xml"
      */
     private File inputFile;
 
@@ -159,44 +169,39 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     protected MavenProjectHelper projectHelper;
 
     /**
-     * The artifact factory to use.
+     * The entry point to Aether, i.e. the component doing all the work.
      *
      * @component
-     * @required
-     * @readonly
      */
-    protected ArtifactFactory artifactFactory;
-    /**
-     * The artifact repository to use.
-     *
-     * @parameter expression="${localRepository}"
-     * @required
-     * @readonly
-     */
-    private ArtifactRepository localRepository;
+    private RepositorySystem repoSystem;
 
     /**
-     * The artifact metadata source to use.
+     * The current repository/network configuration of Maven.
      *
-     * @component
-     * @required
+     * @parameter default-value="${repositorySystemSession}"
      * @readonly
      */
-    private ArtifactMetadataSource artifactMetadataSource;
+    private RepositorySystemSession repoSession;
 
     /**
-     * The artifact collector to use.
+     * The project's remote repositories to use for the resolution of project dependencies.
      *
-     * @component
-     * @required
+     * @parameter default-value="${project.remoteProjectRepositories}"
      * @readonly
      */
-    private ArtifactCollector artifactCollector;
+    private List<RemoteRepository> projectRepos;
 
-    //all dependencies
-    protected Set<Artifact> dependencyArtifacts;
+    /**
+     * The project's remote repositories to use for the resolution of plugins and their dependencies.
+     *
+     * @parameter default-value="${project.remotePluginRepositories}"
+     * @readonly
+     */
+    private List<RemoteRepository> pluginRepos;
+
+
     //dependencies we are interested in
-    protected Set<Artifact> localDependencies;
+    protected Map<Artifact, String> localDependencies;
     //log of what happened during search
     protected String treeListing;
 
@@ -257,10 +262,11 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         }
         feature.setVersion(project.getArtifact().getBaseVersion());
         feature.setResolver(resolver);
-        for (Artifact artifact : localDependencies) {
+        for (Map.Entry<Artifact, String> entry : localDependencies.entrySet()) {
+            Artifact artifact = entry.getKey();
             if (isFeature(artifact)) {
-                if (aggregateFeatures && KarArtifactInstaller.FEATURE_CLASSIFIER.equals(artifact.getClassifier())) {
-                    File featuresFile = artifact.getFile();
+                if (aggregateFeatures && FEATURE_CLASSIFIER.equals(artifact.getClassifier())) {
+                    File featuresFile = resolve(artifact);
                     if (featuresFile == null || !featuresFile.exists()) {
                         throw new MojoExecutionException("Cannot locate file for feature: " + artifact + " at " + featuresFile);
                     }
@@ -276,14 +282,14 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
                 }
             } else {
                 String bundleName;
-                if (artifact.getType().equals("jar")) {
+                if (artifact.getExtension().equals("jar")) {
                     bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
                 } else {
-                    bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType());
+                    bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getExtension());
                 }
                 Bundle bundle = objectFactory.createBundle();
                 bundle.setLocation(bundleName);
-                if ("runtime".equals(artifact.getScope())) {
+                if ("runtime".equals(entry.getValue())) {
                     bundle.setDependency(true);
                 }
                 if (startLevel != null) {
@@ -307,6 +313,29 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         getLogger().info("...done!");
     }
 
+    private File resolve(Artifact artifact) {
+        ArtifactRequest request = new ArtifactRequest();
+        request.setArtifact(artifact);
+        request.setRepositories(projectRepos);
+
+        getLog().debug("Resolving artifact " + artifact +
+                " from " + projectRepos);
+
+        ArtifactResult result;
+        try {
+            result = repoSystem.resolveArtifact(repoSession, request);
+        } catch (org.sonatype.aether.resolution.ArtifactResolutionException e) {
+            getLog().warn("could not resolve " + artifact, e);
+            return null;
+        }
+
+        getLog().debug("Resolved artifact " + artifact + " to " +
+                result.getArtifact().getFile() + " from "
+                + result.getRepository());
+        return result.getArtifact().getFile();
+    }
+
+
     private Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
         Features features;
         InputStream in = new FileInputStream(featuresFile);
@@ -323,34 +352,28 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
 
     protected void getDependencies(MavenProject project, boolean useTransitiveDependencies) throws MojoExecutionException {
 
-        DependencyTreeResolutionListener listener = new DependencyTreeResolutionListener(getLogger());
-
-        DependencyNode rootNode;
-        try {
-            Map managedVersions = project.getManagedVersionMap();
-
-            Set dependencyArtifacts = project.getDependencyArtifacts();
-
-            if (dependencyArtifacts == null) {
-                dependencyArtifacts = project.createArtifacts(artifactFactory, null, null);
-            }
-            ArtifactResolutionResult result = artifactCollector.collect(dependencyArtifacts, project.getArtifact(), managedVersions, localRepository,
-                    project.getRemoteArtifactRepositories(), artifactMetadataSource, null,
-                    Collections.singletonList(listener));
-
-            this.dependencyArtifacts = result.getArtifacts();
-            rootNode = listener.getRootNode();
-        } catch (ArtifactResolutionException exception) {
-            throw new MojoExecutionException("Cannot build project dependency tree", exception);
-        } catch (InvalidDependencyVersionException e) {
-            throw new MojoExecutionException("Invalid dependency version for artifact "
-                    + project.getArtifact());
-        }
+        DependencyNode rootNode = getDependencyTree(RepositoryUtils.toArtifact(project.getArtifact()));
 
         Scanner scanner = new Scanner();
         scanner.scan(rootNode, useTransitiveDependencies);
-        localDependencies = scanner.localDependencies.keySet();
+        localDependencies = scanner.localDependencies;
         treeListing = scanner.getLog();
+    }
+
+    private DependencyNode getDependencyTree(Artifact artifact) throws MojoExecutionException {
+        try {
+            List<org.sonatype.aether.graph.Dependency> managedArtifacts = new ArrayList<org.sonatype.aether.graph.Dependency>();
+            CollectRequest collectRequest = new CollectRequest(new org.sonatype.aether.graph.Dependency(artifact, "compile"), null, projectRepos);
+            DefaultRepositorySystemSession session = new DefaultRepositorySystemSession(repoSession);
+            DependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(new ConflictMarker(),
+                    new JavaEffectiveScopeCalculator(),
+                    new JavaDependencyContextRefiner());
+            session.setDependencyGraphTransformer(transformer);
+            CollectResult result = repoSystem.collectDependencies(session, collectRequest);
+            return result.getRoot();
+        } catch (DependencyCollectionException e) {
+            throw new MojoExecutionException("Cannot build project dependency tree", e);
+        }
     }
 
     public void setLog(Log log) {
@@ -364,7 +387,9 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         return log;
     }
 
+
     private static class Scanner {
+
         private static enum Accept {
             ACCEPT(true, true),
             PROVIDED(true, false),
@@ -387,75 +412,60 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
             }
         }
 
-        //all the dependencies needed for this car, with provided dependencies removed
-        private final Map<Artifact, Set<Artifact>> localDependencies = new LinkedHashMap<Artifact, Set<Artifact>>();
+        //all the dependencies needed for this car, with provided dependencies removed. artifact to scope map
+        private final Map<Artifact, String> localDependencies = new LinkedHashMap<Artifact, String>();
         //dependencies from ancestor cars, to be removed from localDependencies.
         private final Set<Artifact> carDependencies = new LinkedHashSet<Artifact>();
 
         private final StringBuilder log = new StringBuilder();
 
-        public void scan(DependencyNode rootNode, boolean useTransitiveDependencies) {
-            Set<Artifact> children = new LinkedHashSet<Artifact>();
-            for (DependencyNode child : (List<DependencyNode>) rootNode.getChildren()) {
-                scan(child, Accept.ACCEPT, useTransitiveDependencies, false, "", children);
+        public void scan(DependencyNode rootNode, boolean useTransitiveDependencies) throws MojoExecutionException {
+            for (DependencyNode child : rootNode.getChildren()) {
+                scan(child, Accept.ACCEPT, useTransitiveDependencies, false, "");
             }
             if (useTransitiveDependencies) {
                 localDependencies.keySet().removeAll(carDependencies);
             }
         }
 
-        private void scan(DependencyNode rootNode, Accept parentAccept, boolean useTransitiveDependencies, boolean isFromCar, String indent, Set<Artifact> parentsChildren) {
-            Artifact artifact = getArtifact(rootNode);
+        private void scan(DependencyNode dependencyNode, Accept parentAccept, boolean useTransitiveDependencies, boolean isFromFeature, String indent) throws MojoExecutionException {
+//            Artifact artifact = getArtifact(rootNode);
 
-            Accept accept = accept(artifact, parentAccept);
+            Accept accept = accept(dependencyNode, parentAccept);
             if (accept.isContinue()) {
-                Set<Artifact> children = localDependencies.get(artifact);
-                if (isFromCar) {
-                    if (!isFeature(artifact)) {
-                        log.append(indent).append("from feature:").append(artifact).append("\n");
-                        carDependencies.add(artifact);
+                List<DependencyNode> children = dependencyNode.getChildren();
+                if (isFromFeature) {
+                    if (!isFeature(dependencyNode)) {
+                        log.append(indent).append("from feature:").append(dependencyNode).append("\n");
+                        carDependencies.add(dependencyNode.getDependency().getArtifact());
                     } else {
-                        log.append(indent).append("is feature:").append(artifact).append("\n");
+                        log.append(indent).append("is feature:").append(dependencyNode).append("\n");
                     }
                 } else {
-                    log.append(indent).append("local:").append(artifact).append("\n");
-                    if (carDependencies.contains(artifact)) {
-                        log.append(indent).append("already in feature, returning:").append(artifact).append("\n");
-                        parentsChildren.add(artifact);
+                    log.append(indent).append("local:").append(dependencyNode).append("\n");
+                    if (carDependencies.contains(dependencyNode.getDependency().getArtifact())) {
+                        log.append(indent).append("already in feature, returning:").append(dependencyNode).append("\n");
                         return;
                     }
-                    parentsChildren.add(artifact);
-                    if (children == null) {
-                        children = new LinkedHashSet<Artifact>();
-                        localDependencies.put(artifact, children);
-                    }
-                    if (isFeature(artifact) || !useTransitiveDependencies) {
-                        isFromCar = true;
+                    //TODO resolve scope conflicts
+                    localDependencies.put(dependencyNode.getDependency().getArtifact(), dependencyNode.getDependency().getScope());
+                    if (isFeature(dependencyNode) || !useTransitiveDependencies) {
+                        isFromFeature = true;
                     }
                 }
-                for (DependencyNode child : (List<DependencyNode>) rootNode.getChildren()) {
-                    scan(child, accept, useTransitiveDependencies, isFromCar, indent + "  ", children);
+                for (DependencyNode child : children) {
+                    scan(child, accept, useTransitiveDependencies, isFromFeature, indent + "  ");
                 }
             }
         }
+
 
         public String getLog() {
             return log.toString();
         }
 
-        private Artifact getArtifact(DependencyNode rootNode) {
-            Artifact artifact = rootNode.getArtifact();
-            if (rootNode.getRelatedArtifact() != null) {
-                artifact = rootNode.getRelatedArtifact();
-            }
-            return artifact;
-        }
-
-        private Accept accept(Artifact dependency, Accept previous) {
-//            if (dependency.getGroupId().startsWith("org.apache.geronimo.genesis")) {
-//                return Accept.STOP;
-//            }
-            String scope = dependency.getScope();
+        private Accept accept(DependencyNode dependency, Accept previous) {
+            String scope = dependency.getPremanagedScope();
             if (scope == null || "runtime".equalsIgnoreCase(scope) || "compile".equalsIgnoreCase(scope)) {
                 return previous;
             }
@@ -464,8 +474,12 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
 
     }
 
+    private static boolean isFeature(DependencyNode dependencyNode) {
+        return isFeature(dependencyNode.getDependency().getArtifact());
+    }
+
     private static boolean isFeature(Artifact artifact) {
-        return artifact.getType().equals("kar") || KarArtifactInstaller.FEATURE_CLASSIFIER.equals(artifact.getClassifier());
+        return artifact.getExtension().equals("kar") || FEATURE_CLASSIFIER.equals(artifact.getClassifier());
     }
 
     //------------------------------------------------------------------------//
@@ -638,6 +652,8 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
                     if (overwriteChangedDependencies) {
                         writeDependencies(features, dependencyFile);
                     }
+                } else {
+                    getLog().info(saveTreeListing());
                 }
 
             } else {
@@ -657,9 +673,9 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         Features removed = toFeatures(removedBundles, removedDependencys, objectFactory);
         writeDependencies(removed,  removedFile);
 
-        File treeListing = saveTreeListing();
-
         StringWriter out = new StringWriter();
+        out.write(saveTreeListing());
+
         out.write("Dependencies have changed:\n");
         if (!addedBundles.isEmpty() || ! addedDependencys.isEmpty()) {
             out.write("\tAdded dependencies are saved here: " + addedFile.getAbsolutePath() + "\n");
@@ -673,7 +689,6 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
                 JaxbUtil.marshal(Features.class, removed, out);
             }
         }
-        out.write("\tTree listing is saved here: " + treeListing.getAbsolutePath() + "\n");
         out.write("Delete " + dependencyFile.getAbsolutePath()
                 + " if you are happy with the dependency changes.");
 
@@ -725,7 +740,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     }
 
 
-    protected File saveTreeListing() throws IOException {
+    protected String saveTreeListing() throws IOException {
         File treeListFile = new File(filteredDependencyFile.getParentFile(), "treeListing.txt");
         OutputStream os = new FileOutputStream(treeListFile);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
@@ -734,7 +749,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         } finally {
             writer.close();
         }
-        return treeListFile;
+        return "\tTree listing is saved here: " + treeListFile.getAbsolutePath() + "\n";
     }
 
 
