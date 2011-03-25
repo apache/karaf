@@ -37,17 +37,7 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>manual</artifactId>
-            <type>pdf</type>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>manual</artifactId>
-            <type>html</type>
-        </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
         </dependency>
@@ -461,20 +451,6 @@
                                     <outputDirectory>target/dependencies/lib</outputDirectory>
                                     <destFileName>karaf-jaas-boot.jar</destFileName>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf</groupId>
-                                    <artifactId>manual</artifactId>
-                                    <type>pdf</type>
-                                    <outputDirectory>target/dependencies</outputDirectory>
-                                    <destFileName>karaf-manual-${project.version}.pdf</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf</groupId>
-                                    <artifactId>manual</artifactId>
-                                    <type>html</type>
-                                    <outputDirectory>target/dependencies</outputDirectory>
-                                    <destFileName>karaf-manual-${project.version}.html</destFileName>
-                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -627,6 +603,59 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>manual</id>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.karaf</groupId>
+                    <artifactId>manual</artifactId>
+                    <type>pdf</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.karaf</groupId>
+                    <artifactId>manual</artifactId>
+                    <type>html</type>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-manual</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.apache.karaf</groupId>
+                                            <artifactId>manual</artifactId>
+                                            <type>pdf</type>
+                                            <outputDirectory>target/dependencies</outputDirectory>
+                                            <destFileName>karaf-manual-${project.version}.pdf</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.apache.karaf</groupId>
+                                            <artifactId>manual</artifactId>
+                                            <type>html</type>
+                                            <outputDirectory>target/dependencies</outputDirectory>
+                                            <destFileName>karaf-manual-${project.version}.html</destFileName>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>assembly-src</id>
             <build>
