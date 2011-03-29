@@ -58,7 +58,7 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
                     Long startId = Long.valueOf(id.substring(0, index));
                     Long endId = Long.valueOf(id.substring(index + 1));
                     if (startId < endId) {
-                        for (long i = startId; i <= endId; startId++) {
+                        for (long i = startId; i <= endId; i++) {
                             Bundle bundle = getBundleContext().getBundle(i);
                             this.addBundle(bundle, id, force, bundles);
                         }
@@ -137,7 +137,6 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
         ArrayList<Bundle> result = new ArrayList<Bundle>();
 
         Pattern namePattern = Pattern.compile(name);
-        Pattern versionPattern = Pattern.compile(version);
 
         for (int i = 0; i < bundles.length; i++) {
 
@@ -148,6 +147,8 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
             Matcher symbolicNameMatcher = namePattern.matcher(bundleSymbolicName);
 
             if (version != null) {
+
+                Pattern versionPattern = Pattern.compile(version);
 
                 String bundleVersion = (String) bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
                 Matcher versionMatcher = versionPattern.matcher(bundleVersion);
