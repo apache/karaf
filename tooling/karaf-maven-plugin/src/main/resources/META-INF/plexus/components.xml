@@ -35,7 +35,7 @@
                                 org.apache.maven.plugins:maven-resources-plugin:resources
                             </process-resources>
                             <compile>
-                                org.apache.karaf.tooling:features-maven-plugin:generate-features-xml2
+                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml2
                             </compile>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
@@ -74,10 +74,10 @@
                                 org.apache.maven.plugins:maven-resources-plugin:resources
                             </process-resources>
                             <compile>
-                                org.apache.karaf.tooling:features-maven-plugin:generate-features-xml2
+                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml2
                             </compile>
                             <package>
-                                org.apache.karaf.tooling:features-maven-plugin:archive-kar
+                                org.apache.karaf.tooling:karaf-maven-plugin:archive-kar
                             </package>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
@@ -120,12 +120,12 @@
                         <phases>
                             <process-resources>
                                 org.apache.maven.plugins:maven-resources-plugin:resources,
-                                org.apache.karaf.tooling:features-maven-plugin:install-kars
+                                org.apache.karaf.tooling:karaf-maven-plugin:install-kars
                             </process-resources>
                             <compile>
                             </compile>
                             <package>
-                                org.apache.karaf.tooling:features-maven-plugin:archive-server
+                                org.apache.karaf.tooling:karaf-maven-plugin:archive-server
                             </package>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install

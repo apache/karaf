@@ -27,12 +27,12 @@
         <version>3.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>features-maven-plugin</artifactId>
+    <artifactId>karaf-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>Apache Karaf :: Tooling :: Maven2 Features plugin</name>
+    <name>Apache Karaf :: Tooling :: Maven2 Karaf plugin</name>
 
     <description>
-        A Maven 2 plugin for working with feature descriptors.
+        A Maven 2 plugin for working with karaf.
     </description>
 
     <properties>
@@ -141,6 +141,14 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.ant</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.karaf.shell</groupId>
+          <artifactId>org.apache.karaf.shell.console</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.xbean</groupId>
+          <artifactId>xbean-finder-shaded</artifactId>
         </dependency>
         <dependency>
             <groupId>org.easymock</groupId>
