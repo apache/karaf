@@ -33,8 +33,7 @@
     <name>Apache Karaf :: Tooling</name>
 
     <modules>
-        <module>features-maven-plugin</module>
-        <module>cmdhelp-maven-plugin</module>
+        <module>karaf-maven-plugin</module>
         <module>testing</module>
     </modules>
 

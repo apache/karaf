@@ -572,7 +572,7 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>features-maven-plugin</artifactId>
+                <artifactId>karaf-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <executions>
                     <execution>
