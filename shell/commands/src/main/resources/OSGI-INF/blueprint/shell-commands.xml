@@ -73,11 +73,9 @@
         <command name="shell/sort">
             <action class="org.apache.karaf.shell.commands.SortAction"/>
         </command>
-        <!--
         <command name="shell/source">
             <action class="org.apache.karaf.shell.commands.SourceAction"/>
         </command>
-        -->
         <command name="shell/tac">
             <action class="org.apache.karaf.shell.commands.TacAction"/>
         </command>
