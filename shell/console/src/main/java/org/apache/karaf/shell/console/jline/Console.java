@@ -35,14 +35,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jline.AnsiWindowsTerminal;
-import jline.console.ConsoleReader;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
+import jline.console.ConsoleReader;
 import jline.console.history.FileHistory;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
+import org.apache.felix.gogo.runtime.Parser;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
@@ -208,14 +208,35 @@ public class Console implements Runnable
         }
         while (running) {
             try {
-                checkInterrupt();
-                String line = reader.readLine(getPrompt());
-                if (line == null)
-                {
+                String command = null;
+                boolean loop = true;
+                boolean first = true;
+                while (loop) {
+                    checkInterrupt();
+                    String line = reader.readLine(first ? getPrompt() : "> ");
+                    if (line == null)
+                    {
+                        break;
+                    }
+                    if (command == null) {
+                        command = line;
+                    } else {
+                        command += " " + line;
+                    }
+                    reader.getHistory().replace(command);
+                    try {
+                        new Parser(command).program();
+                        loop = false;
+                    } catch (Exception e) {
+                        loop = true;
+                        first = false;
+                    }
+                }
+                if (command == null) {
                     break;
                 }
                 //session.getConsole().println("Executing: " + line);
-                Object result = session.execute(line);
+                Object result = session.execute(command);
                 if (result != null)
                 {
                     session.getConsole().println(session.format(result, Converter.INSPECT));
