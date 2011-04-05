@@ -99,26 +99,6 @@
 
         <!-- to be added automatically to feature.xml -->
         <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.spring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.blueprint</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.features</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.kar</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.wrap</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
@@ -129,10 +109,6 @@
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.management</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>org.apache.karaf.features.obr</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.diagnostic</groupId>
@@ -151,24 +127,8 @@
             <artifactId>org.apache.karaf.diagnostic.management</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.admin</groupId>
-            <artifactId>org.apache.karaf.admin.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.admin</groupId>
-            <artifactId>org.apache.karaf.admin.command</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.admin</groupId>
-            <artifactId>org.apache.karaf.admin.management</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.console</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.obr</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
@@ -216,31 +176,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.mina</groupId>
-            <artifactId>mina-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.eventadmin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.metatype</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sshd</groupId>
-            <artifactId>sshd-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
@@ -266,6 +206,69 @@
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.asm</artifactId>
         </dependency>
+
+<!--
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.bundlerepository</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.eventadmin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.metatype</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.admin</groupId>
+            <artifactId>org.apache.karaf.admin.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.admin</groupId>
+            <artifactId>org.apache.karaf.admin.command</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.admin</groupId>
+            <artifactId>org.apache.karaf.admin.management</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.blueprint</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.features</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.kar</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.deployer</groupId>
+            <artifactId>org.apache.karaf.deployer.wrap</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.obr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.obr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.mina</groupId>
+            <artifactId>mina-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
+        </dependency>
+-->
     </dependencies>
     <build>
         <resources>
