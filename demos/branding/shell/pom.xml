@@ -34,7 +34,7 @@
     <build>
         <resources>
             <resource>
-                <directory>${pom.basedir}/src/main/resources</directory>
+                <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*</include>

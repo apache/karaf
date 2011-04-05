@@ -34,7 +34,7 @@
     related changed.</description>
 
     <properties>
-        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${project.basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
@@ -108,7 +108,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>
-                            ${artifactId}
+                            ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Bundle-Vendor>
                             The Apache Software Foundation
