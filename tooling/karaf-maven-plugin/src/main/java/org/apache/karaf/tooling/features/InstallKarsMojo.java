@@ -95,10 +95,17 @@ public class InstallKarsMojo extends MojoSupport {
     protected File startupPropertiesFile;
 
     /**
+     * default start level for bundles in features that dont' specify it
+     *
+     * @parameter
+     */
+    protected int defaultStartLevel = 30;
+
+    /**
      * if false, unpack to system and add bundles to startup.properties
      * if true, unpack to local-repo and add feature to features config
      *
-     * @parameter
+//     * @parameter
      */
     protected boolean unpackToLocalRepo;
 
@@ -165,15 +172,16 @@ public class InstallKarsMojo extends MojoSupport {
         }
         KarArtifactInstaller installer = new KarArtifactInstaller();
         installer.setBasePath(workDirectory);
-        repoPath = unpackToLocalRepo ? localRepoDirectory : systemDirectory;
-        installer.setLocalRepoPath(repoPath);
         FeaturesService featuresService = new OfflineFeaturesService();
         installer.setFeaturesService(featuresService);
         installer.init();
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
         StringBuilder buf = new StringBuilder();
         for (Artifact artifact: dependencies) {
-            if ("kar".equals(artifact.getType()) && "compile".equals(artifact.getScope())) {
+            unpackToLocalRepo = "runtime".equals(artifact.getScope());
+            repoPath = unpackToLocalRepo ? localRepoDirectory : systemDirectory;
+            installer.setLocalRepoPath(repoPath);
+            if ("kar".equals(artifact.getType()) && acceptScope(artifact)) {
                 File file = artifact.getFile();
                 try {
                     installer.install(file);
@@ -182,7 +190,7 @@ public class InstallKarsMojo extends MojoSupport {
                     buf.append(e.getMessage()).append("\n\n");
                 }
             }
-            if ("features".equals(artifact.getClassifier()) && "compile".equals(artifact.getScope())) {
+            if ("features".equals(artifact.getClassifier()) && acceptScope(artifact)) {
                 File file = artifact.getFile();
                 try {
                     featuresService.addRepository(file.toURI());
@@ -193,10 +201,11 @@ public class InstallKarsMojo extends MojoSupport {
             }
         }
 
+        //install bundles in startup properties that weren't in kars
         byte[] buffer = new byte[4096];
         for (String key: startupProperties.keySet()) {
             String path = fromMaven(key);
-            File target = new File(repoPath + "/" + path);
+            File target = new File(systemDirectory + "/" + path);
             if (!target.exists()) {
                 target.getParentFile().mkdirs();
                 File source = resolve(key);
@@ -229,6 +238,10 @@ public class InstallKarsMojo extends MojoSupport {
         if (buf.length() > 0) {
             throw new MojoExecutionException("Could not unpack all dependencies:\n" + buf.toString());
         }
+    }
+
+    private boolean acceptScope(Artifact artifact) {
+        return "compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope());
     }
 
     /**
@@ -348,7 +361,7 @@ public class InstallKarsMojo extends MojoSupport {
                     List<String> comment = Arrays.asList(new String[] {"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
                     for (Bundle bundle: feature.getBundle()) {
                         String location = bundle.getLocation();
-                        String startLevel = Integer.toString(bundle.getStartLevel());
+                        String startLevel = Integer.toString(bundle.getStartLevel() == 0? defaultStartLevel: bundle.getStartLevel());
                         if (startupProperties.containsKey(location)) {
                             int oldStartLevel = Integer.decode(startupProperties.get(location));
                             if (oldStartLevel > bundle.getStartLevel()) {
