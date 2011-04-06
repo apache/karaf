@@ -470,10 +470,50 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.karaf.assemblies</groupId>
+                <artifactId>apache-karaf-full</artifactId>
+                <type>tar.gz</type>
+                <classifier>bin</classifier>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.assemblies</groupId>
+                <artifactId>apache-karaf-full</artifactId>
+                <type>zip</type>
+                <classifier>bin</classifier>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.assemblies</groupId>
+                <artifactId>apache-karaf-minimal</artifactId>
+                <type>tar.gz</type>
+                <classifier>bin</classifier>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.assemblies</groupId>
+                <artifactId>apache-karaf-minimal</artifactId>
+                <type>zip</type>
+                <classifier>bin</classifier>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
               <groupId>org.apache.karaf.assemblies.features</groupId>
               <artifactId>standard</artifactId>
               <type>xml</type>
               <classifier>features</classifier>
+              <version>${project.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.karaf.assemblies.features</groupId>
+              <artifactId>karaf-framework</artifactId>
+              <type>kar</type>
+              <version>${project.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.karaf.assemblies.features</groupId>
+              <artifactId>karaf-full</artifactId>
+              <type>kar</type>
               <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -1099,6 +1139,11 @@
 
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.3.1</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-eclipse-plugin</artifactId>
