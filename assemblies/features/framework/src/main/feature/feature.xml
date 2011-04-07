@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="&lt;unnamed&gt;">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="framework">
     <feature version="2.99.99-SNAPSHOT" name="karaf-framework">
         <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-mvn/${pax.url.version}</bundle>
         <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}</bundle>

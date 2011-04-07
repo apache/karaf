@@ -177,6 +177,7 @@ public class InstallKarsMojo extends MojoSupport {
         installer.init();
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
         StringBuilder buf = new StringBuilder();
+        byte[] buffer = new byte[4096];
         for (Artifact artifact: dependencies) {
             unpackToLocalRepo = "runtime".equals(artifact.getScope());
             repoPath = unpackToLocalRepo ? localRepoDirectory : systemDirectory;
@@ -191,24 +192,42 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             }
             if ("features".equals(artifact.getClassifier()) && acceptScope(artifact)) {
-                File file = artifact.getFile();
+                String uri = String.format("mvn:%s/%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getType(), artifact.getClassifier());
+
                 try {
-                    featuresService.addRepository(file.toURI());
+                    featuresService.addRepository(URI.create(uri));
                 } catch (Exception e) {
                     buf.append("Could not install feature: ").append(artifact.toString()).append("\n");
                     buf.append(e.getMessage()).append("\n\n");
                 }
+                File source = artifact.getFile();
+                File target = new File(systemDirectory + "/" + fromMaven(artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion() + ":" + artifact.getType() + ":" + artifact.getClassifier()));
+                if (!target.exists()) {
+                    target.getParentFile().mkdirs();
+                    try {
+                        InputStream is = new FileInputStream(source);
+                        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(target));
+                        int count = 0;
+                        while ((count = is.read(buffer)) > 0)
+                        {
+                            bos.write(buffer, 0, count);
+                        }
+                        bos.close();
+                    } catch (IOException e) {
+                        getLog().error("Could not copy features " + uri + " from source file " + source, e);
+                    }
+
+                }
             }
         }
 
-        //install bundles in startup properties that weren't in kars
-        byte[] buffer = new byte[4096];
+        //install bundles listed in startup properties that weren't in kars into the system dir
         for (String key: startupProperties.keySet()) {
             String path = fromMaven(key);
             File target = new File(systemDirectory + "/" + path);
             if (!target.exists()) {
-                target.getParentFile().mkdirs();
                 File source = resolve(key);
+                target.getParentFile().mkdirs();
                 try {
                     InputStream is = new FileInputStream(source);
                     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(target));
@@ -317,9 +336,9 @@ public class InstallKarsMojo extends MojoSupport {
         public void validateRepository(URI uri) throws Exception {
         }
 
-        public void addRepository(URI url) throws Exception {
+        public void addRepository(URI uri) throws Exception {
             if (unpackToLocalRepo) {
-                getLog().info("Adding feature repository to local-repo: " + url);
+                getLog().info("Adding feature repository to local-repo: " + uri);
                 if (featuresCfgFile.exists()) {
                     Properties properties = new Properties();
                     InputStream in = new FileInputStream(featuresCfgFile);
@@ -329,7 +348,7 @@ public class InstallKarsMojo extends MojoSupport {
                         in.close();
                     }
                     String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES)? properties.get(FEATURES_REPOSITORIES) + ",": "";
-                    existingFeatureRepos = existingFeatureRepos + url.toString();
+                    existingFeatureRepos = existingFeatureRepos + uri.toString();
                     properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
                     FileOutputStream out = new FileOutputStream(featuresCfgFile);
                     try {
@@ -341,14 +360,14 @@ public class InstallKarsMojo extends MojoSupport {
             } else {
                 getLog().info("Installing feature to system and startup.properties");
                 File repoFile;
-                if (url.toString().startsWith("mvn:")) {
+                if (uri.toString().startsWith("mvn:")) {
                     DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
-                    String[] bits = url.toString().split("[:/]");
+                    String[] bits = uri.toString().split("[:/]");
                     Artifact artifact = factory.createArtifactWithClassifier(bits[1], bits[2], bits[3], bits[4], bits[5]);
                     String featuresPath = repoPath + "/" + layout.pathOf(artifact);
                     repoFile = new File(featuresPath);
                 } else {
-                    repoFile = new File(url);
+                    repoFile = new File(uri);
                 }
                 InputStream in = new FileInputStream(repoFile);
                 Features features;
