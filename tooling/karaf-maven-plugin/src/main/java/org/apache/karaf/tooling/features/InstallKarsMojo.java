@@ -46,6 +46,7 @@ import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -192,16 +193,12 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             }
             if ("features".equals(artifact.getClassifier()) && acceptScope(artifact)) {
-                String uri = String.format("mvn:%s/%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getType(), artifact.getClassifier());
+                String uri = MvnUrlUtil.artifactToMvn(artifact);
 
-                try {
-                    featuresService.addRepository(URI.create(uri));
-                } catch (Exception e) {
-                    buf.append("Could not install feature: ").append(artifact.toString()).append("\n");
-                    buf.append(e.getMessage()).append("\n\n");
-                }
                 File source = artifact.getFile();
-                File target = new File(systemDirectory + "/" + fromMaven(artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion() + ":" + artifact.getType() + ":" + artifact.getClassifier()));
+                DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
+
+                File target = new File(systemDirectory + "/" + layout.pathOf(artifact));
                 if (!target.exists()) {
                     target.getParentFile().mkdirs();
                     try {
@@ -218,12 +215,18 @@ public class InstallKarsMojo extends MojoSupport {
                     }
 
                 }
+                try {
+                    featuresService.addRepository(URI.create(uri));
+                } catch (Exception e) {
+                    buf.append("Could not install feature: ").append(artifact.toString()).append("\n");
+                    buf.append(e.getMessage()).append("\n\n");
+                }
             }
         }
 
         //install bundles listed in startup properties that weren't in kars into the system dir
         for (String key: startupProperties.keySet()) {
-            String path = fromMaven(key);
+            String path = MvnUrlUtil.pathFromMaven(key);
             File target = new File(systemDirectory + "/" + path);
             if (!target.exists()) {
                 File source = resolve(key);
@@ -263,54 +266,11 @@ public class InstallKarsMojo extends MojoSupport {
         return "compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope());
     }
 
-    /**
-     * Copied from Main class
-     * Returns a path for an srtifact.
-     * Input: path (no ':') returns path
-     * Input: mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to default repo location path
-     * Input:  <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default repo location path
-     * type and classifier are optional.
-     *
-     *
-     * @param name input artifact info
-     * @return path as supplied or a default maven repo path
-     */
-    private static String fromMaven(String name) {
-        if (name.indexOf(':') == -1) {
-            return name;
-        }
-        int firstBit = 0;
-        if (name.startsWith("mvn:")) {
-            firstBit = 1;
-        }
-        String[] bits = name.split("[:/]");
-        StringBuilder b = new StringBuilder(bits[firstBit]);
-        for (int i = 0; i < b.length(); i++) {
-            if (b.charAt(i) == '.') {
-                b.setCharAt(i, '/');
-            }
-        }
-        b.append('/').append(bits[firstBit + 1]); //artifactId
-        b.append('/').append(bits[firstBit + 2]); //version
-        b.append('/').append(bits[firstBit + 1]).append('-').append(bits[firstBit + 2]);
-        if (bits.length == firstBit + 5 && !bits[firstBit + 4].isEmpty()) {
-            b.append('-').append(bits[firstBit + 4]); //classifier
-        }
-        if (bits.length >= firstBit + 4 && !bits[firstBit + 3].isEmpty()) {
-            b.append('.').append(bits[firstBit + 3]);
-        } else {
-            b.append(".jar");
-        }
-        return b.toString();
-    }
 
     public File resolve(String id) {
-        if (id.startsWith("mvn:")) {
-            id = id.substring("mvn:".length()).replaceAll("/", ":");
-        }
+        id = MvnUrlUtil.mvnToAether(id);
         ArtifactRequest request = new ArtifactRequest();
-        request.setArtifact(
-                new DefaultArtifact(id));
+        request.setArtifact(new DefaultArtifact(id));
         request.setRepositories(remoteRepos);
 
         getLog().debug("Resolving artifact " + id +
@@ -361,10 +321,7 @@ public class InstallKarsMojo extends MojoSupport {
                 getLog().info("Installing feature to system and startup.properties");
                 File repoFile;
                 if (uri.toString().startsWith("mvn:")) {
-                    DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
-                    String[] bits = uri.toString().split("[:/]");
-                    Artifact artifact = factory.createArtifactWithClassifier(bits[1], bits[2], bits[3], bits[4], bits[5]);
-                    String featuresPath = repoPath + "/" + layout.pathOf(artifact);
+                    String featuresPath = repoPath + "/" + MvnUrlUtil.pathFromMaven(uri.toString());
                     repoFile = new File(featuresPath);
                 } else {
                     repoFile = new File(uri);
