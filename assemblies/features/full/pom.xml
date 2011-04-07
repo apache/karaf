@@ -38,18 +38,6 @@
 
     <dependencies>
 
-        <!--<dependency>-->
-            <!--<groupId>org.apache.felix</groupId>-->
-            <!--<artifactId>org.apache.felix.bundlerepository</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.felix</groupId>-->
-            <!--<artifactId>org.apache.felix.eventadmin</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.felix</groupId>-->
-            <!--<artifactId>org.apache.felix.metatype</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.karaf.admin</groupId>
             <artifactId>org.apache.karaf.admin.core</artifactId>
@@ -82,14 +70,6 @@
             <groupId>org.apache.karaf.deployer</groupId>
             <artifactId>org.apache.karaf.deployer.wrap</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.karaf.features</groupId>-->
-            <!--<artifactId>org.apache.karaf.features.obr</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.karaf.shell</groupId>-->
-            <!--<artifactId>org.apache.karaf.shell.obr</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.mina</groupId>
             <artifactId>mina-core</artifactId>
@@ -142,9 +122,9 @@
                 <version>${project.version}</version>
                 <configuration>
                     <startLevel>30</startLevel>
-                    <checkDependencyChange>true</checkDependencyChange>
-                    <overwriteChangedDependencies>true</overwriteChangedDependencies>
-                    <warnOnDependencyChange>true</warnOnDependencyChange>
+                    <!--<checkDependencyChange>true</checkDependencyChange>-->
+                    <!--<overwriteChangedDependencies>true</overwriteChangedDependencies>-->
+                    <!--<warnOnDependencyChange>true</warnOnDependencyChange>-->
                 </configuration>
                 <executions>
                     <execution>

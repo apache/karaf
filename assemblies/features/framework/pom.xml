@@ -207,68 +207,6 @@
             <artifactId>org.apache.servicemix.bundles.asm</artifactId>
         </dependency>
 
-<!--
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.eventadmin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.metatype</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.admin</groupId>
-            <artifactId>org.apache.karaf.admin.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.admin</groupId>
-            <artifactId>org.apache.karaf.admin.command</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.admin</groupId>
-            <artifactId>org.apache.karaf.admin.management</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.spring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.blueprint</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.features</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.kar</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.deployer</groupId>
-            <artifactId>org.apache.karaf.deployer.wrap</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>org.apache.karaf.features.obr</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.obr</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.mina</groupId>
-            <artifactId>mina-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sshd</groupId>
-            <artifactId>sshd-core</artifactId>
-        </dependency>
--->
     </dependencies>
     <build>
         <resources>
@@ -341,19 +279,16 @@
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.exception</artifactId>
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
-                                    <!--<destFileName>karaf-jaas-boot.jar</destFileName>-->
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse</groupId>
                                     <artifactId>osgi</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/eclipse/osgi/${equinox.version}</outputDirectory>
-                                    <!--<destFileName>karaf-jaas-boot.jar</destFileName>-->
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.framework</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}</outputDirectory>
-                                    <!--<destFileName>karaf-jaas-boot.jar</destFileName>-->
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -364,13 +299,11 @@
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
                 <version>${project.version}</version>
-                <!--<extensions>true</extensions>-->
                 <configuration>
                     <startLevel>30</startLevel>
-                    <checkDependencyChange>true</checkDependencyChange>
-                    <overwriteChangedDependencies>true</overwriteChangedDependencies>
-                    <warnOnDependencyChange>true</warnOnDependencyChange>
-                    <!--<repositoryPath>resources/system/</repositoryPath>-->
+                    <!--<checkDependencyChange>true</checkDependencyChange>-->
+                    <!--<overwriteChangedDependencies>true</overwriteChangedDependencies>-->
+                    <!--<warnOnDependencyChange>true</warnOnDependencyChange>-->
                 </configuration>
                 <executions>
                     <execution>

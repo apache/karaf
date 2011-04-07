@@ -44,17 +44,15 @@
               which would lead to java.lang.RuntimeException: Could not create [service.obr] -->
         <dependency>
             <groupId>org.apache.karaf.assemblies</groupId>
-            <artifactId>apache-karaf-full</artifactId>
+            <artifactId>apache-karaf</artifactId>
             <type>tar.gz</type>
-            <classifier>bin</classifier>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.karaf.assemblies</groupId>
-            <artifactId>apache-karaf-full</artifactId>
+            <artifactId>apache-karaf</artifactId>
             <type>zip</type>
-            <classifier>bin</classifier>
             <scope>test</scope>
         </dependency>
 
@@ -111,9 +109,8 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.karaf.assemblies</groupId>
-                                    <artifactId>apache-karaf-full</artifactId>
+                                    <artifactId>apache-karaf</artifactId>
                                     <type>tar.gz</type>
-                                    <classifier>bin</classifier>
                                     <outputDirectory>target/distributions</outputDirectory>
                                     <destFileName>karaf.tar.gz</destFileName>
                                 </artifactItem>
@@ -130,9 +127,8 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.karaf.assemblies</groupId>
-                                    <artifactId>apache-karaf-full</artifactId>
+                                    <artifactId>apache-karaf</artifactId>
                                     <type>zip</type>
-                                    <classifier>bin</classifier>
                                     <outputDirectory>target/distributions</outputDirectory>
                                     <destFileName>karaf.zip</destFileName>
                                 </artifactItem>
