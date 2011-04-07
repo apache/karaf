@@ -282,12 +282,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
                     feature.getFeature().add(dependency);
                 }
             } else {
-                String bundleName;
-                if (artifact.getExtension().equals("jar")) {
-                    bundleName = String.format("mvn:%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
-                } else {
-                    bundleName = String.format("mvn:%s/%s/%s/%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getExtension());
-                }
+                String bundleName = MvnUrlUtil.artifactToMvn(artifact);
                 Bundle bundle = objectFactory.createBundle();
                 bundle.setLocation(bundleName);
                 if ("runtime".equals(entry.getValue())) {

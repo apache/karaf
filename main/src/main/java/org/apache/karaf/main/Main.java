@@ -1073,44 +1073,53 @@ public class Main {
         return null;
     }
 
+    private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
+
     /**
      * Returns a path for an srtifact.
      * Input: path (no ':') returns path
      * Input: mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to default repo location path
-     * Input:  <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default repo location path
+//     * Input:  <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default repo location path
      * type and classifier are optional.
      *
      *
      * @param name input artifact info
      * @return path as supplied or a default maven repo path
      */
-    private static String fromMaven(String name) {
-        if (name.indexOf(':') == -1) {
+    static String fromMaven(String name) {
+        Matcher m = mvnPattern.matcher(name);
+        if (!m.matches()) {
             return name;
         }
-        int firstBit = 0;
-        if (name.startsWith("mvn:")) {
-            firstBit = 1;
-        }
-        String[] bits = name.split("[:/]");
-        StringBuilder b = new StringBuilder(bits[firstBit]);
+        StringBuilder b = new StringBuilder();
+        b.append(m.group(1));
         for (int i = 0; i < b.length(); i++) {
             if (b.charAt(i) == '.') {
                 b.setCharAt(i, '/');
             }
         }
-        b.append('/').append(bits[firstBit + 1]); //artifactId
-        b.append('/').append(bits[firstBit + 2]); //version
-        b.append('/').append(bits[firstBit + 1]).append('-').append(bits[firstBit + 2]);
-        if (bits.length == firstBit + 5 && !bits[firstBit + 4].isEmpty()) {
-            b.append('-').append(bits[firstBit + 4]); //classifier
-        }
-        if (bits.length >= firstBit + 4 && !bits[firstBit + 3].isEmpty()) {
-            b.append('.').append(bits[firstBit + 3]);
+        b.append("/");//groupId
+        String artifactId = m.group(2);
+        String version = m.group(3);
+        String extension = m.group(5);
+        String classifier = m.group(7);
+        b.append(artifactId).append("/");//artifactId
+        b.append(version).append("/");//version
+        b.append(artifactId).append("-").append(version);
+        if (present(classifier)) {
+            b.append("-").append(classifier);
         } else {
-            b.append(".jar");
+            if (present(extension)) {
+                b.append(".").append(extension);
+            } else {
+                b.append(".jar");
+            }
         }
         return b.toString();
+    }
+
+    private static boolean present(String part) {
+        return part != null && !part.isEmpty();
     }
 
     private static void findJars(File dir, ArrayList<File> jars) {
