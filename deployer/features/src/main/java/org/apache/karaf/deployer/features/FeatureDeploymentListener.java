@@ -92,7 +92,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                 Document doc = parse(artifact);
                 String name = doc.getDocumentElement().getLocalName();
                 String uri  = doc.getDocumentElement().getNamespaceURI();
-                if ("features".equals(name) && (uri == null || "".equals(uri))) {
+                if ("features".equals(name) && (uri == null || "".equals(uri)  || "http://karaf.apache.org/xmlns/features/v1.0.0".equalsIgnoreCase(uri))) {
                     return true;
                 }
             }
