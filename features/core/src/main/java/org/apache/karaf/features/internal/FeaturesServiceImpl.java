@@ -922,6 +922,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     String[] list = boot.split(",");
                     Set<Feature> features = new LinkedHashSet<Feature>();
                     for (String f : list) {
+                        f = f.trim();
                         if (f.length() > 0) {
                             String featureVersion = null;
 
