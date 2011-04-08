@@ -106,6 +106,13 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     private File inputFile;
 
     /**
+     * The filtered input file
+     *
+     * @parameter default-value="${project.build.directory}/feature/filteredInputFeature.xml"
+     */
+    private File filteredInputFile;
+
+    /**
      * The file to generate
      *
      * @parameter default-value="${project.build.directory}/feature/feature.xml"
@@ -242,8 +249,8 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         ObjectFactory objectFactory = new ObjectFactory();
         Features features;
         if (inputFile.exists()) {
-            filter(inputFile, outputFile);
-            features = readFeaturesFile(outputFile);
+            filter(inputFile, filteredInputFile);
+            features = readFeaturesFile(filteredInputFile);
         } else {
             features = objectFactory.createFeaturesRoot();
         }

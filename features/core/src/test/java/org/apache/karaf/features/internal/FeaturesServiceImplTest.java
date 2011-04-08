@@ -155,10 +155,12 @@ public class FeaturesServiceImplTest extends TestCase {
             Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
             impl.setBoot("transaction;version=1.2,ssh;version=1.0.0");
             impl.start();
-
+            while (!impl.bootFeaturesInstalled.get()) {
+                Thread.sleep(10L);
+            }
             assertFalse("Feature transaction 1.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "1.0.0")));
             assertFalse("Feature transaction 2.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "2.0.0")));
-            assertFalse("Feature ssh should be installed", impl.isInstalled(impl.getFeature("ssh", "1.0.0")));
+            assertTrue("Feature ssh should be installed", impl.isInstalled(impl.getFeature("ssh", "1.0.0")));
         } catch (Exception e) {
             fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
         }

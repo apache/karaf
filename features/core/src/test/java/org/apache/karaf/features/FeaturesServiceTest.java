@@ -70,7 +70,7 @@ public class FeaturesServiceTest extends TestCase {
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
         pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\">");
-        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("    <bundle start='true'>" + name + "</bundle>");
         pw.println("  </feature>");
         pw.println("</features>");
         pw.close();

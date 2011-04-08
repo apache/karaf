@@ -46,6 +46,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -108,7 +109,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private Map<String, Map<String, Feature>> features;
     private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
     private String boot;
-    private boolean bootFeaturesInstalled;
+    AtomicBoolean bootFeaturesInstalled = new AtomicBoolean();
     private List<FeaturesListener> listeners = new CopyOnWriteArrayList<FeaturesListener>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
@@ -914,7 +915,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             saveState();
         }
         // Install boot features
-        if (boot != null && !bootFeaturesInstalled) {
+        if (boot != null && !bootFeaturesInstalled.get()) {
             new Thread() {
                 public void run() {
                     // splitting the features
@@ -958,7 +959,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     } catch (Exception e) {
                         LOGGER.error("Error installing boot features", e);
                     }
-                    bootFeaturesInstalled = true;
+                    bootFeaturesInstalled.set(true);
                     saveState();
                 }
             }.start();
@@ -1035,7 +1036,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             Properties props = new Properties();
             saveSet(props, "repositories.", repositories.keySet());
             saveMap(props, "features.", installed);
-            props.put("bootFeaturesInstalled", Boolean.toString(bootFeaturesInstalled));
+            props.put("bootFeaturesInstalled", Boolean.toString(bootFeaturesInstalled.get()));
             OutputStream os = new FileOutputStream(file);
             try {
                 props.store(new FileOutputStream(file), "FeaturesService State");
@@ -1072,7 +1073,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             for (Feature f : installed.keySet()) {
                 callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, true));
             }
-            bootFeaturesInstalled = Boolean.parseBoolean((String) props.get("bootFeaturesInstalled"));
+            bootFeaturesInstalled.set(Boolean.parseBoolean((String) props.get("bootFeaturesInstalled")));
             return true;
         } catch (Exception e) {
             LOGGER.error("Error loading FeaturesService state", e);

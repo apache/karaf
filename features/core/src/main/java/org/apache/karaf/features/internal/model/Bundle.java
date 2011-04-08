@@ -62,11 +62,11 @@ public class Bundle implements BundleInfo {
     @XmlSchemaType(name = "anyURI")
     protected String value;
     @XmlAttribute(name = "start-level")
-    protected int startLevel;
+    protected Integer startLevel;
     @XmlAttribute
-    protected boolean start = true;
+    protected Boolean start;// = true;
     @XmlAttribute
-    protected boolean dependency;
+    protected Boolean dependency;
 
 
     public Bundle() {
@@ -109,7 +109,7 @@ public class Bundle implements BundleInfo {
      *     
      */
     public int getStartLevel() {
-        return startLevel;
+        return startLevel == null? 0: startLevel;
     }
 
     /**
@@ -133,7 +133,7 @@ public class Bundle implements BundleInfo {
      *     
      */
     public boolean isStart() {
-        return start;
+        return start == null? false: start;
     }
 
     /**
@@ -157,7 +157,7 @@ public class Bundle implements BundleInfo {
      *     
      */
     public boolean isDependency() {
-        return dependency;
+        return dependency == null? false: dependency;
     }
 
     /**
@@ -190,9 +190,9 @@ public class Bundle implements BundleInfo {
     @Override
     public int hashCode() {
         int result = value != null ? value.hashCode() : 0;
-        result = 31 * result + startLevel;
-        result = 31 * result + (start ? 1 : 0);
-        result = 31 * result + (dependency ? 1 : 0);
+        result = 31 * result + getStartLevel();
+        result = 31 * result + (isStart() ? 1 : 0);
+        result = 31 * result + (isDependency() ? 1 : 0);
         return result;
     }
 }
