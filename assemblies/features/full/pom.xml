@@ -71,12 +71,8 @@
             <artifactId>org.apache.karaf.deployer.wrap</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.mina</groupId>
-            <artifactId>mina-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sshd</groupId>
-            <artifactId>sshd-core</artifactId>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.ssh</artifactId>
         </dependency>
     </dependencies>
     <build>
