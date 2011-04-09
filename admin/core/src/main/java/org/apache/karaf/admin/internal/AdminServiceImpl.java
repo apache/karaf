@@ -311,6 +311,7 @@ public class AdminServiceImpl implements AdminService {
         storage.setProperty("count", Integer.toString(data.length));
         for (int i = 0; i < data.length; i++) {
             storage.setProperty("item." + i + ".name", data[i].getName());
+            storage.setProperty("item." + i + ".root", data[i].isRoot() + "");
             storage.setProperty("item." + i + ".loc", data[i].getLocation());
             storage.setProperty("item." + i + ".pid", Integer.toString(data[i].getPid()));
             storage.setProperty("item." + i + ".opts", data[i].getJavaOpts() != null ? data[i].getJavaOpts() : "");
