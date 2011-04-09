@@ -67,15 +67,28 @@ public class ListCommand extends ObrCommandSupport {
         for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
         {
             String name = resources[resIdx].getPresentationName();
+            String bundleSymbolicName = resources[resIdx].getSymbolicName();
             Version version = resources[resIdx].getVersion();
-            if (version != null)
+            
+            StringBuffer outputString = new StringBuffer();
+            if(bundleSymbolicName != null )
             {
-                System.out.println(name + " (" + version + ")");
+            	outputString.append(bundleSymbolicName);
+            	outputString.append(" - ");            	
             }
-            else
+            if(name != null)
             {
-                System.out.println(name);
+            	outputString.append(name);
+            	outputString.append(" ");
             }
+            if(version != null)
+            {
+            	outputString.append("(");
+            	outputString.append(version);
+            	outputString.append(")");
+            }
+            
+            System.out.println(outputString.toString());
         }
 
         if (resources == null)
