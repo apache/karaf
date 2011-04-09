@@ -153,7 +153,7 @@
                 org/ops4j/pax/url/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}
             </outputFileNameMapping>
             <includes>
-                <include>org.ops4j.pax.url:pax-url-mvn</include>
+                <include>org.ops4j.pax.url:pax-url-aether</include>
                 <include>org.ops4j.pax.url:pax-url-wrap</include>
             </includes>
         </dependencySet>
