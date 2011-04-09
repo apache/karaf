@@ -45,6 +45,11 @@ public class DumpCommand extends OsgiCommandSupport {
     private List<DumpProvider> providers = new LinkedList<DumpProvider>();
 
     /**
+     * Output format of the filename if not defined otherwise
+     */
+    private SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
+
+    /**
      * Directory switch.
      */
     @Option(name = "-d", aliases = "--directory", description = "Creates dump in directory instead ZIP")
@@ -67,7 +72,7 @@ public class DumpCommand extends OsgiCommandSupport {
 
         // create default file name if none provided
         if (fileName == null || fileName.trim().length() == 0) {
-            fileName = SimpleDateFormat.getDateTimeInstance().format(new Date());
+            fileName = dumpFormat.format(new Date());
             if (!directory) {
                 fileName += ".zip";
             }
