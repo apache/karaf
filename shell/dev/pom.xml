@@ -46,7 +46,7 @@
 
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-mvn</artifactId>
+            <artifactId>pax-url-aether</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -97,7 +97,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>pax-url-mvn</Embed-Dependency>
+                        <Embed-Dependency>pax-url-aether</Embed-Dependency>
                         <Import-Package>
                             !${project.artifactId}*,
                             org.apache.felix.service.command,

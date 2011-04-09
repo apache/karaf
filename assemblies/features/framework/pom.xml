@@ -33,7 +33,7 @@
     <name>Apache Karaf :: Assemblies :: Framework KAR</name>
 
     <properties>
-        <appendedResourcesDirectory>$basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
@@ -87,7 +87,7 @@
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-mvn</artifactId>
+            <artifactId>pax-url-aether</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
