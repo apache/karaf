@@ -1,0 +1,48 @@
+~~ Licensed to the Apache Software Foundation (ASF) under one
+~~ or more contributor license agreements.  See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership.  The ASF licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License.  You may obtain a copy of the License at
+~~
+~~ http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing,
+~~ software distributed under the License is distributed on an
+~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~ KIND, either express or implied.  See the License for the
+~~ specific language governing permissions and limitations
+~~ under the License.
+
+
+  ------
+  Introduction
+  ------
+
+Introduction
+
+  The karaf-maven-plugin includes three packagings to produce karaf specific artifacts, and a number of other mojos for various purposes.
+
+Packagings
+
+* feature
+
+  The feature packaging generates a new or augments a supplied feature.xml file to produce a features descriptor.  The transitive maven dependencies of the project are used as the
+  bundles and feature and kar dependencies of a feature in the output feature.xml file.
+
+* kar
+
+  The kar packaging augments the feature packaging to generate a kar archive including the generated features.xml file, suitable resources from the project such as configuration files,
+  and optionally the bundle listed in the feature.xml file.
+
+* karaf-assembly
+
+  The karaf-assembly packaging assembles and packages a karaf server from the maven dependencies of the project. Kar dependencies are unpacked into the server.  Feature dependencies
+   (including those found in unpacked kar files) have their bundles installed into the karaf system directory and may have their bundles added at the specified startlevel to startup.properties.
+
+
+Mojos
+
+* cmdhelp
+

@@ -89,11 +89,12 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
  * NB this requires a recent maven-install-plugin such as 2.3.1
  *
  * @version $Revision: 1.1 $
- * @goal generate-features-xml2
+ * @goal generate-features-xml
  * @phase compile
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
- * @description Generates the features XML file
+ * @description Generates the features XML file starting with an optional source feature.xml and adding
+ * project dependencies as bundles and feature/car dependencies
  */
 @SuppressWarnings("unchecked")
 public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo {
@@ -106,14 +107,14 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     private File inputFile;
 
     /**
-     * The filtered input file
+     * (internal) The filtered input file
      *
      * @parameter default-value="${project.build.directory}/feature/filteredInputFeature.xml"
      */
     private File filteredInputFile;
 
     /**
-     * The file to generate
+     * (internal) The file to generate
      *
      * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
@@ -127,14 +128,14 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     private String resolver;
 
     /**
-     * The artifact type for attaching the generated file to the project
+     * (internal) The artifact type for attaching the generated file to the project
      *
      * @parameter default-value="xml"
      */
     private String attachmentArtifactType = "xml";
 
     /**
-     * The artifact classifier for attaching the generated file to the project
+     * (internal) The artifact classifier for attaching the generated file to the project
      *
      * @parameter default-value="features"
      */
@@ -158,7 +159,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     //new
 
     /**
-     * The maven project.
+     * (internal) The maven project.
      *
      * @parameter expression="${project}"
      * @required
@@ -179,6 +180,8 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      * The entry point to Aether, i.e. the component doing all the work.
      *
      * @component
+     * @required
+     * @readonly
      */
     private RepositorySystem repoSystem;
 
@@ -186,6 +189,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      * The current repository/network configuration of Maven.
      *
      * @parameter default-value="${repositorySystemSession}"
+     * @required
      * @readonly
      */
     private RepositorySystemSession repoSession;
@@ -202,6 +206,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      * The project's remote repositories to use for the resolution of plugins and their dependencies.
      *
      * @parameter default-value="${project.remotePluginRepositories}"
+     * @required
      * @readonly
      */
     private List<RemoteRepository> pluginRepos;
@@ -496,7 +501,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     private boolean checkDependencyChange;
 
     /**
-     * Whether to fail on changed dependencies
+     * Whether to fail on changed dependencies (default, false) or warn (true)
      *
      * @parameter
      */
@@ -510,14 +515,14 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     private boolean logDependencyChanges;
 
     /**
-     * Whether to overwrite dependencies.xml if it has changed
+     * Whether to overwrite src/main/history/dependencies.xml if it has changed
      *
      * @parameter
      */
     private boolean overwriteChangedDependencies;
 
     /**
-     * Location of existing dependency file.
+     * (internal) Location of existing dependency file.
      *
      * @parameter expression="${basedir}/src/main/history/dependencies.xml"
      * @required
@@ -529,6 +534,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      *
      * @parameter expression="${basedir}/target/history/dependencies.xml"
      * @required
+     * @readonly
      */
     private File filteredDependencyFile;
 
@@ -543,13 +549,14 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
     /**
      * @component role="org.apache.maven.shared.filtering.MavenResourcesFiltering" role-hint="default"
      * @required
+     * @readonly
      */
     protected MavenResourcesFiltering mavenResourcesFiltering;
 
     /**
      * @parameter expression="${session}"
-     * @readonly
      * @required
+     * @readonly
      */
     protected MavenSession session;
 
@@ -558,7 +565,6 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      * \${foo} will be replaced with ${foo}
      *
      * @parameter expression="${maven.resources.escapeString}"
-     * @since 2.3
      */
     protected String escapeString = "\\";
 
@@ -566,14 +572,17 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
      * @plexus.requirement role-hint="default"
      * @component
      * @required
+     * @readonly
      */
     protected MavenFileFilter mavenFileFilter;
+
     /**
      * System properties.
      *
      * @parameter
      */
     protected Map<String, String> systemProperties;
+
     private Map<String, String> previousSystemProperties;
 
     private void checkChanges(Features newFeatures, ObjectFactory objectFactory) throws Exception, IOException, JAXBException, XMLStreamException {

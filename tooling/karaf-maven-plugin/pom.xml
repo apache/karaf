@@ -29,10 +29,10 @@
 
     <artifactId>karaf-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>Apache Karaf :: Tooling :: Maven2 Karaf plugin</name>
+    <name>Apache Karaf :: Tooling :: Maven3 Karaf plugin</name>
 
     <description>
-        A Maven 2 plugin for working with karaf.
+        A Maven 3 plugin for working with karaf.
     </description>
 
     <properties>
@@ -181,51 +181,13 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>java5</id>
-            <activation>
-                <jdk>[1.5,1.6)</jdk>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.geronimo.specs</groupId>
-                    <artifactId>geronimo-stax-api_1.2_spec</artifactId>
-                    <version>1.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.geronimo.specs</groupId>
-                    <artifactId>geronimo-activation_1.1_spec</artifactId>
-                    <version>1.1</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>wstx-asl</artifactId>
-                    <version>3.2.9</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.geronimo.specs</groupId>
-                    <artifactId>geronimo-jaxb_2.1_spec</artifactId>
-                    <version>1.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-impl</artifactId>
-                    <version>2.1.12</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>javax.xml.bind</groupId>
-                            <artifactId>jaxb-api</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-                <dependency>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-xjc</artifactId>
-                    <version>2.1.12</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
-
+    <reporting>
+        <!--<outputDirectory>target/site</outputDirectory>-->
+        <plugins>
+            <plugin>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>2.5.1</version>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>

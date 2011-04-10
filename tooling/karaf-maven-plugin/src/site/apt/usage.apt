@@ -1,0 +1,187 @@
+~~ Licensed to the Apache Software Foundation (ASF) under one
+~~ or more contributor license agreements.  See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership.  The ASF licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License.  You may obtain a copy of the License at
+~~
+~~ http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing,
+~~ software distributed under the License is distributed on an
+~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~ KIND, either express or implied.  See the License for the
+~~ specific language governing permissions and limitations
+~~ under the License.
+
+  ------
+  Usage
+  ------
+
+Usage
+
+Packagings
+
+  All packagings require that you mention the karaf-maven-plugin in pluginManagement or plugins with the extension element:
+
++---+
+                <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-maven-plugin</artifactId>
+                    <version>${karaf.version}</version>
+                    <extensions>true</extensions>
+                </plugin>
++---+
+
+  You will also need to mention the karaf-maven-plugin in some build/plugins section of your pom or ancestor pom.  The examples below assume extensions is set in
+  a pluginManagement section or an ancestor pom.
+
+* feature
+
+  The feature packaging lifecycle uses these mojos:
+
++---+
+                          <phases>
+                              <process-resources>
+                                  org.apache.maven.plugins:maven-resources-plugin:resources
+                              </process-resources>
+                              <compile>
+                                  org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml
+                              </compile>
+                              <install>
+                                  org.apache.maven.plugins:maven-install-plugin:install
+                              </install>
+                              <deploy>
+                                  org.apache.maven.plugins:maven-deploy-plugin:deploy
+                              </deploy>
+                          </phases>
++---+
+
+  Here's an example of a feature project with all configuration options set:
+
++---+
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <configuration>
+                    <startLevel>50</startLevel>
+                    <aggregateFeatures>true</aggregateFeatures>
+                    <resolver>(OBR)</resolver>
+
+                    <checkDependencyChange>true</checkDependencyChange>
+                    <warnOnDependencyChange>true</warnOnDependencyChange>
+                    <logDependencyChanges>true</logDependencyChanges>
+                    <overwriteChangedDependencies>true</overwriteChangedDependencies>
+                </configuration>
+            </plugin>
++---+
+
+  This packaging results in a features xml descriptor including a feature with the project artifactId as name and project version as version.
+
+  The suitably scoped project jar dependencies are added to this feature as bundles.  Compile and provided scope result in the dependency attribute false (unset) and
+  runtime scope results in the dependency attribute set true.
+
+  startLevel determines the startLevel of bundles added to the constructed feature.
+
+  kar project dependencies are added to the constructed feature as dependencies.
+
+  If aggregate features is false or not set, feature project dependencies are added to the constructed feature as dependencies.  If aggregateFeatures is true,
+  the features of all feature project dependencies are extracted from the dependency feature xml files and added as features to the constructed features xml.
+
+  If a source src/main/feature/feature.xml file is provided then it is filtered and used as a base for the generated feature xml file.  If there is a feature of the appropriate name
+  it is extended with the project dependencies, otherwise one is created.  This allows you to specify alternate startLevels, configuration files, and configuration as well as
+  completely configuring the feature xml file by hand.
+
+  The dependency change options allow you to set up change tracking so you can be alerted if the transitive project dependencies included in the feature have changed.  To turn this  on set
+  checkDependencyChange true.  A stripped down feature xml file will be written to src/main/history/dependencies.xml that includes one feature with all the bundles from all the features.
+  Subsequent builds will compare this historical file with a similar current file.  If it has changed, the new dependencies.xml added and removed lists,
+  and a dependency tree will be written to target/history, and various options are available.
+  If warnOnDependencyChange is missing or false, the build will fail.
+  If logDependencyChanges is set, the added and removed lists will be shown in the maven build output.
+  If overwriteChangedDependencies is set the historical src/main/history/dependencies.xml file will be overwritten with the new contents.
+
+  While the determination of bundle transitive dependencies uses aether, just like maven, the algorithm is slightly different.  We traverse the entire dependency graph
+  and exclude bundle dependencies that are included as project dependencies of feature and kar dependencies.  Currently dependencies that are supplied in source feature xml
+  of dependent features and kars are not tracked.
+
+* kar
+
+  The kar packaging lifecycle uses these mojos:
+
++---+
+                        <phases>
+                            <process-resources>
+                                org.apache.maven.plugins:maven-resources-plugin:resources
+                            </process-resources>
+                            <compile>
+                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml
+                            </compile>
+                            <package>
+                                org.apache.karaf.tooling:karaf-maven-plugin:archive-kar
+                            </package>
+                            <install>
+                                org.apache.maven.plugins:maven-install-plugin:install
+                            </install>
+                            <deploy>
+                                org.apache.maven.plugins:maven-deploy-plugin:deploy
+                            </deploy>
+                        </phases>
++---+
+
+  kar packaging configuration is exactly the same as feature packaging configuration.  All bundles that are not marked as dependencies in the feature.xml output from the xml generation stage are
+  added to a maven-repo-like structure in the target kar.  In addition any resources from src are added.  Resources need to be under "resources" in the src resource directory in order to get
+  unpacked when the kar is installed.  For example with default maven-resource-plugin configuration src/main/resources/resources/etc/foo.cfg will result in resources/etc/foo.cfg in the kar and
+  etc/foo.cfg when installed in the server.
+
+
+* karaf-assembly
+
+  The karaf-assembly lifecycle uses these mojos:
+
++---+
+                        <phases>
+                            <process-resources>
+                                org.apache.maven.plugins:maven-resources-plugin:resources,
+                                org.apache.karaf.tooling:karaf-maven-plugin:install-kars
+                            </process-resources>
+                            <compile>
+                            </compile>
+                            <package>
+                                org.apache.karaf.tooling:karaf-maven-plugin:archive-server
+                            </package>
+                            <install>
+                                org.apache.maven.plugins:maven-install-plugin:install
+                            </install>
+                            <deploy>
+                                org.apache.maven.plugins:maven-deploy-plugin:deploy
+                            </deploy>
+                        </phases>
++---+
+
+  Here's an example of a karaf-assembly project with all configuration options set:
+
++---+
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <configuration>
+                    <defaultStartLevel>50</defaultStartLevel>
+                </configuration>
+            </plugin>
++---+
+
+  defaultStartLevel determines the start level of bundles that do not have startLevel set in the feature xml descriptor. If not set, the default is 30.
+
+  This plugin:
+
+  - unpacks the resources content from project dependencies that are kars
+
+  - unpacks the system maven-repo-like structure from project dependencies that are kars
+
+  - locates and installs all the bundles mentioned in feature xml descriptors that are project dependencies or located in project dependencies that are kars
+
+  - constructs a startup.properties file that includes all the bundles mentioned in these feature descriptors and the specified or default start level.
+
+  The result is packed up into zip and tar.gz assemblies.  Normally to get a working server you would include at least the karaf-framework kar and most likely the karaf-full kar: these are used
+  to assemble the minimal and full server.
