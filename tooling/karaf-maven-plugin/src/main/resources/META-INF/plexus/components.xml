@@ -35,7 +35,7 @@
                                 org.apache.maven.plugins:maven-resources-plugin:resources
                             </process-resources>
                             <compile>
-                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml2
+                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml
                             </compile>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
@@ -74,7 +74,7 @@
                                 org.apache.maven.plugins:maven-resources-plugin:resources
                             </process-resources>
                             <compile>
-                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml2
+                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml
                             </compile>
                             <package>
                                 org.apache.karaf.tooling:karaf-maven-plugin:archive-kar
