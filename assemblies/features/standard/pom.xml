@@ -47,7 +47,7 @@
                         <id>compile</id>
                         <phase>compile</phase>
                         <goals>
-                            <goal>generate-features-xml2</goal>
+                            <goal>generate-features-xml</goal>
                         </goals>
                     </execution>
                 </executions>
