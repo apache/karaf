@@ -112,6 +112,10 @@ public class Main {
      */
     public static final String PROP_KARAF_DATA = "karaf.data";
     /**
+     * The system property for hosting the current Karaf version.
+     */
+    public static final String PROP_KARAF_VERSION = "karaf.version";
+    /**
      * The environment variable for specifying the Karaf data directory. The data directory
      * holds the bundles data and cache for a Karaf instance.
      */
@@ -207,10 +211,9 @@ public class Main {
         karafData = Utils.getKarafDirectory(Main.PROP_KARAF_DATA, Main.ENV_KARAF_DATA, new File(karafBase, "data"), true, true);
         karafInstances = Utils.getKarafDirectory(Main.PROP_KARAF_INSTANCES, Main.ENV_KARAF_INSTANCES, new File(karafHome, "instances"), false, false);
 
-        //System.out.println("Karaf Home: "+main.karafHome.getPath());
-        //System.out.println("Karaf Base: "+main.karafBase.getPath());
-        //System.out.println("Karaf Data: "+main.karafData.getPath());
-
+        Package p = Package.getPackage("org.apache.karaf.main");
+        if (p != null && p.getImplementationVersion() != null)
+            System.setProperty(PROP_KARAF_VERSION, p.getImplementationVersion());
         System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
         System.setProperty(PROP_KARAF_DATA, karafData.getPath());

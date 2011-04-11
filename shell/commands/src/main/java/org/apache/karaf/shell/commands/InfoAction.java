@@ -28,7 +28,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -62,6 +61,7 @@ public class InfoAction extends OsgiCommandSupport {
         //
         maxNameLen = 25;
         System.out.println("Karaf");
+        printValue("Karaf version", maxNameLen, System.getProperty("karaf.version"));
         printValue("Karaf home", maxNameLen, System.getProperty("karaf.home"));
         printValue("Karaf base", maxNameLen, System.getProperty("karaf.base"));
         printValue("OSGi Framework", maxNameLen, bundleContext.getBundle(0).getSymbolicName() + " - " +
