@@ -33,6 +33,7 @@
 
     <modules>
         <module>command</module>
+        <module>feature</module>
     </modules>
 
     <profiles>
