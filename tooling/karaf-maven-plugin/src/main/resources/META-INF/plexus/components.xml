@@ -31,9 +31,6 @@
                     <lifecycle>
                         <id>default</id>
                         <phases>
-                            <process-resources>
-                                org.apache.maven.plugins:maven-resources-plugin:resources
-                            </process-resources>
                             <compile>
                                 org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml
                             </compile>

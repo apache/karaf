@@ -39,13 +39,16 @@ Packagings
 
 * feature
 
+  Specify the feature packaging in your pom with
+
++---+
+    <packaging>feature</packaging>
++---+
+
   The feature packaging lifecycle uses these mojos:
 
 +---+
                           <phases>
-                              <process-resources>
-                                  org.apache.maven.plugins:maven-resources-plugin:resources
-                              </process-resources>
                               <compile>
                                   org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml
                               </compile>
@@ -107,6 +110,12 @@ Packagings
 
 * kar
 
+  Specify the kar packaging in your pom with
+
++---+
+    <packaging>kar</packaging>
++---+
+
   The kar packaging lifecycle uses these mojos:
 
 +---+
@@ -136,6 +145,12 @@ Packagings
 
 
 * karaf-assembly
+
+  Specify the karaf-assembly packaging in your pom with
+
++---+
+    <packaging>karaf-assembly</packaging>
++---+
 
   The karaf-assembly lifecycle uses these mojos:
 
@@ -173,15 +188,21 @@ Packagings
 
   defaultStartLevel determines the start level of bundles that do not have startLevel set in the feature xml descriptor. If not set, the default is 30.
 
+  Project dependencies that are feature or kar packaging are treated differently depending on whether they are scope runtime, or compile/provided.  Runtime scope dependencies are installed
+  less thoroughly.
+
   This plugin:
 
   - unpacks the resources content from project dependencies that are kars
 
-  - unpacks the system maven-repo-like structure from project dependencies that are kars
+  - unpacks the system maven-repo-like structure from project dependencies that are kars. If the project dependency is scope compile or provided it is unpacked to system.  If the scope is runtime
+  it is unpacked to local-repo
 
-  - locates and installs all the bundles mentioned in feature xml descriptors that are project dependencies or located in project dependencies that are kars
+  - locates and installs all the bundles mentioned in feature xml descriptors that are project dependencies or located in project dependencies that are kars of scope compile/provided.
 
-  - constructs a startup.properties file that includes all the bundles mentioned in these feature descriptors and the specified or default start level.
+  - constructs a startup.properties file that includes all the bundles mentioned in feature descriptors of scope compile/provided at the specified or default start level.
+
+  - adds the feature project dependencies and features in kar dependencies of scope runtime to the features service configuration.
 
   The result is packed up into zip and tar.gz assemblies.  Normally to get a working server you would include at least the karaf-framework kar and most likely the karaf-full kar: these are used
   to assemble the minimal and full server.
