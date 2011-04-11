@@ -40,6 +40,7 @@ import org.osgi.framework.InvalidSyntaxException;
 public class ObrResolver implements Resolver {
 
     private RepositoryAdmin repositoryAdmin;
+    private boolean resolveOptionalImports;
 
     public RepositoryAdmin getRepositoryAdmin() {
         return repositoryAdmin;
@@ -47,6 +48,20 @@ public class ObrResolver implements Resolver {
 
     public void setRepositoryAdmin(RepositoryAdmin repositoryAdmin) {
         this.repositoryAdmin = repositoryAdmin;
+    }
+
+    public boolean isResolveOptionalImports() {
+        return resolveOptionalImports;
+    }
+
+    /**
+     * When set to <code>true</code>, the OBR resolver will try to resolve optional imports as well.
+     * Defaults to <code>false</code>
+     *
+     * @param resolveOptionalImports
+     */
+    public void setResolveOptionalImports(boolean resolveOptionalImports) {
+        this.resolveOptionalImports = resolveOptionalImports;
     }
 
     public List<BundleInfo> resolve(Feature feature) throws Exception {
@@ -84,7 +99,7 @@ public class ObrResolver implements Resolver {
             resolver.add(req);
         }
 
-        if (!resolver.resolve(org.apache.felix.bundlerepository.Resolver.NO_OPTIONAL_RESOURCES)) {
+        if (!doResolve(resolver)) {
             StringWriter w = new StringWriter();
             PrintWriter out = new PrintWriter(w);
             Reason[] failedReqs = resolver.getUnsatisfiedRequirements();
@@ -105,6 +120,9 @@ public class ObrResolver implements Resolver {
         List<BundleInfo> bundles = new ArrayList<BundleInfo>();
         Collections.addAll(deploy, resolver.getAddedResources());
         Collections.addAll(deploy, resolver.getRequiredResources());
+        if (resolveOptionalImports) {
+            Collections.addAll(deploy, resolver.getOptionalResources());
+        }
         for (Resource res : deploy) {
             BundleInfo info = infos.get(res);
             if (info == null) {
@@ -124,6 +142,14 @@ public class ObrResolver implements Resolver {
             bundles.add(info);
         }
         return bundles;
+    }
+
+    private boolean doResolve(org.apache.felix.bundlerepository.Resolver resolver) {
+        if (resolveOptionalImports) {
+            return resolver.resolve();
+        } else {
+            return resolver.resolve(org.apache.felix.bundlerepository.Resolver.NO_OPTIONAL_RESOURCES);
+        }
     }
 
     protected void printUnderline(PrintWriter out, int length) {
@@ -155,5 +181,4 @@ public class ObrResolver implements Resolver {
         }
         return repositoryAdmin.getHelper().requirement(name, filter);
     }
-
 }
