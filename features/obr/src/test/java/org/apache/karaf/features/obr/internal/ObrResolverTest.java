@@ -81,4 +81,53 @@ public class ObrResolverTest {
         verify(admin, resolver, resource);
     }
 
+    @Test
+    public void testResolverWithOptionalImports() throws Exception {
+        final String requirement = "bundle:(&(symbolicname=org.apache.camel.camel-blueprint)(version>=2.4.0)(version<2.4.1))";
+
+        final FeatureImpl f = new FeatureImpl("f1", "1.0");
+        f.setResolver("obr");
+        f.getBundles().add(new BundleInfoImpl(requirement));
+        final RepositoryAdmin admin = createMock(RepositoryAdmin.class);
+        final Resolver resolver = createMock(Resolver.class);
+        final Resource resource = createMock(Resource.class);
+        final Resource optionalResource = createMock(Resource.class);
+        final ObrResolver obrResolver = new ObrResolver();
+        obrResolver.setRepositoryAdmin(admin);
+        obrResolver.setResolveOptionalImports(true);
+
+        final Capture<Requirement> captureReq = new Capture<Requirement>();
+
+        expect(admin.getHelper()).andReturn(new DataModelHelperImpl()).anyTimes();
+        expect(admin.getSystemRepository()).andReturn(createMock(org.apache.felix.bundlerepository.Repository.class));
+        expect(admin.getLocalRepository()).andReturn(createMock(org.apache.felix.bundlerepository.Repository.class));
+        expect(admin.listRepositories()).andReturn(new org.apache.felix.bundlerepository.Repository[0]);
+        expect(admin.resolver(EasyMock.<org.apache.felix.bundlerepository.Repository[]>anyObject())).andReturn(resolver);
+        resolver.add(EasyMock.capture(captureReq));
+        expect(resolver.resolve()).andReturn(true);
+        expect(resolver.getAddedResources()).andReturn(new Resource[] { });
+        expect(resolver.getRequiredResources()).andReturn(new Resource[] { resource });
+        expect(resolver.getOptionalResources()).andReturn(new Resource[] { optionalResource});
+        expect(resolver.getReason(resource)).andAnswer(new IAnswer() {
+            public Object answer() throws Throwable {
+                return new Reason[] { new ReasonImpl( resource, captureReq.getValue()) };
+            }
+        });
+        expect(resolver.getReason(optionalResource)).andAnswer(new IAnswer() {
+            public Object answer() throws Throwable {
+                return new Reason[] { new ReasonImpl( optionalResource, captureReq.getValue()) };
+            }
+        });
+        expect(resource.getURI()).andReturn("foo:bar");
+        expect(optionalResource.getURI()).andReturn("foo:optional:baz");
+        replay(admin, resolver, resource, optionalResource);
+
+        List<BundleInfo> bundles = obrResolver.resolve(f);
+        assertNotNull(bundles);
+        assertEquals(2, bundles.size());
+        assertEquals("foo:bar", bundles.get(0).getLocation());
+        assertEquals("foo:optional:baz", bundles.get(1).getLocation());
+        assertEquals(obrResolver.parseRequirement(requirement).toString(), captureReq.getValue().toString());
+        verify(admin, resolver, resource);
+    }
 }
