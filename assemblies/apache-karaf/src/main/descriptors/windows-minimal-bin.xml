@@ -15,7 +15,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<assembly>
+<assembly xmlns='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1'
+          xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+          xsi:schemaLocation='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1 http://maven.apache.org/xsd/assembly-1.1.1.xsd'>
     <id>minimal</id>
     <!-- Used as artifact discriminator -->
     <formats>
@@ -26,7 +28,7 @@
 
         <!-- Copy license and other files from root -->
         <fileSet>
-            <directory>../..</directory>
+            <directory>${basedir}/../..</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>README</include>
@@ -37,7 +39,7 @@
 
         <!-- Copy over everything that needs to get dos line endings -->
         <fileSet>
-            <directory>target/classes/text</directory>
+            <directory>src/main/distribution/text</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>dos</lineEnding>
         </fileSet>
