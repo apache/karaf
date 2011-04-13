@@ -458,7 +458,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             Configuration cfg = findExistingConfiguration(configAdmin, pid[0], pid[1]);
             if (cfg == null) {
                 cfg = createConfiguration(configAdmin, pid[0], pid[1]);
-                String key = (pid[1] == null ? pid[0] : pid[0] + "-" + pid[1]);
+                String key = createConfigurationKey(pid[0], pid[1]);
                 props.put(CONFIG_KEY, key);
                 if (cfg.getBundleLocation() != null) {
                     cfg.setBundleLocation(null);
@@ -476,6 +476,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             state.bundleInfos.put(b.getBundleId(), bInfo);
         }
         state.features.put(feature, bundles);
+    }
+
+    private String createConfigurationKey(String pid, String factoryPid) {
+        return factoryPid == null ? pid : pid + "-" + factoryPid;
     }
 
     protected List<BundleInfo> resolve(Feature feature) throws Exception {
@@ -1018,19 +1022,16 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         if (factoryPid == null) {
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
         } else {
-            filter = "(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + factoryPid + ")";
+            String key = createConfigurationKey(pid, factoryPid);
+            filter = "(" + CONFIG_KEY + "=" + key + ")";
         }
         Configuration[] configurations = configurationAdmin.listConfigurations(filter);
-        if (configurations != null && configurations.length > 0)
-        {
+        if (configurations != null && configurations.length > 0) {
             return configurations[0];
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
-    
+
     protected void saveState() {
         try {
             File file = bundleContext.getDataFile("FeaturesServiceState.properties");
