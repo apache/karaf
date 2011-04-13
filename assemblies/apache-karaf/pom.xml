@@ -511,6 +511,7 @@
                                 <descriptor>src/main/descriptors/unix-bin.xml</descriptor>
                             </descriptors>
                             <finalName>${project.artifactId}-${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                             <tarLongFileMode>gnu</tarLongFileMode>
                         </configuration>
                     </execution>
@@ -540,7 +541,8 @@
                                 <descriptor>src/main/descriptors/windows-bin.xml</descriptor>
                             </descriptors>
                             <finalName>${project.artifactId}-${project.version}</finalName>
-                            <appendAssemblyId>true</appendAssemblyId>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <duplicateBehaviour>skip</duplicateBehaviour>
                             <assemblyId />
                         </configuration>
                     </execution>
