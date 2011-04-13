@@ -86,7 +86,8 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>!${project.artifactId}*,*</Import-Package>
+                        <Export-Package>${project.artifactId};version=${project.version}</Export-Package>
+                        <Import-Package>!${project.artifactId},*</Import-Package>
                         <Private-Package>${project.artifactId}.impl</Private-Package>
                     </instructions>
                 </configuration>
