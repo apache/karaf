@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import jline.Terminal;
-import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.utils.manifest.Attribute;
@@ -34,7 +33,6 @@ import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Directive;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -42,7 +40,7 @@ import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 @Command(scope = "osgi", name = "headers", description = "Displays OSGi headers of a given bundle.")
-public class Headers extends OsgiCommandSupport {
+public class Headers extends BundlesCommandOptional {
 
     protected final static String BUNDLE_PREFIX = "Bundle-";
     protected final static String PACKAGE_SUFFFIX = "-Package";
@@ -56,44 +54,34 @@ public class Headers extends OsgiCommandSupport {
     @Option(name = "--indent", description = "Indentation method")
     int indent = -1;
 
-    @Argument(index = 0, name = "ids", description = "A list of bundle IDs separated by whitespaces", required = false, multiValued = true)
-    List<Long> ids;
-
-    protected Object doExecute() throws Exception {
+    protected void doExecute(List<Bundle> bundles) throws Exception {
         // Get package admin service.
         ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
             System.out.println("PackageAdmin service is unavailable.");
-            return null;
+            return;
         }
 
         try {
             admin = (PackageAdmin) getBundleContext().getService(ref);
             if (admin == null) {
                 System.out.println("PackageAdmin service is unavailable.");
-                return null;
+                return;
             }
 
-            if (ids != null && !ids.isEmpty()) {
-                for (long id : ids) {
-                    Bundle bundle = getBundleContext().getBundle(id);
-                    if (bundle != null) {
-                        printHeaders(bundle);
-                    } else {
-                        System.err.println("Bundle ID " + id + " is invalid.");
-                    }
+            if (bundles == null) {
+                Bundle[] allBundles = getBundleContext().getBundles();
+                for (int i = 0; i < allBundles.length; i++) {
+                    printHeaders(allBundles[i]);
                 }
             } else {
-                Bundle[] bundles = getBundleContext().getBundles();
-                for (int i = 0; i < bundles.length; i++) {
-                    printHeaders(bundles[i]);
+                for (Bundle bundle : bundles) {
+                    printHeaders(bundle);
                 }
             }
         } finally {
             getBundleContext().ungetService(ref);
         }
-
-        return null;
     }
 
     protected void printHeaders(Bundle bundle) throws Exception {

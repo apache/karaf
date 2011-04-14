@@ -16,40 +16,29 @@
  */
 package org.apache.karaf.shell.osgi;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.karaf.util.StringEscapeUtils;
-import org.osgi.framework.Bundle;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.util.StringEscapeUtils;
+import org.osgi.framework.Bundle;
+
 @Command(scope = "osgi", name = "info", description = "Displays detailed information of a given bundle.")
-public class Info extends OsgiCommandSupport {
+public class Info extends BundlesCommandOptional {
 
-    @Argument(index = 0, name = "ids", description = "A list of bundle IDs separated by whitespaces", required = false, multiValued = true)
-    List<Long> ids;
-
-    protected Object doExecute() throws Exception {
-        if (ids != null && !ids.isEmpty()) {
-            for (long id : ids) {
-                Bundle bundle = getBundleContext().getBundle(id);
-                if (bundle != null) {
-                    printInfo(bundle);
-                } else {
-                    System.err.println("Bundle ID " + id + " is invalid.");
-                }
+    protected void doExecute(List<Bundle> bundles) throws Exception {
+        if (bundles == null) {
+            Bundle[] allBundles = getBundleContext().getBundles();
+            for (int i = 0; i < allBundles.length; i++) {
+                printInfo(allBundles[i]);
             }
         } else {
-            Bundle[] bundles = getBundleContext().getBundles();
             for (Bundle bundle : bundles) {
                 printInfo(bundle);
             }
         }
-        return null;
     }
 
     /**

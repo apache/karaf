@@ -18,16 +18,14 @@ package org.apache.karaf.shell.osgi;
 
 import java.util.List;
 
-import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.service.command.Function;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 @Command(scope = "osgi", name = "ls", description = "Lists OSGi services.")
-public class ListServices extends OsgiCommandSupport {
+public class ListServices extends BundlesCommandOptional {
 
     @Option(name = "-a", aliases = {}, description = "Shows all services", required = false, multiValued = false)
     boolean showAll;
@@ -35,142 +33,108 @@ public class ListServices extends OsgiCommandSupport {
     @Option(name = "-u", aliases = {}, description = "Shows services which are in use", required = false, multiValued = false)
     boolean inUse;
 
-    @Argument(index = 0, name = "ids", description = "Show only services for the given bundle ids", required = false, multiValued = true)
-    List<Long> ids;
-
-    protected Object doExecute() throws Exception {
-        if (ids != null && !ids.isEmpty()) {
-            for (long id : ids) {
-                Bundle bundle = getBundleContext().getBundle(id);
-                if (bundle != null) {
-                    boolean headerPrinted = false;
-                    boolean needSeparator = false;
-                    ServiceReference[] refs = null;
-
-                    // Get registered or in-use services.
-                    if (inUse) {
-                        refs = bundle.getServicesInUse();
-                    } else {
-                        refs = bundle.getRegisteredServices();
-                    }
-
-                    // Print properties for each service.
-                    for (int refIdx = 0;
-                         (refs != null) && (refIdx < refs.length);
-                         refIdx++) {
-                        String[] objectClass = (String[])
-                                refs[refIdx].getProperty("objectClass");
-
-                        // Determine if we need to print the service, depending
-                        // on whether it is a command service or not.
-                        boolean print = true;
-                        for (int ocIdx = 0;
-                             !showAll && (ocIdx < objectClass.length);
-                             ocIdx++) {
-                            if (objectClass[ocIdx].equals(Function.class.getName())) {
-                                print = false;
-                            }
-                        }
-
-                        // Print header if we have not already done so.
-                        if (!headerPrinted) {
-                            headerPrinted = true;
-                            String title = Util.getBundleName(bundle);
-                            title = (inUse)
-                                    ? title + " uses:"
-                                    : title + " provides:";
-                            System.out.println("");
-                            System.out.println(title);
-                            System.out.println(Util.getUnderlineString(title));
-                        }
-
-                        if (showAll || print) {
-                            // Print service separator if necessary.
-                            if (needSeparator) {
-                                System.out.println("----");
-                            }
-
-                            // Print service properties.
-                            String[] keys = refs[refIdx].getPropertyKeys();
-                            for (int keyIdx = 0;
-                                 (keys != null) && (keyIdx < keys.length);
-                                 keyIdx++) {
-                                Object v = refs[refIdx].getProperty(keys[keyIdx]);
-                                System.out.println(
-                                        keys[keyIdx] + " = " + Util.getValueString(v));
-                            }
-
-                            needSeparator = true;
-                        }
-                    }
-                } else {
-                    System.err.println("Bundle ID " + id + " is invalid.");
-                }
+    protected void doExecute(List<Bundle> bundles) throws Exception {
+        if (bundles == null) {
+            Bundle[] allBundles = getBundleContext().getBundles();
+            for (int i = 0; i < allBundles.length; i++) {
+                printServicesShort(allBundles[i]);
+            }
+        } else {
+            for (Bundle bundle : bundles) {
+                printServices(bundle);
             }
         }
-        else
-        {
-            Bundle[] bundles = getBundleContext().getBundles();
-            if (bundles != null)
-            {
-                // TODO: Sort list.
-                for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
-                {
-                    boolean headerPrinted = false;
-                    ServiceReference[] refs = null;
+    }
 
-                    // Get registered or in-use services.
-                    if (inUse)
-                    {
-                        refs = bundles[bundleIdx].getServicesInUse();
-                    }
-                    else
-                    {
-                        refs = bundles[bundleIdx].getRegisteredServices();
-                    }
+    private void printServices(Bundle bundle) {
+        boolean headerPrinted = false;
+        boolean needSeparator = false;
+        ServiceReference[] refs = null;
 
-                    for (int refIdx = 0; (refs != null) && (refIdx < refs.length); refIdx++)
-                    {
-                        String[] objectClass = (String[])
-                            refs[refIdx].getProperty("objectClass");
+        // Get registered or in-use services.
+        if (inUse) {
+            refs = bundle.getServicesInUse();
+        } else {
+            refs = bundle.getRegisteredServices();
+        }
 
-                        // Determine if we need to print the service, depending
-                        // on whether it is a command service or not.
-                        boolean print = true;
-                        for (int ocIdx = 0;
-                            !showAll && (ocIdx < objectClass.length);
-                            ocIdx++)
-                        {
-                            if (objectClass[ocIdx].equals(Function.class.getName()))
-                            {
-                                print = false;
-                            }
-                        }
+        // Print properties for each service.
+        for (int refIdx = 0; (refs != null) && (refIdx < refs.length); refIdx++) {
+            String[] objectClass = (String[]) refs[refIdx].getProperty("objectClass");
 
-                        // Print the service if necessary.
-                        if (showAll || print)
-                        {
-                            if (!headerPrinted)
-                            {
-                                headerPrinted = true;
-                                String title = Util.getBundleName(bundles[bundleIdx]);
-                                title = (inUse)
-                                    ? title + " uses:"
-                                    : title + " provides:";
-                                System.out.println("\n" + title);
-                                System.out.println(Util.getUnderlineString(title));
-                            }
-                            System.out.println(Util.getValueString(objectClass));
-                        }
-                    }
+            // Determine if we need to print the service, depending
+            // on whether it is a command service or not.
+            boolean print = true;
+            for (int ocIdx = 0; !showAll && (ocIdx < objectClass.length); ocIdx++) {
+                if (objectClass[ocIdx].equals(Function.class.getName())) {
+                    print = false;
                 }
             }
-            else
-            {
-                System.out.println("There are no registered services.");
+
+            // Print header if we have not already done so.
+            if (!headerPrinted) {
+                headerPrinted = true;
+                String title = Util.getBundleName(bundle);
+                title = (inUse) ? title + " uses:" : title + " provides:";
+                System.out.println("");
+                System.out.println(title);
+                System.out.println(Util.getUnderlineString(title));
+            }
+
+            if (showAll || print) {
+                // Print service separator if necessary.
+                if (needSeparator) {
+                    System.out.println("----");
+                }
+
+                // Print service properties.
+                String[] keys = refs[refIdx].getPropertyKeys();
+                for (int keyIdx = 0; (keys != null) && (keyIdx < keys.length); keyIdx++) {
+                    Object v = refs[refIdx].getProperty(keys[keyIdx]);
+                    System.out.println(keys[keyIdx] + " = " + Util.getValueString(v));
+                }
+
+                needSeparator = true;
             }
         }
-        return null;
+    }
+
+    private void printServicesShort(Bundle bundle) {
+        boolean headerPrinted = false;
+        ServiceReference[] refs = null;
+
+        // Get registered or in-use services.
+        if (inUse) {
+            refs = bundle.getServicesInUse();
+        } else {
+            refs = bundle.getRegisteredServices();
+        }
+
+        for (int refIdx = 0; (refs != null) && (refIdx < refs.length); refIdx++) {
+            String[] objectClass = (String[]) refs[refIdx].getProperty("objectClass");
+
+            // Determine if we need to print the service, depending
+            // on whether it is a command service or not.
+            boolean print = true;
+            for (int ocIdx = 0; !showAll && (ocIdx < objectClass.length); ocIdx++) {
+                if (objectClass[ocIdx].equals(Function.class.getName())) {
+                    print = false;
+                }
+            }
+
+            // Print the service if necessary.
+            if (showAll || print) {
+                if (!headerPrinted) {
+                    headerPrinted = true;
+                    String title = Util.getBundleName(bundle);
+                    title = (inUse) ? title + " uses:" : title + " provides:";
+                    System.out.println("\n" + title);
+                    System.out.println(Util.getUnderlineString(title));
+                }
+                System.out.println(Util.getValueString(objectClass));
+            }
+        }
+
     }
 
 }

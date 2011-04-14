@@ -39,7 +39,7 @@ public class ResolveBundle extends BundlesCommandOptional {
                 System.out.println("PackageAdmin service is unavailable.");
                 return;
             }
-            if (bundles.isEmpty()) {
+            if (bundles == null) {
                 pa.resolveBundles(null);
             } else {
                 pa.resolveBundles(bundles.toArray(new Bundle[bundles.size()]));
