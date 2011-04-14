@@ -18,8 +18,6 @@ package org.apache.karaf.shell.osgi;
 
 import java.util.List;
 
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -41,10 +39,9 @@ public class RefreshBundle extends BundlesCommandOptional {
                 System.out.println("PackageAdmin service is unavailable.");
                 return;
             }
-            if (bundles.isEmpty()) {
+            if (bundles == null) {
                 pa.refreshPackages(null);
-            }
-            else {
+            } else {
                 pa.refreshPackages(bundles.toArray(new Bundle[bundles.size()]));
             }
         }
