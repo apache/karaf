@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.shell.osgi;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.gogo.commands.Argument;
@@ -25,30 +24,27 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
 public abstract class BundlesCommandOptional extends OsgiCommandSupport {
-
-    @Argument(index = 0, name = "ids", description = "The list of bundle IDs separated by whitespaces", required = false, multiValued = true)
-    List<Long> ids;
+    
+    @Argument(index = 0, name = "ids", description = "The list of bundle (identified by IDs or name or name/version) separated by whitespaces", required = false, multiValued = true)
+    List<String> ids;
 
     @Option(name = "--force", aliases = {}, description = "Forces the command to execute", required = false, multiValued = false)
     boolean force;
 
     protected Object doExecute() throws Exception {
-        List<Bundle> bundles = new ArrayList<Bundle>();
+        List<Bundle> bundles = null;
         if (ids != null && !ids.isEmpty()) {
-            for (long id : ids) {
-                Bundle bundle = getBundleContext().getBundle(id);
-                if (bundle == null) {
-                    System.err.println("Bundle ID" + id + " is invalid");
-                } else {
-                    if (force || !Util.isASystemBundle(getBundleContext(), bundle) || Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), session)) {
-                        bundles.add(bundle);
-                    }
-                }
-            }
+            BundleSelector selector = new BundleSelector(getBundleContext(), session);      
+            bundles = selector.selectBundles(ids, force);
         }
         doExecute(bundles);
         return null;
     }
 
+    /**
+     * 
+     * @param bundles null if no bundle ids or names were specified.
+     * @throws Exception
+     */
     protected abstract void doExecute(List<Bundle> bundles) throws Exception;
 }
