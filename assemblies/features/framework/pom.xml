@@ -140,10 +140,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.packages</artifactId>
         </dependency>
         <dependency>
@@ -167,10 +163,6 @@
             <artifactId>org.apache.karaf.jaas.command</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.management</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
         </dependency>
@@ -191,17 +183,29 @@
             <artifactId>org.apache.aries.util</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.jmx</groupId>
-            <artifactId>org.apache.aries.jmx</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.jmx</groupId>
-            <artifactId>org.apache.aries.jmx.blueprint</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.asm</artifactId>
         </dependency>
+
+        <!-- management feature -->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.karaf</groupId>-->
+            <!--<artifactId>org.apache.karaf.management</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.aries.jmx</groupId>-->
+            <!--<artifactId>org.apache.aries.jmx</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.aries.jmx</groupId>-->
+            <!--<artifactId>org.apache.aries.jmx.blueprint</artifactId>-->
+        <!--</dependency>-->
+
+        <!-- config feature -->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.karaf.shell</groupId>-->
+            <!--<artifactId>org.apache.karaf.shell.config</artifactId>-->
+        <!--</dependency>-->
 
     </dependencies>
     <build>
