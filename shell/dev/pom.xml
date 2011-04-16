@@ -99,7 +99,18 @@
                     <instructions>
                         <Embed-Dependency>pax-url-aether</Embed-Dependency>
                         <Import-Package>
-                            !${project.artifactId}*,
+                            !${project.artifactId}.*,
+                            !junit.framework,
+                            !org.cyberneko.html,
+                            !org.cyberneko.html.filters,
+                            !com.sun.jdmk.comm,
+                            !javax.management,
+                            !javax.crypto,
+                            !javax.crypto.spec,
+                            !org.apache.avalon.framework.logger,
+                            !org.apache.log,
+                            !org.apache.xerces.xni,
+                            !org.apache.xerces.xni.parser,
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.karaf.shell.console,
