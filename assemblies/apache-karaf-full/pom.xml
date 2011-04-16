@@ -83,6 +83,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <features>
+                        <feature>ssh</feature>
+                        <feature>config</feature>
+                        <feature>management</feature>
+                    </features>
+                </configuration>
             </plugin>
 
         </plugins>
