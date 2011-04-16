@@ -65,6 +65,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <features>
+                        <feature>management</feature>
+                    </features>
+                </configuration>
             </plugin>
 
         </plugins>

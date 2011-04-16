@@ -38,8 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
+import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Bundle;
@@ -126,6 +129,13 @@ public class InstallKarsMojo extends MojoSupport {
      */
     protected String systemDirectory;
 
+    /**
+     * List of features from runtime-scope features xml and kars to be installed.
+     *
+     * @parameter
+     */
+    private List<String> features;
+
     //Aether support
     /**
      * The entry point to Aether, i.e. the component doing all the work.
@@ -198,7 +208,9 @@ public class InstallKarsMojo extends MojoSupport {
                 File source = artifact.getFile();
                 DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
 
-                File target = new File(systemDirectory + "/" + layout.pathOf(artifact));
+                //remove timestamp version
+                artifact = factory.createArtifactWithClassifier(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType(), artifact.getClassifier());
+                File target = new File(repoPath + "/" + layout.pathOf(artifact));
                 if (!target.exists()) {
                     target.getParentFile().mkdirs();
                     try {
@@ -316,46 +328,41 @@ public class InstallKarsMojo extends MojoSupport {
                     } finally {
                         out.close();
                     }
+                    Features repo = readFeatures(uri);
+                    for (Feature feature: repo.getFeature()) {
+                        if (features.contains(feature.getName())) {
+                            installFeature(feature, null);
+                        }
+                    }
                 }
             } else {
                 getLog().info("Installing feature to system and startup.properties");
                 File repoFile;
-                if (uri.toString().startsWith("mvn:")) {
-                    String featuresPath = repoPath + "/" + MvnUrlUtil.pathFromMaven(uri.toString());
-                    repoFile = new File(featuresPath);
-                } else {
-                    repoFile = new File(uri);
-                }
-                InputStream in = new FileInputStream(repoFile);
-                Features features;
-                try {
-                    features = JaxbUtil.unmarshal(in, false);
-                } finally {
-                    in.close();
-                }
+                Features features = readFeatures(uri);
                 for (Feature feature: features.getFeature()) {
-                    List<String> comment = Arrays.asList(new String[] {"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
-                    for (Bundle bundle: feature.getBundle()) {
-                        String location = bundle.getLocation();
-                        String startLevel = Integer.toString(bundle.getStartLevel() == 0? defaultStartLevel: bundle.getStartLevel());
-                        if (startupProperties.containsKey(location)) {
-                            int oldStartLevel = Integer.decode(startupProperties.get(location));
-                            if (oldStartLevel > bundle.getStartLevel()) {
-                                startupProperties.put(location, startLevel);
-                            }
-                        } else {
-                            if (comment == null) {
-                                startupProperties.put(location, startLevel);
-                            } else {
-                                startupProperties.put(location, comment, startLevel);
-                                comment = null;
-                            }
-                        }
-                    }
+                    installFeature(feature, null);
                 }
 
 
             }
+        }
+
+        private Features readFeatures(URI uri) throws XMLStreamException, JAXBException, IOException {
+            File repoFile;
+            if (uri.toString().startsWith("mvn:")) {
+                String featuresPath = repoPath + "/" + MvnUrlUtil.pathFromMaven(uri.toString());
+                repoFile = new File(featuresPath);
+            } else {
+                repoFile = new File(uri);
+            }
+            InputStream in = new FileInputStream(repoFile);
+            Features features;
+            try {
+                features = JaxbUtil.unmarshal(in, false);
+            } finally {
+                in.close();
+            }
+            return features;
         }
 
         public void removeRepository(URI url) {
@@ -377,7 +384,25 @@ public class InstallKarsMojo extends MojoSupport {
         public void installFeature(String name, String version, EnumSet<Option> options) throws Exception {
         }
 
-        public void installFeature(org.apache.karaf.features.Feature f, EnumSet<Option> options) throws Exception {
+        public void installFeature(org.apache.karaf.features.Feature feature, EnumSet<Option> options) throws Exception {
+            List<String> comment = Arrays.asList(new String[] {"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
+            for (BundleInfo bundle: feature.getBundles()) {
+                String location = bundle.getLocation();
+                String startLevel = Integer.toString(bundle.getStartLevel() == 0? defaultStartLevel: bundle.getStartLevel());
+                if (startupProperties.containsKey(location)) {
+                    int oldStartLevel = Integer.decode(startupProperties.get(location));
+                    if (oldStartLevel > bundle.getStartLevel()) {
+                        startupProperties.put(location, startLevel);
+                    }
+                } else {
+                    if (comment == null) {
+                        startupProperties.put(location, startLevel);
+                    } else {
+                        startupProperties.put(location, comment, startLevel);
+                        comment = null;
+                    }
+                }
+            }
         }
 
         public void installFeatures(Set<org.apache.karaf.features.Feature> features, EnumSet<Option> options) throws Exception {
