@@ -66,9 +66,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <features>
+                    <startupFeatures>
                         <feature>management</feature>
-                    </features>
+                    </startupFeatures>
                 </configuration>
             </plugin>
 

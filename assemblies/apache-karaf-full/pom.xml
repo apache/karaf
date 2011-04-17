@@ -84,11 +84,11 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <features>
+                    <startupFeatures>
                         <feature>ssh</feature>
                         <feature>config</feature>
                         <feature>management</feature>
-                    </features>
+                    </startupFeatures>
                 </configuration>
             </plugin>
 
