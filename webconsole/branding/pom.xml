@@ -78,7 +78,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-DocURL>http://felix.apache.org/site/apache-karaf.html</Bundle-DocURL>
-                        <Fragment-Host>org.apache.karaf.webconsole.console;bundle-version="[2,3)"</Fragment-Host>
+                        <Fragment-Host>org.apache.karaf.webconsole.console;bundle-version="[3,4)"</Fragment-Host>
                         <Export-Package>!*</Export-Package>
                         <Import-Package>!org.apache.felix.webconsole*,*</Import-Package>
                     </instructions>
