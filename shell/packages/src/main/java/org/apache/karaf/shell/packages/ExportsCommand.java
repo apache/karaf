@@ -99,8 +99,8 @@ public class ExportsCommand extends PackageCommandSupport {
                         fillDetailRecord(columns, size);
                     }
                 }
-
-                columns.add(exports[i].getName());
+                
+                columns.add(exports[i].toString());
 
                 if (imports) {
                     Bundle[] bs = exports[i].getImportingBundles();
