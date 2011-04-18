@@ -18,11 +18,15 @@ package org.apache.karaf.shell.log;
 
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "log", name = "display-exception", description = "Displays the last occurred exception from the log.")
 public class DisplayException extends OsgiCommandSupport {
 
+    @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)
+    String logger;
+    
     protected LruList events;
 
     public LruList getEvents() {
@@ -37,9 +41,17 @@ public class DisplayException extends OsgiCommandSupport {
         PaxLoggingEvent throwableEvent = null;
         Iterable<PaxLoggingEvent> le = events.getElements(Integer.MAX_VALUE);
         for (PaxLoggingEvent event : le) {
-            if (event.getThrowableStrRep() != null) {
+        	// if this is an exception, and the log is the same as the requested log,
+        	// then save this exception and continue iterating from oldest to newest
+            if ((event.getThrowableStrRep() != null)
+            		&&(logger != null)
+            		&&(checkIfFromRequestedLog(event))) {
                 throwableEvent = event;
-                // Do not break, as we iterate from the oldest to the newest event
+              // Do not break, as we iterate from the oldest to the newest event
+            } else if ((event.getThrowableStrRep() != null)&&(logger == null)) {
+            	// now check if there has been no log passed in, and if this is an exception
+                // then save this exception and continue iterating from oldest to newest
+                throwableEvent = event;            	
             }
         }
         if (throwableEvent != null) {
@@ -49,6 +61,10 @@ public class DisplayException extends OsgiCommandSupport {
             System.out.println();
         }
         return null;
+    }
+        
+    protected boolean checkIfFromRequestedLog(PaxLoggingEvent event) {
+    	return (event.getLoggerName().lastIndexOf(logger)>=0) ? true : false;
     }
 
 }
