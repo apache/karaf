@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.features.internal;
 
-import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.slf4j.Logger;
@@ -114,6 +113,17 @@ public class RepositoryImpl implements Repository {
                     Element e = (Element) nodes.item(i);
                     String name = e.getAttribute("name");
                     String version = e.getAttribute("version");
+                    String allBundleInfeatureStartLevel = e.getAttribute("start-level");
+                    int absl = 0;
+                    // Check start level
+                    if (allBundleInfeatureStartLevel != null && allBundleInfeatureStartLevel.length() > 0) {
+                        try {
+                            absl = Integer.parseInt(allBundleInfeatureStartLevel);
+                        } catch (Exception ex) {
+                            LOGGER.error("The start-level is not an int value for the feature : " + name);
+                        }
+                    }
+                    
                     FeatureImpl f;
                     if (version != null && version.length() > 0) {
                         f = new FeatureImpl(name, version);
@@ -182,7 +192,7 @@ public class RepositoryImpl implements Repository {
                         String bDependency = b.getAttribute("dependency");
                         boolean bs = true;
                         boolean bd = false;
-                        int bsl = 0;
+                        int bsl = absl;
 
                         // Check the value of the "start" attribute
                         if (bStart != null && bStart.length() > 0) {
