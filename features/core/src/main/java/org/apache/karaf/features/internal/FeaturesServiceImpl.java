@@ -345,7 +345,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     	// do no start bundles when user request it
                     	Long bundleId = b.getBundleId();
                     	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
-                        if (bundleInfo == null || bundleInfo.isStart()) {
+                        if (bundleInfo == null || bundleInfo.isStart() ||options.contains(FeaturesService.Option.ForceStart)) {
 	                        try {
 	                            b.start();
 	                        } catch (BundleException be) {
@@ -960,7 +960,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                         }
                     }
                     try {
-                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
+                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure, Option.ForceStart));
                     } catch (Exception e) {
                         LOGGER.error("Error installing boot features", e);
                     }

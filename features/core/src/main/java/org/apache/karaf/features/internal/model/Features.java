@@ -70,7 +70,7 @@ public class Features {
     protected List<String> repository;
     protected List<Feature> feature;
     @XmlAttribute
-    protected String name ="<unnamed>";
+    protected String name;
 
     /**
      * Gets the value of the repository property.

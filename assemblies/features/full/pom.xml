@@ -41,14 +41,32 @@
         <dependency>
             <groupId>org.apache.karaf.admin</groupId>
             <artifactId>org.apache.karaf.admin.core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf.shell</groupId>
+                    <artifactId>org.apache.karaf.shell.console</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.admin</groupId>
             <artifactId>org.apache.karaf.admin.command</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf.shell</groupId>
+                    <artifactId>org.apache.karaf.shell.console</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.admin</groupId>
             <artifactId>org.apache.karaf.admin.management</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf.shell</groupId>
+                    <artifactId>org.apache.karaf.shell.console</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.deployer</groupId>
@@ -61,10 +79,22 @@
         <dependency>
             <groupId>org.apache.karaf.deployer</groupId>
             <artifactId>org.apache.karaf.deployer.features</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf.features</groupId>
+                    <artifactId>org.apache.karaf.features.core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.deployer</groupId>
             <artifactId>org.apache.karaf.deployer.kar</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf.features</groupId>
+                    <artifactId>org.apache.karaf.features.core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.deployer</groupId>

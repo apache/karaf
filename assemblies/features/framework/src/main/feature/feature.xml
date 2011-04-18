@@ -11,5 +11,6 @@
         <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
         <bundle dependency="false" start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
+        <bundle dependency="false" start="true" start-level="25">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
     </feature>
 </features>
