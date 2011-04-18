@@ -259,7 +259,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
         } else {
             features = objectFactory.createFeaturesRoot();
         }
-        if (features.getName() == null) {
+        if (features.getName() == null ) {
             features.setName(project.getArtifactId());
         }
 

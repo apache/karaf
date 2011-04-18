@@ -66,9 +66,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <startupFeatures>
+                    <bootFeatures>
                         <feature>management</feature>
-                    </startupFeatures>
+                        <feature>standard</feature>
+                    </bootFeatures>
                 </configuration>
             </plugin>
 

@@ -71,7 +71,7 @@
         <bundle>mvn:org.apache.karaf.features/org.apache.karaf.features.obr/${project.version}</bundle>
     </feature>
     <feature name="config" version="${project.version}">
-        <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
+        <bundle start-level='30' start='true'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
     </feature>
 	<feature name="jetty" version="${jetty.version}" resolver="(obr)">
 		<bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
@@ -152,14 +152,14 @@
             sshRealm=karaf
             hostKey=${karaf.base}/etc/host.key
         </config>
-        <bundle dependency='true'>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
-        <bundle dependency='true'>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
-        <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
+        <bundle start-level='30' start='true'>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
+        <bundle start-level='30' start='true'>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
+        <bundle start-level='30' start='true'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
     </feature>
     <feature name="management" version="${project.version}">
-        <bundle>mvn:org.apache.karaf/org.apache.karaf.management/${project.version}</bundle>
-        <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
-        <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
+        <bundle start-level='30' start='true'>mvn:org.apache.karaf/org.apache.karaf.management/${project.version}</bundle>
+        <bundle start-level='30' start='true'>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
+        <bundle start-level='30' start='true'>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
     </feature>
     <feature name="eventadmin" version="${project.version}">
 		<bundle start-level='30'>mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>

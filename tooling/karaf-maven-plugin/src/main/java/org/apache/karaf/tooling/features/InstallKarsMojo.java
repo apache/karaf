@@ -29,7 +29,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -107,19 +106,10 @@ public class InstallKarsMojo extends MojoSupport {
 
     /**
      * if false, unpack to system and add bundles to startup.properties
-     * if true, unpack to local-repo and add feature to features config
+     * if true, unpack to system and add feature to features config
      *
-//     * @parameter
      */
-    protected boolean unpackToLocalRepo;
-
-    /**
-     * Directory that resources are copied to during the build.
-     *
-     * @parameter expression="${project.build.directory}/assembly/local-repo"
-     * @required
-     */
-    protected File localRepoDirectory;
+    protected boolean dontAddToStartup;
 
     /**
      * Directory that resources are copied to during the build.
@@ -174,9 +164,7 @@ public class InstallKarsMojo extends MojoSupport {
      */
     private List<RemoteRepository> remoteRepos;
 
-    private URI localRepo;
     private URI system;
-    private URI repoPath;
     private CommentProperties startupProperties = new CommentProperties();
 
     /**
@@ -185,8 +173,6 @@ public class InstallKarsMojo extends MojoSupport {
     private List<Feature> localRepoFeatures = new ArrayList<Feature>();
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        localRepoDirectory.mkdirs();
-        localRepo = localRepoDirectory.toURI();
         systemDirectory.mkdirs();
         system = systemDirectory.toURI();
         if (startupPropertiesFile.exists()) {
@@ -215,9 +201,8 @@ public class InstallKarsMojo extends MojoSupport {
         StringBuilder buf = new StringBuilder();
         byte[] buffer = new byte[4096];
         for (Artifact artifact: dependencies) {
-            unpackToLocalRepo = "runtime".equals(artifact.getScope());
-            repoPath = unpackToLocalRepo ? localRepo : system;
-            installer.setLocalRepoPath(repoPath.getPath());
+            dontAddToStartup = "runtime".equals(artifact.getScope());
+            installer.setLocalRepoPath(system.getPath());
             if ("kar".equals(artifact.getType()) && acceptScope(artifact)) {
                 File file = artifact.getFile();
                 try {
@@ -235,7 +220,7 @@ public class InstallKarsMojo extends MojoSupport {
 
                 //remove timestamp version
                 artifact = factory.createArtifactWithClassifier(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType(), artifact.getClassifier());
-                File target = new File(repoPath.resolve(layout.pathOf(artifact)));
+                File target = new File(system.resolve(layout.pathOf(artifact)));
                 if (!target.exists()) {
                     target.getParentFile().mkdirs();
                     try {
@@ -278,7 +263,7 @@ public class InstallKarsMojo extends MojoSupport {
                     String path = MvnUrlUtil.pathFromMaven(key);
                     File test = new File(system.resolve(path));
                     if (!test.exists()) {
-                        File target = new File(localRepo.resolve(path));
+                        File target = new File(system.resolve(path));
                         if (!target.exists()) {
                             install(buffer, key, target);
                         }
@@ -355,8 +340,8 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         public void addRepository(URI uri) throws Exception {
-            if (unpackToLocalRepo) {
-                getLog().info("Adding feature repository to local-repo: " + uri);
+            if (dontAddToStartup) {
+                getLog().info("Adding feature repository to system: " + uri);
                 if (featuresCfgFile.exists()) {
                     Properties properties = new Properties();
                     InputStream in = new FileInputStream(featuresCfgFile);
@@ -365,7 +350,7 @@ public class InstallKarsMojo extends MojoSupport {
                     } finally {
                         in.close();
                     }
-                    String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES)? properties.get(FEATURES_REPOSITORIES) + ",": "";
+                    String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES) && !properties.get(FEATURES_REPOSITORIES).isEmpty()? properties.get(FEATURES_REPOSITORIES) + ",": "";
                     existingFeatureRepos = existingFeatureRepos + uri.toString();
                     properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
                     Features repo = readFeatures(uri);
@@ -374,10 +359,10 @@ public class InstallKarsMojo extends MojoSupport {
                             installFeature(feature, null);
                         } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
-                            String existingBootFeatures = properties.containsKey(FEATURES_BOOT)? properties.get(FEATURES_BOOT) + ",": "";
+                            String existingBootFeatures = properties.containsKey(FEATURES_BOOT) && !properties.get(FEATURES_BOOT).isEmpty()? properties.get(FEATURES_BOOT) + ",": "";
                             existingBootFeatures = existingBootFeatures + feature.getName();
                             properties.put(FEATURES_BOOT, existingBootFeatures);
-                        }  else if (installedFeatures != null && installedFeatures.contains(featuresCfgFile.getName())) {
+                        }  else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
                         }
                     }
@@ -400,7 +385,7 @@ public class InstallKarsMojo extends MojoSupport {
         private Features readFeatures(URI uri) throws XMLStreamException, JAXBException, IOException {
             File repoFile;
             if (uri.toString().startsWith("mvn:")) {
-                URI featuresPath = repoPath.resolve(MvnUrlUtil.pathFromMaven(uri.toString()));
+                URI featuresPath = system.resolve(MvnUrlUtil.pathFromMaven(uri.toString()));
                 repoFile = new File(featuresPath);
             } else {
                 repoFile = new File(uri);

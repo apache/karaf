@@ -45,6 +45,7 @@
             <groupId>org.apache.karaf.assemblies.features</groupId>
             <artifactId>karaf-full</artifactId>
             <type>kar</type>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
@@ -84,11 +85,13 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <startupFeatures>
+                    <bootFeatures>
+                        <feature>management</feature>
+                        <feature>standard</feature>
+                        <feature>karaf-full</feature>
                         <feature>ssh</feature>
                         <feature>config</feature>
-                        <feature>management</feature>
-                    </startupFeatures>
+                    </bootFeatures>
                 </configuration>
             </plugin>
 
