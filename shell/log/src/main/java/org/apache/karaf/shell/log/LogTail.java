@@ -17,8 +17,6 @@
 package org.apache.karaf.shell.log;
 
 import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -30,26 +28,41 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 @Command(scope = "log", name = "tail", description = "Continuously display log entries.")
 public class LogTail extends DisplayLog {
-
+	
     protected Object doExecute() throws Exception {
         final PatternConverter cnv = new PatternParser(overridenPattern != null ? overridenPattern : pattern).parse();
         final PrintStream out = System.out;
 
         Iterable<PaxLoggingEvent> le = events.getElements(entries == 0 ? Integer.MAX_VALUE : entries);
         for (PaxLoggingEvent event : le) {
-            display(cnv, event, out);
+            if ((logger != null) && 
+                (event != null)&&
+                (checkIfFromRequestedLog(event))) {
+                    display(cnv, event, out);
+                }
+                else if ((event != null)&&(logger == null)){
+                    display(cnv, event, out);      
+            }
         }
         // Tail
         final BlockingQueue<PaxLoggingEvent> queue = new LinkedBlockingQueue<PaxLoggingEvent>();
         PaxAppender appender = new PaxAppender() {
             public void doAppend(PaxLoggingEvent event) {
-                queue.add(event);
+                    queue.add(event);
             }
         };
         try {
             events.addAppender(appender);
             for (;;) {
-                display(cnv, queue.take(), out);
+            	PaxLoggingEvent event = queue.take();
+                if ((logger != null) && 
+                     (event != null)&&
+                     (checkIfFromRequestedLog(event))) {
+                            display(cnv, event, out);
+                    }
+                else if ((event != null)&&(logger == null)){
+                            display(cnv, event, out);      
+                    }
             }
         } catch (InterruptedException e) {
             // Ignore

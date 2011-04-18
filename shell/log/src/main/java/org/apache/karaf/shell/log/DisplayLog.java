@@ -21,6 +21,7 @@ import java.io.PrintStream;
 import org.apache.karaf.shell.log.layout.PatternConverter;
 import org.apache.karaf.shell.log.layout.PatternParser;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 import org.ops4j.pax.logging.spi.PaxAppender;
@@ -40,6 +41,9 @@ public class DisplayLog extends OsgiCommandSupport {
 
     @Option(name = "--no-color", description="Disable syntax coloring of log events", required = false, multiValued = false)
     protected boolean noColor;
+
+    @Argument(index = 0, name = "logger", description = "The name of the logger. This can be ROOT, ALL, or the name of a logger specified in the org.ops4j.pax.logger.cfg file.", required = false, multiValued = false)
+    String logger;
 
     protected String pattern;
     protected LruList events;
@@ -131,12 +135,19 @@ public class DisplayLog extends OsgiCommandSupport {
 
         Iterable<PaxLoggingEvent> le = events.getElements(entries == 0 ? Integer.MAX_VALUE : entries);
         for (PaxLoggingEvent event : le) {
-            if (event != null) {
-                display(cnv, event, out);
-            }
+			if ((logger != null) && (event != null)
+					&& (checkIfFromRequestedLog(event))) {
+				display(cnv, event, out);
+			} else if ((event != null) && (logger == null)) {
+				display(cnv, event, out);
+			}
         }
         out.println();
         return null;
+    }
+        
+    protected boolean checkIfFromRequestedLog(PaxLoggingEvent event) {
+    	return (event.getLoggerName().lastIndexOf(logger)>=0) ? true : false;
     }
 
     protected void display(PatternConverter cnv, PaxLoggingEvent event, PrintStream stream) {
