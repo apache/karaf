@@ -20,7 +20,7 @@
 
 <features name="karaf-enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
     <feature name='transaction' description='OSGi Transaction Manager' version='${aries.transaction.version}'
-             resolver='(obr)'>
+             resolver='(obr)' start-level='30'>
         <details>The Aries JTA</details>
         <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle>mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.version}</bundle>
@@ -29,7 +29,7 @@
     </feature>
 
     <feature name='jpa' description='OSGi Persistence Container' version='${aries.jpa.version}'
-             resolver='(obr)'>
+             resolver='(obr)' start-level='30'>
         <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <bundle>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
@@ -40,7 +40,7 @@
     </feature>
 
     <feature name='jndi' description='OSGi Service Registry JNDI access' version='${aries.jndi.version}'
-             resolver='(obr)'>
+             resolver='(obr)' start-level='30'>
         <bundle>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.version}</bundle>
         <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.core/${aries.jndi.version}</bundle>
@@ -49,7 +49,7 @@
         <bundle>mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
     </feature>
 
-    <feature name="application-without-isolation" version="${aries.application.version}">
+    <feature name="application-without-isolation" version="${aries.application.version}" start-level='30'>
         <!-- pre-requisites-->
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
         <bundle>mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
