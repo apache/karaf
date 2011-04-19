@@ -30,8 +30,7 @@ public interface FeaturesService {
         PrintBundlesToRefresh,
         NoAutoRefreshBundles,
         ContinueBatchOnFailure,
-        Verbose ,
-        ForceStart
+        Verbose
     }
 
     /**
