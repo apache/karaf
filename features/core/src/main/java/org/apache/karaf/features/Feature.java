@@ -43,4 +43,6 @@ public interface Feature {
     Map<String, Map<String, String>> getConfigurations();
 
     List<ConfigFileInfo> getConfigurationFiles();
+    
+    int getStartLevel();
 }

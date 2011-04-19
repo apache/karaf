@@ -25,6 +25,8 @@ public interface BundleInfo {
 	
     int getStartLevel();
     
+    void setStartLevel(Integer sl);
+    
     boolean isStart();
 
     boolean isDependency();

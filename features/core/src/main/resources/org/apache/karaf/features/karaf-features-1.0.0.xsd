@@ -86,6 +86,14 @@ Karaf allow using dynamic resolvers.
                 </xs:documentation>
             </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="start-level" type="xs:int">
+             <xs:annotation>
+                <xs:documentation><![CDATA[
+Bundles in this feature start level set to OSGi framework.
+                ]]>
+                </xs:documentation>
+             </xs:annotation>
+         </xs:attribute>
     </xs:complexType>
 
     <xs:complexType name="bundle">

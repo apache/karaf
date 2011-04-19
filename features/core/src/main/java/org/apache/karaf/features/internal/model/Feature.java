@@ -95,7 +95,8 @@ public class Feature implements org.apache.karaf.features.Feature {
     protected String description;
     @XmlAttribute
     protected String resolver;
-
+    @XmlAttribute(name = "start-level")
+    protected Integer startLevel;
 
     public Feature() {
     }
@@ -382,6 +383,30 @@ public class Feature implements org.apache.karaf.features.Feature {
      */
     public void setResolver(String value) {
         this.resolver = value;
+    }
+    
+    /**
+     * Gets the value of the startLevel property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public int getStartLevel() {
+        return startLevel == null? 0: startLevel;
+    }
+
+    /**
+     * Sets the value of the startLevel property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setStartLevel(Integer value) {
+        this.startLevel = value;
     }
 
     public String toString() {
