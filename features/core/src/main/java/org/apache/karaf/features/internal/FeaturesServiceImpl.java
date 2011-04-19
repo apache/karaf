@@ -345,7 +345,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     	// do no start bundles when user request it
                     	Long bundleId = b.getBundleId();
                     	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
-                        if (bundleInfo == null || bundleInfo.isStart() ||options.contains(FeaturesService.Option.ForceStart)) {
+                        if (bundleInfo == null || bundleInfo.isStart()) {
 	                        try {
 	                            b.start();
 	                        } catch (BundleException be) {
@@ -471,13 +471,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         Set<Long> bundles = new TreeSet<Long>();
         for (BundleInfo bInfo : resolve(feature)) {
-        	int sl = feature.getStartLevel();
-        	if (sl > 0 && bInfo.getStartLevel() == 0) {
-        		//there's no start-level specified for a bundle
-        		//so use the possible one from host feature
-        		bInfo.setStartLevel(sl);
-        	}
-            Bundle b = installBundleIfNeeded(state, bInfo, verbose);
+            Bundle b = installBundleIfNeeded(state, bInfo, feature.getStartLevel(), verbose);
             bundles.add(b.getBundleId());
             state.bundleInfos.put(b.getBundleId(), bInfo);
         }
@@ -644,7 +638,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         return result;
     }
 
-    protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, boolean verbose) throws IOException, BundleException {
+    protected Bundle installBundleIfNeeded(InstallationState state, BundleInfo bundleInfo, int defaultStartLevel, boolean verbose) throws IOException, BundleException {
         InputStream is;
         String bundleLocation = bundleInfo.getLocation();
         LOGGER.debug("Checking " + bundleLocation);
@@ -694,6 +688,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             int ibsl = bundleInfo.getStartLevel();
             if (ibsl > 0) {
                 getStartLevel().setBundleStartLevel(b, ibsl);
+            } else if (defaultStartLevel > 0) {
+                getStartLevel().setBundleStartLevel(b, defaultStartLevel);
             }
 
             state.bundles.add(b);
@@ -966,7 +962,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                         }
                     }
                     try {
-                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure, Option.ForceStart));
+                        installFeatures(features, EnumSet.of(Option.NoCleanIfFailure, Option.ContinueBatchOnFailure));
                     } catch (Exception e) {
                         LOGGER.error("Error installing boot features", e);
                     }

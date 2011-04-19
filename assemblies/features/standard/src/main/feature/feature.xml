@@ -145,21 +145,21 @@
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.gogo/${project.version}</bundle>
 		<bundle>mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/${felix.eventadmin-plugin.version}</bundle>
     </feature>
-    <feature name="ssh" version="${project.version}">
+    <feature name="ssh" version="${project.version}" start-level='30'>
         <config name="org.apache.karaf.shell">
             sshPort=8101
             sshHost=0.0.0.0
             sshRealm=karaf
             hostKey=${karaf.base}/etc/host.key
         </config>
-        <bundle start-level='30' start='true'>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
-        <bundle start-level='30' start='true'>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
-        <bundle start-level='30' start='true'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
+        <bundle>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
+        <bundle>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
+        <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
     </feature>
-    <feature name="management" version="${project.version}">
-        <bundle start-level='30' start='true'>mvn:org.apache.karaf/org.apache.karaf.management/${project.version}</bundle>
-        <bundle start-level='30' start='true'>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
-        <bundle start-level='30' start='true'>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
+    <feature name="management" version="${project.version}" start-level='30'>
+        <bundle>mvn:org.apache.karaf/org.apache.karaf.management/${project.version}</bundle>
+        <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
+        <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
     </feature>
     <feature name="eventadmin" version="${project.version}">
 		<bundle start-level='30'>mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>

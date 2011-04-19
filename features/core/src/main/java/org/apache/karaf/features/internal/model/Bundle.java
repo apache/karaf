@@ -133,7 +133,7 @@ public class Bundle implements BundleInfo {
      *     
      */
     public boolean isStart() {
-        return start == null? false: start;
+        return start == null? true: start;
     }
 
     /**

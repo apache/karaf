@@ -105,10 +105,10 @@ Bundle start level set to OSGi framework.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="start" type="xs:boolean">
+                <xs:attribute name="start" type="xs:boolean" default="true">
                     <xs:annotation>
                         <xs:documentation><![CDATA[
-This switch allow you to leave bundle in resolved state.
+This switch allow you to leave bundle in resolved state rather than the default active state.
                         ]]>
                         </xs:documentation>
                     </xs:annotation>
