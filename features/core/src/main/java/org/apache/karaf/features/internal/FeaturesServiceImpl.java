@@ -471,6 +471,12 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
         Set<Long> bundles = new TreeSet<Long>();
         for (BundleInfo bInfo : resolve(feature)) {
+        	int sl = feature.getStartLevel();
+        	if (sl > 0 && bInfo.getStartLevel() == 0) {
+        		//there's no start-level specified for a bundle
+        		//so use the possible one from host feature
+        		bInfo.setStartLevel(sl);
+        	}
             Bundle b = installBundleIfNeeded(state, bInfo, verbose);
             bundles.add(b.getBundleId());
             state.bundleInfos.put(b.getBundleId(), bInfo);

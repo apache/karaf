@@ -132,4 +132,8 @@ public class ExtendedFeature implements Feature
     public State getState() {
         return this.state;
     }
+    
+    public int getStartLevel() {
+        return 0;
+    }
 }
