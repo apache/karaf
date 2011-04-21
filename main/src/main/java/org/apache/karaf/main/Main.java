@@ -264,11 +264,9 @@ public class Main {
         FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
         framework = factory.newFramework(new StringMap(configProps, false));
         framework.init();
-        // If we have a clean state, install everything
-        if (framework.getBundleContext().getBundles().length == 1) {
-            loadStartupProperties(configProps);
-            processAutoProperties(framework.getBundleContext());
-        }
+        // Process properties
+        loadStartupProperties(configProps);
+        processAutoProperties(framework.getBundleContext());
         framework.start();
         // Start lock monitor
         new Thread() {
@@ -559,21 +557,24 @@ public class Main {
         }
         sl.setInitialBundleStartLevel(ibsl);
 
-        // The auto-install property specifies a space-delimited list of
-        // bundle URLs to be automatically installed into each new profile;
-        // the start level to which the bundles are assigned is specified by
-        // appending a ".n" to the auto-install property name, where "n" is
-        // the desired start level for the list of bundles.
-        autoInstall(PROPERTY_AUTO_INSTALL, context, sl, convertToMavenUrls, false);
+        // If we have a clean state, install everything
+        if (framework.getBundleContext().getBundles().length == 1) {
+            // The auto-install property specifies a space-delimited list of
+            // bundle URLs to be automatically installed into each new profile;
+            // the start level to which the bundles are assigned is specified by
+            // appending a ".n" to the auto-install property name, where "n" is
+            // the desired start level for the list of bundles.
+            autoInstall(PROPERTY_AUTO_INSTALL, context, sl, convertToMavenUrls, false);
 
-        // The auto-start property specifies a space-delimited list of
-        // bundle URLs to be automatically installed and started into each
-        // new profile; the start level to which the bundles are assigned
-        // is specified by appending a ".n" to the auto-start property name,
-        // where "n" is the desired start level for the list of bundles.
-        // The following code starts bundles in one pass, installing bundles
-        // for a given level, then starting them, then moving to the next level.
-        autoInstall(PROPERTY_AUTO_START, context, sl, convertToMavenUrls, true);
+            // The auto-start property specifies a space-delimited list of
+            // bundle URLs to be automatically installed and started into each
+            // new profile; the start level to which the bundles are assigned
+            // is specified by appending a ".n" to the auto-start property name,
+            // where "n" is the desired start level for the list of bundles.
+            // The following code starts bundles in one pass, installing bundles
+            // for a given level, then starting them, then moving to the next level.
+            autoInstall(PROPERTY_AUTO_START, context, sl, convertToMavenUrls, true);
+        }
     }
 
     private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, StartLevel sl, boolean convertToMavenUrls, boolean start) {
