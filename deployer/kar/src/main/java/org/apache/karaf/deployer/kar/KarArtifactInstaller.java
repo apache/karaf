@@ -242,7 +242,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 
     static URI pathToMvnUri(String path) {
         String[] bits = path.split("/");
-        String classifier = "features";
+        String classifier = "feature";
         String artifactType = "xml";
         String version = bits[bits.length - 2];
         String artifactId = bits[bits.length - 3];
