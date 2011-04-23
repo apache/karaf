@@ -243,6 +243,17 @@
                         <artifactId>org.apache.karaf.jaas.command</artifactId>
                         <version>${project.version}</version>
                     </dependency>
+                    <!-- Additional Required Dependencies -->
+                    <dependency>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                        <version>${osgi.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.compendium</artifactId>
+                        <version>${osgi.version}</version>
+                    </dependency>
                 </dependencies>
             </plugin>
             <plugin>
