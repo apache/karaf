@@ -27,7 +27,7 @@
     <artifactId>karaf-feature-archetype</artifactId>
     <packaging>maven-archetype</packaging>
 
-    <name>Apache Karaf :: Feature Archetype</name>
+    <name>Apache Karaf :: Archetypes :: Feature Archetype</name>
     <description>This archetype sets up an empty karaf features project.</description>
 
     <build>

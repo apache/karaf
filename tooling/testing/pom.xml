@@ -29,7 +29,7 @@
 
     <artifactId>org.apache.karaf.tooling.testing</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Tooling :: Testing environment</name>
+    <name>Apache Karaf :: Tooling :: Testing Environment</name>
 
     <description>
       A bundle to help using Pax-Exam and Karaf.

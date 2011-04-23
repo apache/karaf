@@ -27,7 +27,7 @@
     <groupId>org.apache.karaf.archetypes</groupId>
     <artifactId>archetypes-command</artifactId>
 
-    <name>Apache Karaf :: Command Archetype</name>
+    <name>Apache Karaf :: Archetypes :: Command Archetype</name>
 
     <build>
         <resources>

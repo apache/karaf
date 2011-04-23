@@ -29,7 +29,7 @@
 
     <artifactId>apache-karaf-full</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Assemblies :: full</name>
+    <name>Apache Karaf :: Assemblies :: Full</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
