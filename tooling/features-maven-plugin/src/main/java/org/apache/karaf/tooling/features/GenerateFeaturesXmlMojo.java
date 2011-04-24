@@ -142,6 +142,10 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
     public void execute() throws MojoExecutionException, MojoFailureException {
         PrintStream out = null;
         try {
+            File parent = outputFile.getParentFile();
+            if (!parent.exists()) {
+                parent.mkdirs();
+            }
             out = new PrintStream(new FileOutputStream(outputFile));
             readSystemPackages();
             readKernelBundles();
