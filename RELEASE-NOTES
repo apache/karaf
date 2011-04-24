@@ -15,6 +15,31 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.1.5
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.1.x series branch, representing an update to Apache Karaf 2.1.4. It contains several bug fixes identified in the prior release, including; improved Eclipse console karaf shell output, handling TAB characters in feature repository to avoid resoultion errors when adding features to repo, and multiple fixes to the config shell. IMPORTANT: This patch release also updates the Felix Framework from version 3.0.2 to 3.0.9. For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-458|https://issues.apache.org/jira/browse/KARAF-458] - Fix the karaf shell to look nice within Eclipse console
+    * [KARAF-472|https://issues.apache.org/jira/browse/KARAF-472] - features-maven-plugin: TAB-characters in feature-repository lead to resolution-errors in add-features-to-repo
+    * [KARAF-505|https://issues.apache.org/jira/browse/KARAF-505] - Karaf should ignore the resolver attribute in a features descriptor
+    * [KARAF-506|https://issues.apache.org/jira/browse/KARAF-506] - The config shell commands offer no way to delete a command
+    * [KARAF-507|https://issues.apache.org/jira/browse/KARAF-507] - The config shell completer does not allow completion of factory based pids
+    * [KARAF-508|https://issues.apache.org/jira/browse/KARAF-508] - The config:edit create does not allow the creation of factory configs
+    * [KARAF-509|https://issues.apache.org/jira/browse/KARAF-509] - The config:update command does not save factory configurations to the correct file
+    * [KARAF-515|https://issues.apache.org/jira/browse/KARAF-515] - Completion error
+
+** Improvement
+    * [KARAF-484|https://issues.apache.org/jira/browse/KARAF-484] - Upgrade to Felix Framework 3.0.9
+
+
                     Apache Karaf 2.1.4
                     ==================
 
