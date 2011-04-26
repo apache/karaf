@@ -61,6 +61,7 @@ public class Console implements Runnable
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}> ";
     public static final String PRINT_STACK_TRACES = "karaf.printStackTraces";
     public static final String LAST_EXCEPTION = "karaf.lastException";
+    public static final String IGNORE_INTERRUPTS = "karaf.ignoreInterrupts";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
@@ -268,7 +269,7 @@ public class Console implements Runnable
                             .fg(Ansi.Color.DEFAULT).toString();
                         session.getConsole().println(str);
                     }
-                    if ( isPrintStackTraces()) {
+                    if ( getBoolean(PRINT_STACK_TRACES)) {
                         session.getConsole().print(Ansi.ansi().fg(Ansi.Color.RED).toString());
                         t.printStackTrace(session.getConsole());
                         session.getConsole().print(Ansi.ansi().fg(Ansi.Color.DEFAULT).toString());
@@ -292,10 +293,10 @@ public class Console implements Runnable
         }
     }
 
-    protected boolean isPrintStackTraces() {
-        Object s = session.get(PRINT_STACK_TRACES);
+    protected boolean getBoolean(String name) {
+        Object s = session.get(name);
         if (s == null) {
-            s = System.getProperty(PRINT_STACK_TRACES);
+            s = System.getProperty(name);
         }
         if (s == null) {
             return false;
@@ -484,19 +485,17 @@ public class Console implements Runnable
                         {
                             return;
                         }
-                        else if (c == 4)
+                        else if (c == 4 && !getBoolean(IGNORE_INTERRUPTS))
                         {
                             err.println("^D");
-                            queue.put(c);
                         }
-                        else if (c == 3)
+                        else if (c == 3 && !getBoolean(IGNORE_INTERRUPTS))
                         {
                             err.println("^C");
                             reader.getCursorBuffer().clear();
                             interrupt();
-                        } else {
-                            queue.put(c);
                         }
+                        queue.put(c);
                     }
                     catch (Throwable t) {
                         return;
