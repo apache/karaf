@@ -28,6 +28,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.shell.console.BlueprintContainerAware;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.console.jline.Console;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -67,7 +68,7 @@ public class SshAction
 
     private BlueprintContainer container;
 
-	private ClientSession session;
+	private ClientSession sshSession;
     private String sshClientId;
 
     public void setBlueprintContainer(final BlueprintContainer container) {
@@ -107,12 +108,16 @@ public class SshAction
         try {
             ConnectFuture future = client.connect(hostname, port);
             future.await();
-            session = future.getSession();
+            sshSession = future.getSession();
+
+            Object oldIgnoreInterrupts = this.session.get(Console.IGNORE_INTERRUPTS);
+            this.session.put( Console.IGNORE_INTERRUPTS, Boolean.TRUE );
+
             try {
                 System.out.println("Connected");
 
-                session.authPassword(username, password);
-                int ret = session.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
+                sshSession.authPassword(username, password);
+                int ret = sshSession.waitFor(ClientSession.WAIT_AUTH | ClientSession.CLOSED | ClientSession.AUTHED, 0);
                 if ((ret & ClientSession.AUTHED) == 0) {
                     System.err.println("Authentication failed");
                     return null;
@@ -128,12 +133,12 @@ public class SshAction
                     }
                 }
 
-                ClientChannel channel = session.createChannel("shell");
+                ClientChannel channel;
                 if (sb.length() > 0) {
-                    channel = session.createChannel("exec", sb.append("\n").toString());
+                    channel = sshSession.createChannel("exec", sb.append("\n").toString());
                     channel.setIn(new ByteArrayInputStream(new byte[0]));
                 } else {
-                    channel = session.createChannel("shell");
+                    channel = sshSession.createChannel("shell");
                     channel.setIn(new NoCloseInputStream(System.in));
                     ((ChannelShell) channel).setupSensibleDefaultPty();
                 }
@@ -142,7 +147,8 @@ public class SshAction
                 channel.open();
                 channel.waitFor(ClientChannel.CLOSED, 0);
             } finally {
-                session.close(false);
+                session.put( Console.IGNORE_INTERRUPTS, oldIgnoreInterrupts );
+                sshSession.close(false);
             }
         } finally {
             client.stop();
