@@ -656,6 +656,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 throw new BundleException("Manifest not present in the first entry of the zip " + bundleLocation);
             }
             String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
+            // remove attributes from the symbolic name (like ;blueprint.graceperiod:=false suffix)
+            int attributeIndexSep = sn.indexOf(';');
+            if (attributeIndexSep != -1) {
+                sn = sn.substring(0, attributeIndexSep);
+            }
             String vStr = m.getMainAttributes().getValue(Constants.BUNDLE_VERSION);
             Version v = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
             for (Bundle b : bundleContext.getBundles()) {
