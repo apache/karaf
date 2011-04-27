@@ -74,17 +74,6 @@ public class ExampleSubclassMain extends Main  {
             }
 
             /**
-             * If you don't overwrite then Karaf displays stack traces based on setting
-             * of the karaf.printStackTraces system property.
-             *
-             * @return
-             */
-            @Override
-            protected boolean isPrintStackTraces() {
-                return true;
-            }
-
-            /**
              * If you don't overwrite, then karaf automatically adds session properties
              * found in the following resource files:
              * <ul>
