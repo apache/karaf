@@ -35,6 +35,7 @@
     * [KARAF-508|https://issues.apache.org/jira/browse/KARAF-508] - The config:edit create does not allow the creation of factory configs
     * [KARAF-509|https://issues.apache.org/jira/browse/KARAF-509] - The config:update command does not save factory configurations to the correct file
     * [KARAF-515|https://issues.apache.org/jira/browse/KARAF-515] - Completion error
+    * [KARAF-587|https://issues.apache.org/jira/browse/KARAF-587] - Archetypes iTests don't take the correct command archetypes
 
 ** Improvement
     * [KARAF-484|https://issues.apache.org/jira/browse/KARAF-484] - Upgrade to Felix Framework 3.0.9
