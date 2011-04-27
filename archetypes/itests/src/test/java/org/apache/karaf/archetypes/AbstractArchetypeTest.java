@@ -95,7 +95,6 @@ public abstract class AbstractArchetypeTest extends TestCase {
         FileUtils.deleteDirectory(targetDir);
         targetDir.mkdirs();
         MavenEmbedderConsoleLogger logger = new MavenEmbedderConsoleLogger();
-//        logger.setThreshold(MavenEmbedderConsoleLogger.LEVEL_DEBUG);
         EventMonitor eventMonitor = new DefaultEventMonitor(new PlexusLoggerAdapter(logger));
 
         String catalog = "file://" + new File(maven.getLocalRepositoryDirectory().getParent(), "archetype-catalog.xml").getAbsolutePath();
