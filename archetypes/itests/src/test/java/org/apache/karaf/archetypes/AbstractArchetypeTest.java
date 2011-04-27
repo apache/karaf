@@ -96,6 +96,7 @@ public abstract class AbstractArchetypeTest extends TestCase {
         props.setProperty("archetypeGroupId", groupId);
         props.setProperty("archetypeArtifactId", artifactId);
         props.setProperty("archetypeVersion", version);
+        props.setProperty("archetypeRepository", maven.getLocalRepositoryDirectory().toURI().toURL().toString());
         props.setProperty("interactiveMode", "false");
         props.setProperty("groupId", "sample");
         props.setProperty("artifactId", UUID.randomUUID().toString());
