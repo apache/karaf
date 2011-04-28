@@ -102,7 +102,7 @@
 
     <properties>
         <!-- Apache ServiceMix Bundles -->
-        <aopalliance.bundle.version>1.0_4</aopalliance.bundle.version>
+        <aopalliance.bundle.version>1.0_5</aopalliance.bundle.version>
         <asm.bundle.version>3.3_1</asm.bundle.version>
         <cglib.bundle.version>2.1_3_6</cglib.bundle.version>
         <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
