@@ -109,6 +109,11 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             Set<String> bundles = new HashSet<String>();
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
             for (String uri : descriptors) {
+                // let's ensure a mvn: based url is sitting in the local repo before we try reading it
+                Artifact descriptor = bundleToArtifact(uri, true);
+                if (descriptor != null) {
+                    resolveBundle(descriptor, remoteRepos);
+                }
                 if (includeMvnBasedDescriptors) {
                     bundles.add(uri);
                 }
