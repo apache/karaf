@@ -105,7 +105,7 @@
         <aopalliance.bundle.version>1.0_5</aopalliance.bundle.version>
         <asm.bundle.version>3.3_2</asm.bundle.version>
         <cglib.bundle.version>2.1_3_7</cglib.bundle.version>
-        <commons-codec.bundle.version>1.3_3</commons-codec.bundle.version>
+        <commons-codec.bundle.version>1.3_4</commons-codec.bundle.version>
         <commons-collections.bundle.version>3.2.1_1</commons-collections.bundle.version>
         <commons-fileupload.version>1.1.1</commons-fileupload.version>
         <commons-lang.bundle.version>2.4_4</commons-lang.bundle.version>
