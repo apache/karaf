@@ -145,7 +145,7 @@
         <mina.version>2.0.3</mina.version>
         <osgi.version>4.2.0</osgi.version>
         <pax.exam.version>1.2.4</pax.exam.version>
-        <pax.logging.version>1.6.1</pax.logging.version>
+        <pax.logging.version>1.6.2</pax.logging.version>
         <pax.runner.version>1.6.1</pax.runner.version>
         <pax.url.version>1.3.2</pax.url.version>
         <pax.web.version>1.1.0-SNAPSHOT</pax.web.version>
