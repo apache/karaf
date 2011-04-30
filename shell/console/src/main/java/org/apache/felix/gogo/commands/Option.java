@@ -30,6 +30,8 @@ import java.lang.annotation.ElementType;
 @Target({ElementType.FIELD})
 public @interface Option
 {
+    public static final String DEFAULT_STRING= "DEFAULT";
+
     String name();
 
     String[] aliases() default {};
@@ -40,4 +42,5 @@ public @interface Option
 
     boolean multiValued() default false;
 
+    String valueToShowInHelp() default DEFAULT_STRING;
 }
