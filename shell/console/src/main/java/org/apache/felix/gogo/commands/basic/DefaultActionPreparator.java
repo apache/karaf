@@ -71,6 +71,11 @@ public class DefaultActionPreparator implements ActionPreparator {
             return false;
         }
 
+        public String valueToShowInHelp()
+        {
+            return Option.DEFAULT_STRING;
+        }
+
         public Class<? extends Annotation> annotationType()
         {
             return Option.class;
@@ -109,6 +114,9 @@ public class DefaultActionPreparator implements ActionPreparator {
                             }
                             public boolean multiValued() {
                                 return delegate.multiValued();
+                            }
+                            public String valueToShowInHelp() {
+                                return delegate.valueToShowInHelp();
                             }
                             public Class<? extends Annotation> annotationType() {
                                 return delegate.annotationType();
@@ -444,18 +452,18 @@ public class DefaultActionPreparator implements ActionPreparator {
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(argument.name()).a(Ansi.Attribute.RESET));
                 printFormatted("                ", argument.description(), term != null ? term.getWidth() : 80, out);
                 if (!argument.required()) {
-                    try {
-                        argsMap.get(argument).setAccessible(true);
-                        Object o = argsMap.get(argument).get(action);
-                        if (o != null
-                                && (!(o instanceof Boolean) || ((Boolean) o))
-                                && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
-                            out.print("                    (defaults to ");
-                            out.print(o.toString());
-                            out.println(")");
+                    if (argument.valueToShowInHelp() != null && argument.valueToShowInHelp().length() != 0) {
+                         try {
+                            if (Argument.DEFAULT_STRING.equals(argument.valueToShowInHelp())) {
+                                argsMap.get(argument).setAccessible(true);
+                                Object o = argsMap.get(argument).get(action);
+                                printObjectDefaultsTo(out, o);
+                            } else {
+                                printDefaultsTo(out, argument.valueToShowInHelp());
+                            }
+                        } catch (Throwable t) {
+                            // Ignore
                         }
-                    } catch (Throwable t) {
-                        // Ignore
                     }
                 }
             }
@@ -474,18 +482,18 @@ public class DefaultActionPreparator implements ActionPreparator {
                 out.print("        ");
                 out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(opt).a(Ansi.Attribute.RESET));
                 printFormatted("                ", option.description(), term != null ? term.getWidth() : 80, out);
-                try {
-                    optionsMap.get(option).setAccessible(true);
-                    Object o = optionsMap.get(option).get(action);
-                    if (o != null
-                            && (!(o instanceof Boolean) || ((Boolean) o))
-                            && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
-                        out.print("                (defaults to ");
-                        out.print(o.toString());
-                        out.println(")");
+                if (option.valueToShowInHelp() != null && option.valueToShowInHelp().length() != 0) {
+                    try {
+                        if(Option.DEFAULT_STRING.equals(option.valueToShowInHelp())) {
+                            optionsMap.get(option).setAccessible(true);
+                            Object o = optionsMap.get(option).get(action);
+                            printObjectDefaultsTo(out, o);
+                        } else {
+                            printDefaultsTo(out, option.valueToShowInHelp());
+                        }
+                    } catch (Throwable t) {
+                        // Ignore
                     }
-                } catch (Throwable t) {
-                    // Ignore
                 }
             }
             out.println();
@@ -495,6 +503,20 @@ public class DefaultActionPreparator implements ActionPreparator {
             String desc = loadDescription(action.getClass(), command.detailedDescription());
             printFormatted("        ", desc, term != null ? term.getWidth() : 80, out);
         }
+    }
+
+    private void printObjectDefaultsTo(PrintStream out, Object o) {
+        if (o != null
+                && (!(o instanceof Boolean) || ((Boolean) o))
+                && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+            printDefaultsTo(out, o.toString());
+        }
+    }
+
+    private void printDefaultsTo(PrintStream out, String value) {
+        out.print("                (defaults to ");
+        out.print(value);
+        out.println(")");
     }
 
     protected String loadDescription(Class clazz, String desc) {
