@@ -18,6 +18,8 @@
  */
 package org.apache.felix.gogo.commands;
 
+import org.apache.karaf.shell.console.completer.StringsCompleter;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -30,6 +32,7 @@ import java.lang.annotation.ElementType;
 @Target({ElementType.FIELD})
 public @interface Argument
 {
+    public static final String DEFAULT_STRING= "DEFAULT";
 
     String DEFAULT = "##default";
 
@@ -42,4 +45,6 @@ public @interface Argument
     int index() default 0;
 
     boolean multiValued() default false;
+
+    String valueToShowInHelp() default DEFAULT_STRING;
 }
