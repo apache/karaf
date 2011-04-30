@@ -39,7 +39,7 @@ public class ListBundles extends OsgiCommandSupport {
     @Option(name = "-u", description = "Shows the update locations", required = false, multiValued = false)
     boolean showUpdate;
     
-    @Option(name = "-t", description = "Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.", required = false, multiValued = false)
+    @Option(name = "-t", valueToShowInHelp = "", description = "Specifies the bundle threshold; bundles with a start-level less than this value will not get printed out.", required = false, multiValued = false)
     int bundleLevelThreshold = -1;
 
     private List<BundleStateListener.Factory> bundleStateListenerFactories;
