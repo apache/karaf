@@ -1,0 +1,91 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>shell</artifactId>
+		<groupId>org.apache.karaf.shell</groupId>
+		<version>3.0.0-SNAPSHOT</version>
+	</parent>
+	<groupId>org.apache.karaf.shell</groupId>
+	<artifactId>org.apache.karaf.shell.http</artifactId>
+	<packaging>bundle</packaging>
+	<name>Apache Karaf :: Shell :: Http Commands</name>
+	<version>3.0.0-SNAPSHOT</version>
+	<description>This bundle provides Karaf shell commands to list details of the http service.</description>
+
+	<properties>
+		<appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.karaf.shell</groupId>
+			<artifactId>org.apache.karaf.shell.console</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.utils</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.web</groupId>
+			<artifactId>pax-web-spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<includes>
+					<include>**/*</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.info</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
+						<Import-Package>
+							!${project.artifactId}*,
+							org.apache.felix.service.command,
+							org.apache.felix.gogo.commands,
+							org.apache.karaf.shell.console,
+							*
+                        </Import-Package>
+						<Private-Package>
+							org.apache.felix.utils.version,
+							org.apache.felix.utils.manifest,
+							!*
+                        </Private-Package>
+						<_versionpolicy>${bnd.version.policy}</_versionpolicy>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

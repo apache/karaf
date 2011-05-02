@@ -108,6 +108,7 @@
         <bundle>mvn:org.ops4j.pax.web/pax-web-spi/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-runtime/${pax.web.version}</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jetty/${pax.web.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.http/${project.version}</bundle>
     </feature>
     <feature name="http-whiteboard" version="${project.version}" resolver="(obr)" start-level='30'>
         <feature>http</feature>
