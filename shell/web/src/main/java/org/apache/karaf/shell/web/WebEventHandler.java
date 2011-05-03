@@ -25,7 +25,6 @@ import org.ops4j.pax.web.service.spi.WebListener;
 /**
  * Class implementing {@link WebListener} service to retrieve {@link WebEvent}
  */
-//public class WebEventHandler implements WebListener {
 public class WebEventHandler implements WebListener {
 	
 	private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();

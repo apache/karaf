@@ -15,29 +15,32 @@
  * limitations under the License.
  */
 
-package org.apache.karaf.shell.http;
+package org.apache.karaf.shell.web;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.ops4j.pax.web.service.spi.ServletEvent;
-import org.ops4j.pax.web.service.spi.ServletListener;
-import org.osgi.framework.Bundle;
-
-public class ServletEventHandler implements ServletListener {
-
-	Map<Bundle, ServletEvent> servletEvents =  new HashMap<Bundle, ServletEvent>();
-	
-	public void servletEvent(ServletEvent event) {
-		servletEvents.put(event.getBundle(), event);
-	}
+/**
+ * Contains various methods for helping with layout no commands
+ * 
+ * @author anierbeck
+ *
+ */
+public class CommandUtils {
 
 	/**
-	 * @return the servletEvents
+	 * The message is either enlarged or trimmed to the given size. 
+	 * 
+	 * @param message - the message to be trimmed or enlarged
+	 * @param length - the length of the message text
+	 * @return the optimized message
 	 */
-	public Collection<ServletEvent> getServletEvents() {
-		return servletEvents.values();
+	public static String trimToSize(String message, int length) {
+		while (message.length() < length) {
+			message += " ";
+		} 
+		if (message.length() > length) {
+			message = message.substring(0, length);
+		}
+		
+		return message;
 	}
-
+	
 }
