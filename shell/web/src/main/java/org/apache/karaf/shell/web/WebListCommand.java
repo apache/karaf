@@ -72,21 +72,15 @@ public class WebListCommand extends OsgiCommandSupport {
                 }
                 else {
                     level = String.valueOf(startLevelService.getBundleStartLevel(bundles[i]));
-                }
-                while (level.length() < 5) {
-                    level = " " + level;
-                }
-                while (id.length() < 4) {
-                    id = " " + id;
-                }
+                } 
+                level = CommandUtils.trimToSize(level, 5);
+                id = CommandUtils.trimToSize(id, 4);
                 
                 //prepend ctxt with slash (looks better)
                 if (!webappctxt.startsWith("/"))
                 	webappctxt = "/" + webappctxt;
                 
-                while (webappctxt.length() < 24) {
-                	webappctxt += " ";
-                }
+                webappctxt = CommandUtils.trimToSize(webappctxt, 24);
                 
                 String line = "[" + id + "] [" + getStateString(bundles[i]) + "]";
                 if (bundleEvents != null && !bundleEvents.isEmpty())

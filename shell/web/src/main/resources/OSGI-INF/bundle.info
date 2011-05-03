@@ -11,6 +11,5 @@
 
     The following commands are available:
     \u001B[36mweb:list\u001B[0m Lists details for war bundles.
-
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mDeployer\u001B[0m section of the Karaf User Guide.
+    \u001B[36mweb:deploy\u001B[0m Deploys content of a war bundle.
+    \u001B[36mweb:undeploy\u001B[0m Un-deploys content of a war bundles.
