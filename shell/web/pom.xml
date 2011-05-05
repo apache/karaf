@@ -39,6 +39,11 @@
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-spi</artifactId>
         </dependency>
+        <dependency>
+        	<groupId>org.apache.karaf</groupId>
+        	<artifactId>org.apache.karaf.util</artifactId>
+        	<scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -75,6 +80,7 @@
                         <Private-Package>
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.manifest,
+                            org.apache.karaf.util,
                             !*
                         </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
