@@ -40,9 +40,6 @@ import java.util.Map;
  * <p>
  * Karaf JAAS login module which uses a LDAP backend.
  * </p>
- *
- * @author jbonofre
- * @author gnodet
  */
 public class LDAPLoginModule extends AbstractKarafLoginModule {
 
@@ -224,6 +221,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             } else {
                 controls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
             }
+            controls.setReturningAttributes(new String[]{ roleNameAttribute });
             logger.debug("Looking for the user roles in LDAP with ");
             logger.debug("  base DN: " + roleBaseDN);
             roleFilter = roleFilter.replaceAll("%u", user);
