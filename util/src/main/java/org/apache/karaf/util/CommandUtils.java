@@ -15,13 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.karaf.shell.web;
+package org.apache.karaf.util;
 
 /**
  * Contains various methods for helping with layout no commands
- * 
- * @author anierbeck
- *
  */
 public class CommandUtils {
 
