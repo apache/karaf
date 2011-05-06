@@ -130,7 +130,7 @@
         <felix.eventadmin.version>1.2.10</felix.eventadmin.version>
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <aries.application.version>0.3</aries.application.version>
-        <aries.blueprint.version>0.3</aries.blueprint.version>
+        <aries.blueprint.version>0.3.1</aries.blueprint.version>
         <aries.jmx.version>0.3</aries.jmx.version>
         <aries.jpa.version>0.3</aries.jpa.version>
         <aries.jndi.version>0.3</aries.jndi.version>
