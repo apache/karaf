@@ -28,11 +28,16 @@ import java.util.LinkedList;
 public class CancelCommand extends JaasCommandSupport {
 
     @Override
-    protected Object doExecute(BackingEngine engine) throws Exception {
+    protected Object doExecute() throws Exception {
         //Cleanup the session
         session.put(JAAS_REALM, null);
         session.put(JAAS_ENTRY, null);
         session.put(JAAS_CMDS, new LinkedList<JaasCommandSupport>());
+        return null;
+    }
+
+    @Override
+    protected Object doExecute(BackingEngine engine) throws Exception {
         return null;
     }
 }
