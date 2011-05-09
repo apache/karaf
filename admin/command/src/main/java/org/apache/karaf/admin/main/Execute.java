@@ -63,10 +63,10 @@ public class Execute {
             listCommands();
             exit(0);
         }
-        
-        Class<?> cls = COMMANDS.get(args[0]);
+        String commandName = args[0];
+        Class<?> cls = COMMANDS.get(commandName);
         if (cls == null) {
-            System.err.println("Command not found: " + args[0]);
+            System.err.println("Command not found: " + commandName);
             exit(-1);
         }
 
@@ -81,9 +81,16 @@ public class Execute {
         
         Object command = cls.newInstance();
         if (command instanceof AdminCommandSupport) {
-            execute((AdminCommandSupport) command, storageFile, args);            
+            try {
+                execute((AdminCommandSupport) command, storageFile, args);
+            } catch (Exception e) {
+                System.err.println("Error execution command '" + commandName + "': " + e.getMessage());
+                if (System.getProperty("karaf.showStackTrace") != null) {
+                    throw e;
+                }
+            }
         } else {
-            System.err.println("Not an admin command: " + args[0]);
+            System.err.println("Not an admin command: " + commandName);
             exit(-1);
         }
     }
