@@ -102,7 +102,6 @@
     </feature>
 	<feature name="jetty" version="${jetty.version}" resolver="(obr)">
 		<bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
-        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm.bundle.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
 	    <bundle>mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
