@@ -65,6 +65,12 @@ public class BootstrapLogManager {
                     }
                 }
             }
+
+            if (props.getProperty("log4j.appender.out.file") == null) {
+                // manage if the log4j.appender.out.file property is not present in
+                // the etc/org.ops4j.pax.logging.cfg file
+                props.setProperty("log4j.appender.out.file", "${karaf.data}/log/karaf.log");
+            }
             filename = Main.substVars(props.getProperty("log4j.appender.out.file"),"log4j.appender.out.file", null, null);
             log = new File(filename);
         }
