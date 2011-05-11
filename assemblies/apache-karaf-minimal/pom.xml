@@ -42,6 +42,13 @@
             <version>${project.version}</version>
             <type>kar</type>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.assemblies.features</groupId>
+            <artifactId>standard</artifactId>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
