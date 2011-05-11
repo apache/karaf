@@ -20,7 +20,6 @@
 
 package org.apache.karaf.tooling.features;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -29,20 +28,23 @@ import java.util.Set;
 
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.project.MavenProject;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.collection.CollectResult;
+import org.sonatype.aether.collection.DependencyCollectionContext;
 import org.sonatype.aether.collection.DependencyCollectionException;
 import org.sonatype.aether.collection.DependencyGraphTransformer;
+import org.sonatype.aether.collection.DependencySelector;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
+import org.sonatype.aether.util.graph.selector.AndDependencySelector;
+import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
+import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
 import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
 import org.sonatype.aether.util.graph.transformer.ConflictMarker;
 import org.sonatype.aether.util.graph.transformer.JavaDependencyContextRefiner;
@@ -90,6 +92,8 @@ public class DependencyHelper {
       */
      private final List<RemoteRepository> pluginRepos;
 
+    private boolean includeTopLevelProvidedScopeDependencies;
+
     //dependencies we are interested in
     protected Map<Artifact, String> localDependencies;
     //log of what happened during search
@@ -97,11 +101,12 @@ public class DependencyHelper {
 
 
 
-    public DependencyHelper(List<RemoteRepository> pluginRepos, List<RemoteRepository> projectRepos, RepositorySystemSession repoSession, RepositorySystem repoSystem) {
+    public DependencyHelper(List<RemoteRepository> pluginRepos, List<RemoteRepository> projectRepos, RepositorySystemSession repoSession, RepositorySystem repoSystem, boolean includeTopLevelProvidedScopeDependencies) {
         this.pluginRepos = pluginRepos;
         this.projectRepos = projectRepos;
         this.repoSession = repoSession;
         this.repoSystem = repoSystem;
+        this.includeTopLevelProvidedScopeDependencies = includeTopLevelProvidedScopeDependencies;
     }
 
     public Map<Artifact, String> getLocalDependencies() {
@@ -126,9 +131,12 @@ public class DependencyHelper {
 
     private DependencyNode getDependencyTree(Artifact artifact) throws MojoExecutionException {
         try {
-            List<org.sonatype.aether.graph.Dependency> managedArtifacts = new ArrayList<Dependency>();
-            CollectRequest collectRequest = new CollectRequest(new org.sonatype.aether.graph.Dependency(artifact, "compile"), null, projectRepos);
+            CollectRequest collectRequest = new CollectRequest(new Dependency(artifact, "compile"), null, projectRepos);
             DefaultRepositorySystemSession session = new DefaultRepositorySystemSession(repoSession);
+            if (includeTopLevelProvidedScopeDependencies) {
+                session.setDependencySelector(new AndDependencySelector(new OptionalDependencySelector(),
+                        new ScopeDependencySelectorProvider()));
+            }
             DependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(new ConflictMarker(),
                     new JavaEffectiveScopeCalculator(),
                     new JavaDependencyContextRefiner());
@@ -140,7 +148,18 @@ public class DependencyHelper {
         }
     }
 
+    private static class ScopeDependencySelectorProvider implements DependencySelector {
 
+        private DependencySelector child = new ScopeDependencySelector("test", "provided");
+
+        public boolean selectDependency(Dependency dependency) {
+            throw new IllegalStateException("this does not appear to be called");
+        }
+
+        public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
+            return child;
+        }
+    }
     private static class Scanner {
 
         private static enum Accept {
@@ -185,8 +204,7 @@ public class DependencyHelper {
 //            Artifact artifact = getArtifact(rootNode);
 
             Accept accept = accept(dependencyNode, parentAccept);
-            if (accept.isContinue()) {
-                List<DependencyNode> children = dependencyNode.getChildren();
+            if (accept.isLocal()) {
                 if (isFromFeature) {
                     if (!isFeature(dependencyNode)) {
                         log.append(indent).append("from feature:").append(dependencyNode).append("\n");
@@ -206,8 +224,11 @@ public class DependencyHelper {
                         isFromFeature = true;
                     }
                 }
-                for (DependencyNode child : children) {
-                    scan(child, accept, useTransitiveDependencies, isFromFeature, indent + "  ");
+                if (accept.isContinue()) {
+                    List<DependencyNode> children = dependencyNode.getChildren();
+                    for (DependencyNode child : children) {
+                        scan(child, accept, useTransitiveDependencies, isFromFeature, indent + "  ");
+                    }
                 }
             }
         }
@@ -221,6 +242,9 @@ public class DependencyHelper {
             String scope = dependency.getPremanagedScope();
             if (scope == null || "runtime".equalsIgnoreCase(scope) || "compile".equalsIgnoreCase(scope)) {
                 return previous;
+            }
+            if ("provided".equalsIgnoreCase(scope)) {
+                return Accept.PROVIDED;
             }
             return Accept.STOP;
         }

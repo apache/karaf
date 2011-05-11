@@ -209,7 +209,7 @@ public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
+            DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem, false);
             dependencyHelper.getDependencies(project, true);
             this.localDependencies = dependencyHelper.getLocalDependencies();
             this.treeListing = dependencyHelper.getTreeListing();
