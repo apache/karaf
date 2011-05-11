@@ -15,6 +15,7 @@
  */
 package org.apache.karaf.features.internal;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLConnection;
@@ -43,7 +44,12 @@ public class FeatureValidationUtil {
      * @throws Exception When validation fails.
      */
     public static void validate(URI uri) throws Exception {
-        URLConnection conn = uri.toURL().openConnection();
+        URLConnection conn = null;
+        try {
+            conn = uri.toURL().openConnection();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("invalid URI: " + uri, e);
+        }
         conn.setDefaultUseCaches(false);
 
         InputStream stream = conn.getInputStream();
