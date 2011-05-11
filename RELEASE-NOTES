@@ -15,6 +15,115 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.1
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an
+ update to Apache Karaf 2.2.0. It contains bug fixes identified in the prior release, 
+ and introduces improvements including; updates to pax-logging, pax-runner, pax-web, 
+ jetty, and felix versions. The config commands have has been updated, and kar features 
+ are now in features-maven-plugin.
+  For more detail please see the change log below. 
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-456] - Artifact versions named in the documentation are not replaced with the version of the current project
+    * [KARAF-493] - Various site fixes
+    * [KARAF-494] - Include the .kar features in 2.2.1
+    * [KARAF-504] - Features Maven Plugin does not work with Maven 3
+    * [KARAF-506] - The config shell commands offer no way to delete a command
+    * [KARAF-507] - The config shell completer does not allow completion of factory based pids
+    * [KARAF-508] - The config:edit create does not allow the creation of factory configs
+    * [KARAF-509] - The config:update command does not save factory configurations to the correct file
+    * [KARAF-512] - WebConsole installation failed due to missing jetty-jaas feature
+    * [KARAF-518] - Unable to load features.xml with included schema attribute
+    * [KARAF-521] - Executing complex scripts is extremely difficult
+    * [KARAF-525] - Bundles listed in etc/startup.properties should only installed the first time
+    * [KARAF-527] - The console bundle should indicate it provides the gogo related services
+    * [KARAF-528] - Error while using correct feature descriptor in features-maven-plugin
+    * [KARAF-534] - Startlevel: Strange deployment behaviour 
+    * [KARAF-535] - Description for List command incorrectly claims Threshold default is -1
+    * [KARAF-537] - admin.bat prints stacktraces to standard out
+    * [KARAF-546] - Null point exception when executing log:display on an empty log
+    * [KARAF-547] - Missing features file in the system directory of the distribution
+    * [KARAF-557] - Feature: Failed to check to not install a bundle with the symbolic name contains attributes
+    * [KARAF-558] - Boot feature from configuration file, can contain some spaces; the name should be trimmed
+    * [KARAF-559] - AdminService loses root flag for instances
+    * [KARAF-562] - Config properties defined in <config> tag (features.xml) are loaded during each refresh
+    * [KARAF-568] - minimal assembly: zip and tar.gz do differ in content
+    * [KARAF-569] - Installing and uninstalling the jetty feature leaves Karaf in an ususable state
+    * [KARAF-577] - Cannot Run WAR From Root Context
+    * [KARAF-580] - Kar installer in 2.2 uses feature instead of features as classifier
+    * [KARAF-585] - When connected to a remote instance, Ctrl-C closes the connection instead of simply interrupting the command
+    * [KARAF-589] - Shell console ExampleSubclassMain unit test is broken
+    * [KARAF-599] - Archetypes CommandArchetypeTest unit test fails
+    * [KARAF-600] - "Extending the console" documentation still refers to org.osgi.service.command
+    * [KARAF-610] - Can't input the path string completely via karaf shell
+    * [KARAF-621] - features-maven-plugin:2.2.0:generate-features-xml fails with NullPointerException
+    * [KARAF-625] - Missing property 'log4j.appender.out.file' in the file org.ops4j.pax.logging.cfg caused a NPE
+    * [KARAF-626] - admin:connect always fails with "Authentication failed"
+    * [KARAF-629] - CommandArchetypeTest test case failure, expected START_TAG or END_TAG not TEXT.
+    * [KARAF-630] - SpringDeploymentListenerTest fails on IBM JDK builds with No Class Def Found Error
+    * [KARAF-632] - Itests failures
+
+** Dependency upgrade
+    * [KARAF-590] - Upgrade to pax-logging 1.6.2
+    * [KARAF-591] - Upgrade aopalliance ServiceMix bundle to 1.0_5
+    * [KARAF-592] - Upgrade asm ServiceMix bundle to 3.3_2
+    * [KARAF-593] - Upgrade cglib ServiceMix bundle to 2.1_3_7
+    * [KARAF-594] - Upgrade commons-codec ServiceMix bundle to 1.3_4
+    * [KARAF-595] - Upgrade commons-collections ServiceMix bundle to 3.2.1_2
+    * [KARAF-596] - Upgrade commons-lang ServiceMix bundle to 2.4_5
+    * [KARAF-597] - Upgrade jasypt ServiceMix bundle to 1.7_3
+    * [KARAF-598] - Upgrade junit ServiceMix bundle to 4.7_3
+    * [KARAF-613] - Upgrade to Blueprint 0.3.1
+
+** Improvement
+    * [KARAF-461] - dev:create-dump command should generate a cleaner zip file name
+    * [KARAF-476] - The admin-command should be extended to handle RMI-server-port settings
+    * [KARAF-483] - pax-web jetty.xml configfile should contain default security realm 
+    * [KARAF-484] - Upgrade to Felix Framework 3.0.9
+    * [KARAF-487] - Improve --help information for obr:list
+    * [KARAF-488] - obr:list should also include the bundle-symbolic-name of the packages it lists as this is used to execute other OBR commands
+    * [KARAF-495] - Add a Tutorials section to the website.
+    * [KARAF-497] - Resolve mvn: urls in <descriptor/> element for features-maven-plugin:add-features-to-repo
+    * [KARAF-513] - The ssh:ssh and admin:connect command do not allow passing a command to execute
+    * [KARAF-514] - When starting a child instance, there's no way to wait until it's started 
+    * [KARAF-517] - Upgrade to pax-runner 1.6.1
+    * [KARAF-533] - Improve depdencny handling to manual
+    * [KARAF-539] - Document configfile xml tag of features
+    * [KARAF-542] - Support of next line with '>' character
+    * [KARAF-551] - Implement the shell:source command
+    * [KARAF-554] - Add karaf version in system properties and display in shell:info command output
+    * [KARAF-563] - Adjustable PermSize and MaxPermSize in karaf script
+    * [KARAF-564] - Allow configuring features OBR resolver to resolve optional imports as well
+    * [KARAF-574] - Re-introduce export version in packages:exports command
+    * [KARAF-576] - introduce start-level attribute for feature element in features.xml
+    * [KARAF-588] - Some fixes to Karaf Site
+    * [KARAF-603] - Add 'karaf-framework' feature to describe core Karaf bundles
+    * [KARAF-606] - JAAS: Allow LDAPLoginModule to supply role "DN" from LDAP group search
+
+** New Feature
+    * [KARAF-463] - Add chapter for Pax Web and the OSGi HttpService
+    * [KARAF-605] - Add param to Gogo Argument and Option to override default value with specific value
+
+** Task
+    * [KARAF-489] - Upgrade pax-logging to 1.6.1
+    * [KARAF-492] - Upgrade Karaf to version 1.0.2 of pax-web
+    * [KARAF-500] - Upgrade to Jetty 7.3.1
+    * [KARAF-501] - Upgrade to PAX Exam 1.2.4
+    * [KARAF-516] - Upgrade to felix eventadmin 1.2.10
+    * [KARAF-552] - Upgrade to Pax URL 1.2.6
+    * [KARAF-566] - Build: Remove duplicate entries from build artefacts.
+    * [KARAF-567] - org.apache.karaf.jaas.config.impl accidentally exported?
+    * [KARAF-578] - Upgrade to PAX-WEB 1.0.3 
+
+
                     Apache Karaf 2.2.0
                     ==================
 
