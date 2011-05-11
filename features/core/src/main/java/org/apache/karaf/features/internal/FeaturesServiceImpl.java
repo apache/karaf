@@ -185,7 +185,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         String[] s = uris.split(",");
         this.uris = new HashSet<URI>();
         for (String value : s) {
-            this.uris.add(new URI(value));
+            value = value.trim();
+            if (!value.isEmpty()) {
+                this.uris.add(new URI(value));
+            }
         }
     }
 
@@ -656,6 +659,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 throw new BundleException("Manifest not present in the first entry of the zip " + bundleLocation);
             }
             String sn = m.getMainAttributes().getValue(Constants.BUNDLE_SYMBOLICNAME);
+            if (sn == null) {
+                throw new BundleException("Jar is not a bundle, no Bundle-SymbolicName " + bundleLocation);
+            }
             // remove attributes from the symbolic name (like ;blueprint.graceperiod:=false suffix)
             int attributeIndexSep = sn.indexOf(';');
             if (attributeIndexSep != -1) {
