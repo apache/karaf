@@ -30,6 +30,8 @@
             <includes>
                 <include>README</include>
                 <include>RELEASE*</include>
+                <include>LICENSE</include>
+                <include>NOTICE</include>
             </includes>
             <lineEnding>unix</lineEnding>
         </fileSet>
@@ -107,23 +109,6 @@
             <outputDirectory>system</outputDirectory>
         </fileSet>
     </fileSets>
-
-    <files>
-        <file>
-            <source>../../LICENSE</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>LICENSE</destName>
-            <fileMode>0644</fileMode>
-            <lineEnding>unix</lineEnding>
-        </file>
-        <file>
-            <source>NOTICE</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>NOTICE</destName>
-            <fileMode>0644</fileMode>
-            <lineEnding>unix</lineEnding>
-        </file>
-    </files>
 
     <dependencySets>
         <dependencySet>
