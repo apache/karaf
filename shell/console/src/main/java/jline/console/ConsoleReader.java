@@ -99,6 +99,8 @@ public class ConsoleReader
     private String previousSearchTerm = "";
 
     private int searchIndex = -1;
+    
+    private boolean skipLF = false;
 
     public ConsoleReader(final InputStream in, final Writer out, final InputStream bindings, final Terminal term) throws
         IOException
@@ -1371,17 +1373,32 @@ public class ConsoleReader
     private String readLine(final InputStream in) throws IOException {
         StringBuilder buff = new StringBuilder();
 
+        if (skipLF) {
+            skipLF = false;
+            
+            int i = streamBuffer.isEmpty() ? in.read() : streamBuffer.remove(0);
+            
+            if (i == -1 || i == '\r') {
+                return buff.toString();
+            } else if (i == '\n') {
+                // ignore
+            } else {
+                buff.append((char) i);
+            }
+        }        
+        
         while (true) {
             int i = streamBuffer.isEmpty() ? in.read() : streamBuffer.remove(0);
 
-            if (i == -1 || i == '\n' || i == '\r') {
+            if (i == -1 || i == '\n') {
                 return buff.toString();
+            } else if (i == '\r') {
+                skipLF = true;
+                return buff.toString();
+            } else {
+                buff.append((char) i);
             }
-
-            buff.append((char) i);
         }
-
-        // return new BufferedReader (new InputStreamReader (in)).readLine ();
     }
 
     //
