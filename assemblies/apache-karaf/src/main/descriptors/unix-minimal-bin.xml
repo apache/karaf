@@ -104,6 +104,13 @@
             </excludes>
             <outputDirectory>/</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>target/features-repo</directory>
+            <includes>
+            	<include>**/*.xml</include>
+            </includes>
+            <outputDirectory>system</outputDirectory>
+        </fileSet>
 
     </fileSets>
 
