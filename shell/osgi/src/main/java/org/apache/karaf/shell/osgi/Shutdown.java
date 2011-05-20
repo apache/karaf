@@ -27,17 +27,36 @@ import org.osgi.framework.Bundle;
 public class Shutdown extends OsgiCommandSupport {
 
     protected Object doExecute() throws Exception {
-        new Thread() {
-            public void run() {
-                try {
-                    Bundle bundle = getBundleContext().getBundle(0);
-                    bundle.stop();
-                } catch (Exception e) {
-                    log.error("Error when shutting down Apache Karaf", e);
+        for (;;) {
+            StringBuffer sb = new StringBuffer();
+            System.err.println("Do you really want to shutdown (yes/no): ");
+            System.err.flush();
+            for (;;) {
+                int c = session.getKeyboard().read();
+                if (c < 0) {
+                    return null;
                 }
+                System.err.print((char) c);
+                if (c == '\r' || c == '\n') {
+                    break;
+                }
+                sb.append((char) c);
             }
-        }.start();
-        return null;
+            String str = sb.toString();
+            if (str.equals("yes")) {
+                new Thread() {
+                    public void run() {
+                        try {
+                            Bundle bundle = getBundleContext().getBundle(0);
+                            bundle.stop();
+                        } catch (Exception e) {
+                            log.error("Error when shutting down Apache Karaf", e);
+                        }
+                    }
+                }.start();
+            }
+            return null;
+        }
     }
 
 }
