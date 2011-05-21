@@ -115,6 +115,7 @@
 
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
+        <geronimo.activation.version>1.1</geronimo.activation.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
         <depends-maven-plugin.version>1.0</depends-maven-plugin.version>
         <easymock.version>2.4</easymock.version>
@@ -810,6 +811,11 @@
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-war</artifactId>
                 <version>${pax.url.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-activation_1.1_spec</artifactId>
+                <version>${geronimo.activation.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
