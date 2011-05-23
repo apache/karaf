@@ -32,7 +32,7 @@ public class Shutdown extends OsgiCommandSupport {
             System.err.println("Do you really want to shutdown (yes/no): ");
             System.err.flush();
             for (;;) {
-                int c = System.in.read();
+                int c = session.getKeyboard().read();
                 if (c < 0) {
                     return null;
                 }
