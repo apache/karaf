@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
+import org.apache.felix.gogo.runtime.Closure;
 import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
@@ -64,6 +65,12 @@ public class CommandsCompleter implements Completer {
         if (!names.equals(commands)) {
             commands.clear();
             completers.clear();
+
+            // get command aliases
+            Set<String> aliases = this.getAliases();
+            completers.add(new StringsCompleter(aliases));
+
+            // add argument completers for each command
             for (String command : names) {
                 Function function = (Function) session.get(command);
                 function = unProxy(function);
@@ -73,6 +80,23 @@ public class CommandsCompleter implements Completer {
                 commands.add(command);
             }
         }
+    }
+
+    /**
+     * Get the aliases defined in the console session.
+     *
+     * @return the aliases set
+     */
+    private Set<String> getAliases() {
+        Set<String> vars = (Set<String>) session.get(null);
+        Set<String> aliases = new HashSet<String>();
+        for (String var : vars) {
+            Object content = session.get(var);
+            if (content instanceof Closure)  {
+                aliases.add(var);
+            }
+        }
+        return aliases;
     }
 
     protected Function unProxy(Function function) {
