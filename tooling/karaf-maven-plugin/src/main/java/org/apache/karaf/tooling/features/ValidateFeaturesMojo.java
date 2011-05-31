@@ -26,13 +26,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
@@ -79,6 +73,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
     private static final String MVN_URI_PREFIX = "mvn:";
     private static final String MVN_REPO_SEPARATOR = "!";
 
+    private static final String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/standard/%s/xml/features";
+    private static final String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/enterprise/%s/xml/features";
+
     /**
      * The dependency tree builder to use.
      *
@@ -117,6 +114,13 @@ public class ValidateFeaturesMojo extends MojoSupport {
      * @parameter default-value="jre-1.5"
      */
     private String jreVersion;
+
+    /**
+     * which karaf version used for karaf core features resolution
+     *
+     * @parameter
+     */
+    private String karafVersion;
 
     /**
      *  The repositories which are included from the plugin config   
@@ -198,6 +202,38 @@ public class ValidateFeaturesMojo extends MojoSupport {
         readSystemPackages();
         info(" - getting list of provided bundle exports");
         readProvidedBundles();
+        info(" - populating repositories with karaf core features descriptors");
+        appendKarafCoreFeaturesDescriptors();
+    }
+
+    /**
+     * Add Karaf core features URL in the default repositories set
+     */
+    private void appendKarafCoreFeaturesDescriptors() {
+        if (repositories == null) {
+            repositories = new ArrayList<String>();
+        }
+        if (karafVersion == null) {
+            Package p = Package.getPackage("org.apache.karaf.tooling");
+            karafVersion = p.getImplementationVersion();
+        }
+        String karafCoreStandardFeaturesUrl = String.format(KARAF_CORE_STANDARD_FEATURE_URL, karafVersion);
+        String karafCoreEnterpriseFeaturesUrl = String.format(KARAF_CORE_ENTERPRISE_FEATURE_URL, karafVersion);
+
+        try {
+            resolve(karafCoreStandardFeaturesUrl);
+            repositories.add(karafCoreStandardFeaturesUrl);
+        } catch (Exception e) {
+            warn("Can't add " + karafCoreStandardFeaturesUrl + " in the default repositories set");
+        }
+
+        try {
+            resolve(karafCoreEnterpriseFeaturesUrl);
+            repositories.add(karafCoreEnterpriseFeaturesUrl);
+        } catch (Exception e) {
+            warn("Can't add " + karafCoreStandardFeaturesUrl + " in the default repositories set");
+        }
+
     }
 
     /*
