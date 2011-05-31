@@ -199,6 +199,9 @@ public class ValidateFeaturesMojo extends MojoSupport {
         appendKarafCoreFeaturesDescriptors();
     }
 
+    /**
+     * Add Karaf core features descriptors in the default repositories set.
+     */
     private void appendKarafCoreFeaturesDescriptors() {
         if (repositories == null) {
             repositories = new ArrayList<String>();
