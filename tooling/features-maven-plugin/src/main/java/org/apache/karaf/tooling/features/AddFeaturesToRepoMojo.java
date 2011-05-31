@@ -64,6 +64,9 @@ import org.xml.sax.SAXException;
  */
 public class AddFeaturesToRepoMojo extends MojoSupport {
 
+    private final static String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/standard/%s/xml/features";
+    private final static String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/enterprise/%s/xml/features";
+
     /**
      * @parameter
      */
@@ -78,6 +81,13 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
      * @parameter
      */
     private File repository;
+
+    /**
+     * which is the target karaf version used to resolve karaf core features descriptors
+     *
+     * @parameter
+     */
+    private String karafVersion;
 
     /**
      * @parameter
@@ -105,21 +115,49 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     private boolean addTransitiveFeatures = true;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (karafVersion == null) {
+            Package p = Package.getPackage("org.apache.karaf.tooling.features");
+            karafVersion = p.getImplementationVersion();
+        }
+        String karafCoreEnterpriseFeatureUrl = String.format(KARAF_CORE_ENTERPRISE_FEATURE_URL, karafVersion);
+        Artifact enterpriseFeatureDescriptor = bundleToArtifact(karafCoreEnterpriseFeatureUrl, true);
+        if (enterpriseFeatureDescriptor != null) {
+            try {
+                resolveBundle(enterpriseFeatureDescriptor, remoteRepos);
+                descriptors.add(0, karafCoreEnterpriseFeatureUrl);
+            } catch (Exception e) {
+                getLog().warn("Can't add " + enterpriseFeatureDescriptor + " in the descriptors set");
+                getLog().debug(e);
+            }
+        }
+        String karafCoreStandardFeatureUrl = String.format(KARAF_CORE_STANDARD_FEATURE_URL, karafVersion);
+        Artifact standardFeatureDescriptor = bundleToArtifact(karafCoreStandardFeatureUrl, true);
+        if (standardFeatureDescriptor != null) {
+            try {
+                resolveBundle(standardFeatureDescriptor, remoteRepos);
+                descriptors.add(0, karafCoreStandardFeatureUrl);
+            } catch (Exception e) {
+                getLog().warn("Can't add " + standardFeatureDescriptor + " in the descriptors set");
+                getLog().debug(e);
+            }
+        }
         try {
             Set<String> bundles = new HashSet<String>();
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
             for (String uri : descriptors) {
-                // let's ensure a mvn: based url is sitting in the local repo before we try reading it
-                Artifact descriptor = bundleToArtifact(uri, true);
-                if (descriptor != null) {
-                    resolveBundle(descriptor, remoteRepos);
-                }
-                if (includeMvnBasedDescriptors) {
-                    bundles.add(uri);
-                }
-                Repository repo = new Repository(URI.create(translateFromMaven(uri)));
-                for (Feature f : repo.getFeatures()) {
-                    featuresMap.put(f.getName(), f);
+                if (!uri.equals(karafCoreStandardFeatureUrl) && !uri.equals(karafCoreEnterpriseFeatureUrl)) {
+                    // let's ensure a mvn: based url is sitting in the local repo before we try reading it
+                    Artifact descriptor = bundleToArtifact(uri, true);
+                    if (descriptor != null) {
+                        resolveBundle(descriptor, remoteRepos);
+                    }
+                    if (includeMvnBasedDescriptors) {
+                        bundles.add(uri);
+                    }
+                    Repository repo = new Repository(URI.create(translateFromMaven(uri)));
+                    for (Feature f : repo.getFeatures()) {
+                        featuresMap.put(f.getName(), f);
+                    }
                 }
             }
             
