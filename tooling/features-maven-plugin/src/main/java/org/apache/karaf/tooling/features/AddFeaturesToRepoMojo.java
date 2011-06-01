@@ -126,7 +126,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 resolveBundle(enterpriseFeatureDescriptor, remoteRepos);
                 descriptors.add(0, karafCoreEnterpriseFeatureUrl);
             } catch (Exception e) {
-                getLog().warn("Can't add " + enterpriseFeatureDescriptor + " in the descriptors set");
+                getLog().warn("Can't add " + karafCoreEnterpriseFeatureUrl + " in the descriptors set");
                 getLog().debug(e);
             }
         }
@@ -137,7 +137,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 resolveBundle(standardFeatureDescriptor, remoteRepos);
                 descriptors.add(0, karafCoreStandardFeatureUrl);
             } catch (Exception e) {
-                getLog().warn("Can't add " + standardFeatureDescriptor + " in the descriptors set");
+                getLog().warn("Can't add " + karafCoreStandardFeatureUrl + " in the descriptors set");
                 getLog().debug(e);
             }
         }
