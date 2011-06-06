@@ -17,11 +17,15 @@
 package org.apache.karaf.shell.osgi;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
 
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.osgi.wikidoc.AnsiPrintingWikiVisitor;
+import org.apache.karaf.shell.osgi.wikidoc.WikiParser;
+import org.apache.karaf.shell.osgi.wikidoc.WikiVisitor;
 import org.apache.karaf.util.StringEscapeUtils;
 import org.osgi.framework.Bundle;
 
@@ -54,15 +58,21 @@ public class Info extends BundlesCommandOptional {
         System.out.println(Util.getUnderlineString(title));
         URL bundleInfo = bundle.getEntry("OSGI-INF/bundle.info");
         if (bundleInfo != null) {
+        	BufferedReader reader = null;
             try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(bundleInfo.openStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(StringEscapeUtils.unescapeJava(line));
-                }
-                reader.close();
+                reader = new BufferedReader(new InputStreamReader(bundleInfo.openStream()));
+                WikiVisitor visitor = new AnsiPrintingWikiVisitor(System.out);
+                WikiParser parser = new WikiParser(visitor);
+                parser.parse(reader);
             } catch (Exception e) {
                 // ignore
+            } finally {
+            	if (reader != null) {
+            		try {
+						reader.close();
+					} catch (IOException e) {
+					}
+            	}
             }
         }
     }
