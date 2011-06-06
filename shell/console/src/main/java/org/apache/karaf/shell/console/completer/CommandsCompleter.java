@@ -18,7 +18,6 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,10 +30,7 @@ import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 /**
  * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
@@ -100,26 +96,17 @@ public class CommandsCompleter implements Completer {
     }
 
     protected Function unProxy(Function function) {
-        try {
-            if (function instanceof CommandProxy) {
-                Field contextField = function.getClass().getDeclaredField("context");
-                Field referenceField = function.getClass().getDeclaredField("reference");
-                contextField.setAccessible(true);
-                referenceField.setAccessible(true);
-                BundleContext context = (BundleContext) contextField.get(function);
-                ServiceReference reference = (ServiceReference) referenceField.get(function);
-                Object target = context.getService(reference);
-                try {
-                    if (target instanceof Function) {
-                        function = (Function) target;
-                    }
-                } finally {
-                    context.ungetService(reference);
-                }
-            }
-        } catch (Throwable t) {
-        }
-        return function;
+    	if (function instanceof CommandProxy) {
+        	CommandProxy proxy = (CommandProxy) function;
+        	Object target = proxy.getTarget();
+       		if (target instanceof Function) {
+       			return (Function) target;
+       		} else {
+       			return function;
+       		}
+    	} else {	
+    		return function;
+    	}
     }
 
 }
