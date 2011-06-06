@@ -69,6 +69,7 @@ public class FrameworkOptions extends OsgiCommandSupport {
             Properties props = new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
             props.put("karaf.framework", framework.toLowerCase());
             props.save();
+            System.out.println("Changed OSGi framework to " + framework.toLowerCase() + ". Karaf needs to be restarted to make the change effective");
         }
 
         return null;
