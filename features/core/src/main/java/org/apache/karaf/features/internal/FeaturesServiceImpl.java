@@ -337,27 +337,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
             // Start all bundles
             for (Bundle b : state.bundles) {
-                // do not start fragment bundles
-                Dictionary d = b.getHeaders();
-                String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
-                if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
-                    // do not start bundles that are persistently stopped
-                    if (state.installed.contains(b)
-                            || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
-                                    && getStartLevel().isBundlePersistentlyStarted(b))) {
-                    	// do no start bundles when user request it
-                    	Long bundleId = b.getBundleId();
-                    	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
-                        if (bundleInfo == null || bundleInfo.isStart()) {
-	                        try {
-	                            b.start();
-	                        } catch (BundleException be) {
-	                            String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
-	                            throw new Exception(msg, be);
-	                        }
-                    	}
-                    }
-                }
+                startBundle(state, b);
             }
             // Clean up for batch
             if (!options.contains(Option.NoCleanIfFailure)) {
@@ -371,44 +351,75 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 }
             }
         } catch (Exception e) {
-            // cleanup on error
-            if (!options.contains(Option.NoCleanIfFailure)) {
-                // Uninstall everything
-                for (Bundle b : state.installed) {
-                    try {
-                        b.uninstall();
-                    } catch (Exception e2) {
-                        // Ignore
-                    }
-                }
-                for (Bundle b : failure.installed) {
-                    try {
-                        b.uninstall();
-                    } catch (Exception e2) {
-                        // Ignore
-                    }
-                }
-            } else {
-                // Force start of bundles so that they are flagged as persistently started
-                for (Bundle b : state.installed) {
-                    try {
-                        b.start();
-                    } catch (Exception e2) {
-                        // Ignore
-                    }
-                }
-            }
-            // rethrow exception
+        	boolean noCleanIfFailure = options.contains(Option.NoCleanIfFailure);
+            cleanUpOnFailure(state, failure, noCleanIfFailure);
             throw e;
+        } finally {
+            for (Feature f : features) {
+                callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
+            }
+            for (Map.Entry<Feature, Set<Long>> e : state.features.entrySet()) {
+                installed.put(e.getKey(), e.getValue());
+            }
+            saveState();
         }
-        for (Feature f : features) {
-            callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
-        }
-        for (Map.Entry<Feature, Set<Long>> e : state.features.entrySet()) {
-            installed.put(e.getKey(), e.getValue());
-        }
-        saveState();
     }
+
+	private void startBundle(InstallationState state, Bundle b)
+			throws Exception {
+		// do not start fragment bundles
+		Dictionary d = b.getHeaders();
+		String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
+		if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
+		    // do not start bundles that are persistently stopped
+		    if (state.installed.contains(b)
+		            || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
+		                    && getStartLevel().isBundlePersistentlyStarted(b))) {
+		    	// do no start bundles when user request it
+		    	Long bundleId = b.getBundleId();
+		    	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
+		        if (bundleInfo == null || bundleInfo.isStart()) {
+		            try {
+		                b.start();
+		            } catch (BundleException be) {
+		                String msg = format("Could not start bundle %s in feature(s) %s: %s", b.getLocation(), getFeaturesContainingBundleList(b), be.getMessage());
+		                throw new Exception(msg, be);
+		            }
+		    	}
+		    }
+		}
+	}
+
+	private void cleanUpOnFailure(InstallationState state,
+			InstallationState failure, boolean noCleanIfFailure) {
+		// cleanup on error
+		if (!noCleanIfFailure) {
+		    // Uninstall everything
+		    for (Bundle b : state.installed) {
+		        try {
+		            b.uninstall();
+		        } catch (Exception e2) {
+		            // Ignore
+		        }
+		    }
+		    for (Bundle b : failure.installed) {
+		        try {
+		            b.uninstall();
+		        } catch (Exception e2) {
+		            // Ignore
+		        }
+		    }
+		} else {
+		    // Force start of bundles so that they are flagged as persistently started
+		    for (Bundle b : state.installed) {
+		        try {
+		            b.start();
+		        } catch (Exception e2) {
+		            // Ignore
+		        }
+		    }
+		}
+	}
 
     protected static class InstallationState {
         final Set<Bundle> installed = new HashSet<Bundle>();
