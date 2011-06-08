@@ -46,11 +46,13 @@ import junit.framework.TestCase;
 
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
 import org.easymock.EasyMock;
+import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.xml.sax.SAXParseException;
 
 import static org.easymock.EasyMock.*;
 
@@ -872,7 +874,7 @@ public class FeaturesServiceTest extends TestCase {
 
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + bundle2 + "</bundle>");
@@ -971,13 +973,17 @@ public class FeaturesServiceTest extends TestCase {
     /**
      * This test checks feature service behavior with old, non namespaced descriptor.
      */
-    public void testNoSchemaValidation() throws Exception {
+    public void testLoadOldFeatureFile() throws Exception {
+        String bundle1 = getJarUrl(LogService.class);
+        String bundle2 = getJarUrl(Bundle.class);
+        
         File tmp = File.createTempFile("smx", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features>");
-        pw.println("  <featur>");
-        pw.println("    <bundle>anotherBundle</bundle>");
-        pw.println("  </featur>");
+        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("  <feature name='f1'>");
+        pw.println("    <bundle>" + bundle1 + "</bundle>");
+        pw.println("    <bundle>" + bundle2 + "</bundle>");
+        pw.println("  </feature>");
         pw.println("</features>");
         pw.close();
 
@@ -990,6 +996,10 @@ public class FeaturesServiceTest extends TestCase {
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
         svc.addRepository(uri);
+        Feature feature = svc.getFeature("f1");
+        Assert.assertNotNull("No feature named fi found", feature);        
+        List<BundleInfo> bundles = feature.getBundles();
+        Assert.assertEquals(2, bundles.size());
     }
 
     private String getJarUrl(Class cl) {

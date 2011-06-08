@@ -48,7 +48,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 /**
- * @version $Rev:$ $Date:$
+ * @version $Rev$ $Date$
  */
 public class JaxbUtil {
 
@@ -60,15 +60,6 @@ public class JaxbUtil {
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static Features unmarshal(InputStream in, boolean validate) throws XMLStreamException, JAXBException {
-        XMLStreamReader xmlStream = XMLINPUT_FACTORY.createXMLStreamReader(in);
-        Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
-        JAXBElement<Features> element = unmarshaller.unmarshal(xmlStream, Features.class);
-        Features features = element.getValue();
-        return features;
-
     }
 
     public static <T> void marshal(Class<T> type, Object object, OutputStream out) throws JAXBException {
@@ -102,15 +93,18 @@ public class JaxbUtil {
      * @throws SAXException                 if there is an xml problem
      * @throws JAXBException                if the xml cannot be marshalled into a T.
      */
-    public static <T> T unmarshal(Class<T> type, InputStream in, boolean validate) throws ParserConfigurationException, SAXException, JAXBException {
+    public static Features unmarshal(InputStream in, boolean validate) {
         InputSource inputSource = new InputSource(in);
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         factory.setValidating(validate);
-        SAXParser parser = factory.newSAXParser();
+        SAXParser parser;
+        try {
+            parser = factory.newSAXParser();
+        
 
-        JAXBContext ctx = JAXBContext.newInstance(type);
+        JAXBContext ctx = JAXBContext.newInstance(Features.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
         unmarshaller.setEventHandler(new ValidationEventHandler() {
             public boolean handleEvent(ValidationEvent validationEvent) {
@@ -119,18 +113,32 @@ public class JaxbUtil {
             }
         });
 
-        XMLFilter xmlFilter = new NoSourceFilter(parser.getXMLReader());
+        XMLFilter xmlFilter = new NoSourceAndNamespaceFilter(parser.getXMLReader());
         xmlFilter.setContentHandler(unmarshaller.getUnmarshallerHandler());
 
         SAXSource source = new SAXSource(xmlFilter, inputSource);
 
-        return type.cast(unmarshaller.unmarshal(source));
+        return (Features)unmarshaller.unmarshal(source);
+        
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static class NoSourceFilter extends XMLFilterImpl {
+    /**
+     * Provides an empty inputsource for the entity resolver.
+     * Converts all elements with empty namespace to the features namespace to make old feature files 
+     * compatible to the new format
+     */
+    public static class NoSourceAndNamespaceFilter extends XMLFilterImpl {
+        private static final String FEATURES_NAMESPACE = "http://karaf.apache.org/xmlns/features/v1.0.0";
         private static final InputSource EMPTY_INPUT_SOURCE = new InputSource(new ByteArrayInputStream(new byte[0]));
 
-        public NoSourceFilter(XMLReader xmlReader) {
+        public NoSourceAndNamespaceFilter(XMLReader xmlReader) {
             super(xmlReader);
         }
 
@@ -141,12 +149,20 @@ public class JaxbUtil {
 
         @Override
         public void startElement(String uri, String localName, String qname, Attributes atts) throws SAXException {
-            super.startElement("http://karaf.apache.org/xmlns/features/v1.0.0", localName, qname, atts);
+            if ("".equals(uri)) {
+                super.startElement(FEATURES_NAMESPACE, localName, qname, atts);
+            } else {
+                super.startElement(uri, localName, qname, atts);
+            }
         }
 
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
-            super.endElement("http://karaf.apache.org/xmlns/features/v1.0.0", localName, qName);
+            if ("".equals(uri)) {
+                super.endElement(FEATURES_NAMESPACE, localName, qName);
+            } else {
+                super.endElement(uri, localName, qName);
+            }
         }
     }
 

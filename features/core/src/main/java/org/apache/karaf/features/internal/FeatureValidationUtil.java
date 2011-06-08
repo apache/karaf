@@ -28,6 +28,8 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
@@ -36,6 +38,7 @@ import org.w3c.dom.Document;
  * @author ldywicki
  */
 public class FeatureValidationUtil {
+    private static final Logger log = LoggerFactory.getLogger(FeatureValidationUtil.class);
 
     /**
      * Runs schema validation.
@@ -59,7 +62,8 @@ public class FeatureValidationUtil {
         dFactory.setNamespaceAware(true);
         Document doc = dFactory.newDocumentBuilder().parse(stream);
 
-        if (doc.getDocumentElement().getNamespaceURI() == null) {
+        if ("features".equals(doc.getDocumentElement().getNodeName()) && doc.getDocumentElement().getNamespaceURI() == null) {
+            log.warn("Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed", uri);
             return;
         }
 

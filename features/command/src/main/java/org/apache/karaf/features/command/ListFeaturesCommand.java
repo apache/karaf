@@ -33,7 +33,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     boolean installed;
 
     private static final String STATE = "State";
-    private static final String INSTALLED = "installed  ";
+    private static final String INSTALLED = "installed";
     private static final String UNINSTALLED = "uninstalled";
 
     private static final String VERSION = "Version";
@@ -42,20 +42,29 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     private static final String DESCRIPTION = "Description";
 
     protected void doExecute(FeaturesService admin) throws Exception {
+        List<InfoLine> lines = new ArrayList<ListFeaturesCommand.InfoLine>();
+        boolean needsLegend = false;
 
         // Get the feature data to print.
-        List<Feature> features = new ArrayList<Feature>();
-        List<Repository> repositories = new ArrayList<Repository>();
         for (Repository r : Arrays.asList(admin.listRepositories())) {
             for (Feature f : r.getFeatures()) {
                 if (installed && !admin.isInstalled(f)) {
+                    // Filter out not installed features if we only want to see the installed ones
                     continue;
                 }
-                features.add(f);
-                repositories.add(r);
+                InfoLine line = new InfoLine();
+                line.state = admin.isInstalled(f) ? INSTALLED : UNINSTALLED;
+                line.version = getSafeString(f.getVersion());
+                line.name = getSafeString(f.getName());
+                line.repoName = getSafeString(r.getName());
+                line.description = getSafeString(f.getDescription());
+                if (isInstalledViaDeployDir(line.repoName)) {
+                    needsLegend = true;
+                }
+                lines.add(line);
             }
         }
-        if (features.size() == 0) {
+        if (lines.size() == 0) {
             if (installed) {
                 System.out.println("No features installed.");
             } else {
@@ -64,84 +73,22 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
             return;
         }
 
-        // Print column headers.
+        // Determine size of columns
         int maxVersionSize = VERSION.length();
-        for (Feature f : features) {
-            maxVersionSize = Math.max(maxVersionSize, f.getVersion().length());
-        }
         int maxNameSize = NAME.length();
-        for (Feature f : features) {
-            maxNameSize = Math.max(maxNameSize, f.getName().length());
-        }
         int maxRepositorySize = REPOSITORY.length();
-        for (Repository repository:repositories) {
-                maxRepositorySize = Math.max(maxRepositorySize,  repository.getName().length());
+        for (InfoLine line : lines) {
+            maxVersionSize = Math.max(maxVersionSize, line.version.length());
+            maxNameSize = Math.max(maxNameSize, line.name.length());
+            maxRepositorySize = Math.max(maxRepositorySize, line.repoName.length());
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(STATE).append("         ").append(VERSION).append("   ");
-        for (int i = VERSION.length(); i < maxVersionSize; i++) {
-            sb.append(" ");
-        }
-        sb.append(NAME).append(" ");
-        for (int i = NAME.length(); i < maxNameSize; i++) {
-            sb.append(" ");
-        }
-        sb.append(REPOSITORY).append(" ");
-
-        for (int i = REPOSITORY.length(); i < maxRepositorySize; i++) {
-            sb.append(" ");
-        }
-        sb.append(DESCRIPTION);
-        System.out.println(sb.toString());
-
-        // Print the feature data.
-        boolean needsLegend = false;
-        for (Feature f : features) {
-
-            sb.setLength(0);
-            sb.append("[");
-            if (admin.isInstalled(f)) {
-                sb.append(INSTALLED);
-            } else {
-                sb.append(UNINSTALLED);
-            }
-
-            sb.append("] [");
-            String str = f.getVersion();
-            sb.append(str);
-            for (int i = str.length(); i < maxVersionSize; i++) {
-                sb.append(" ");
-            }
-            sb.append("] ");
-
-            str = f.getName();
-            sb.append(str);
-            for (int i = str.length(); i < maxNameSize; i++) {
-                sb.append(" ");
-            }
-
-            sb.append(" ");
-            String name = repositories.get(0).getName();
-            sb.append(name);
-            repositories.remove(0);
-            
-            if (name.charAt(name.length() - 1) == '*') {
-                needsLegend = true;
-            }
-
-            for (int i = name.length(); i < maxRepositorySize; i++) {
-                sb.append(" ");
-            }
-
-            sb.append(" ");
-            String description = "";
-            if(f.getDescription() != null) {
-            description = f.getDescription();
-            }
-            sb.append(description);
-
-            System.out.println(sb.toString());            
+        // Print feature info in columns
+        String formatHeader = "%-13s %-17s %-" + maxNameSize + "s %-" + maxRepositorySize + "s %s";
+        String formatLine = "[%-11s] [%-15s] %-" + maxNameSize + "s %-" + maxRepositorySize + "s %s";
+        System.out.println(String.format(formatHeader, STATE, VERSION, NAME, REPOSITORY, DESCRIPTION));
+        for (InfoLine line : lines) {
+            System.out.println(String.format(formatLine, line.state, line.version, line.name, line.repoName, line.description));
         }
 
         if (needsLegend) {
@@ -150,4 +97,20 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
     }
 
+    private String getSafeString(String st) {
+        return st == null ? "" : st;
+    }
+    
+    private boolean isInstalledViaDeployDir(String st) {
+        return (st == null || st.length() <= 1) ? false : (st.charAt(st.length() - 1) == '*');
+    }
+
+    private class InfoLine {
+        String state;
+        String version;
+        String name;
+        String repoName;
+        String description;
+    }
+    
 }
