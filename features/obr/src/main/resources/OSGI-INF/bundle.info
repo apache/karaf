@@ -1,15 +1,18 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    This bundle provides the OBR (OSGi Bundle Repository) support for Karaf features.
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
 
-    It allows you to use an OBR resolver for bundle.
+h1. Description
 
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mProvisioning\u001B[0m section of the Karaf User Guide.
+This bundle provides the OBR (OSGi Bundle Repository) support for Karaf features.
+
+It allows you to use an OBR resolver for bundle.
+
+h1. See also
+
+Provisioning - section of the Karaf User Guide

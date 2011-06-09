@@ -1,16 +1,20 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    The wrap deployer allows you to drop non-OSGi jar files into the Karaf deploy directory.
+Maven URL:
 
-    Karaf will transform the jar files into a deployable OSGi bundle, including creation of the Export-Package and
-    Import-Package statement.
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
 
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mDeployer\u001B[0m section of the Karaf User Guide.
+h1. Description
+
+The wrap deployer allows you to drop non-OSGi jar files into the Karaf deploy directory.
+
+Karaf will transform the jar files into a deployable OSGi bundle, including creation of the Export-Package and
+Import-Package statement.
+
+h1. See also
+
+Deployer - section of the Karaf User Guide.

@@ -1,19 +1,22 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    This bundle provides Karaf shell commands to manipulate the PackageAdmin service.
+Maven URL
+[mvn:${pct.groupId}/${project.artifactId}/${project.version}]
 
-    It allows you to get the export/import packages present in the OSGi framework.
+h1. Description
 
-    The following commands are available:
-    \u001B[36mpackages:exports\u001B[0m Displays exported packages.
-    \u001B[36mpackages:imports\u001B[0m Displays imported packages.
+This bundle provides Karaf shell commands to manipulate the PackageAdmin service.
 
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mCommands\u001B[0m section of the Karaf User Guide.
+It allows you to get export/import packages present in the OSGi framework.
+
+The following commands available:
+* packages:exports - Display exported packages
+* packages:imports - Displays imported packages
+
+h1. See also
+
+Commands - section of the Karaf User guide
