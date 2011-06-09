@@ -1,18 +1,21 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    This bundle manage the configuration of the JAAS security framework.
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
 
-    Especially it's the initializer of the JAAS ProxyLoginModule and manage the Karaf JAAS namespaces:
-        \u001B[33mhttp://karaf.apache.org/xmlns/jaas/v1.0.0\u001B[0m
-        \u001B[33mhttp://karaf.apache.org/xmlns/jaas/v1.1.0\u001B[0m
+h1. Description
 
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mSecurity\u001B[0m section of the Karaf User Guide.
-    \u001B[36mSecurity Framework\u001B[0m section of the Karaf Developer Guide.
+This bundle manage the configuration of the JAAS security framework.
+
+Especially it's the initializer of the JAAS ProxyLoginModule and manage the Karaf JAAS namespaces:
+[http://karaf.apache.org/xmlns/jaas/v1.0.0 -
+[http://karaf.apache.org/xmlns/jaas/v1.1.0 -
+
+h1. See also
+
+* Security - section of the Karaf User Guide.
+* Security Framework - section of the Karaf Developer Guide.

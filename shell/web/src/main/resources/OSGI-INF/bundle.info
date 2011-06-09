@@ -1,15 +1,17 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    This bundle provides Karaf shell commands to manipulate web application (war) bundles.
+Maven URL
+[mvn:${pct.groupId}/${project.artifactId}/${project.version}]
 
-    The following commands are available:
-    \u001B[36mweb:list\u001B[0m Lists details for war bundles.
-    \u001B[36mweb:deploy\u001B[0m Deploys content of a war bundle.
-    \u001B[36mweb:undeploy\u001B[0m Un-deploys content of a war bundles.
+h1. Description
+
+This bundle prov Karaf shell commands to manipulate web application (war) bundles.
+
+The following commands are available:
+* web:list - Lists war bundles
+* web:deploy - Deploys a war bundle
+* web:undeploy - Un-deploys a war bundles

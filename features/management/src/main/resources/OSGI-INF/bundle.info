@@ -1,23 +1,26 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    This bundle provide MBean to manipulate Karaf features via JMX.
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
 
-    Especially, it provides the FeaturesServiceMBean supporting the following operations:
-    \u001B[36mgetFeatures()\u001B[0m Gets the list of features with the current status (installed or uninstalled).
-    \u001B[36mgetRepositories()\u001B[0m Gets the list of features repositories.
-    \u001B[36maddRepository(url)\u001B[0m Adds a new repository URL in the repositories set.
-    \u001B[36mremoveRepository(url)\u001B[0m Removes a repository URL from the repositories set.
-    \u001B[36minstallFeature(name)\u001B[0m Installs a feature identified by name.
-    \u001B[36minstallFeature(name, version)\u001B[0m Installs a feature identified by name and version.
-    \u001B[36muninstallFeature(name)\u001B[0m Uninstalls a feature identified by name.
-    \u001B[36muninstallFeature(name, version)\u001B[0m Uninstalls a feature identified by name and version.
+h1. Description
 
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mProvisioning\u001B[0m and \u001B[Remote Management via JMX\u001B[0m sections of the Karaf User Guide.
+This bundle provide MBean to manipulate Karaf features via JMX.
+
+Especially, it provides the FeaturesServiceMBean supporting the following operations:
+* getFeatures() - Gets the list of features with the current status (installed or uninstalled).
+* getRepositories() - Gets the list of features repositories.
+* addRepository(url) - Adds a new repository URL in the repositories set.
+* removeRepository(url) - Removes a repository URL from the repositories set.
+* installFeature(name) - Installs a feature identified by name.
+* installFeature(name, version) - Installs a feature identified by name and version.
+* uninstallFeature(name) - Uninstalls a feature identified by name.
+* uninstallFeature(name, version) - Uninstalls a feature identified by name and version.
+
+h1. See also
+
+Provisioning - and Remote Management via JMX - sections of the Karaf User Guide

@@ -1,15 +1,18 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    Apache Karaf branding for the Apache Felix Web Console. This fragment attaches to the
-    org.apache.felix.webconsole bundle to provide branding through the
-    /META-INF/webconsole.properties.
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
 
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mWeb console\u001B[0m section in the Karaf User Guide.
+h1. Description
+
+Apache Karaf branding for the Apache Felix Web Console. This fragment attaches to the
+org.apache.felix.webconsole bundle to provide branding through the
+/META-INF/webconsole.properties.
+
+h1. See also
+
+Web console - section in the Karaf User Guide

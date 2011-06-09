@@ -1,20 +1,23 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    This bundle provides several JAAS modules depending of the target backend that you want to use.
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
 
-    Currently, Karaf provides login module for:
-    - JDBC to use a database backend
-    - LDAP to use a LDAP backend
-    - Properties to use a simple properties file
+h1. Description
 
-    The default encryption facility is also provided by this bundle.
+This bundle provides several JAAS modules depending of the target backend that you want to use.
 
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mSecurity Framework\u001B[0m section of the Karaf Developer Guide.
+Currently, Karaf provides login module for:
+- JDBC to use a database backend
+- LDAP to use a LDAP backend
+- Properties to use a simple properties file
+
+The default encryption facility is also provided by this bundle.
+
+h1. See also
+
+Security Framework - section of the Karaf Developer Guide.

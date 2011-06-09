@@ -1,16 +1,19 @@
-\u001B[1mSYNOPSIS\u001B[0m
-    ${project.name}
+h1. Synopsis
 
-    ${project.description}
+${project.name}
 
-    Maven URL:
-        \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
+${project.description}
 
-\u001B[1mDESCRIPTION\u001B[0m
-    This bundle provides SSH support for the Karaf shell console.
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
 
-    It acts as SSH client and server allowing you to receive SSH connection and be able to
-    connect to a remote SSH server.
+h1. Description
 
-\u001B[1mSEE ALSO\u001B[0m
-    \u001B[36mUsing remote instances\u001B[0m section of the Karaf User Guide.
+This bundle provides SSH support for the Karaf shell console.
+
+It acts as SSH client and server allowing you to receive SSH connection and be able to
+connect to a remote SSH server.
+
+h1. See also
+
+Using remote instances - section of the Karaf User Guide
