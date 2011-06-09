@@ -581,7 +581,7 @@
                         <id>add-features-to-repo</id>
                         <phase>generate-resources</phase>
                         <goals>
-                            <goal>add-features-to-repo</goal>
+                            <goal>features-add-to-repository</goal>
                         </goals>
                         <configuration>
                             <descriptors>

@@ -292,13 +292,13 @@
                         <id>compile</id>
                         <phase>compile</phase>
                         <goals>
-                            <goal>generate-features-xml</goal>
+                            <goal>features-generate-descriptor</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>package</id>
                         <goals>
-                            <goal>archive-kar</goal>
+                            <goal>features-create-kar</goal>
                         </goals>
                     </execution>
                 </executions>
