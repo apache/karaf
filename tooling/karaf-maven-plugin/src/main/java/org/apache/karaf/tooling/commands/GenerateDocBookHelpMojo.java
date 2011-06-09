@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.tooling.cmdhelp;
+package org.apache.karaf.tooling.commands;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -55,14 +55,14 @@ import org.fusesource.jansi.Ansi;
  * Generates docbook for Karaf commands
  *
  * @version $Revision: 1.1 $
- * @goal cmdhelp
+ * @goal commands-generate-docbook-help
  * @phase generate-resources
  * @execute phase="generate-resources"
  * @requiresDependencyResolution runtime
  * @inheritByDefault false
  * @description Generates help for Karaf commands
  */
-public class CmdHelpMojo extends AbstractMojo {
+public class GenerateDocBookHelpMojo extends AbstractMojo {
 
     /**
      * The maven project.

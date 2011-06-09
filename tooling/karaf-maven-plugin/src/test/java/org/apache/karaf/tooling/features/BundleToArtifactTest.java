@@ -23,6 +23,7 @@ package org.apache.karaf.tooling.features;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
+import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;

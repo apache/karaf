@@ -39,6 +39,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.FeatureValidationUtil;
 import org.apache.karaf.features.internal.RepositoryImpl;
+import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -61,14 +62,14 @@ import static org.apache.karaf.tooling.features.ManifestUtils.matches;
  * Validates a features XML file
  * 
  * @version $Revision: 1.1 $
- * @goal validate
+ * @goal features-validate-descriptor
  * @execute phase="process-resources"
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Validates the features XML file
  */
 @SuppressWarnings("unchecked")
-public class ValidateFeaturesMojo extends MojoSupport {
+public class ValidateDescriptorMojo extends MojoSupport {
 
     private static final String MVN_URI_PREFIX = "mvn:";
     private static final String MVN_REPO_SEPARATOR = "!";

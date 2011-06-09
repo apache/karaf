@@ -31,6 +31,7 @@ import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.Artifact;
@@ -44,13 +45,13 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
  * assembles a kar archive from a features.xml file
  *
  * @version $Revision: 1.1 $
- * @goal archive-kar
+ * @goal feature-create-kar
  * @phase package
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Assemble a kar archive from a features.xml file
  */
-public class ArchiveKarMojo extends MojoSupport {
+public class CreateKarMojo extends MojoSupport {
 
 
     /**
