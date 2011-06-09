@@ -80,7 +80,7 @@
                     <execution>
                         <id>package</id>
                         <goals>
-                            <goal>archive-server</goal>
+                            <goal>instance-create-archive</goal>
                         </goals>
                     </execution>
                 </executions>

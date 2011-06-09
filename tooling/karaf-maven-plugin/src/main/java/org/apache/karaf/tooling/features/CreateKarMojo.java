@@ -45,7 +45,7 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
  * assembles a kar archive from a features.xml file
  *
  * @version $Revision: 1.1 $
- * @goal feature-create-kar
+ * @goal features-create-kar
  * @phase package
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
@@ -89,8 +89,8 @@ public class CreateKarMojo extends MojoSupport {
     private String finalName = null;
 
     /**
-     * Location of resources directory for additional content to include in the car.
-     * Note that it includes everything under classes so as to include maven-remote-resources goo
+     * Location of resources directory for additional content to include in the kar.
+     * Note that it includes everything under classes so as to include maven-remote-resources
      *
      * @parameter expression="${project.build.directory}/classes"
      */
