@@ -276,6 +276,9 @@ public class Main {
     }
 
     public void awaitShutdown() throws Exception {
+        if (framework == null) {
+            return;
+        }
         while (true) {
             FrameworkEvent event = framework.waitForStop(0);
             if (event.getType() != FrameworkEvent.STOPPED_UPDATE) {
@@ -811,7 +814,11 @@ public class Main {
         URL configPropURL;
 
         try {
-            File file = new File(new File(karafBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
+            File etcFolder = new File(karafBase, "etc");
+            if (!etcFolder.exists()) {
+                throw new FileNotFoundException("etc folder not found: " + etcFolder.getAbsolutePath());
+            }
+            File file = new File(etcFolder, CONFIG_PROPERTIES_FILE_NAME);
             configPropURL = file.toURI().toURL();
         }
         catch (MalformedURLException ex) {
@@ -843,16 +850,29 @@ public class Main {
         // See if the property URL was specified as a property.
         URL startupPropURL;
 
-        File file = new File(new File(karafBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
+        File etcFolder = new File(karafBase, "etc");
+        if (!etcFolder.exists()) {
+            throw new FileNotFoundException("etc folder not found: " + etcFolder.getAbsolutePath());
+        }
+        File file = new File(etcFolder, STARTUP_PROPERTIES_FILE_NAME);
         startupPropURL = file.toURI().toURL();
         Properties startupProps = loadPropertiesFile(startupPropURL, true);
 
         String defaultRepo = System.getProperty(DEFAULT_REPO, "system");
         if (karafBase.equals(karafHome)) {
-            bundleDirs.add(new File(karafHome, defaultRepo));
+            File systemRepo = new File(karafHome, defaultRepo);
+            if (!systemRepo.exists()) {
+                throw new FileNotFoundException("system repo not found: " + systemRepo.getAbsolutePath());
+            }
+            bundleDirs.add(systemRepo);
         } else {
-            bundleDirs.add(new File(karafBase, defaultRepo));
-            bundleDirs.add(new File(karafHome, defaultRepo));
+            File baseSystemRepo = new File(karafBase, defaultRepo);
+            File homeSystemRepo = new File(karafHome, defaultRepo);
+            if (!baseSystemRepo.exists() && !homeSystemRepo.exists()) {
+                throw new FileNotFoundException("system repos not found: " + baseSystemRepo.getAbsolutePath() + " " + homeSystemRepo.getAbsolutePath());
+            }
+            bundleDirs.add(baseSystemRepo);
+            bundleDirs.add(homeSystemRepo);
         }
         String locations = configProps.getProperty(BUNDLE_LOCATIONS);
         if (locations != null) {
