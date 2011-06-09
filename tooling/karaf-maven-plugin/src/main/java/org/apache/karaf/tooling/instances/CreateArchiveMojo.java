@@ -18,11 +18,12 @@
  */
 
 
-package org.apache.karaf.tooling.features;
+package org.apache.karaf.tooling.instances;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.taskdefs.Tar;
@@ -37,13 +38,13 @@ import org.apache.maven.plugin.MojoFailureException;
  * Package a server archive from an assembled server
  *
  * @version $Revision: 1.1 $
- * @goal archive-server
+ * @goal instance-create-archive
  * @phase package
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Package a server archive from an assembled server
  */
-public class ArchiveServerMojo extends MojoSupport {
+public class CreateArchiveMojo extends MojoSupport {
 
     /**
      * The target directory of the project.

@@ -38,10 +38,9 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -55,14 +54,14 @@ import org.xml.sax.SAXException;
  * Generates the features XML file
  *
  * @version $Revision: 1.1 $
- * @goal add-features-to-repo
+ * @goal features-add-to-repository
  * @phase compile
  * @execute phase="compile"
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
  * @description Add the features to the repository
  */
-public class AddFeaturesToRepoMojo extends MojoSupport {
+public class AddToRepositoryMojo extends MojoSupport {
 
     private final static String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/standard/%s/xml/features";
     private final static String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/enterprise/%s/xml/features";

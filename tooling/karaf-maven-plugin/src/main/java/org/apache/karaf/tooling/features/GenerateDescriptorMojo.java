@@ -75,7 +75,7 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
  * NB this requires a recent maven-install-plugin such as 2.3.1
  *
  * @version $Revision: 1.1 $
- * @goal generate-features-xml
+ * @goal features-generate-descriptor
  * @phase compile
  * @requiresDependencyResolution runtime
  * @inheritByDefault true
@@ -83,7 +83,7 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
  * project dependencies as bundles and feature/car dependencies
  */
 @SuppressWarnings("unchecked")
-public class GenerateFeaturesXmlMojo2 extends AbstractLogEnabled implements Mojo {
+public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 
     /**
      * The (optional) input feature.file to extend

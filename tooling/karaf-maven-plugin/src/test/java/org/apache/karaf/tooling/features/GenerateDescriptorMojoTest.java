@@ -34,7 +34,7 @@ import org.xml.sax.SAXException;
 /**
  * @version $Rev:$ $Date:$
  */
-public class GenerateFeaturesXmlMojo2Test {
+public class GenerateDescriptorMojoTest {
 
     @Test
     public void testReadXml() throws JAXBException, SAXException, ParserConfigurationException, XMLStreamException {
