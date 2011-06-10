@@ -34,7 +34,9 @@ import org.apache.karaf.features.FeaturesService;
 @Command(scope = "features", name = "info", description = "Shows information about selected information.")
 public class InfoFeatureCommand extends FeaturesCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
+    private static final String INDENT = "  ";
+
+	@Argument(index = 0, name = "name", description = "The name of the feature", required = true, multiValued = false)
     private String name;
 
     @Argument(index = 1, name = "version", description = "The version of the feature", required = false, multiValued = false)
@@ -73,12 +75,17 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
             bundle = true;
         }
 
-        System.out.println("Description of " + feature.getName() + " " + feature.getVersion() + " feature");
-        System.out.println("----------------------------------------------------------------");
-        if(feature.getDetails() != null && feature.getDetails().length() >0) {
-           System.out.print(feature.getDetails());
-           System.out.println("----------------------------------------------------------------");
+        System.out.println("Feature " + feature.getName() + " " + feature.getVersion());
+        if (feature.getDescription() != null) {
+        	System.out.println("Description:");
+        	System.out.println(INDENT + feature.getDescription());
         }
+        
+        if(feature.getDetails() != null) {
+        	System.out.println("Details:");
+        	printWithIndent(feature.getDetails());
+        }
+
         if (config) {
             displayConfigInformation(feature);
             displayConfigFileInformation(feature);
@@ -105,14 +112,21 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
     }
 
-    private void displayBundleInformation(Feature feature) {
+    private void printWithIndent(String details) {
+    	String[] lines = details.split("\r?\n");
+    	for (String line : lines) {
+			System.out.println(INDENT + line);
+		}
+	}
+
+	private void displayBundleInformation(Feature feature) {
         List<BundleInfo> bundleInfos = feature.getBundles();
         if (bundleInfos.isEmpty()) {
             System.out.println("Feature has no bundles.");
         } else {
             System.out.println("Feature contains followed bundles:");
             for (BundleInfo featureBundle : bundleInfos) {
-                System.out.println("  " + featureBundle.getLocation());
+                System.out.println(INDENT + featureBundle.getLocation());
             }
         }
     }
@@ -124,7 +138,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         } else {
             System.out.println("Feature depends on:");
             for (Dependency featureDependency : dependencies) {
-                System.out.println("  " + featureDependency.getName() + " " + featureDependency.getVersion());
+                System.out.println(INDENT + featureDependency.getName() + " " + featureDependency.getVersion());
             }
         }
     }
@@ -136,7 +150,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         } else {
             System.out.println("Feature configuration:");
             for (String name : configurations.keySet()) {
-                System.out.println("  " + name);
+                System.out.println(INDENT + name);
             }
         }
     }
@@ -148,7 +162,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     	} else {
     		System.out.println("Feature configuration files: ");
     		for (ConfigFileInfo configFileInfo : configurationFiles) {
-				System.out.println("  " + configFileInfo.getFinalname());
+				System.out.println(INDENT + configFileInfo.getFinalname());
 			}
     	}    	
     }
