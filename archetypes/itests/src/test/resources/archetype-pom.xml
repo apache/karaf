@@ -24,10 +24,14 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
+        <properties>
+            <karaf.version>^project.version^</karaf.version>
+        </properties>
+
 	<groupId>org.apache.karaf</groupId>
 	<artifactId>dummy</artifactId>
 	<name>Archetype Manager</name>
-	<version>2.2.1-SNAPSHOT</version>
+	<version>${karaf.version}</version>
 	<packaging>pom</packaging>
 
 </project>
