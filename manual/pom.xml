@@ -154,10 +154,10 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <id>generate-commands</id>
+                        <id>generate-commands-help</id>
                         <phase>generate-resources</phase>
                         <goals>
-                            <goal>cmdhelp</goal>
+                            <goal>commands-generate-help</goal>
                         </goals>
                         <configuration>
                             <format>conf</format>
