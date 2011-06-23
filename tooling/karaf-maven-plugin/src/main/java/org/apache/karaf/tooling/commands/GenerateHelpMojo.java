@@ -52,17 +52,17 @@ import org.apache.felix.service.command.CommandSession;
 import org.fusesource.jansi.Ansi;
 
 /**
- * Generates docbook for Karaf commands
+ * Generates help documentation for Karaf commands
  *
  * @version $Revision: 1.1 $
- * @goal commands-generate-docbook-help
+ * @goal commands-generate-help
  * @phase generate-resources
  * @execute phase="generate-resources"
  * @requiresDependencyResolution runtime
  * @inheritByDefault false
  * @description Generates help for Karaf commands
  */
-public class GenerateDocBookHelpMojo extends AbstractMojo {
+public class GenerateHelpMojo extends AbstractMojo {
 
     /**
      * The maven project.
