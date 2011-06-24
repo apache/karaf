@@ -63,6 +63,12 @@
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
         </fileSet>
+        <!-- Copy over jetty.xml -->
+        <fileSet>
+            <directory>src/main/resources/extra</directory>
+            <outputDirectory>/etc/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
         <!-- Copy over the examples -->
         <fileSet>
             <directory>target/classes/demos</directory>
