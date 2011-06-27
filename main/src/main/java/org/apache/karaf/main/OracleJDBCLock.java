@@ -18,6 +18,8 @@
  */
 package org.apache.karaf.main;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Properties;
 
 /**
@@ -66,5 +68,38 @@ public class OracleJDBCLock extends DefaultJDBCLock {
     @Override
     boolean updateLock() {
         return aquireLock();
+    }
+    
+    /**
+     * A SELECT FOR UPDATE does not create a database lock when the SELECT FOR UPDATE is performed
+     * on an empty selection. So a succesfull call to {@link DefaultJDBCLock#aquireLock()} is not sufficient to 
+     * ensure that we are the only one who have acquired the lock.
+     */
+    @Override
+    boolean aquireLock() {
+    	return super.aquireLock() && lockAcquiredOnNonEmptySelection();
+    }
+    
+    //Verify that we have a non empty record set.
+    private boolean lockAcquiredOnNonEmptySelection() {
+        String verifySelectionNotEmpytStatement = statements.getLockVerifySelectionNotEmptyStatement();
+        PreparedStatement preparedStatement = null;
+        boolean lockAquired = false;
+        
+        try {
+            preparedStatement = getConnection().prepareStatement(verifySelectionNotEmpytStatement);
+            preparedStatement.setQueryTimeout(timeout);
+            ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+            	lockAquired = rs.getInt(1) > 0;
+            } else {
+            	LOG.warning("Failed to acquire database lock. Missing database lock record.");
+            }
+        } catch (Exception e) {
+            LOG.warning("Failed to acquire database lock: " + e);
+        }finally {
+            closeSafely(preparedStatement);
+        }        
+        return lockAquired;
     }
 }
