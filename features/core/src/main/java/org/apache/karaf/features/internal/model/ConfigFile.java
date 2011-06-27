@@ -41,6 +41,7 @@ import org.apache.karaf.features.ConfigFileInfo;
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
  *       &lt;attribute name="finalname" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="override" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -58,6 +59,8 @@ public class ConfigFile implements ConfigFileInfo {
     protected String value;
     @XmlAttribute(required = true)
     protected String finalname;
+    @XmlAttribute
+    protected Boolean override;
 
     /**
      * Gets the value of the value property.
@@ -104,7 +107,30 @@ public class ConfigFile implements ConfigFileInfo {
      *     
      */
     public void setFinalname(String value) {
-        this.finalname = value;
+    	this.finalname = value;
     }
 
+    /**
+     * Gets the value of the override property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public boolean isOverride() {
+        return override == null? false: override;
+    }
+
+    /**
+     * Sets the value of the override property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setOverride(Boolean value) {
+    	this.override = value;
+    }
 }
