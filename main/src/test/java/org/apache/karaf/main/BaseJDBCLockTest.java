@@ -307,4 +307,28 @@ public abstract class BaseJDBCLockTest {
         verify(connection, metaData, statement, preparedStatement, resultSet);
         assertFalse(alive);
     }
+    
+    @Test
+    public void lockShouldReturnFalseIfTableIsEmpty() throws Exception {
+        initShouldNotCreateTheSchemaIfItAlreadyExists();
+        reset(connection, metaData, statement, preparedStatement, resultSet);
+        
+        expect(connection.isClosed()).andReturn(false);
+        expect(connection.prepareStatement("SELECT * FROM " + tableName + " FOR UPDATE")).andReturn(preparedStatement);
+        preparedStatement.setQueryTimeout(10);
+        expect(preparedStatement.execute()).andReturn(true);
+        preparedStatement.close();
+        expect(connection.isClosed()).andReturn(false);
+        expect(connection.prepareStatement("UPDATE " + tableName + " SET MOMENT = 1")).andReturn(preparedStatement);
+        preparedStatement.setQueryTimeout(10);
+        expect(preparedStatement.executeUpdate()).andReturn(0);
+        preparedStatement.close();
+        
+        replay(connection, metaData, statement, preparedStatement, resultSet);
+        
+        boolean lockAquired = lock.lock();
+        
+        verify(connection, metaData, statement, preparedStatement, resultSet);
+        assertFalse(lockAquired);
+    }
 }
