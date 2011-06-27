@@ -29,7 +29,7 @@
         <bundle>b3</bundle>
     </feature>
     <feature name="f3">
-    	<configfile finalname="cf1">cfloc</configfile>
+    	<configfile finalname="cf1" override="true">cfloc</configfile>
     	<bundle>b4</bundle> 
     </feature>
 </features>

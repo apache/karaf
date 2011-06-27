@@ -62,6 +62,7 @@ public class RepositoryTest extends TestCase {
         assertNotNull(features[2].getConfigurationFiles());
         assertEquals(1, features[2].getConfigurationFiles().size());
         assertEquals("cf1", features[2].getConfigurationFiles().get(0).getFinalname());
+        assertEquals(true, features[2].getConfigurationFiles().get(0).isOverride());
         assertEquals("cfloc", features[2].getConfigurationFiles().get(0).getLocation());
     }
     

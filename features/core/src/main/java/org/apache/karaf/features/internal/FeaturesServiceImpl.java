@@ -481,7 +481,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             }
         }
         for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
-        	installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), verbose);
+        	installConfigurationFile(configFile.getLocation(), configFile.getFinalname(), configFile.isOverride()
+        			,verbose);
         }
         Set<Long> bundles = new TreeSet<Long>();
         for (BundleInfo bInfo : resolve(feature)) {
@@ -722,7 +723,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
     
-    public void installConfigurationFile(String fileLocation, String finalname, boolean verbose) throws IOException {
+    public void installConfigurationFile(String fileLocation, String finalname, boolean override, boolean verbose) throws IOException {
     	LOGGER.info("Checking configuration file " + fileLocation);
         if (verbose) {
             System.out.println("Checking configuration file " + fileLocation);
@@ -739,6 +740,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     	finalname = basePath + File.separator + finalname;
     	
     	File file = new File(finalname); 
+    	if (file.exists() && !override) {
+    		LOGGER.info("configFile already exist, don't override it");
+    		return;
+    	}
     	
     	if (!file.exists()) {
     		File parentFile = file.getParentFile();

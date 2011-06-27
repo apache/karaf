@@ -167,7 +167,7 @@ Additional configuration files which should be created during feature installati
             ]]></xs:documentation>
         </xs:annotation>
         <xs:simpleContent>
-            <xs:extension base="xs:string">
+            <xs:extension base="xs:anyURI">
                 <xs:attribute name="finalname" type="xs:string" use="required">
                     <xs:annotation>
                         <xs:documentation><![CDATA[
@@ -175,6 +175,14 @@ Name of file name where given deployable element should be stored.
                         ]]></xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
+                <xs:attribute name="override" type="xs:boolean">
+                    <xs:annotation>
+                        <xs:documentation><![CDATA[
+flag to specify if the finalname file should be overriden
+                        ]]></xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
