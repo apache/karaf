@@ -167,6 +167,20 @@ public abstract class BaseJDBCLockIntegrationTest {
     }
     
     @Test
+    public void lockShouldReturnFalseIfTheTableIsEmpty() throws Exception {
+        Connection connection = null;
+        try {
+            lock = createLock(props);
+            truncateTable(); //Empty the table
+            connection = lock(tableName, clustername);
+            
+            assertFalse(lock.lock());
+        } finally {
+            close(connection);
+        }
+    }
+    
+    @Test
     public void release() throws Exception {
         lock = createLock(props);
         
@@ -309,6 +323,11 @@ public abstract class BaseJDBCLockIntegrationTest {
         executeStatement("UPDATE " + tableName + " SET MOMENT = " + System.currentTimeMillis());
     }
 
+    void truncateTable() throws SQLException, ClassNotFoundException {
+	    executeStatement("TRUNCATE TABLE " + tableName);
+    }
+    
+    
     Connection lock(String table, String node) throws ClassNotFoundException, SQLException {
         Connection connection = null;
         Statement statement = null;
