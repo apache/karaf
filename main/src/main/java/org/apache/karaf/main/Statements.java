@@ -30,6 +30,7 @@ public class Statements {
     private String[] lockCreateSchemaStatements;
     private String lockCreateStatement;
     private String lockUpdateStatement;
+    private String lockVerifySelectionNotEmptyStatement;
     
     public String[] getLockCreateSchemaStatements(long moment) {
         if (lockCreateSchemaStatements == null) {
@@ -67,6 +68,20 @@ public class Statements {
         this.lockUpdateStatement = lockUpdateStatement;
     }
 
+	public void setLockVerifySelectionNotEmptyStatement(String lockVerifySelectionNotEmptyStatement) {
+		this.lockVerifySelectionNotEmptyStatement = lockVerifySelectionNotEmptyStatement;
+	}
+
+	public String getLockVerifySelectionNotEmptyStatement() {
+		if (lockVerifySelectionNotEmptyStatement == null) {
+			 //The lock create and lock update are perfomed on the whole table instead of 
+			 //the cluster. So not taking the node into account for now.
+			lockVerifySelectionNotEmptyStatement = "SELECT COUNT(*) FROM " + getFullLockTableName();
+		}
+		return lockVerifySelectionNotEmptyStatement;
+	}
+    
+    
     long getCurrentTimeMillis() {
         return System.currentTimeMillis();
     }
