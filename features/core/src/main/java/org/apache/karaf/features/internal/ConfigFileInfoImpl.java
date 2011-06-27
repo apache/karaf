@@ -22,10 +22,12 @@ public class ConfigFileInfoImpl implements ConfigFileInfo {
 
 	private String location;
 	private String finalname;
+	private boolean override;
 
-	public ConfigFileInfoImpl(String location, String finalname) {
+	public ConfigFileInfoImpl(String location, String finalname, boolean override) {
 		this.location = location;
 		this.finalname = finalname;
+		this.override = override;
 	}
 
 	public String getLocation() {
@@ -34,6 +36,10 @@ public class ConfigFileInfoImpl implements ConfigFileInfo {
 
 	public String getFinalname() {
 		return finalname;
+	}
+	
+	public boolean isOverride() {
+		return override;
 	}
 
 }

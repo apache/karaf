@@ -182,7 +182,13 @@ public class RepositoryImpl implements Repository {
                     	Element cf = (Element) configurationFiles.item(j);
                     	String finalname = cf.getAttribute("finalname");
                     	String location = cf.getTextContent().trim();
-                    	f.addConfigurationFile(new ConfigFileInfoImpl(location, finalname));
+                    	String override = cf.getAttribute("override");
+                    	boolean finalnameOverride = false;
+                    	// Check the value of the "override" attribute
+                        if (override != null && override.length() > 0) {
+                        	finalnameOverride = Boolean.parseBoolean(override);
+                        }
+                    	f.addConfigurationFile(new ConfigFileInfoImpl(location, finalname, finalnameOverride));
                     }
                     NodeList bundleNodes = e.getElementsByTagName("bundle");
                     for (int j = 0; j < bundleNodes.getLength(); j++) {

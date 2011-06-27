@@ -21,5 +21,7 @@ public interface ConfigFileInfo {
 	String getLocation();
 	
 	String getFinalname();
+	
+	boolean isOverride();
 
 }
