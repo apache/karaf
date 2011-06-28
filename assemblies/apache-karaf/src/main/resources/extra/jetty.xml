@@ -17,8 +17,6 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
       <Arg>
           <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
             <Set name="host"><Property name="jetty.host" /></Set>
-			<!-- default port will be overwritten by pax-web configuration -->
-            <Set name="port"><Property name="jetty.port" default="8080"/></Set>
             <Set name="maxIdleTime">300000</Set>
             <Set name="Acceptors">2</Set>
             <Set name="statsOn">false</Set>
