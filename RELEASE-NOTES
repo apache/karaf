@@ -15,6 +15,64 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.2
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an
+ update to Apache Karaf 2.2.1. It contains bug fixes identified in the prior release, 
+ and introduces improvements including; improved behavior for the OracleDB locking 
+ mechanism and http feature jetty port usage. Several improvements to the shell have 
+ been incorporated, such as completion for shell aliases and a warning on osgi:shutdown
+ to avoid inadvertently shutting down the container. There has also been a few small 
+ dependency upgrades to felix event admin, Pax URL, and jetty.
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-496] - Karaf prompt displayed twice
+    * [KARAF-622] - Jaas Cancel command is not working
+    * [KARAF-633] - NOTICE distribution file still refers Apache Felix Karaf
+    * [KARAF-634] - README file refers an incorrect contribution URL
+    * [KARAF-637] - Update branding-console documentation to include the changes to custom.properties
+    * [KARAF-648] - maven-enforcer-plugin configuration not used
+    * [KARAF-653] - Karaf minimal is missing the feature files. 
+    * [KARAF-655] - Remove http://repository.ops4j.org/maven2 from org.apache.karaf.management.cfg
+    * [KARAF-656] - kar deployer service not exported
+    * [KARAF-670] - Missing ${karaf.base}/system cause NullPointerException
+    * [KARAF-686] - introduce an override flag to configfile element so that we get chance to not override the finalname if it already exist
+    * [KARAF-689] - Karaf instance can wrongly obtain a lock when the locking table is empty on a Oracle DB
+    * [KARAF-690] - install http feature will start both 8080 and 8181 jetty port
+
+** Dependency upgrade
+    * [KARAF-672] - Upgrade to felix event admin 1.2.12
+    * [KARAF-680] - Upgrade to Pax URL 1.2.7
+    * [KARAF-682] - upgrade to jetty 7.4.2.v20110526
+
+** Improvement
+    * [KARAF-445] - Add completion for shell aliases
+    * [KARAF-573] - Print out that karaf has to be restarted if using framework with new framework
+    * [KARAF-614] - Add warning to osgi:shutdown to avoid inadvertently shutting down the container
+    * [KARAF-618] - Align Cellar major version with the Karaf one
+    * [KARAF-651] - features-maven-plugin should "embed" the Karaf features descriptor
+    * [KARAF-654] - Merge jetty feature with jetty-jaas feature
+    * [KARAF-661] - Typing ^D should behave as on Unix
+    * [KARAF-662] - Clarify relationship of config.properties and custom.properties
+    * [KARAF-663] - features-maven-plugin add-features-to-repo should embed Karaf core features descriptor
+
+** Task
+    * [KARAF-543] - Add manual section around log custom appenders
+    * [KARAF-619] - Add Cellar manual
+    * [KARAF-620] - Cellar should use the parent Karaf POM
+    * [KARAF-646] - Upgrade to Jetty 7.4.1.v20110513
+
+** Test
+    * [KARAF-683] - use filter ${karaf.version} instead of the hard code one to fix archetypes/itests failure
+
                     Apache Karaf 2.2.1
                     ==================
 
