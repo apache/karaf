@@ -69,6 +69,8 @@
     * [KARAF-619] - Add Cellar manual
     * [KARAF-620] - Cellar should use the parent Karaf POM
     * [KARAF-646] - Upgrade to Jetty 7.4.1.v20110513
+    * [KARAF-694] - Upgrade to Pax-Logging 1.6.3
+    * [KARAF-695] - Upgrade to Pax-Web 1.0.4
 
 ** Test
     * [KARAF-683] - use filter ${karaf.version} instead of the hard code one to fix archetypes/itests failure
