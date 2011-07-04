@@ -19,13 +19,13 @@ package org.apache.karaf.admin.command;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "admin", name = "change-opts", description = "Changes the java options of an existing container instance.")
+@Command(scope = "admin", name = "change-opts", description = "Changes the Java options of an existing container instance.")
 public class ChangeOptsCommand extends AdminCommandSupport {
 
     @Argument(index = 0, name = "name", description="The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
-    @Argument(index = 1, name = "javaOpts", description = "The new java options to set", required = true, multiValued = false)
+    @Argument(index = 1, name = "javaOpts", description = "The new Java options to set", required = true, multiValued = false)
     private String javaOpts;
 
     protected Object doExecute() throws Exception {

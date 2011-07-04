@@ -52,7 +52,7 @@ public class BlueprintURLHandler extends URLStreamHandler {
     @Override
 	public URLConnection openConnection(URL url) throws IOException {
 		if (url.getPath() == null || url.getPath().trim().length() == 0) {
-			throw new MalformedURLException ("Path can not be null or empty. Syntax: " + SYNTAX );
+			throw new MalformedURLException ("Path cannot be null or empty. Syntax: " + SYNTAX );
 		}
 		blueprintXmlURL = new URL(url.getPath());
 
