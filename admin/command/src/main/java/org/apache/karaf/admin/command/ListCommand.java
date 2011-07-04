@@ -29,7 +29,7 @@ public class ListCommand extends AdminCommandSupport {
     @Option(name = "-l", aliases = { "--location" }, description = "Displays the location of the container instances", required = false, multiValued = false)
     boolean location;
 
-    @Option(name = "-o", aliases = { "--java-opts" }, description = "Displays the java options used to launch the JVM", required = false, multiValued = false)
+    @Option(name = "-o", aliases = { "--java-opts" }, description = "Displays the Java options used to launch the JVM", required = false, multiValued = false)
     boolean javaOpts;
 
     protected Object doExecute() throws Exception {

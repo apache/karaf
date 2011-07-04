@@ -77,7 +77,7 @@ public class ProcessImpl implements Process {
             ret = ScriptUtils.executeProcess(new java.lang.ProcessBuilder("kill", "-9", Integer.toString(pid)));
         }
         if (ret != 0) {
-            throw new IOException("Unable to destroy proces, it may be already terminated");
+            throw new IOException("Unable to destroy process, it may be already terminated");
         }
     }
 

@@ -260,7 +260,7 @@ public class AdminServiceImpl implements AdminService {
             throw new IllegalArgumentException("Instance " + oldName + " not found");
         }
         if (instance.isRoot()) {
-            throw new IllegalArgumentException("You can't rename the root instance");
+            throw new IllegalArgumentException("Root instance cannot be renamed");
         }
         if (instance.getPid() != 0) {
             throw new IllegalStateException("Instance not stopped");

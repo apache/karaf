@@ -158,7 +158,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
     }
 
     public void uninstall(File file) throws Exception {
-		logger.warn("Karaf archive '" + file + "' has been removed; however, it's feature URLs have not been deregistered, and it's bundles are still available in '" + localRepoPath + "'.");
+		logger.warn("Karaf archive '" + file + "' has been removed; however, its feature URLs have not been deregistered, and its bundles are still available in '" + localRepoPath + "'.");
 	}
 
 	public void update(File file) throws Exception {
