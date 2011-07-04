@@ -787,7 +787,7 @@ public class Main {
         for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             String value = System.getProperty(name, props.getProperty(name));
-            System.setProperty(name, substVars(value, name, null, null));
+            System.setProperty(name, substVars(value, name, null, props));
         }
     }
 
