@@ -54,7 +54,7 @@ import org.xml.sax.SAXException;
 /**
  * Generates the features XML file
  *
- * @version $Revision: 1.1 $
+ * @version $Revision$
  * @goal add-features-to-repo
  * @phase compile
  * @execute phase="compile"
@@ -83,7 +83,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     private File repository;
 
     /**
-     * which is the target karaf version used to resolve karaf core features descriptors
+     * the target Karaf version used to resolve Karaf core features descriptors
      *
      * @parameter
      */

@@ -33,10 +33,8 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
  * Command to create dump from shell.
- * 
- * @author ldywicki
  */
-@Command(scope = "dev", name = "create-dump", description = "Creates zip archive wich diagnostic info.")
+@Command(scope = "dev", name = "create-dump", description = "Creates zip archive with diagnostic info.")
 public class DumpCommand extends OsgiCommandSupport {
 
     /**
@@ -52,7 +50,7 @@ public class DumpCommand extends OsgiCommandSupport {
     /**
      * Directory switch.
      */
-    @Option(name = "-d", aliases = "--directory", description = "Creates dump in directory instead ZIP")
+    @Option(name = "-d", aliases = "--directory", description = "Creates dump in directory in place of a ZIP archive")
     boolean directory;
 
     /**

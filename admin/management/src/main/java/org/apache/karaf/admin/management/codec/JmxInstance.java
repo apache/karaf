@@ -102,7 +102,7 @@ public class JmxInstance {
             descriptions[7] = "The location of the instance.";
 
             itemTypes[8] = SimpleType.STRING;
-            descriptions[8] = "The java options of the instance.";
+            descriptions[8] = "The Java options of the instance.";
 
             return new CompositeType("Instance", desc, itemNames, descriptions, itemTypes);
         } catch (OpenDataException e) {
