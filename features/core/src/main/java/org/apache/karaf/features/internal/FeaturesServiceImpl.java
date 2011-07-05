@@ -350,11 +350,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                 }
             }
-        } catch (Exception e) {
-        	boolean noCleanIfFailure = options.contains(Option.NoCleanIfFailure);
-            cleanUpOnFailure(state, failure, noCleanIfFailure);
-            throw e;
-        } finally {
             for (Feature f : features) {
                 callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
             }
@@ -362,6 +357,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                 installed.put(e.getKey(), e.getValue());
             }
             saveState();
+        } catch (Exception e) {
+            boolean noCleanIfFailure = options.contains(Option.NoCleanIfFailure);
+            cleanUpOnFailure(state, failure, noCleanIfFailure);
+            throw e;
         }
     }
 
