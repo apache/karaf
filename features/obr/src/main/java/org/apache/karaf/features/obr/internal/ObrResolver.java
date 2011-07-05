@@ -35,7 +35,6 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Resolver;
-import org.osgi.framework.InvalidSyntaxException;
 
 public class ObrResolver implements Resolver {
 
@@ -70,15 +69,18 @@ public class ObrResolver implements Resolver {
         List<Resource> deploy = new ArrayList<Resource>();
         Map<Object, BundleInfo> infos = new HashMap<Object, BundleInfo>();
         for (BundleInfo bundleInfo : feature.getBundles()) {
+        	URL url = null;
             try {
-                URL url = new URL(bundleInfo.getLocation());
-                Resource res = repositoryAdmin.getHelper().createResource(url);
-                ress.add(res);
-                infos.put(res, bundleInfo);
+                url = new URL(bundleInfo.getLocation());
             } catch (MalformedURLException e) {
                 Requirement req = parseRequirement(bundleInfo.getLocation());
                 reqs.add(req);
                 infos.put(req, bundleInfo);
+            }
+            if (url != null) {
+            	Resource res = repositoryAdmin.getHelper().createResource(url);
+            	ress.add(res);
+            	infos.put(res, bundleInfo);
             }
         }
 
@@ -159,7 +161,7 @@ public class ObrResolver implements Resolver {
         out.println("");
     }
 
-    protected Requirement parseRequirement(String req) throws InvalidSyntaxException {
+    protected Requirement parseRequirement(String req) {
         int p = req.indexOf(':');
         String name;
         String filter;
