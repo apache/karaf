@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
-import jline.console.history.FileHistory;
 import jline.console.history.PersistentHistory;
 import org.apache.felix.gogo.commands.CommandException;
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
@@ -102,40 +101,14 @@ public class Console implements Runnable
                                    getClass().getResourceAsStream("keybinding.properties"),
                                    this.terminal);
 
-        final File file = getHistoryFile();
-        file.getParentFile().mkdirs();
-
-        // We may not have the perms to read the history file...
-        if( file.exists() && file.canRead() ) {
-            // Override the FileHistory impl to trap failures due to the
-            // user does not having write access to the history file.
-            reader.setHistory(new FileHistory(file) {
-                boolean failed = false;
-                @Override
-                public void flush() throws IOException {
-                    if( !failed ) {
-                        try {
-                            super.flush();
-                        } catch (IOException e) {
-                            failed = true;
-                            LOGGER.debug("Cold not write history file: "+file, e);
-                        }
-                    }
-                }
-
-                @Override
-                public void purge() throws IOException {
-                    if( !failed ) {
-                        try {
-                            super.purge();
-                        } catch (IOException e) {
-                            failed = true;
-                            LOGGER.debug("Cold not delete history file: "+file, e);
-                        }
-                    }
-                }
-            });
-        }
+        
+		final File file = getHistoryFile();
+		
+        try {
+			reader.setHistory(new KarafFileHistory(file));
+		} catch (Exception e) {
+			LOGGER.error("Can not read history from file " + file + ". Using in memory history", e);
+		}
         session.put(".jline.history", reader.getHistory());
         Completer completer = createCompleter();
         if (completer != null) {
@@ -154,7 +127,8 @@ public class Console implements Runnable
      * @return
      */
     protected File getHistoryFile() {
-        return new File(System.getProperty("karaf.history", new File(System.getProperty("user.home"), ".karaf/karaf.history").toString()));
+    	String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();
+        return new File(System.getProperty("karaf.history", defaultHistoryPath));
     }
 
     public CommandSession getSession() {
