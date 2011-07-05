@@ -16,6 +16,16 @@
  */
 package org.apache.karaf.features.obr.internal;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.Reason;
@@ -31,13 +41,6 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.junit.Test;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class ObrResolverTest {
 
@@ -65,8 +68,8 @@ public class ObrResolverTest {
         expect(resolver.resolve(Resolver.NO_OPTIONAL_RESOURCES)).andReturn(true);
         expect(resolver.getAddedResources()).andReturn(new Resource[] { });
         expect(resolver.getRequiredResources()).andReturn(new Resource[] { resource });
-        expect(resolver.getReason(resource)).andAnswer(new IAnswer() {
-            public Object answer() throws Throwable {
+        expect(resolver.getReason(resource)).andAnswer(new IAnswer<Reason[]>() {
+            public Reason[] answer() throws Throwable {
                 return new Reason[] { new ReasonImpl( resource, captureReq.getValue()) };
             }
         });
@@ -108,13 +111,13 @@ public class ObrResolverTest {
         expect(resolver.getAddedResources()).andReturn(new Resource[] { });
         expect(resolver.getRequiredResources()).andReturn(new Resource[] { resource });
         expect(resolver.getOptionalResources()).andReturn(new Resource[] { optionalResource});
-        expect(resolver.getReason(resource)).andAnswer(new IAnswer() {
-            public Object answer() throws Throwable {
+        expect(resolver.getReason(resource)).andAnswer(new IAnswer<Reason[]>() {
+            public Reason[] answer() throws Throwable {
                 return new Reason[] { new ReasonImpl( resource, captureReq.getValue()) };
             }
         });
-        expect(resolver.getReason(optionalResource)).andAnswer(new IAnswer() {
-            public Object answer() throws Throwable {
+        expect(resolver.getReason(optionalResource)).andAnswer(new IAnswer<Reason[]>() {
+            public Reason[] answer() throws Throwable {
                 return new Reason[] { new ReasonImpl( optionalResource, captureReq.getValue()) };
             }
         });
@@ -129,5 +132,43 @@ public class ObrResolverTest {
         assertEquals("foo:optional:baz", bundles.get(1).getLocation());
         assertEquals(obrResolver.parseRequirement(requirement).toString(), captureReq.getValue().toString());
         verify(admin, resolver, resource);
+    }
+    
+    /**
+     * Test resolving a mvn url when pax url is configured with a repo that contains no protocol like: "test"
+     * We expect to get a MalFormedUrlException not a IllegalArgumentException as in the issue 
+     * @throws Exception
+     */
+    @Test(expected=MalformedURLException.class)
+    public void testResolverWithInvalidMvnRepoIssueKaraf667() throws Exception {
+    	final org.apache.karaf.features.internal.model.Feature f = new org.apache.karaf.features.internal.model.Feature("f1", "1.0");
+        f.setResolver("obr");
+        // Using file instead of mvn: as we do not want to mess with URL handlers
+        f.getBundle().add(new Bundle("file:org.foo/foo/1.0"));
+
+        final RepositoryAdmin admin = createMock(RepositoryAdmin.class);
+        final Resolver resolver = createMock(Resolver.class);
+        final Resource resource = createMock(Resource.class);
+        final ObrResolver obrResolver = new ObrResolver();
+        obrResolver.setRepositoryAdmin(admin);
+
+        expect(admin.getHelper()).andReturn(new DummyDataModelHelper()).anyTimes();
+        replay(admin, resolver, resource);
+
+       	obrResolver.resolve(f);
+    }
+    
+    /**
+     * Recreates behaviour of DataModelHelper when an invalid maven url is set for pax url repos
+     * TODO Remove as soon as DataModelHelper does not throw this exception any more  
+     */
+    class DummyDataModelHelper extends DataModelHelperImpl {
+
+		@Override
+		public Resource createResource(URL bundleUrl) throws IOException {
+			throw new MalformedURLException("Missing protocol");
+		}
+
+    	
     }
 }
