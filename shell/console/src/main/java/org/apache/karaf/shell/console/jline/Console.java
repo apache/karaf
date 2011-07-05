@@ -105,6 +105,7 @@ public class Console implements Runnable
 		final File file = getHistoryFile();
 		
         try {
+        	file.getParentFile().mkdirs();
 			reader.setHistory(new KarafFileHistory(file));
 		} catch (Exception e) {
 			LOGGER.error("Can not read history from file " + file + ". Using in memory history", e);
