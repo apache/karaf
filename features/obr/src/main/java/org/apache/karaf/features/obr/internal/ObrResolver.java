@@ -70,15 +70,18 @@ public class ObrResolver implements Resolver {
         List<Resource> deploy = new ArrayList<Resource>();
         Map<Object, BundleInfo> infos = new HashMap<Object, BundleInfo>();
         for (BundleInfo bundleInfo : feature.getBundles()) {
+        	URL url = null;
             try {
-                URL url = new URL(bundleInfo.getLocation());
-                Resource res = repositoryAdmin.getHelper().createResource(url);
-                ress.add(res);
-                infos.put(res, bundleInfo);
+                url = new URL(bundleInfo.getLocation());
             } catch (MalformedURLException e) {
                 Requirement req = parseRequirement(bundleInfo.getLocation());
                 reqs.add(req);
                 infos.put(req, bundleInfo);
+            }
+            if (url != null) {
+            	Resource res = repositoryAdmin.getHelper().createResource(url);
+            	ress.add(res);
+            	infos.put(res, bundleInfo);
             }
         }
 
