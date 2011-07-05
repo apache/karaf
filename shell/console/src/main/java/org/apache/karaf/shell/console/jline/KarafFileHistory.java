@@ -18,7 +18,6 @@ public final class KarafFileHistory extends FileHistory {
 
 	public KarafFileHistory(File file) throws IOException {
 		super(file);
-        file.getParentFile().mkdirs();
 	}
 
 	@Override
