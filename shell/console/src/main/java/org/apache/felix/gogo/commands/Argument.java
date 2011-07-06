@@ -18,8 +18,6 @@
  */
 package org.apache.felix.gogo.commands;
 
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
