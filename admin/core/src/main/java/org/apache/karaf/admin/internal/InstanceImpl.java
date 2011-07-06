@@ -19,6 +19,7 @@ package org.apache.karaf.admin.internal;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
@@ -34,17 +35,10 @@ public class InstanceImpl implements Instance {
     private static final Logger LOG = LoggerFactory.getLogger(InstanceImpl.class);
 
     private static final String CONFIG_PROPERTIES_FILE_NAME = "config.properties";
-
     private static final String KARAF_SHUTDOWN_PORT = "karaf.shutdown.port";
-
     private static final String KARAF_SHUTDOWN_HOST = "karaf.shutdown.host";
-
     private static final String KARAF_SHUTDOWN_PORT_FILE = "karaf.shutdown.port.file";
-
     private static final String KARAF_SHUTDOWN_COMMAND = "karaf.shutdown.command";
-
-    private static final String KARAF_SHUTDOWN_PID_FILE = "karaf.shutdown.pid.file";
-
     private static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
 
     private AdminServiceImpl service;
@@ -327,37 +321,53 @@ public class InstanceImpl implements Instance {
                 props.put(name,
                         InterpolationHelper.substVars(props.get(name), name, null, props, null));
             }
-            int port = 0;
-            if (props.get(KARAF_SHUTDOWN_PORT) != null)
-                port = Integer.parseInt(props.get(KARAF_SHUTDOWN_PORT));
+            
             String host = "localhost";
             if (props.get(KARAF_SHUTDOWN_HOST) != null)
                 host = props.get(KARAF_SHUTDOWN_HOST);
-            String portFile = props.get(KARAF_SHUTDOWN_PORT_FILE);
+            
             String shutdown = DEFAULT_SHUTDOWN_COMMAND;
             if (props.get(KARAF_SHUTDOWN_COMMAND) != null)
                 shutdown = props.get(KARAF_SHUTDOWN_COMMAND);
-            if (port == 0 && portFile != null) {
-                BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
-                String portStr = r.readLine();
-                port = Integer.parseInt(portStr);
-                r.close();
-            }
+            
+            int port = getShutDownPort(props);
+
             // We found the port, try to send the command
             if (port > 0) {
-                Socket s = new Socket(host, port);
-                s.getOutputStream().write(shutdown.getBytes());
-                s.close();
-                long t = System.currentTimeMillis() + service.getStopTimeout();
-                do {
-                    Thread.sleep(100);
-                    checkProcess();
-                } while (System.currentTimeMillis() < t && process != null);
+                tryShutDownAndWait(host, shutdown, port, service.getStopTimeout());
             }
         } catch (Exception e) {
             LOG.debug("Unable to cleanly shutdown instance", e);
         }
     }
+
+	private void tryShutDownAndWait(String host, String shutdownCommand, int port, long stopTimeout)
+			throws UnknownHostException, IOException, InterruptedException {
+		Socket s = new Socket(host, port);
+		s.getOutputStream().write(shutdownCommand.getBytes());
+		s.close();
+		long t = System.currentTimeMillis() + stopTimeout;
+		do {
+		    Thread.sleep(100);
+		    checkProcess();
+		} while (System.currentTimeMillis() < t && process != null);
+	}
+
+	private int getShutDownPort(Properties props) throws FileNotFoundException,
+			IOException {
+		int port = 0;
+		if (props.get(KARAF_SHUTDOWN_PORT) != null)
+		    port = Integer.parseInt(props.get(KARAF_SHUTDOWN_PORT));
+		// Try to get port from port file
+		String portFile = props.get(KARAF_SHUTDOWN_PORT_FILE);
+		if (port == 0 && portFile != null) {
+		    BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
+		    String portStr = r.readLine();
+		    port = Integer.parseInt(portStr);
+		    r.close();
+		}
+		return port;
+	}
 
     protected static boolean deleteFile(File fileToDelete) {
         if (fileToDelete == null || !fileToDelete.exists()) {
@@ -393,21 +403,17 @@ public class InstanceImpl implements Instance {
         try {
             is = configPropURL.openConnection().getInputStream();
             configProps.load(is);
-            is.close();
-        }
-        catch (Exception ex) {
-            System.err.println(
-                    "Error loading config properties from " + configPropURL);
-            System.err.println("Main: " + ex);
-            try {
+            return configProps;
+        } catch (Exception ex) {
+        	throw new RuntimeException("Error loading config properties from " + configPropURL, ex);
+        } finally {
+        	try {
                 if (is != null) is.close();
             }
             catch (IOException ex2) {
-                // Nothing we can do.
+                LOG.warn(ex2.getMessage(), ex2);
             }
-            return null;
         }
-        return configProps;
     }
 
 }
