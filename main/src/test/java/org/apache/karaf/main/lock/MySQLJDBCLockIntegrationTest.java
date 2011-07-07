@@ -16,43 +16,56 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
-import static org.junit.Assert.assertTrue;
 
+import static org.junit.Assert.assertFalse;
+
+import java.sql.Connection;
 import java.util.Properties;
 
+import org.apache.karaf.main.lock.MySQLJDBCLock;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 
 @Ignore
-public class DerbyJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
+public class MySQLJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest {
 
     @Before
-    @Override
     public void setUp() throws Exception {
-        password = "root";
-        driver = "org.apache.derby.jdbc.ClientDriver";
-        url = "jdbc:derby://127.0.0.1:1527/test";
+        driver = "com.mysql.jdbc.Driver";
+        url = "jdbc:mysql://127.0.0.1:3306/test";
         
         super.setUp();
     }
     
     @Override
-    DefaultJDBCLock createLock(Properties props) {
-        return new DerbyJDBCLock(props);
+    MySQLJDBCLock createLock(Properties props) {
+        return new MySQLJDBCLock(props);
     }
     
     @Test
     public void initShouldCreateTheDatabaseIfItNotExists() throws Exception {
         String database = "test" + System.currentTimeMillis();
-        url = "jdbc:derby://127.0.0.1:1527/" + database;
+        
+        try {
+            executeStatement("DROP DATABASE " + database);
+        } catch (Exception e) {
+            // expected if table dosn't exist
+        }
+        
+        url = "jdbc:mysql://127.0.0.1:3306/" + database;
         props.put("karaf.lock.jdbc.url", url);
         lock = createLock(props);
-        lock.lock();
         
-        assertTrue(lock.lockConnection.getMetaData().getURL().contains(database));
+        
+        // should throw an exeption, if the database doesn't exists
+        Connection connection = getConnection("jdbc:mysql://127.0.0.1:3306/" + database, user, password);
+        assertFalse(connection.isClosed());
+        
+        executeStatement("DROP DATABASE " + database);
+        close(connection);
     }
 }

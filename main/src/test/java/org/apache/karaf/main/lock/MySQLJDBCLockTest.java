@@ -16,35 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
 import java.util.Properties;
 
+import org.apache.karaf.main.lock.MySQLJDBCLock;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class DefaultJDBCLockTest extends BaseJDBCLockTest {
+public class MySQLJDBCLockTest extends BaseJDBCLockTest {
     
     @Before
     @Override
     public void setUp() throws Exception {
-        password = "root";
-        driver = "org.apache.derby.jdbc.ClientDriver";
-        url = "jdbc:derby://127.0.0.1:1527/test";
+        driver = "com.mysql.jdbc.Driver";
+        url = "jdbc:mysql://127.0.0.1:3306/test";
+        createTableStmtSuffix = " ENGINE=INNODB";
         
         super.setUp();
     }
     
-    DefaultJDBCLock createLock(Properties props) {
-        return new DefaultJDBCLock(props) {
+    MySQLJDBCLock createLock(Properties props) {
+        return new MySQLJDBCLock(props) {
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
-                assertEquals(this.url + ";create=true", url);
+                assertEquals(this.url + "?createDatabaseIfNotExist=true", url);
                 assertEquals(this.user, username);
                 assertEquals(this.password, password);
                 return connection;
@@ -59,13 +60,13 @@ public class DefaultJDBCLockTest extends BaseJDBCLockTest {
     
     @Test
     public void createConnectionShouldConcatinateOptionsCorrect() {
-        props.put("karaf.lock.jdbc.url", this.url + ";dataEncryption=false");
+        props.put("karaf.lock.jdbc.url", this.url + "?connectTimeout=10000");
         
-        lock = new DefaultJDBCLock(props) {
+        lock = new MySQLJDBCLock(props) {
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
-                assertEquals(this.url + ";create=true", url);
+                assertEquals(this.url + "&createDatabaseIfNotExist=true", url);
                 assertEquals(this.user, username);
                 assertEquals(this.password, password);
                 return connection;

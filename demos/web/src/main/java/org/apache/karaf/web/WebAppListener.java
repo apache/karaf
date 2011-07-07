@@ -21,11 +21,13 @@ import java.io.File;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.apache.karaf.main.LifecycleManager;
 import org.apache.karaf.main.Main;
 
 public class WebAppListener implements ServletContextListener {
 
 	private Main main;
+	private LifecycleManager lifecycleManager;
 
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
@@ -41,7 +43,7 @@ public class WebAppListener implements ServletContextListener {
 			System.setProperty("karaf.startRemoteShell", "true");
             System.setProperty("karaf.lock", "false");
 			main = new Main(new String[0]);
-            main.launch();
+            lifecycleManager = main.launch();
 		} catch (Exception e) {
 			main = null;
 			e.printStackTrace();
@@ -51,8 +53,8 @@ public class WebAppListener implements ServletContextListener {
 	public void contextDestroyed(ServletContextEvent sce) {
 		try {
 			System.err.println("contextDestroyed");
-			if (main != null) {
-                main.destroy();
+			if (lifecycleManager != null) {
+                lifecycleManager.destroyKaraf();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

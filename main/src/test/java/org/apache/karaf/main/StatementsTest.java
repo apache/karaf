@@ -20,6 +20,7 @@ package org.apache.karaf.main;
 
 import static org.junit.Assert.*;
 
+import org.apache.karaf.main.lock.Statements;
 import org.junit.Before;
 import org.junit.Test;
 

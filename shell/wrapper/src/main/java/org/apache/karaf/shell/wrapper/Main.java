@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.shell.wrapper;
 
+import org.apache.karaf.main.LifecycleManager;
 import org.apache.karaf.main.ShutdownCallback;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
@@ -25,8 +26,8 @@ import org.tanukisoftware.wrapper.WrapperManager;
  */
 public class Main extends Thread implements WrapperListener, ShutdownCallback {
 
-   	private org.apache.karaf.main.Main main;
     private volatile boolean destroying;
+	private LifecycleManager lifecycleManager;
 
     /*---------------------------------------------------------------
      * Constructors
@@ -52,11 +53,11 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
      */
     public Integer start( String[] args )
     {
-        main = new org.apache.karaf.main.Main( args );
+    	 org.apache.karaf.main.Main main = new org.apache.karaf.main.Main( args );
         try
         {
-            main.launch();
-            main.setShutdownCallback(this);
+            lifecycleManager = main.launch();
+            lifecycleManager.setShutdownCallback(this);
             start();
             return null;
         }
@@ -70,9 +71,9 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
 
     public void run() {
         try {
-            main.awaitShutdown();
+            lifecycleManager.awaitShutdown();
             if (!destroying) {
-                WrapperManager.stop(main.getExitCode());
+                WrapperManager.stop(0);
             }
         } catch (Exception e) {
             // Ignore
@@ -100,7 +101,7 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
         try
         {
             destroying = true;
-            if (!main.destroy())
+            if (!lifecycleManager.destroyKaraf())
             {
                 System.err.println("Timeout waiting for Karaf to shutdown");
                 return -3;
@@ -113,7 +114,7 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
             return -2;
         }
 
-        return main.getExitCode();
+        return 0;
     }
     
     /**

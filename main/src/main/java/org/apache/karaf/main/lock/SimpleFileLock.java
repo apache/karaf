@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +24,8 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import org.apache.karaf.main.util.BootstrapLogManager;
 
 public class SimpleFileLock implements Lock {
 
