@@ -16,16 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
+public interface Lock {
 
-/**
- * Main class used to stop the root Karaf instance
- */
-public class Stop {
+    /**
+     * A KeepAlive function to maintain the lock. 
+     * Indicates whether or not the lock could be aquired.
+     * 
+     * @return true if connection lock retained, false otherwise.
+     * @throws Exception
+     */
+    boolean lock() throws Exception;
 
-    public static void main(String[] args) throws Exception {
-        Main.shutdown();
-    }
+    /**
+     * Terminate the lock connection safely.
+     * 
+     * @throws Exception
+     */
+    void release() throws Exception;
 
+    /**
+     * Indicates whether or not the lock still exists.
+     * 
+     * @return true, if the lock still exists, otherwise false.
+     * @throws Exception
+     */
+    boolean isAlive() throws Exception;
 }

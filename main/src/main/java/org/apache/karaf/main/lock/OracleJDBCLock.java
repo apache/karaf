@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Properties;
+
 
 /**
  * Represents an exclusive lock on a database,

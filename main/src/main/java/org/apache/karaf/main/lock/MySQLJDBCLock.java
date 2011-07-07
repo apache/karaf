@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
 import java.sql.Connection;
 import java.util.Properties;
+
 
 /**
  * Represents an exclusive lock on a database,
@@ -28,15 +29,32 @@ import java.util.Properties;
  * 
  * @version $Revision: $
  */
-public class DerbyJDBCLock extends DefaultJDBCLock {
+public class MySQLJDBCLock extends DefaultJDBCLock {
 
-    public DerbyJDBCLock(Properties props) {
+    public MySQLJDBCLock(Properties props) {
         super(props);
     }
 
+    Statements createStatements() {
+        Statements statements = new Statements();
+        statements.setTableName(table);
+        statements.setNodeName(clusterName);
+        String[] lockCreateSchemaStatements = statements.getLockCreateSchemaStatements(getCurrentTimeMillis());
+        for (int index = 0; index < lockCreateSchemaStatements.length; index++) {
+            if (lockCreateSchemaStatements[index].toUpperCase().startsWith("CREATE TABLE")) {
+                lockCreateSchemaStatements[index] = lockCreateSchemaStatements[index] + " ENGINE=INNODB";
+            }
+        }
+        return statements;
+    }
+    
     @Override
     Connection createConnection(String driver, String url, String username, String password) throws Exception {
-        url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
+        url = (url.toLowerCase().contains("createDatabaseIfNotExist=true")) ? 
+            url : 
+            ((url.contains("?")) ? 
+                url + "&createDatabaseIfNotExist=true" : 
+                url + "?createDatabaseIfNotExist=true");
         
         return super.createConnection(driver, url, username, password);
     }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertFalse;
@@ -30,6 +30,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import org.apache.karaf.main.lock.DefaultJDBCLock;
+import org.apache.karaf.main.util.BootstrapLogManager;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.BeforeClass;

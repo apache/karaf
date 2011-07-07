@@ -16,18 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
 import java.util.Properties;
 
+import org.apache.karaf.main.lock.DefaultJDBCLock;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class DerbyJDBCLockTest extends BaseJDBCLockTest {
+public class DefaultJDBCLockTest extends BaseJDBCLockTest {
     
     @Before
     @Override
@@ -39,8 +40,8 @@ public class DerbyJDBCLockTest extends BaseJDBCLockTest {
         super.setUp();
     }
     
-    DerbyJDBCLock createLock(Properties props) {
-        return new DerbyJDBCLock(props) {
+    DefaultJDBCLock createLock(Properties props) {
+        return new DefaultJDBCLock(props) {
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
@@ -61,7 +62,7 @@ public class DerbyJDBCLockTest extends BaseJDBCLockTest {
     public void createConnectionShouldConcatinateOptionsCorrect() {
         props.put("karaf.lock.jdbc.url", this.url + ";dataEncryption=false");
         
-        lock = new DerbyJDBCLock(props) {
+        lock = new DefaultJDBCLock(props) {
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);

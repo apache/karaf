@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,6 +32,9 @@ import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.apache.karaf.main.lock.DefaultJDBCLock;
+import org.apache.karaf.main.lock.Lock;
+import org.apache.karaf.main.util.BootstrapLogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

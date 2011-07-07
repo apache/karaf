@@ -16,39 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.net.JarURLConnection;
 import java.net.URI;
-
-import org.apache.karaf.main.Main;
+import java.net.URL;
 
 public class Utils {
 
-    public static File getKarafHome() throws IOException {
+    public static File getKarafHome(Class<?> mainClass, String karafHomeProperty, String karafHomeEnv) throws IOException {
         File rc = null;
 
         // Use the system property if specified.
-        String path = System.getProperty(Main.PROP_KARAF_HOME);
+        String path = System.getProperty(karafHomeProperty);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + Main.PROP_KARAF_HOME + " system property", false, true);
+            rc = validateDirectoryExists(path, "Invalid " + karafHomeProperty + " system property", false, true);
         }
 
         if (rc == null) {
-            path = System.getenv(Main.ENV_KARAF_HOME);
+            path = System.getenv(karafHomeEnv);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + Main.ENV_KARAF_HOME + " environment variable", false, true);
+                rc = validateDirectoryExists(path, "Invalid " + karafHomeEnv + " environment variable", false, true);
             }
         }
 
         // Try to figure it out using the jar file this class was loaded from.
         if (rc == null) {
             // guess the home from the location of the jar
-            URL url = Main.class.getClassLoader().getResource(Main.class.getName().replace(".", "/") + ".class");
+            URL url = mainClass.getClassLoader().getResource(mainClass.getName().replace(".", "/") + ".class");
             if (url != null) {
                 try {
                     JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
@@ -70,7 +68,7 @@ public class Utils {
             }
         }
         if (rc == null) {
-            throw new IOException("The Karaf install directory could not be determined.  Please set the " + Main.PROP_KARAF_HOME + " system property or the " + Main.ENV_KARAF_HOME + " environment variable.");
+            throw new IOException("The Karaf install directory could not be determined.  Please set the " + karafHomeProperty + " system property or the " + karafHomeEnv + " environment variable.");
         }
 
         return rc;

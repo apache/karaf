@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.lock;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,6 +26,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import org.apache.karaf.main.util.BootstrapLogManager;
 
 /**
  * Represents an exclusive lock on a database,
