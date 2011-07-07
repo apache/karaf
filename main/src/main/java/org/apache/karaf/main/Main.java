@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.PropertiesHelper;
+import org.apache.karaf.main.util.StringMap;
 import org.apache.karaf.main.util.Utils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
