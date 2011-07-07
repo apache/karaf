@@ -7,15 +7,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.karaf.main.lock.Lock;
 import org.apache.karaf.main.lock.LockFactory;
@@ -76,7 +72,7 @@ public class LifecycleManager extends Thread {
     
     protected void setupShutdown() {
     	String pidFile = props.getProperty(KARAF_SHUTDOWN_PID_FILE);
-        writePid(pidFile);
+        InstanceInfoManager.writePid(pidFile);
         try {
             int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
             String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
@@ -95,25 +91,6 @@ public class LifecycleManager extends Thread {
                 Thread thread = new ShutdownSocketThread(shutdown, shutdownSocket, framework);
                 thread.setDaemon(true);
                 thread.start();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void writePid(String pidFile) {
-        try {
-            if (pidFile != null) {
-                RuntimeMXBean rtb = ManagementFactory.getRuntimeMXBean();
-                String processName = rtb.getName();
-                Pattern pattern = Pattern.compile("^([0-9]+)@.+$", Pattern.CASE_INSENSITIVE);
-                Matcher matcher = pattern.matcher(processName);
-                if (matcher.matches()) {
-                    int pid = Integer.parseInt(matcher.group(1));
-                    Writer w = new OutputStreamWriter(new FileOutputStream(pidFile));
-                    w.write(Integer.toString(pid));
-                    w.close();
-                }
             }
         } catch (Exception e) {
             e.printStackTrace();
