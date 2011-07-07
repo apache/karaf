@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.util;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -30,9 +30,14 @@ import java.util.TreeMap;
  * a <tt>String</tt> using the <tt>toString()</tt> method,
  * since it is only intended to compare strings.
 **/
-public class StringMap extends TreeMap
+public class StringMap extends TreeMap<String, Object>
 {
-    public StringMap()
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public StringMap()
     {
         this(true);
     }
@@ -42,13 +47,14 @@ public class StringMap extends TreeMap
         super(new StringComparator(caseSensitive));
     }
 
-    public StringMap(Map map, boolean caseSensitive)
+    @SuppressWarnings("unchecked")
+	public StringMap(Map<?, ?> map, boolean caseSensitive)
     {
         this(caseSensitive);
-        putAll(map);
+        putAll((Map<? extends String, ? extends Object>) map);
     }
 
-    public Object put(Object key, Object value)
+    public Object put(String key, Object value)
     {
         return super.put(key.toString(), value);
     }
@@ -63,7 +69,7 @@ public class StringMap extends TreeMap
         ((StringComparator) comparator()).setCaseSensitive(b);
     }
 
-    private static class StringComparator implements Comparator
+    private static class StringComparator implements Comparator<String>
     {
         private boolean m_isCaseSensitive = true;
 
@@ -72,7 +78,7 @@ public class StringMap extends TreeMap
             m_isCaseSensitive = b;
         }
 
-        public int compare(Object o1, Object o2)
+        public int compare(String o1, String o2)
         {
             if (m_isCaseSensitive)
             {

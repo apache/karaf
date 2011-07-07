@@ -16,21 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.main;
+package org.apache.karaf.main.util;
+
+import org.apache.karaf.main.util.StringMap;
 
 import junit.framework.TestCase;
 
 /**
- * Test cased for {@link org.apache.karaf.main.StringMap}
+ * Test cased for {@link org.apache.karaf.main.util.StringMap}
  */
 public class StringMapTest extends TestCase {
 
-    public void testPut() throws Exception {
-        StringMap sm = new StringMap();
-        Object key = new String("key");
+    public void testCaseInsensitiveStringMap() throws Exception {
+        StringMap sm = new StringMap(false);
         Object value = new String("value");
-        sm.put(key, value);
-        Object result = sm.get(key);
+        sm.put("key", value);
+        Object result = sm.get("Key");
         assertFalse(result == null);
         assertTrue(result.equals(value));
     }
