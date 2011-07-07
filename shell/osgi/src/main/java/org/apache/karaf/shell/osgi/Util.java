@@ -19,6 +19,9 @@
 package org.apache.karaf.shell.osgi;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 
 import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.Bundle;
@@ -26,9 +29,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Util
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
+
     public static String getBundleName(Bundle bundle)
     {
         if (bundle != null)
@@ -67,16 +74,11 @@ public class Util
             else if (obj instanceof String[])
             {
                 String[] array = (String[]) obj;
-                m_sb.delete(0, m_sb.length());
-                for (int i = 0; i < array.length; i++)
-                {
-                    if (i != 0)
-                    {
-                        m_sb.append(", ");
+                return convertTypedArrayToString(array, new StringConverter<String>() {
+                    public String convertObjectToString(String toConvert) {
+                        return toConvert;
                     }
-                    m_sb.append(array[i].toString());
-                }
-                return m_sb.toString();
+                });
             }
             else if (obj instanceof Boolean)
             {
@@ -102,6 +104,42 @@ public class Util
             {
                 return ((Float) obj).toString();
             }
+            else if (obj instanceof URL)
+            {
+                return ((URL)obj).toExternalForm();
+            }
+            else if (obj instanceof URL[])
+            {
+                URL[] array = (URL[]) obj;
+                return convertTypedArrayToString(array, new StringConverter<URL>() {
+                    public String convertObjectToString(URL toConvert) {
+                        return toConvert.toExternalForm();
+                    }
+                });
+            }
+            else if (obj instanceof URI)
+            {
+                try {
+                    return ((URI)obj).toURL().toExternalForm();
+                } catch (MalformedURLException e) {
+                    LOGGER.error("URI could not be transformed to URL",e);
+                    return obj.toString();
+                }
+            }
+            else if (obj instanceof URI[])
+            {
+                URI[] array = (URI[]) obj;
+                return convertTypedArrayToString(array, new StringConverter<URI>() {
+                    public String convertObjectToString(URI toConvert) {
+                        try {
+                            return toConvert.toURL().toExternalForm();
+                        } catch (MalformedURLException e) {
+                            LOGGER.error("URI could not be transformed to URL",e);
+                            return toConvert.toString();
+                        }
+                    }
+                });
+            }
             else if (obj == null)
             {
                 return "null";
@@ -111,6 +149,23 @@ public class Util
                 return obj.toString();
             }
         }
+    }
+
+    private static <Type> String convertTypedArrayToString(Type[] array, StringConverter<Type> converter) {
+        m_sb.delete(0, m_sb.length());
+        for (int i = 0; i < array.length; i++)
+        {
+            if (i != 0)
+            {
+                m_sb.append(", ");
+            }
+            m_sb.append(converter.convertObjectToString(array[i]));
+        }
+        return m_sb.toString();
+    }
+
+    private static interface StringConverter<Type> {
+      String convertObjectToString(Type toConvert);
     }
 
     /**
