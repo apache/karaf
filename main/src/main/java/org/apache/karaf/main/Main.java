@@ -20,13 +20,10 @@ package org.apache.karaf.main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -41,8 +38,6 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.PropertiesHelper;
@@ -199,7 +194,7 @@ public class Main {
 		Properties sysProps = PropertiesHelper.loadPropertiesFile(etcFolder,
 				SYSTEM_PROPERTIES_FILE_NAME, false);
 		PropertiesHelper.updateSystemProperties(sysProps);
-		updateInstancePid();
+		InstanceInfoManager.updateInstanceInfo(karafHome, karafBase);
 
 		configProps = PropertiesHelper.loadPropertiesFile(etcFolder,
 				CONFIG_PROPERTIES_FILE_NAME, false);
@@ -325,7 +320,7 @@ public class Main {
 
 			// We should start all the bundles in the system dir.
 			for (File bundleDir : bundleDirs) {
-				findJars(bundleDir, jars);
+				Utils.findJars(bundleDir, jars);
 			}
 
 			StringBuffer sb = new StringBuffer();
@@ -349,7 +344,7 @@ public class Main {
 			HashMap<Integer, StringBuffer> levels = new HashMap<Integer, StringBuffer>();
 			for (Object o : startupProps.keySet()) {
 				String name = (String) o;
-				File file = findFile(bundleDirs, name);
+				File file = Utils.findFile(bundleDirs, name);
 
 				if (file != null) {
 					Integer level;
@@ -527,72 +522,6 @@ public class Main {
 		}
 	}
 
-	private void updateInstancePid() {
-		try {
-			String instanceName = System.getProperty("karaf.name");
-			String pid = ManagementFactory.getRuntimeMXBean().getName();
-			if (pid.indexOf('@') > 0) {
-				pid = pid.substring(0, pid.indexOf('@'));
-			}
-
-			boolean isRoot = karafHome.equals(karafBase);
-
-			if (instanceName != null) {
-				String storage = System.getProperty("karaf.instances");
-				if (storage == null) {
-					throw new Exception(
-							"System property 'karaf.instances' is not set. \n"
-									+ "This property needs to be set to the full path of the instance.properties file.");
-				}
-				File storageFile = new File(storage);
-				File propertiesFile = new File(storageFile,
-						"instance.properties");
-				Properties props = new Properties();
-				if (propertiesFile.exists()) {
-					FileInputStream fis = new FileInputStream(propertiesFile);
-					props.load(fis);
-					int count = Integer.parseInt(props.getProperty("count"));
-					for (int i = 0; i < count; i++) {
-						String name = props.getProperty("item." + i + ".name");
-						if (name.equals(instanceName)) {
-							props.setProperty("item." + i + ".pid", pid);
-							FileOutputStream fos = new FileOutputStream(
-									propertiesFile);
-							props.store(fos, null);
-							fis.close();
-							fos.close();
-							return;
-						}
-					}
-					fis.close();
-					if (!isRoot) {
-						throw new Exception("Instance " + instanceName
-								+ " not found");
-					}
-				} else if (isRoot) {
-					if (!propertiesFile.getParentFile().exists()) {
-						try {
-							propertiesFile.getParentFile().mkdirs();
-						} catch (SecurityException se) {
-							throw new Exception(se.getMessage());
-						}
-					}
-					props.setProperty("count", "1");
-					props.setProperty("item.0.name", instanceName);
-					props.setProperty("item.0.loc", karafHome.getAbsolutePath());
-					props.setProperty("item.0.pid", pid);
-					props.setProperty("item.0.root", "true");
-					FileOutputStream fos = new FileOutputStream(propertiesFile);
-					props.store(fos, null);
-					fos.close();
-				}
-			}
-		} catch (Exception e) {
-			System.err.println("Unable to update instance pid: "
-					+ e.getMessage());
-		}
-	}
-
 	/**
 	 * <p/>
 	 * Processes the auto-install and auto-start properties from the specified
@@ -681,7 +610,7 @@ public class Main {
 					location = PropertiesHelper.nextLocation(st);
 					if (location != null) {
 						try {
-							String[] parts = convertToMavenUrlsIfNeeded(
+							String[] parts = Utils.convertToMavenUrlsIfNeeded(
 									location, convertToMavenUrls);
 							Bundle b = context.installBundle(parts[0], new URL(
 									parts[1]).openStream());
@@ -716,57 +645,6 @@ public class Main {
 						+ b.getSymbolicName() + ": " + ex);
 			}
 		}
-	}
-
-	private static String[] convertToMavenUrlsIfNeeded(String location,
-			boolean convertToMavenUrls) {
-		String[] parts = location.split("\\|");
-		if (convertToMavenUrls) {
-			String[] p = parts[1].split("/");
-			if (p.length >= 4
-					&& p[p.length - 1].startsWith(p[p.length - 3] + "-"
-							+ p[p.length - 2])) {
-				String artifactId = p[p.length - 3];
-				String version = p[p.length - 2];
-				String classifier;
-				String type;
-				String artifactIdVersion = artifactId + "-" + version;
-				StringBuffer sb = new StringBuffer();
-				if (p[p.length - 1].charAt(artifactIdVersion.length()) == '-') {
-					classifier = p[p.length - 1].substring(
-							artifactIdVersion.length() + 1,
-							p[p.length - 1].lastIndexOf('.'));
-				} else {
-					classifier = null;
-				}
-				type = p[p.length - 1].substring(p[p.length - 1]
-						.lastIndexOf('.') + 1);
-				sb.append("mvn:");
-				for (int j = 0; j < p.length - 3; j++) {
-					if (j > 0) {
-						sb.append('.');
-					}
-					sb.append(p[j]);
-				}
-				sb.append('/').append(artifactId).append('/').append(version);
-				if (!"jar".equals(type) || classifier != null) {
-					sb.append('/');
-					if (!"jar".equals(type)) {
-						sb.append(type);
-					}
-					if (classifier != null) {
-						sb.append('/').append(classifier);
-					}
-				}
-				parts[1] = parts[0];
-				parts[0] = sb.toString();
-			} else {
-				parts[1] = parts[0];
-			}
-		} else {
-			parts[1] = parts[0];
-		}
-		return parts;
 	}
 
 	private ClassLoader createClassLoader(Properties configProps)
@@ -805,89 +683,6 @@ public class Main {
 
 		return new URLClassLoader(urls.toArray(new URL[urls.size()]),
 				Main.class.getClassLoader());
-	}
-
-	private static File findFile(List<File> bundleDirs, String name) {
-		for (File bundleDir : bundleDirs) {
-			File file = findFile(bundleDir, name);
-			if (file != null) {
-				return file;
-			}
-		}
-		return null;
-	}
-
-	private static File findFile(File dir, String name) {
-		name = fromMaven(name);
-		File theFile = new File(dir, name);
-
-		if (theFile.exists() && !theFile.isDirectory()) {
-			return theFile;
-		}
-		return null;
-	}
-
-	private static final Pattern mvnPattern = Pattern
-			.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
-
-	/**
-	 * Returns a path for an srtifact. Input: path (no ':') returns path Input:
-	 * mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to
-	 * default repo location path // * Input:
-	 * <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default
-	 * repo location path type and classifier are optional.
-	 * 
-	 * 
-	 * @param name
-	 *            input artifact info
-	 * @return path as supplied or a default maven repo path
-	 */
-	static String fromMaven(String name) {
-		Matcher m = mvnPattern.matcher(name);
-		if (!m.matches()) {
-			return name;
-		}
-		StringBuilder b = new StringBuilder();
-		b.append(m.group(1));
-		for (int i = 0; i < b.length(); i++) {
-			if (b.charAt(i) == '.') {
-				b.setCharAt(i, '/');
-			}
-		}
-		b.append("/");// groupId
-		String artifactId = m.group(2);
-		String version = m.group(3);
-		String extension = m.group(5);
-		String classifier = m.group(7);
-		b.append(artifactId).append("/");// artifactId
-		b.append(version).append("/");// version
-		b.append(artifactId).append("-").append(version);
-		if (present(classifier)) {
-			b.append("-").append(classifier);
-		} else {
-			if (present(extension)) {
-				b.append(".").append(extension);
-			} else {
-				b.append(".jar");
-			}
-		}
-		return b.toString();
-	}
-
-	private static boolean present(String part) {
-		return part != null && !part.isEmpty();
-	}
-
-	private static void findJars(File dir, ArrayList<File> jars) {
-		for (File file : dir.listFiles()) {
-			if (file.isDirectory()) {
-				findJars(file, jars);
-			} else {
-				if (file.toString().endsWith(".jar")) {
-					jars.add(file);
-				}
-			}
-		}
 	}
 
 	/**

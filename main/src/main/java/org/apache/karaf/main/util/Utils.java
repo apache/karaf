@@ -24,8 +24,15 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public class Utils {
+	public static final Pattern mvnPattern = Pattern
+			.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public static File getKarafHome(Class<?> mainClass, String karafHomeProperty, String karafHomeEnv) throws IOException {
         File rc = null;
@@ -204,5 +211,138 @@ public class Utils {
             }
         }
     }
+
+	/**
+	 * Returns a path for an srtifact. Input: path (no ':') returns path Input:
+	 * mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to
+	 * default repo location path // * Input:
+	 * <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default
+	 * repo location path type and classifier are optional.
+	 * 
+	 * 
+	 * @param name
+	 *            input artifact info
+	 * @return path as supplied or a default maven repo path
+	 */
+	private static String fromMaven(String name) {
+		Matcher m = mvnPattern.matcher(name);
+		if (!m.matches()) {
+			return name;
+		}
+		StringBuilder b = new StringBuilder();
+		b.append(m.group(1));
+		for (int i = 0; i < b.length(); i++) {
+			if (b.charAt(i) == '.') {
+				b.setCharAt(i, '/');
+			}
+		}
+		b.append("/");// groupId
+		String artifactId = m.group(2);
+		String version = m.group(3);
+		String extension = m.group(5);
+		String classifier = m.group(7);
+		b.append(artifactId).append("/");// artifactId
+		b.append(version).append("/");// version
+		b.append(artifactId).append("-").append(version);
+		if (present(classifier)) {
+			b.append("-").append(classifier);
+		} else {
+			if (present(extension)) {
+				b.append(".").append(extension);
+			} else {
+				b.append(".jar");
+			}
+		}
+		return b.toString();
+	}
+	
+	public static boolean present(String part) {
+		return part != null && !part.isEmpty();
+	}
+
+	public static File findFile(List<File> bundleDirs, String name) {
+		for (File bundleDir : bundleDirs) {
+			File file = Utils.findFile(bundleDir, name);
+			if (file != null) {
+				return file;
+			}
+		}
+		return null;
+	}
+
+	public static File findFile(File dir, String name) {
+		name = fromMaven(name);
+		File theFile = new File(dir, name);
+	
+		if (theFile.exists() && !theFile.isDirectory()) {
+			return theFile;
+		}
+		return null;
+	}
+
+	public static void findJars(File dir, ArrayList<File> jars) {
+		for (File file : dir.listFiles()) {
+			if (file.isDirectory()) {
+				findJars(file, jars);
+			} else {
+				if (file.toString().endsWith(".jar")) {
+					jars.add(file);
+				}
+			}
+		}
+	}
+
+	public static String[] convertToMavenUrlsIfNeeded(String location,
+			boolean convertToMavenUrls) {
+		String[] parts = location.split("\\|");
+		if (convertToMavenUrls) {
+			String[] p = parts[1].split("/");
+			if (p.length >= 4
+					&& p[p.length - 1].startsWith(p[p.length - 3] + "-"
+							+ p[p.length - 2])) {
+				String artifactId = p[p.length - 3];
+				String version = p[p.length - 2];
+				String classifier;
+				String type;
+				String artifactIdVersion = artifactId + "-" + version;
+				StringBuffer sb = new StringBuffer();
+				if (p[p.length - 1].charAt(artifactIdVersion.length()) == '-') {
+					classifier = p[p.length - 1].substring(
+							artifactIdVersion.length() + 1,
+							p[p.length - 1].lastIndexOf('.'));
+				} else {
+					classifier = null;
+				}
+				type = p[p.length - 1].substring(p[p.length - 1]
+						.lastIndexOf('.') + 1);
+				sb.append("mvn:");
+				for (int j = 0; j < p.length - 3; j++) {
+					if (j > 0) {
+						sb.append('.');
+					}
+					sb.append(p[j]);
+				}
+				sb.append('/').append(artifactId).append('/').append(version);
+				if (!"jar".equals(type) || classifier != null) {
+					sb.append('/');
+					if (!"jar".equals(type)) {
+						sb.append(type);
+					}
+					if (classifier != null) {
+						sb.append('/').append(classifier);
+					}
+				}
+				parts[1] = parts[0];
+				parts[0] = sb.toString();
+			} else {
+				parts[1] = parts[0];
+			}
+		} else {
+			parts[1] = parts[0];
+		}
+		return parts;
+	}
+
+
 
 }
