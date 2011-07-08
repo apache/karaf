@@ -20,16 +20,25 @@ import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
+import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.service.command.CommandSession;
 
 @Command(scope = "obr", name = "list", description = "Lists OBR bundles, optionally providing the given packages.")
-public class ListCommand extends ObrCommandSupport {
+public class ListCommand implements Action {
 
     @Argument(index = 0, name = "packages", description = "A list of packages separated by whitespaces.", required = false, multiValued = true)
     List<String> packages;
+    
+    RepositoryAdmin repoAdmin;
 
-    void doExecute(RepositoryAdmin admin) throws Exception {
+	public void setRepoAdmin(RepositoryAdmin repoAdmin) {
+		this.repoAdmin = repoAdmin;
+	}
+
+	@Override
+	public Object execute(CommandSession session) throws Exception {
         StringBuilder substr = new StringBuilder();
 
         if (packages != null) {
@@ -45,7 +54,7 @@ public class ListCommand extends ObrCommandSupport {
         } else {
         	query = "(|(presentationname=*" + substr + "*)(symbolicname=*" + substr + "*))";
         }
-        Resource[] resources = admin.discoverResources(query);
+        Resource[] resources = repoAdmin.discoverResources(query);
         int maxPName = 4;
         int maxSName = 13;
         int maxVersion = 7;
@@ -68,6 +77,7 @@ public class ListCommand extends ObrCommandSupport {
         if (resources == null || resources.length == 0) {
             System.out.println("No matching bundles.");
         }
+        return null;
     }
 
 	private String emptyIfNull(Object st) {

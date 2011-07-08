@@ -18,6 +18,7 @@
 
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
+	<reference id="repoAdmin" interface="org.apache.felix.bundlerepository.RepositoryAdmin"/>
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="obr/addUrl">
@@ -33,7 +34,9 @@
             <action class="org.apache.karaf.shell.obr.InfoCommand"/>
         </command>
         <command name="obr/list">
-            <action class="org.apache.karaf.shell.obr.ListCommand"/>
+            <action class="org.apache.karaf.shell.obr.ListCommand">
+            	<property name="repoAdmin" ref="repoAdmin"/>
+            </action>
         </command>
         <command name="obr/listUrl">
             <action class="org.apache.karaf.shell.obr.ListUrlCommand"/>
