@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
-import org.osgi.framework.Version;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
@@ -30,71 +29,49 @@ public class ListCommand extends ObrCommandSupport {
     @Argument(index = 0, name = "packages", description = "A list of packages separated by whitespaces.", required = false, multiValued = true)
     List<String> packages;
 
-    protected void doExecute(RepositoryAdmin admin) throws Exception {
-        String substr = null;
+    void doExecute(RepositoryAdmin admin) throws Exception {
+        StringBuilder substr = new StringBuilder();
 
         if (packages != null) {
-            for (String arg : packages)
-            {
-                // Add a space in between tokens.
-                if (substr == null)
-                {
-                    substr = "";
-                }
-                else
-                {
-                    substr += " ";
-                }
-
-                substr += arg;
+            for (String packageName : packages) {
+            	substr.append(" ");
+            	substr.append(packageName);
             }
         }
         
-        StringBuffer sb = new StringBuffer();
-        if ((substr == null) || (substr.length() == 0))
-        {
-            sb.append("(|(presentationname=*)(symbolicname=*))");
+        String query;
+        if ((substr == null) || (substr.length() == 0)) {
+            query = "(|(presentationname=*)(symbolicname=*))";
+        } else {
+        	query = "(|(presentationname=*" + substr + "*)(symbolicname=*" + substr + "*))";
         }
-        else
-        {
-            sb.append("(|(presentationname=*");
-            sb.append(substr);
-            sb.append("*)(symbolicname=*");
-            sb.append(substr);
-            sb.append("*))");
-        }
-        Resource[] resources = admin.discoverResources(sb.toString());
-        for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
-        {
-            String name = resources[resIdx].getPresentationName();
-            String bundleSymbolicName = resources[resIdx].getSymbolicName();
-            Version version = resources[resIdx].getVersion();
-            
-            StringBuffer outputString = new StringBuffer();
-            if(bundleSymbolicName != null )
-            {
-            	outputString.append(bundleSymbolicName);
-            	outputString.append(" - ");            	
-            }
-            if(name != null)
-            {
-            	outputString.append(name);
-            	outputString.append(" ");
-            }
-            if(version != null)
-            {
-            	outputString.append("(");
-            	outputString.append(version);
-            	outputString.append(")");
-            }
-            
-            System.out.println(outputString.toString());
-        }
+        Resource[] resources = admin.discoverResources(query);
+        int maxPName = 4;
+        int maxSName = 13;
+        int maxVersion = 7;
+        for (Resource resource : resources) {
+        	maxPName = Math.max(maxPName, emptyIfNull(resource.getPresentationName()).length());
+        	maxSName = Math.max(maxSName, emptyIfNull(resource.getSymbolicName()).length());
+        	maxVersion = Math.max(maxVersion, emptyIfNull(resource.getVersion()).length());
+		}
+        
+    	String formatHeader = "| %-" + maxPName +"s | %-" + maxSName + "s | %-" + maxVersion + "s |";
+        String formatLine   = "| %-" + maxPName +"s | %-" + maxSName + "s | %-" + maxVersion + "s |";
+        System.out.println(String.format(formatHeader, "NAME", "SYMBOLIC NAME", "VERSION"));
+        for (Resource resource : resources) {
+            System.out.println(String.format(formatLine, 
+            		emptyIfNull(resource.getPresentationName()), 
+            		emptyIfNull(resource.getSymbolicName()), 
+            		emptyIfNull(resource.getVersion())));
+		}
 
-        if (resources == null)
-        {
+        if (resources == null || resources.length == 0) {
             System.out.println("No matching bundles.");
         }
     }
+
+	private String emptyIfNull(Object st) {
+		return st == null ? "" : st.toString();
+	}
 
 }

@@ -58,7 +58,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         return null;
     }
 
-    protected abstract void doExecute(RepositoryAdmin admin) throws Exception;
+    abstract void doExecute(RepositoryAdmin admin) throws Exception;
 
     protected Resource[] searchRepository(RepositoryAdmin admin, String targetId, String targetVersion) throws InvalidSyntaxException
     {
