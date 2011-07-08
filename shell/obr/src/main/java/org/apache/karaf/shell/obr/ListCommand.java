@@ -30,49 +30,46 @@ public class ListCommand implements Action {
 
     @Argument(index = 0, name = "packages", description = "A list of packages separated by whitespaces.", required = false, multiValued = true)
     List<String> packages;
-    
+
     RepositoryAdmin repoAdmin;
 
-	public void setRepoAdmin(RepositoryAdmin repoAdmin) {
-		this.repoAdmin = repoAdmin;
-	}
+    public void setRepoAdmin(RepositoryAdmin repoAdmin) {
+        this.repoAdmin = repoAdmin;
+    }
 
-	@Override
-	public Object execute(CommandSession session) throws Exception {
+    @Override
+    public Object execute(CommandSession session) throws Exception {
         StringBuilder substr = new StringBuilder();
 
         if (packages != null) {
             for (String packageName : packages) {
-            	substr.append(" ");
-            	substr.append(packageName);
+                substr.append(" ");
+                substr.append(packageName);
             }
         }
-        
+
         String query;
         if ((substr == null) || (substr.length() == 0)) {
             query = "(|(presentationname=*)(symbolicname=*))";
         } else {
-        	query = "(|(presentationname=*" + substr + "*)(symbolicname=*" + substr + "*))";
+            query = "(|(presentationname=*" + substr + "*)(symbolicname=*" + substr + "*))";
         }
         Resource[] resources = repoAdmin.discoverResources(query);
         int maxPName = 4;
         int maxSName = 13;
         int maxVersion = 7;
         for (Resource resource : resources) {
-        	maxPName = Math.max(maxPName, emptyIfNull(resource.getPresentationName()).length());
-        	maxSName = Math.max(maxSName, emptyIfNull(resource.getSymbolicName()).length());
-        	maxVersion = Math.max(maxVersion, emptyIfNull(resource.getVersion()).length());
-		}
-        
-    	String formatHeader = "| %-" + maxPName +"s | %-" + maxSName + "s | %-" + maxVersion + "s |";
-        String formatLine   = "| %-" + maxPName +"s | %-" + maxSName + "s | %-" + maxVersion + "s |";
+            maxPName = Math.max(maxPName, emptyIfNull(resource.getPresentationName()).length());
+            maxSName = Math.max(maxSName, emptyIfNull(resource.getSymbolicName()).length());
+            maxVersion = Math.max(maxVersion, emptyIfNull(resource.getVersion()).length());
+        }
+
+        String formatHeader = "  %-" + maxPName + "s  %-" + maxSName + "s   %-" + maxVersion + "s";
+        String formatLine = "[%-" + maxPName + "s] [%-" + maxSName + "s] [%-" + maxVersion + "s]";
         System.out.println(String.format(formatHeader, "NAME", "SYMBOLIC NAME", "VERSION"));
         for (Resource resource : resources) {
-            System.out.println(String.format(formatLine, 
-            		emptyIfNull(resource.getPresentationName()), 
-            		emptyIfNull(resource.getSymbolicName()), 
-            		emptyIfNull(resource.getVersion())));
-		}
+            System.out.println(String.format(formatLine, emptyIfNull(resource.getPresentationName()), emptyIfNull(resource.getSymbolicName()), emptyIfNull(resource.getVersion())));
+        }
 
         if (resources == null || resources.length == 0) {
             System.out.println("No matching bundles.");
@@ -80,8 +77,8 @@ public class ListCommand implements Action {
         return null;
     }
 
-	private String emptyIfNull(Object st) {
-		return st == null ? "" : st.toString();
-	}
+    private String emptyIfNull(Object st) {
+        return st == null ? "" : st.toString();
+    }
 
 }
