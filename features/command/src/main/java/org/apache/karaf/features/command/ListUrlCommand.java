@@ -46,7 +46,7 @@ public class ListUrlCommand extends FeaturesCommandSupport {
             header = " Loaded   URI ";
         }
 
-        session.getConsole().println(header);
+        System.out.println(header);
 
         String verboseOutput = "";
 
@@ -66,14 +66,14 @@ public class ListUrlCommand extends FeaturesCommandSupport {
                     verboseOutput += uri + ":" + e.getMessage() + "\n";
                 }
 
-                session.getConsole().println(line + "   " + uri);
+                System.out.println(line + " " + uri);
             }
 
             if (verbose) {
-                session.getConsole().println("Validation output:\n" + verboseOutput);
+                System.out.println("Validation output:\n" + verboseOutput);
             }
         } else {
-            session.getConsole().println("No repository URLs are set.");
+            System.out.println("No repository URLs are set.");
         }
     }
 }
