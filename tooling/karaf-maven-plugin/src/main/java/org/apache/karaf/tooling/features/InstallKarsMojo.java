@@ -65,7 +65,7 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 /**
  * Installs kar dependencies into a server-under-construction in target/assembly
  *
- * @version $Revision: 1.1 $
+ * @version $Revision$
  * @goal install-kars
  * @phase process-resources
  * @requiresDependencyResolution runtime
@@ -248,7 +248,7 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         //install bundles listed in startup properties that weren't in kars into the system dir
-        for (String key: startupProperties.keySet()) {
+        for (String key: (Set<String>) startupProperties.keySet()) {
             String path = MvnUrlUtil.pathFromMaven(key);
             File target = new File(system.resolve(path));
             if (!target.exists()) {
@@ -351,7 +351,7 @@ public class InstallKarsMojo extends MojoSupport {
                     } finally {
                         in.close();
                     }
-                    String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES) && !properties.get(FEATURES_REPOSITORIES).isEmpty()? properties.get(FEATURES_REPOSITORIES) + ",": "";
+                    String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES) && !((String) properties.get(FEATURES_REPOSITORIES)).isEmpty()? properties.get(FEATURES_REPOSITORIES) + ",": "";
                     existingFeatureRepos = existingFeatureRepos + uri.toString();
                     properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
                     Features repo = readFeatures(uri);
@@ -360,7 +360,7 @@ public class InstallKarsMojo extends MojoSupport {
                             installFeature(feature, null);
                         } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
-                            String existingBootFeatures = properties.containsKey(FEATURES_BOOT) && !properties.get(FEATURES_BOOT).isEmpty()? properties.get(FEATURES_BOOT) + ",": "";
+                            String existingBootFeatures = properties.containsKey(FEATURES_BOOT) && !((String) properties.get(FEATURES_BOOT)).isEmpty()? properties.get(FEATURES_BOOT) + ",": "";
                             existingBootFeatures = existingBootFeatures + feature.getName();
                             properties.put(FEATURES_BOOT, existingBootFeatures);
                         }  else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
@@ -426,7 +426,7 @@ public class InstallKarsMojo extends MojoSupport {
                 String location = bundle.getLocation();
                 String startLevel = Integer.toString(bundle.getStartLevel() == 0? defaultStartLevel: bundle.getStartLevel());
                 if (startupProperties.containsKey(location)) {
-                    int oldStartLevel = Integer.decode(startupProperties.get(location));
+                    int oldStartLevel = Integer.decode((String) startupProperties.get(location));
                     if (oldStartLevel > bundle.getStartLevel()) {
                         startupProperties.put(location, startLevel);
                     }
