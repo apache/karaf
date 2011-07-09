@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Set;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
@@ -190,7 +191,7 @@ public class InstanceImpl implements Instance {
             is = new FileInputStream(configurationFile);
             Properties props = new Properties();
             props.load(is);
-            return props.get(propertyName);
+            return (String) props.get(propertyName);
         } catch (Exception e) {
             throw e;
         } finally {
@@ -317,18 +318,18 @@ public class InstanceImpl implements Instance {
             props.put("karaf.base", new File(location).getCanonicalPath());
             props.put("karaf.home", System.getProperty("karaf.home"));
             props.put("karaf.data", new File(new File(location), "data").getCanonicalPath());
-            for (String name : props.keySet()) {
+            for (String name : (Set<String>) props.keySet()) {
                 props.put(name,
-                        InterpolationHelper.substVars(props.get(name), name, null, props, null));
+                        InterpolationHelper.substVars((String) props.get(name), name, null, props, null));
             }
             
             String host = "localhost";
             if (props.get(KARAF_SHUTDOWN_HOST) != null)
-                host = props.get(KARAF_SHUTDOWN_HOST);
+                host = (String) props.get(KARAF_SHUTDOWN_HOST);
             
             String shutdown = DEFAULT_SHUTDOWN_COMMAND;
             if (props.get(KARAF_SHUTDOWN_COMMAND) != null)
-                shutdown = props.get(KARAF_SHUTDOWN_COMMAND);
+                shutdown = (String) props.get(KARAF_SHUTDOWN_COMMAND);
             
             int port = getShutDownPort(props);
 
@@ -357,9 +358,9 @@ public class InstanceImpl implements Instance {
 			IOException {
 		int port = 0;
 		if (props.get(KARAF_SHUTDOWN_PORT) != null)
-		    port = Integer.parseInt(props.get(KARAF_SHUTDOWN_PORT));
+		    port = Integer.parseInt((String) props.get(KARAF_SHUTDOWN_PORT));
 		// Try to get port from port file
-		String portFile = props.get(KARAF_SHUTDOWN_PORT_FILE);
+		String portFile = (String) props.get(KARAF_SHUTDOWN_PORT_FILE);
 		if (port == 0 && portFile != null) {
 		    BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
 		    String portStr = r.readLine();
