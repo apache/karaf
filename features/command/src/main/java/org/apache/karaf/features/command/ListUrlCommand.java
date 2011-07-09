@@ -66,7 +66,7 @@ public class ListUrlCommand extends FeaturesCommandSupport {
                     verboseOutput += uri + ":" + e.getMessage() + "\n";
                 }
 
-                System.out.println(line + " " + uri);
+                System.out.println(line + "   " + uri);
             }
 
             if (verbose) {
