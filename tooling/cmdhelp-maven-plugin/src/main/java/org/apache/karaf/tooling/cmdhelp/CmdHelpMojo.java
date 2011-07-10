@@ -52,9 +52,9 @@ import org.apache.felix.service.command.CommandSession;
 import org.fusesource.jansi.Ansi;
 
 /**
- * Generates docbook for Karaf commands
+ * Generates help (in scalate or docbook format) for Karaf commands
  *
- * @version $Revision: 1.1 $
+ * @version $Revision$
  * @goal cmdhelp
  * @phase generate-resources
  * @execute phase="generate-resources"
@@ -93,6 +93,13 @@ public class CmdHelpMojo extends AbstractMojo {
      */
     protected String classLoader;
 
+    /**
+     * Adds the --help option to every commands documentation
+     *
+     * @parameter default-value="true"
+     */
+    protected boolean includeHelpOption;
+
     private static final String FORMAT_CONF = "conf";
     private static final String FORMAT_DOCBX = "docbx";
 
@@ -128,9 +135,13 @@ public class CmdHelpMojo extends AbstractMojo {
 
             for (Class clazz : classes) {
                 try {
-                    String help = new HelpPrinter(clazz).printHelp(format);
+                    String help = new HelpPrinter(clazz).printHelp(format, includeHelpOption);
                     Command cmd = (Command) clazz.getAnnotation(Command.class);
                     File output = null;
+
+                    // skip the *-help command
+                    if (cmd.scope().equals("*")) continue;
+
                     if (FORMAT_DOCBX.equals(format)) {
                         output = new File(targetFolder, cmd.scope() + "-" + cmd.name() + ".xml");
                     } else if (FORMAT_CONF.equals(format)) {
@@ -195,7 +206,7 @@ public class CmdHelpMojo extends AbstractMojo {
             this.actionClass = actionClass;
         }
 
-        public String printHelp(String format) throws Exception {
+        public String printHelp(String format, boolean includeHelpOption) throws Exception {
             PrintStream oldout = System.out;
             try {
                 Action action = actionClass.newInstance();
@@ -205,9 +216,9 @@ public class CmdHelpMojo extends AbstractMojo {
                 System.setOut(newout);
                 ActionPreparator preparator;
                 if (FORMAT_DOCBX.equals(format)) {
-                    preparator = new DocbxPreparator();
+                    preparator = new DocbxPreparator(includeHelpOption);
                 } else {
-                    preparator = new ConfPreparator();
+                    preparator = new ConfPreparator(includeHelpOption);
                 }
                 preparator.prepare(action, session, Collections.<Object>singletonList("--help"));
                 newout.close();
@@ -220,6 +231,12 @@ public class CmdHelpMojo extends AbstractMojo {
 
         protected class DocbxPreparator extends BlueprintActionPreparator {
 
+            boolean includeHelpOption;
+
+            DocbxPreparator(boolean includeHelpOption) {
+                this.includeHelpOption = includeHelpOption;
+            }
+
             @Override
             protected void printUsage(CommandSession session, Action action, Map<Option,Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
             {
@@ -231,7 +248,7 @@ public class CmdHelpMojo extends AbstractMojo {
                     }
                 });
                 Set<Option> options = new HashSet<Option>(optionsMap.keySet());
-                options.add(HELP);
+                if (includeHelpOption) options.add(HELP);
 
                 out.println("<section>");
                 out.print("  <title>");
@@ -273,7 +290,21 @@ public class CmdHelpMojo extends AbstractMojo {
                     {
                         out.println("    <tr>");
                         out.println("      <td>" + argument.name() + "</td>");
-                        out.println("      <td>" + argument.description() + "</td>");
+                        String description = argument.description();
+                        if (!argument.required()) {
+                            try {
+                                argsMap.get(argument).setAccessible(true);
+                                Object o = argsMap.get(argument).get(action);
+                                if (o != null
+                                    && (!(o instanceof Boolean) || ((Boolean) o))
+                                    && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                                    description += " (defaults to " + o.toString() + ")");
+                                }
+                            } catch (Exception e) {
+                                // Ignore
+                            }
+                        }
+                        out.println("     <td>" + description + "</td>");
                         out.println("    </tr>");
                     }
 
@@ -289,18 +320,41 @@ public class CmdHelpMojo extends AbstractMojo {
                     for (Option option : options)
                     {
                         String opt = option.name();
+                        String description = option.description();
                         for (String alias : option.aliases())
                         {
                             opt += ", " + alias;
                         }
+                        try {
+                            optionsMap.get(option).setAccessible(true);
+                            Object o = optionsMap.get(option).get(action);
+                            if (o != null
+                                && (!(o instanceof Boolean) || ((Boolean) o))
+                                && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
+                                description += " (defaults to " + o.toString() + ")";
+                            }
+                        } catch (Exception e) {
+                            // Ignore
+                        }
                         out.println("    <tr>");
                         out.println("      <td>" + opt + "</td>");
-                        out.println("      <td>" + option.description() + "</td>");
+                        out.println("      <td>" + description + "</td>");
                         out.println("    </tr>");
                     }
 
                     out.println("    </informaltable>");
                     out.println("  </section>");
+                }
+
+                if(command.detailedDescription() != null
+                    && command.detailedDescription().trim().length() > 0) {
+                    out.println("<section>");
+                    out.println("    <title>Details</title>");
+                    String description = loadDescription(action.getClass(), command.detailedDescription());
+                    out.println("    <para>");
+                    out.println(description);
+                    out.println("    </para>");
+                    out.println("</section>");
                 }
                 out.println("</section>");
             }
@@ -308,6 +362,12 @@ public class CmdHelpMojo extends AbstractMojo {
         }
 
         protected class ConfPreparator extends BlueprintActionPreparator {
+
+            boolean includeHelpOption;
+
+            ConfPreparator(boolean includeHelpOption) {
+                this.includeHelpOption = includeHelpOption;
+            }
 
             @Override
             protected void printUsage(CommandSession session, Action action, Map<Option, Field> optionsMap, Map<Argument,Field> argsMap, PrintStream out)
@@ -320,7 +380,7 @@ public class CmdHelpMojo extends AbstractMojo {
                     }
                 });
                 Set<Option> options = new HashSet<Option>(optionsMap.keySet());
-                options.add(HELP);
+                if (includeHelpOption) options.add(HELP);
 
                 out.println("h1. " + command.scope() + ":" + command.name());
                 out.println();
