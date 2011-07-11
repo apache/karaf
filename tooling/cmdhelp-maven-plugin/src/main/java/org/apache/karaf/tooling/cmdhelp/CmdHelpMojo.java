@@ -298,7 +298,7 @@ public class CmdHelpMojo extends AbstractMojo {
                                 if (o != null
                                     && (!(o instanceof Boolean) || ((Boolean) o))
                                     && (!(o instanceof Number) || ((Number) o).doubleValue() != 0.0)) {
-                                    description += " (defaults to " + o.toString() + ")");
+                                    description += " (defaults to " + o.toString() + ")";
                                 }
                             } catch (Exception e) {
                                 // Ignore
