@@ -23,14 +23,13 @@ import java.util.Map;
 
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.ServletListener;
-import org.osgi.framework.Bundle;
 
 public class ServletEventHandler implements ServletListener {
 
-	Map<Bundle, ServletEvent> servletEvents =  new HashMap<Bundle, ServletEvent>();
+	Map<String, ServletEvent> servletEvents =  new HashMap<String, ServletEvent>();
 	
 	public void servletEvent(ServletEvent event) {
-		servletEvents.put(event.getBundle(), event);
+		servletEvents.put(event.getServletName(), event);
 	}
 
 	/**
