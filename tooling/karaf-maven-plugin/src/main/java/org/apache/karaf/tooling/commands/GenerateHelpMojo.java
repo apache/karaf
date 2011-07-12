@@ -87,7 +87,7 @@ public class GenerateHelpMojo extends AbstractMojo {
     protected String format;
 
     /**
-     * The classloader to use to load the commands
+     * The classloader to use for loading the commands
      *
      * @parameter default-value="project"
      */

@@ -20,8 +20,8 @@ package org.apache.karaf.tooling.features;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
-public class CustomBundleURLStreamHandlerFactory implements
-		URLStreamHandlerFactory {
+public class CustomBundleURLStreamHandlerFactory implements URLStreamHandlerFactory {
+
 	private static final String MVN_URI_PREFIX = "mvn";
 	private static final String WRAP_URI_PREFIX = "wrap";
     private static final String FEATURE_URI_PREFIX = "feature";

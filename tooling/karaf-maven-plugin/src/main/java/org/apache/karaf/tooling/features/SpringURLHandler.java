@@ -31,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * As org.apache.karaf.deployer.spring.SpringURLHandler need run with OSGi container
- * so create this class only used for features-maven-plugin
+ * As org.apache.karaf.deployer.spring.SpringURLHandler needs to be run with
+ * the OSGi container this class was created for use by the karaf-maven-plugin
  */
 public class SpringURLHandler extends URLStreamHandler {
 
@@ -52,7 +52,7 @@ public class SpringURLHandler extends URLStreamHandler {
     @Override
 	public URLConnection openConnection(URL url) throws IOException {
 		if (url.getPath() == null || url.getPath().trim().length() == 0) {
-			throw new MalformedURLException ("Path can not be null or empty. Syntax: " + SYNTAX );
+			throw new MalformedURLException ("Path cannot be null or empty. Syntax: " + SYNTAX );
 		}
 		springXmlURL = new URL(url.getPath());
 
@@ -82,8 +82,8 @@ public class SpringURLHandler extends URLStreamHandler {
                 os.close();
                 return new ByteArrayInputStream(os.toByteArray());
             } catch (Exception e) {
-                logger.error("Error opening spring xml url", e);
-                throw (IOException) new IOException("Error opening spring xml url").initCause(e);
+                logger.error("Error opening Spring xml url", e);
+                throw (IOException) new IOException("Error opening Spring xml url").initCause(e);
             }
         }
     }
