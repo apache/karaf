@@ -61,7 +61,7 @@ import static org.apache.karaf.tooling.features.ManifestUtils.matches;
 /**
  * Validates a features XML file
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision:$
  * @goal features-validate-descriptor
  * @execute phase="process-resources"
  * @requiresDependencyResolution runtime
@@ -103,21 +103,21 @@ public class ValidateDescriptorMojo extends MojoSupport {
     private File file;
 
     /**
-     * karaf config.properties
+     * Karaf config.properties
      * 
      * @parameter default-value="config.properties"
      */
     private String karafConfig;
     
     /**
-     * which jre version we wanna parse to get jre exported package in config.properties
+     * which JRE version to parse from config.properties to get the JRE exported packages
      * 
      * @parameter default-value="jre-1.5"
      */
     private String jreVersion;
 
     /**
-     * which karaf version used for karaf core features resolution
+     * which Karaf version used for Karaf core features resolution
      *
      * @parameter
      */
@@ -203,7 +203,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
         readSystemPackages();
         info(" - getting list of provided bundle exports");
         readProvidedBundles();
-        info(" - populating repositories with karaf core features descriptors");
+        info(" - populating repositories with Karaf core features descriptors");
         appendKarafCoreFeaturesDescriptors();
     }
 

@@ -37,7 +37,7 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
  * N.B. we do not handle repository-url in mvn urls.
  * N.B. version is required in mvn urls.
  *
- * @version $Rev:$ $Date:$
+ * @version $Revision$
  */
 public class MvnUrlUtil {
 
@@ -101,7 +101,7 @@ public class MvnUrlUtil {
     }
 
     /**
-     * similar to a Main class method
+     * Similar to a Main class method
      * Returns a path for an srtifact.
      * Input: path (no ':') returns path
      * Input: mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to default repo location path
