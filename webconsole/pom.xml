@@ -37,6 +37,7 @@
     <module>branding</module>
     <module>features</module>
     <module>gogo</module>
+    <module>http</module>
     <module>admin</module>
   </modules>
   
