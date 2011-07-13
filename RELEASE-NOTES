@@ -15,6 +15,27 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.1.6
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.1.x series branch, representing an update to Apache Karaf 2.1.5 and the last planned patch to the 2.1.x branch. It contains a few small bug fixes and improvements, including; updated branding-console documentation, a new warning on osgi:shutdown to avoid inadvertently shutting down the container, and a correction to the Oracle JDBC locking mechanism behavior when the locking table is empty. For more details please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-637|https://issues.apache.org/jira/browse/KARAF-637] - Update branding-console documentation to include the changes to custom.properties
+    * [KARAF-655|https://issues.apache.org/jira/browse/KARAF-655] - Remove http://repository.ops4j.org/maven2 from org.apache.karaf.management.cfg
+    * [KARAF-689|https://issues.apache.org/jira/browse/KARAF-689] - Karaf instance can wrongly obtain a lock when the locking table is empty on a Oracle DB
+
+** Improvement
+    * [KARAF-603|https://issues.apache.org/jira/browse/KARAF-603] - Add 'karaf-framework' feature to describe core Karaf bundles
+    * [KARAF-614|https://issues.apache.org/jira/browse/KARAF-614] - Add warning to osgi:shutdown to avoid inadvertently shutting down the container
+
+
                     Apache Karaf 2.1.5
                     ==================
 
