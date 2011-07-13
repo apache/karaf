@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * As org.apache.karaf.deployer.features.FeatureURLHandler need run with OSGi container
- * so create this class only used for features-maven-plugin
+ * As org.apache.karaf.deployer.features.FeatureURLHandler needs to be run with
+ * OSGi container this class was created  for use by the features-maven-plugin
  */
 public class FeatureURLHandler extends URLStreamHandler {
 
@@ -52,11 +52,11 @@ public class FeatureURLHandler extends URLStreamHandler {
     @Override
     public URLConnection openConnection(URL url) throws IOException {
         if (url.getPath() == null || url.getPath().trim().length() == 0) {
-            throw new MalformedURLException("Path can not be null or empty. Syntax: " + SYNTAX );
+            throw new MalformedURLException("Path can not be null or empty. Syntax: " + SYNTAX);
         }
         featureXmlURL = new URL(url.getPath());
 
-        logger.debug("Feature xml URL is: [" + featureXmlURL + "]");
+        logger.debug("Features xml URL is: [" + featureXmlURL + "]");
         return new Connection(url);
     }
 
@@ -82,7 +82,7 @@ public class FeatureURLHandler extends URLStreamHandler {
                 os.close();
                 return new ByteArrayInputStream(os.toByteArray());
             } catch (Exception e) {
-                logger.error("Error opening feature xml url", e);
+                logger.error("Error opening features xml url", e);
                 throw (IOException) new IOException("Error opening features xml url").initCause(e);
             }
         }

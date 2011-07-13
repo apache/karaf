@@ -35,11 +35,11 @@ import java.net.URLStreamHandler;
  */
 public class WarURLHandler extends URLStreamHandler {
 
-	private final Logger logger = LoggerFactory.getLogger(WarURLHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(WarURLHandler.class);
 
-	private static String SYNTAX = "war: war-uri";
+    private static String SYNTAX = "war: war-uri";
 
-	private URL warURL;
+    private URL warURL;
 
     /**
      * Open the connection for the given URL.
@@ -49,18 +49,18 @@ public class WarURLHandler extends URLStreamHandler {
      * @throws java.io.IOException if an error occurs or if the URL is malformed.
      */
     @Override
-	public URLConnection openConnection(URL url) throws IOException {
-		if (url.getPath() == null || url.getPath().trim().length() == 0) {
-			throw new MalformedURLException ("Path can not be null or empty. Syntax: " + SYNTAX );
-		}
+    public URLConnection openConnection(URL url) throws IOException {
+        if (url.getPath() == null || url.getPath().trim().length() == 0) {
+            throw new MalformedURLException("Path can not be null or empty. Syntax: " + SYNTAX);
+        }
 
         // We don't resolve any specific data here, just forward it to another URL Stream Handler
-		warURL = new URL(url.getPath());
-		return warURL.openConnection();
-	}
+        warURL = new URL(url.getPath());
+        return warURL.openConnection();
+    }
 
-	public URL getWarURL() {
-		return warURL;
-	}
+    public URL getWarURL() {
+        return warURL;
+    }
 
 }
