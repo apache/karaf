@@ -51,7 +51,7 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuildingException;
 
 /**
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public abstract class MojoSupport extends AbstractMojo {
 
@@ -63,7 +63,7 @@ public abstract class MojoSupport extends AbstractMojo {
     protected MavenProjectHelper projectHelper;
 
     /**
-     * The maven project.
+     * The Maven project.
      *
      * @parameter expression="${project}"
      * @required
@@ -349,13 +349,13 @@ public abstract class MojoSupport extends AbstractMojo {
     }
 
     /**
-     * Required because maven3 returns null in {@link ArtifactRepository#getProtocol()} (see KARAF-244)
+     * Required because Maven 3 returns null in {@link ArtifactRepository#getProtocol()} (see KARAF-244)
      */
     private String extractProtocolFromLocalMavenRepo() {
         try {
             return new URL(localRepo.getUrl()).getProtocol();
         } catch (MalformedURLException e) {
-            // Basically this should not happen; if though cancel the process
+            // Basically this should not happen; if it does though cancel the process
             throw new RuntimeException("Repository URL is not valid", e);
         }
     }
