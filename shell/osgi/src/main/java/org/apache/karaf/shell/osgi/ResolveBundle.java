@@ -24,7 +24,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "osgi", name = "resolve", description = "Resolve bundle(s).")
-public class ResolveBundle extends BundlesCommandOptional {
+public class ResolveBundle extends BundlesCommand {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
         // Get package admin service.

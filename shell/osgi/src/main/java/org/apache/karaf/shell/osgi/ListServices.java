@@ -25,7 +25,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 @Command(scope = "osgi", name = "ls", description = "Lists OSGi services.")
-public class ListServices extends BundlesCommandOptional {
+public class ListServices extends BundlesCommand {
 
     @Option(name = "-a", aliases = {}, description = "Shows all services", required = false, multiValued = false)
     boolean showAll;

@@ -16,33 +16,34 @@
  */
 package org.apache.karaf.shell.osgi;
 
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
+/**
+ * Unique bundle command.
+ */
 public abstract class BundleCommand extends OsgiCommandSupport {
 
-    @Argument(index = 0, name = "id", description = "The bundle ID", required = true, multiValued  = false)
+    @Argument(index = 0, name = "id", description = "The bundle ID", required = true, multiValued = false)
     long id;
 
-    @Option(name = "--force", aliases = {}, description = "Forces the command to execute", required = false, multiValued = false)
-    boolean force;
-
     protected Object doExecute() throws Exception {
+        return doExecute(true);
+    }
+
+    protected Object doExecute(boolean force) throws Exception {
         Bundle bundle = getBundleContext().getBundle(id);
         if (bundle == null) {
-            System.out.println("Bundle " + id + " not found");
+            System.err.println("Bundle " + id + " not found");
             return null;
         }
-
-        if (!force && Util.isASystemBundle(getBundleContext(), bundle) && !Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), session)) {
-            return null;
-        } else {
+        if (force || !Util.isASystemBundle(getBundleContext(), bundle) || Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), session)) {
             doExecute(bundle);
-            return null;
         }
+        return null;
     }
 
     protected abstract void doExecute(Bundle bundle) throws Exception;
+
 }

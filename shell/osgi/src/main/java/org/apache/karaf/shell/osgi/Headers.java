@@ -40,7 +40,7 @@ import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 @Command(scope = "osgi", name = "headers", description = "Displays OSGi headers of a given bundle.")
-public class Headers extends BundlesCommandOptional {
+public class Headers extends BundlesCommand {
 
     protected final static String BUNDLE_PREFIX = "Bundle-";
     protected final static String PACKAGE_SUFFFIX = "-Package";

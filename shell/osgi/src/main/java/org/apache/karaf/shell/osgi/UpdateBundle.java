@@ -21,21 +21,23 @@ import java.net.URL;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "osgi", name = "update", description = "Update bundle.")
-public class UpdateBundle extends BundleCommand {
+public class UpdateBundle extends BundleCommandWithConfirmation {
 
-	@Argument(index = 1, name = "location", description = "The bundles update location", required = false, multiValued = false)
-	String location;
+    @Argument(index = 1, name = "location", description = "The bundles update location", required = false, multiValued = false)
+    String location;
 
-	protected void doExecute(Bundle bundle) throws Exception {
-		if (location != null) {
-			InputStream is = new URL(location).openStream();
-			bundle.update(is);
-		} else {
-			bundle.update();
-		}
-	}
+    protected void doExecute(Bundle bundle) throws Exception {
+        if (location != null) {
+            InputStream is = new URL(location).openStream();
+            bundle.update(is);
+        } else {
+            bundle.update();
+        }
+    }
 
 }
