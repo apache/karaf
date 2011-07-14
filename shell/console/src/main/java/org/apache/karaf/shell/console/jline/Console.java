@@ -241,7 +241,11 @@ public class Console implements Runnable
 		    } else {
 		        command += " " + line;
 		    }
-		    reader.getHistory().replace(command);
+                    if (reader.getHistory().size()==0) {
+                        reader.getHistory().add(command);
+                    } else {
+                        reader.getHistory().replace(command);
+                    }
 		    try {
 		        new Parser(command).program();
 		        loop = false;
