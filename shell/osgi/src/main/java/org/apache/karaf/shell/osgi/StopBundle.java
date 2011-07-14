@@ -22,7 +22,7 @@ import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "osgi", name = "stop", description = "Stop bundle(s).")
-public class StopBundle extends BundlesCommand {
+public class StopBundle extends BundlesCommandWithConfirmation {
 	
 	protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {

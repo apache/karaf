@@ -22,7 +22,7 @@ import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "osgi", name = "uninstall", description = "Uninstall bundle(s).")
-public class UninstallBundle extends BundlesCommand {
+public class UninstallBundle extends BundlesCommandWithConfirmation {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {

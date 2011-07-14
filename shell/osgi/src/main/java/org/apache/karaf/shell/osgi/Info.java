@@ -30,7 +30,7 @@ import org.apache.karaf.util.StringEscapeUtils;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "osgi", name = "info", description = "Displays detailed information of a given bundle.")
-public class Info extends BundlesCommandOptional {
+public class Info extends BundlesCommand {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
         if (bundles == null) {

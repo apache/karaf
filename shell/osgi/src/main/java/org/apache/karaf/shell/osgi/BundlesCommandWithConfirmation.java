@@ -16,29 +16,19 @@
  */
 package org.apache.karaf.shell.osgi;
 
-import java.util.List;
-
-import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.osgi.framework.Bundle;
 
-public abstract class BundlesCommand extends OsgiCommandSupport {
+/**
+ * Command related to bundles requiring read-write access to the bundle (including system bundle).
+ */
+public abstract class BundlesCommandWithConfirmation extends BundlesCommand {
 
-    @Argument(index = 0, name = "ids", description = "The list of bundle (identified by IDs or name or name/version) separated by whitespaces", required = true, multiValued = true)
-    List<String> ids;
+    @Option(name = "--force", aliases = {}, description = "Forces the command to execute", required = false, multiValued = false)
+    boolean force;
 
     protected Object doExecute() throws Exception {
-        doExecute(true);
+        doExecute(force);
         return null;
     }
 
-    protected Object doExecute(boolean force) throws Exception {
-        BundleSelector selector = new BundleSelector(getBundleContext(), session);
-        List<Bundle> bundles = selector.selectBundles(ids, force);
-        doExecute(bundles);
-        return null;
-    }
-      
-    protected abstract void doExecute(List<Bundle> bundles) throws Exception;
 }

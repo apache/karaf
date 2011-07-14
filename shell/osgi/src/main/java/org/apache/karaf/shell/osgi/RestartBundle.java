@@ -22,7 +22,7 @@ import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "osgi", name = "restart", description = "Stops and restarts bundle(s).")
-public class RestartBundle extends BundlesCommand {
+public class RestartBundle extends BundlesCommandWithConfirmation {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {
