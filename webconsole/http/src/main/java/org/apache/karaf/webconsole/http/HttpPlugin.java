@@ -37,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.WebEvent;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,9 @@ public class HttpPlugin extends AbstractWebConsolePlugin
 
     private String featuresJs = "/http/res/ui/http-contexts.js";
 
-    private ServletEventHandler eventHandler;
+    private ServletEventHandler servletEventHandler;
+    
+    private WebEventHandler webEventHandler;
     
     private BundleContext bundleContext;
 
@@ -166,8 +169,10 @@ public class HttpPlugin extends AbstractWebConsolePlugin
     {
         
         final List<ServletDetails> servlets = this.getServletDetails();
+        
+        final List<WebDetail> web = this.getWebDetails();
 
-        final String statusLine = this.getStatusLine( servlets );
+        final String statusLine = this.getStatusLine( servlets, web );
 
         final JSONWriter jw = new JSONWriter( pw );
 
@@ -202,6 +207,23 @@ public class HttpPlugin extends AbstractWebConsolePlugin
                 jw.endObject();
             }
             jw.endArray();
+            
+            jw.key( "web" );
+            jw.array();
+            for (WebDetail webDetail : web) {
+				jw.object();
+				jw.key( "id" );
+				jw.value( webDetail.getBundleId() );
+				jw.key( "bundlestate" );
+				jw.value( webDetail.getState() );
+				jw.key( "contextpath" );
+				jw.value( webDetail.getContextPath() );
+				jw.key( "state" );
+				jw.value( webDetail.getWebState() );
+				jw.endObject();
+			}
+            jw.endArray();
+            
             jw.endObject();
         }
         catch ( JSONException je )
@@ -213,7 +235,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin
 
 	protected List<ServletDetails> getServletDetails() {
 		
-        Collection<ServletEvent> events = eventHandler.getServletEvents();
+        Collection<ServletEvent> events = servletEventHandler.getServletEvents();
         List<ServletDetails> result = new ArrayList<ServletDetails>(events.size());
         
 		for (ServletEvent event : events) {
@@ -243,8 +265,42 @@ public class HttpPlugin extends AbstractWebConsolePlugin
 		}
 		return result;
 	}
+	
+	protected List<WebDetail> getWebDetails() {
+		Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
+		
+		List<WebDetail> result = new ArrayList<WebDetail>();
+		
+		for (WebEvent event : bundleEvents.values()) {
+			
+			WebDetail webDetail = new WebDetail();
+			webDetail.setBundleId(event.getBundle().getBundleId());
+			webDetail.setContextPath(event.getContextPath().trim().concat("/"));
+			int state = event.getBundle().getState();
+			String stateStr;
+	        if (state == Bundle.ACTIVE) {
+	        	stateStr = "Active";
+	        } else if (state == Bundle.INSTALLED) {
+	        	stateStr = "Installed";
+	        } else if (state == Bundle.RESOLVED) {
+	        	stateStr = "Resolved";
+	        } else if (state == Bundle.STARTING) {
+	        	stateStr = "Starting";
+	        } else if (state == Bundle.STOPPING) {
+	        	stateStr = "Stopping";
+	        } else {
+	        	stateStr = "Unknown";
+	        }
+	        webDetail.setState(stateStr);
+			
+			webDetail.setWebState(getStateString(event.getType()));
+			result.add(webDetail);
+		}
+		
+		return result;
+	}
     
-    public String getStatusLine(List<ServletDetails> servlets) {
+    public String getStatusLine(List<ServletDetails> servlets, List<WebDetail> web) {
         Map<String,Integer> states = new HashMap<String,Integer>();
         for ( ServletDetails servlet : servlets ) {
             Integer count = states.get(servlet.getState());
@@ -292,9 +348,14 @@ public class HttpPlugin extends AbstractWebConsolePlugin
     // Dependency Injection setters
     //
 
-    public void setEventHandler(ServletEventHandler eventHandler) 
+    public void setServletEventHandler(ServletEventHandler eventHandler) 
     {
-        this.eventHandler = eventHandler;
+        this.servletEventHandler = eventHandler;
+    }
+    
+    public void setWebEventHandler(WebEventHandler eventHandler) 
+    {
+    	this.webEventHandler = eventHandler;
     }
 
 

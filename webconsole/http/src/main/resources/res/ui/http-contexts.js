@@ -25,6 +25,7 @@ function renderFeatures( data ) {
 function renderView() {
     renderStatusLine();
     renderTable( "HTTP Contexts", "context_table", ["ID", "Servlet", "Name", "State", "Alias", "urls"] );
+    renderTable( "Web Contexts", "webctxt_table", ["ID", "BundleState", "Web Context", "State"] );
     renderStatusLine();
 }    
     
@@ -53,6 +54,14 @@ function renderData( /* Object */ data ) {
         },
         sortList: [[0,0]]
     } );
+    
+    renderWebCtxtTableData( data.web );
+    $("#webctxt_table").tablesorter( {
+        headers: {
+            2: { sorter: false }
+        },
+        sortList: [[0,0]]
+    } );
 }
 
 function renderStatusData( /* String */ status )  {
@@ -67,6 +76,16 @@ function renderContextTableData( /* array of Objects */ contexts ) {
         $("#context_table > tbody").append( trElement ); 
     }
     $("#context_table").trigger( "update" );
+}
+
+function renderWebCtxtTableData( /* array of Objects */ webctxts ) {
+    $("#webctxt_table > tbody > tr").remove();
+    for ( var idx in webctxts ) {
+        var trElement = tr( null, { id: "webctxts-" + webctxts[idx].id } );
+        renderWebCtxtData( trElement, webctxts[idx] );
+        $("#webctxt_table > tbody").append( trElement ); 
+    }
+    $("#webctxt_table").trigger( "update" );
 }
 
 function link( url, linkText ) {
@@ -97,3 +116,9 @@ function renderContextData( /* Element */ parent, /* Object */ context ) {
     parent.appendChild( urlBox );
 }
 
+function renderWebCtxtData( /* Element */ parent, /* Object */ webCtxt ) {
+    parent.appendChild( td( null, null, [ text( webCtxt.id ) ] ) );
+    parent.appendChild( td( null, null, [ text( webCtxt.bundleState) ] ) );
+    parent.appendChild( td( null, null, [ link( trimUrl( webCtxt.contextpath ), webCtxt.contextpath) ] ) );
+    parent.appendChild( td( null, null, [ text( webCtxt.state ) ] ) );
+}
