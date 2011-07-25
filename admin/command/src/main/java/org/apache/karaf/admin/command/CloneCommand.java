@@ -22,9 +22,7 @@ import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.admin.InstanceSettings;
 
 /**
- * <p>
  * Clone an existing Karaf instance.
- * </p>
  */
 @Command(scope = "admin", name = "clone", description = "Clones an existing container instance.")
 public class CloneCommand extends AdminCommandSupport {
@@ -38,16 +36,16 @@ public class CloneCommand extends AdminCommandSupport {
     @Option(name = "-rs", aliases = {"--rmi-server-port"}, description = "Port number for RMI server connection", required = false, multiValued = false)
     int rmiServerPort = 0;
 
-    @Option(name = "-l", aliases = {"--location"}, description = "Location of the clone container instance in the file system", required = false, multiValued = false)
+    @Option(name = "-l", aliases = {"--location"}, description = "Location of the cloned container instance in the file system", required = false, multiValued = false)
     String location;
 
-    @Option(name = "-o", aliases = {"--java-opts"}, description = "JVM options to use when launching the clone instance", required = false, multiValued = false)
+    @Option(name = "-o", aliases = {"--java-opts"}, description = "JVM options to use when launching the cloned instance", required = false, multiValued = false)
     String javaOpts;
 
     @Argument(index = 0, name = "name", description = "The name of the source container instance", required = true, multiValued = false)
     String name;
 
-    @Argument(index = 1, name = "cloneName", description = "The name of the clone container instance", required = true, multiValued = false)
+    @Argument(index = 1, name = "cloneName", description = "The name of the cloned" container instance", required = true, multiValued = false)
     String cloneName;
 
     protected Object doExecute() throws Exception {

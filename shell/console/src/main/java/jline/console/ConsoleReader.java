@@ -59,8 +59,8 @@ import org.fusesource.jansi.AnsiOutputStream;
  * @author <a href="mailto:mwp1@cornell.edu">Marc Prud'hommeaux</a>
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  */
-public class ConsoleReader
-{
+public class ConsoleReader {
+
     public static final String JLINE_NOBELL = "jline.nobell";
 
     public static final char BACKSPACE = '\b';
@@ -626,8 +626,8 @@ public class ConsoleReader
     }
 
     /**
-     * Flush the console output stream. This is important for printout out single characters (like a backspace or
-     * keyboard) that we want the console to handle immediately.
+     * Flush the console output stream. This is important for printout out single characters
+     * (like the keyboard backspace key) that we want the console to handle immediately.
      */
     public void flush() throws IOException {
         out.flush();
@@ -1818,9 +1818,9 @@ public class ConsoleReader
     private final Map<Character, ActionListener> triggeredActions = new HashMap<Character, ActionListener>();
 
     /**
-     * Adding a triggered Action allows to give another curse of action if a character passed the pre-processing.
+     * Adding a triggered Action allows for another course of action if a character passed the pre-processing.
      * <p/>
-     * Say you want to close the application if the user enter q.
+     * Say you wish to close the application if the user enters q.
      * addTriggerAction('q', new ActionListener(){ System.exit(0); }); would do the trick.
      */
     public void addTriggeredAction(final char c, final ActionListener listener) {
@@ -1884,7 +1884,7 @@ public class ConsoleReader
                 }
             }
 
-            // NOTE: toString() is important here due to AnsiString being retarded
+            // NOTE: toString() is important here due to hiccups with AnsiString
             buff.append(item.toString());
             for (int i = 0; i < (maxWidth + 3 - item.length()); i++) {
                 buff.append(' ');
@@ -1952,7 +1952,7 @@ public class ConsoleReader
      * @param buffer
      *            the buffer to be drawn
      * @param cursorDest
-     *            where you want the cursor set when the line has been drawn.
+     *            where you wish to have the cursor set when the line has been drawn.
      *            -1 for end of line.
      * */
     public void resetPromptLine(String prompt, String buffer, int cursorDest) throws IOException {

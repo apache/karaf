@@ -32,8 +32,8 @@ import org.osgi.service.startlevel.StartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Util
-{
+public class Util {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     public static String getBundleName(Bundle bundle)
@@ -208,7 +208,7 @@ public class Util
     public static boolean accessToSystemBundleIsAllowed(long bundleId, CommandSession session) throws IOException {
         for (;;) {
             StringBuffer sb = new StringBuffer();
-            System.err.print("You are about to access system bundle " + bundleId + ".  Do you want to continue (yes/no): ");
+            System.err.print("You are about to access system bundle " + bundleId + ".  Do you wish to continue (yes/no): ");
             System.err.flush();
             for (;;) {
                 int c = session.getKeyboard().read();
