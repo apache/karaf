@@ -17,7 +17,7 @@
 #
 ################################################################################
 
-This directory is the java extension directory.
+This directory is the Java extension directory.
 Any jar in this folder will be used as a JVM extension.
-For more informations, see
-   http://java.sun.com/j2se/1.5.0/docs/guide/extensions/spec.html
+For more information, see
+   http://download.oracle.com/javase/6/docs/technotes/guides/standards/
