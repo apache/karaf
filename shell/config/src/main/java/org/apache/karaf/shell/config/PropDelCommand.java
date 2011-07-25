@@ -22,7 +22,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-@Command(scope = "config", name = "propdel", description = "Deletes a property from the edited configuration.")
+@Command(scope = "config", name = "propdel", description = "Deletes a property from the configuration being edited.")
 public class PropDelCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "property", description = "The name of the property to delete", required = true, multiValued = false)
@@ -31,7 +31,7 @@ public class PropDelCommand extends ConfigCommandSupport {
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Dictionary props = getEditedProps();
         if (props == null) {
-            System.err.println("No configuration is being edited. Run the edit command first");
+            System.err.println("No configuration is being edited--run the edit command first");
         } else {
             props.remove(prop);
         }

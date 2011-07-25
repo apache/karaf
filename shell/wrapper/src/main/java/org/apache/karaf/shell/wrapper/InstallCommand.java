@@ -35,8 +35,6 @@ import org.fusesource.jansi.Ansi;
 
 /**
  * Installs this Karaf instance as a service in your operating systems.
- *
- * @version $Rev: 603634 $ $Date: 2007-12-12 16:07:16 +0100 (Wed, 12 Dec 2007) $
  */
 @Command(scope = "wrapper", name = "install", description = "Install the container as a system service in the OS.")
 public class InstallCommand extends OsgiCommandSupport
@@ -139,7 +137,7 @@ public class InstallCommand extends OsgiCommandSupport
             createJar(new File(lib, "karaf-wrapper-main.jar"), "org/apache/karaf/shell/wrapper/Main.class");
 
 			System.out.println("");
-			System.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file:");
+			System.out.println("Setup complete.  You may wish to tweak the JVM properties in the wrapper configuration file:");
             System.out.println("\t" + wrapperConf.getPath());
 			System.out.println("before installing and starting the service.");
 			System.out.println("");
@@ -307,7 +305,7 @@ public class InstallCommand extends OsgiCommandSupport
 		} else {
             System.out.println(Ansi.ansi()
                                    .fg(Ansi.Color.RED).a("File already exists").a(Ansi.Attribute.RESET)
-                                   .a(". Move it out of the way if you want it re-created: ").a(outFile.getPath()).toString());
+                                   .a(". Move it out of the way if you wish to recreate it: ").a(outFile.getPath()).toString());
 		}
 	}
 	
@@ -335,7 +333,7 @@ public class InstallCommand extends OsgiCommandSupport
 		} else {
             System.out.println(Ansi.ansi()
                                    .fg(Ansi.Color.RED).a("File already exists").a(Ansi.Attribute.RESET)
-                                   .a(". Move it out of the way if you want it re-created: ").a(outFile.getPath()).toString());
+                                   .a(". Move it out of the way if you wish to recreate it: ").a(outFile.getPath()).toString());
 		}
 	}
 
