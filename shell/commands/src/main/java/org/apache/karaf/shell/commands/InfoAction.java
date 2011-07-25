@@ -175,7 +175,6 @@ public class InfoAction extends OsgiCommandSupport {
         long days = (long) uptime;
         long hours = (long) ((uptime - days) * 24);
         String s = fmtI.format(days) + (days > 1 ? " days" : " day");
-        String s = fmtI.format(days) + (days > 1 ? " days" : " day");
         if (hours != 0) {
             s += " " + fmtI.format(hours) + (hours > 1 ? " hours" : "hour");
         }
