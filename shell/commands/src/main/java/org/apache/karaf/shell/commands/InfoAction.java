@@ -151,20 +151,17 @@ public class InfoAction extends OsgiCommandSupport {
     }
 
     protected String printDuration(double uptime) {
-        System.out.println("Initial uptime: " + uptime);
         uptime /= 1000;
         if (uptime < 60) {
             return fmtD.format(uptime) + " seconds";
         }
         uptime /= 60;
-        System.out.println("Uptime in minutes: " + uptime);
         if (uptime < 60) {
             long minutes = (long) uptime;
             String s = fmtI.format(minutes) + (minutes > 1 ? " minutes" : " minute");
             return s;
         }
         uptime /= 60;
-        System.out.println("Uptime in hours: " + uptime);
         if (uptime < 24) {
             long hours = (long) uptime;
             long minutes = (long) ((uptime - hours) * 60);
@@ -175,13 +172,9 @@ public class InfoAction extends OsgiCommandSupport {
             return s;
         }
         uptime /= 24;
-        System.out.println("Uptime in days: " + uptime);
-
         long days = (long) uptime;
         long hours = (long) ((uptime - days) * 24);
-        System.out.println("Uptime - days: " + (uptime - days));
-        System.out.println("Days: " + days);
-        System.out.println("Hours: " + hours);
+        String s = fmtI.format(days) + (days > 1 ? " days" : " day");
         String s = fmtI.format(days) + (days > 1 ? " days" : " day");
         if (hours != 0) {
             s += " " + fmtI.format(hours) + (hours > 1 ? " hours" : "hour");
