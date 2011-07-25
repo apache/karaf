@@ -20,7 +20,7 @@ EMBEDDING KARAF IN A WEB APPLICATION
 
 Purpose
 -------
-Embed Karaf in a web application.
+To embed Karaf in a web application.
 
 
 Prerequisites for Running the Example
