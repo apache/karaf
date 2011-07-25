@@ -45,7 +45,7 @@ public class CloneCommand extends AdminCommandSupport {
     @Argument(index = 0, name = "name", description = "The name of the source container instance", required = true, multiValued = false)
     String name;
 
-    @Argument(index = 1, name = "cloneName", description = "The name of the cloned" container instance", required = true, multiValued = false)
+    @Argument(index = 1, name = "cloneName", description = "The name of the cloned container instance", required = true, multiValued = false)
     String cloneName;
 
     protected Object doExecute() throws Exception {
