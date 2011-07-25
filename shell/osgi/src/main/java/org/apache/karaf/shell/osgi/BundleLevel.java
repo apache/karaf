@@ -25,7 +25,7 @@ import org.osgi.service.startlevel.StartLevel;
 @Command(scope = "osgi", name = "bundle-level", description = "Gets or sets the start level of a given bundle.")
 public class BundleLevel extends BundleCommand {
 
-    @Argument(index = 1, name = "startLevel", description = "The bundles new start level", required = false, multiValued = false)
+    @Argument(index = 1, name = "startLevel", description = "The bundle's new start level", required = false, multiValued = false)
     Integer level;
 
     protected void doExecute(Bundle bundle) throws Exception {
@@ -47,7 +47,7 @@ public class BundleLevel extends BundleCommand {
         else if ((level < 50) && sl.getBundleStartLevel(bundle) > 50){
             for (;;) {
                 StringBuffer sb = new StringBuffer();
-                System.err.println("You are about to designate bundle as a system bundle.  Do you want to continue (yes/no): ");
+                System.err.println("You are about to designate bundle as a system bundle.  Do you wish to continue (yes/no): ");
                 System.err.flush();
                 for (;;) {
                     int c = System.in.read();

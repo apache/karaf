@@ -38,10 +38,10 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "shell", name = "cat", description = "Displays the content of a file or URL.")
 public class CatAction extends AbstractAction {
 
-    @Option(name = "-n", aliases = {}, description = "The number the output lines, starting at 1.", required = false, multiValued = false)
+    @Option(name = "-n", aliases = {}, description = "Number the output lines, starting at 1.", required = false, multiValued = false)
     private boolean displayLineNumbers;
 
-    @Argument(index = 0, name = "paths or urls", description = "A list of file paths or urls to display separated by whitespaces (use - for STDIN)", required = true, multiValued = true)
+    @Argument(index = 0, name = "paths or urls", description = "A list of file paths or urls to display separated by whitespace (use - for STDIN)", required = true, multiValued = true)
     private List<String> paths;
 
     protected Object doExecute() throws Exception {

@@ -137,7 +137,8 @@ public class Main {
     public static final String BUNDLE_LOCATIONS = "bundle.locations";
 
     /**
-     * Config property that indicates we want to convert bundles locations to maven style urls
+     * Config property that indicates we want to convert bundles locations
+     * to Maven style URLs
      */
     public static final String PROPERTY_CONVERT_TO_MAVEN_URL = "karaf.maven.convert";
 

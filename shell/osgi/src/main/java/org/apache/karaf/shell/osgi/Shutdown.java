@@ -78,7 +78,7 @@ public class Shutdown extends OsgiCommandSupport {
 
         for (; ; ) {
             StringBuffer sb = new StringBuffer();
-            System.err.println("Do you really want to shutdown (yes/no): ");
+            System.err.println("Confirm: shutdown instance (yes/no): ");
             System.err.flush();
             for (; ; ) {
                 int c = session.getKeyboard().read();

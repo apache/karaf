@@ -28,7 +28,7 @@ public class PropListCommand extends ConfigCommandSupport {
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Dictionary props = getEditedProps();
         if (props == null) {
-            System.err.println("No configuration is being edited. Run the edit command first");
+            System.err.println("No configuration is being edited--run the edit command first");
         } else {
             for (Enumeration e = props.keys(); e.hasMoreElements();) {
                 Object key = e.nextElement();
