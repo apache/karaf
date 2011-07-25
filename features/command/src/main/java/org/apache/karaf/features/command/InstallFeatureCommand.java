@@ -29,7 +29,7 @@ public class InstallFeatureCommand extends FeaturesCommandSupport {
 
     private static String DEFAULT_VERSION = "0.0.0";
 
-    @Argument(index = 0, name = "feature", description = "The name and version of the features to uninstall. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
+    @Argument(index = 0, name = "feature", description = "The name and version of the features to install. A feature id looks like name/version. The version is optional.", required = true, multiValued = true)
     List<String> features;
     @Option(name = "-c", aliases = "--no-clean", description = "Do not uninstall bundles on failure", required = false, multiValued = false)
     boolean noClean;
