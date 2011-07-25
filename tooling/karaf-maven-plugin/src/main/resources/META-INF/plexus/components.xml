@@ -32,7 +32,7 @@
                         <id>default</id>
                         <phases>
                             <compile>
-                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml
+                                org.apache.karaf.tooling:karaf-maven-plugin:features-generate-descriptor
                             </compile>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
@@ -71,10 +71,10 @@
                                 org.apache.maven.plugins:maven-resources-plugin:resources
                             </process-resources>
                             <compile>
-                                org.apache.karaf.tooling:karaf-maven-plugin:generate-features-xml
+                                org.apache.karaf.tooling:karaf-maven-plugin:features-generate-descriptor
                             </compile>
                             <package>
-                                org.apache.karaf.tooling:karaf-maven-plugin:archive-kar
+                                org.apache.karaf.tooling:karaf-maven-plugin:features-create-kar
                             </package>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
@@ -122,7 +122,7 @@
                             <compile>
                             </compile>
                             <package>
-                                org.apache.karaf.tooling:karaf-maven-plugin:archive-server
+                                org.apache.karaf.tooling:karaf-maven-plugin:instance-create-archive
                             </package>
                             <install>
                                 org.apache.maven.plugins:maven-install-plugin:install
