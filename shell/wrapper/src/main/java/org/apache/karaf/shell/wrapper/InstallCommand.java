@@ -139,7 +139,7 @@ public class InstallCommand extends OsgiCommandSupport
             createJar(new File(lib, "karaf-wrapper-main.jar"), "org/apache/karaf/shell/wrapper/Main.class");
 
 			System.out.println("");
-			System.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file:");
+			System.out.println("Setup complete.  You may wish to tweak the JVM properties in the wrapper configuration file:");
             System.out.println("\t" + wrapperConf.getPath());
 			System.out.println("before installing and starting the service.");
 			System.out.println("");
@@ -307,7 +307,7 @@ public class InstallCommand extends OsgiCommandSupport
 		} else {
             System.out.println(Ansi.ansi()
                                    .fg(Ansi.Color.RED).a("File already exists").a(Ansi.Attribute.RESET)
-                                   .a(". Move it out of the way if you want it re-created: ").a(outFile.getPath()).toString());
+                                   .a(". Move it out of the way if you wish to recreate it: ").a(outFile.getPath()).toString());
 		}
 	}
 	
@@ -335,7 +335,7 @@ public class InstallCommand extends OsgiCommandSupport
 		} else {
             System.out.println(Ansi.ansi()
                                    .fg(Ansi.Color.RED).a("File already exists").a(Ansi.Attribute.RESET)
-                                   .a(". Move it out of the way if you want it re-created: ").a(outFile.getPath()).toString());
+                                   .a(". Move it out of the way if you wish to recreate it: ").a(outFile.getPath()).toString());
 		}
 	}
 
