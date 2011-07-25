@@ -26,12 +26,9 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public class JDBCBackingEngineFactory implements BackingEngineFactory {
 
-    private final Logger logger = LoggerFactory.getLogger(JDBCBackingEngineFactory.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(JDBCBackingEngineFactory.class);
 
     /**
      * Build a Backing engine for the JDBCLoginModule.
@@ -78,7 +75,7 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
                 instance.setSelectRolesQuery(selectRolesQuery);
             }
         } catch (Exception e) {
-            logger.error("Error creating JDBCBackingEngine.", e);
+            LOGGER.error("Error creating JDBCBackingEngine.", e);
         }
         return instance;
     }
@@ -91,4 +88,5 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
     public String getModuleClass() {
         return JDBCLoginModule.class.getName();
     }
+
 }

@@ -195,5 +195,4 @@ public class BasicEncryption implements Encryption {
         return (dataLength / 3) * 4 + ((modulus == 0) ? 0 : 4);
     }
 
-
 }

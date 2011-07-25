@@ -23,10 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.security.auth.Subject;
 
-/**
- *
- * @author iocanel
- */
 public enum RolePolicy {
 
     PREFIXED_ROLES("prefix") {
@@ -77,4 +73,5 @@ public enum RolePolicy {
     }
 
     public abstract void handleRoles(Subject subject,Set<Principal> principals,String discriminator);
+
 }

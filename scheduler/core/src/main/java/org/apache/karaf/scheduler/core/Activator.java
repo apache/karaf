@@ -21,16 +21,12 @@ import org.osgi.framework.*;
 
 import java.util.Properties;
 
-/**
- * @author: iocanel
- */
 public class Activator implements BundleActivator {
 
     private TaskScheduler scheduler = new TaskScheduler();
     private RunableServiceListener listener;
 
     private static final String filter = "(&(objectclass=%s)(&(%s >= 0)(%s >= 0)))";
-
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -48,4 +44,5 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
 
     }
+
 }

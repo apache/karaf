@@ -22,9 +22,6 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
-/**
- * @author: iocanel
- */
 public class RunableServiceListener implements ServiceListener {
 
     private final BundleContext bundleContext;
@@ -84,4 +81,5 @@ public class RunableServiceListener implements ServiceListener {
         String id = (String) reference.getProperty(KarafTimerTask.ID_PROPERTY);
         scheduler.unschedule(id);
     }
+
 }

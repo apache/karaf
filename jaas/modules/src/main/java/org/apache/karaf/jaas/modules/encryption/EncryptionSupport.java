@@ -26,9 +26,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public class EncryptionSupport {
 
     private final Logger logger = LoggerFactory.getLogger(EncryptionSupport.class);
@@ -132,4 +129,5 @@ public class EncryptionSupport {
     public void setEncryptionPrefix(String encryptionPrefix) {
         this.encryptionPrefix = encryptionPrefix;
     }
+
 }

@@ -21,9 +21,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 
 import java.util.LinkedList;
 
-/**
- * @author iocanel
- */
 @Command(scope = "jaas", name = "cancel", description = "Cancel the modification of a JAAS realm.")
 public class CancelCommand extends JaasCommandSupport {
 
@@ -40,4 +37,5 @@ public class CancelCommand extends JaasCommandSupport {
     protected Object doExecute(BackingEngine engine) throws Exception {
         return null;
     }
+
 }

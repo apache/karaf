@@ -28,13 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-
-/**
- * @author iocanel
- */
 public class PropertiesBackingEngine implements BackingEngine {
 
-    private final Logger logger = LoggerFactory.getLogger(PropertiesBackingEngine.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesBackingEngine.class);
 
     private Properties users;
     private EncryptionSupport encryptionSupport;
@@ -90,7 +86,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         try {
             users.save();
         } catch (Exception ex) {
-            logger.error("Cannot update users file,", ex);
+            LOGGER.error("Cannot update users file,", ex);
         }
     }
 
@@ -150,7 +146,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         try {
             users.save();
         } catch (Exception ex) {
-            logger.error("Cannot update users file,", ex);
+            LOGGER.error("Cannot update users file,", ex);
         }
     }
 
@@ -185,7 +181,8 @@ public class PropertiesBackingEngine implements BackingEngine {
         try {
             users.save();
         } catch (Exception ex) {
-            logger.error("Cannot update users file,", ex);
+            LOGGER.error("Cannot update users file,", ex);
         }
     }
+
 }

@@ -20,10 +20,6 @@ import java.security.acl.Group;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-/**
- *
- * @author iocanel
- */
 public class GroupPrincipal implements Group {
 
     private String name;
@@ -54,4 +50,5 @@ public class GroupPrincipal implements Group {
     public String getName() {
         return name;
     }
+
 }

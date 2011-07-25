@@ -27,12 +27,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public class PropertiesBackingEngineFactory implements BackingEngineFactory {
 
-    private final Logger logger = LoggerFactory.getLogger(PropertiesBackingEngineFactory.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesBackingEngineFactory.class);
 
     private static final String USER_FILE = "users";
 
@@ -53,7 +50,7 @@ public class PropertiesBackingEngineFactory implements BackingEngineFactory {
             EncryptionSupport encryptionSupport = new EncryptionSupport(options);
             engine = new PropertiesBackingEngine(users, encryptionSupport);
         } catch (IOException ioe) {
-            logger.warn("Cannot open users file:" + usersFile);
+            LOGGER.warn("Cannot open users file: {}", usersFile);
         } finally {
             return engine;
         }
@@ -67,4 +64,5 @@ public class PropertiesBackingEngineFactory implements BackingEngineFactory {
     public String getModuleClass() {
         return PropertiesLoginModule.class.getName();
     }
+
 }

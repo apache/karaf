@@ -28,11 +28,7 @@ import java.util.Set;
 
 
 /**
- * <p>
  * Abstract JAAS login module extended by all Karaf Login Modules.
- * </p>
- *
- * @author iocanel, jbonofre
  */
 public abstract class AbstractKarafLoginModule implements LoginModule {
 

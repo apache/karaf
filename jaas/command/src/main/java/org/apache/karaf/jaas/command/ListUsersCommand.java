@@ -9,9 +9,6 @@ import org.apache.karaf.jaas.modules.UserPrincipal;
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
-/**
- * @author iocanel
- */
 @Command(scope = "jaas", name = "userlist", description = "Lists the users of the active realm/module.")
 public class ListUsersCommand extends JaasCommandSupport {
 
@@ -58,4 +55,5 @@ public class ListUsersCommand extends JaasCommandSupport {
         }
         return null;
     }
+
 }

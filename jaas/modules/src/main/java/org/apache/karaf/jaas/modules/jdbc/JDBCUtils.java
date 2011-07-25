@@ -21,9 +21,6 @@ import org.osgi.framework.ServiceReference;
 
 import javax.naming.InitialContext;
 
-/**
- * @author iocanel
- */
 public final class JDBCUtils {
 
     public static final String DATASOURCE = "datasource";
@@ -76,4 +73,5 @@ public final class JDBCUtils {
             throw new Exception("Illegal datasource url format");
         }
     }
+
 }

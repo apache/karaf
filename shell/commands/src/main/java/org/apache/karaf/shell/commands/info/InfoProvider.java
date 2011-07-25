@@ -18,9 +18,6 @@ package org.apache.karaf.shell.commands.info;
 
 import java.util.Properties;
 
-/**
- * @author iocanel
- */
 public interface InfoProvider {
 
 	public String getName();

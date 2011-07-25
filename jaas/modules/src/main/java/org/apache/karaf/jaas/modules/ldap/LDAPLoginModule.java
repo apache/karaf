@@ -37,12 +37,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 /**
- * <p>
  * Karaf JAAS login module which uses a LDAP backend.
- * </p>
- *
- * @author jbonofre
- * @author gnodet
  */
 public class LDAPLoginModule extends AbstractKarafLoginModule {
 

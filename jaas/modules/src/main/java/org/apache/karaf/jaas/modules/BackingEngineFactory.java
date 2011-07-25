@@ -17,9 +17,6 @@ package org.apache.karaf.jaas.modules;
 
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public interface BackingEngineFactory {
 
     /**
@@ -37,4 +34,5 @@ public interface BackingEngineFactory {
      * @return
      */
     BackingEngine build(Map options);
+
 }
