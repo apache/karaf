@@ -25,9 +25,6 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 import java.util.Queue;
 
-/**
- * @author iocanel
- */
 public abstract class JaasCommandSupport extends OsgiCommandSupport {
 
     public static final String JAAS_REALM = "JaasCommand.REALM";
@@ -106,7 +103,6 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
         return appConfigurationEntry;
     }
 
-
     public List<JaasRealm> getRealms() {
         return realms;
     }
@@ -122,4 +118,5 @@ public abstract class JaasCommandSupport extends OsgiCommandSupport {
     public void setBackingEngineService(BackingEngineService backingEngineService) {
         this.backingEngineService = backingEngineService;
     }
+
 }

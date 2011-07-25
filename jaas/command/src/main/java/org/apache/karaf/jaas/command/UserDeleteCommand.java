@@ -22,8 +22,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 
 /**
  * Deletes a user of the active realm/module.
- *
- * @author iocanel
  */
 @Command(scope = "jaas", name = "userdel", description = "Delete a user.")
 public class UserDeleteCommand extends JaasCommandSupport {
@@ -44,7 +42,6 @@ public class UserDeleteCommand extends JaasCommandSupport {
         return null;
     }
 
-
     public String getUsername() {
         return username;
     }
@@ -59,4 +56,5 @@ public class UserDeleteCommand extends JaasCommandSupport {
                 "username='" + username + '\'' +
                 '}';
     }
+
 }

@@ -18,10 +18,6 @@ package org.apache.karaf.archetypes;
 
 import java.util.Properties;
 
-/**
- *
- * @author iocanel
- */
 public class CommandArchetypeTest extends AbstractArchetypeTest {
 
     public void testCommand() throws Exception {
@@ -31,4 +27,5 @@ public class CommandArchetypeTest extends AbstractArchetypeTest {
         commandArchetypeParameters.setProperty("description", "testdescription");
         testKarafArchetype("archetypes-command", commandArchetypeParameters);
     }
+
 }

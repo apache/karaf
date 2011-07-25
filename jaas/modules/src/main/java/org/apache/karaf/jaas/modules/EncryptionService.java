@@ -16,8 +16,6 @@ package org.apache.karaf.jaas.modules;
 
 import java.util.Map;
 
-/**
- */
 public interface EncryptionService {
 
     String ALGORITHM = "algorithm";

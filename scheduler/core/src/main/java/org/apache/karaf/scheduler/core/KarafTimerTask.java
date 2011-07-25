@@ -19,9 +19,6 @@ package org.apache.karaf.scheduler.core;
 
 import java.util.TimerTask;
 
-/**
- * @author: iocanel
- */
 public class KarafTimerTask<R extends Runnable> extends TimerTask {
 
     public static final String ID_PROPERTY = "org.apache.karaf.scheduler.task.id";
@@ -81,4 +78,5 @@ public class KarafTimerTask<R extends Runnable> extends TimerTask {
     public void setSchedulePeriod(Long schedulePeriod) {
         this.schedulePeriod = schedulePeriod;
     }
+
 }

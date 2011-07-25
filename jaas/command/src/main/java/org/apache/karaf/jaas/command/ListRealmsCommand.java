@@ -8,9 +8,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
-/**
- * @author iocanel
- */
 @Command(scope = "jaas", name = "list", description = "Lists the modification on the active realm/module.")
 public class ListRealmsCommand extends JaasCommandSupport {
 

@@ -47,4 +47,5 @@ public class PropertiesConverter implements Converter {
 
         return properties;
     }
+
 }

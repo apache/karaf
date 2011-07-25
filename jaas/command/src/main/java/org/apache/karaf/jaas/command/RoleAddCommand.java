@@ -22,8 +22,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 
 /**
  * Adds a role to a user of the active realm/module.
- *
- * @author iocanel
  */
 @Command(scope = "jaas", name = "roleadd", description = "Add a role to a user.")
 public class RoleAddCommand extends JaasCommandSupport {
@@ -70,4 +68,5 @@ public class RoleAddCommand extends JaasCommandSupport {
                 ", role='" + role + '\'' +
                 '}';
     }
+
 }

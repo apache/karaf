@@ -31,9 +31,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author iocanel, jbonofre
- */
 public class JDBCBackingEngine implements BackingEngine {
 
     private final Logger logger = LoggerFactory.getLogger(JDBCBackingEngine.class);
@@ -50,7 +47,6 @@ public class JDBCBackingEngine implements BackingEngine {
     private String deleteUserStatement = "DELETE FROM USERS WHERE USERNAME=?";
     private String selectUsersQuery = "SELECT USERNAME FROM USERS";
     private String selectRolesQuery = "SELECT ROLE FROM ROLES WHERE USERNAME=?";
-
 
     /**
      * Constructor
@@ -403,4 +399,5 @@ public class JDBCBackingEngine implements BackingEngine {
     public void setSelectRolesQuery(String selectRolesQuery) {
         this.selectRolesQuery = selectRolesQuery;
     }
+
 }

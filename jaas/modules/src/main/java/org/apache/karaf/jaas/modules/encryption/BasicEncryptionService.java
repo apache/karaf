@@ -24,4 +24,5 @@ public class BasicEncryptionService implements EncryptionService {
     public Encryption createEncryption(Map<String, String> params) throws IllegalArgumentException {
         return new BasicEncryption(params);
     }
+
 }

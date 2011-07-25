@@ -22,8 +22,6 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 
 /**
  * Creates a new user in the active realm/module.
- *
- * @author iocanel
  */
 @Command(scope = "jaas", name = "useradd", description = "Add a user.")
 public class UserAddCommand extends JaasCommandSupport {
@@ -71,4 +69,5 @@ public class UserAddCommand extends JaasCommandSupport {
                 ", password='" + password + '\'' +
                 '}';
     }
+
 }

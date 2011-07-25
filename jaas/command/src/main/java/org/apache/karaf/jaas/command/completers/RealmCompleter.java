@@ -6,9 +6,6 @@ import org.apache.karaf.shell.console.completer.StringsCompleter;
 
 import java.util.List;
 
-/**
- * @author: iocanel
- */
 public class RealmCompleter implements Completer {
 
     private final StringsCompleter delegate = new StringsCompleter();
@@ -35,4 +32,5 @@ public class RealmCompleter implements Completer {
     public void setRealms(List<JaasRealm> realms) {
         this.realms = realms;
     }
+
 }

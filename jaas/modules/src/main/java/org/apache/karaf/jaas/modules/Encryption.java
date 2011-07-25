@@ -15,18 +15,12 @@
 package org.apache.karaf.jaas.modules;
 
 /**
- * <p>
  * Interface describing the password encryption service.
- * </>
- * 
- * @author jbonofre
  */
 public interface Encryption {
     
     /**
-     * <p>
      * Encrypt a password.
-     * </p>
      * 
      * @param plain the password in plain format.
      * @return the encrypted password format.
@@ -34,9 +28,7 @@ public interface Encryption {
     public String encryptPassword(String plain);
     
     /**
-     * <p>
      * Check password.
-     * </p>
      * 
      * @param input password provided in plain format.
      * @param password the encrypted format to compare with.

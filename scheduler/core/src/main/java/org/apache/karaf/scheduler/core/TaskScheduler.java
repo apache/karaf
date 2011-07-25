@@ -21,9 +21,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * @author: iocanel
- */
 public class TaskScheduler {
 
     private final Timer timer = new Timer();
@@ -53,4 +50,5 @@ public class TaskScheduler {
             }
         }
     }
+
 }

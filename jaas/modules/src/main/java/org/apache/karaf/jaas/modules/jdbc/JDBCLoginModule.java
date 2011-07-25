@@ -36,12 +36,9 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map;
 
-/**
- * @author iocanel
- */
 public class JDBCLoginModule extends AbstractKarafLoginModule {
 
-    private final Logger logger = LoggerFactory.getLogger(PropertiesLoginModule.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesLoginModule.class);
 
     public static final String PASSWORD_QUERY = "query.password";
     public static final String ROLE_QUERY = "query.role";
@@ -61,12 +58,11 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         passwordQuery = (String) options.get(PASSWORD_QUERY);
         roleQuery = (String) options.get(ROLE_QUERY);
         if (datasourceURL == null || datasourceURL.trim().length() == 0) {
-            logger.error("No datasource was specified ");
+            LOGGER.error("No datasource was specified ");
         } else if (!datasourceURL.startsWith(JDBCUtils.JNDI) && !datasourceURL.startsWith(JDBCUtils.OSGI)) {
-            logger.error("Invalid datasource lookup protocol");
+            LOGGER.error("Invalid datasource lookup protocol");
         }
     }
-
 
     public boolean login() throws LoginException {
         Connection connection = null;
@@ -156,7 +152,7 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
                     connection.close();
                 }
             } catch (SQLException ex) {
-                logger.warn("Failed to clearly close connection to the database:", ex);
+                LOGGER.warn("Failed to clearly close connection to the database:", ex);
             }
         }
         return true;
@@ -170,8 +166,9 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
         subject.getPrincipals().removeAll(principals);
         principals.clear();
         if (debug) {
-            logger.debug("logout");
+            LOGGER.debug("logout");
         }
         return true;
     }
+
 }

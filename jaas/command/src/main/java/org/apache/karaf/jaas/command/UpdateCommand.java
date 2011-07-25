@@ -26,8 +26,6 @@ import java.util.Queue;
 
 /**
  * Executes all the pending commands of the active realm/module.
- *
- * @author iocanel
  */
 @Command(scope = "jaas", name = "update", description = "Update JAAS realm.")
 public class UpdateCommand extends JaasCommandSupport {
@@ -74,4 +72,5 @@ public class UpdateCommand extends JaasCommandSupport {
         session.put(JAAS_CMDS, new LinkedList<JaasCommandSupport>());
         return null;
     }
+
 }

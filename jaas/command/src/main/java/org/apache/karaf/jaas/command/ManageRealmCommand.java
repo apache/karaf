@@ -26,9 +26,6 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-/**
- * @author iocanel
- */
 @Command(scope = "jaas", name = "manage", description = "Manage user and roles of a Jaas Realm.")
 public class ManageRealmCommand extends JaasCommandSupport {
 
@@ -83,4 +80,5 @@ public class ManageRealmCommand extends JaasCommandSupport {
     protected Object doExecute(BackingEngine engine) throws Exception {
         return null;
     }
+
 }

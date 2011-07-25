@@ -9,13 +9,7 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.Queue;
 
 /**
- * @author iocanel
- */
-
-/**
  * Lists the commands the are in the command queue, for the active realm/module.
- *
- * @author iocanel
  */
 @Command(scope = "jaas", name = "pending", description = "Lists the modification on the active realm/module.")
 public class ListPendingCommand extends JaasCommandSupport {

@@ -21,9 +21,6 @@ import org.apache.karaf.jaas.boot.ProxyLoginModule;
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
-/**
- * @author iocanel
- */
 public class BackingEngineService {
 
     private List<BackingEngineFactory> engineFactories;
@@ -48,4 +45,5 @@ public class BackingEngineService {
     public void setEngineFactories(List<BackingEngineFactory> engineFactories) {
         this.engineFactories = engineFactories;
     }
+
 }
