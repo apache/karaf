@@ -20,14 +20,14 @@ EMBEDDING KARAF IN A WEB APPLICATION
 
 Purpose
 -------
-Embed Karaf in a web application.
+To embed Karaf in a web application.
 
 
 Prerequisites for Running the Example
 -------------------------------------
 You must have the following installed on your machine:
 
-  - JDK 1.5 or higher
+  - JDK 1.6 or higher
 
   - Maven 2.0.9 or higher
 
