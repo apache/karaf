@@ -209,7 +209,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem, false);
+            DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
             dependencyHelper.getDependencies(project, true);
             this.localDependencies = dependencyHelper.getLocalDependencies();
             this.treeListing = dependencyHelper.getTreeListing();

@@ -43,8 +43,8 @@ import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
 import org.sonatype.aether.util.graph.selector.AndDependencySelector;
+import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
 import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
-import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
 import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
 import org.sonatype.aether.util.graph.transformer.ConflictMarker;
 import org.sonatype.aether.util.graph.transformer.JavaDependencyContextRefiner;
@@ -92,8 +92,6 @@ public class DependencyHelper {
       */
      private final List<RemoteRepository> pluginRepos;
 
-    private boolean includeTopLevelProvidedScopeDependencies;
-
     //dependencies we are interested in
     protected Map<Artifact, String> localDependencies;
     //log of what happened during search
@@ -101,12 +99,11 @@ public class DependencyHelper {
 
 
 
-    public DependencyHelper(List<RemoteRepository> pluginRepos, List<RemoteRepository> projectRepos, RepositorySystemSession repoSession, RepositorySystem repoSystem, boolean includeTopLevelProvidedScopeDependencies) {
+    public DependencyHelper(List<RemoteRepository> pluginRepos, List<RemoteRepository> projectRepos, RepositorySystemSession repoSession, RepositorySystem repoSystem) {
         this.pluginRepos = pluginRepos;
         this.projectRepos = projectRepos;
         this.repoSession = repoSession;
         this.repoSystem = repoSystem;
-        this.includeTopLevelProvidedScopeDependencies = includeTopLevelProvidedScopeDependencies;
     }
 
     public Map<Artifact, String> getLocalDependencies() {
@@ -133,10 +130,9 @@ public class DependencyHelper {
         try {
             CollectRequest collectRequest = new CollectRequest(new Dependency(artifact, "compile"), null, projectRepos);
             DefaultRepositorySystemSession session = new DefaultRepositorySystemSession(repoSession);
-            if (includeTopLevelProvidedScopeDependencies) {
-                session.setDependencySelector(new AndDependencySelector(new OptionalDependencySelector(),
-                        new ScopeDependencySelectorProvider()));
-            }
+            session.setDependencySelector(new AndDependencySelector(new OptionalDependencySelector(),
+                    new ScopeDependencySelector1(),
+                    new ExclusionDependencySelector()));
             DependencyGraphTransformer transformer = new ChainedDependencyGraphTransformer(new ConflictMarker(),
                     new JavaEffectiveScopeCalculator(),
                     new JavaDependencyContextRefiner());
@@ -148,9 +144,12 @@ public class DependencyHelper {
         }
     }
 
-    private static class ScopeDependencySelectorProvider implements DependencySelector {
+    //aether's ScopeDependencySelector appears to always exclude the configured scopes (test and provided) and there is no way to configure it to
+    //accept the top level provided scope dependencies.  We need this 3 layer cake since aether never actually uses the top level selector you give it,
+    //it always starts by getting the child to apply to the project's dependencies.
+    private static class ScopeDependencySelector1 implements DependencySelector {
 
-        private DependencySelector child = new ScopeDependencySelector("test", "provided");
+        private DependencySelector child = new ScopeDependencySelector2();
 
         public boolean selectDependency(Dependency dependency) {
             throw new IllegalStateException("this does not appear to be called");
@@ -160,6 +159,33 @@ public class DependencyHelper {
             return child;
         }
     }
+
+    private static class ScopeDependencySelector2 implements DependencySelector {
+
+        private DependencySelector child = new ScopeDependencySelector3();
+
+        public boolean selectDependency(Dependency dependency) {
+            String scope = dependency.getScope();
+            return !"test".equals(scope);
+        }
+
+        public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
+            return child;
+        }
+    }
+
+    private static class ScopeDependencySelector3 implements DependencySelector {
+
+        public boolean selectDependency(Dependency dependency) {
+            String scope = dependency.getScope();
+            return !"test".equals(scope) && !"provided".equals(scope);
+        }
+
+        public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
+            return this;
+        }
+    }
+
     private static class Scanner {
 
         private static enum Accept {
