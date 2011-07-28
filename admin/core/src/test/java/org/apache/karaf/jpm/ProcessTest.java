@@ -17,24 +17,27 @@
 package org.apache.karaf.jpm;
 
 import java.io.File;
+import java.net.URI;
 
 import junit.framework.TestCase;
+
 import org.apache.karaf.jpm.impl.ScriptUtils;
-import org.apache.karaf.jpm.ProcessBuilder;
 
 public class ProcessTest extends TestCase {
 
     public void testCreate() throws Exception {
-        String javaPath = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath();
+        String javaPath =
+            new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java")
+                .getCanonicalPath();
         System.err.println(javaPath);
         StringBuilder command = new StringBuilder();
         command.append(javaPath);
         command.append(" -Dprop=\"key\"");
         command.append(" -classpath ");
         String clRes = getClass().getName().replace('.', '/') + ".class";
-        String str = getClass().getClassLoader().getResource(clRes).toString();
-        str = str.substring("file:".length(), str.indexOf(clRes));
-        command.append(str);
+        String str = new URI(getClass().getClassLoader().getResource(clRes).toString()).getPath();
+        str = str.substring(0, str.indexOf(clRes));
+        command.append("\"" + str + "\"");
         command.append(" ");
         command.append(MainTest.class.getName());
         command.append(" ");

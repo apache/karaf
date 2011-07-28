@@ -90,7 +90,7 @@ public class KarArtifactInstallerTest {
 	@Test 
 	public void shouldRecognizeGoodFeaturesFile() throws Exception
 	{
-		File goodFeaturesXml = new File(getClass().getClassLoader().getResource("goodKarFile/org/foo/goodFeaturesXml.xml").getFile());
+		File goodFeaturesXml = new File(new URI(getClass().getClassLoader().getResource("goodKarFile/org/foo/goodFeaturesXml.xml").getFile()).getPath());
 		Assert.assertTrue(karArtifactInstaller.isFeaturesRepository(goodFeaturesXml));
 	}
 	
@@ -117,7 +117,7 @@ public class KarArtifactInstallerTest {
 		
 		// Test
 		//
-		File goodKarFile = new File(getClass().getClassLoader().getResource("goodKarFile.kar").getFile());
+		File goodKarFile = new File(new URI(getClass().getClassLoader().getResource("goodKarFile.kar").getFile()).getPath());
 		karArtifactInstaller.install(goodKarFile);
 		
 		// Verify expectations.
@@ -134,7 +134,7 @@ public class KarArtifactInstallerTest {
 		
 		// Test
 		//
-		File goodKarFile = new File(getClass().getClassLoader().getResource("goodKarFile.kar").getFile());
+		File goodKarFile = new File(new URI(getClass().getClassLoader().getResource("goodKarFile.kar").getFile()).getPath());
 		karArtifactInstaller.install(goodKarFile);
 		
 		// Verify expectations.
@@ -152,7 +152,7 @@ public class KarArtifactInstallerTest {
 		
 		// Test
 		//
-		File goodKarFile = new File(getClass().getClassLoader().getResource("goodKarFile.kar").getFile());
+		File goodKarFile = new File(new URI(getClass().getClassLoader().getResource("goodKarFile.kar").getFile()).getPath());
 		karArtifactInstaller.install(goodKarFile);
 		karArtifactInstaller.update(goodKarFile);
 		
@@ -169,7 +169,7 @@ public class KarArtifactInstallerTest {
 		
 		// Test
 		//
-		File karFileAsZip = new File(getClass().getClassLoader().getResource("karFileAsZip.zip").getFile());
+		File karFileAsZip = new File(new URI(getClass().getClassLoader().getResource("karFileAsZip.zip").getFile()).getPath());
 		karArtifactInstaller.install(karFileAsZip);
 		
 		// Verify expectations.

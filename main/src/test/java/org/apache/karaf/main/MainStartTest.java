@@ -18,17 +18,19 @@
  */
 package org.apache.karaf.main;
 
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
+
 import java.io.File;
+import java.net.URI;
 
 import junit.framework.Assert;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
-
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
 public class MainStartTest {
 
@@ -71,9 +73,9 @@ public class MainStartTest {
 
         Utils.deleteDirectory(data);
 
-		String[] args = new String[0];
-		System.setProperty("karaf.home", home.toString());
-		System.setProperty("karaf.data", data.toString());
+        String[] args = new String[0];
+        System.setProperty("karaf.home", new URI(home.getPath()).getPath());
+        System.setProperty("karaf.data", new URI(data.getPath()).getPath());
         System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
 
 
