@@ -28,8 +28,6 @@ import org.apache.karaf.shell.console.Completer;
 
 /**
  * Completer for a set of strings.
- *
- * @version $Rev: 722797 $ $Date: 2008-12-03 08:18:16 +0100 (Wed, 03 Dec 2008) $
  */
 public class StringsCompleter
     implements Completer

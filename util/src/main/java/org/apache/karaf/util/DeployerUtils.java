@@ -20,9 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Contain various methods that are useful for deploying artifacts
- *
- * @author gnodet
+ * Contain various methods that are useful for deploying artifacts.
  */
 public final class DeployerUtils {
 

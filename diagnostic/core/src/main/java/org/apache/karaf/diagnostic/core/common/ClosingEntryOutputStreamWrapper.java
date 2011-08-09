@@ -21,8 +21,6 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Output stream which closes entry instead closing whole stream.
- * 
- * @author ldywicki
  */
 public class ClosingEntryOutputStreamWrapper extends OutputStream {
 

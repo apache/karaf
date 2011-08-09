@@ -17,8 +17,6 @@ package org.apache.karaf.shell.console.table;
 
 /**
  * Column definition.
- * 
- * @author ldywicki
  */
 public class Column extends TableElement {
 

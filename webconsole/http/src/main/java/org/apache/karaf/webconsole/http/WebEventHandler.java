@@ -23,10 +23,6 @@ import java.util.Map;
 import org.ops4j.pax.web.service.spi.WebEvent;
 import org.ops4j.pax.web.service.spi.WebListener;
 
-/**
- * @author Achim
- *
- */
 public class WebEventHandler implements WebListener {
 
 	private final Map<Long, WebEvent> bundleEvents = new HashMap<Long, WebEvent>();

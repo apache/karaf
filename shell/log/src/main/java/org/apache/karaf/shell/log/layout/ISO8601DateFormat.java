@@ -35,9 +35,6 @@ import java.util.TimeZone;
    International Standard Date and Time Notation</a> for more
    information on this format.
 
-   @author Ceki G&uuml;lc&uuml;
-   @author Andrew Vajoczki
-
    @since 0.7.5
 */
 public class ISO8601DateFormat extends AbsoluteTimeDateFormat {

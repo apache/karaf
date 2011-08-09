@@ -19,11 +19,7 @@ package org.apache.karaf.util;
 import java.util.Locale;
 
 /**
- * <p>
  * Util class to manipulate String, especially around escape/unescape.
- * </p>
- *
- * @author gnodet, jbonofre
  */
 public class StringEscapeUtils {
 

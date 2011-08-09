@@ -23,8 +23,6 @@ import org.apache.karaf.diagnostic.core.DumpProvider;
 
 /**
  * Base class for dump providers which writes text to destination.
- * 
- * @author ldywicki
  */
 public abstract class TextDumpProvider implements DumpProvider {
 

@@ -22,8 +22,6 @@ import org.fusesource.jansi.Ansi.Color;
 
 /**
  * Class which covers {@link org.fusesource.jansi.Ansi} class with standard fluent-api.
- * 
- * @author ldywicki
  */
 public class Style {
 

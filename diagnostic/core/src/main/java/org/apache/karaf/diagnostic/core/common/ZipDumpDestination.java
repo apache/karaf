@@ -26,8 +26,6 @@ import org.apache.karaf.diagnostic.core.DumpDestination;
 
 /**
  * Class which packages dumps to ZIP archive.
- * 
- * @author ldywicki
  */
 public class ZipDumpDestination implements DumpDestination {
 

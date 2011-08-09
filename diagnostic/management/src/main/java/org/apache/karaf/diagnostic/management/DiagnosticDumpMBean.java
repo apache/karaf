@@ -17,8 +17,6 @@ package org.apache.karaf.diagnostic.management;
 
 /**
  * Diagnostic MBean which allows to create dumps over JMX.
- * 
- * @author ldywicki
  */
 public interface DiagnosticDumpMBean {
 

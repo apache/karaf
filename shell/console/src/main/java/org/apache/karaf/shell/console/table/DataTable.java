@@ -80,8 +80,6 @@ import java.util.List;
  * [3  ][3    ][3           ][3           ][3    ] 3
  * [4  ][4    ][4           ][4           ][4    ] 4
  * </code>
- * 
- * @author ldywicki
  */
 public class DataTable extends TableElement {
 

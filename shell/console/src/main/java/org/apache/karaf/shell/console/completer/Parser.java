@@ -23,8 +23,8 @@ package org.apache.karaf.shell.console.completer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Parser
-{
+public class Parser {
+
     int current = 0;
     String text;
     boolean escaped;
@@ -40,75 +40,60 @@ public class Parser
     int c2;
     int c3;
 
-    public Parser(String text, int cursor)
-    {
+    public Parser(String text, int cursor) {
         this.text = text;
         this.cursor = cursor;
     }
 
-    void ws()
-    {
+    void ws() {
         // derek: BUGFIX: loop if comment  at beginning of input
         //while (!eof() && Character.isWhitespace(peek())) {
-        while (!eof() && (!escaped && Character.isWhitespace(peek()) || current == 0))
-        {
-            if (current != 0 || !escaped && Character.isWhitespace(peek()))
-            {
+        while (!eof() && (!escaped && Character.isWhitespace(peek()) || current == 0)) {
+            if (current != 0 || !escaped && Character.isWhitespace(peek())) {
                 current++;
             }
             if (peek() == '/' && current < text.length() - 2
-                && text.charAt(current + 1) == '/')
-            {
+                && text.charAt(current + 1) == '/') {
                 comment();
             }
-            if (current == 0)
-            {
+            if (current == 0) {
                 break;
             }
         }
     }
 
-    private void comment()
-    {
-        while (!eof() && peek() != '\n' && peek() != '\r')
-        {
+    private void comment() {
+        while (!eof() && peek() != '\n' && peek() != '\r') {
             next();
         }
     }
 
-    boolean eof()
-    {
+    boolean eof() {
         return current >= text.length();
     }
 
-    char peek()
-    {
+    char peek() {
         return peek(false);
     }
 
-    char peek(boolean increment)
-    {
+    char peek(boolean increment) {
         escaped = false;
-        if (eof())
-        {
+        if (eof()) {
             return 0;
         }
 
         int last = current;
         char c = text.charAt(current++);
 
-        if (c == '\\')
-        {
+        if (c == '\\') {
             escaped = true;
-            if (eof())
-            {
-                throw new RuntimeException("Eof found after \\"); // derek
+            if (eof()) {
+                throw new RuntimeException("Eof found after \\");
             }
 
             c = text.charAt(current++);
 
-            switch (c)
-            {
+            switch (c) {
                 case 't':
                     c = '\t';
                     break;
@@ -137,36 +122,30 @@ public class Parser
                     // but have the escaped flag set, important for {},[] etc
             }
         }
-        if (cursor > last && cursor <= current)
-        {
+        if (cursor > last && cursor <= current) {
             c0 = program != null ? program.size() : 0;
             c1 = statements != null ? statements.size() : 0;
             c2 = statement != null ? statement.size() : 0;
             c3 = (start >= 0) ? current - start : 0;
         }
-        if (!increment)
-        {
+        if (!increment) {
             current = last;
         }
         return c;
     }
 
-    public List<List<List<String>>> program()
-    {
+    public List<List<List<String>>> program() {
         program = new ArrayList<List<List<String>>>();
         ws();
-        if (!eof())
-        {
+        if (!eof()) {
             program.add(pipeline());
-            while (peek() == ';')
-            {
+            while (peek() == ';') {
                 current++;
                 List<List<String>> pipeline = pipeline();
                 program.add(pipeline);
             }
         }
-        if (!eof())
-        {
+        if (!eof()) {
             throw new RuntimeException("Program has trailing text: " + context(current));
         }
 
@@ -175,26 +154,21 @@ public class Parser
         return p;
     }
 
-    CharSequence context(int around)
-    {
+    CharSequence context(int around) {
         return text.subSequence(Math.max(0, current - 20), Math.min(text.length(),
             current + 4));
     }
 
-    public List<List<String>> pipeline()
-    {
+    public List<List<String>> pipeline() {
         statements = new ArrayList<List<String>>();
         statements.add(statement());
-        while (peek() == '|')
-        {
+        while (peek() == '|') {
             current++;
             ws();
-            if (!eof())
-            {
+            if (!eof()) {
                 statements.add(statement());
             }
-            else
-            {
+            else {
                 statements.add(new ArrayList<String>());
                 break;
             }
@@ -204,20 +178,16 @@ public class Parser
         return s;
     }
 
-    public List<String> statement()
-    {
+    public List<String> statement() {
         statement = new ArrayList<String>();
         statement.add(value());
-        while (!eof())
-        {
+        while (!eof()) {
             ws();
-            if (peek() == '|' || peek() == ';')
-            {
+            if (peek() == '|' || peek() == ';') {
                 break;
             }
 
-            if (!eof())
-            {
+            if (!eof()) {
                 statement.add(messy());
             }
         }
@@ -230,15 +200,12 @@ public class Parser
     {
         start = current;
         char c = peek();
-        if (c > 0 && SPECIAL.indexOf(c) < 0)
-        {
+        if (c > 0 && SPECIAL.indexOf(c) < 0) {
             current++;
             try {
-                while (!eof())
-                {
+                while (!eof()) {
                     c = peek();
-                    if (!escaped && (c == ';' || c == '|' || Character.isWhitespace(c)))
-                    {
+                    if (!escaped && (c == ';' || c == '|' || Character.isWhitespace(c))) {
                         break;
                     }
                     next();
@@ -248,23 +215,19 @@ public class Parser
                 start = -1;
             }
         }
-        else
-        {
+        else {
             return value();
         }
     }
 
-    String value()
-    {
+    String value() {
         ws();
 
         start = current;
         try {
             char c = next();
-            if (!escaped)
-            {
-                switch (c)
-                {
+            if (!escaped) {
+                switch (c) {
                     case '{':
                         return text.substring(start, find('}', '{'));
                     case '(':
@@ -283,48 +246,38 @@ public class Parser
             }
 
             // Some identifier or number
-            while (!eof())
-            {
+            while (!eof()) {
                 c = peek();
-                if (!escaped)
-                {
-                    if (Character.isWhitespace(c) || c == ';' || c == '|' || c == '=')
-                    {
+                if (!escaped) {
+                    if (Character.isWhitespace(c) || c == ';' || c == '|' || c == '=') {
                         break;
                     }
-                    else if (c == '{')
-                    {
+                    else if (c == '{') {
                         next();
                         find('}', '{');
                     }
-                    else if (c == '(')
-                    {
+                    else if (c == '(') {
                         next();
                         find(')', '(');
                     }
-                    else if (c == '<')
-                    {
+                    else if (c == '<') {
                         next();
                         find('>', '<');
                     }
-                    else if (c == '[')
-                    {
+                    else if (c == '[') {
                         next();
                         find(']', '[');
                     }
-                    else if (c == '\'' || c == '"')
-                    {
+                    else if (c == '\'' || c == '"') {
                         next();
                         quote(c);
                         next();
                     }
-                    else
-                    {
+                    else {
                         next();
                     }
                 }
-                else
-                {
+                else {
                     next();
                 }
             }
@@ -334,20 +287,16 @@ public class Parser
         }
     }
 
-    boolean escaped()
-    {
+    boolean escaped() {
         return escaped;
     }
 
-    char next()
-    {
+    char next() {
         return peek(true);
     }
 
-    char unicode()
-    {
-        if (current + 4 > text.length())
-        {
+    char unicode() {
+        if (current + 4 > text.length()) {
             throw new IllegalArgumentException("Unicode \\u escape at eof at pos ..."
                 + context(current) + "...");
         }
@@ -357,48 +306,32 @@ public class Parser
         return (char) n;
     }
 
-    int find(char target, char deeper)
-    {
+    int find(char target, char deeper) {
         int start = current;
         int level = 1;
 
-        while (level != 0)
-        {
-            if (eof())
-            {
+        while (level != 0) {
+            if (eof()) {
                 throw new RuntimeException("Eof found in the middle of a compound for '"
                     + target + deeper + "', begins at " + context(start));
             }
 
             char c = next();
-            if (!escaped)
-            {
-                if (c == target)
-                {
+            if (!escaped) {
+                if (c == target) {
                     level--;
-                }
-                else
-                {
-                    if (c == deeper)
-                    {
+                } else {
+                    if (c == deeper) {
                         level++;
-                    }
-                    else
-                    {
-                        if (c == '"')
-                        {
+                    } else {
+                        if (c == '"') {
                             quote('"');
-                        }
-                        else
-                        {
-                            if (c == '\'')
-                            {
+                        } else {
+                            if (c == '\'') {
                                 quote('\'');
                             }
-                            else
-                            {
-                                if (c == '`')
-                                {
+                            else {
+                                if (c == '`') {
                                     quote('`');
                                 }
                             }
@@ -410,42 +343,34 @@ public class Parser
         return current;
     }
 
-    int quote(char which)
-    {
-        while (!eof() && (peek() != which || escaped))
-        {
+    int quote(char which) {
+        while (!eof() && (peek() != which || escaped)) {
             next();
         }
 
         return current++;
     }
 
-    CharSequence findVar()
-    {
+    CharSequence findVar() {
         int start = current;
         char c = peek();
 
-        if (c == '{')
-        {
+        if (c == '{') {
             next();
             int end = find('}', '{');
             return text.subSequence(start, end);
         }
-        if (c == '(')
-        {
+        if (c == '(') {
             next();
             int end = find(')', '(');
             return text.subSequence(start, end);
         }
 
-        if (Character.isJavaIdentifierPart(c))
-        {
-            while (c == '$')
-            {
+        if (Character.isJavaIdentifierPart(c)) {
+            while (c == '$') {
                 c = next();
             }
-            while (!eof() && (Character.isJavaIdentifierPart(c) || c == '.') && c != '$')
-            {
+            while (!eof() && (Character.isJavaIdentifierPart(c) || c == '.') && c != '$') {
                 next();
                 c = peek();
             }
@@ -456,18 +381,16 @@ public class Parser
                 + context(start));
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "..." + context(current) + "...";
     }
 
-    public String unescape()
-    {
+    public String unescape() {
         StringBuilder sb = new StringBuilder();
-        while (!eof())
-        {
+        while (!eof()) {
             sb.append(next());
         }
         return sb.toString();
     }
+
 }

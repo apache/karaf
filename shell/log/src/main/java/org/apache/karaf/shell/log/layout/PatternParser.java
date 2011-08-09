@@ -29,16 +29,9 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 /**
  * Copied from log4j
  */
-// Contributors:   Nelson Minar <(nelson@monkey.org>
-//                 Igor E. Poteryaev <jah@mail.ru>
-//                 Reinhard Deschler <reinhard.deschler@web.de>
 /**
    Most of the work of the {@link org.apache.log4j.PatternLayout} class
    is delegated to the PatternParser class.
-
-   @author <a href=mailto:"cakalijp@Maritz.com">James P. Cakalic</a>
-   @author Ceki G&uuml;lc&uuml;
-   @author Anders Kristensen
 
    @since 0.8.2
 */

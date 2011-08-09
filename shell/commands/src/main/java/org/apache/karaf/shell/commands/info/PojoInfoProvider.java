@@ -2,10 +2,8 @@ package org.apache.karaf.shell.commands.info;
 
 import java.util.Properties;
 
-/**
- * @author: splatch
- */
 public class PojoInfoProvider implements InfoProvider {
+
 	private String name;
 	private Properties properties;
 
