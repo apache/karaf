@@ -17,8 +17,6 @@ package org.apache.karaf.shell.console.table;
 
 /**
  * Cell information.
- * 
- * @author ldywicki
  */
 public class Cell extends TableElement {
 

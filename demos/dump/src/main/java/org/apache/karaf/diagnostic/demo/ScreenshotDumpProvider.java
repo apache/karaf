@@ -31,8 +31,6 @@ import org.apache.karaf.diagnostic.core.DumpProvider;
 /**
  * This demo provider creates images in dump destination which
  * contains screenshots from all attached displays.
- * 
- * @author ldywicki
  */
 public class ScreenshotDumpProvider implements DumpProvider {
 

@@ -17,8 +17,6 @@ package org.apache.karaf.shell.console.table;
 
 /**
  * Table element.
- * 
- * @author ldywicki
  */
 public class TableElement {
 

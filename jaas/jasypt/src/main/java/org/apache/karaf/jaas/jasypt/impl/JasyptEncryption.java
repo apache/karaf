@@ -39,11 +39,7 @@ import org.jasypt.exceptions.EncryptionInitializationException;
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 
 /**
- * <p>
  * Jasypt implementation of the Encryption service.
- * </p>
- * 
- * @author jbonofre
  */
 public class JasyptEncryption implements Encryption {
 

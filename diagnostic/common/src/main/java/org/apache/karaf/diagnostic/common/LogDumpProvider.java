@@ -27,8 +27,6 @@ import org.apache.karaf.diagnostic.core.DumpProvider;
 /**
  * Dump provider which copies log files from data/log directory to
  * destination.
- * 
- * @author ldywicki
  */
 public class LogDumpProvider implements DumpProvider {
 

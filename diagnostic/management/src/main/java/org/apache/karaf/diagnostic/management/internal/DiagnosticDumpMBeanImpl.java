@@ -26,9 +26,7 @@ import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 import org.apache.karaf.diagnostic.management.DiagnosticDumpMBean;
 
 /**
- * Implementation of diagnostic mbean.
- * 
- * @author ldywicki
+ * Implementation of diagnostic MBean.
  */
 public class DiagnosticDumpMBeanImpl extends StandardMBean implements 
     DiagnosticDumpMBean {

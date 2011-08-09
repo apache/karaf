@@ -17,8 +17,6 @@ package org.apache.karaf.shell.console.table;
 
 /**
  * Dynamic style calculator.
- * 
- * @author ldywicki
  */
 public interface StyleCalculator {
 

@@ -16,12 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Copyright (c) 2002-2007, Marc Prud'hommeaux. All rights reserved.
- *
- * This software is distributable under the BSD license. See the terms of the
- * BSD license in the documentation provided with this software.
- */
 package org.apache.karaf.shell.console.completer;
 
 import java.io.File;
@@ -51,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ArgumentCompleter implements Completer {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ArgumentCompleter.class);
 
     final Completer commandCompleter;

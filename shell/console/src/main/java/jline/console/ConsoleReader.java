@@ -55,9 +55,6 @@ import org.fusesource.jansi.AnsiOutputStream;
  * platform-specific commands will need to be issued before the reader will
  * function properly. See {@link jline.Terminal#init} for convenience
  * methods for issuing platform-specific setup commands.
- *
- * @author <a href="mailto:mwp1@cornell.edu">Marc Prud'hommeaux</a>
- * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  */
 public class ConsoleReader {
 

@@ -30,9 +30,6 @@ import java.util.jar.Manifest;
 
 /**
  * Utility class to parse a standard OSGi header with paths.
- *
- * @author <a href="mailto:dev@geronimo.apache.org">Apache Geronimo Project</a>
- * @version $Rev: 786132 $, $Date: 2009-06-18 17:47:58 +0200 (Thu, 18 Jun 2009) $
  */
 public final class HeaderParser  {
 

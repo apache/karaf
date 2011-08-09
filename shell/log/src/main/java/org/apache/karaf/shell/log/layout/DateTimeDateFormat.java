@@ -30,7 +30,6 @@ import java.util.TimeZone;
    Formats a {@link Date} in the format "dd MMM yyyy HH:mm:ss,SSS" for example,
    "06 Nov 1994 15:49:37,459".
 
-   @author Ceki G&uuml;lc&uuml;
    @since 0.7.5
 */
 public class DateTimeDateFormat extends AbsoluteTimeDateFormat {

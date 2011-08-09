@@ -20,8 +20,6 @@ import java.util.List;
 
 /**
  * Row information.
- * 
- * @author ldywicki
  */
 public class Row extends TableElement {
 

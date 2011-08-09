@@ -15,12 +15,7 @@
  */
 package org.apache.karaf.webconsole.http;
 
-/**
- *
- * @author njt
- */
-public class ServletDetails
-{
+public class ServletDetails {
     private long  id;
     private String  servlet;
     private String  servletName;

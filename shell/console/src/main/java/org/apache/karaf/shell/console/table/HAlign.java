@@ -19,8 +19,6 @@ import static org.apache.karaf.shell.console.table.StringUtil.*;
 
 /**
  * Enumeration type which contains all possible horizontal alignments.
- * 
- * @author ldywicki
  */
 public enum HAlign {
 

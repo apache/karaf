@@ -18,8 +18,6 @@ package org.apache.karaf.diagnostic.core;
 /**
  * Interface which represents instance of tool which can provide dump
  * information.
- * 
- * @author ldywicki
  */
 public interface DumpProvider {
 
