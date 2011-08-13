@@ -131,6 +131,7 @@
         <felix.metatype.version>1.0.4</felix.metatype.version>
         <felix.eventadmin.version>1.2.12</felix.eventadmin.version>
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
+        <felix.obr.version>1.0.2</felix.obr.version>
         <aries.application.version>0.3</aries.application.version>
         <aries.blueprint.version>0.3.1</aries.blueprint.version>
         <aries.jmx.version>0.3</aries.jmx.version>
