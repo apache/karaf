@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
 
@@ -131,6 +132,7 @@
         <felix.metatype.version>1.0.4</felix.metatype.version>
         <felix.eventadmin.version>1.2.12</felix.eventadmin.version>
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
+        <felix.obr.version>1.0.2</felix.obr.version>
         <aries.application.version>0.3</aries.application.version>
         <aries.blueprint.version>0.3.1</aries.blueprint.version>
         <aries.jmx.version>0.3</aries.jmx.version>
@@ -447,29 +449,29 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-              <groupId>org.apache.karaf.assemblies.features</groupId>
-              <artifactId>standard</artifactId>
-              <type>xml</type>
-              <classifier>features</classifier>
-              <version>${project.version}</version>
+                <groupId>org.apache.karaf.assemblies.features</groupId>
+                <artifactId>standard</artifactId>
+                <type>xml</type>
+                <classifier>features</classifier>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
-              <groupId>org.apache.karaf.assemblies.features</groupId>
-              <artifactId>enterprise</artifactId>
-              <type>xml</type>
-              <classifier>features</classifier>
-              <version>${project.version}</version>
+                <groupId>org.apache.karaf.assemblies.features</groupId>
+                <artifactId>enterprise</artifactId>
+                <type>xml</type>
+                <classifier>features</classifier>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>org.apache.karaf.tooling.testing</artifactId>
                 <version>${project.version}</version>
             </dependency>
-			<dependency>
-			    <groupId>org.apache.karaf.archetypes</groupId>
+            <dependency>
+                <groupId>org.apache.karaf.archetypes</groupId>
                 <artifactId>archetypes-command</artifactId>
                 <version>${project.version}</version>
-			</dependency>
+            </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
@@ -1048,11 +1050,11 @@
                     <version>${felix.plugin.version}</version>
                     <extensions>true</extensions>
                     <configuration>
-                    	<instructions>
-                        	<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        	<Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
-                        	<_versionpolicy>${bnd.version.policy}</_versionpolicy>
-                    	</instructions>
+                        <instructions>
+                            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                            <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
+                            <_versionpolicy>${bnd.version.policy}</_versionpolicy>
+                        </instructions>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1119,29 +1121,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>enforce-versions</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[2.2.1,3)</version>
-                                </requireMavenVersion>
-                                <requireJavaVersion>
-                                    <version>[1.5,1.7.1)</version>
-                                </requireJavaVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.0.2</version>
                 <configuration>
@@ -1177,7 +1156,8 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <target>
-                                <copy file="NOTICE" todir="target/maven-shared-archive-resources/META-INF" failonerror="false" overwrite="true" />
+                                <copy file="NOTICE" todir="target/maven-shared-archive-resources/META-INF"
+                                      failonerror="false" overwrite="true"/>
                             </target>
                         </configuration>
                         <goals>
@@ -1299,6 +1279,30 @@
             </modules>
             <build>
                 <plugins>
+                    <!-- We check the Maven and JDK during the release -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>enforce-versions</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireMavenVersion>
+                                            <version>[2.2.1,3)</version>
+                                        </requireMavenVersion>
+                                        <requireJavaVersion>
+                                            <version>[1.5,1.7.1)</version>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <!-- We want to deploy the artifact to a staging location for perusal -->
                     <plugin>
                         <inherited>true</inherited>
