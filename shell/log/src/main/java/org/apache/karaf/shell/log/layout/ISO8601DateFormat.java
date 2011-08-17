@@ -25,7 +25,6 @@ import java.util.TimeZone;
 /**
  * Copied from log4j
  */
-// Contributors: Arndt Schoenewald <arndt@ibm23093i821.mc.schoenewald.de>
 /**
    Formats a {@link Date} in the format "yyyy-MM-dd HH:mm:ss,SSS" for example
    "1999-11-27 15:49:37,459".
@@ -34,11 +33,6 @@ import java.util.TimeZone;
    href=http://www.cl.cam.ac.uk/~mgk25/iso-time.html>summary of the
    International Standard Date and Time Notation</a> for more
    information on this format.
-
-   @author Ceki G&uuml;lc&uuml;
-   @author Andrew Vajoczki
-
-   @since 0.7.5
 */
 public class ISO8601DateFormat extends AbsoluteTimeDateFormat {
 

@@ -21,11 +21,7 @@ import junit.framework.TestCase;
 import org.apache.karaf.jaas.modules.EncryptionService;
 
 /**
- * <p>
  * Test <code>JasyptEncryption</code>.
- * </p>
- * 
- * @author jbonofre
  */
 public class JasyptEncryptionTest extends TestCase {
     

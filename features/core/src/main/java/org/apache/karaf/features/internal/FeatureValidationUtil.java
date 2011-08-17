@@ -31,8 +31,6 @@ import org.w3c.dom.Document;
 
 /**
  * Utility class which fires XML Schema validation.
- * 
- * @author ldywicki
  */
 public class FeatureValidationUtil {
 

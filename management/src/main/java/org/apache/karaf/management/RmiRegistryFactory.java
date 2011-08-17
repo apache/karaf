@@ -21,10 +21,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-/**
- * 
- * @author gnodet
- */
 public class RmiRegistryFactory {
 
     private int port = Registry.REGISTRY_PORT;

@@ -39,12 +39,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <p>
  * Enhancement of the standard <code>Properties</code>
  * managing the maintain of comments, etc.
- * </p>
- * 
- * @author gnodet, jbonofre
  */
 public class Properties extends AbstractMap<String, String> {
 

@@ -19,18 +19,15 @@ package org.apache.karaf.shell.log.layout;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
-
+ * Copied from log4j.
+ */
+/**
    <p>PatternConverter is an abtract class that provides the
    formatting functionality that derived classes need.
 
    <p>Conversion specifiers in a conversion patterns are parsed to
    individual PatternConverters. Each of which is responsible for
    converting a logging event in a converter specific manner.
-
-   @author <a href="mailto:cakalijp@Maritz.com">James P. Cakalic</a>
-   @author Ceki G&uuml;lc&uuml;
-
-   @since 0.8.2
  */
 public abstract class PatternConverter {
   public PatternConverter next;

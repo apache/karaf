@@ -23,8 +23,6 @@ import org.apache.karaf.diagnostic.core.DumpDestination;
 
 /**
  * Class which packages dumps to given directory.
- * 
- * @author ldywicki
  */
 public class DirectoryDumpDestination implements DumpDestination {
 

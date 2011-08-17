@@ -25,9 +25,7 @@ import org.apache.karaf.features.Repository;
 
 /**
  * Dump provider which add file named features.txt with informations
- * about installed features and repositories. 
- * 
- * @author ldywicki
+ * about installed features and repositories.
  */
 public class FeaturesDumpProvider extends TextDumpProvider {
 

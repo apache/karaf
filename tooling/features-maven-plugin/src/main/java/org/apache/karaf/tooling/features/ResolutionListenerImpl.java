@@ -28,11 +28,8 @@ import org.apache.maven.artifact.resolver.ResolutionListener;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.logging.Log;
 
-/**
- * @author Edwin Punzalan
- * @version $Revision: 1.1 $
- */
 public class ResolutionListenerImpl implements ResolutionListener {
+
     private Stack parents = new Stack();
     private Map artifacts = new HashMap();
     private Node rootNode;

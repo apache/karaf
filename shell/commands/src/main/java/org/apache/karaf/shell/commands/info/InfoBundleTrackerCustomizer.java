@@ -29,8 +29,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 /**
- * @author splatch
- *         Bundle tracker which check manifest headers for informations.
+ *  Bundle tracker which check manifest headers for information.
  */
 public class InfoBundleTrackerCustomizer implements BundleTrackerCustomizer {
 

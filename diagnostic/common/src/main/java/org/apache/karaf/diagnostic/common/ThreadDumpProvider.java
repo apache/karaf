@@ -24,8 +24,6 @@ import org.apache.karaf.diagnostic.core.common.TextDumpProvider;
 
 /**
  * Provider which dumps thread info to file named threads.txt.
- * 
- * @author ldywicki
  */
 public class ThreadDumpProvider extends TextDumpProvider {
 
