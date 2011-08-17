@@ -27,8 +27,6 @@ import org.osgi.framework.BundleContext;
 /**
  * Dump provider which produces file named bundles.txt with list of
  * installed bundles and it's state.
- * 
- * @author ldywicki
  */
 public class BundleDumpProvider extends TextDumpProvider {
 

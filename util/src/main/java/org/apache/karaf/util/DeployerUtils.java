@@ -21,8 +21,6 @@ import java.util.regex.Pattern;
 
 /**
  * Contain various methods that are useful for deploying artifacts
- *
- * @author gnodet
  */
 public final class DeployerUtils {
 

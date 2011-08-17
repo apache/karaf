@@ -28,8 +28,6 @@ import org.apache.karaf.shell.console.Completer;
 
 /**
  * Completer which contains multipule completers and aggregates them together.
- *
- * @version $Rev: 699733 $ $Date: 2008-09-27 22:55:23 +0200 (Sat, 27 Sep 2008) $
  */
 public class AggregateCompleter implements Completer
 {

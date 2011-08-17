@@ -20,11 +20,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
 /**
- * <p>
  * Rename an existing Karaf container instance.
- * </p>
- *
- * @author jbonofre
  */
 @Command(scope = "admin", name = "rename", description = "Renames an existing container instance.")
 public class RenameCommand extends AdminCommandSupport {

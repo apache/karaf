@@ -27,8 +27,6 @@ import org.apache.karaf.diagnostic.management.DiagnosticDumpMBean;
 
 /**
  * Implementation of diagnostic mbean.
- * 
- * @author ldywicki
  */
 public class DiagnosticDumpMBeanImpl extends StandardMBean implements 
     DiagnosticDumpMBean {

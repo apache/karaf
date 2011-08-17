@@ -27,11 +27,7 @@ import org.apache.felix.fileinstall.ArtifactUrlTransformer;
 import org.apache.karaf.util.DeployerUtils;
 
 /**
- * <p>
  * A deployment listener that listens for non OSGi jar deployements.
- * </p>
- *
- * @author jbonofre
  */
 public class WrapDeploymentListener implements ArtifactUrlTransformer {
 

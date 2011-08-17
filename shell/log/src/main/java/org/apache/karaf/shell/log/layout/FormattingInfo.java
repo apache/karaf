@@ -16,18 +16,12 @@
  */
 package org.apache.karaf.shell.log.layout;
 
-
 /**
  * Copied from log4j
  */
 /**
    FormattingInfo instances contain the information obtained when parsing
    formatting modifiers in conversion modifiers.
-
-   @author <a href=mailto:jim_cakalic@na.biomerieux.com>Jim Cakalic</a>
-   @author Ceki G&uuml;lc&uuml;
-
-   @since 0.8.2
  */
 public class FormattingInfo {
   int min = -1;

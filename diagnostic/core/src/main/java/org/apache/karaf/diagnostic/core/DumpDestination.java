@@ -19,8 +19,6 @@ import java.io.OutputStream;
 
 /**
  * Destination for created dumps.
- * 
- * @author ldywicki
  */
 public interface DumpDestination {
 
