@@ -27,7 +27,7 @@
         <version>3.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>karaf-full</artifactId>
+    <artifactId>org.apache.karaf.feature.karaf-full</artifactId>
     <packaging>pom</packaging>
     <!--<packaging>kar</packaging>-->
     <name>Apache Karaf :: Assemblies :: Full KAR</name>

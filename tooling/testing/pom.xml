@@ -49,13 +49,13 @@
         <!-- Feature Files -->
         <dependency>
           <groupId>org.apache.karaf.assemblies.features</groupId>
-          <artifactId>standard</artifactId>
+          <artifactId>org.apache.karaf.feature.standard</artifactId>
           <type>xml</type>
           <classifier>features</classifier>
         </dependency>
         <dependency>
           <groupId>org.apache.karaf.assemblies.features</groupId>
-          <artifactId>enterprise</artifactId>
+          <artifactId>org.apache.karaf.feature.enterprise</artifactId>
           <type>xml</type>
           <classifier>features</classifier>
         </dependency>

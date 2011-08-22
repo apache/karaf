@@ -38,13 +38,13 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>karaf-framework</artifactId>
+            <artifactId>org.apache.karaf.feature.karaf-framework</artifactId>
             <version>${project.version}</version>
             <type>kar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>standard</artifactId>
+            <artifactId>org.apache.karaf.feature.standard</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>
@@ -74,8 +74,8 @@
                 </executions>
                 <configuration>
                     <bootFeatures>
-                        <feature>management</feature>
-                        <feature>standard</feature>
+                        <feature>org.apache.karaf.feature.management</feature>
+                        <feature>org.apache.karaf.feature.standard</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>
