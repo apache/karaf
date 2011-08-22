@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.karaf.tooling.utils.MojoSupport;
+import org.apache.maven.model.Resource;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.taskdefs.Tar;
@@ -130,6 +131,16 @@ public class CreateArchiveMojo extends MojoSupport {
             rc.setIncludes("bin/*.bat");
             tar.add(rc);
 
+            for (Resource resource: this.project.getResources()) {
+                rc = new TarFileSet();
+                rc.setPrefix(serverName);
+                rc.setProject(project);
+                rc.setDir(new File(resource.getDirectory()));
+                rc.appendIncludes(resource.getIncludes().toArray(new String[0]));
+                rc.appendExcludes(resource.getExcludes().toArray(new String[0]));
+                tar.add(rc);
+            }
+
             archiver = tar;
         } else if ("zip".equals(artifact.getType())) {
             Zip zip = new Zip();
@@ -139,6 +150,17 @@ public class CreateArchiveMojo extends MojoSupport {
             fs.setPrefix(serverName);
             fs.setProject(project);
             zip.addFileset(fs);
+
+            for (Resource resource: this.project.getResources()) {
+                fs = new ZipFileSet();
+                fs.setPrefix(serverName);
+                fs.setProject(project);
+                fs.setDir(new File(resource.getDirectory()));
+                fs.appendIncludes(resource.getIncludes().toArray(new String[0]));
+                fs.appendExcludes(resource.getExcludes().toArray(new String[0]));
+                zip.add(fs);
+            }
+
             archiver = zip;
         } else {
             throw new IllegalArgumentException("Unknown target type: " + artifact.getType());
