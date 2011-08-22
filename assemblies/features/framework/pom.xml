@@ -206,17 +206,6 @@
                     <include>**/*</include>
                 </includes>
             </resource>
-            <resource>
-                <directory>${project.basedir}/../../..</directory>
-                <targetPath>resources</targetPath>
-                <filtering>false</filtering>
-                <includes>
-                    <include>README</include>
-                    <include>RELEASE*</include>
-                    <include>LICENSE</include>
-                    <include>NOTICE</include>
-                </includes>
-            </resource>
         </resources>
         <plugins>
             <plugin>
