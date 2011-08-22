@@ -27,7 +27,7 @@
         <version>3.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>karaf-framework</artifactId>
+    <artifactId>org.apache.karaf.feature.karaf-framework</artifactId>
     <packaging>pom</packaging>
     <!--<packaging>kar</packaging>-->
     <name>Apache Karaf :: Assemblies :: Framework KAR</name>

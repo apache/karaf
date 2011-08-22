@@ -60,7 +60,7 @@ public class FeaturesTest extends AbstractIntegrationTest {
                 Helper.setLogLevel("DEBUG")),
 
             // add two features
-            Helper.loadKarafStandardFeatures("obr", "wrapper"),
+            Helper.loadKarafStandardFeatures("org.apache.karaf.feature.obr", "org.apache.karaf.feature.wrapper"),
 
             workingDirectory("target/paxrunner/features/"),
 
