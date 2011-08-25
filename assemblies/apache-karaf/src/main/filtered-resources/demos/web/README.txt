@@ -73,9 +73,16 @@ try executing the "features:list" command as follows:
 1. In a command prompt/shell, change to your product
    installation directory.
 
-2. Run the following command:
+2. Run the following commands:
 
-    java -jar lib/karaf-client.jar features:list
+    Unix:
+        ${KARAF_HOME}/bin/client features:list
+
+    Windows:
+        %KARAF_HOME%\bin\client.bat features:list
+
+    Using JDK:
+        java -jar lib/bin/karaf-client.jar features:list
 
 In this case, you should see output similar to the following:
 

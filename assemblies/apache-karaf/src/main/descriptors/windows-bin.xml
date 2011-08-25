@@ -69,7 +69,7 @@
         </fileSet>
 
         <fileSet>
-            <directory>../demos</directory>
+            <directory>../../demos</directory>
             <outputDirectory>/demos/</outputDirectory>
             <lineEnding>dos</lineEnding>
             <excludes>
