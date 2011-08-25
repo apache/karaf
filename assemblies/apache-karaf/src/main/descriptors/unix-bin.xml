@@ -70,7 +70,7 @@
             <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
-            <directory>../demos</directory>
+            <directory>../../demos</directory>
             <outputDirectory>/demos/</outputDirectory>
             <lineEnding>unix</lineEnding>
             <excludes>
