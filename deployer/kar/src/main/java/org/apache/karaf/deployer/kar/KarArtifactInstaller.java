@@ -42,6 +42,7 @@ import org.xml.sax.SAXParseException;
 
 public class KarArtifactInstaller implements ArtifactInstaller {
 
+    public static final String FEATURES_CLASSIFIER = "features";
 	private final Logger logger = LoggerFactory.getLogger(KarArtifactInstaller.class);
 
 	private static final String KAR_SUFFIX = ".kar";
@@ -242,7 +243,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 
     static URI pathToMvnUri(String path) {
         String[] bits = path.split("/");
-        String classifier = "feature";
+        String classifier = FEATURES_CLASSIFIER;
         String artifactType = "xml";
         String version = bits[bits.length - 2];
         String artifactId = bits[bits.length - 3];
