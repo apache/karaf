@@ -34,7 +34,7 @@
 		<bundle>mvn:org.springframework/spring-webmvc/${spring.version}</bundle>
     </feature>
     <feature name="org.apache.karaf.feature.spring-dm" version="${spring.osgi.version}" resolver="(obr)" start-level='30'>
-        <feature version="[2.5.6,4)">org.apache.karaf.feature.spring</feature>
+        <feature version="${spring.version}">org.apache.karaf.feature.spring</feature>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.bundle.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-io/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
@@ -44,9 +44,16 @@
     </feature>
     <feature name="org.apache.karaf.feature.spring-dm-web" version="${spring.osgi.version}" resolver="(obr)" start-level='30'>
     	<feature version="${spring.osgi.version}">org.apache.karaf.feature.spring-dm</feature>
-    	<feature version="[2.5.6,4)">vspring-web</feature>
+    	<feature version="[2.5.6,4)">spring-web</feature>
     	<feature version="${project.version}">org.apache.karaf.feature.http</feature>
 		<bundle>mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.spring-jms" version="${spring.version}" resolver="(obr)" start-level='30'>
+        <feature version="${spring.version}">spring-web</feature>
+        <bundle start-level='10'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
+        <bundle start-level='10'>mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
+        <bundle>mvn:org.springframework/spring-jms/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-tx/${spring.version}</bundle>
     </feature>
     <feature name="org.apache.karaf.feature.wrapper" version="${project.version}" start-level='30'>
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
