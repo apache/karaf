@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author iocanel
  */
-@Command(scope = "jaas", name = "userlist", description = "Lists the users of the active realm/module.")
+@Command(scope = "jaas", name = "users", description = "Lists the users of the active realm/module.")
 public class ListUsersCommand extends JaasCommandSupport {
 
     private static final String OUTPUT_FORMAT = "%-20s %-20s";
