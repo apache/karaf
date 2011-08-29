@@ -74,8 +74,8 @@ public class MainStartTest {
         Utils.deleteDirectory(data);
 
         String[] args = new String[0];
-        System.setProperty("karaf.home", new URI(home.getPath()).getPath());
-        System.setProperty("karaf.data", new URI(data.getPath()).getPath());
+        System.setProperty("karaf.home", home.toString());
+        System.setProperty("karaf.data", data.toString());
         System.setProperty("karaf.framework.factory", "org.apache.felix.framework.FrameworkFactory");
 
 
