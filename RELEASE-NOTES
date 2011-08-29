@@ -15,6 +15,85 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.3
+                    ==================
+
+  Overview
+  --------
+
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an
+ update to Apache Karaf 2.2.2. It contains bug fixes identified in the prior release,
+ and introduces improvements including; Optional JDK 7 support, a spring-jms feature, 
+ and a macro allowing users to identify the contents of a specific config file. Several
+ dependencies were also updated, bringing Jetty to version 7.4.5.v20110725, Eclispe
+ Equinox to 4.6.2.R36x_v20110210, and Pax web to 1.0.6. 
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-281] - History using up arrow does not work on windows
+    * [KARAF-706] - variable substitution doesn't work for system.properties
+    * [KARAF-712] - Karaf's ls command does not represent URL objects correctly
+    * [KARAF-718] - Grep doesn't work when piped from features:listurl
+    * [KARAF-735] - java.util.NoSuchElementException if issue the first command as an empty command
+    * [KARAF-753] - commandlist --help points to help for jaas:pending
+    * [KARAF-760] - MInor time rendering bug
+    * [KARAF-766] - Wrong help for features:install
+    * [KARAF-769] - Update NOTICE file to mention JSW
+    * [KARAF-776] - jclouds features require OSS Sonatype repository
+    * [KARAF-796] - Editing Pax Web Configuration Via Karaf Console
+    * [KARAF-800] - karaf does not start when using java7
+    * [KARAF-809] - MainStartTest fails on WinXP
+    * [KARAF-815] - Generic the Karaf manual link
+    * [KARAF-820] - Karaf client.bat swallows commands to be passed to the Karaf instance
+    * [KARAF-824] - Web demo folder in 2.2.2 release is missing content and README.txt has bugs
+    * [KARAF-826] - KarArtifactInstaller should look for "features" classifier in place of "feature"
+    * [KARAF-827] - Karaf Web deployer (Pax-Web) always tries to deploy the deploy/README file
+
+** Dependency upgrade
+    * [KARAF-757] - upgrade to jetty 7.4.4.v20110707
+    * [KARAF-768] - Upgrade to Eclipse Equinox 3.6.2.R36x_v20110210
+    * [KARAF-775] - upgrade to pax web 1.0.5
+    * [KARAF-789] - Upgrade jetty to 7.4.5.v20110725
+    * [KARAF-790] - Upgrade paxurl to 1.2.8
+    * [KARAF-792] - Upgrade pax-runner to 1.6.2
+    * [KARAF-833] - Upgrade to Pax Web 1.0.6
+    * [KARAF-834] - Upgrade to Spring 3.0.6 - in std. features.xml
+
+** Improvement
+    * [KARAF-645] - Add a flag to suppress --help Option output on 
+    * [KARAF-667] - Improve error message when OBR resolution fails due to invalid URLs
+    * [KARAF-698] - Technical edits to User's Guide
+    * [KARAF-699] - Grammar fixes to source code files
+    * [KARAF-700] - Updates to developer's guide
+    * [KARAF-722] - throw more meaningful exception but not NPE when the BUNDLE_SYMBOLICNAME is null
+    * [KARAF-729] - Karaf Maven Plugin source code cleanup
+    * [KARAF-733] - Doc fixes to the quick start guide and overview page
+    * [KARAF-752] - Editorial fixes to the assemblies/ configuration files
+    * [KARAF-755] - Recommended improvements to help commands
+    * [KARAF-764] - Correct links to ops4j in documentation
+    * [KARAF-784] - Add date in the default Karaf log
+    * [KARAF-795] - Kar builder uses a different version for easymock then the rest of the project
+    * [KARAF-802] - Upgrade mail bundle version to 1.4.4.
+    * [KARAF-803] - Add JDK7 compile support to 2.2.x source build
+    * [KARAF-807] - Add a features name to the karaf-cellar features.xml
+    * [KARAF-808] - Remove author attribute tags from Karaf source code
+    * [KARAF-813] - Install Pax URL OBR with the OBR feature
+    * [KARAF-817] - Allow to set Karaf window name via parameter
+    * [KARAF-818] - Allow JAVA_MAX_MEM, JAVA_PERM_MEM, JAVA_MIN_MEM, JAVA_MAX_PERM_MEM the same way as for linux startup file
+    * [KARAF-829] - Support of Java 7
+    * [KARAF-840] - specify javax.annotation packages version to 1.1.0 for jre-1.6 as Annotation 1.1 Spec is used for Java 6
+
+** New Feature
+    * [KARAF-696] - Add a macro allowing users to identify the contents of a specific config file.
+    * [KARAF-835] - Provide a spring-jms feature
+
+** Task
+    * [KARAF-673] - Page failover.html contains invalid configuration properties
+
+
                     Apache Karaf 2.2.2
                     ==================
 
