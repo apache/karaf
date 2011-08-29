@@ -36,15 +36,15 @@
         <command name="jaas/cancel">
             <action class="org.apache.karaf.jaas.command.CancelCommand"/>
         </command>
-        <command name="jaas/commandlist">
+        <command name="jaas/pending">
             <action class="org.apache.karaf.jaas.command.ListPendingCommand"/>
         </command>
-        <command name="jaas/userlist">
+        <command name="jaas/users">
             <action class="org.apache.karaf.jaas.command.ListUsersCommand">
                 <property name="backingEngineService" ref="engineService"/>
             </action>
         </command>
-        <command name="jaas/list">
+        <command name="jaas/realms">
             <action class="org.apache.karaf.jaas.command.ListRealmsCommand">
                 <property name="realms" ref="realms"/>
             </action>
