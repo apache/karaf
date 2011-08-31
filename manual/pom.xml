@@ -291,52 +291,6 @@
                 </dependencies>
             </plugin>
             <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <id>attach-manual</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <taskdef name="trycatch" classname="net.sf.antcontrib.logic.TryCatchTask" classpathref="maven.plugin.classpath" />
-                                <mkdir dir="${manual.dir}" />
-                                <move file="${project.build.directory}/sitegen/manual.html" tofile="${manual}.html" />
-                                <trycatch property="error">
-                                    <try>
-                                        <echo message="Generating PDF using Prince XML (http://www.princexml.com/)" />
-                                        <exec executable="prince">
-                                            <arg value="${manual}.html" />
-                                            <arg value="${manual}.pdf" />
-                                            <arg value="--log" />
-                                            <arg value="${project.build.directory}/prince.log" />
-                                        </exec>
-                                    </try>
-                                    <catch>
-                                        <if>
-                                            <equals arg1="${must-succeed}" arg2="true" />
-                                            <then>
-                                                <echo>ERROR: ${error}</echo>
-                                                <fail>${error}</fail>
-                                            </then>
-                                            <else>
-                                                <echo>ERROR: ${error}</echo>
-                                                <echo>Falling back to dummy manuals</echo>
-                                                <copy file="src/fallback/manual.html" tofile="${manual}.html" />
-                                                <copy file="src/fallback/manual.pdf" tofile="${manual}.pdf" />
-                                            </else>
-                                        </if>
-                                    </catch>
-                                </trycatch>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>1.5</version>
@@ -349,10 +303,6 @@
                         </goals>
                         <configuration>
                             <artifacts>
-                                <artifact>
-                                    <file>${manual}.pdf</file>
-                                    <type>pdf</type>
-                                </artifact>
                                 <artifact>
                                     <file>${manual}.html</file>
                                     <type>html</type>
@@ -460,6 +410,62 @@
                 <jetty-war-dir>${basedir}/src/main/webapp/</jetty-war-dir>
                 <scalate.mode>development</scalate.mode>
             </properties>
+        </profile>
+        <profile>
+            <id>pdf-manual</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.2</version>
+                        <executions>
+                            <execution>
+                                <id>attach-manual</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <mkdir dir="${manual.dir}" />
+                                        <move file="${project.build.directory}/sitegen/manual.html" tofile="${manual}.html" />
+                                        <echo message="Generating PDF using Prince XML (http://www.princexml.com/)"/>
+                                        <exec executable="prince">
+                                            <arg value="${manual}.html"/>
+                                            <arg value="${manual}.pdf"/>
+                                            <arg value="--log"/>
+                                            <arg value="${project.build.directory}/prince.log"/>
+                                        </exec>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${manual}.pdf</file>
+                                            <type>pdf</type>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>release</id>
