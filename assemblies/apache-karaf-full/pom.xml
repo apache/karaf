@@ -38,12 +38,12 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.feature.karaf-framework</artifactId>
+            <artifactId>org.apache.karaf.feature.framework</artifactId>
             <type>kar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.feature.karaf-full</artifactId>
+            <artifactId>org.apache.karaf.feature.full</artifactId>
             <type>kar</type>
             <scope>runtime</scope>
         </dependency>
@@ -117,11 +117,9 @@
                 </executions>
                 <configuration>
                     <bootFeatures>
-                        <feature>org.apache.karaf.feature.management</feature>
-                        <feature>org.apache.karaf.feature.standard</feature>
-                        <feature>org.apache.karaf.feature.karaf-full</feature>
-                        <feature>org.apache.karaf.feature.ssh</feature>
-                        <feature>org.apache.karaf.feature.config</feature>
+                        <feature>org.apache.karaf.feature.standard.management</feature>
+                        <feature>org.apache.karaf.feature.standard.ssh</feature>
+                        <feature>org.apache.karaf.feature.standard.config</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>
