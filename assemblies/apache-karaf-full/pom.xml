@@ -117,6 +117,8 @@
                 </executions>
                 <configuration>
                     <bootFeatures>
+                        <feature>org.apache.karaf.feature.standard</feature>
+                        <feature>org.apache.karaf.feature.full</feature>
                         <feature>org.apache.karaf.feature.standard.management</feature>
                         <feature>org.apache.karaf.feature.standard.ssh</feature>
                         <feature>org.apache.karaf.feature.standard.config</feature>
