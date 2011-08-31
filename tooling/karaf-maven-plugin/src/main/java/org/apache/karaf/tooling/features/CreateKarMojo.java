@@ -42,7 +42,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 /**
- * assembles a kar archive from a features.xml file
+ * assembles a kar archive
  *
  * @version $Revision: 1.1 $
  * @goal features-create-kar
