@@ -38,7 +38,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.feature.karaf-framework</artifactId>
+            <artifactId>org.apache.karaf.feature.framework</artifactId>
             <version>${project.version}</version>
             <type>kar</type>
         </dependency>
@@ -105,8 +105,7 @@
                 </executions>
                 <configuration>
                     <bootFeatures>
-                        <feature>org.apache.karaf.feature.management</feature>
-                        <feature>org.apache.karaf.feature.standard</feature>
+                        <feature>org.apache.karaf.feature.standard.management</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>

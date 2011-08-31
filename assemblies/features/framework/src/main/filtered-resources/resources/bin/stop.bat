@@ -27,7 +27,11 @@ set DIRNAME=%~dp0%
 set PROGNAME=%~nx0%
 set ARGS=%*
 
-title Karaf
+if not "%KARAF_TITLE%" == "" (
+    title %KARAF_TITLE%
+) else (
+    title Karaf
+)
 
 goto BEGIN
 
@@ -69,4 +73,4 @@ endlocal
 
 if not "%PAUSE%" == "" pause
 
-:END_NO_PAUSE
+

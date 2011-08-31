@@ -589,9 +589,9 @@
                               <descriptor>mvn:org.apache.karaf.assemblies.features/org.apache.karaf.feature.enterprise/${project.version}/xml/features</descriptor>
                             </descriptors>
                             <features>
-                                <feature>org.apache.karaf.feature.config</feature>
-                                <feature>org.apache.karaf.feature.ssh</feature>
-                                <feature>org.apache.karaf.feature.management</feature>
+                                <feature>org.apache.karaf.feature.standard.config</feature>
+                                <feature>org.apache.karaf.feature.standard.ssh</feature>
+                                <feature>org.apache.karaf.feature.standard.management</feature>
                             </features>
                             <includeMvnBasedDescriptors>true</includeMvnBasedDescriptors>
                             <repository>target/features-repo</repository>

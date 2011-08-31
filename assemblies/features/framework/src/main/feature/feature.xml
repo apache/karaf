@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="org.apache.karaf.feature.framework">
-    <feature version="2.99.99-SNAPSHOT" name="org.apache.karaf.feature.karaf-framework">
+    <feature version="${project.version}" name="org.apache.karaf.feature.framework">
         <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <bundle dependency="false" start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}</bundle>
         <bundle dependency="false" start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
