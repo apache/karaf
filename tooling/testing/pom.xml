@@ -43,8 +43,9 @@
         <!-- The assembly and all the dependencies -->
         <dependency>
           <groupId>org.apache.karaf.assemblies</groupId>
-          <artifactId>apache-karaf</artifactId>
-          <type>pom</type>
+          <artifactId>apache-karaf-full</artifactId>
+          <classifier>bin</classifier>
+          <type>zip</type>
         </dependency>
         <!-- Feature Files -->
         <dependency>
