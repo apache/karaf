@@ -166,7 +166,7 @@ public class DependencyHelper {
 
         public boolean selectDependency(Dependency dependency) {
             String scope = dependency.getScope();
-            return !"test".equals(scope);
+            return !"test".equals(scope) && !"runtime".equals(scope);
         }
 
         public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
@@ -178,7 +178,7 @@ public class DependencyHelper {
 
         public boolean selectDependency(Dependency dependency) {
             String scope = dependency.getScope();
-            return !"test".equals(scope) && !"provided".equals(scope);
+            return !"test".equals(scope) && !"provided".equals(scope) && !"runtime".equals(scope);
         }
 
         public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
