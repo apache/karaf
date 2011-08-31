@@ -17,7 +17,7 @@
 #
 ################################################################################
 
-This directory is the java endorsed directory.
+This directory is the Java endorsed directory.
 Any jar in this folder will be used to override classes defined by the JVM.
-For more informations, see:
-   http://java.sun.com/j2se/1.5.0/docs/guide/standards/
+For more information, see:
+   http://download.oracle.com/javase/6/docs/technotes/guides/standards/

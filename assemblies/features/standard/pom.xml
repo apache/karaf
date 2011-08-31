@@ -164,6 +164,7 @@
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
                 <configuration>
+                    <startLevel>30</startLevel>
                 </configuration>
                 <executions>
                     <execution>
