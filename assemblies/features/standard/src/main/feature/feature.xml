@@ -27,11 +27,9 @@
         <bundle start-level='30'>mvn:org.springframework/spring-context/${spring.version}</bundle>
         <bundle start-level='30'>mvn:org.springframework/spring-context-support/${spring.version}</bundle>
     </feature>
-    <feature name="org.apache.karaf.feature.standard.spring-web" version="${spring.version}" resolver="(obr)">
-    	<feature version="${spring.version}">org.apache.karaf.feature.standard.spring</feature>
-    	<feature version="${project.version}">org.apache.karaf.feature.http</feature>
-    	<bundle start-level='30'>mvn:org.springframework/spring-web/${spring.version}</bundle>
-		<bundle start-level='30'>mvn:org.springframework/spring-webmvc/${spring.version}</bundle>
+    <feature name="org.apache.karaf.feature.standard.spring-aspects" version="${spring.version}" resolver="(obr)">
+        <feature version="[2.5.6,4)">org.apache.karaf.feature.standard.spring</feature>
+        <bundle start-level='30'>mvn:org.springframework/spring-aspects/${spring.version}</bundle>
     </feature>
     <feature name="org.apache.karaf.feature.standard.spring-dm" version="${spring.osgi.version}" resolver="(obr)">
         <feature version="[2.5.6,4)">org.apache.karaf.feature.standard.spring</feature>
@@ -48,12 +46,51 @@
     	<feature version="${project.version}">org.apache.karaf.feature.standard.http</feature>
 		<bundle start-level='30'>mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
     </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-instrument" version="${spring.version}" resolver="(obr)">
+        <feature version="${spring.version}">org.apache.karaf.feature.standard.spring</feature>
+        <bundle start-level='30'>mvn:org.springframework/spring-instrument/${spring.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-jdbc" version="${spring.version}" resolver="(obr)">
+        <feature version="${spring.version}">org.apache.karaf.feature.standard.spring-tx</feature>
+        <bundle start-level='30'>mvn:org.springframework/spring-jdbc/${spring.version}</bundle>
+    </feature>
     <feature name="org.apache.karaf.feature.standard.spring-jms" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">org.apache.karaf.feature.standard.spring-web</feature>
         <bundle start-level='10'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle start-level='10'>mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle start-level='30'>mvn:org.springframework/spring-jms/${spring.version}</bundle>
         <bundle start-level='30'>mvn:org.springframework/spring-tx/${spring.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-struts" version="${spring.version}" resolver="(obr)">
+        <feature version="${spring.version}">org.apache.karaf.feature.standard.spring-web</feature>
+        <bundle dependency='true' start-level='30'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-beanutils/${commons-beanutils.bundle.version}</bundle>
+        <bundle start-level='30'>mvn:org.springframework/spring-struts/${spring.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-test" version="${spring.version}" resolver="(obr)">
+        <feature version="${spring.version}">org.apache.karaf.feature.standard.spring</feature>
+        <bundle start-level='30'>mvn:org.springframework/spring-test/${spring.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-orm" version="${spring.version}" resolver="(obr)">
+        <feature version="${spring.version}">org.apache.karaf.feature.standard.spring-jdbc</feature>
+        <bundle start-level='30'>mvn:org.springframework/spring-orm/${spring.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-oxm" version="${spring.version}" resolver="(obr)">
+        <feature version="${spring.version}">org.apache.karaf.feature.standard.spring</feature>
+        <bundle start-level='30'>mvn:org.springframework/spring-oxm/${spring.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-tx" version="${spring.version}" resolver="(obr)">
+        <feature version="${spring.version}">org.apache.karaf.feature.standard.spring</feature>
+        <bundle start-level='30'>mvn:org.springframework/spring-tx/${spring.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-web" version="${spring.version}" resolver="(obr)">
+    	<feature version="${spring.version}">org.apache.karaf.feature.standard.spring</feature>
+    	<feature version="${project.version}">org.apache.karaf.feature.standard.http</feature>
+    	<bundle start-level='30'>mvn:org.springframework/spring-web/${spring.version}</bundle>
+		<bundle start-level='30'>mvn:org.springframework/spring-webmvc/${spring.version}</bundle>
+    </feature>
+    <feature name="org.apache.karaf.feature.standard.spring-web-portlet" version="${spring.version}" resolver="(obr)">
+        <feature version="${spring.version}">org.apache.karaf.feature.standard.spring-web</feature>
+        <bundle start-level='30'>mvn:org.springframework/spring-webmvc-portlet/${spring.version}</bundle>
     </feature>
     <feature name="org.apache.karaf.feature.standard.wrapper" version="${project.version}">
         <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
