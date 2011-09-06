@@ -108,7 +108,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>
-                            ${artifactId}
+                            ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Bundle-Vendor>
                             The Apache Software Foundation
