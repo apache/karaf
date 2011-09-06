@@ -29,10 +29,10 @@
 
     <artifactId>karaf-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>Apache Karaf :: Tooling :: Maven3 Karaf Plugin</name>
+    <name>Apache Karaf :: Tooling :: Maven Karaf Plugin</name>
 
     <description>
-        A Maven 3 plugin for working with karaf.
+        A Maven plugin for working with karaf.
     </description>
 
     <properties>
@@ -40,12 +40,11 @@
     </properties>
 
     <dependencies>
-        <!-- Aether resolver support -->
+
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
             <version>3.0.3</version>
-            <!--<scope>provided</scope>-->
         </dependency>
         <dependency>
            <groupId>org.sonatype.aether</groupId>
@@ -61,19 +60,16 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-artifact</artifactId>
             <version>3.0.3</version>
-            <!--<scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
             <version>3.0.3</version>
-            <!--<scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
             <version>3.0.3</version>
-            <!--<scope>provided</scope>-->
         </dependency>
 
 
@@ -81,11 +77,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.maven</groupId>-->
-            <!--<artifactId>maven-project</artifactId>-->
-            <!--<version>3.0.3</version>-->
-        <!--</dependency>-->
+
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-filtering</artifactId>
@@ -145,6 +137,10 @@
         <dependency>
           <groupId>org.apache.karaf.shell</groupId>
           <artifactId>org.apache.karaf.shell.console</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.osgi</groupId>
+          <artifactId>org.osgi.core</artifactId>
         </dependency>
         <dependency>
           <groupId>org.apache.xbean</groupId>
