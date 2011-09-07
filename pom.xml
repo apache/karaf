@@ -152,8 +152,8 @@
         <osgi.version>4.2.0</osgi.version>
         <pax.exam.version>1.2.4</pax.exam.version>
         <pax.logging.version>1.6.3</pax.logging.version>
-        <pax.runner.version>1.6.1</pax.runner.version>
-        <pax.url.version>1.3.4</pax.url.version>
+        <pax.runner.version>1.7.5</pax.runner.version>
+        <pax.url.version>1.3.5</pax.url.version>
         <pax.web.version>1.1.1</pax.web.version>
         <pax.tinybundles.version>1.3.0</pax.tinybundles.version>
         <servlet.api.version>2.5</servlet.api.version>
@@ -517,6 +517,17 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
+                <version>${felix.framework.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>org.osgi.compendium</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.main</artifactId>
                 <version>${felix.framework.version}</version>
                 <exclusions>
                     <exclusion>

@@ -42,7 +42,6 @@
         <dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
-			<version>3.0.2</version>
         </dependency>
         <!--
         <dependency>
