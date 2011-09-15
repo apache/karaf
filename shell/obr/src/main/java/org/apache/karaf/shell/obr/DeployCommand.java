@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 
 @Command(scope = "obr", name = "deploy", description = "Deploys a list of bundles using OBR service.")
 public class DeployCommand extends ObrCommandSupport {
@@ -28,8 +29,11 @@ public class DeployCommand extends ObrCommandSupport {
     @Argument(index = 0, name = "bundles", description = "List of bundle names to deploy (separated by whitespaces)", required = true, multiValued = true)
     protected List<String> bundles;
 
+    @Option(name = "-s", aliases = { "--start" }, description = "Start all deployed bundles", required = false, multiValued = false)
+    protected boolean start = false;
+
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-        doDeploy(admin, bundles, false);
+        doDeploy(admin, bundles, start);
     }
 
 }
