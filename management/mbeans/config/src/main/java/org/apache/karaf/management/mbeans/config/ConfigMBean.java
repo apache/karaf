@@ -14,17 +14,66 @@
 
 package org.apache.karaf.management.mbeans.config;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * MBean to manipulate the Config layer.
  */
 public interface ConfigMBean {
 
     /**
-     * Return the list of all configuration PIDs.
+     * Get the list of all configuration PIDs.
      *
      * @return the list of all configuration PIDs.
      * @throws Exception
      */
-    String[] list() throws Exception;
+    List<String> list() throws Exception;
+
+    /**
+     * Delete a configuration identified by the given PID.
+     *
+     * @param pid the configuration PID to delete.
+     * @throws Exception
+     */
+    void delete(String pid) throws Exception;
+
+    /**
+     * Get the list of properties for a configuration PID.
+     *
+     * @param pid the configuration PID.
+     * @return the list of properties.
+     * @throws Exception
+     */
+    Map<String, String> proplist(String pid) throws Exception;
+
+    /**
+     * Remove the configuration property identified by the given key.
+     *
+     * @param pid the configuration PID.
+     * @param key the property key.
+     * @throws Exception
+     */
+    void propdel(String pid, String key) throws Exception;
+
+    /**
+     * Append (or add) a value for the given configuration key.
+     *
+     * @param pid the configuration PID.
+     * @param key the property key.
+     * @param value the value to append to the current property value.
+     * @throws Exception
+     */
+    void propappend(String pid, String key, String value) throws Exception;
+
+    /**
+     * Set a configuration property.
+     *
+     * @param pid the configuration PID.
+     * @param key the property key.
+     * @param value the property value.
+     * @throws Exception
+     */
+    void propset(String pid, String key, String value) throws Exception;
 
 }
