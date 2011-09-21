@@ -197,6 +197,7 @@
     <feature name="webconsole-base" version="${project.version}">
         <config name="org.apache.karaf.webconsole">
             realm=karaf
+            role=${karaf.admin.role}
         </config>
         <feature>http</feature>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
