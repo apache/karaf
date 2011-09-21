@@ -25,13 +25,13 @@
         <groupId>org.apache.karaf.webconsole</groupId>
         <artifactId>webconsole</artifactId>
         <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.karaf.webconsole.console</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Web Console :: Console</name>
-    <description>This bundle is a repackaging of the Felix Web console with small security
-    related changed.</description>
+    <description>This bundle is a repackaging of the Felix Web console with small security related changed.</description>
 
     <properties>
         <appendedResourcesDirectory>${project.basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -170,5 +170,4 @@
         </plugins>
     </build>
 
-  
 </project>

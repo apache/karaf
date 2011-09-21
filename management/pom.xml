@@ -25,79 +25,17 @@
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
         <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.management</artifactId>
-    <packaging>bundle</packaging>
+    <groupId>org.apache.karaf.management</groupId>
+    <artifactId>management</artifactId>
+    <packaging>pom</packaging>
     <name>Apache Karaf :: Management</name>
-    <description>This bundle starts the Karaf embedded MBean server and RMI registry allowing users
-    to use JMX to manage Karaf.</description>
 
-    <properties>
-        <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymockclassextension</artifactId>
-            <version>${easymock.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.info</include>
-                </includes>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Import-Package>
-                            !${project.artifactId}*,
-                            javax.management,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-       </plugins>
-    </build>
-
+    <modules>
+        <module>server</module>
+        <module>mbeans</module>
+    </modules>
 
 </project>
