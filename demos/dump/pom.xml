@@ -19,26 +19,27 @@
         limitations under the License.
     -->
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.karaf.demos</groupId>
-    <artifactId>demos</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>org.apache.karaf.demos</groupId>
+        <artifactId>demos</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-  <artifactId>dump</artifactId>
-  <packaging>bundle</packaging>
-  <name>Apache Karaf :: Demos :: Demo Dump provider</name>
+    <artifactId>dump</artifactId>
+    <packaging>bundle</packaging>
+    <name>Apache Karaf :: Demos :: Demo Dump provider</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.karaf.diagnostic</groupId>
-      <artifactId>org.apache.karaf.diagnostic.core</artifactId>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.diagnostic</groupId>
+            <artifactId>org.apache.karaf.diagnostic.core</artifactId>
+        </dependency>
+    </dependencies>
 
-  <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -47,10 +48,10 @@
                     <instructions>
                         <Import-Package>*</Import-Package>
                         <Private-Package>!*</Private-Package>
-                    </instructions> 
+                    </instructions>
                 </configuration>
             </plugin>
         </plugins>
-  </build>
+    </build>
 
 </project>

@@ -10,7 +10,7 @@
         (the "License"); you may not use this file except in compliance with
         the License.  You may obtain a copy of the License at
 
-           http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,36 +25,18 @@
         <groupId>org.apache.karaf.itests</groupId>
         <artifactId>itests</artifactId>
         <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>dependencies</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Integration Tests :: Dependencies</name>
 
-    <repositories>
-        <repository>
-            <id>pax-runner</id>
-            <url>http://osgi.sonatype.org/content/groups/pax-runner</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.main</artifactId>
         </dependency>
-        <!--
-        <dependency>
-			<groupId>org.eclipse</groupId>
-			<artifactId>osgi</artifactId>
-			<version>3.5.1.R35x_v20090827</version>
-        </dependency>
-        <dependency>
-			<groupId>org.junit</groupId>
-			<artifactId>com.springsource.junit</artifactId>
-			<version>4.4.0</version>
-        </dependency>
--->
         <dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-container-default</artifactId>

@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
 
@@ -22,16 +22,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<artifactId>shell</artifactId>
 		<groupId>org.apache.karaf.shell</groupId>
+		<artifactId>shell</artifactId>
 		<version>3.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>org.apache.karaf.shell</groupId>
 	<artifactId>org.apache.karaf.shell.http</artifactId>
 	<packaging>bundle</packaging>
 	<name>Apache Karaf :: Shell :: Http Commands</name>
-	<version>3.0.0-SNAPSHOT</version>
 	<description>This bundle provides Karaf shell commands to list details of the http service.</description>
 
 	<properties>
