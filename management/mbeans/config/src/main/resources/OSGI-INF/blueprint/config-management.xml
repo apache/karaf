@@ -12,7 +12,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
+           default-activation="lazy">
 
     <!-- Reference to the MBean server -->
     <reference id="mbeanServer" interface="javax.management.MBeanServer">
@@ -25,6 +28,7 @@
     <!-- Config MBean -->
     <bean id="configMBean" class="org.apache.karaf.management.mbeans.config.internal.ConfigMBeanImpl">
         <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="storage" value="${storage}"/>
     </bean>
 
     <!-- Register MBean in the MBeanServer -->
@@ -35,5 +39,13 @@
             </map>
         </property>
     </bean>
+
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
+
+    <cm:property-placeholder persistent-id="org.apache.karaf.shell.config">
+        <cm:default-properties>
+            <cm:property name="storage" value="$[karaf.base]/etc/"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
 
 </blueprint>
