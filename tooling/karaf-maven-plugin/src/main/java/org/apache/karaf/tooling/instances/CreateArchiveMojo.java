@@ -90,13 +90,13 @@ public class CreateArchiveMojo extends MojoSupport {
     private void archive(String type) throws IOException {
         Artifact artifact1 = factory.createArtifactWithClassifier(project.getArtifact().getGroupId(), project.getArtifact().getArtifactId(), project.getArtifact().getVersion(), type, "bin");
         File target1 = archive(targetServerDirectory, destDir, artifact1);
-        projectHelper.attachArtifact( project, artifact1.getType(), "bin", target1 );
+        projectHelper.attachArtifact( project, artifact1.getType(), null, target1 );
     }
 
     public File archive(File source, File dest, Artifact artifact) throws //ArchiverException,
             IOException {
         String serverName = artifact.getArtifactId() + "-" + artifact.getVersion();
-        dest = new File(dest, serverName + "-bin." + artifact.getType());
+        dest = new File(dest, serverName + "." + artifact.getType());
         Project project = new Project();
         MatchingTask archiver;
         if ("tar.gz".equals(artifact.getType())) {
@@ -132,13 +132,16 @@ public class CreateArchiveMojo extends MojoSupport {
             tar.add(rc);
 
             for (Resource resource: this.project.getResources()) {
-                rc = new TarFileSet();
-                rc.setPrefix(serverName);
-                rc.setProject(project);
-                rc.setDir(new File(resource.getDirectory()));
-                rc.appendIncludes(resource.getIncludes().toArray(new String[0]));
-                rc.appendExcludes(resource.getExcludes().toArray(new String[0]));
-                tar.add(rc);
+                File resourceFile = new File(resource.getDirectory());
+                if (resourceFile.exists()) {
+                    rc = new TarFileSet();
+                    rc.setPrefix(serverName);
+                    rc.setProject(project);
+                    rc.setDir(resourceFile);
+                    rc.appendIncludes(resource.getIncludes().toArray(new String[0]));
+                    rc.appendExcludes(resource.getExcludes().toArray(new String[0]));
+                    tar.add(rc);
+                }
             }
 
             archiver = tar;
@@ -152,13 +155,16 @@ public class CreateArchiveMojo extends MojoSupport {
             zip.addFileset(fs);
 
             for (Resource resource: this.project.getResources()) {
-                fs = new ZipFileSet();
-                fs.setPrefix(serverName);
-                fs.setProject(project);
-                fs.setDir(new File(resource.getDirectory()));
-                fs.appendIncludes(resource.getIncludes().toArray(new String[0]));
-                fs.appendExcludes(resource.getExcludes().toArray(new String[0]));
-                zip.add(fs);
+                File resourceFile = new File(resource.getDirectory());
+                if (resourceFile.exists()) {
+                    fs = new ZipFileSet();
+                    fs.setPrefix(serverName);
+                    fs.setProject(project);
+                    fs.setDir(resourceFile);
+                    fs.appendIncludes(resource.getIncludes().toArray(new String[0]));
+                    fs.appendExcludes(resource.getExcludes().toArray(new String[0]));
+                    zip.add(fs);
+                }
             }
 
             archiver = zip;
