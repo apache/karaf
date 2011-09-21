@@ -469,8 +469,10 @@ public class Main {
 			try {
 				manager = main.launch();
 			} catch (Throwable ex) {
-				main.lifecycleManager.destroyKaraf();
-				exitCode = -1;
+                if (main.lifecycleManager != null) {
+                    main.lifecycleManager.destroyKaraf();
+                }
+                exitCode = -1;
 				System.err.println("Could not create framework: " + ex);
 				ex.printStackTrace();
 			}
