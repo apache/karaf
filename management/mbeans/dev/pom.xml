@@ -28,24 +28,19 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.management.mbeans.config</artifactId>
+    <artifactId>org.apache.karaf.management.mbeans.dev</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Management :: MBeans :: Config</name>
-    <description>This bundle provides a JMX MBean to manipulate the Karaf ConfigAdmin layer.</description>
+    <name>Apache Karaf :: Management :: MBeans :: Dev</name>
+    <description>This bundle provides a JMX MBean for dev utils actions.</description>
 
     <properties>
-        <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${basedir}../../../etc/appended-resources/</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -57,13 +52,13 @@
     <build>
         <resources>
             <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
+                <directory>src/main/resources</directory>
                 <includes>
                     <include>**/*</include>
                 </includes>
             </resource>
             <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
+                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*.info</include>
@@ -77,17 +72,17 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.management.mbeans.config;version=${project.version}
+                            org.apache.karaf.management.mbeans.dev;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !org.apache.karaf.management.mbeans.config,
+                            !org.apache.karaf.management.mbeans.dev,
                             javax.management,
                             javax.management.loading,
                             org.apache.karaf.management;version=${project.version},
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.management.mbeans.config.internal,
+                            org.apache.karaf.management.mbeans.dev.internal,
                             org.apache.felix.utils.properties,
                             !*
                         </Private-Package>
