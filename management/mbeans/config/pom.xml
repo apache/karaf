@@ -22,39 +22,33 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.diagnostic</groupId>
-        <artifactId>diagnostic</artifactId>
+        <groupId>org.apache.karaf.management.mbeans</groupId>
+        <artifactId>mbeans</artifactId>
         <version>2.2.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.diagnostic.management</artifactId>
+    <artifactId>org.apache.karaf.management.mbeans.config</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Diagnostic :: Management</name>
-    <description>Expose diagnostic MBeans via JMX.</description>
+    <name>Apache Karaf :: Management :: MBeans :: Config</name>
+    <description>This bundle provides a JMX MBean to manipulate the Karaf ConfigAdmin layer.</description>
 
     <properties>
-        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${project.basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.diagnostic</groupId>
-            <artifactId>org.apache.karaf.diagnostic.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.management</groupId>
-            <artifactId>org.apache.karaf.management.server</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
         </dependency>
     </dependencies>
 
@@ -80,18 +74,21 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
-                            ${project.artifactId}*;version=${project.version}
+                            org.apache.karaf.management.mbeans.config*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !${project.artifactId}*,
+                            !org.apache.karaf.management.mbeans.config*,
                             javax.management,
                             javax.management.loading,
+                            org.apache.karaf.management;version=${project.version},
                             *
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.diagnostic.management.internal</Private-Package>
-                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
+                        <Private-Package>
+                            org.apache.karaf.management.mbeans.config.internal,
+                            org.apache.felix.utils.properties,
+                            !*
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
