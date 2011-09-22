@@ -140,6 +140,16 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.management.mbeans</groupId>
+            <artifactId>org.apache.karaf.management.mbeans.dev</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf.shell</groupId>
+                    <artifactId>org.apache.karaf.shell.console</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.config</artifactId>
         </dependency>

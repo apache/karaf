@@ -35,6 +35,7 @@
 
     <modules>
         <module>config</module>
+        <module>dev</module>
     </modules>
 
 </project>
