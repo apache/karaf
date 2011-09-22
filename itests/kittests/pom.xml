@@ -25,15 +25,12 @@
         <groupId>org.apache.karaf.itests</groupId>
         <artifactId>itests</artifactId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>kittests</artifactId>
     <packaging>jar</packaging>
     <name>Apache Karaf :: Integration Tests :: Kit Tests</name>
-
-    <description>
-        Kits Integration tests
-    </description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>

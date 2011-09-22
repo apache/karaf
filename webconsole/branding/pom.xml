@@ -25,6 +25,7 @@
         <groupId>org.apache.karaf.webconsole</groupId>
         <artifactId>webconsole</artifactId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.karaf.webconsole.branding</artifactId>

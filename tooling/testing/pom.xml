@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    
+
     <!--
 
         Licensed to the Apache Software Foundation (ASF) under one or more
@@ -18,22 +18,20 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-    
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>org.apache.karaf.tooling</groupId>
-      <artifactId>tooling</artifactId>
-      <version>2.2.4-SNAPSHOT</version>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>tooling</artifactId>
+        <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.karaf.tooling.testing</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Tooling :: Testing environment</name>
-
-    <description>
-      A bundle to help using Pax-Exam and Karaf.
-    </description>
+    <description>A bundle to help using Pax-Exam and Karaf.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -42,22 +40,22 @@
     <dependencies>
         <!-- The assembly and all the dependencies -->
         <dependency>
-          <groupId>org.apache.karaf</groupId>
-          <artifactId>apache-karaf</artifactId>
-          <type>pom</type>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>apache-karaf</artifactId>
+            <type>pom</type>
         </dependency>
         <!-- Feature Files -->
         <dependency>
-          <groupId>org.apache.karaf.assemblies.features</groupId>
-          <artifactId>standard</artifactId>
-          <type>xml</type>
-          <classifier>features</classifier>
+            <groupId>org.apache.karaf.assemblies.features</groupId>
+            <artifactId>standard</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
         </dependency>
         <dependency>
-          <groupId>org.apache.karaf.assemblies.features</groupId>
-          <artifactId>enterprise</artifactId>
-          <type>xml</type>
-          <classifier>features</classifier>
+            <groupId>org.apache.karaf.assemblies.features</groupId>
+            <artifactId>enterprise</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
         </dependency>
         <!-- Pax EXAM -->
         <dependency>
