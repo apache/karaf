@@ -19,25 +19,26 @@
         limitations under the License.
     -->
 
-  <modelVersion>4.0.0</modelVersion>
-  
-  <parent>
-    <groupId>org.apache.karaf</groupId>
-    <artifactId>karaf</artifactId>
-    <version>2.2.4-SNAPSHOT</version>
-  </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apache.karaf.webconsole</groupId>
-  <artifactId>webconsole</artifactId>
-  <packaging>pom</packaging>
-  <name>Apache Karaf :: Web Console</name>
-  
-  <modules>
-    <module>console</module>
-    <module>branding</module>
-    <module>features</module>
-    <module>gogo</module>
-    <module>admin</module>
-  </modules>
-  
+    <parent>
+        <groupId>org.apache.karaf</groupId>
+        <artifactId>karaf</artifactId>
+        <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>org.apache.karaf.webconsole</groupId>
+    <artifactId>webconsole</artifactId>
+    <packaging>pom</packaging>
+    <name>Apache Karaf :: Web Console</name>
+
+    <modules>
+        <module>console</module>
+        <module>branding</module>
+        <module>features</module>
+        <module>gogo</module>
+        <module>admin</module>
+    </modules>
+
 </project>

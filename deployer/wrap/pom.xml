@@ -25,12 +25,12 @@
         <groupId>org.apache.karaf.deployer</groupId>
         <artifactId>deployer</artifactId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.karaf.deployer.wrap</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Deployer :: Wrap Non OSGi Jar</name>
-
     <description>This deployer transforms non OSGi jar files to a deployable bundle.</description>
 
     <properties>

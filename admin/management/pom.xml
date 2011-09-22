@@ -25,6 +25,7 @@
         <groupId>org.apache.karaf.admin</groupId>
         <artifactId>admin</artifactId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.karaf.admin.management</artifactId>
@@ -105,4 +106,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

@@ -25,6 +25,7 @@
         <groupId>org.apache.karaf.diagnostic</groupId>
         <artifactId>diagnostic</artifactId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.karaf.diagnostic.management</artifactId>
@@ -96,4 +97,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

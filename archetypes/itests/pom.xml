@@ -24,6 +24,7 @@
         <artifactId>archetypes</artifactId>
         <groupId>org.apache.karaf</groupId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     
     <groupId>org.apache.karaf.archetypes</groupId>

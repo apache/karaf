@@ -25,6 +25,7 @@
         <groupId>org.apache.karaf.tooling</groupId>
         <artifactId>tooling</artifactId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>features-maven-plugin</artifactId>

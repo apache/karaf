@@ -25,6 +25,7 @@
         <groupId>org.apache.karaf.features</groupId>
         <artifactId>features</artifactId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.karaf.features.core</artifactId>
@@ -134,4 +135,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

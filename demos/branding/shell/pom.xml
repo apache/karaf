@@ -25,6 +25,7 @@
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>org.apache.karaf.demos.branding</artifactId>
         <version>2.2.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.karaf.demos.branding.shell</artifactId>
