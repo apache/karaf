@@ -167,8 +167,12 @@
             <artifactId>org.apache.karaf.jaas.command</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.management</artifactId>
+            <groupId>org.apache.karaf.management</groupId>
+            <artifactId>org.apache.karaf.management.server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.management.mbeans</groupId>
+            <artifactId>org.apache.karaf.management.mbeans.config</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.webconsole</groupId>

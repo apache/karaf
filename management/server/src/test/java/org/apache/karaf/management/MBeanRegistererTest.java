@@ -26,7 +26,6 @@ import static org.easymock.classextension.EasyMock.*;
 import org.easymock.classextension.IMocksControl;
 
 import junit.framework.TestCase;
-import org.junit.Assert;
 
 public class MBeanRegistererTest extends TestCase {
     public void testRegistration() throws Exception {
