@@ -291,8 +291,13 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf</groupId>
-                <artifactId>org.apache.karaf.management</artifactId>
+                <groupId>org.apache.karaf.management</groupId>
+                <artifactId>org.apache.karaf.management.server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.management.mbeans</groupId>
+                <artifactId>org.apache.karaf.management.mbeans.config</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
