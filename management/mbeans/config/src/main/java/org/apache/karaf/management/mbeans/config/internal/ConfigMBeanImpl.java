@@ -22,12 +22,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Implementation of the ConfigMBean.
@@ -66,6 +61,10 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             pids.add(configurations[i].getPid());
         }
         return pids;
+    }
+
+    public void create(String pid) throws Exception {
+        store(pid, new Hashtable(), false);
     }
 
     public void delete(String pid) throws Exception {

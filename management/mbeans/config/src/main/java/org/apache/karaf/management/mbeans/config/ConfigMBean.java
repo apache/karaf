@@ -31,6 +31,14 @@ public interface ConfigMBean {
     List<String> list() throws Exception;
 
     /**
+     * Create a new configuration for the given PID.
+     *
+     * @param pid the configuration PID.
+     * @throws Exception
+     */
+    void create(String pid) throws Exception;
+
+    /**
      * Delete a configuration identified by the given PID.
      *
      * @param pid the configuration PID to delete.
