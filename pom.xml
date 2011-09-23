@@ -306,6 +306,16 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.karaf.management.mbeans</groupId>
+                <artifactId>org.apache.karaf.management.mbeans.http</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.management.mbeans</groupId>
+                <artifactId>org.apache.karaf.management.mbeans.log</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.karaf.demos</groupId>
                 <artifactId>demos</artifactId>
                 <version>${project.version}</version>
