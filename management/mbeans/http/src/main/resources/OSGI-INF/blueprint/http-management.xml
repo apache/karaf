@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <!-- Servlet Event Handler -->
+    <bean id="servletEventHandler" class="org.apache.karaf.management.mbeans.http.internal.ServletEventHandler"/>
+
+    <!-- Servlet Listener service -->
+    <service id="servletListener" interface="org.ops4j.pax.web.service.spi.ServletListener" ref="servletEventHandler"/>
+
+    <!-- Reference to the MBean server -->
+    <reference id="mbeanServer" interface="javax.management.MBeanServer">
+        <reference-listener ref="mbeanRegistrer" bind-method="registerMBeanServer" unbind-method="unregisterMBeanServer"/>
+    </reference>
+
+    <!-- HTTP MBean -->
+    <bean id="httpMBean" class="org.apache.karaf.management.mbeans.http.internal.HttpMBeanImpl">
+        <property name="servletEventHandler" ref="servletEventHandler"/>
+    </bean>
+
+    <!-- Register Dev MBean in the MBean Server -->
+    <bean id="mbeanRegistrer" class="org.apache.karaf.management.MBeanRegistrer">
+        <property name="mbeans">
+            <map>
+                <entry value="org.apache.karaf:type=http,name=${karaf.name}" key-ref="httpMBean"/>
+            </map>
+        </property>
+    </bean>
+
+</blueprint>
