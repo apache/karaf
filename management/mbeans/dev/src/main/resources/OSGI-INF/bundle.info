@@ -10,6 +10,9 @@ PSIS\u001B[0m
     The dev mbean management bundle exposes a Dev MBean that you can use with any JMX client (for instance JConsole).
 
     The dev MBean allows you quite the same actions that you can perform using dev:* commands:
+    \u001B[36mframework()\u001B[0m
+    \u001B[36mframeworkOptions(debug, framework)\u001B[0m
+    \u001B[36mrestart(clean)\u001B[0m
 
 \u001B[1mSEE ALSO\u001B[0m
     \u001B[36mDiagnostic\u001B[0m and \u001B[36mRemote Management via JMX\u001B[0m for the Karaf User Guide.
