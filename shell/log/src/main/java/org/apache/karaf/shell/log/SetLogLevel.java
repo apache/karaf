@@ -50,7 +50,9 @@ public class SetLogLevel extends OsgiCommandSupport {
         
         // make sure both uppercase and lowercase levels are supported
         level = level.toUpperCase();
-        
+
+
+
         try {
             Level.valueOf(level);
         } catch (IllegalArgumentException e) {
