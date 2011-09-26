@@ -60,30 +60,30 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
         TabularData table = new TabularDataSupport(tableType);
 
         Bundle[] bundles;
-        if (bundleId > 0) {
+        if (bundleId >= 0) {
             bundles = new Bundle[]{ bundleContext.getBundle(bundleId) };
         } else {
             bundles = bundleContext.getBundles();
         }
-        for (int i = 0; i < bundles.length; i++) {
-            Bundle bundle = bundles[i];
+        for (Bundle bundle : bundles) {;
             ServiceReference[] serviceReferences;
             if (inUse) {
                 serviceReferences = bundle.getServicesInUse();
             } else {
                 serviceReferences = bundle.getRegisteredServices();
             }
-            for (int j = 0; j < serviceReferences.length; j++) {
-                ServiceReference reference = serviceReferences[j];
-                String[] interfaces = (String[]) reference.getProperty("objectClass");
-                List<String> properties = new ArrayList<String>();
-                for (int k = 0; j < reference.getPropertyKeys().length; k++) {
-                    properties.add(reference.getPropertyKeys()[k] + " = " + reference.getProperty(reference.getPropertyKeys()[k]));
-                }
-                CompositeData data = new CompositeDataSupport(serviceType,
+            if (serviceReferences != null) {
+                for (ServiceReference reference : serviceReferences) {
+                    String[] interfaces = (String[]) reference.getProperty("objectClass");
+                    List<String> properties = new ArrayList<String>();
+                    for (String key : reference.getPropertyKeys()) {
+                        properties.add(key + " = " + reference.getProperty(key));
+                    }
+                    CompositeData data = new CompositeDataSupport(serviceType,
                         new String[]{ "Interfaces", "Properties" },
                         new Object[]{ interfaces, properties.toArray(new String[0]) });
-                table.put(data);
+                    table.put(data);
+                }
             }
         }
         return table;
