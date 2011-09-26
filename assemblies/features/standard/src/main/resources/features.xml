@@ -231,6 +231,7 @@
         <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.system/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.bundles/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.services/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.config/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.log/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.packages/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.dev/${project.version}</bundle>
