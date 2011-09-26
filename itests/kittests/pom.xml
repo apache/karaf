@@ -43,7 +43,6 @@
         <dependency>
             <groupId>org.apache.karaf.assemblies</groupId>
             <artifactId>apache-karaf-full</artifactId>
-            <classifier>bin</classifier>
             <type>tar.gz</type>
             <scope>test</scope>
         </dependency>
@@ -51,7 +50,6 @@
         <dependency>
             <groupId>org.apache.karaf.assemblies</groupId>
             <artifactId>apache-karaf-full</artifactId>
-            <classifier>bin</classifier>
             <type>zip</type>
             <scope>test</scope>
         </dependency>
@@ -108,7 +106,6 @@
                                 <artifactItem>
                                     <groupId>org.apache.karaf.assemblies</groupId>
                                     <artifactId>apache-karaf-full</artifactId>
-                                    <classifier>bin</classifier>
                                     <type>tar.gz</type>
                                     <outputDirectory>target/distributions</outputDirectory>
                                     <destFileName>karaf.tar.gz</destFileName>
@@ -127,7 +124,6 @@
                                 <artifactItem>
                                     <groupId>org.apache.karaf.assemblies</groupId>
                                     <artifactId>apache-karaf-full</artifactId>
-                                    <classifier>bin</classifier>
                                     <type>zip</type>
                                     <outputDirectory>target/distributions</outputDirectory>
                                     <destFileName>karaf.zip</destFileName>
