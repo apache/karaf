@@ -14,19 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.management.mbeans.log;
+package org.apache.karaf.management.mbeans.web;
 
-import java.util.List;
+import javax.management.openmbean.TabularData;
 
 /**
- * Log MBean.
+ * Web MBean.
  */
-public interface LogMBean {
+public interface WebMBean {
 
-    void set(String level) throws Exception;
-    void set(String level, String logger) throws Exception;
-
-    String get() throws Exception;
-    String get(String logger) throws Exception;
+    TabularData list() throws Exception;
 
 }
