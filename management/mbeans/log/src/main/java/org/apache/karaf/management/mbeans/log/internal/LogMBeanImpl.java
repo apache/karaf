@@ -37,30 +37,10 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
     static final String ROOT_LOGGER_PREFIX = "log4j.rootLogger";
     static final String LOGGER_PREFIX = "log4j.logger.";
     static final String ROOT_LOGGER = "ROOT";
-
-    private LruList events;
     private BundleContext bundleContext;
 
     public LogMBeanImpl() throws NotCompliantMBeanException {
         super(LogMBean.class);
-    }
-
-    public List<String> display() throws Exception {
-        return display(null);
-    }
-
-    public List<String> display(String logger) throws Exception {
-        Iterable<PaxLoggingEvent> le = events.getElements(Integer.MAX_VALUE);
-        List<String> out = new ArrayList<String>();
-        for (PaxLoggingEvent event : le) {
-            if ((logger != null) && (event != null)
-                    && (checkIfFromRequestedLog(event, logger))) {
-                out.add(render(event));
-            } else if ((event != null) && (logger == null)) {
-                out.add(render(event));
-            }
-        }
-        return out;
     }
 
     public void set(String level) throws Exception {
@@ -187,14 +167,6 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
             }
             return val;
         }
-    }
-
-    public LruList getEvents() {
-        return this.events;
-    }
-
-    public void setEvents(LruList events) {
-        this.events = events;
     }
 
     public BundleContext getBundleContext() {
