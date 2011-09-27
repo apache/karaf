@@ -127,6 +127,7 @@
                             !javax.swing,
                             !jline,
                             com.sun.jna*;resolution:=optional,
+                            org.osgi.service.event;resolution:=optional,
                             org.apache.karaf.branding;resolution:=optional,
                             *
                         </Import-Package>
