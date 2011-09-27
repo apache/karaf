@@ -22,7 +22,6 @@
     <!-- Log MBean -->
     <bean id="logMBean" class="org.apache.karaf.management.mbeans.log.internal.LogMBeanImpl">
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="events" ref="events"/>
     </bean>
 
     <!-- Register MBean in the MBean Server -->
@@ -32,10 +31,6 @@
                 <entry value="org.apache.karaf:type=log,name=${karaf.name}" key-ref="logMBean"/>
             </map>
         </property>
-    </bean>
-
-    <bean id="events" class="org.apache.karaf.management.mbeans.log.internal.LruList">
-        <argument value="500"/>
     </bean>
 
 </blueprint>
