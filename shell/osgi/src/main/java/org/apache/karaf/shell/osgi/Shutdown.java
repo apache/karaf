@@ -79,11 +79,8 @@ public class Shutdown extends OsgiCommandSupport {
         for (; ; ) {
             StringBuffer sb = new StringBuffer();
             String karafName = System.getProperty("karaf.name");
-<<<<<<< HEAD
             System.err.println(String.format("Confirm: shutdown instance %s (yes/no): ", karafName));
-=======
-            System.err.println(String.format("Confirm: shutdown instance %s (yes/no): ",karafName));
->>>>>>> 5ae4e9a... [KARAF-900] Shutdown command now uses the system property karaf.name to display instance name. Also its now visible what the user is typing on the confirmation prompt.
+
             System.err.flush();
             for (; ; ) {
                 int c = session.getKeyboard().read();
