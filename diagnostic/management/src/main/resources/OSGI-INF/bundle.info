@@ -11,7 +11,7 @@ h1. Description
 
 The diagnostic management bundle exposes Diagnostic MBeans that you can use with any JMX client (for instance JConsole).
 
-The DiagnosticDumpMBean is available and exposes the following operation:
+The provided DiagnosticDumpMBean exposes the following operation:
 * createDump() -
 
 h1. See also

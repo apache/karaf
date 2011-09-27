@@ -9,9 +9,9 @@ Maven URL:
 
 h1. Description
 
-This bundle provides shell commands aim to help the developer.
+This bundle provides shell commands aimed at helping the developer.
 
-The purpose is provide tooling to help the developer to identify eventually leaks or issues.
+The purpose is provide tooling to help the developer to identify eventual leaks or issues.
 
 The following commands are available:
 * dev:dynamic-import - Enables/disables dynamic-import for a given bundle.

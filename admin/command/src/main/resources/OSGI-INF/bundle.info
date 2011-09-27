@@ -9,7 +9,7 @@ Maven URL:
 
 h1. Description
 
-This bundle contains all Karaf shell commands related to admin feature.
+This bundle contains all Karaf shell commands related to the admin feature.
 
 The following commands are available:
 * admin:create - Creates a new container instance.

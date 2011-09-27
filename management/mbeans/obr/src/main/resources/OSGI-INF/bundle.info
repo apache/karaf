@@ -7,9 +7,9 @@ PSIS\u001B[0m
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    The obr mbean management bundle exposes an OBR MBean that you can use with any JMX client (for instance JConsole).
+    The obr mbean management bundle exposes an OBR MBean that can be used with any JMX client (for instance JConsole).
 
-    The OBR MBean allows you quite the same actions that you can perform using obr:* commands:
+    The OBR MBean allows quite the same actions that can be performed using obr:* commands:
     \u001B[36mlistUrls()\u001B[0m
     \u001B[36maddUrl(url)\u001B[0m
     \u001B[36mremoveUrl(url)\u001B[0m

@@ -7,9 +7,9 @@ PSIS\u001B[0m
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    The log mbean management bundle exposes a Log MBean that you can use with any JMX client (for instance JConsole).
+    The log mbean management bundle exposes a Log MBean that can be used with any JMX client (for instance JConsole).
 
-    The Log MBean allows you quite the same actions that you can perform using log:* commands:
+    The Log MBean allows quite the same actions that can be performed using log:* commands:
     \u001B[36mdisplay()\u001B[0m
     \u001B[36mdisplay(logger)\u001B[0m
     \u001B[36mget()\u001B[0m

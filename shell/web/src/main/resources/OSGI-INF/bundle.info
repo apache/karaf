@@ -9,7 +9,7 @@ Maven URL
 
 h1. Description
 
-This bundle prov Karaf shell commands to manipulate web application (war) bundles.
+This bundle provides Karaf shell commands to manipulate web application (war) bundles.
 
 The following commands are available:
 * web:list - Lists war bundles

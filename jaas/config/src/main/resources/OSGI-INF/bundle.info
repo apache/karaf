@@ -9,9 +9,9 @@ Maven URL:
 
 h1. Description
 
-This bundle manage the configuration of the JAAS security framework.
+This bundle manages the configuration of the JAAS security framework.
 
-Especially it's the initializer of the JAAS ProxyLoginModule and manage the Karaf JAAS namespaces:
+In particular it initializes of the JAAS ProxyLoginModule and manages the Karaf JAAS namespaces:
 [http://karaf.apache.org/xmlns/jaas/v1.0.0 -
 [http://karaf.apache.org/xmlns/jaas/v1.1.0 -
 

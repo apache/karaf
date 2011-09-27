@@ -9,8 +9,8 @@ Maven URL:
 
 h1. Description
 
-This bundle register a service listener, which listens from service events related to java.lang.Runnable interface.
-Each serivce with such interface may be added the following properties:
+This bundle registers a service listener, which listens from service events related to java.lang.Runnable interface.
+Each service with such interface may be added the following properties:
 
 org.apache.karaf.scheduler.task.id
 org.apache.karaf.scheduler.task.period
