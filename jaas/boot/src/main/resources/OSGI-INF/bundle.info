@@ -9,15 +9,15 @@ Maven URL
 
 h1. Description
 
-This bundle prov JAAS classes loaded during Karaf boot process.
+This bundle provides JAAS classes loaded during the Karaf boot process.
 
-Especially, it provithe ProxyLoginModule.
+In particular, it provides the ProxyLoginModule.
 
-The ProxyLoginModule is SGi proxy login module that should be used instead of a plain reference to
-a given login module. It takwo properties, the name of the login module class, and the bundle to be used
+The ProxyLoginModule is an OSGi proxy login module that should be used instead of a plain reference to
+a given login module. It takes two properties, the name of the login module class, and the bundle to be used
 to load it.
-This class must be aable from aldules, so it has to be either in a fragment bundle attached to the
-system bundle or be made available throuhe boot delegation class path.
+This class must be loadable from modules, so it has to be either in a fragment bundle attached to the
+system bundle or be made available through boot delegation class path.
 
 h1. See also
 

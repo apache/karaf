@@ -9,7 +9,7 @@ Maven URL:
 
 h1. Description
 
-This bundle provides support of the service wrapper. Which allows to start/stop Karaf as a system service
+This bundle provides support of the service wrapper, which allows for starting/stopping Karaf as a system service.
 
 h1. See also
 

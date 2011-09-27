@@ -9,9 +9,9 @@ Maven URL:
 
 h1. Description
 
-The Karaf client allows you to connect remotely to a running Karaf instance.
+The Karaf client allows for connecting remotely to a running Karaf instance.
 
-It acts as a SSH client and send commands to the running Karaf instance. If no commands are provided, the Karaf
+It acts as a SSH client and sends commands to the running Karaf instance. If no commands are provided, the Karaf
 client display the Karaf instance shell on which you can interact.
 
 To start the Karaf client, you can use the following arguments:

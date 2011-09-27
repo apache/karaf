@@ -9,7 +9,7 @@ Maven URL:
 
 h1. Description
 
-This bundle uses Jasypt tool to provide encryption support in the JAAS security framework.
+This bundle uses the Jasypt tool to provide encryption support in the JAAS security framework.
 
 Jasypt is a java library which allows the developer to add basic encryption capabilities to his/her projects
 with minimum effort, and without the need of having deep knowledge on how cryptography works.

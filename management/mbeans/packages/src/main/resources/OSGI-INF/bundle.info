@@ -7,9 +7,9 @@ PSIS\u001B[0m
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    The Packages MBean management bundle exposes a Package MBean that you can use with any JMX client (for instance JConsole).
+    The Packages MBean management bundle exposes a Package MBean that can be used with any JMX client (for instance JConsole).
 
-    The Packages MBean allows you quite the same action that you can perform using packages:* commands:
+    The Packages MBean allows quite the same actions that can be performed using packages:* commands:
     \u001B[36mexportPackages()\u001B[0m
     \u001B[36mexportPackages(bundleId)\u001B[0m
     \u001B[36mimportPackages()\u001B[0m

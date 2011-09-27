@@ -11,7 +11,7 @@ h1. Description
 
 This bundle provides the OBR (OSGi Bundle Repository) support for Karaf features.
 
-It allows you to use an OBR resolver for bundle.
+It allows you to use an OBR resolver for bundles.
 
 h1. See also
 

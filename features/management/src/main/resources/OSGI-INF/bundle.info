@@ -9,9 +9,9 @@ Maven URL:
 
 h1. Description
 
-This bundle provide MBean to manipulate Karaf features via JMX.
+This bundle provides MBean to manipulate Karaf features via JMX.
 
-Especially, it provides the FeaturesServiceMBean supporting the following operations:
+It provides the FeaturesServiceMBean supporting the following operations:
 * getFeatures() - Gets the list of features with the current status (installed or uninstalled).
 * getRepositories() - Gets the list of features repositories.
 * addRepository(url) - Adds a new repository URL in the repositories set.

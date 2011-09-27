@@ -7,9 +7,9 @@ PSIS\u001B[0m
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    The http mbean management bundle exposes a HTTP MBean that you can use with any JMX client (for instance JConsole).
+    The http mbean management bundle exposes a HTTP MBean that can be used with any JMX client (for instance JConsole).
 
-    The HTTP MBean allows you quite the same actions that you can perform using http:* commands:
+    The HTTP MBean allows quite the same actions that can be performed using http:* commands:
     \u001B[36mlist()\u001B[0m
 
 \u001B[1mSEE ALSO\u001B[0m

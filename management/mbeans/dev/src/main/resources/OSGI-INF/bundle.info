@@ -7,9 +7,9 @@ PSIS\u001B[0m
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    The dev mbean management bundle exposes a Dev MBean that you can use with any JMX client (for instance JConsole).
+    The dev mbean management bundle exposes a Dev MBean that can be used with any JMX client (for instance JConsole).
 
-    The dev MBean allows you quite the same actions that you can perform using dev:* commands:
+    The dev MBean allows quite the same actions that can be performed using dev:* commands:
     \u001B[36mframework()\u001B[0m
     \u001B[36mframeworkOptions(debug, framework)\u001B[0m
     \u001B[36mrestart(clean)\u001B[0m

@@ -11,7 +11,7 @@ h1. Description
 
 This bundle provides several JAAS modules depending of the target backend that you want to use.
 
-Currently, Karaf provides login module for:
+Currently, Karaf provides login modules for:
 - JDBC to use a database backend
 - LDAP to use a LDAP backend
 - Properties to use a simple properties file

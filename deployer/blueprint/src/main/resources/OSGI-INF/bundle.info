@@ -9,7 +9,7 @@ Maven URL:
 
 h1. Description
 
-The blueprint deployer allows you to drop Blueprint XML file directory in the deploy directory.
+The blueprint deployer allows you to drop Blueprint XML files directly in the deploy directory.
 
 Karaf will load the Blueprint descriptor and transforms it into a deployable bundle.
 

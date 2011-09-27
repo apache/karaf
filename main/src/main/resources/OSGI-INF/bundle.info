@@ -9,9 +9,9 @@ Maven URL:
 
 h1. Description
 
-This bundle is responsible of the main Karaf startup.
+This bundle is responsible for the main Karaf startup.
 
-Especially it manages the bootstrap of the low level Karaf services such as the embedded Derby database, locking
+In particular, it manages the bootstrap of low level Karaf services such as the embedded Derby database, locking
 facilities, etc.
 
 h1. See also

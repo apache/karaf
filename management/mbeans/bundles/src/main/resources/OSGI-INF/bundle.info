@@ -7,9 +7,9 @@ PSIS\u001B[0m
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    The bundles mbean management bundle exposes a Bundles MBean that you can use with any JMX client (for instance JConsole).
+    The bundles mbean management bundle exposes a Bundles MBean that can be used with any JMX client (for instance JConsole).
 
-    The bundles MBean allows you quite the same actions that you can perform using osgi:* (and bundles:*) commands:
+    The bundles MBean allows quite the same actions that can be performed using osgi:* (and bundles:*) commands:
     \u001B[36mlist()\u001B[0m
     \u001B[36mgetStartLevel(bundleId)\u001B[0m
     \u001B[36msetStartLevel(bundleId, startLevel)\u001B[0m
