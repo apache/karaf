@@ -7,10 +7,10 @@
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    The Karaf client allows you to connect remotely to a running Karaf instance.
+    The Karaf client allows for connecting remotely to a running Karaf instance.
 
-    It acts as a SSH client and send commands to the running Karaf instance. If no commands are provided, the Karaf
-    client display the Karaf instance shell on which you can interact.
+    It acts as a SSH client and sends commands to the running Karaf instance. If no commands are provided, the Karaf
+    client displays the Karaf instance shell on which you can interact.
 
     To start the Karaf client, you can use the following arguments:
         \u001B[36m-a [port]     specify the port to connect to\u001B[0m
