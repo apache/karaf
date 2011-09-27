@@ -99,6 +99,11 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
         return null;
     }
 
+   protected void deleteStorage(String pid) throws Exception {
+        File cfgFile = new File(storage, pid + ".cfg");
+        cfgFile.delete();
+    }
+
     public File getStorage() {
         return storage;
     }

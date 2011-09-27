@@ -31,6 +31,9 @@ public class DeleteCommand extends ConfigCommandSupport {
     @Option(name = "--force", aliases = {}, description = "Force the edition of this config, even if another one was under edition", required = false, multiValued = false)
     boolean force;
 
+    @Option(name = "--no-delete-cfg-file", aliases = {}, description = "Do not delete the configuration file from the etc folder", required = false, multiValued = false)
+    boolean noDeleteCfgFile = false;
+
     @Option(name = "-f", aliases = {"--use-file"}, description = "Configuration lookup using the filename instead of the pid", required = false, multiValued = false)
     boolean useFile;
 
@@ -52,6 +55,9 @@ public class DeleteCommand extends ConfigCommandSupport {
         } else {
             Configuration configuration = admin.getConfiguration(pid);
             configuration.delete();
+        }
+        if (!noDeleteCfgFile) {
+            deleteStorage(pid);
         }
         if (oldPid != null && oldPid.equals(pid) && !force) {
             this.session.put(PROPERTY_CONFIG_PID, null);

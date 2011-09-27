@@ -59,10 +59,9 @@ public interface ConfigMBean {
      *
      * @param pid the configuration PID.
      * @param key the property key.
-     * @param bypassStorage doesn't flush the change on the storage config file.
      * @throws Exception
      */
-    void propdel(String pid, String key, boolean bypassStorage) throws Exception;
+    void propdel(String pid, String key) throws Exception;
 
     /**
      * Append (or add) a value for the given configuration key.
@@ -70,10 +69,9 @@ public interface ConfigMBean {
      * @param pid the configuration PID.
      * @param key the property key.
      * @param value the value to append to the current property value.
-     * @param bypassStorage doesn't flush the change on the storage config file.
      * @throws Exception
      */
-    void propappend(String pid, String key, String value, boolean bypassStorage) throws Exception;
+    void propappend(String pid, String key, String value) throws Exception;
 
     /**
      * Set a configuration property.
@@ -81,9 +79,8 @@ public interface ConfigMBean {
      * @param pid the configuration PID.
      * @param key the property key.
      * @param value the property value.
-     * @param bypassStorage doesn't flush the change on the storage config file.
      * @throws Exception
      */
-    void propset(String pid, String key, String value, boolean bypassStorage) throws Exception;
+    void propset(String pid, String key, String value) throws Exception;
 
 }
