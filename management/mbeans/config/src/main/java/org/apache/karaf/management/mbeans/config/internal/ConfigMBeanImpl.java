@@ -73,6 +73,10 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
         configuration.delete();
+        if (storage != null) {
+            File cfgFile = new File(storage, pid + ".cfg");
+            cfgFile.delete();
+        }
     }
 
     public Map<String, String> proplist(String pid) throws Exception {
@@ -90,17 +94,17 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         return propertiesMap;
     }
 
-    public void propdel(String pid, String key, boolean bypassStorage) throws Exception {
+    public void propdel(String pid, String key) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
         Dictionary dictionary = configuration.getProperties();
         dictionary.remove(key);
-        store(pid, dictionary, bypassStorage);
+        store(pid, dictionary, false);
     }
 
-    public void propappend(String pid, String key, String value, boolean bypassStorage) throws Exception {
+    public void propappend(String pid, String key, String value) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
@@ -114,17 +118,17 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         } else {
             throw new IllegalStateException("Current value is not a String");
         }
-        store(pid, dictionary, bypassStorage);
+        store(pid, dictionary, false);
     }
 
-    public void propset(String pid, String key, String value, boolean bypassStorage) throws Exception {
+    public void propset(String pid, String key, String value) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
         Dictionary dictionary = configuration.getProperties();
         dictionary.put(key, value);
-        store(pid, dictionary, bypassStorage);
+        store(pid, dictionary, false);
     }
 
     /**
