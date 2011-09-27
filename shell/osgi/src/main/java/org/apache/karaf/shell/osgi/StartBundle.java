@@ -26,7 +26,12 @@ public class StartBundle extends BundlesCommand {
     
     protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {
-            bundle.start();
+            try {
+                bundle.start();
+            } catch (Exception e) {
+                System.err.println("Bundle " + bundle.getBundleId() + " didn't start correctly");
+                e.printStackTrace();
+            }
         }
     }
 

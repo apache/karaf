@@ -26,10 +26,13 @@ public class RestartBundle extends BundlesCommand {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {
-            bundle.stop();
-        }
-        for (Bundle bundle : bundles) {
-            bundle.start();
+            try {
+                bundle.stop();
+                bundle.start();
+            } catch (Exception e) {
+                System.err.println("Bundle " + bundle.getBundleId() + " didn't restart correctly");
+                e.printStackTrace();
+            }
         }
     }
 
