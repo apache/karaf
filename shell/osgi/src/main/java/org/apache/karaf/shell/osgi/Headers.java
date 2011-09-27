@@ -84,7 +84,7 @@ public class Headers extends BundlesCommandOptional {
         }
     }
 
-    protected void printHeaders(Bundle bundle) throws Exception {
+    protected void printHeaders(Bundle bundle) {
         String title = Util.getBundleName(bundle);
         System.out.println("\n" + title);
         System.out.println(Util.getUnderlineString(title));
