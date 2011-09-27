@@ -59,7 +59,6 @@ public class DeleteCommand extends ConfigCommandSupport {
         if (!noDeleteCfgFile) {
             deleteStorage(pid);
         }
-        deleteStorage(pid);
         if (oldPid != null && oldPid.equals(pid) && !force) {
             this.session.put(PROPERTY_CONFIG_PID, null);
             this.session.put(PROPERTY_CONFIG_PROPS, null);
