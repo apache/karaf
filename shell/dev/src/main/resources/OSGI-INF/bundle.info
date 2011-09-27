@@ -7,9 +7,9 @@
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    This bundle provides shell commands aim to help the developer.
+    This bundle provides shell commands aimed at helping the developer.
 
-    The purpose is provide tooling to help the developer to identify eventually leaks or issues.
+    The purpose is provide tooling to help the developer to identify eventual leaks or issues.
 
     The following commands are available:
     \u001B[36mdev:dynamic-import\u001B[0m Enables/disables dynamic-import for a given bundle.

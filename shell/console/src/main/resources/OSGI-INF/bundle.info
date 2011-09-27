@@ -7,7 +7,7 @@
         \u001B[33mmvn:${project.groupId}/${project.artifactId}/${project.version}\u001B[0m
 
 \u001B[1mDESCRIPTION\u001B[0m
-    This bundle provides the integration of Apache Felix Gogo, shell, and console.
+    This bundle provides for integration of Apache Felix Gogo, shell, and console.
 
     It provides the default Karaf branding including the default welcome message.
 

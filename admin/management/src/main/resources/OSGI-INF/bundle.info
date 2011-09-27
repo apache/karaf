@@ -9,10 +9,10 @@
 \u001B[1mDESCRIPTION\u001B[0m
     This bundle provides JMX MBeans related to the Karaf admin feature.
 
-    Especially, you have a AdminServiceMBean that you can manipulate remotely using a JMX client (for instance
+    In particular, an AdminServiceMBean is provided that can be remotely administered using a JMX client (for instance
     JConsole).
 
-    On this AdminServiceMBean, you have the following operations available:
+    With this AdminServiceMBean, you have the following operations available:
     \u001B[36mcreateInstance(name, sshPort, rmiPort, location, javaOpts, features, featureURLs)\u001B[0m Creates a new Karaf instance.
     \u001B[36mchangeSshPort(name, port)\u001B[0m Changes the SSH port number of an existing Karaf instance.
     \u001B[36mchangeRmiRegistryPort(name, port)\u001B[0m Changes the RMI registry port number of an existing Karaf instance.

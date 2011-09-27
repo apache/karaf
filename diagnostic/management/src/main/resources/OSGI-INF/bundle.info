@@ -9,7 +9,7 @@
 \u001B[1mDESCRIPTION\u001B[0m
     The diagnostic management bundle exposes Diagnostic MBeans that you can use with any JMX client (for instance JConsole).
 
-    The DiagnosticDumpMBean is available and exposes the following operation:
+    The provided DiagnosticDumpMBean exposes the following operation:
     \u001B[36mcreateDump()\u001B[0m
 
 \u001B[1mSEE ALSO\u001B[0m
