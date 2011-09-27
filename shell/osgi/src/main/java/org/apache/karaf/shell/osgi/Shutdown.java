@@ -78,7 +78,8 @@ public class Shutdown extends OsgiCommandSupport {
 
         for (; ; ) {
             StringBuffer sb = new StringBuffer();
-            System.err.println("Confirm: shutdown instance (yes/no): ");
+            String karafName = System.getProperty("karaf.name");
+            System.err.println(String.format("Confirm: shutdown instance %s (yes/no): ",karafName));
             System.err.flush();
             for (; ; ) {
                 int c = session.getKeyboard().read();
@@ -86,6 +87,7 @@ public class Shutdown extends OsgiCommandSupport {
                     return null;
                 }
                 System.err.print((char) c);
+                System.err.flush();
                 if (c == '\r' || c == '\n') {
                     break;
                 }
