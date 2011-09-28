@@ -152,6 +152,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
                 }
             }
             Properties p = new Properties(storageFile);
+            p.clear();
             for (Enumeration keys = properties.keys(); keys.hasMoreElements(); ) {
                 Object key = keys.nextElement();
                 if (!Constants.SERVICE_PID.equals(key)
