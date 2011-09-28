@@ -51,25 +51,32 @@ public class FrameworkOptions extends OsgiCommandSupport {
             System.out.printf("Current OSGi framework is %s%n", getFramework().getName());
             return null;
         }
-        if (debug) {
-            Framework frwk = getFramework();
-            System.out.printf("Enabling debug for OSGi framework (%s)%n", frwk.getName());
-            frwk.enableDebug(new File(KARAF_BASE));
-        }
-        if (nodebug) {
-            Framework frwk = getFramework();
-            System.out.printf("Disabling debug for OSGi framework (%s)%n", frwk.getName());
-            frwk.disableDebug(new File(KARAF_BASE));
-        }
+        Framework frwk = null;
         if (framework != null) {
             if (!Felix.NAME.equalsIgnoreCase(framework) && !Equinox.NAME.equalsIgnoreCase(framework)) {
                 System.err.printf("Unsupported framework: %s%n", framework);
                 return null;
             }
+            if (Felix.NAME.equalsIgnoreCase(framework))
+                frwk = new Felix(new File(KARAF_BASE));
+            else
+                frwk = new Equinox(new File(KARAF_BASE));
             Properties props = new Properties(new File(System.getProperty("karaf.base"), "etc/config.properties"));
             props.put("karaf.framework", framework.toLowerCase());
             props.save();
             System.out.println("Changed OSGi framework to " + framework.toLowerCase() + ". Karaf needs to be restarted to make the change effective");
+        }
+        if (debug) {
+            if (frwk == null)
+                frwk = getFramework();
+            System.out.printf("Enabling debug for OSGi framework (%s)%n", frwk.getName());
+            frwk.enableDebug(new File(KARAF_BASE));
+        }
+        if (nodebug) {
+            if (frwk == null)
+                frwk = getFramework();
+            System.out.printf("Disabling debug for OSGi framework (%s)%n", frwk.getName());
+            frwk.disableDebug(new File(KARAF_BASE));
         }
 
         return null;
