@@ -26,7 +26,11 @@ public class UninstallBundle extends BundlesCommandWithConfirmation {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {
-            bundle.uninstall();
+            try {
+                bundle.uninstall();
+            } catch (Exception e) {
+                System.err.println(e.toString());
+            }
         }
     }
 
