@@ -29,8 +29,7 @@ public class StopBundle extends BundlesCommand {
             try {
                 bundle.stop();
             } catch (Exception e) {
-                System.err.println("Bundle " + bundle.getBundleId() + " didn't stop correctly");
-                e.printStackTrace();
+                System.err.println(e.toString());
             }
         }
     }

@@ -29,8 +29,7 @@ public class UninstallBundle extends BundlesCommand {
             try {
                 bundle.uninstall();
             } catch (Exception e) {
-                System.err.println("Bundle " + bundle.getBundleId() + " didn't uninstall correctly");
-                e.printStackTrace();
+                System.err.println(e.toString());
             }
         }
     }

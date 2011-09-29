@@ -51,7 +51,11 @@ public class InstallBundle extends OsgiCommandSupport {
         }
         if (start) {
             for (Bundle bundle : bundles) {
-                bundle.start();
+                try {
+                    bundle.start();
+                } catch (Exception e) {
+                    System.err.println(e.toString());
+                }
             }
         }
         if (sb.toString().indexOf(',') > 0) {
