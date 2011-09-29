@@ -57,9 +57,6 @@
         <command name="osgi/restart">
             <action class="org.apache.karaf.shell.osgi.RestartBundle"/>
         </command>
-        <command name="osgi/shutdown">
-            <action class="org.apache.karaf.shell.osgi.Shutdown"/>
-        </command>
         <command name="osgi/start">
             <action class="org.apache.karaf.shell.osgi.StartBundle"/>
         </command>

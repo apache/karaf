@@ -9,7 +9,7 @@ PSIS\u001B[0m
 \u001B[1mDESCRIPTION\u001B[0m
     The System MBean management bundle exposes a System MBean that can be used with any JMX client (for instance JConsole).
 
-    The System MBean allows quite the same actions that can be performed using osgi:shutdown, etc commands:
+    The System MBean allows quite the same actions that can be performed using system:* commands:
     \u001B[36mshutdown()\u001B[0m
 
 \u001B[1mSEE ALSO\u001B[0m
