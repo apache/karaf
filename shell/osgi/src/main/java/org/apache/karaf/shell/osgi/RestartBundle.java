@@ -28,16 +28,9 @@ public class RestartBundle extends BundlesCommand {
         for (Bundle bundle : bundles) {
             try {
                 bundle.stop();
-            } catch (Exception e) {
-                System.err.println("Bundle " + bundle.getBundleId() + " didn't stop correctly");
-                e.printStackTrace();
-                continue;
-            }
-            try {
                 bundle.start();
             } catch (Exception e) {
-                System.err.println("Bundle " + bundle.getBundleId() + " didn't start correctly");
-                e.printStackTrace();
+                System.err.println(e.toString());
             }
         }
     }

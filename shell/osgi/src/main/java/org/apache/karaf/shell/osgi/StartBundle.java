@@ -29,8 +29,7 @@ public class StartBundle extends BundlesCommand {
             try {
                 bundle.start();
             } catch (Exception e) {
-                System.err.println("Bundle " + bundle.getBundleId() + " didn't start correctly");
-                e.printStackTrace();
+                System.err.println(e.toString());
             }
         }
     }
