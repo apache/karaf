@@ -37,15 +37,16 @@
         <module>commands</module>
         <module>config</module>
         <module>console</module>
+        <module>dev</module>
+        <module>http</module>
         <module>log</module>
         <module>obr</module>
         <module>osgi</module>
         <module>packages</module>
         <module>ssh</module>
-        <module>wrapper</module>
-        <module>dev</module>
-        <module>http</module>
+        <module>system</module>
         <module>web</module>
+        <module>wrapper</module>
     </modules>
 
 </project>

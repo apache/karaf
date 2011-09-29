@@ -21,7 +21,6 @@ The following commands are available:
 * osgi:refresh - Refresh a bundle.
 * osgi:resolve - Resolve bundle(s).
 * osgi:restart - Stops and restarts bundle(s).
-* osgi:shutdown - Shuts the framework down.
 * osgi:start - Starts bundle(s).
 * osgi:start-level - Gets or sets the system start level.
 * osgi:stop - Stop bundle(s).

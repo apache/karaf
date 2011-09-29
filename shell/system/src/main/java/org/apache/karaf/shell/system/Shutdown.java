@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.osgi;
+package org.apache.karaf.shell.system;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
@@ -28,7 +28,7 @@ import java.util.GregorianCalendar;
 /**
  * Command to shut down Karaf
  */
-@Command(scope = "osgi", name = "shutdown", description = "Shuts the framework down.")
+@Command(scope = "system", name = "shutdown", description = "Shuts Karaf down.")
 public class Shutdown extends OsgiCommandSupport {
 
     @Option(name = "-f", aliases = "--force", description = "Force the shutdown without confirmation message.", required = false, multiValued = false)
