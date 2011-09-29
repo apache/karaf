@@ -26,7 +26,11 @@ public class StopBundle extends BundlesCommandWithConfirmation {
 	
 	protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {
-            bundle.stop();
+            try {
+                bundle.stop();
+            } catch (Exception e) {
+                System.err.println(e.toString());
+            }
         }
     }
 

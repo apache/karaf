@@ -26,7 +26,11 @@ public class StartBundle extends BundlesCommandWithConfirmation {
     
     protected void doExecute(List<Bundle> bundles) throws Exception {
         for (Bundle bundle : bundles) {
-            bundle.start();
+            try {
+                bundle.start();
+            } catch (Exception e) {
+                System.err.println(e.toString());
+            }
         }
     }
 
