@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.dev;
+package org.apache.karaf.shell.services;
 
 import java.util.concurrent.TimeoutException;
 
@@ -31,8 +31,8 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Command that can be used to wait for an OSGi service.
  */
-@Command(scope = "dev", name = "wait-for-service", description = "Wait for a given OSGi service.")
-public class WaitForService extends OsgiCommandSupport {
+@Command(scope = "service", name = "wait", description = "Wait for a given OSGi service.")
+public class Wait extends OsgiCommandSupport {
 
     @Option(name = "-e", aliases = { "--exception" }, description = "throw an exception if the service is not found after the timeout")
     boolean exception;
