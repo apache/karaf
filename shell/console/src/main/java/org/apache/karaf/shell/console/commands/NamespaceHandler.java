@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.aries.blueprint.mutable.MutablePassThroughMetadata;
 import org.apache.felix.service.command.Function;
 import org.osgi.service.blueprint.reflect.*;
 import org.w3c.dom.Element;
@@ -82,6 +83,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
                     parseChildElement(childElement, context);
                 }
             }
+            registerConverters(context);
             return null;
         } else {
             throw new IllegalStateException("Unexpected element " + element.getNodeName());
@@ -92,6 +94,13 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         if (nodeNameEquals(element, COMMAND)) {
             parseCommand(element, context);
         }
+    }
+
+    private void registerConverters(ParserContext context) {
+        MutablePassThroughMetadata cnv = context.createMetadata(MutablePassThroughMetadata.class);
+        cnv.setId("." + NumberToStringConverter.class.getName());
+        cnv.setObject(new NumberToStringConverter());
+        context.getComponentDefinitionRegistry().registerTypeConverter(cnv);
     }
 
     private void parseCommand(Element element, ParserContext context) {
