@@ -14,17 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.osgi;
+package org.apache.karaf.shell.services;
 
 import java.util.List;
 
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.service.command.Function;
+import org.apache.karaf.shell.osgi.BundlesCommand;
+import org.apache.karaf.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
-@Command(scope = "osgi", name = "ls", description = "Lists OSGi services.")
+@Command(scope = "services", name = "list", description = "Lists OSGi services.")
 public class ListServices extends BundlesCommand {
 
     @Option(name = "-a", aliases = {}, description = "Shows all services", required = false, multiValued = false)
@@ -74,11 +76,11 @@ public class ListServices extends BundlesCommand {
             // Print header if we have not already done so.
             if (!headerPrinted) {
                 headerPrinted = true;
-                String title = Util.getBundleName(bundle);
+                String title = ShellUtil.getBundleName(bundle);
                 title = (inUse) ? title + " uses:" : title + " provides:";
                 System.out.println("");
                 System.out.println(title);
-                System.out.println(Util.getUnderlineString(title));
+                System.out.println(ShellUtil.getUnderlineString(title));
             }
 
             if (showAll || print) {
@@ -91,7 +93,7 @@ public class ListServices extends BundlesCommand {
                 String[] keys = refs[refIdx].getPropertyKeys();
                 for (int keyIdx = 0; (keys != null) && (keyIdx < keys.length); keyIdx++) {
                     Object v = refs[refIdx].getProperty(keys[keyIdx]);
-                    System.out.println(keys[keyIdx] + " = " + Util.getValueString(v));
+                    System.out.println(keys[keyIdx] + " = " + ShellUtil.getValueString(v));
                 }
 
                 needSeparator = true;
@@ -126,12 +128,12 @@ public class ListServices extends BundlesCommand {
             if (showAll || print) {
                 if (!headerPrinted) {
                     headerPrinted = true;
-                    String title = Util.getBundleName(bundle);
+                    String title = ShellUtil.getBundleName(bundle);
                     title = (inUse) ? title + " uses:" : title + " provides:";
                     System.out.println("\n" + title);
-                    System.out.println(Util.getUnderlineString(title));
+                    System.out.println(ShellUtil.getUnderlineString(title));
                 }
-                System.out.println(Util.getValueString(objectClass));
+                System.out.println(ShellUtil.getValueString(objectClass));
             }
         }
 

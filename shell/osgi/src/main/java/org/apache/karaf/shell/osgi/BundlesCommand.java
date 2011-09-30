@@ -25,7 +25,7 @@ import org.osgi.framework.Bundle;
 
 public abstract class BundlesCommand extends OsgiCommandSupport {
 
-    @Argument(index = 0, name = "ids", description = "The list of bundle (identified by IDs or name or name/version) separated by whitespaces", required = true, multiValued = true)
+    @Argument(index = 0, name = "ids", description = "The list of bundle (identified by IDs or name or name/version) separated by whitespaces", required = false, multiValued = true)
     List<String> ids;
 
     protected Object doExecute() throws Exception {

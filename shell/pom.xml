@@ -35,14 +35,15 @@
 
     <modules>
         <module>commands</module>
-        <module>config</module>
         <module>console</module>
+        <module>config</module>
         <module>dev</module>
         <module>http</module>
         <module>log</module>
         <module>obr</module>
         <module>osgi</module>
         <module>packages</module>
+        <module>services</module>
         <module>ssh</module>
         <module>system</module>
         <module>web</module>

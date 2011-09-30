@@ -17,7 +17,6 @@ The following commands are available:
 * osgi:info - Displays detailed information of a given bundle.
 * osgi:installs - Installs one or more bundles.
 * osgi:list - Lists all installed bundles.
-* osgi:ls - Lists OSGi services.
 * osgi:refresh - Refresh a bundle.
 * osgi:resolve - Resolve bundle(s).
 * osgi:restart - Stops and restarts bundle(s).

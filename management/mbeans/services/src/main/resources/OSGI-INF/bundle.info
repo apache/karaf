@@ -9,7 +9,7 @@ PSIS\u001B[0m
 \u001B[1mDESCRIPTION\u001B[0m
     The services mbean management bundle exposes a Services MBean that can be used with any JMX client (for instance JConsole).
 
-    The Services MBean allows quite the same action that can be performed using osgi:ls (and services:*) commands:
+    The Services MBean allows quite the same action that can be performed using services:* commands:
     \u001B[36mlist()\u001B[0m
 
 \u001B[1mSEE ALSO\u001B[0m
