@@ -18,13 +18,23 @@
  */
 package org.apache.karaf.shell.console.jline;
 
+import java.io.InputStream;
+import java.io.PrintStream;
+
+import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.CommandSessionImpl;
+import org.apache.felix.gogo.runtime.activator.EventAdminListener;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.threadio.ThreadIO;
 import org.fusesource.jansi.AnsiConsole;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 public class Activator implements BundleActivator {
 
-    private org.apache.felix.gogo.runtime.activator.Activator activator = new org.apache.felix.gogo.runtime.activator.Activator();
+    private org.apache.felix.gogo.runtime.activator.Activator activator = new WrappedActivator();
 
     public void start(BundleContext context) throws Exception {
         AnsiConsole.systemInstall();
@@ -35,5 +45,59 @@ public class Activator implements BundleActivator {
         activator.stop(context);
         AnsiConsole.systemUninstall();
     }
+
+    protected static class WrappedActivator extends org.apache.felix.gogo.runtime.activator.Activator {
+
+        @Override
+        protected ServiceRegistration newProcessor(ThreadIO tio, BundleContext context) {
+            processor = new WrappedCommandProcessor(tio);
+            try
+            {
+                processor.addListener(new EventAdminListener(context));
+            }
+            catch (NoClassDefFoundError error)
+            {
+                // Ignore the listener if EventAdmin package isn't present
+            }
+
+            // Setup the variables and commands exposed in an OSGi environment.
+            processor.addConstant(CONTEXT, context);
+            processor.addCommand("osgi", processor, "addCommand");
+            processor.addCommand("osgi", processor, "removeCommand");
+            processor.addCommand("osgi", processor, "eval");
+
+            return context.registerService(CommandProcessor.class.getName(), processor, null);
+        }
+
+    }
+
+    protected static class WrappedCommandProcessor extends CommandProcessorImpl {
+
+        public WrappedCommandProcessor(ThreadIO tio) {
+            super(tio);
+        }
+
+        @Override
+        public CommandSession createSession(InputStream in, PrintStream out, PrintStream err) {
+            CommandSessionImpl session = new WrappedCommandSession(this, in, out, err);
+            sessions.put(session, null);
+            return session;
+        }
+    }
+
+    protected static class WrappedCommandSession extends CommandSessionImpl {
+
+        public WrappedCommandSession(CommandProcessorImpl shell, InputStream in, PrintStream out, PrintStream err) {
+            super(shell, in, out, err);
+        }
+        public Object get(String name) {
+            Object val = super.get(name);
+            if (val == null) {
+                val = System.getProperty(name);
+            }
+            return val;
+        }
+
+   }
 
 }
