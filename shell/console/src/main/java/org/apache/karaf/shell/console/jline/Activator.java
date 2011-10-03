@@ -62,9 +62,9 @@ public class Activator implements BundleActivator {
 
             // Setup the variables and commands exposed in an OSGi environment.
             processor.addConstant(CONTEXT, context);
-            processor.addCommand("osgi", processor, "addCommand");
-            processor.addCommand("osgi", processor, "removeCommand");
-            processor.addCommand("osgi", processor, "eval");
+            processor.addCommand("bundles", processor, "addCommand");
+            processor.addCommand("bundles", processor, "removeCommand");
+            processor.addCommand("bundles", processor, "eval");
 
             return context.registerService(CommandProcessor.class.getName(), processor, null);
         }

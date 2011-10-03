@@ -45,7 +45,7 @@ public class CoreTest extends AbstractIntegrationTest {
 
         CommandProcessor cp = getOsgiService(CommandProcessor.class);
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
-        cs.execute("osgi:list --help");
+        cs.execute("bundles:list --help");
         cs.close();
     }
 
@@ -89,7 +89,7 @@ public class CoreTest extends AbstractIntegrationTest {
 //        Thread.sleep(5000);
 //
 //        Shell shell = getOsgiService(Shell.class);
-//        shell.execute("osgi");
+//        shell.execute("bundles");
 //        shell.execute("help");
 //        shell.execute("..");
 //    }

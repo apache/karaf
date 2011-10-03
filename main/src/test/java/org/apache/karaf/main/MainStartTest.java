@@ -45,7 +45,7 @@ public class MainStartTest {
 
 		String[] args = new String[0];
 		String fileMVNbundle = new File(home, "bundles/pax-url-mvn.jar").toURI().toURL().toExternalForm();
-		String mvnUrl = "mvn:org.osgi/org.osgi.compendium/4.2.0";
+		String mvnUrl = "mvn:org.bundles/org.bundles.compendium/4.2.0";
 		System.setProperty("karaf.home", home.toString());
 		System.setProperty("karaf.data", data.toString());
 		System.setProperty("karaf.auto.start.1", "\""+fileMVNbundle+"|unused\"");

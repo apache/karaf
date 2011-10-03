@@ -25,14 +25,14 @@ public final class JDBCUtils {
 
     public static final String DATASOURCE = "datasource";
     public static final String JNDI = "jndi:";
-    public static final String OSGI = "osgi:";
+    public static final String OSGI = "bundles:";
 
     private JDBCUtils() {
 
     }
 
     /**
-     * Looks up a datasource from the url. The datasource can be passed either as jndi name or osgi ldap filter.
+     * Looks up a datasource from the url. The datasource can be passed either as jndi name or bundles ldap filter.
      *
      * @param url
      * @return

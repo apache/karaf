@@ -70,7 +70,7 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
         String val = enc.encrypt("bar");
         System.setProperty("foo", val);
 
-        System.setProperty("org.osgi.framework.storage", "target/osgi/" + System.currentTimeMillis());
+        System.setProperty("org.bundles.framework.storage", "target/bundles/" + System.currentTimeMillis());
         System.setProperty("karaf.name", "root");
 
         List<BundleDescriptor> bundles = new ClasspathScanner().scanForBundles("(Bundle-SymbolicName=*)");

@@ -195,7 +195,7 @@
             <includes>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.console</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.dev</include>
-                <include>org.apache.karaf.shell:org.apache.karaf.shell.osgi</include>
+                <include>org.apache.karaf.shell:org.apache.karaf.shell.bundles</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.log</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.config</include>
                 <include>org.apache.karaf.shell:org.apache.karaf.shell.packages</include>

@@ -104,7 +104,7 @@
                         <Private-Package>
                             org.apache.felix.*;-split-package:=merge-first,
                             org.eclipse.*;-split-package:=merge-first,
-                            org.osgi.*;-split-package:=merge-first,
+                            org.bundles.*;-split-package:=merge-first,
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Import-Package>!*</Import-Package>
@@ -130,16 +130,16 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>org.eclipse:osgi</include>
+                                    <include>org.eclipse:bundles</include>
                                     <include>org.apache.felix:org.apache.felix.framework</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
                                 </includes>
                             </artifactSet>
                             <filters>
                                 <filter>
-                                    <artifact>org.eclipse:osgi</artifact>
+                                    <artifact>org.eclipse:bundles</artifact>
                                     <includes>
-                                        <include>org/osgi/**</include>
+                                        <include>org/bundles/**</include>
                                         <include>org/eclipse/**</include>
                                         <include>hookconfigurators.properties</include>
                                     </includes>

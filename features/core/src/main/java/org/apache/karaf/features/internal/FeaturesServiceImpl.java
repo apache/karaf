@@ -926,7 +926,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         // Register EventAdmin listener
         EventAdminListener listener = null;
         try {
-            getClass().getClassLoader().loadClass("org.osgi.service.event.EventAdmin");
+            getClass().getClassLoader().loadClass("org.bundles.service.event.EventAdmin");
             listener = new EventAdminListener(bundleContext);
         } catch (Throwable t) {
             // Ignore, if the EventAdmin package is not available, just don't use it
@@ -1202,7 +1202,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
      * the version syntax. This method cleans up such a version to match an OSGi
      * version.
      *
-     * @param version possibly osgi-non-compliant version
+     * @param version possibly bundles-non-compliant version
      * @return osgi compliant version
      */
     static public String cleanupVersion(String version) {

@@ -36,12 +36,12 @@
     <modules>
         <module>commands</module>
         <module>console</module>
+        <module>bundles</module>
         <module>config</module>
         <module>dev</module>
         <module>http</module>
         <module>log</module>
         <module>obr</module>
-        <module>osgi</module>
         <module>packages</module>
         <module>services</module>
         <module>ssh</module>

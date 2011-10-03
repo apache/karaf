@@ -168,7 +168,7 @@ public class PropertiesHelper {
             String key = (String) e.nextElement();
             if (key.startsWith("felix.") ||
                     key.startsWith("karaf.") ||
-                    key.startsWith("org.osgi.framework.")) {
+                    key.startsWith("org.bundles.framework.")) {
                 configProps.setProperty(key, System.getProperty(key));
             }
         }

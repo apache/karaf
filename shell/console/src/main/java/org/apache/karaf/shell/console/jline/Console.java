@@ -93,7 +93,7 @@ public class Console implements Runnable
         this.terminal = term == null ? new UnsupportedTerminal() : term;
         this.consoleInput = new ConsoleInputStream();
         this.session = processor.createSession(this.consoleInput, this.out, this.err);
-        this.session.put("SCOPE", "shell:osgi:*");
+        this.session.put("SCOPE", "shell:bundles:*");
         this.closeCallback = closeCallback;
 
         reader = new ConsoleReader(this.consoleInput,
