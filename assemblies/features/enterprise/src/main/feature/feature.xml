@@ -19,6 +19,9 @@
 -->
 
 <features name="org.apache.karaf.feature.enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+
+    <!-- For transition purpose, we provide both Feature Full Qualified name and "old" short name, see KARAF-819 -->
+
     <feature name='org.apache.karaf.feature.enterprise.transaction' description='OSGi Transaction Manager' version='${aries.transaction.version}'
              resolver='(obr)'>
         <details>The Aries JTA</details>
@@ -26,6 +29,9 @@
         <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.blueprint/${aries.transaction.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.wrappers/${aries.transaction.version}</bundle>
+    </feature>
+    <feature name="transaction" version="${aries.transaction.version}" resolver="(obr)">
+        <feature version="${aries.transaction.version}">org.apache.karaf.feature.enterprise.transaction</feature>
     </feature>
 
     <feature name='org.apache.karaf.feature.enterprise.jpa' description='OSGi Persistence Container' version='${aries.jpa.version}'
@@ -38,6 +44,9 @@
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.version}</bundle>
     </feature>
+    <feature name="jpa" version="${aries.jpa.version}" resolver="(obr)">
+        <feature version="${aries.jpa.version}">org.apache.karaf.feature.enterprise.jpa</feature>
+    </feature>
 
     <feature name='org.apache.karaf.feature.enterprise.jndi' description='OSGi Service Registry JNDI access' version='${aries.jndi.version}'
              resolver='(obr)'>
@@ -47,6 +56,9 @@
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
+    </feature>
+    <feature name="jndi" version="${aries.jndi.version}" resolver="(obr)">
+        <feature version="${aries.jndi.version}">org.apache.karaf.feature.enterprise.jndi</feature>
     </feature>
 
     <feature name="org.apache.karaf.feature.enterprise.application-without-isolation" version="${aries.application.version}">
@@ -69,4 +81,8 @@
         <!-- without isolation -->
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.runtime/${aries.application.version}</bundle>
     </feature>
+    <feature name="application-without-isolation" version="${aries.application.version}">
+        <feature version="${aries.application.version}">org.apache.karaf.feature.enterprise.application-without-isolation</feature>
+    </feature>
+
 </features>
