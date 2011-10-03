@@ -23,6 +23,9 @@
         <command name="system/shutdown">
             <action class="org.apache.karaf.shell.system.Shutdown"/>
         </command>
+        <command name="system/start-level">
+            <action class="org.apache.karaf.shell.system.StartLevel"/>
+        </command>
     </command-bundle>
 
 </blueprint>

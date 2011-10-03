@@ -45,7 +45,7 @@ public class Equinox extends Framework {
         setConfigProperty("osgi.debug", "etc/equinox-debug.properties");
         saveConfigProperties();
 
-        System.out.printf("- set osgi.debug=etc/equinox-debug.properties in etc/config.properties%n");
+        System.out.printf("- set bundles.debug=etc/equinox-debug.properties in etc/config.properties%n");
 
         File debug = new File(directory, "etc/equinox-debug.properties");
         if (!debug.exists()) {
@@ -64,7 +64,7 @@ public class Equinox extends Framework {
         removeConfigProperty("osgi.debug");
         saveConfigProperties();
         
-        System.out.printf("- removed osgi.debug from etc/config.properties%n%n");
+        System.out.printf("- removed bundles.debug from etc/config.properties%n%n");
         System.out.printf("Restart Karaf now to disable Equinox debug logging%n");
 
     }

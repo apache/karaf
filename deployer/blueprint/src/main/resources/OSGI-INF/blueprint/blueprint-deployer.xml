@@ -28,11 +28,11 @@
 
     <bean id="blueprintDeploymentListener" class="org.apache.karaf.deployer.blueprint.BlueprintDeploymentListener"/>
 
-    <!-- Force a reference to the url handler above from the osgi registry to (try to) make sure
+    <!-- Force a reference to the url handler above from the bundles registry to (try to) make sure
          the url handler is registered inside the framework.  Else we can run into timing issues
          where fileinstall will use the featureDeploymentListener before the url can be actually
          used.  In order to not block the bundle, the blueprint.graceperiod=false flag must be
-         set on the SymbolicName osgi header -->
+         set on the SymbolicName bundles header -->
     <reference id="blueprintUrlHandlerRef" interface="org.osgi.service.url.URLStreamHandlerService" filter="url.handler.protocol=blueprint" />
 
     <service ref="blueprintDeploymentListener" auto-export="interfaces" depends-on="blueprintDeploymentListener" />

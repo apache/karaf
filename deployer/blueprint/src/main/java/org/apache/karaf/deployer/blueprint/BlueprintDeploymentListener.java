@@ -48,7 +48,7 @@ public class BlueprintDeploymentListener implements ArtifactUrlTransformer {
                 Document doc = parse(artifact);
                 String name = doc.getDocumentElement().getLocalName();
                 String uri  = doc.getDocumentElement().getNamespaceURI();
-                if ("blueprint".equals(name) && "http://www.osgi.org/xmlns/blueprint/v1.0.0".equals(uri)) {
+                if ("blueprint".equals(name) && "http://www.bundles.org/xmlns/blueprint/v1.0.0".equals(uri)) {
                     return true;
                 }
             }

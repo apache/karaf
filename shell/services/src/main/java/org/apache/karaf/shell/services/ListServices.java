@@ -21,7 +21,7 @@ import java.util.List;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.osgi.BundlesCommand;
+import org.apache.karaf.shell.bundles.BundlesCommand;
 import org.apache.karaf.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;

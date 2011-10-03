@@ -76,7 +76,7 @@ public class EquinoxTest {
 
         Properties properties = new Properties();
         properties.load(new FileInputStream(new File(etc, "config.properties")));
-        assertFalse("osgi.debug property should have been removed from the file",
+        assertFalse("bundles.debug property should have been removed from the file",
                     properties.containsKey("osgi.debug"));
     }
 }

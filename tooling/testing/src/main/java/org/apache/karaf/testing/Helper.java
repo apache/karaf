@@ -191,16 +191,16 @@ public final class Helper {
         sysProps.setProperty("karaf.base", karafHome);
         sysProps.setProperty("karaf.startLocalConsole", "false");
         sysProps.setProperty("karaf.startRemoteShell", "false");
-        sysProps.setProperty("org.osgi.framework.startlevel.beginning", "100");
+        sysProps.setProperty("org.bundles.framework.startlevel.beginning", "100");
         return sysProps;
     }
 
     /**
-     * Return an array of pax-exam options to correctly configure the osgi
+     * Return an array of pax-exam options to correctly configure the bundles
      * framework for karaf.
      *
      * @param sysOptions test-specific system property options
-     * @return default pax-exam options for karaf osgi framework
+     * @return default pax-exam options for karaf bundles framework
      */
     public static Option[] getDefaultConfigOptions(SystemPropertyOption... sysOptions) {
         return getDefaultConfigOptions(getDefaultSystemOptions(),
@@ -209,14 +209,14 @@ public final class Helper {
     }
 
     /**
-     * Return an array of pax-exam options to configure the osgi
+     * Return an array of pax-exam options to configure the bundles
      * framework for karaf, given the system properties and the
-     * location of the osgi framework properties file.
+     * location of the bundles framework properties file.
      *
      * @param sysProps karaf system properties
-     * @param configProperties the URL to load the osgi framework properties from
+     * @param configProperties the URL to load the bundles framework properties from
      * @param sysOptions test-specific system property options
-     * @return pax-exam options for karaf osgi framework
+     * @return pax-exam options for karaf bundles framework
      */
     public static Option[] getDefaultConfigOptions(Properties sysProps, URL configProperties, SystemPropertyOption... sysOptions) {
         // Load props
@@ -239,14 +239,14 @@ public final class Helper {
             String name = (String) e.nextElement();
             String value = configProps.getProperty(name);
             value = align(value);
-            if ("org.osgi.framework.system.packages".equals(name)) {
-            	String extra = align(configProps.getProperty("org.osgi.framework.system.packages.extra"));
+            if ("org.bundles.framework.system.packages".equals(name)) {
+            	String extra = align(configProps.getProperty("org.bundles.framework.system.packages.extra"));
             	if (extra != null && extra.length() > 0) {
                 	vmOptions = vmOptions + " -D" + name + "=" + value + "," + extra;
                 } else {
                 	vmOptions = vmOptions + " -D" + name + "=" + value;
                 }
-            } else if ("org.osgi.framework.bootdelegation".equals(name)) {
+            } else if ("org.bundles.framework.bootdelegation".equals(name)) {
                 options.add(bootDelegationPackages(value));
             } else {
                 vmOptions = vmOptions + " -D" + name + "=" + value;
@@ -260,8 +260,8 @@ public final class Helper {
             }
         }
 
-        if (configProps.getProperty("org.osgi.framework.startlevel.beginning") != null) {
-            options.add(frameworkStartLevel(Integer.parseInt(configProps.getProperty("org.osgi.framework.startlevel.beginning"))));
+        if (configProps.getProperty("org.bundles.framework.startlevel.beginning") != null) {
+            options.add(frameworkStartLevel(Integer.parseInt(configProps.getProperty("org.bundles.framework.startlevel.beginning"))));
         }
 
         options.add(vmOption(vmOptions));

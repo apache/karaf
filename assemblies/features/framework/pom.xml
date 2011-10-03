@@ -70,8 +70,8 @@
         </dependency>
         <!-- ???? -->
         <!--<dependency>-->
-            <!--<groupId>org.osgi</groupId>-->
-            <!--<artifactId>org.osgi.compendium</artifactId>-->
+            <!--<groupId>org.bundles</groupId>-->
+            <!--<artifactId>org.bundles.compendium</artifactId>-->
             <!--<scope>provided</scope>-->
         <!--</dependency>-->
 
@@ -135,7 +135,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.osgi</artifactId>
+            <artifactId>org.apache.karaf.shell.bundles</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>

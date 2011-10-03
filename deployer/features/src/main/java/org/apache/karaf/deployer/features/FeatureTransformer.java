@@ -30,7 +30,7 @@ import org.apache.karaf.util.DeployerUtils;
 import org.osgi.framework.Constants;
 
 /**
- * Transform a feature descriptor into an osgi bundle
+ * Transform a feature descriptor into an bundles bundle
  */
 public class FeatureTransformer {
 

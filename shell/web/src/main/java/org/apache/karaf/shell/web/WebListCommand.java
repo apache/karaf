@@ -34,7 +34,7 @@ public class WebListCommand extends OsgiCommandSupport {
 	private WebEventHandler eventHandler;
 
 	/* (non-Javadoc)
-	 * @see org.apache.karaf.shell.war.WarCommandSupport#doExecute(org.osgi.service.packageadmin.PackageAdmin)
+	 * @see org.apache.karaf.shell.war.WarCommandSupport#doExecute(org.bundles.service.packageadmin.PackageAdmin)
 	 */
 	@Override
 	protected Object doExecute() {

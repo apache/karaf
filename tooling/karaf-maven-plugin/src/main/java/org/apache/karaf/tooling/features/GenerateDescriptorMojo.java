@@ -278,7 +278,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 } else {
                     Dependency dependency = objectFactory.createDependency();
                     dependency.setName(artifact.getArtifactId());
-                    //TODO convert to osgi version?
+                    //TODO convert to bundles version?
                     dependency.setVersion(artifact.getVersion());
                     feature.getFeature().add(dependency);
                 }
