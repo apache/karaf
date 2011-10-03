@@ -108,24 +108,44 @@ public class InstallCommand extends OsgiCommandSupport
 				// TODO: figure out how to hook in the service that it starts up
 				// when the machine boots up.
 			} else if( os.startsWith("Linux") ) {
-				mkdir(bin);
-				
-				File file = new File(bin, name+"-wrapper");
-				copyResourceTo(file, "linux/karaf-wrapper", false);
-				chmod(file, "a+x");
+                String arch = System.getProperty("os.arch");
+                if (arch.equalsIgnoreCase("amd64") || arch.equalsIgnoreCase("x86_64")) {
+				    mkdir(bin);
 
-				serviceFile = new File(bin,name+"-service");
-				copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
-				chmod(serviceFile, "a+x");
-				
-				wrapperConf = new File(etc,name+"-wrapper.conf");
-				copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+				    File file = new File(bin, name+"-wrapper");
+				    copyResourceTo(file, "linux64/karaf-wrapper", false);
+				    chmod(file, "a+x");
 
-				mkdir(lib);
-				copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
+				    serviceFile = new File(bin,name+"-service");
+				    copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+				    chmod(serviceFile, "a+x");
+
+				    wrapperConf = new File(etc,name+"-wrapper.conf");
+				    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
+				    mkdir(lib);
+				    copyResourceTo(new File(lib, "libwrapper.so"), "linux64/libwrapper.so", false);
+
+                } else {
+				    mkdir(bin);
 				
-				// TODO: figure out how to hook in the service that it starts up
-				// when the machine boots up.
+				    File file = new File(bin, name+"-wrapper");
+				    copyResourceTo(file, "linux/karaf-wrapper", false);
+				    chmod(file, "a+x");
+
+				    serviceFile = new File(bin,name+"-service");
+				    copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
+				    chmod(serviceFile, "a+x");
+				
+				    wrapperConf = new File(etc,name+"-wrapper.conf");
+				    copyFilteredResourceTo(wrapperConf, "unix/karaf-wrapper.conf", props);
+
+				    mkdir(lib);
+				    copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
+				
+				    // TODO: figure out how to hook in the service that it starts up
+				    // when the machine boots up.
+                }
 			} else {
 		        System.out.println("Your operating system '"+os+"' is not currently supported.");
 		        return 1;
