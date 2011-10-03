@@ -25,6 +25,7 @@ lde = { log:display-exception $args } ;
 la = { osgi:list -t 0 $args } ;
 cl = { config:list "(service.pid=$args)" } ;
 system:shutdown = { osgi:shutdown } ;
+system:start-level = { osgi:start-level } ;
 services:list = { ls } ;
 bundles:list = { osgi:list } ;
 bundles:install = { osgi:install };
