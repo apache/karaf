@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -66,11 +67,9 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 			logger.warn("Unable to create directory for Karaf Archive timestamps. Results may vary...");
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Karaf archives will be extracted to " + localRepoPath);
-			logger.info("Timestamps for Karaf archives will be extracted to " + timestampPath);
+        logger.info("Karaf archives will be extracted to {}", localRepoPath);
+		logger.info("Timestamps for Karaf archives will be extracted to {}", timestampPath);
 
-		}
 	}
 
 	public void destroy() {
@@ -83,12 +82,11 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 		// we don't necessarily want to re-extract all the Karaf Archives!
 		//
 		if (alreadyExtracted(file)) {
-			logger.info("Ignoring '" + file + "'; timestamp indicates it's already been deployed.");
+			logger.info("Ignoring '{}'; timestamp indicates it's already been deployed.", file);
 			return;
 		}
 
-		if (logger.isInfoEnabled())
-			logger.info("Installing " + file);
+		logger.info("Installing {}", file);
 
 		ZipFile zipFile = new ZipFile(file);
 
@@ -101,13 +99,12 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 			if (repoEntryName != null) {
                 File extract = extract(zipFile, buffer, entry, repoEntryName, localRepoPath);
                 if (isFeaturesRepository(extract)) {
-                    addToFeaturesRepositories(repoEntryName);
+                    addToFeaturesRepositories(extract.toURI());
                 }
 			}
             if (entry.getName().startsWith("resource")) {
                 String resourceEntryName = entry.getName().substring("resource/".length());
                 extract(zipFile, buffer, entry, resourceEntryName, base);
-
             }
 		}
 
@@ -120,13 +117,11 @@ public class KarArtifactInstaller implements ArtifactInstaller {
         File extract;
         if (entry.isDirectory()) {
             extract = new File(base + File.separator + repoEntryName);
-            if (logger.isDebugEnabled())
-                logger.debug("Creating directory '" + extract.getName());
+            logger.debug("Creating directory {}", extract.getName());
             extract.mkdirs();
         } else {
             extract = new File(base + File.separator + repoEntryName);
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(extract));
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(extract));
 
             int count = 0;
             int totalBytes = 0;
@@ -136,8 +131,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
                 totalBytes += count;
             }
 
-            if (logger.isDebugEnabled())
-                logger.debug("Extracted " + totalBytes + " bytes to " + extract);
+            logger.debug("Extracted {} bytes to {}", totalBytes, extract);
 
             bos.close();
             inputStream.close();
@@ -159,11 +153,11 @@ public class KarArtifactInstaller implements ArtifactInstaller {
     }
 
     public void uninstall(File file) throws Exception {
-		logger.warn("Karaf archive '" + file + "' has been removed; however, its feature URLs have not been deregistered, and its bundles are still available in '" + localRepoPath + "'.");
+		logger.warn("Karaf archive '{}' has been removed; however, its feature URLs have not been deregistered, and its bundles are still available in '{}'.", file, localRepoPath);
 	}
 
 	public void update(File file) throws Exception {
-		logger.warn("Karaf archive " + file + " has been updated; redeploying.");
+		logger.warn("Karaf archive {}' has been updated; redeploying.", file);
 		install(file);
 	}
 
@@ -171,15 +165,14 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 		File timestamp = getArchiveTimestampFile(karafArchive);
 
 		if (timestamp.exists()) {
-			if (logger.isDebugEnabled())
-				logger.debug("Deleting old timestamp file '" + timestamp + "");
+		    logger.debug("Deleting old timestamp file '{}'", timestamp);
 
 			if (!timestamp.delete()) {
 				throw new Exception("Unable to delete archive timestamp '" + timestamp + "'");
 			}
 		}
 
-		logger.debug("Creating timestamp file '" + timestamp + "'");
+		logger.debug("Creating timestamp file '{}'", timestamp);
 		timestamp.createNewFile();
 	}
 
@@ -210,8 +203,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 			    }
 			}
 		} catch (Exception e) {
-			if (logger.isDebugEnabled())
-				logger.debug("File " + artifact.getName() + " is not a features file.", e);
+		    logger.debug("File '{}' is not a features file.", artifact.getName(), e);
 		}
 		return false;
 	}
@@ -230,14 +222,13 @@ public class KarArtifactInstaller implements ArtifactInstaller {
         return db.parse(artifact);
     }
 
-	private void addToFeaturesRepositories(String path)  {
-        URI mvnUri = pathToMvnUri(path);
+	private void addToFeaturesRepositories(URI uri) throws Exception {
+        //URI mvnUri = pathToMvnUri(path);
 		try {
-			featuresService.addRepository(mvnUri);
-			if (logger.isInfoEnabled())
-				logger.info("Added feature repository '" + mvnUri + "'.");
+			featuresService.addRepository(uri);
+			logger.info("Added feature repository '{}'.", uri);
 		} catch (Exception e) {
-			logger.error("Unable to add repository '" + mvnUri + "'", e);
+			logger.error("Unable to add repository '{}'", uri, e);
 		}
 	}
 
@@ -276,7 +267,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 					return true;
 				}
 			} catch (Exception e) {
-				logger.warn("Problem extracting zip file '" + file.getName() + "'; ignoring.", e);
+				logger.warn("Problem extracting zip file '{}'; ignoring.", file.getName(), e);
 			}
 		}
 
