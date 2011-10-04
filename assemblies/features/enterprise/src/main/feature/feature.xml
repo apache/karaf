@@ -30,7 +30,7 @@
         <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/${aries.transaction.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.wrappers/${aries.transaction.version}</bundle>
     </feature>
-    <feature name="transaction" version="${aries.transaction.version}" resolver="(obr)">
+    <feature name="transaction" description="Alias to org.apache.karaf.Features.enterprise.transaction feature" version="${aries.transaction.version}" resolver="(obr)">
         <feature version="${aries.transaction.version}">org.apache.karaf.features.enterprise.transaction</feature>
     </feature>
 
@@ -44,7 +44,7 @@
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container/${aries.jpa.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.version}</bundle>
     </feature>
-    <feature name="jpa" version="${aries.jpa.version}" resolver="(obr)">
+    <feature name="jpa" description="Alias to org.apache.karaf.features.enterprise.jpa feature" version="${aries.jpa.version}" resolver="(obr)">
         <feature version="${aries.jpa.version}">org.apache.karaf.features.enterprise.jpa</feature>
     </feature>
 
@@ -57,11 +57,11 @@
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
     </feature>
-    <feature name="jndi" version="${aries.jndi.version}" resolver="(obr)">
+    <feature name="jndi" description="Alias to org.apache.karaf.features.enterprise.jndi feature" version="${aries.jndi.version}" resolver="(obr)">
         <feature version="${aries.jndi.version}">org.apache.karaf.features.enterprise.jndi</feature>
     </feature>
 
-    <feature name="org.apache.karaf.features.enterprise.application-without-isolation" version="${aries.application.version}">
+    <feature name="org.apache.karaf.features.enterprise.application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
         <!-- pre-requisites-->
         <feature version="${project.version}">org.apache.karaf.features.standard.obr</feature>
         <bundle start-level='30'>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
@@ -81,7 +81,7 @@
         <!-- without isolation -->
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.runtime/${aries.application.version}</bundle>
     </feature>
-    <feature name="application-without-isolation" version="${aries.application.version}">
+    <feature name="application-without-isolation" description="Alias to org.apache.karaf.features.enterprise.application-without-isolation feature" version="${aries.application.version}">
         <feature version="${aries.application.version}">org.apache.karaf.features.enterprise.application-without-isolation</feature>
     </feature>
 
