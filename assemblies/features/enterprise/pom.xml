@@ -28,7 +28,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.feature.enterprise</artifactId>
+    <artifactId>org.apache.karaf.features.enterprise</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Enterprise</name>
 

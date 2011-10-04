@@ -20,7 +20,7 @@
 
     <!-- For transition purpose, we provide both Feature Full Qualified name and "old" short name, see KARAF-819 -->
 
-    <feature version="${project.version}" name="org.apache.karaf.feature.framework">
+    <feature version="${project.version}" name="org.apache.karaf.features.framework">
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}</bundle>
         <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
@@ -34,7 +34,7 @@
         <bundle start="true" start-level="25">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
     </feature>
     <feature name="framework" version="${project.version}">
-        <feature version="${project.version}">org.apache.karaf.feature.framework</feature>
+        <feature version="${project.version}">org.apache.karaf.features.framework</feature>
     </feature>
 
 </features>
