@@ -28,10 +28,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.feature.framework</artifactId>
+    <artifactId>org.apache.karaf.features.framework</artifactId>
     <packaging>pom</packaging>
     <!--<packaging>kar</packaging>-->
-    <name>Apache Karaf :: Assemblies :: Framework KAR</name>
+    <name>Apache Karaf :: Assemblies :: Features :: Framework</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>

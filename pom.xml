@@ -516,26 +516,26 @@
             </dependency>
             <dependency>
               <groupId>org.apache.karaf.assemblies.features</groupId>
-              <artifactId>org.apache.karaf.feature.standard</artifactId>
+              <artifactId>org.apache.karaf.features.standard</artifactId>
               <type>xml</type>
               <classifier>features</classifier>
               <version>${project.version}</version>
             </dependency>
             <dependency>
               <groupId>org.apache.karaf.assemblies.features</groupId>
-              <artifactId>org.apache.karaf.feature.framework</artifactId>
+              <artifactId>org.apache.karaf.features.framework</artifactId>
               <type>kar</type>
               <version>${project.version}</version>
             </dependency>
             <dependency>
               <groupId>org.apache.karaf.assemblies.features</groupId>
-              <artifactId>org.apache.karaf.feature.full</artifactId>
+              <artifactId>org.apache.karaf.features.full</artifactId>
               <type>kar</type>
               <version>${project.version}</version>
             </dependency>
             <dependency>
               <groupId>org.apache.karaf.assemblies.features</groupId>
-              <artifactId>org.apache.karaf.feature.enterprise</artifactId>
+              <artifactId>org.apache.karaf.features.enterprise</artifactId>
               <type>xml</type>
               <classifier>features</classifier>
               <version>${project.version}</version>

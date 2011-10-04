@@ -39,25 +39,19 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.feature.framework</artifactId>
+            <artifactId>org.apache.karaf.features.framework</artifactId>
             <type>kar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.feature.full</artifactId>
-            <type>kar</type>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.feature.standard</artifactId>
+            <artifactId>org.apache.karaf.features.standard</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.feature.enterprise</artifactId>
+            <artifactId>org.apache.karaf.features.enterprise</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>
@@ -118,11 +112,11 @@
                 </executions>
                 <configuration>
                     <bootFeatures>
-                        <feature>org.apache.karaf.feature.standard</feature>
-                        <feature>org.apache.karaf.feature.full</feature>
-                        <feature>org.apache.karaf.feature.standard.management</feature>
-                        <feature>org.apache.karaf.feature.standard.ssh</feature>
-                        <feature>org.apache.karaf.feature.standard.config</feature>
+                        <feature>org.apache.karaf.features.standard</feature>
+                        <feature>org.apache.karaf.features.full</feature>
+                        <feature>org.apache.karaf.features.standard.management</feature>
+                        <feature>org.apache.karaf.features.standard.ssh</feature>
+                        <feature>org.apache.karaf.features.standard.config</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>
