@@ -29,19 +29,23 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.karaf.jaas.config.KeystoreInstance;
 import org.apache.karaf.jaas.config.KeystoreIsLocked;
 import org.apache.karaf.jaas.config.KeystoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of KeystoreManager
  */
 public class OsgiKeystoreManager implements KeystoreManager {
 
+    private final static transient Logger logger = LoggerFactory.getLogger(OsgiKeystoreManager.class);
+
     private List<KeystoreInstance> keystores = new CopyOnWriteArrayList<KeystoreInstance>();
 
-    public void register(KeystoreInstance keystore, Map<String,?> properties) {
+    public void register(KeystoreInstance keystore, Map<String, ?> properties) {
         keystores.add(keystore);
     }
 
-    public void unregister(KeystoreInstance keystore, Map<String,?> properties) {
+    public void unregister(KeystoreInstance keystore, Map<String, ?> properties) {
         keystores.remove(keystore);
     }
 
@@ -58,6 +62,13 @@ public class OsgiKeystoreManager implements KeystoreManager {
     }
 
     public SSLContext createSSLContext(String provider, String protocol, String algorithm, String keyStore, String keyAlias, String trustStore) throws GeneralSecurityException {
+        return createSSLContext(provider, protocol, algorithm, keyStore, keyAlias, trustStore, 0);
+    }
+
+    public SSLContext createSSLContext(String provider, String protocol, String algorithm, String keyStore, String keyAlias, String trustStore, long timeout) throws GeneralSecurityException {
+
+        this.checkForKeystoresAvailability(keyStore, keyAlias, trustStore, timeout);
+
         KeystoreInstance keyInstance = getKeystore(keyStore);
         if (keyInstance != null && keyInstance.isKeystoreLocked()) {
             throw new KeystoreIsLocked("Keystore '" + keyStore + "' is locked");
@@ -76,17 +87,67 @@ public class OsgiKeystoreManager implements KeystoreManager {
             context = SSLContext.getInstance(protocol, provider);
         }
         context.init(keyInstance == null ? null : keyInstance.getKeyManager(algorithm, keyAlias),
-                     trustInstance == null ? null : trustInstance.getTrustManager(algorithm), new SecureRandom());
+                trustInstance == null ? null : trustInstance.getTrustManager(algorithm), new SecureRandom());
         return context;
     }
 
     public SSLServerSocketFactory createSSLServerFactory(String provider, String protocol, String algorithm, String keyStore, String keyAlias, String trustStore) throws GeneralSecurityException {
-        SSLContext context = createSSLContext(provider, protocol, algorithm, keyStore, keyAlias, trustStore);
+        return createSSLServerFactory(provider, protocol, algorithm, keyStore, keyAlias, trustStore, 0);
+    }
+
+    public SSLServerSocketFactory createSSLServerFactory(String provider, String protocol, String algorithm, String keyStore, String keyAlias, String trustStore, long timeout) throws GeneralSecurityException {
+        SSLContext context = createSSLContext(provider, protocol, algorithm, keyStore, keyAlias, trustStore, timeout);
         return context.getServerSocketFactory();
     }
 
     public SSLSocketFactory createSSLFactory(String provider, String protocol, String algorithm, String keyStore, String keyAlias, String trustStore) throws GeneralSecurityException {
-        SSLContext context = createSSLContext(provider, protocol, algorithm, keyStore, keyAlias, trustStore);
+        return createSSLFactory(provider, protocol, algorithm, keyStore, keyAlias, trustStore, 0);
+    }
+
+    public SSLSocketFactory createSSLFactory(String provider, String protocol, String algorithm, String keyStore, String keyAlias, String trustStore, long timeout) throws GeneralSecurityException {
+        SSLContext context = createSSLContext(provider, protocol, algorithm, keyStore, keyAlias, trustStore, timeout);
         return context.getSocketFactory();
     }
+
+    private void sleep(long time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+
+        }
+    }
+
+    /**
+     * Purely check for the availability of provided key stores and key
+     *
+     * @param keyStore
+     * @param keyAlias
+     * @param trustStore
+     * @param timeout
+     */
+    private void checkForKeystoresAvailability(String keyStore, String keyAlias, String trustStore, long timeout) {
+        for (int i = 0; i < timeout / 1000; ++i) {
+            KeystoreInstance keyInstance = getKeystore(keyStore);
+            if (keyInstance != null && keyInstance.isKeystoreLocked()) {
+                sleep(1000);
+                logger.info("Looking for keystore: {}...", keyStore);
+                continue;
+            }
+            if (keyInstance != null && keyInstance.isKeyLocked(keyAlias)) {
+                sleep(1000);
+                logger.info("Looking for keystore's key: {}...", keyAlias);
+                continue;
+            }
+
+            KeystoreInstance trustInstance = trustStore == null ? null : getKeystore(trustStore);
+            if (trustInstance != null && trustInstance.isKeystoreLocked()) {
+                sleep(1000);
+                logger.info("Looking for truststore: {}...", trustStore);
+                continue;
+            }
+
+        }
+
+    }
+
 }
