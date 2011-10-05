@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -32,7 +33,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -230,7 +233,27 @@ public class KarArtifactInstaller implements ArtifactInstaller {
             logger.info("Added feature repository '{}'.", uri);
 		} catch (Exception e) {
 			logger.error("Unable to add repository '{}'", uri, e);
+            return;
 		}
+
+        logger.info("Installing KAR features ...");
+        for (Repository repository : featuresService.listRepositories()) {
+            if (repository.getURI().equals(uri)) {
+                try {
+                    for (Feature feature : repository.getFeatures()) {
+                        try {
+                            logger.info("Installing feature {}/{}", feature.getName(), feature.getVersion());
+                            featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                        } catch (Exception e) {
+                            logger.warn("Can't install feature {}/{}", new Object[]{ feature.getName(), feature.getVersion() }, e);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Can't get KAR features", e);
+                    return;
+                }
+            }
+        }
 	}
 
     static URI pathToMvnUri(String path) {
