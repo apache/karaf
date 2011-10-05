@@ -29,8 +29,8 @@ import org.osgi.framework.Constants;
 @Command(scope = "dev", name = "watch", description = "Watches and updates bundles.", detailedDescription="classpath:watch.txt")
 public class Watch extends OsgiCommandSupport {
 
-    @Argument(index = 0, name = "urls", description = "The bundle URLs", required = false)
-    String urls;
+    @Argument(index = 0, name = "urls", description = "The bundle IDs or URLs", required = false, multiValued = true)
+    List<String> urls;
 
     @Option(name = "-i", aliases = {}, description = "Watch interval", required = false, multiValued = false)
     private long interval;
@@ -51,6 +51,9 @@ public class Watch extends OsgiCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
+
+        System.out.println(urls);
+
         if (start && stop) {
             System.err.println("Please use only one of --start and --stop options!");
             return null;
@@ -64,13 +67,15 @@ public class Watch extends OsgiCommandSupport {
             System.out.println("Stopping watch");
             watcher.stop();
         }
-        if (urls != null && urls.length()>0) {
+        if (urls != null) {
             if (remove) {
-                System.out.println("Removing watched urls");
-                watcher.remove(urls);
+                for (String url : urls) {
+                    watcher.remove(url);
+                }
             } else {
-                System.out.println("Adding watched urls");
-                watcher.add(urls);
+                for (String url : urls) {
+                    watcher.add(url);
+                }
             }
         }
         if (start) {
@@ -95,12 +100,12 @@ public class Watch extends OsgiCommandSupport {
         } else {
             List<String> urls = watcher.getWatchURLs();
             if (urls != null && urls.size()>0) {
-                System.out.println("Watched urls:");
+                System.out.println("Watched URLs/IDs:");
                 for (String url : watcher.getWatchURLs()) {
                     System.out.println(url);
                 }
             } else {
-                System.out.println("No watched urls");
+                System.out.println("No watched URLs/IDs");
             }
         }
 
