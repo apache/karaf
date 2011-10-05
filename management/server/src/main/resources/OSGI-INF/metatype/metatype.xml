@@ -30,6 +30,14 @@
         <AD id="daemon" type="Boolean" default="true" name="%daemon.name" description="%daemon.description"/>
         <AD id="threaded" type="Boolean" default="true" name="%threaded.name" description="%threaded.description"/>
         <AD id="objectName" type="String" default="connector:name=rmi" name="%objectName.name" description="%objectName.description"/>
+        <AD id="secured" type="Boolean" default="false" name="%secured.name" description="%secured.description"/>
+        <AD id="keyStoreAvailabilityTimeout" type="Boolean" default="false" name="%keyStoreAvailabilityTimeout.name" description="%keyStoreAvailabilityTimeout.description"/>
+        <AD id="secureAlgorithm" type="String" default="default" name="%secureAlgorithm.name" description="%secureAlgorithm.description"/>
+        <AD id="secureProtocol" type="String" default="TLS" name="%secureProtocol.name" description="%secureProtocol.description"/>
+        <AD id="keyStore" type="String" default="karaf.ks" name="%keyStore.name" description="%keyStore.description"/>
+        <AD id="keyAlias" type="String" default="karaf" name="%keyAlias.name" description="%keyAlias.description"/>
+        <AD id="trustStore" type="String" default="karaf.ts" name="%trustStore.name" description="%trustStore.description"/>
+        <AD id="authenticatorType" type="String" default="password" name="%authenticatorType.name" description="%authenticatorType.description"/>
     </OCD>
     <Designate pid="org.apache.karaf.management">
         <Object ocdref="org.apache.karaf.management"/>
