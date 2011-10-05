@@ -19,7 +19,8 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
-           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
+           xmlns:jaas="http://karaf.apache.org/xmlns/jaas/v1.0.0">
 
     <!-- Allow the use of system properties -->
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]">
@@ -39,6 +40,16 @@
             <cm:property name="daemon" value="true"/>
             <cm:property name="threaded" value="true"/>
             <cm:property name="objectName" value="connector:name=rmi"/>
+            <!-- SSL Support -->
+            <cm:property name="keyStoreAvailabilityTimeout" value="5000" />
+            <cm:property name="authenticatorType" value="password" />
+            <cm:property name="secured" value="false" />
+            <cm:property name="secureAlgorithm" value="default" />
+            <cm:property name="secureProtocol" value="TLS" />
+            <cm:property name="keyStore" value="karaf.ks"/>
+            <cm:property name="keyAlias" value="karaf"/>
+            <cm:property name="trustStore" value="karaf.ts"/>
+            <cm:property name="clientAuth" value="false"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -61,6 +72,8 @@
     </bean>
 
     <!-- Create a JMX connector ServiceFactory -->
+    <reference id="keystoreManager" interface="org.apache.karaf.jaas.config.KeystoreManager"/>
+
     <bean id="connectorFactory" class="org.apache.karaf.management.ConnectorServerFactory" init-method="init"
           destroy-method="destroy">
         <property name="server" ref="mbeanServer"/>
@@ -73,6 +86,15 @@
                 <entry key="jmx.remote.authenticator" value-ref="jaasAuthenticator"/>
             </map>
         </property>
+        <property name="keyStoreAvailabilityTimeout" value="${keyStoreAvailabilityTimeout}" />
+        <property name="authenticatorType" value="${authenticatorType}" />
+        <property name="secured" value="${secured}" />
+        <property name="algorithm" value="${secureAlgorithm}" />
+        <property name="secureProtocol" value="${secureProtocol}" />
+        <property name="keyStore" value="${keyStore}"/>
+        <property name="keyAlias" value="${keyAlias}"/>
+        <property name="trustStore" value="${trustStore}"/>
+        <property name="keystoreManager" ref="keystoreManager" />
     </bean>
 
     <!-- JAAS authenticator -->
