@@ -52,8 +52,6 @@ public class Watch extends OsgiCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
 
-        System.out.println(urls);
-
         if (start && stop) {
             System.err.println("Please use only one of --start and --stop options!");
             return null;
@@ -100,7 +98,7 @@ public class Watch extends OsgiCommandSupport {
         } else {
             List<String> urls = watcher.getWatchURLs();
             if (urls != null && urls.size()>0) {
-                System.out.println("Watched URLs/IDs:");
+                System.out.println("Watched URLs/IDs: ");
                 for (String url : watcher.getWatchURLs()) {
                     System.out.println(url);
                 }
