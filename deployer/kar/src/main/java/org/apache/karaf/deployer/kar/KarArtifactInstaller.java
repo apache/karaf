@@ -134,7 +134,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
                             }
                         }
                     } catch (Exception e) {
-                        logger.error("Can't get features for KAR {}", karFeatureRepoUri, e);
+                        logger.warn("Can't get features for KAR {}", karFeatureRepoUri, e);
                     }
                 }
             }
@@ -260,7 +260,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 			featuresService.addRepository(uri);
             logger.info("Added feature repository '{}'.", uri);
 		} catch (Exception e) {
-			logger.error("Unable to add repository '{}'", uri, e);
+			logger.warn("Unable to add repository '{}'", uri, e);
 		}
 	}
 
