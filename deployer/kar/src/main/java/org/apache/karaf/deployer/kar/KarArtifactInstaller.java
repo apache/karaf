@@ -130,7 +130,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
                             try {
                                 featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
                             } catch (Exception e) {
-                                logger.error("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                                logger.warn("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
                             }
                         }
                     } catch (Exception e) {
