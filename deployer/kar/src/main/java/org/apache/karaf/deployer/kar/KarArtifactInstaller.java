@@ -24,8 +24,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -87,35 +89,59 @@ public class KarArtifactInstaller implements ArtifactInstaller {
 			return;
 		}
 
-        logger.info("Installing {}", file);
+        logger.info("Installing KAR file {}", file);
 
 		ZipFile zipFile = new ZipFile(file);
 
-        byte[] buffer = new byte[5 * 1024];
+        List<URI> featuresRepositoriesInKar = new ArrayList<URI>();
+
         Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
 		while (entries.hasMoreElements()) {
 			ZipEntry entry = entries.nextElement();
 
             String repoEntryName = getRepoEntryName(entry);
+
 			if (repoEntryName != null) {
-                File extract = extract(zipFile, buffer, entry, repoEntryName, localRepoPath);
+                File extract = extract(zipFile, entry, repoEntryName, localRepoPath);
                 if (isFeaturesRepository(extract)) {
                     addToFeaturesRepositories(extract.toURI());
+                    featuresRepositoriesInKar.add(extract.toURI());
                 }
 			}
             if (entry.getName().startsWith("resource")) {
                 String resourceEntryName = entry.getName().substring("resource/".length());
-                extract(zipFile, buffer, entry, resourceEntryName, base);
-
+                extract(zipFile, entry, resourceEntryName, base);
             }
 		}
+
+        installFeatures(featuresRepositoriesInKar);
 
 		zipFile.close();
 
 		updateTimestamp(file);
 	}
 
-    private File extract(ZipFile zipFile, byte[] buffer, ZipEntry entry, String repoEntryName, String base) throws IOException {
+    private void installFeatures(List<URI> featuresRepositories) {
+        for (Repository repository : featuresService.listRepositories()) {
+            for (URI karFeatureRepoUri : featuresRepositories) {
+                if (repository.getURI().equals(karFeatureRepoUri)) {
+                    try {
+                        for (Feature feature : repository.getFeatures()) {
+                            try {
+                                featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
+                            } catch (Exception e) {
+                                logger.error("Unable to install Kar feature {}", feature.getName() + "/" + feature.getVersion(), e);
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.error("Can't get features for KAR {}", karFeatureRepoUri, e);
+                    }
+                }
+            }
+        }
+    }
+
+    private File extract(ZipFile zipFile, ZipEntry entry, String repoEntryName, String base) throws IOException {
         File extract;
         if (entry.isDirectory()) {
             extract = new File(base + File.separator + repoEntryName);
@@ -123,23 +149,25 @@ public class KarArtifactInstaller implements ArtifactInstaller {
             extract.mkdirs();
         } else {
             extract = new File(base + File.separator + repoEntryName);
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(extract));
+            extract.getParentFile().mkdirs();
 
-            int count = 0;
+            InputStream in = zipFile.getInputStream(entry);
+            FileOutputStream out = new FileOutputStream(extract);
+
+            byte[] buffer = new byte[8192];
+            int count = in.read(buffer);
             int totalBytes = 0;
-            InputStream inputStream = zipFile.getInputStream(entry);
-            while ((count = inputStream.read(buffer)) > 0) {
-                bos.write(buffer, 0, count);
+            while (count >= 0) {
+                out.write(buffer, 0, count);
                 totalBytes += count;
+                count = in.read(buffer);
             }
 
-            if (logger.isDebugEnabled())
-                logger.debug("Extracted " + totalBytes + " bytes to " + extract);
+            logger.debug("Extracted {} bytes to {}", totalBytes, extract);
 
-            bos.close();
-            inputStream.close();
-
+            in.close();
+            out.flush();
+            out.close();
         }
         return extract;
     }
@@ -233,27 +261,7 @@ public class KarArtifactInstaller implements ArtifactInstaller {
             logger.info("Added feature repository '{}'.", uri);
 		} catch (Exception e) {
 			logger.error("Unable to add repository '{}'", uri, e);
-            return;
 		}
-
-        logger.info("Installing KAR features ...");
-        for (Repository repository : featuresService.listRepositories()) {
-            if (repository.getURI().equals(uri)) {
-                try {
-                    for (Feature feature : repository.getFeatures()) {
-                        try {
-                            logger.info("Installing feature {}/{}", feature.getName(), feature.getVersion());
-                            featuresService.installFeature(feature, EnumSet.noneOf(FeaturesService.Option.class));
-                        } catch (Exception e) {
-                            logger.warn("Can't install feature {}/{}", new Object[]{ feature.getName(), feature.getVersion() }, e);
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.error("Can't get KAR features", e);
-                    return;
-                }
-            }
-        }
 	}
 
     static URI pathToMvnUri(String path) {
