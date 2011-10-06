@@ -302,7 +302,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     failure.features.putAll(s.features);
                     failure.installed.addAll(s.installed);
                     if (options.contains(Option.ContinueBatchOnFailure)) {
-                        LOGGER.info("Error when installing feature {}: {}", f.getName(), e);
+                        LOGGER.warn("Error when installing feature {}: {}", f.getName(), e);
                     } else {
                         throw e;
                     }
