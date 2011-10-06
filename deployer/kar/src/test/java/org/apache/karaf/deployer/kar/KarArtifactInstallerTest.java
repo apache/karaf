@@ -131,6 +131,7 @@ public class KarArtifactInstallerTest {
 	@Test
 	public void shouldLogAndNotThrowExceptionIfCannotAddToFeaturesRepository() throws Exception { 
 		// Setup expectations on the features service
+        expect(featuresService.listRepositories()).andReturn(new Repository[0]);
 		featuresService.addRepository((URI)EasyMock.anyObject());
 		EasyMock.expectLastCall().andThrow(new Exception("Unable to add to repository."));
 		EasyMock.replay(featuresService);
