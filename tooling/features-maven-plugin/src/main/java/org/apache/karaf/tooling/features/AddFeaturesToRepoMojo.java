@@ -40,8 +40,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -64,8 +62,10 @@ import org.xml.sax.SAXException;
  */
 public class AddFeaturesToRepoMojo extends MojoSupport {
 
-    private final static String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/standard/%s/xml/features";
-    private final static String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/enterprise/%s/xml/features";
+    private final static String KARAF_CORE_STANDARD_FEATURE_URL =
+        "mvn:org.apache.karaf.assemblies.features/standard/%s/xml/features";
+    private final static String KARAF_CORE_ENTERPRISE_FEATURE_URL =
+        "mvn:org.apache.karaf.assemblies.features/enterprise/%s/xml/features";
 
     /**
      * @parameter
@@ -112,7 +112,13 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     /**
      * @parameter
      */
+    private boolean resolveDefinedRepositoriesRecursively = true;
+
+    /**
+     * @parameter
+     */
     private boolean addTransitiveFeatures = true;
+
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (karafVersion == null) {
@@ -145,18 +151,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             Set<String> bundles = new HashSet<String>();
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
             for (String uri : descriptors) {
-                // let's ensure a mvn: based url is sitting in the local repo before we try reading it
-                Artifact descriptor = bundleToArtifact(uri, true);
-                if (descriptor != null) {
-                    resolveBundle(descriptor, remoteRepos);
-                }
-                if (includeMvnBasedDescriptors) {
-                    bundles.add(uri);
-                }
-                Repository repo = new Repository(URI.create(translateFromMaven(uri)));
-                for (Feature f : repo.getFeatures()) {
-                    featuresMap.put(f.getName(), f);
-                }
+                retrieveDescriptorsRecursivly(uri, bundles, featuresMap);
             }
 
             // no features specified, handle all of them
@@ -177,7 +172,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 for (String feature : transitiveFeatures) {
                     getLog().info("Adding contents of transitive feature: " + feature);
                     bundles.addAll(featuresMap.get(feature).getBundles());
-                    //Treat the config files as bundles, since it is only copying
+                    // Treat the config files as bundles, since it is only copying
                     bundles.addAll(featuresMap.get(feature).getConfigFiles());
                 }
             }
@@ -194,7 +189,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 if (artifact.getRepository() != null) {
                     explicitRepoBundles.add(artifact);
                 } else {
-                    //bundle URL without repository information are resolved now
+                    // bundle URL without repository information are resolved now
                     resolveBundle(artifact, remoteRepos);
                 }
             }
@@ -205,10 +200,10 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             if (copyFileBasedDescriptors != null) {
                 for (CopyFileBasedDescriptor fileBasedDescritpor : copyFileBasedDescriptors) {
                     copy(new FileInputStream(fileBasedDescritpor.getSourceFile()),
-                            repository,
-                            fileBasedDescritpor.getTargetFileName(),
-                            fileBasedDescritpor.getTargetDirectory(),
-                            new byte[8192]);
+                        repository,
+                        fileBasedDescritpor.getTargetFileName(),
+                        fileBasedDescritpor.getTargetDirectory(),
+                        new byte[8192]);
                 }
             }
         } catch (MojoExecutionException e) {
@@ -220,21 +215,46 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         }
     }
 
+    private void retrieveDescriptorsRecursivly(String uri, Set<String> bundles, Map<String, Feature> featuresMap)
+        throws Exception {
+        // let's ensure a mvn: based url is sitting in the local repo before we try reading it
+        Artifact descriptor = bundleToArtifact(uri, true);
+        if (descriptor != null) {
+            resolveBundle(descriptor, remoteRepos);
+        }
+        if (includeMvnBasedDescriptors) {
+            bundles.add(uri);
+        }
+        Repository repo = new Repository(URI.create(translateFromMaven(uri)));
+        for (Feature f : repo.getFeatures()) {
+            featuresMap.put(f.getName(), f);
+        }
+        if (resolveDefinedRepositoriesRecursively) {
+            for (String r : repo.getDefinedRepositories()) {
+                retrieveDescriptorsRecursivly(r, bundles, featuresMap);
+            }
+        }
+    }
+
     // resolves the bundle in question
-    //TODO neither remoteRepos nor bundle's Repository are used, only the local repo?????
-    private void resolveBundle(Artifact bundle, List<ArtifactRepository> remoteRepos) throws IOException, MojoFailureException {
-        //TODO consider DefaultRepositoryLayout
-        String dir = bundle.getGroupId().replace('.', '/') + "/" + bundle.getArtifactId() + "/" + bundle.getBaseVersion() + "/";
-        String name = bundle.getArtifactId() + "-" + bundle.getBaseVersion() + (bundle.getClassifier() != null ? "-" + bundle.getClassifier() : "") + "." + bundle.getType();
+    // TODO neither remoteRepos nor bundle's Repository are used, only the local repo?????
+    private void resolveBundle(Artifact bundle, List<ArtifactRepository> remoteRepos) throws IOException,
+        MojoFailureException {
+        // TODO consider DefaultRepositoryLayout
+        String dir =
+            bundle.getGroupId().replace('.', '/') + "/" + bundle.getArtifactId() + "/" + bundle.getBaseVersion() + "/";
+        String name =
+            bundle.getArtifactId() + "-" + bundle.getBaseVersion()
+                    + (bundle.getClassifier() != null ? "-" + bundle.getClassifier() : "") + "." + bundle.getType();
 
         try {
             getLog().info("Copying bundle: " + bundle);
             resolver.resolve(bundle, remoteRepos, localRepo);
             copy(new FileInputStream(bundle.getFile()),
-                    repository,
-                    name,
-                    dir,
-                    new byte[8192]);
+                repository,
+                name,
+                dir,
+                new byte[8192]);
         } catch (ArtifactResolutionException e) {
             if (failOnArtifactResolutionError) {
                 throw new MojoFailureException("Can't resolve bundle " + bundle, e);
@@ -248,7 +268,8 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         }
     }
 
-    private void addFeatures(List<String> features, Set<String> featuresBundles, Set<String> transitiveFeatures, Map<String, Feature> featuresMap) {
+    private void addFeatures(List<String> features, Set<String> featuresBundles, Set<String> transitiveFeatures,
+            Map<String, Feature> featuresMap) {
         for (String feature : features) {
             Feature f = featuresMap.get(feature);
             if (f == null) {
@@ -262,7 +283,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 // add the bundles of the feature to the bundle set
                 getLog().info("Adding contents for feature: " + feature);
                 featuresBundles.addAll(featuresMap.get(feature).getBundles());
-                //Treat the config files as bundles, since it is only copying
+                // Treat the config files as bundles, since it is only copying
                 featuresBundles.addAll(featuresMap.get(feature).getConfigFiles());
             }
             addFeatures(f.getDependencies(), featuresBundles, transitiveFeatures, featuresMap);
@@ -271,7 +292,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
     public static void copy(
             InputStream is, File dir, String destName, String destDir, byte[] buffer)
-            throws IOException {
+        throws IOException {
         if (destDir == null) {
             destDir = "";
         }
@@ -290,7 +311,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
         }
 
         BufferedOutputStream bos = new BufferedOutputStream(
-                new FileOutputStream(new File(targetDir, destName)));
+            new FileOutputStream(new File(targetDir, destName)));
         int count = 0;
         while ((count = is.read(buffer)) > 0) {
             bos.write(buffer, 0, count);
@@ -351,6 +372,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
         private URI uri;
         private List<Feature> features;
+        private List<String> repositories;
 
         public Repository(URI uri) {
             this.uri = uri;
@@ -362,12 +384,40 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
 
         public Feature[] getFeatures() throws Exception {
             if (features == null) {
-                load();
+                loadFeatures();
             }
             return features.toArray(new Feature[features.size()]);
         }
 
-        public void load() throws IOException {
+        public String[] getDefinedRepositories() throws Exception {
+            if (repositories == null) {
+                loadRepositories();
+            }
+            return repositories.toArray(new String[repositories.size()]);
+        }
+
+        private void loadRepositories() throws IOException {
+            try {
+                repositories = new ArrayList<String>();
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                Document doc = factory.newDocumentBuilder().parse(uri.toURL().openStream());
+                NodeList nodes = doc.getDocumentElement().getChildNodes();
+                for (int i = 0; i < nodes.getLength(); i++) {
+                    org.w3c.dom.Node node = nodes.item(i);
+                    if (!(node instanceof Element) || !"repository".equals(node.getNodeName())) {
+                        continue;
+                    }
+                    Element e = (Element) nodes.item(i);
+                    repositories.add(e.getTextContent());
+                }
+            } catch (SAXException e) {
+                throw (IOException) new IOException().initCause(e);
+            } catch (ParserConfigurationException e) {
+                throw (IOException) new IOException().initCause(e);
+            }
+        }
+
+        private void loadFeatures() throws IOException {
             try {
                 features = new ArrayList<Feature>();
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
