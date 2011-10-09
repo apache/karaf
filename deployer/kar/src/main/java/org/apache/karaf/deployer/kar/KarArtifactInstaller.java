@@ -185,6 +185,11 @@ public class KarArtifactInstaller implements ArtifactInstaller {
     }
 
     public void uninstall(File file) throws Exception {
+        File timestamp = getArchiveTimestampFile(file);
+        if (timestamp.exists()) {
+            logger.debug("Removing the timestamp file");
+            timestamp.delete();
+        }
 		logger.warn("Karaf archive '{}' has been removed; however, its feature URLs have not been deregistered, and its bundles are still available in '{}'.", file, localRepoPath);
 	}
 
