@@ -120,7 +120,6 @@ public class AddToRepositoryMojo extends MojoSupport {
      */
     private boolean addTransitiveFeatures = true;
 
-
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (karafVersion == null) {
             Package p = Package.getPackage("org.apache.karaf.tooling.features");
@@ -226,7 +225,7 @@ public class AddToRepositoryMojo extends MojoSupport {
         if (includeMvnBasedDescriptors) {
             bundles.add(uri);
         }
-        Repository repo = new Repository(URI.create(translateFromMaven(uri)));
+        Repository repo = new Repository(URI.create(translateFromMaven(uri.replaceAll(" ", "%20"))));
         for (Feature f : repo.getFeatures()) {
             featuresMap.put(f.getName(), f);
         }
