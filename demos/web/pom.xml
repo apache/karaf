@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>demos</artifactId>
-        <version>2.2.4-SNAPSHOT</version>
+        <version>2.2.4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -99,7 +99,7 @@
                         <!-- enable easy connection to JConsole -->
                         <systemProperty>
                             <name>com.sun.management.jmxremote</name>
-                            <value/>
+                            <value />
                         </systemProperty>
                     </systemProperties>
                     <scanIntervalSeconds>10</scanIntervalSeconds>
@@ -144,8 +144,7 @@
                         <configuration>
                             <tasks>
                                 <move todir="${project.build.directory}/karaf/WEB-INF/karaf">
-                                    <fileset
-                                            dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-${project.version}"/>
+                                    <fileset dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-${project.version}" />
                                 </move>
                             </tasks>
                         </configuration>
