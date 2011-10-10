@@ -15,6 +15,73 @@
  * limitations under the License.
  */
 
+                    Apache karaf 2.2.4
+                    ==================
+
+  Overview
+  --------
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an
+ update to Apache Karaf 2.2.3. It contains bug fixes identified in the prior release,
+ and introduces improvements including; significant improvements to KAR support, and new
+ MBeans (such as Dev, HTTP, Log, OBR, Bundles, Services and System). Several dependencies
+ were also updated, bringing Apache Felix Gogo to version 0.10.0, and Pax Web to 1.0.7.
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-771] - KAR Deployer doesn't work
+    * [KARAF-773] - KAR docu outdated
+    * [KARAF-816] - Wrapper feature doesn't load security libraries
+    * [KARAF-889] - dev:framework commands incorrect workflow
+    * [KARAF-892] - EventAdmin events from Gogo not being sent from Karaf's console bundle
+    * [KARAF-893] - Wrong URL in release notes [1]
+    * [KARAF-894] - Kar deployment failed
+    * [KARAF-895] - NPE during webconsole startup
+    * [KARAF-896] - Karaf webconsole exports wrong version of Felix webconsole package
+    * [KARAF-902] - Jaas: Properties backing engine doesn't remove users
+    * [KARAF-904] - add jetty.port=8181 to jetty.xml so that configuration for jetty connector could take effect
+    * [KARAF-905] - propdel() method in the ConfigMBean didn't work
+    * [KARAF-914] - Add ICU4J in Jasypt bundle
+    * [KARAF-915] - KAR deployment failed in the features XML is not the first entry of the KAR archive
+    * [KARAF-917] - warn instead of info when failing to install a feature
+    * [KARAF-919] - Kar redeployment failed
+    * [KARAF-920] - Feature autoinstall from kar failed
+    * [KARAF-921] - maven eclipse plugin 2.8 does not work correctly with karaf
+    * [KARAF-922] - features-maven-plugin ignores repository tags in feature files
+    * [KARAF-923] - features-maven-plugin#AddFeaturesToRepoMojo does not handle spaces in repository urls well
+
+** Dependency upgrade
+    * [KARAF-901] - Upgrade to Pax Web 1.0.7
+
+** Improvement
+    * [KARAF-756] - Add ability to have KeyStoreManager to wait for SSL keystore to be fully initialize by other bundle through timeout
+    * [KARAF-762] - dev:watch should support multiple bundle IDs
+    * [KARAF-786] - Add more MBeans
+    * [KARAF-847] - Provide Karaf features covering all Spring bundles
+    * [KARAF-851] - Upgrade Maven plugins in use
+    * [KARAF-864] - obr:deploy command should provide a start option
+    * [KARAF-881] - Make aliases to osgi:* commands to be more clear for the users
+    * [KARAF-885] - StartBundle doesn't deploy all bundles if one failed
+    * [KARAF-886] - Document security properties in the relevant configuration files
+    * [KARAF-897] - Fixing text in bundle.info files
+    * [KARAF-898] - Config delete operation should remove the pid.cfg file
+    * [KARAF-899] - Upgrade to Apache Felix Gogo version 0.10.0
+    * [KARAF-900] - Shutdown command should display the instance name
+    * [KARAF-907] - Include 64 bits wrapper library
+    * [KARAF-925] - Karaf config.properties doesn't define J2SE-1.6 and J2SE-1.7 execution environment
+
+** New Feature
+    * [KARAF-541] - Support JMX SSL via etc/org.apache.karaf.management.cfg 
+    * [KARAF-657] - kar deployer should start the feature
+    * [KARAF-845] - Add a jasypt based property placeholder to support encrypted values
+    * [KARAF-912] - Add a goal to create a kar file
+
+** Task
+    * [KARAF-887] - Refer PrinceXML website in the manual
+
+
                     Apache Karaf 2.2.3
                     ==================
 
