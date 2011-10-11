@@ -79,22 +79,18 @@
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-service</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-wrap</artifactId>
-            <scope>runtime</scope>
         </dependency>
 
 
