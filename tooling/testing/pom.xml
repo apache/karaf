@@ -42,7 +42,7 @@
         <!-- The assembly and all the dependencies -->
         <dependency>
             <groupId>org.apache.karaf.assemblies</groupId>
-            <artifactId>apache-karaf-full</artifactId>
+            <artifactId>apache-karaf</artifactId>
             <type>zip</type>
         </dependency>
         <!-- Feature Files -->
@@ -110,11 +110,10 @@
                             <outputDirectory>${basedir}/target/classes/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../../assemblies/apache-karaf/src/main/filtered-resources/etc</directory>
+                                    <directory>../../assemblies/features/framework/src/main/filtered-resources/resources/etc</directory>
                                     <filtering>true</filtering>
                                     <includes>
                                         <include>config.properties</include>
-                                        <include>startup.properties</include>
                                         <include>jre.properties</include>
                                         <include>custom.properties</include>
                                     </includes>
@@ -153,8 +152,7 @@
                             {maven-resources},
                             org/apache/karaf/testing/config.properties=target/classes/config.properties,
                             org/apache/karaf/testing/jre.properties=target/classes/jre.properties,
-                            org/apache/karaf/testing/custom.properties=target/classes/custom.properties,
-                            org/apache/karaf/testing/startup.properties=target/classes/startup.properties
+                            org/apache/karaf/testing/custom.properties=target/classes/custom.properties
                         </Include-Resource>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

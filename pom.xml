@@ -492,13 +492,13 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.assemblies</groupId>
-                <artifactId>apache-karaf-full</artifactId>
+                <artifactId>apache-karaf</artifactId>
                 <type>tar.gz</type>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.assemblies</groupId>
-                <artifactId>apache-karaf-full</artifactId>
+                <artifactId>apache-karaf</artifactId>
                 <type>zip</type>
                 <version>${project.version}</version>
             </dependency>
