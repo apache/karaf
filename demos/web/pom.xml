@@ -51,7 +51,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.assemblies</groupId>
-            <artifactId>apache-karaf-full</artifactId>
+            <artifactId>apache-karaf</artifactId>
             <type>zip</type>
             <scope>provided</scope>
         </dependency>
@@ -120,7 +120,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.karaf.assemblies</groupId>
-                                    <artifactId>apache-karaf-full</artifactId>
+                                    <artifactId>apache-karaf</artifactId>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/karaf/WEB-INF</outputDirectory>
@@ -145,7 +145,7 @@
                             <tasks>
                                 <move todir="${project.build.directory}/karaf/WEB-INF/karaf">
                                     <fileset
-                                            dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-full-${project.version}"/>
+                                            dir="${project.build.directory}/karaf/WEB-INF/apache-karaf-${project.version}"/>
                                 </move>
                             </tasks>
                         </configuration>

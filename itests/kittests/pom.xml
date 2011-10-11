@@ -42,14 +42,14 @@
               which would lead to java.lang.RuntimeException: Could not create [service.obr] -->
         <dependency>
             <groupId>org.apache.karaf.assemblies</groupId>
-            <artifactId>apache-karaf-full</artifactId>
+            <artifactId>apache-karaf</artifactId>
             <type>tar.gz</type>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.karaf.assemblies</groupId>
-            <artifactId>apache-karaf-full</artifactId>
+            <artifactId>apache-karaf</artifactId>
             <type>zip</type>
             <scope>test</scope>
         </dependency>
@@ -105,7 +105,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.karaf.assemblies</groupId>
-                                    <artifactId>apache-karaf-full</artifactId>
+                                    <artifactId>apache-karaf</artifactId>
                                     <type>tar.gz</type>
                                     <outputDirectory>target/distributions</outputDirectory>
                                     <destFileName>karaf.tar.gz</destFileName>
@@ -123,7 +123,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.apache.karaf.assemblies</groupId>
-                                    <artifactId>apache-karaf-full</artifactId>
+                                    <artifactId>apache-karaf</artifactId>
                                     <type>zip</type>
                                     <outputDirectory>target/distributions</outputDirectory>
                                     <destFileName>karaf.zip</destFileName>
