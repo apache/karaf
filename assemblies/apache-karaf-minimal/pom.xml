@@ -30,7 +30,7 @@
 
     <artifactId>apache-karaf-minimal</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Assemblies :: Minimal</name>
+    <name>Apache Karaf :: Assemblies :: Minimal Distribution</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
