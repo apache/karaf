@@ -105,7 +105,7 @@
                             <outputDirectory>${basedir}/target/classes/org/apache/karaf/admin/etc</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../../assemblies/apache-karaf/src/main/distribution/text/etc/</directory>
+                                    <directory>../../assemblies/features/framework/src/main/resources/resources/etc</directory>
                                     <includes>
                                         <include>*.properties</include>
                                         <include>*.cfg</include>
@@ -116,25 +116,18 @@
                                         <exclude>system.properties</exclude>
                                     </excludes>
                                 </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-filtered</id>
-                        <!-- here the phase you need -->
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/target/classes/org/apache/karaf/admin/etc</outputDirectory>
-                            <resources>
                                 <resource>
-                                    <directory>../../assemblies/apache-karaf/src/main/filtered-resources/etc</directory>
+                                    <directory>../../assemblies/features/framework/src/main/filtered-resources/resources/etc</directory>
                                     <filtering>true</filtering>
                                     <includes>
                                         <include>*.properties</include>
                                         <include>*.cfg</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/src/test/resources/etc</directory>
+                                    <includes>
+                                        <include>startup.properties</include>
                                     </includes>
                                 </resource>
                             </resources>

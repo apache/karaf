@@ -97,8 +97,8 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <id>process-resources</id>
-                        <phase>process-resources</phase>
+                        <id>install-kar</id>
+                        <phase>compile</phase>
                         <goals>
                             <goal>install-kars</goal>
                         </goals>
