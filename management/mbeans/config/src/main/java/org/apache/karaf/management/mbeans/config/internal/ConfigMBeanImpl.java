@@ -85,6 +85,8 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
         Dictionary dictionary = configuration.getProperties();
+        if (dictionary == null)
+            dictionary = new java.util.Properties();
         Map<String, String> propertiesMap = new HashMap<String, String>();
         for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
             Object key = e.nextElement();
@@ -100,6 +102,8 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
         Dictionary dictionary = configuration.getProperties();
+        if (dictionary == null)
+            dictionary = new java.util.Properties();
         dictionary.remove(key);
         store(pid, dictionary, false);
     }
@@ -110,6 +114,8 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
         Dictionary dictionary = configuration.getProperties();
+        if (dictionary == null)
+            dictionary = new java.util.Properties();
         Object currentValue = dictionary.get(key);
         if (currentValue == null) {
             dictionary.put(key, value);
@@ -127,6 +133,8 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
         }
         Dictionary dictionary = configuration.getProperties();
+        if (dictionary == null)
+            dictionary = new java.util.Properties();
         dictionary.put(key, value);
         store(pid, dictionary, false);
     }
