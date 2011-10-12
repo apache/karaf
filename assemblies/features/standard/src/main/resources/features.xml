@@ -145,7 +145,7 @@
         <bundle>mvn:org.ops4j.pax.url/pax-url-obr/${pax.url.version}</bundle>
     </feature>
     <feature name="config" version="${project.version}">
-        <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
     </feature>
     <feature name="jetty" version="${jetty.version}" resolver="(obr)">
         <bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-activation_1.1_spec/${geronimo.activation.version}</bundle>
@@ -220,21 +220,21 @@
             sshRealm=karaf
             hostKey=${karaf.base}/etc/host.key
         </config>
-        <bundle dependency='true'>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
-        <bundle dependency='true'>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
-        <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
+        <bundle start-level="30" dependency='true'>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
+        <bundle start-level="30" dependency='true'>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
     </feature>
     <feature name="management" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.management/org.apache.karaf.management.server/${project.version}</bundle>
-        <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
-        <bundle>mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
-        <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.system/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.bundles/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.services/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.config/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.log/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.packages/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.dev/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management/org.apache.karaf.management.server/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx/${aries.jmx.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.aries.jmx/org.apache.aries.jmx.blueprint/${aries.jmx.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.system/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.bundles/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.services/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.config/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.log/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.packages/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.dev/${project.version}</bundle>
     </feature>
     <feature name="eventadmin" version="${project.version}">
 		<bundle start-level='30'>mvn:org.apache.felix/org.apache.felix.eventadmin/${felix.eventadmin.version}</bundle>
