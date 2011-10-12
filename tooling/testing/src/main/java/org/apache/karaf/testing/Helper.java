@@ -570,23 +570,26 @@ public final class Helper {
 
     private static MavenArtifactProvisionOption convertToMaven(String location) {
         String[] p = location.split("/");
-        if (p.length >= 4 && p[p.length-1].startsWith(p[p.length-3] + "-" + p[p.length-2])) {
+        if (p.length >= 3) {
+            if (p[0].startsWith("mvn:")) {
+                p[0] = p[0].substring(4);
+            }
             MavenArtifactProvisionOption opt = new MavenArtifactProvisionOption();
-            int artifactIdVersionLength = p[p.length-3].length() + 1 + p[p.length-2].length(); // (artifactId + "-" + version).length
-            if (p[p.length-1].charAt(artifactIdVersionLength) == '-') {
-                opt.classifier((p[p.length-1].substring(artifactIdVersionLength + 1, p[p.length-1].lastIndexOf('.'))));
+            opt.groupId(p[0]);
+            opt.artifactId(p[1]);
+            opt.version(p[2]);
+            String type = null;
+            if (p.length == 5) {
+                opt.classifier(p[3]);
+                type = p[4];
             }
-            StringBuffer sb = new StringBuffer();
-            for (int j = 0; j < p.length - 3; j++) {
-                if (j > 0) {
-                    sb.append('.');
-                }
-                sb.append(p[j]);
+            if (p.length == 4) {
+                type = p[3];
             }
-            opt.groupId(sb.toString());
-            opt.artifactId(p[p.length-3]);
-            opt.version(p[p.length-2]);
-            opt.type(p[p.length-1].substring(p[p.length-1].lastIndexOf('.') + 1));
+            if (type != null)
+                opt.type(type);
+            else opt.type("jar");
+
             return opt;
         } else {
             throw new IllegalArgumentException("Unable to extract maven information from " + location);
