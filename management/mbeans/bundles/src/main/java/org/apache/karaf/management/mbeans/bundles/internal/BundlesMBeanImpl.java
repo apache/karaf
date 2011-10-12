@@ -155,16 +155,19 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         BundlesSelector selector = new BundlesSelector(bundleContext);
         List<Bundle> bundles = selector.selectBundles(bundleId);
 
+        if (location == null) {
+            for (Bundle bundle : bundles) {
+                bundle.update();
+            }
+            return;
+        }
+
         if (bundles.size() != 1) {
             throw new IllegalArgumentException("Provided bundle Id doesn't return any bundle or more than one bundle selected");
         }
 
-        if (location != null) {
-            InputStream is = new URL(location).openStream();
-            bundles.get(0).update(is);
-        } else {
-            bundles.get(0).update();
-        }
+        InputStream is = new URL(location).openStream();
+        bundles.get(0).update(is);
     }
 
     public void resolve() throws Exception {
