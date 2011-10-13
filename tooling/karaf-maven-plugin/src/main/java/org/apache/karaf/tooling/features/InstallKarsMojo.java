@@ -350,8 +350,10 @@ public class InstallKarsMojo extends MojoSupport {
                         in.close();
                     }
                     String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES) && !((String) properties.get(FEATURES_REPOSITORIES)).isEmpty()? properties.get(FEATURES_REPOSITORIES) + ",": "";
-                    existingFeatureRepos = existingFeatureRepos + uri.toString();
-                    properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
+                    if(!existingFeatureRepos.contains(uri.toString())) {
+                       existingFeatureRepos = existingFeatureRepos + uri.toString();
+                       properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
+                    }
                     Features repo = readFeatures(uri);
                     for (Feature feature: repo.getFeature()) {
                         if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
@@ -359,8 +361,10 @@ public class InstallKarsMojo extends MojoSupport {
                         } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
                             String existingBootFeatures = properties.containsKey(FEATURES_BOOT) && !((String) properties.get(FEATURES_BOOT)).isEmpty()? properties.get(FEATURES_BOOT) + ",": "";
-                            existingBootFeatures = existingBootFeatures + feature.getName();
-                            properties.put(FEATURES_BOOT, existingBootFeatures);
+                            if(!existingBootFeatures.contains(feature.getName())) {
+                                existingBootFeatures = existingBootFeatures + feature.getName();
+                                properties.put(FEATURES_BOOT, existingBootFeatures);
+                            }
                         }  else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
                         }
