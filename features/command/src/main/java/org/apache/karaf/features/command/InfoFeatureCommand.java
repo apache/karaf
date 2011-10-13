@@ -111,7 +111,13 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         } else {
             System.out.println("Feature contains followed bundles:");
             for (BundleInfo featureBundle : bundleInfos) {
-                System.out.println("  " + featureBundle.getLocation());
+                int startLevel = featureBundle.getStartLevel();
+                StringBuilder sb = new StringBuilder();
+                sb.append(" ").append(featureBundle.getLocation());
+                if(startLevel > 0) {
+                    sb.append(" start-level=").append(startLevel);
+                }
+                System.out.println(sb.toString());
             }
         }
     }
