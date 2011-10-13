@@ -151,7 +151,7 @@ public class AddToRepositoryMojo extends MojoSupport {
             Set<String> bundles = new HashSet<String>();
             Map<String, Feature> featuresMap = new HashMap<String, Feature>();
             for (String uri : descriptors) {
-                retrieveDescriptorsRecursivly(uri, bundles, featuresMap);
+                retrieveDescriptorsRecursively(uri, bundles, featuresMap);
             }
 
             // no features specified, handle all of them
@@ -198,11 +198,11 @@ public class AddToRepositoryMojo extends MojoSupport {
                 resolveBundle(explicitBundle, Collections.singletonList(explicitBundle.getRepository()));
             }
             if (copyFileBasedDescriptors != null) {
-                for (CopyFileBasedDescriptor fileBasedDescritpor : copyFileBasedDescriptors) {
-                    copy(new FileInputStream(fileBasedDescritpor.getSourceFile()),
+                for (CopyFileBasedDescriptor fileBasedDescriptor : copyFileBasedDescriptors) {
+                    copy(new FileInputStream(fileBasedDescriptor.getSourceFile()),
                         repository,
-                        fileBasedDescritpor.getTargetFileName(),
-                        fileBasedDescritpor.getTargetDirectory(),
+                        fileBasedDescriptor.getTargetFileName(),
+                        fileBasedDescriptor.getTargetDirectory(),
                         new byte[8192]);
                 }
             }
@@ -215,7 +215,7 @@ public class AddToRepositoryMojo extends MojoSupport {
         }
     }
 
-    private void retrieveDescriptorsRecursivly(String uri, Set<String> bundles, Map<String, Feature> featuresMap)
+    private void retrieveDescriptorsRecursively(String uri, Set<String> bundles, Map<String, Feature> featuresMap)
         throws Exception {
         // let's ensure a mvn: based url is sitting in the local repo before we try reading it
         Artifact descriptor = bundleToArtifact(uri, true);
@@ -231,7 +231,7 @@ public class AddToRepositoryMojo extends MojoSupport {
         }
         if (resolveDefinedRepositoriesRecursively) {
             for (String r : repo.getDefinedRepositories()) {
-                retrieveDescriptorsRecursivly(r, bundles, featuresMap);
+                retrieveDescriptorsRecursively(r, bundles, featuresMap);
             }
         }
     }
