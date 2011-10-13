@@ -51,6 +51,8 @@
     * [KARAF-921] - maven eclipse plugin 2.8 does not work correctly with karaf
     * [KARAF-922] - features-maven-plugin ignores repository tags in feature files
     * [KARAF-923] - features-maven-plugin#AddFeaturesToRepoMojo does not handle spaces in repository urls well
+    * [KARAF-929] - MBean bundles should be seen as system bundles
+    * [KARAF-932] - ConfigMBean raise a NPE when dictionnary is null
 
 ** Dependency upgrade
     * [KARAF-901] - Upgrade to Pax Web 1.0.7
@@ -71,6 +73,7 @@
     * [KARAF-900] - Shutdown command should display the instance name
     * [KARAF-907] - Include 64 bits wrapper library
     * [KARAF-925] - Karaf config.properties doesn't define J2SE-1.6 and J2SE-1.7 execution environment
+    * [KARAF-930] - Bundles MBean should mimic the BundleSelector like osgi:* commands
 
 ** New Feature
     * [KARAF-541] - Support JMX SSL via etc/org.apache.karaf.management.cfg 

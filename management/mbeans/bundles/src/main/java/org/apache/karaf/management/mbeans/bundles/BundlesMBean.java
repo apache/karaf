@@ -25,27 +25,27 @@ public interface BundlesMBean {
 
     TabularData list() throws Exception;
 
-    int getStartLevel(long bundleId) throws Exception;
-    void setStartLevel(long bundleId, int bundleStartLevel) throws Exception;
+    int getStartLevel(String bundleId) throws Exception;
+    void setStartLevel(String bundleId, int bundleStartLevel) throws Exception;
 
     void refresh() throws Exception;
-    void refresh(long bundleId) throws Exception;
+    void refresh(String bundleId) throws Exception;
 
-    void update(long bundleId) throws Exception;
-    void update(long bundleId, String location) throws Exception;
+    void update(String bundleId) throws Exception;
+    void update(String bundleId, String location) throws Exception;
 
     void resolve() throws Exception;
-    void resolve(long bundleId) throws Exception;
+    void resolve(String bundleId) throws Exception;
 
-    void restart(long bundleId) throws Exception;
+    void restart(String bundleId) throws Exception;
 
     long install(String url) throws Exception;
     long install(String url, boolean start) throws Exception;
 
-    void start(long bundleId) throws Exception;
+    void start(String bundleId) throws Exception;
 
-    void stop(long bundleId) throws Exception;
+    void stop(String bundleId) throws Exception;
 
-    void uninstall(long bundleId) throws Exception;
+    void uninstall(String bundleId) throws Exception;
 
 }

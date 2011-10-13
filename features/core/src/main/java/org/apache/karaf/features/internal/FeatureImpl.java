@@ -36,6 +36,7 @@ public class FeatureImpl implements Feature {
     private String details;
     private String version;
     private String resolver;
+    private String install = DEFAULT_INSTALL_MODE;
     private List<Feature> dependencies = new ArrayList<Feature>();
     private List<BundleInfo> bundles = new ArrayList<BundleInfo>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
@@ -95,6 +96,14 @@ public class FeatureImpl implements Feature {
 
     public void setResolver(String resolver) {
         this.resolver = resolver;
+    }
+
+    public String getInstall() {
+        return install;
+    }
+
+    public void setInstall(String install) {
+        this.install = install;
     }
 
     public List<Feature> getDependencies() {

@@ -136,6 +136,11 @@ public class RepositoryImpl implements Repository {
                         f.setResolver(resolver);
                     }
 
+                    String install = e.getAttribute("install");
+                    if (install != null && install.length() > 0) {
+                        f.setInstall(install);
+                    }
+
                     String description = e.getAttribute("description");
                     if (description != null && description.length() > 0) {
                         f.setDescription(description);

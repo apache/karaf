@@ -28,6 +28,7 @@ import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.karaf.features.internal.FeatureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -130,7 +131,13 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
                             for (Repository repo : featuresService.listRepositories()) {
                                 if (repo.getURI().equals(url.toURI())) {
                                     Set<Feature> features = new HashSet<Feature>(Arrays.asList(repo.getFeatures()));
-                                    featuresService.installFeatures(features, EnumSet.noneOf(FeaturesService.Option.class));
+                                    Set<Feature> autoInstallFeatures = new HashSet<Feature>();
+                                    for(Feature feature:features) {
+                                        if(feature.getInstall().equals(Feature.DEFAULT_INSTALL_MODE)){
+                                            autoInstallFeatures.add(feature);
+                                        }
+                                    }
+                                    featuresService.installFeatures(autoInstallFeatures, EnumSet.noneOf(FeaturesService.Option.class));
                                 }
                             }
                             urls.add(url);

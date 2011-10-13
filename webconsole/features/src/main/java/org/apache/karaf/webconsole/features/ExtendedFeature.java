@@ -127,6 +127,9 @@ public class ExtendedFeature implements Feature
         return this.repository;
     }
 
+    public String getInstall() {
+        return feature.getInstall();
+    }
 
     public State getState() {
         return this.state;

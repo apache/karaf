@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public interface Feature {
 
+    public static String DEFAULT_INSTALL_MODE = "auto";
+
     String getId();
 
     String getName();
@@ -35,6 +37,8 @@ public interface Feature {
     String getVersion();
 
     String getResolver();
+
+    String getInstall();
 
     List<Feature> getDependencies();
 
