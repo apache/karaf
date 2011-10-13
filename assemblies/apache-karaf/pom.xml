@@ -38,20 +38,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.features.framework</artifactId>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
             <type>kar</type>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.features.standard</artifactId>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.assemblies.features</groupId>
-            <artifactId>org.apache.karaf.features.enterprise</artifactId>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>enterprise</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>

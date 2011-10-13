@@ -28,7 +28,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.features.standard</artifactId>
+    <groupId>org.apache.karaf.features</groupId>
+    <artifactId>standard</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Standard</name>
 
