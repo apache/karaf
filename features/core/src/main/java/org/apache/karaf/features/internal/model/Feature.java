@@ -82,6 +82,7 @@ public class Feature implements org.apache.karaf.features.Feature {
     public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
     public static String DEFAULT_VERSION = "0.0.0";
 
+
     protected String details;
     protected List<Config> config;
     protected List<ConfigFile> configfile;
@@ -95,6 +96,8 @@ public class Feature implements org.apache.karaf.features.Feature {
     protected String description;
     @XmlAttribute
     protected String resolver;
+    @XmlAttribute
+    protected String install = DEFAULT_INSTALL_MODE;
     @XmlAttribute(name = "start-level")
     protected Integer startLevel;
 
@@ -338,6 +341,14 @@ public class Feature implements org.apache.karaf.features.Feature {
      */
     public String getResolver() {
         return resolver;
+    }
+
+    public String getInstall() {
+        return install;
+    }
+
+    public void setInstall(String install) {
+        this.install = install;
     }
 
     public List<org.apache.karaf.features.Dependency> getDependencies() {
