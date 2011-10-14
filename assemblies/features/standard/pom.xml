@@ -162,6 +162,10 @@
                     <groupId>org.apache.karaf.shell</groupId>
                     <artifactId>org.apache.karaf.shell.console</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.utils</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>

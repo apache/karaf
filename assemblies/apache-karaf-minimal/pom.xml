@@ -106,8 +106,8 @@
                 </executions>
                 <configuration>
                     <bootFeatures>
-                        <feature>org.apache.karaf.features.standard</feature>
-                        <feature>org.apache.karaf.features.standard.management</feature>
+                        <feature>standard</feature>
+                        <feature>management</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>
