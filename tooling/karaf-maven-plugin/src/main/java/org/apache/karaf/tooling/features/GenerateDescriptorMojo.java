@@ -238,7 +238,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
      */
     private void writeFeatures(PrintStream out) throws ArtifactResolutionException, ArtifactNotFoundException,
             IOException, JAXBException, SAXException, ParserConfigurationException, XMLStreamException, MojoExecutionException {
-        getLogger().info("Step 4 : Generating " + outputFile.getAbsolutePath());
+        getLogger().info("Generating feature descriptor file " + outputFile.getAbsolutePath());
         //read in an existing feature.xml
         ObjectFactory objectFactory = new ObjectFactory();
         Features features;

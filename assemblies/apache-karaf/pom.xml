@@ -112,11 +112,10 @@
                 </executions>
                 <configuration>
                     <bootFeatures>
-                        <feature>org.apache.karaf.features.standard</feature>
-                        <feature>org.apache.karaf.features.full</feature>
-                        <feature>org.apache.karaf.features.standard.management</feature>
-                        <feature>org.apache.karaf.features.standard.ssh</feature>
-                        <feature>org.apache.karaf.features.standard.config</feature>
+                        <feature>standard</feature>
+                        <feature>management</feature>
+                        <feature>ssh</feature>
+                        <feature>config</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>
