@@ -16,7 +16,6 @@ rem    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem    See the License for the specific language governing permissions and
 rem    limitations under the License.
 rem
-rem 
 
 if not "%ECHO%" == "" echo %ECHO%
 
@@ -24,6 +23,32 @@ setlocal
 set DIRNAME=%~dp0%
 set PROGNAME=%~nx0%
 set ARGS=%*
+
+rem Check console window title. Set to Karaf by default
+
+if not "%KARAF_TITLE%" == "" (
+    title %KARAF_TITLE%
+) else (
+    title Karaf
+)
+
+rem Check/Set up some easily accessible MIN/MAX params for JVM mem usage
+
+if "%JAVA_MIN_MEM%" == "" (
+    set JAVA_MIN_MEM=128M
+)
+
+if "%JAVA_MAX_MEM%" == "" (
+    set JAVA_MAX_MEM=512M
+)
+
+if "%JAVA_PERM_MEM%" == "" (
+    set JAVA_PERM_MEM=16M
+)
+
+if "%JAVA_MAX_PERM_MEM%" == "" (
+    set JAVA_MAX_PERM_MEM=64M
+)
 
 goto BEGIN
 
