@@ -16,9 +16,6 @@ rem    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem    See the License for the specific language governing permissions and
 rem    limitations under the License.
 rem
-rem
-rem $Id: karaf.bat 979 2005-11-30 22:50:55Z bsnyder $
-rem
 
 if not "%ECHO%" == "" echo %ECHO%
 
@@ -26,6 +23,8 @@ setlocal
 set DIRNAME=%~dp0%
 set PROGNAME=%~nx0%
 set ARGS=%*
+
+rem Check console window title. Set to Karaf by default
 
 if not "%KARAF_TITLE%" == "" (
     title %KARAF_TITLE%

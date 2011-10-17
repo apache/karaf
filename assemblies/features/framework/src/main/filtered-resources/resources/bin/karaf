@@ -15,8 +15,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-# $Id: karaf 979 2005-11-30 22:50:55Z bsnyder $
-#
 
 DIRNAME=`dirname $0`
 PROGNAME=`basename $0`
@@ -52,13 +50,6 @@ warn() {
 die() {
     warn "$*"
     exit 1
-}
-
-maybeSource() {
-    file="$1"
-    if [ -f "$file" ] ; then
-        . $file
-    fi
 }
 
 detectOS() {
