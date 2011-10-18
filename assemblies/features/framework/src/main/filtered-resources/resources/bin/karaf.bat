@@ -24,8 +24,13 @@ set DIRNAME=%~dp0%
 set PROGNAME=%~nx0%
 set ARGS=%*
 
-rem Check console window title. Set to Karaf by default
+rem Sourcing environment settings for karaf similar to tomcats setenv
+SET KARAF_SCRIPT="karaf.bat"
+if exist "%DIRNAME%setenv.bat" (
+  call "%DIRNAME%setenv.bat"
+)
 
+rem Check console window title. Set to Karaf by default
 if not "%KARAF_TITLE%" == "" (
     title %KARAF_TITLE%
 ) else (
@@ -33,19 +38,15 @@ if not "%KARAF_TITLE%" == "" (
 )
 
 rem Check/Set up some easily accessible MIN/MAX params for JVM mem usage
-
 if "%JAVA_MIN_MEM%" == "" (
     set JAVA_MIN_MEM=128M
 )
-
 if "%JAVA_MAX_MEM%" == "" (
     set JAVA_MAX_MEM=512M
 )
-
 if "%JAVA_PERM_MEM%" == "" (
     set JAVA_PERM_MEM=16M
 )
-
 if "%JAVA_MAX_PERM_MEM%" == "" (
     set JAVA_MAX_PERM_MEM=64M
 )
