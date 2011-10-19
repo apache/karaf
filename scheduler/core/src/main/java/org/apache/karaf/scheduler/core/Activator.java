@@ -24,13 +24,13 @@ import java.util.Properties;
 public class Activator implements BundleActivator {
 
     private TaskScheduler scheduler = new TaskScheduler();
-    private RunableServiceListener listener;
+    private RunnableServiceListener listener;
 
     private static final String filter = "(&(objectclass=%s)(&(%s >= 0)(%s >= 0)))";
 
     @Override
     public void start(BundleContext context) throws Exception {
-        listener = new RunableServiceListener(context, scheduler);
+        listener = new RunnableServiceListener(context, scheduler);
 
         //register scheduler service
         context.registerService(scheduler.getClass().getName(), scheduler, new Properties());
