@@ -22,7 +22,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
-public class RunableServiceListener implements ServiceListener {
+public class RunnableServiceListener implements ServiceListener {
 
     private final BundleContext bundleContext;
     private final TaskScheduler scheduler;
@@ -33,7 +33,7 @@ public class RunableServiceListener implements ServiceListener {
      * @param bundleContext
      * @param scheduler
      */
-    public RunableServiceListener(BundleContext bundleContext, TaskScheduler scheduler) {
+    public RunnableServiceListener(BundleContext bundleContext, TaskScheduler scheduler) {
         this.bundleContext = bundleContext;
         this.scheduler = scheduler;
     }
