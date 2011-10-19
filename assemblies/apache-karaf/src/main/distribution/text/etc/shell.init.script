@@ -24,9 +24,15 @@ ld = { log:display $args } ;
 lde = { log:display-exception $args } ;
 la = { osgi:list -t 0 $args } ;
 cl = { config:list "(service.pid=$args)" } ;
+
+// system:* aliases
 system:shutdown = { osgi:shutdown $args } ;
 system:start-level = { osgi:start-level $args } ;
+
+// service:* aliases
 service:list = { ls $args } ;
+
+// bundle:* aliases
 bundle:list = { osgi:list $args } ;
 bundle:install = { osgi:install $args };
 bundle:uninstall = { osgi:uninstall $args } ;
@@ -39,3 +45,20 @@ bundle:resolve = { osgi:resolve $args } ;
 bundle:restart = { osgi:restart $args } ;
 bundle:start-level = { osgi:start-level $args } ;
 bundle:update = { osgi:update $args } ;
+
+// package:* aliases
+package:export = { packages:exports $args } ;
+package:import = { packages:imports $args } ;
+
+// feature:* aliases
+feature:add-url = { features:addurl $args } ;
+feature:refresh-url = { features:refreshurl $args } ;
+feature:info = { features:info $args } ;
+feature:remove-repository = { features:removerepository $args } ;
+feature:install = { features:install $args } ;
+feature:remove-url = { features:removeurl $args } ;
+feature:list = { features:list $args } ;
+feature:uninstall = { features:uninstall $args } ;
+feature:list-repository = { features:listrepositories $args } ;
+feature:list-url = { features:listurl $args } ;
+feature:list-version = { features:listversions $args } ;
