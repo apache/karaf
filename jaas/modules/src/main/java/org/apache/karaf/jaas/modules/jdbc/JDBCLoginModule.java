@@ -118,12 +118,20 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
             passwordResultSet = passwordStatement.executeQuery();
 
             if (!passwordResultSet.next()) {
-                throw new LoginException("User " + user + " does not exist");
+            	if (!this.detailedLoginExcepion) {
+            		throw new LoginException("login failed");
+            	} else {
+            		throw new LoginException("User " + user + " does not exist");
+            	}
             } else {
                 String storedPassword = passwordResultSet.getString(1);
 
                 if (!checkPassword(password, storedPassword)) {
-                    throw new LoginException("Password for " + user + " does not match");
+                	if (!this.detailedLoginExcepion) {
+                		throw new LoginException("login failed");
+                	} else {
+                		throw new LoginException("Password for " + user + " does not match");
+                	}
                 }
                 principals.add(new UserPrincipal(user));
             }

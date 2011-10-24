@@ -68,14 +68,22 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
 
             String userInfos = (String) properties.get(USER_PREFIX + user);
             if (userInfos == null) {
-                throw new FailedLoginException("User does not exist");
+            	if (!this.detailedLoginExcepion) {
+            		throw new FailedLoginException("login failed");
+            	} else {
+            		throw new FailedLoginException("User does not exist");
+            	}
             }
             String[] infos = userInfos.split(",");
             String storedPassword = infos[0];
 
             // check the provided password
             if (!checkPassword(password, storedPassword)) {
-                throw new FailedLoginException("Password for " + user + " does not match");
+            	if (!this.detailedLoginExcepion) {
+            		throw new FailedLoginException("login failed");
+            	} else {
+            		throw new FailedLoginException("Password for " + user + " does not match");
+            	}
             }
 
             principals = new HashSet<Principal>();
