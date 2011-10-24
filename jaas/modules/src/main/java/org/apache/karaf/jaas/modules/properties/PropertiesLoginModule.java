@@ -91,7 +91,11 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
             //error handled in the next statement
         }
         if (userInfos == null) {
-            throw new FailedLoginException("User " + user + " does not exist");
+        	if (!this.detailedLoginExcepion) {
+        		throw new FailedLoginException("login failed");
+        	} else {
+        		throw new FailedLoginException("User " + user + " does not exist");
+        	}
         }
         
         // the password is in the first position
@@ -132,7 +136,11 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
 
         // check the provided password
         if (!checkPassword(password, storedPassword)) {
-            throw new FailedLoginException("Password for " + user + " does not match");
+        	if (!this.detailedLoginExcepion) {
+        		throw new FailedLoginException("login failed");
+        	} else {
+        		throw new FailedLoginException("Password for " + user + " does not match");
+        	}
         }
 
         principals = new HashSet<Principal>();
