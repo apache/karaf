@@ -33,6 +33,11 @@
         <bundle start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
         <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
         <bundle start="true" start-level="25">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
+        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
+        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
+        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.features/${project.version}</bundle>
+        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
+        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
     </feature>
 
 </features>
