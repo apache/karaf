@@ -38,9 +38,10 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     protected CallbackHandler callbackHandler;
     protected boolean debug;
     protected Map<String, ?> options;
-
+   
     protected String rolePolicy;
     protected String roleDiscriminator;
+    protected boolean detailedLoginExcepion;
 
     /**
      * the bundle context is required to use the encryption service
@@ -70,6 +71,7 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         this.rolePolicy = (String) options.get("role.policy");
         this.roleDiscriminator = (String) options.get("role.discriminator");
         this.debug = Boolean.parseBoolean((String) options.get("debug"));
+        this.detailedLoginExcepion = Boolean.parseBoolean((String) options.get("detailed.login.exception"));
         // the bundle context is set in the Config JaasRealm by default
         this.bundleContext = (BundleContext) options.get(BundleContext.class.getName());
         encryptionSupport = new EncryptionSupport(options);
