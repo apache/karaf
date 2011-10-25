@@ -20,9 +20,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Dictionary;
+import java.util.Enumeration;
 
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Dump provider which copies log files from data/log directory to
@@ -30,37 +36,63 @@ import org.apache.karaf.diagnostic.core.DumpProvider;
  */
 public class LogDumpProvider implements DumpProvider {
 
+    private BundleContext bundleContext;
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
     /**
      * Attach log entries from directory.
      */
     public void createDump(DumpDestination destination) throws Exception {
-        File logDir = new File("data/log");
-        File[] listFiles = logDir.listFiles();
+        // get the ConfigAdmin service
+        ServiceReference ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+        if (ref == null) {
+            return;
+        }
 
-        // ok, that's not the best way of doing that..
-        for (File file : listFiles) {
-            FileInputStream inputStream = new FileInputStream(file);
+        // get the PAX Logging configuration
+        ConfigurationAdmin configurationAdmin = (ConfigurationAdmin) bundleContext.getService(ref);
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.logging");
 
-            OutputStream outputStream = destination.add("log/" + file.getName());
-
-            copy(inputStream, outputStream);
+            // get the ".file" Pax Logging Properties
+            Dictionary dictionary = configuration.getProperties();
+            for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
+                String property = (String) e.nextElement();
+                if (property.endsWith(".file")) {
+                    // it's a file appender, get the log file location
+                    String location = (String) dictionary.get(property);
+                    File file = new File(location);
+                    if (file.exists()) {
+                        FileInputStream inputStream = new FileInputStream(file);
+                        OutputStream outputStream = destination.add("log/" + file.getName());
+                        copy(inputStream, outputStream);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            bundleContext.ungetService(ref);
         }
     }
 
     /**
      * Rewrites data from input stream to output stream. This code is very common
      * but we would avoid additional dependencies in diagnostic stuff.
-     * 
-     * @param inputStream Source stream.
+     *
+     * @param inputStream  Source stream.
      * @param outputStream Destination stream.
      * @throws IOException When IO operation fails.
      */
-	private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+    private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
         byte[] buffer = new byte[4096];
         int n = 0;
         while (-1 != (n = inputStream.read(buffer))) {
             outputStream.write(buffer, 0, n);
         }
-	}
+    }
 
 }
