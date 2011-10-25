@@ -17,6 +17,7 @@
 package org.apache.karaf.shell.config;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
@@ -74,6 +75,20 @@ public class UpdateCommand extends ConfigCommandSupport {
                     p.put((String) key, (String) props.get(key));
                 }
             }
+            // remove "removed" properties from the file
+            ArrayList<String> propertiesToRemove = new ArrayList<String>();
+            for (String key : p.keySet()) {
+                if (props.get(key) == null
+                        && !Constants.SERVICE_PID.equals(key)
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
+                    propertiesToRemove.add(key);
+                }
+            }
+            for (String key : propertiesToRemove) {
+                p.remove(key);
+            }
+            // save the cfg file
             storage.mkdirs();
             p.save();
         } else {
