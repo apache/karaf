@@ -97,7 +97,7 @@ public class Feature implements org.apache.karaf.features.Feature {
     @XmlAttribute
     protected String resolver;
     @XmlAttribute
-    protected String install = DEFAULT_INSTALL_MODE;
+    protected String install;
     @XmlAttribute(name = "start-level")
     protected Integer startLevel;
 
