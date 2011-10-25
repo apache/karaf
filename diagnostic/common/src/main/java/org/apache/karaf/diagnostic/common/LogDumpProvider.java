@@ -54,39 +54,45 @@ public class LogDumpProvider implements DumpProvider {
 
         // get the PAX Logging configuration
         ConfigurationAdmin configurationAdmin = (ConfigurationAdmin) bundleContext.getService(ref);
-        Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.logging");
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.logging");
 
-        // get the ".file" Pax Logging properties
-        Dictionary dictionary = configuration.getProperties();
-        for (Enumeration e = dictionary.keys(); e.hasMoreElements();) {
-            String property = (String) e.nextElement();
-            if (property.endsWith(".file")) {
-                // it's a file appender, get the file location
-                String location = (String) dictionary.get(property);
-                File file = new File(location);
-                if (file.exists()) {
-                    FileInputStream inputStream = new FileInputStream(file);
-                    OutputStream outputStream = destination.add("log/" + file.getName());
-                    copy(inputStream, outputStream);
+            // get the ".file" Pax Logging properties
+            Dictionary dictionary = configuration.getProperties();
+            for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
+                String property = (String) e.nextElement();
+                if (property.endsWith(".file")) {
+                    // it's a file appender, get the file location
+                    String location = (String) dictionary.get(property);
+                    File file = new File(location);
+                    if (file.exists()) {
+                        FileInputStream inputStream = new FileInputStream(file);
+                        OutputStream outputStream = destination.add("log/" + file.getName());
+                        copy(inputStream, outputStream);
+                    }
                 }
             }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            bundleContext.ungetService(ref);
         }
     }
 
     /**
      * Rewrites data from input stream to output stream. This code is very common
      * but we would avoid additional dependencies in diagnostic stuff.
-     * 
-     * @param inputStream Source stream.
+     *
+     * @param inputStream  Source stream.
      * @param outputStream Destination stream.
      * @throws IOException When IO operation fails.
      */
-	private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+    private void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
         byte[] buffer = new byte[4096];
         int n = 0;
         while (-1 != (n = inputStream.read(buffer))) {
             outputStream.write(buffer, 0, n);
         }
-	}
+    }
 
 }
