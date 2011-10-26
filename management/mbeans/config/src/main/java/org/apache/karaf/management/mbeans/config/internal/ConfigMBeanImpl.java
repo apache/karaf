@@ -181,6 +181,20 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
                     p.put((String) key, (String) properties.get(key));
                 }
             }
+            // remove "removed" properties from the file
+            ArrayList<String> propertiesToRemove = new ArrayList<String>();
+            for (String key : p.keySet()) {
+                if (properties.get(key) == null
+                        && !Constants.SERVICE_PID.equals(key)
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
+                    propertiesToRemove.add(key);
+                }
+            }
+            for (String key : propertiesToRemove) {
+                p.remove(key);
+            }
+            // save the cfg file
             storage.mkdirs();
             p.save();
         } else {
