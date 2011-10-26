@@ -244,4 +244,10 @@
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
     </feature>
 
+    <feature name="standard" description="Standard providing core Karaf features" version="${project.version}">
+        <bundle start-level="30">mvn:org.apache.karaf.admin/org.apache.karaf.admin.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.admin/org.apache.karaf.admin.command/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.admin/org.apache.karaf.admin.management/${project.version}</bundle>
+    </feature>
+
 </features>
