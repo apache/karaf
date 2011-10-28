@@ -258,6 +258,8 @@ public class InstanceImpl implements Instance {
         if (javaOpts == null || javaOpts.length() == 0) {
             javaOpts = "-server -Xmx512M -Dcom.sun.management.jmxremote";
         }
+        String karafOpts = System.getProperty("karaf.opts", "");  
+        
         File libDir = new File(System.getProperty("karaf.home"), "lib");
         File[] jars = libDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
@@ -272,7 +274,8 @@ public class InstanceImpl implements Instance {
             classpath.append(jar.getCanonicalPath());
         }
         String command = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
-                + " " + javaOpts
+                + " " + javaOpts 
+                + " " + karafOpts
                 + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
                 + " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
                 + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\""

@@ -55,6 +55,18 @@ public class Execute {
     
     // For testing
     static boolean exitAllowed = true;
+    
+    /**
+     * Environment variable for specifying extra options to the Karaf admin 
+     * process kicked off from this Java process.
+     */
+    private static final String ENV_KARAF_OPTS = "KARAF_OPTS";
+    
+    /**
+     * System property for specifying extra options to the Karaf admin 
+     * process kicked off from this Java process.
+     */
+    private static final String PROP_KARAF_OPTS = "karaf.opts";    
 
     public static void main(String[] args) throws Exception {
         AnsiConsole.systemInstall();
@@ -78,6 +90,18 @@ public class Execute {
         }
         File storageFile = new File(storage);
         System.setProperty("user.dir", storageFile.getParentFile().getParentFile().getCanonicalPath());
+        
+        try {
+            String karafOpts = System.getenv(ENV_KARAF_OPTS);
+            if (karafOpts != null) {
+                System.setProperty(PROP_KARAF_OPTS, karafOpts);
+            }
+        } catch(Exception e) {
+            System.err.println("Could not read KARAF_OPTS environment variable: " + e.getMessage());
+            if (System.getProperty("karaf.showStackTrace") != null) {
+                throw e;
+            }
+        }        
         
         Object command = cls.newInstance();
         if (command instanceof AdminCommandSupport) {
