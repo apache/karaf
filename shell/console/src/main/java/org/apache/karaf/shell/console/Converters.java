@@ -193,7 +193,7 @@ public class Converters implements Converter
         String s = in.toString();
         if (s.startsWith("(") && s.endsWith(")"))
         {
-            ServiceReference refs[] = context.getServiceReferences(null, String.format(
+            ServiceReference refs[] = context.getServiceReferences((String) null, String.format(
                 "(|(service.id=%s)(service.pid=%s))", in, in));
             if (refs != null && refs.length > 0)
             {
@@ -201,7 +201,7 @@ public class Converters implements Converter
             }
         }
 
-        ServiceReference refs[] = context.getServiceReferences(null, String.format(
+        ServiceReference refs[] = context.getServiceReferences((String) null, String.format(
             "(|(service.id=%s)(service.pid=%s))", in, in));
         if (refs != null && refs.length > 0)
         {
