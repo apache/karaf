@@ -29,7 +29,7 @@ public class StringMapTest extends TestCase {
 
     public void testCaseInsensitiveStringMap() throws Exception {
         StringMap sm = new StringMap(false);
-        Object value = new String("value");
+        String value = new String("value");
         sm.put("key", value);
         Object result = sm.get("Key");
         assertFalse(result == null);

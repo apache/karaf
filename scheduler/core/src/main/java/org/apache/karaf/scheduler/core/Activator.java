@@ -19,6 +19,7 @@ package org.apache.karaf.scheduler.core;
 
 import org.osgi.framework.*;
 
+import java.util.Dictionary;
 import java.util.Properties;
 
 public class Activator implements BundleActivator {
@@ -33,7 +34,7 @@ public class Activator implements BundleActivator {
         listener = new RunnableServiceListener(context, scheduler);
 
         //register scheduler service
-        context.registerService(scheduler.getClass().getName(), scheduler, new Properties());
+        context.registerService(scheduler.getClass().getName(), scheduler, (Dictionary) new Properties());
 
         //register service listener
         context.addServiceListener(listener, String.format(filter, Runnable.class.getName(), KarafTimerTask.ID_PROPERTY, KarafTimerTask.PERIOD_PROPERTY));
