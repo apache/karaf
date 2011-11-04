@@ -246,14 +246,13 @@ public class Utils {
 		b.append(artifactId).append("-").append(version);
 		if (present(classifier)) {
 			b.append("-").append(classifier);
-		} else {
-			if (present(extension)) {
-				b.append(".").append(extension);
-			} else {
-				b.append(".jar");
-			}
 		}
-		return b.toString();
+        if (present(extension)) {
+            b.append(".").append(extension);
+        } else {
+            b.append(".jar");
+        }
+        return b.toString();
 	}
 	
 	public static boolean present(String part) {
