@@ -138,6 +138,7 @@
                         <feature>management</feature>
                         <feature>ssh</feature>
                         <feature>config</feature>
+                        <feature>kar</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>
