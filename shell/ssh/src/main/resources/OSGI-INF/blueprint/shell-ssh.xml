@@ -73,12 +73,19 @@
             </bean>
         </property>
         <property name="commandFactory">
-            <bean class="org.apache.karaf.shell.ssh.ShellCommandFactory">
-                <property name="commandProcessor" ref="commandProcessor"/>
+            <bean class="org.apache.sshd.server.command.ScpCommandFactory">
+                <argument>
+                    <bean class="org.apache.karaf.shell.ssh.ShellCommandFactory">
+                        <property name="commandProcessor" ref="commandProcessor"/>
+                    </bean>
+                </argument>
             </bean>
         </property>
         <property name="keyPairProvider" ref="keyPairProvider"/>
         <property name="passwordAuthenticator" ref="passwordAuthenticator"/>
+        <property name="fileSystemFactory">
+            <bean class="org.apache.karaf.shell.ssh.KarafFileSystemFactory"/>
+        </property>
     </bean>
 
     <bean id="keyPairProvider" class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
