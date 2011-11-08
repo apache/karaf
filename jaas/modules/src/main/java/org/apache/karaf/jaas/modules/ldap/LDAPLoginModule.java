@@ -168,9 +168,10 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
         }
         logger.debug("Get the user DN.");
         String userDN;
+        DirContext context = null;
         try {
             logger.debug("Initialize the JNDI LDAP Dir Context.");
-            DirContext context = new InitialDirContext(env);
+            context = new InitialDirContext(env);
             logger.debug("Define the subtree scope search control.");
             SearchControls controls = new SearchControls();
             if (userSearchSubtree) {
@@ -192,8 +193,17 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             userDN = (String) result.getName();
         } catch (Exception e) {
             throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
+        } finally {
+            if (context != null) {
+                try {
+                    context.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
         // step 2: bind the user using the DN
+        context = null;
         try {
             logger.debug("Bind user (authentication).");
             env.put(Context.SECURITY_AUTHENTICATION, authentication);
@@ -201,18 +211,27 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             env.put(Context.SECURITY_PRINCIPAL, userDN + "," + userBaseDN);
             env.put(Context.SECURITY_CREDENTIALS, password);
             logger.debug("Binding the user.");
-            DirContext context = new InitialDirContext(env);
+            context = new InitialDirContext(env);
             logger.debug("User " + user + " successfully bound.");
             context.close();
         } catch (Exception e) {
             logger.warn("User " + user + " authentication failed.", e);
             return false;
+        } finally {
+            if (context != null) {
+                try {
+                    context.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
         principals.add(new UserPrincipal(user));
         // step 3: retrieving user roles
+        context = null;
         try {
             logger.debug("Get user roles.");
-            DirContext context = new InitialDirContext(env);
+            context = new InitialDirContext(env);
             SearchControls controls = new SearchControls();
             if (roleSearchSubtree) {
                 controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -235,6 +254,14 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             }
         } catch (Exception e) {
             throw new LoginException("Can't get user " + user + " roles: " + e.getMessage());
+        } finally {
+            if (context != null) {
+                try {
+                    context.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
         return true;
     }
