@@ -18,25 +18,9 @@
  */
 package org.apache.karaf.shell.ssh;
 
-import org.apache.sshd.server.SshFile;
-import org.apache.sshd.server.filesystem.NameEqualsFileFilter;
 import org.apache.sshd.server.filesystem.NativeSshFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * Karaf ssh file support.
