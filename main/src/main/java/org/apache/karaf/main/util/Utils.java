@@ -295,47 +295,53 @@ public class Utils {
 			boolean convertToMavenUrls) {
 		String[] parts = location.split("\\|");
 		if (convertToMavenUrls) {
-			String[] p = parts[1].split("/");
-			if (p.length >= 4
-					&& p[p.length - 1].startsWith(p[p.length - 3] + "-"
-							+ p[p.length - 2])) {
-				String artifactId = p[p.length - 3];
-				String version = p[p.length - 2];
-				String classifier;
-				String type;
-				String artifactIdVersion = artifactId + "-" + version;
-				StringBuffer sb = new StringBuffer();
-				if (p[p.length - 1].charAt(artifactIdVersion.length()) == '-') {
-					classifier = p[p.length - 1].substring(
-							artifactIdVersion.length() + 1,
-							p[p.length - 1].lastIndexOf('.'));
-				} else {
-					classifier = null;
-				}
-				type = p[p.length - 1].substring(p[p.length - 1]
-						.lastIndexOf('.') + 1);
-				sb.append("mvn:");
-				for (int j = 0; j < p.length - 3; j++) {
-					if (j > 0) {
-						sb.append('.');
-					}
-					sb.append(p[j]);
-				}
-				sb.append('/').append(artifactId).append('/').append(version);
-				if (!"jar".equals(type) || classifier != null) {
-					sb.append('/');
-					if (!"jar".equals(type)) {
-						sb.append(type);
-					}
-					if (classifier != null) {
-						sb.append('/').append(classifier);
-					}
-				}
-				parts[1] = parts[0];
-				parts[0] = sb.toString();
+            if (!parts[1].startsWith("mvn:")) {
+                String[] p = parts[1].split("/");
+                if (p.length >= 4
+                        && p[p.length - 1].startsWith(p[p.length - 3] + "-"
+                                + p[p.length - 2])) {
+                    String artifactId = p[p.length - 3];
+                    String version = p[p.length - 2];
+                    String classifier;
+                    String type;
+                    String artifactIdVersion = artifactId + "-" + version;
+                    StringBuffer sb = new StringBuffer();
+                    if (p[p.length - 1].charAt(artifactIdVersion.length()) == '-') {
+                        classifier = p[p.length - 1].substring(
+                                artifactIdVersion.length() + 1,
+                                p[p.length - 1].lastIndexOf('.'));
+                    } else {
+                        classifier = null;
+                    }
+                    type = p[p.length - 1].substring(p[p.length - 1]
+                            .lastIndexOf('.') + 1);
+                    sb.append("mvn:");
+                    for (int j = 0; j < p.length - 3; j++) {
+                        if (j > 0) {
+                            sb.append('.');
+                        }
+                        sb.append(p[j]);
+                    }
+                    sb.append('/').append(artifactId).append('/').append(version);
+                    if (!"jar".equals(type) || classifier != null) {
+                        sb.append('/');
+                        if (!"jar".equals(type)) {
+                            sb.append(type);
+                        }
+                        if (classifier != null) {
+                            sb.append('/').append(classifier);
+                        }
+                    }
+                    parts[1] = parts[0];
+                    parts[0] = sb.toString();
+                } else {
+                    parts[1] = parts[0];
+                }
 			} else {
-				parts[1] = parts[0];
-			}
+                String tmp = parts[0];
+                parts[0] = parts[1];
+                parts[1] = tmp;
+            }
 		} else {
 			parts[1] = parts[0];
 		}
