@@ -46,7 +46,7 @@ public class FeaturesTest extends AbstractIntegrationTest {
         // Run some commands to make sure they are installed properly
         CommandProcessor cp = getOsgiService(CommandProcessor.class);
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
-        cs.execute("obr:listUrl");
+        cs.execute("obr:list-url");
         cs.execute("wrapper:install --help");
         cs.close();
     }
