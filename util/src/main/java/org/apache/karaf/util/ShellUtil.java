@@ -48,124 +48,83 @@ public class ShellUtil {
         return "[STALE BUNDLE]";
     }
 
-    private static StringBuffer m_sb = new StringBuffer();
-
     public static String getUnderlineString(String s)
     {
-        synchronized (m_sb)
+        StringBuilder sb = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++)
         {
-            m_sb.delete(0, m_sb.length());
-            for (int i = 0; i < s.length(); i++)
-            {
-                m_sb.append('-');
-            }
-            return m_sb.toString();
+            sb.append('-');
         }
+        return sb.toString();
     }
 
     public static String getValueString(Object obj)
     {
-        synchronized (m_sb)
+        if (obj.getClass().isArray())
         {
-            if (obj instanceof String)
+            Object[] array = (Object[]) obj;
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            for (int i = 0; i < array.length; i++)
             {
-                return (String) obj;
-            }
-            else if (obj instanceof String[])
-            {
-                String[] array = (String[]) obj;
-                return convertTypedArrayToString(array, new StringConverter<String>() {
-                    public String convertObjectToString(String toConvert) {
-                        return toConvert;
-                    }
-                });
-            }
-            else if (obj instanceof Boolean)
-            {
-                return ((Boolean) obj).toString();
-            }
-            else if (obj instanceof Long)
-            {
-                return ((Long) obj).toString();
-            }
-            else if (obj instanceof Integer)
-            {
-                return ((Integer) obj).toString();
-            }
-            else if (obj instanceof Short)
-            {
-                return ((Short) obj).toString();
-            }
-            else if (obj instanceof Double)
-            {
-                return ((Double) obj).toString();
-            }
-            else if (obj instanceof Float)
-            {
-                return ((Float) obj).toString();
-            }
-            else if (obj instanceof URL)
-            {
-                return ((URL)obj).toExternalForm();
-            }
-            else if (obj instanceof URL[])
-            {
-                URL[] array = (URL[]) obj;
-                return convertTypedArrayToString(array, new StringConverter<URL>() {
-                    public String convertObjectToString(URL toConvert) {
-                        return toConvert.toExternalForm();
-                    }
-                });
-            }
-            else if (obj instanceof URI)
-            {
-                try {
-                    return ((URI)obj).toURL().toExternalForm();
-                } catch (MalformedURLException e) {
-                    LOGGER.error("URI could not be transformed to URL",e);
-                    return obj.toString();
+                if (i != 0)
+                {
+                    sb.append(", ");
                 }
+                sb.append(getValueString(array[i]));
             }
-            else if (obj instanceof URI[])
-            {
-                URI[] array = (URI[]) obj;
-                return convertTypedArrayToString(array, new StringConverter<URI>() {
-                    public String convertObjectToString(URI toConvert) {
-                        try {
-                            return toConvert.toURL().toExternalForm();
-                        } catch (MalformedURLException e) {
-                            LOGGER.error("URI could not be transformed to URL",e);
-                            return toConvert.toString();
-                        }
-                    }
-                });
-            }
-            else if (obj == null)
-            {
-                return "null";
-            }
-            else
-            {
+            sb.append("]");
+            return sb.toString();
+        }
+        else if (obj instanceof String)
+        {
+            return (String) obj;
+        }
+        else if (obj instanceof Boolean)
+        {
+            return ((Boolean) obj).toString();
+        }
+        else if (obj instanceof Long)
+        {
+            return ((Long) obj).toString();
+        }
+        else if (obj instanceof Integer)
+        {
+            return ((Integer) obj).toString();
+        }
+        else if (obj instanceof Short)
+        {
+            return ((Short) obj).toString();
+        }
+        else if (obj instanceof Double)
+        {
+            return ((Double) obj).toString();
+        }
+        else if (obj instanceof Float)
+        {
+            return ((Float) obj).toString();
+        }
+        else if (obj instanceof URL)
+        {
+            return ((URL)obj).toExternalForm();
+        }
+        else if (obj instanceof URI)
+        {
+            try {
+                return ((URI)obj).toURL().toExternalForm();
+            } catch (MalformedURLException e) {
+                LOGGER.error("URI could not be transformed to URL",e);
                 return obj.toString();
             }
         }
-    }
-
-    private static <Type> String convertTypedArrayToString(Type[] array, StringConverter<Type> converter) {
-        m_sb.delete(0, m_sb.length());
-        for (int i = 0; i < array.length; i++)
+        else if (obj == null)
         {
-            if (i != 0)
-            {
-                m_sb.append(", ");
-            }
-            m_sb.append(converter.convertObjectToString(array[i]));
+            return "null";
         }
-        return m_sb.toString();
-    }
-
-    private static interface StringConverter<Type> {
-      String convertObjectToString(Type toConvert);
+        else
+        {
+            return obj.toString();
+        }
     }
 
     /**
