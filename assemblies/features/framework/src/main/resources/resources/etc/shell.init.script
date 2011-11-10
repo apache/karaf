@@ -22,5 +22,5 @@
 //
 ld = { log:display $args } ;
 lde = { log:display-exception $args } ;
-la = { bundles:list -t 0 $args } ;
+la = { bundle:list -t 0 $args } ;
 cl = { config:list "(service.pid=$args)" } ;
