@@ -8,7 +8,7 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
-@Command(scope = "jaas", name = "realms", description = "Lists the modification on the active realm/module.")
+@Command(scope = "jaas", name = "list-realm", description = "Lists the modification on the active realm/module.")
 public class ListRealmsCommand extends JaasCommandSupport {
 
     private static final String REALM_LIST_FORMAT = "%-20s %-80s";
