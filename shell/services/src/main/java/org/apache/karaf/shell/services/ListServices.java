@@ -36,7 +36,7 @@ public class ListServices extends BundlesCommand {
     boolean inUse;
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
-        if (bundles == null) {
+        if (bundles == null || bundles.isEmpty()) {
             Bundle[] allBundles = getBundleContext().getBundles();
             for (int i = 0; i < allBundles.length; i++) {
                 printServicesShort(allBundles[i]);
