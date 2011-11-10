@@ -21,7 +21,7 @@ import org.apache.karaf.features.Repository;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 
-@Command(scope = "features", name = "listRepositories", description = "Displays a list of all defined repositories.")
+@Command(scope = "feature", name = "list-repository", description = "Displays a list of all defined repositories.")
 public class ListRepositoriesCommand extends FeaturesCommandSupport {
 
 	private static final String REPOSITORY = "Repository";

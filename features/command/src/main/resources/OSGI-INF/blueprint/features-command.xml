@@ -20,55 +20,55 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="features/addUrl">
+        <command name="feature/add-url">
             <action class="org.apache.karaf.features.command.AddUrlCommand"/>
         </command>
-        <command name="features/listUrl">
+        <command name="feature/list-url">
             <action class="org.apache.karaf.features.command.ListUrlCommand"/>
         </command>
-        <command name="features/listRepositories">
+        <command name="feature/list-repository">
             <action class="org.apache.karaf.features.command.ListRepositoriesCommand"/>
         </command>
-        <command name="features/removeUrl">
+        <command name="feature/remove-url">
             <action class="org.apache.karaf.features.command.RemoveUrlCommand"/>
             <completers>
                 <ref component-id="featureUrlCompleter" />
             </completers>
         </command>
-        <command name="features/removeRepository">
+        <command name="feature/remove-repository">
              <action class="org.apache.karaf.features.command.RemoveRepositoryCommand"/>
              <completers>
                  <ref component-id="featureRepositoryNameCompleter" />
              </completers>
          </command>
-        <command name="features/refreshUrl">
+        <command name="feature/refresh-url">
             <action class="org.apache.karaf.features.command.RefreshUrlCommand"/>
             <completers>
                 <ref component-id="featureUrlCompleter" />
             </completers>
         </command>
-        <command name="features/install">
+        <command name="feature/install">
             <action class="org.apache.karaf.features.command.InstallFeatureCommand"/>
             <completers>
                 <ref component-id="uninstalledFeatureCompleter" />
             </completers>
         </command>
-        <command name="features/uninstall">
+        <command name="feature/uninstall">
             <action class="org.apache.karaf.features.command.UninstallFeatureCommand"/>
             <completers>
                 <ref component-id="installedFeatureCompleter" />
             </completers>
         </command>
-        <command name="features/list">
+        <command name="feature/list">
             <action class="org.apache.karaf.features.command.ListFeaturesCommand"/>
         </command>
-        <command name="features/listVersions">
+        <command name="feature/list-version">
             <action class="org.apache.karaf.features.command.ListFeatureVersionsCommand"/>
             <completers>
                 <ref component-id="allFeatureCompleter" />
             </completers>
         </command>
-        <command name="features/info">
+        <command name="feature/info">
             <action class="org.apache.karaf.features.command.InfoFeatureCommand"/>
             <completers>
                 <ref component-id="allFeatureCompleter" />

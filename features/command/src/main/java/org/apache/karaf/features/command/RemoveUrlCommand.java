@@ -23,7 +23,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 
-@Command(scope = "features", name = "removeUrl", description = "Removes the given list of repository URLs from the features service.")
+@Command(scope = "feature", name = "remove-url", description = "Removes the given list of repository URLs from the features service.")
 public class RemoveUrlCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "One or more repository URLs separated by whitespaces", required = true, multiValued = true)

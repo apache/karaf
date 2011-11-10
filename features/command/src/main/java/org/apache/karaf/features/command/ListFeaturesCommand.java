@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Command(scope = "features", name = "list", description = "Lists all existing features available from the defined repositories.")
+@Command(scope = "feature", name = "list", description = "Lists all existing features available from the defined repositories.")
 public class ListFeaturesCommand extends FeaturesCommandSupport {
 
     @Option(name = "-i", aliases = {"--installed"}, description = "Display a list of all installed features only", required = false, multiValued = false)

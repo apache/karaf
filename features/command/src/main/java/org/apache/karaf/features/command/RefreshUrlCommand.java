@@ -23,7 +23,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 
-@Command(scope = "features", name = "refreshUrl", description = "Reloads the list of available features from the repositories.")
+@Command(scope = "feature", name = "refresh-url", description = "Reloads the list of available features from the repositories.")
 public class RefreshUrlCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "Repository URLs to reload (leave empty for all)", required = false, multiValued = true)
