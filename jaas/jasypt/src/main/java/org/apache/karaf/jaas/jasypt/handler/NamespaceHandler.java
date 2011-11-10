@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.aries.blueprint.ParserContext;
-import org.apache.aries.blueprint.ext.PlaceholdersUtils;
 import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
 import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
 import org.apache.aries.blueprint.mutable.MutableRefMetadata;
