@@ -27,7 +27,7 @@ public interface ConfigMBean {
      * @return the list of all configuration PIDs.
      * @throws Exception
      */
-    List<String> list() throws Exception;
+    List<String> getConfig() throws Exception;
 
     /**
      * Create a new configuration for the given PID.
@@ -52,7 +52,7 @@ public interface ConfigMBean {
      * @return the list of properties.
      * @throws Exception
      */
-    Map<String, String> proplist(String pid) throws Exception;
+    Map<String, String> listProperty(String pid) throws Exception;
 
     /**
      * Remove the configuration property identified by the given key.
@@ -61,7 +61,7 @@ public interface ConfigMBean {
      * @param key the property key.
      * @throws Exception
      */
-    void propdel(String pid, String key) throws Exception;
+    void deleteProperty(String pid, String key) throws Exception;
 
     /**
      * Append (or add) a value for the given configuration key.
@@ -71,7 +71,7 @@ public interface ConfigMBean {
      * @param value the value to append to the current property value.
      * @throws Exception
      */
-    void propappend(String pid, String key, String value) throws Exception;
+    void appendProperty(String pid, String key, String value) throws Exception;
 
     /**
      * Set a configuration property.
@@ -81,6 +81,6 @@ public interface ConfigMBean {
      * @param value the property value.
      * @throws Exception
      */
-    void propset(String pid, String key, String value) throws Exception;
+    void setProperty(String pid, String key, String value) throws Exception;
 
 }
