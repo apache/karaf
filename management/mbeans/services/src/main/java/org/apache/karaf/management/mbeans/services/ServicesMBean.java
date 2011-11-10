@@ -23,9 +23,9 @@ import javax.management.openmbean.TabularData;
  */
 public interface ServicesMBean {
 
-    TabularData list() throws Exception;
-    TabularData list(boolean inUse) throws Exception;
-    TabularData list(long bundleId) throws Exception;
-    TabularData list(long bundleId, boolean inUse) throws Exception;
+    TabularData getService() throws Exception;
+    TabularData getService(boolean inUse) throws Exception;
+    TabularData getService(long bundleId) throws Exception;
+    TabularData getService(long bundleId, boolean inUse) throws Exception;
 
 }
