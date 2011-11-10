@@ -23,7 +23,7 @@ import javax.management.openmbean.TabularData;
  */
 public interface BundlesMBean {
 
-    TabularData list() throws Exception;
+    TabularData getBundles() throws Exception;
 
     int getStartLevel(String bundleId) throws Exception;
     void setStartLevel(String bundleId, int bundleStartLevel) throws Exception;

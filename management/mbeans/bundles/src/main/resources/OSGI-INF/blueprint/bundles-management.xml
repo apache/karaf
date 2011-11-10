@@ -28,7 +28,7 @@
     <bean id="mbeanRegistrer" class="org.apache.karaf.management.MBeanRegistrer">
         <property name="mbeans">
             <map>
-                <entry value="org.apache.karaf:type=bundles,name=${karaf.name}" key-ref="bundlesMBean"/>
+                <entry value="org.apache.karaf:type=bundle,name=${karaf.name}" key-ref="bundlesMBean"/>
             </map>
         </property>
     </bean>
