@@ -31,7 +31,7 @@ import org.apache.karaf.features.FeaturesService;
 /**
  * Utility command to display info about features.
  */
-@Command(scope = "features", name = "info", description = "Shows information about selected information.")
+@Command(scope = "feature", name = "info", description = "Shows information about selected information.")
 public class InfoFeatureCommand extends FeaturesCommandSupport {
 
     private static final String INDENT = "  ";

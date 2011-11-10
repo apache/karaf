@@ -24,7 +24,7 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "features", name = "install", description = "Installs a feature with the specified name and version.")
+@Command(scope = "feature", name = "install", description = "Installs a feature with the specified name and version.")
 public class InstallFeatureCommand extends FeaturesCommandSupport {
 
     private static String DEFAULT_VERSION = "0.0.0";
