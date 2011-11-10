@@ -20,7 +20,7 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="jaas/manage">
+        <command name="jaas/manage-realm">
             <action class="org.apache.karaf.jaas.command.ManageRealmCommand">
                 <property name="realms" ref="realms"/>
             </action>
@@ -36,29 +36,29 @@
         <command name="jaas/cancel">
             <action class="org.apache.karaf.jaas.command.CancelCommand"/>
         </command>
-        <command name="jaas/pending">
+        <command name="jaas/list-pending">
             <action class="org.apache.karaf.jaas.command.ListPendingCommand"/>
         </command>
-        <command name="jaas/users">
+        <command name="jaas/list-user">
             <action class="org.apache.karaf.jaas.command.ListUsersCommand">
                 <property name="backingEngineService" ref="engineService"/>
             </action>
         </command>
-        <command name="jaas/realms">
+        <command name="jaas/list-realm">
             <action class="org.apache.karaf.jaas.command.ListRealmsCommand">
                 <property name="realms" ref="realms"/>
             </action>
         </command>
-        <command name="jaas/useradd">
+        <command name="jaas/add-user">
             <action class="org.apache.karaf.jaas.command.UserAddCommand"/>
         </command>
-        <command name="jaas/userdel">
+        <command name="jaas/delete-user">
             <action class="org.apache.karaf.jaas.command.UserDeleteCommand"/>
         </command>
-        <command name="jaas/roleadd">
+        <command name="jaas/add-role">
             <action class="org.apache.karaf.jaas.command.RoleAddCommand"/>
         </command>
-        <command name="jaas/roledel">
+        <command name="jaas/delete-role">
             <action class="org.apache.karaf.jaas.command.RoleDeleteCommand"/>
         </command>
     </command-bundle>

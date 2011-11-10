@@ -11,7 +11,7 @@ import java.util.Queue;
 /**
  * Lists the commands the are in the command queue, for the active realm/module.
  */
-@Command(scope = "jaas", name = "pending", description = "Lists the modification on the active realm/module.")
+@Command(scope = "jaas", name = "list-pending", description = "Lists the modification on the active realm/module.")
 public class ListPendingCommand extends JaasCommandSupport {
 
     @Override

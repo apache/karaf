@@ -9,7 +9,7 @@ import org.apache.karaf.jaas.modules.UserPrincipal;
 import javax.security.auth.login.AppConfigurationEntry;
 import java.util.List;
 
-@Command(scope = "jaas", name = "users", description = "Lists the users of the active realm/module.")
+@Command(scope = "jaas", name = "list-user", description = "Lists the users of the active realm/module.")
 public class ListUsersCommand extends JaasCommandSupport {
 
     private static final String OUTPUT_FORMAT = "%-20s %-20s";

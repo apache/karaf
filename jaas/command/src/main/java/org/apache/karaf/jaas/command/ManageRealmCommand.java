@@ -26,7 +26,7 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.LinkedList;
 import java.util.Queue;
 
-@Command(scope = "jaas", name = "manage", description = "Manage user and roles of a Jaas Realm.")
+@Command(scope = "jaas", name = "manage-realm", description = "Manage user and roles of a Jaas Realm.")
 public class ManageRealmCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "realm", description = "Jaas Realm", required = true, multiValued = false)
