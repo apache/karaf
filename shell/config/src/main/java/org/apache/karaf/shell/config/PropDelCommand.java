@@ -22,7 +22,7 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-@Command(scope = "config", name = "propdel", description = "Deletes a property from the configuration being edited.")
+@Command(scope = "config", name = "delete-property", description = "Deletes a property from the configuration being edited.")
 public class PropDelCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "property", description = "The name of the property to delete", required = true, multiValued = false)
