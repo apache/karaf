@@ -54,7 +54,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         super(ConfigMBean.class);
     }
 
-    public List<String> list() throws Exception {
+    public List<String> getConfig() throws Exception {
         Configuration[] configurations = configurationAdmin.listConfigurations(null);
         List<String> pids = new ArrayList<String>();
         for (int i = 0; i < configurations.length; i++) {
@@ -79,7 +79,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
-    public Map<String, String> proplist(String pid) throws Exception {
+    public Map<String, String> listProperty(String pid) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
@@ -99,7 +99,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         return propertiesMap;
     }
 
-    public void propdel(String pid, String key) throws Exception {
+    public void deleteProperty(String pid, String key) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
@@ -114,7 +114,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         store(pid, dictionary, false);
     }
 
-    public void propappend(String pid, String key, String value) throws Exception {
+    public void appendProperty(String pid, String key, String value) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
@@ -136,7 +136,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         store(pid, dictionary, false);
     }
 
-    public void propset(String pid, String key, String value) throws Exception {
+    public void setProperty(String pid, String key, String value) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
