@@ -22,7 +22,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "removeUrl", description = "Removes a list of repository URLs from the OBR service.")
+@Command(scope = "obr", name = "remove-url", description = "Removes a list of repository URLs from the OBR service.")
 public class RemoveUrlCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "Repository URLs to remove from OBR service", required = true, multiValued = true)

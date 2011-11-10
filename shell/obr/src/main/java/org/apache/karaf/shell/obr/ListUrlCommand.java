@@ -20,7 +20,7 @@ import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "listUrl", description = "Displays the repository URLs currently associated with the OBR service.")
+@Command(scope = "obr", name = "list-url", description = "Displays the repository URLs currently associated with the OBR service.")
 public class ListUrlCommand extends ObrCommandSupport {
 
     protected void doExecute(RepositoryAdmin admin) {
