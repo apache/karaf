@@ -60,6 +60,15 @@
    </dependencies>
 
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/filtered-resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </testResource>
+        </testResources>
         <plugins>
             <!-- generate dependencies versions -->
             <plugin>
