@@ -23,7 +23,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "obr", name = "refreshUrl", description = "Reloads the repositories to obtain a fresh list of bundles.")
+@Command(scope = "obr", name = "refresh-url", description = "Reloads the repositories to obtain a fresh list of bundles.")
 public class RefreshUrlCommand extends ObrCommandSupport {
 
     @Argument(index = 0, name = "urls", description = "Repository URLs to refresh (leave empty for all)", required = false, multiValued = true)

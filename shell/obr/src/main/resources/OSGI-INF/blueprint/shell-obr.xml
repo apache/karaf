@@ -24,7 +24,7 @@
         availability="optional" />
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="obr/addUrl">
+        <command name="obr/add-url">
             <action class="org.apache.karaf.shell.obr.AddUrlCommand" />
         </command>
         <command name="obr/deploy">
@@ -41,13 +41,13 @@
                 <property name="repoAdmin" ref="repoAdmin" />
             </action>
         </command>
-        <command name="obr/listUrl">
+        <command name="obr/list-url">
             <action class="org.apache.karaf.shell.obr.ListUrlCommand" />
         </command>
-        <command name="obr/refreshUrl">
+        <command name="obr/refresh-url">
             <action class="org.apache.karaf.shell.obr.RefreshUrlCommand" />
         </command>
-        <command name="obr/removeUrl">
+        <command name="obr/remove-url">
             <action class="org.apache.karaf.shell.obr.RemoveUrlCommand" />
         </command>
         <command name="obr/resolve">
