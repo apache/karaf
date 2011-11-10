@@ -77,12 +77,12 @@ public class UpdateCommand extends ConfigCommandSupport {
             }
             // remove "removed" properties from the file
             ArrayList<String> propertiesToRemove = new ArrayList<String>();
-            for (String key : p.keySet()) {
+            for (Object key : p.keySet()) {
                 if (props.get(key) == null
                         && !Constants.SERVICE_PID.equals(key)
                         && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
                         && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    propertiesToRemove.add(key);
+                    propertiesToRemove.add(key.toString());
                 }
             }
             for (String key : propertiesToRemove) {
