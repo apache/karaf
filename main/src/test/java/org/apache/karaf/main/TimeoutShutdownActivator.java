@@ -26,9 +26,12 @@ public class TimeoutShutdownActivator implements BundleActivator {
     public static int TIMEOUT = 10000;
 
     public void start(BundleContext context) throws Exception {
+        System.err.println("Starting timeout activator");
     }
 
     public void stop(BundleContext context) throws Exception {
+        System.err.println("Timeout activator asked to stopped");
         Thread.sleep(TIMEOUT);
+        System.err.println("Stopping timeout activator");
     }
 }

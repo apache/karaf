@@ -53,8 +53,7 @@ public class MainStartTest {
 		System.setProperty("karaf.maven.convert", "false");
 
 		Main main = new Main(args);
-		LifecycleManager lifecacleManager = main.launch();
-		Thread.sleep(1000);
+		main.launch();
 		Framework framework = main.getFramework();
 		Bundle[] bundles = framework.getBundleContext().getBundles();
 		Assert.assertEquals(3, bundles.length);
@@ -62,7 +61,8 @@ public class MainStartTest {
 		Assert.assertEquals(mvnUrl, bundles[2].getLocation());
 		Assert.assertEquals(Bundle.ACTIVE, bundles[1].getState());
 		Assert.assertEquals(Bundle.ACTIVE, bundles[2].getState());
-		lifecacleManager.destroyKaraf();
+
+        main.destroy();
 	}
 
     @Test
@@ -80,8 +80,7 @@ public class MainStartTest {
 
 
         Main main = new Main(args);
-        LifecycleManager lifecycleManager = main.launch();
-        Thread.sleep(1000);
+        main.launch();
         Framework framework = main.getFramework();
         String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
         Bundle bundle = framework.getBundleContext().installBundle("foo",
@@ -92,8 +91,11 @@ public class MainStartTest {
         );
         bundle.start();
 
+        Thread.sleep(1000);
+
         long t0 = System.currentTimeMillis();
-        lifecycleManager.destroyKaraf();
+        Stop.main(null);
+        main.awaitShutdown();
         long t1 = System.currentTimeMillis();
 //        System.err.println("Shutdown duration: " + (t1 - t0) + " ms");
         Assert.assertTrue((t1 - t0) > TimeoutShutdownActivator.TIMEOUT / 2);

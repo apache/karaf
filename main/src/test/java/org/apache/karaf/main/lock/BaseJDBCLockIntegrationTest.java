@@ -18,12 +18,6 @@
  */
 package org.apache.karaf.main.lock;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -32,14 +26,14 @@ import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import org.apache.karaf.main.lock.DefaultJDBCLock;
-import org.apache.karaf.main.lock.Lock;
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public abstract class BaseJDBCLockIntegrationTest {
     
@@ -63,7 +57,7 @@ public abstract class BaseJDBCLockIntegrationTest {
     public static void setUpTestSuite() {
         Properties properties = new Properties();
         properties.put("karaf.bootstrap.log", "target/karaf.log");
-        BootstrapLogManager.setProperties(properties);        
+        BootstrapLogManager.setProperties(properties);
     }
     
     @Before
