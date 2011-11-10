@@ -28,6 +28,7 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
+import org.apache.karaf.main.Main;
 
 /**
  * Convenience class for configuring java.util.logging to append to
@@ -36,24 +37,41 @@ import java.util.logging.StreamHandler;
  * 
  */
 public class BootstrapLogManager {
-    private static final String DEFAULT_LOG_FILE = "${karaf.data}/log/karaf.log";
-	private static final String PROP_LOG4J_APPENDER_OUT_FILE = "log4j.appender.out.file";
-	private static Handler handler;
+    private static Handler handler;
     private static final String KARAF_BOOTSTRAP_LOG = "karaf.bootstrap.log";
 
     private static Properties configProps;
 
     public static Handler getDefaultHandler () {
+        String filename;
         File log;
-        String filename = configProps.getProperty(KARAF_BOOTSTRAP_LOG);
-        if (filename == null) {
-            Properties props = readLoggingConfig();
-            if (props.getProperty(PROP_LOG4J_APPENDER_OUT_FILE) == null) {
-                props.setProperty(PROP_LOG4J_APPENDER_OUT_FILE, DEFAULT_LOG_FILE);
+        Properties props = new Properties();
+        filename = configProps.getProperty(KARAF_BOOTSTRAP_LOG);
+
+        if (filename != null) {
+            log = new File(filename);
+        } else {
+            // Make a best effort to log to the default file appender configured for log4j
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(System.getProperty("karaf.base") + "/etc/org.ops4j.pax.logging.cfg");
+                props.load(fis);
+            } catch (IOException e) {
+                props.setProperty("log4j.appender.out.file", "${karaf.data}/log/karaf.log");
+            } finally {
+                if (fis != null) { 
+                    try {
+                        fis.close(); 
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+                }
             }
-            filename = PropertiesHelper.substVars(props.getProperty(PROP_LOG4J_APPENDER_OUT_FILE),PROP_LOG4J_APPENDER_OUT_FILE, null, null);
+            filename = Main.substVars(props.getProperty("log4j.appender.out.file"), "log4j.appender.out.file", null, null);
+            log = new File(filename);
         }
-        log = new File(filename);
+
+
         try {
             handler = new BootstrapLogManager.SimpleFileHandler(log);
         } catch (IOException e) {
@@ -62,27 +80,6 @@ public class BootstrapLogManager {
 
         return handler;
     }
-
-	private static Properties readLoggingConfig() {
-		// Make a best effort to log to the default file appender configured for log4j
-		Properties props = new Properties();
-		FileInputStream fis = null;
-		try {
-		    fis = new FileInputStream(System.getProperty("karaf.base") + "/etc/org.ops4j.pax.logging.cfg");
-		    props.load(fis);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-		    if (fis != null) { 
-		        try {
-		            fis.close(); 
-		        } catch (IOException ioe) {
-		            ioe.printStackTrace();
-		        }
-		    }
-		}
-		return props;
-	}
 
     public static void setProperties(Properties configProps) {
         BootstrapLogManager.configProps = configProps;

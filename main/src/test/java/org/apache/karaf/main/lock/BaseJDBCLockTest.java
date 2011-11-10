@@ -30,7 +30,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.apache.karaf.main.lock.DefaultJDBCLock;
 import org.apache.karaf.main.util.BootstrapLogManager;
 import org.easymock.EasyMock;
 import org.junit.Before;
@@ -64,7 +63,7 @@ public abstract class BaseJDBCLockTest {
     public static void setUpTestSuite() {
         Properties properties = new Properties();
         properties.put("karaf.bootstrap.log", "target/karaf.log");
-        BootstrapLogManager.setProperties(properties);        
+        BootstrapLogManager.setProperties(properties);
     }
     
     @Before
