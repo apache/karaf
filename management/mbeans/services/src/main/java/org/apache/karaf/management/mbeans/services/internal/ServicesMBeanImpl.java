@@ -38,19 +38,19 @@ public class ServicesMBeanImpl extends StandardMBean implements ServicesMBean {
         super(ServicesMBean.class);
     }
 
-    public TabularData list() throws Exception {
-        return list(-1, false);
+    public TabularData getService() throws Exception {
+        return getService(-1, false);
     }
 
-    public TabularData list(boolean inUse) throws Exception {
-        return list(-1, inUse);
+    public TabularData getService(boolean inUse) throws Exception {
+        return getService(-1, inUse);
     }
 
-    public TabularData list(long bundleId) throws Exception {
-        return list(bundleId, false);
+    public TabularData getService(long bundleId) throws Exception {
+        return getService(bundleId, false);
     }
 
-    public TabularData list(long bundleId, boolean inUse) throws Exception {
+    public TabularData getService(long bundleId, boolean inUse) throws Exception {
         CompositeType serviceType = new CompositeType("Service", "OSGi Service",
                 new String[]{ "Interfaces", "Properties" },
                 new String[]{ "Interfaces class name of the service", "Properties of the service" },
