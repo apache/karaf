@@ -43,7 +43,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         super(ObrMBean.class);
     }
 
-    public List<String> listUrls() throws Exception {
+    public List<String> getUrls() throws Exception {
         Repository[] repositories = repositoryAdmin.listRepositories();
         List<String> urls = new ArrayList<String>();
         for (int i = 0; i < repositories.length; i++) {
@@ -64,7 +64,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         repositoryAdmin.addRepository(url);
     }
 
-    public TabularData list() throws Exception {
+    public TabularData getBundles() throws Exception {
         CompositeType bundleType = new CompositeType("OBR Resource", "Bundle available in the OBR",
                 new String[]{ "presentationname", "symbolicname", "version" },
                 new String[]{ "Presentation Name", "Symbolic Name", "Version" },
@@ -84,11 +84,11 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         return table;
     }
 
-    public void deploy(String bundle) throws Exception {
-        deploy(bundle, false);
+    public void deployBundle(String bundle) throws Exception {
+        deployBundle(bundle, false);
     }
 
-    public void deploy(String bundle, boolean start) throws Exception {
+    public void deployBundle(String bundle, boolean start) throws Exception {
         Resolver resolver = repositoryAdmin.resolver();
         String[] target = getTarget(bundle);
         Resource resource = selectNewestVersion(searchRepository(repositoryAdmin, target[0], target[1]));
