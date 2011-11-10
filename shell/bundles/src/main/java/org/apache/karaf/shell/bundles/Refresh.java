@@ -23,7 +23,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-@Command(scope = "bundles", name = "refresh", description = "Refresh bundles.")
+@Command(scope = "bundle", name = "refresh", description = "Refresh bundles.")
 public class Refresh extends BundlesCommandWithConfirmation {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {

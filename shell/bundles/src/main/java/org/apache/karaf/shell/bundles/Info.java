@@ -29,7 +29,7 @@ import org.apache.karaf.shell.bundles.wikidoc.WikiVisitor;
 import org.apache.karaf.util.ShellUtil;
 import org.osgi.framework.Bundle;
 
-@Command(scope = "bundles", name = "info", description = "Displays detailed information of a given bundles.")
+@Command(scope = "bundle", name = "info", description = "Displays detailed information of a given bundles.")
 public class Info extends BundlesCommand {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {

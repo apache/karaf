@@ -21,7 +21,7 @@ import java.util.List;
 import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "bundles", name = "start", description = "Starts bundles.")
+@Command(scope = "bundle", name = "start", description = "Starts bundles.")
 public class Start extends BundlesCommandWithConfirmation {
     
     protected void doExecute(List<Bundle> bundles) throws Exception {
