@@ -23,7 +23,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "bundles", name = "resolve", description = "Resolve bundles.")
+@Command(scope = "bundle", name = "resolve", description = "Resolve bundles.")
 public class Resolve extends BundlesCommand {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {

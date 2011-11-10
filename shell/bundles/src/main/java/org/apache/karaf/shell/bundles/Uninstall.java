@@ -21,7 +21,7 @@ import java.util.List;
 import org.osgi.framework.Bundle;
 import org.apache.felix.gogo.commands.Command;
 
-@Command(scope = "bundles", name = "uninstall", description = "Uninstall bundles.")
+@Command(scope = "bundle", name = "uninstall", description = "Uninstall bundles.")
 public class Uninstall extends BundlesCommandWithConfirmation {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {

@@ -26,7 +26,7 @@ import org.apache.karaf.util.ShellUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
-@Command(scope = "services", name = "list", description = "Lists OSGi services.")
+@Command(scope = "service", name = "list", description = "Lists OSGi services.")
 public class ListServices extends BundlesCommand {
 
     @Option(name = "-a", aliases = {}, description = "Shows all services", required = false, multiValued = false)
