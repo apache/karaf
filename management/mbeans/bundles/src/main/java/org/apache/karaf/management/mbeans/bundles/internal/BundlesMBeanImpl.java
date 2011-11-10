@@ -41,7 +41,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         super(BundlesMBean.class);
     }
 
-    public TabularData list() throws Exception {
+    public TabularData getBundles() throws Exception {
         ServiceReference startLevelReference = bundleContext.getServiceReference(StartLevel.class.getName());
         StartLevel startLevel = null;
         if (startLevelReference != null) {
