@@ -25,7 +25,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * Appends a value to the current property value.
  */
-@Command(scope = "config", name = "propappend", description = "Appends the given value to an existing property or creates the property with the specified name and value.")
+@Command(scope = "config", name = "append-property", description = "Appends the given value to an existing property or creates the property with the specified name and value.")
 public class PropAppendCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the property", required = true, multiValued = false)

@@ -47,24 +47,24 @@
         <command name="config/list">
             <action class="org.apache.karaf.shell.config.ListCommand"/>
         </command>
-        <command name="config/propdel">
+        <command name="config/delete-property">
             <action class="org.apache.karaf.shell.config.PropDelCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
-        <command name="config/proplist">
+        <command name="config/list-property">
             <action class="org.apache.karaf.shell.config.PropListCommand"/>
         </command>
-        <command name="config/propset">
+        <command name="config/set-property">
             <action class="org.apache.karaf.shell.config.PropSetCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
-        <command name="config/propappend">
+        <command name="config/append-property">
             <action class="org.apache.karaf.shell.config.PropAppendCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
