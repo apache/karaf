@@ -61,8 +61,7 @@ public class FeatureValidationUtil {
         Document doc = dFactory.newDocumentBuilder().parse(stream);
 
         if ("features".equals(doc.getDocumentElement().getNodeName()) && doc.getDocumentElement().getNamespaceURI() == null) {
-            log.warn("Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed", uri);
-            return;
+            throw new IllegalArgumentException("Features repository without namespace is not allowed");
         }
 
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
