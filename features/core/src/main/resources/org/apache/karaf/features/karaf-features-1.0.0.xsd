@@ -52,7 +52,7 @@ Feature definition.
                 </xs:annotation>
             </xs:element>
         </xs:choice>
-        <xs:attribute name="name" type="xs:string" />
+        <xs:attribute name="name" type="xs:string" use="required" />
     </xs:complexType>
 
     <xs:complexType name="feature">

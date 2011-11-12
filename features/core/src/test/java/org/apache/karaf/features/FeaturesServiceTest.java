@@ -68,9 +68,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\">");
         pw.println("    <bundle start='true'>" + name + "</bundle>");
         pw.println("  </feature>");
@@ -135,9 +135,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <bundle>" + name + "</bundle>");
         pw.println("  </feature>");
@@ -224,9 +224,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <bundle>" + name + "</bundle>");
         pw.println("  </feature>");
@@ -264,9 +264,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <bundle>" + name + "</bundle>");
         pw.println("  </feature>");
@@ -356,9 +356,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("  <feature version=\"0.1\">f2</feature>");
         pw.println("    <bundle>" + name + "</bundle>");
@@ -426,9 +426,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature version=\"0.1\">f2</feature>");
         pw.println("  </feature>");
@@ -461,9 +461,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature>f2</feature>");
         pw.println("  </feature>");
@@ -495,9 +495,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
         pw.println("  </feature>");
@@ -529,9 +529,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
         pw.println("  </feature>");
@@ -587,9 +587,9 @@ public class FeaturesServiceTest extends TestCase {
 
         String name = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name=\"f1\" version=\"0.1\">");
         pw.println("    <feature version=\"[0.1,0.3)\">f2</feature>");
         pw.println("  </feature>");
@@ -652,9 +652,9 @@ public class FeaturesServiceTest extends TestCase {
         String bundle1 = getJarUrl(Bundle.class);
         String bundle2 = getJarUrl(LogService.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
@@ -704,9 +704,9 @@ public class FeaturesServiceTest extends TestCase {
         String bundle1 = getJarUrl(Bundle.class);
         String bundle2 = getJarUrl(LogService.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
@@ -757,9 +757,9 @@ public class FeaturesServiceTest extends TestCase {
         String bundle1 = getJarUrl(Bundle.class);
         String bundle2 = getJarUrl(LogService.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
@@ -814,9 +814,9 @@ public class FeaturesServiceTest extends TestCase {
         String bundle1 = getJarUrl(Bundle.class);
         String bundle2 = getJarUrl(LogService.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + "zfs:unknown" + "</bundle>");
@@ -872,9 +872,9 @@ public class FeaturesServiceTest extends TestCase {
         String bundle1 = getJarUrl(LogService.class);
         String bundle2 = getJarUrl(Bundle.class);
 
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + bundle2 + "</bundle>");
@@ -945,9 +945,9 @@ public class FeaturesServiceTest extends TestCase {
      * This test checks schema validation of submited uri.
      */
     public void testSchemaValidation() throws Exception {
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <featur>");
         pw.println("    <bundle>somebundle</bundle>");
         pw.println("  </featur>");
@@ -977,9 +977,9 @@ public class FeaturesServiceTest extends TestCase {
         String bundle1 = getJarUrl(LogService.class);
         String bundle2 = getJarUrl(Bundle.class);
         
-        File tmp = File.createTempFile("smx", ".feature");
+        File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
-        pw.println("<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
+        pw.println("<features name=\"test\" xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\">");
         pw.println("  <feature name='f1'>");
         pw.println("    <bundle>" + bundle1 + "</bundle>");
         pw.println("    <bundle>" + bundle2 + "</bundle>");
