@@ -224,7 +224,7 @@ public class BundleWatcher implements Runnable, BundleListener {
     }
 
     protected boolean isMavenSnapshotUrl(String url) {
-        return url.startsWith("mvn:") && url.contains("-SNAPSHOT");
+        return url.startsWith("mvn:") && url.contains("SNAPSHOT");
     }
 
     /**
