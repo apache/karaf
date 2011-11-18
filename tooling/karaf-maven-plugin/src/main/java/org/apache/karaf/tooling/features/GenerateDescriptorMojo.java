@@ -17,22 +17,15 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -68,7 +61,6 @@ import org.sonatype.aether.resolution.ArtifactResult;
 import org.xml.sax.SAXException;
 
 import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
-
 
 /**
  * Generates the features XML file
@@ -284,6 +276,12 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                 }
             } else {
                 String bundleName = MvnUrlUtil.artifactToMvn(artifact);
+                File bundleFile = resolve(artifact);
+
+                if (!ManifestUtils.isBundle(getManifest(bundleFile))) {
+                    bundleName = "wrap:" + bundleName;
+                }
+
                 Bundle bundle = objectFactory.createBundle();
                 bundle.setLocation(bundleName);
                 if ("runtime".equals(entry.getValue())) {
@@ -308,6 +306,32 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             throw new MojoExecutionException("Features contents have changed", e);
         }
         getLogger().info("...done!");
+    }
+
+    /**
+     * Extract the MANIFEST from the give file.
+     */
+    private Manifest getManifest(File file) throws ArtifactResolutionException, ArtifactNotFoundException, IOException {
+        InputStream is = null;
+        try {
+            is = new BufferedInputStream(new FileInputStream(file));
+        } catch (Exception e) {
+            getLogger().warn("Error while opening artifact", e);
+        }
+
+        try {
+            is.mark(256 * 1024);
+            JarInputStream jar = new JarInputStream(is);
+            Manifest m = jar.getManifest();
+            if (m == null) {
+                throw new IOException("Manifest not present in the first entry of the zip");
+            }
+            return m;
+        } finally {
+            if (is != null) { // just in case when we did not open bundle
+                is.close();
+            }
+        }
     }
 
     private File resolve(Artifact artifact) {
