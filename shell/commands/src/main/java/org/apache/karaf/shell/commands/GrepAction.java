@@ -120,22 +120,26 @@ public class GrepAction extends AbstractAction {
                     break;
                 }
                 if (p.matcher(line).matches() ^ invertMatch) {
-
                     Matcher matcher2 = p2.matcher(line);
                     StringBuffer sb = new StringBuffer();
                     while (matcher2.find()) {
                         if (!invertMatch && color != ColorOption.never) {
+                            int index = matcher2.start(0);
+                            String prefix = line.substring(0,index);
                             matcher2.appendReplacement(sb, Ansi.ansi()
                                 .bg(Ansi.Color.YELLOW)
                                 .fg(Ansi.Color.BLACK)
                                 .a(matcher2.group())
-                                .reset().toString());
+                                 .reset()
+                                .a(lastEscapeSequence(prefix))
+                                .toString());
                         } else {
                             matcher2.appendReplacement(sb, matcher2.group());
                         }
                         nb++;
                     }
                     matcher2.appendTail(sb);
+                    sb.append(Ansi.ansi().reset().toString());
                     if (!count && lineNumber) {
                         lines.add(String.format("%6d  ", lineno) + sb.toString());
                     } else {
@@ -184,4 +188,22 @@ public class GrepAction extends AbstractAction {
         return null;
     }
 
+
+    /**
+     * Returns the last escape pattern found inside the String.
+     * This method is used to restore the formating after highliting the grep pattern.
+     * If no pattern is found just returns the reset String.
+     * @param str
+     * @return
+     */
+    private String lastEscapeSequence(String str) {
+        String escapeSequence=Ansi.ansi().reset().toString();
+        String escapePattern = "(\\\u001B\\[[0-9;]*[0-9]+m)+";
+        Pattern pattern =  Pattern.compile(escapePattern);
+        Matcher matcher = pattern.matcher(str);
+        while(matcher.find()) {
+            escapeSequence = matcher.group();
+        }
+        return escapeSequence;
+    }
 }
