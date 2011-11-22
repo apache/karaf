@@ -40,6 +40,7 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
     protected Converter blueprintConverter;
     protected String actionId;
     protected List<Completer> completers;
+    protected List<Completer> optionalCompleters;
 
     public void setBlueprintContainer(BlueprintContainer blueprintContainer) {
         this.blueprintContainer = blueprintContainer;
@@ -59,6 +60,14 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
 
     public void setCompleters(List<Completer> completers) {
         this.completers = completers;
+    }
+
+    public List<Completer> getOptionalCompleters() {
+        return optionalCompleters;
+    }
+
+    public void setOptionalCompleters(List<Completer> optionalCompleters) {
+        this.optionalCompleters = optionalCompleters;
     }
 
     @Override
