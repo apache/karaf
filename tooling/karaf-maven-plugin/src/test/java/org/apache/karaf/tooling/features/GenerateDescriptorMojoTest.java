@@ -43,7 +43,7 @@ public class GenerateDescriptorMojoTest {
         assert featuresRoot.getRepository().size() == 1;
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        JaxbUtil.marshal(Features.class, featuresRoot, baos);
+        JaxbUtil.marshal(featuresRoot, baos);
         String s = new String(baos.toByteArray());
         assert s.indexOf("repository") > -1;
         assert s.indexOf("http://karaf.apache.org/xmlns/features/v1.0.0") > -1;

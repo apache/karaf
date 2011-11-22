@@ -299,7 +299,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             features.getFeature().add(feature);
         }
 
-        JaxbUtil.marshal(Features.class, features, out);
+        JaxbUtil.marshal(features, out);
         try {
             checkChanges(features, objectFactory);
         } catch (Exception e) {
@@ -583,13 +583,13 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         if (!addedBundles.isEmpty() || ! addedDependencys.isEmpty()) {
             out.write("\tAdded dependencies are saved here: " + addedFile.getAbsolutePath() + "\n");
             if (logDependencyChanges) {
-                JaxbUtil.marshal(Features.class, added, out);
+                JaxbUtil.marshal(added, out);
             }
         }
         if (!removedBundles.isEmpty() || !removedDependencys.isEmpty()) {
             out.write("\tRemoved dependencies are saved here: " + removedFile.getAbsolutePath() + "\n");
             if (logDependencyChanges) {
-                JaxbUtil.marshal(Features.class, removed, out);
+                JaxbUtil.marshal(removed, out);
             }
         }
         out.write("Delete " + dependencyFile.getAbsolutePath()
@@ -619,7 +619,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
         }
         FileOutputStream out = new FileOutputStream(file);
         try {
-            JaxbUtil.marshal(Features.class, features, out);
+            JaxbUtil.marshal(features, out);
         } finally {
             out.close();
         }
