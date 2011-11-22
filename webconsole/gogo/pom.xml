@@ -103,8 +103,12 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>!${project.artifactId}*,
+                        <Import-Package>
+                            !${project.artifactId}*,
                             jline;version="[${jline.version}, ${jline.version}]",
+                            org.apache.aries.blueprint,
+                            org.osgi.service.blueprint.container,
+                            org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
                         <Embed-Dependency>

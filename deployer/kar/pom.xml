@@ -103,6 +103,9 @@
                         <Import-Package>
                             !${project.artifactId}*,
                             org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
+                            org.apache.aries.blueprint,
+                            org.osgi.service.blueprint.container,
+                            org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
                         <Private-Package>org.apache.karaf.deployer.features</Private-Package>

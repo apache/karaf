@@ -86,6 +86,9 @@
                     <instructions>
                         <Import-Package>
                             !${project.artifactId}*,
+                            org.apache.aries.blueprint,
+                            org.osgi.service.blueprint.container,
+                            org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
                         <Private-Package>org.apache.karaf.features.obr.internal</Private-Package>

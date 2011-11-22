@@ -83,6 +83,9 @@
                             !org.apache.karaf.management.mbeans.config,
                             javax.management,
                             javax.management.loading,
+                            org.apache.aries.blueprint,
+                            org.osgi.service.blueprint.container,
+                            org.osgi.service.blueprint.reflect,
                             org.apache.karaf.management;version=${project.version},
                             *
                         </Import-Package>

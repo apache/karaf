@@ -100,6 +100,9 @@
                         <Import-Package>
                             !${project.artifactId}*,
                             javax.management,
+                            org.apache.aries.blueprint,
+                            org.osgi.service.blueprint.container,
+                            org.osgi.service.blueprint.reflect,
                             *
                         </Import-Package>
                     </instructions>

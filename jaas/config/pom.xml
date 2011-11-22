@@ -88,7 +88,13 @@
                 <configuration>
                     <instructions>
                         <Export-Package>${project.artifactId};version=${project.version}</Export-Package>
-                        <Import-Package>!${project.artifactId},*</Import-Package>
+                        <Import-Package>
+                            !${project.artifactId},
+                            org.apache.aries.blueprint,
+                            org.osgi.service.blueprint.container,
+                            org.osgi.service.blueprint.reflect,
+                            *
+                        </Import-Package>
                         <Private-Package>${project.artifactId}.impl</Private-Package>
                     </instructions>
                 </configuration>
