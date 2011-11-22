@@ -25,9 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -37,9 +35,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.sax.SAXSource;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -62,33 +59,29 @@ public class JaxbUtil {
         }
     }
 
-    public static <T> void marshal(Class<T> type, Object object, OutputStream out) throws JAXBException {
-        JAXBContext ctx2 = JAXBContext.newInstance(type);
-        Marshaller marshaller = ctx2.createMarshaller();
+    public static void marshal(Features features, OutputStream out) throws JAXBException {
+        Marshaller marshaller = FEATURES_CONTEXT.createMarshaller();
 
         marshaller.setProperty("jaxb.formatted.output", true);
 
-        marshaller.marshal(object, out);
+        marshaller.marshal(features, out);
     }
 
-    public static <T> void marshal(Class<T> type, Object object, Writer out) throws JAXBException {
-        JAXBContext ctx2 = JAXBContext.newInstance(type);
-        Marshaller marshaller = ctx2.createMarshaller();
+    public static void marshal(Features features, Writer out) throws JAXBException {
+        Marshaller marshaller = FEATURES_CONTEXT.createMarshaller();
 
         marshaller.setProperty("jaxb.formatted.output", true);
 
-        marshaller.marshal(object, out);
+        marshaller.marshal(features, out);
     }
 
 
     /**
-     * Read in a T from the input stream.
+     * Read in a Features from the input stream.
      *
-     * @param type     Class of object to be read in
      * @param in       input stream to read
      * @param validate whether to validate the input.
-     * @param <T>      class of object to be returned
-     * @return a T read from the input stream
+     * @return a Features read from the input stream
      * @throws ParserConfigurationException is the SAX parser can not be configured
      * @throws SAXException                 if there is an xml problem
      * @throws JAXBException                if the xml cannot be marshalled into a T.
@@ -104,8 +97,7 @@ public class JaxbUtil {
             parser = factory.newSAXParser();
         
 
-        JAXBContext ctx = JAXBContext.newInstance(Features.class);
-        Unmarshaller unmarshaller = ctx.createUnmarshaller();
+        Unmarshaller unmarshaller = FEATURES_CONTEXT.createUnmarshaller();
         unmarshaller.setEventHandler(new ValidationEventHandler() {
             public boolean handleEvent(ValidationEvent validationEvent) {
                 System.out.println(validationEvent);
