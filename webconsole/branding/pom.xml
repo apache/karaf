@@ -84,7 +84,11 @@
                         <Import-Package>
                             javax.servlet;version=2.4,
                             javax.servlet.http;version=2.4,
-                            !org.apache.felix.webconsole*,*
+                            !org.apache.felix.webconsole*,
+                            org.apache.aries.blueprint,
+                            org.osgi.service.blueprint.container,
+                            org.osgi.service.blueprint.reflect,
+                            *
                         </Import-Package>
                     </instructions>
                 </configuration>

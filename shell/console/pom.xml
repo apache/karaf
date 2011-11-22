@@ -128,6 +128,7 @@
                             !jline,
                             com.sun.jna*;resolution:=optional,
                             org.osgi.service.event;resolution:=optional,
+                            org.apache.aries.blueprint, org.osgi.service.blueprint.container, org.osgi.service.blueprint.reflect,
                             org.apache.karaf.branding;resolution:=optional,
                             *
                         </Import-Package>
