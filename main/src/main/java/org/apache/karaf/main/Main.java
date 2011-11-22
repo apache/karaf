@@ -48,6 +48,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -59,6 +60,7 @@ import org.apache.karaf.main.util.BootstrapLogManager;
 import org.apache.karaf.main.util.StringMap;
 import org.apache.karaf.main.util.Utils;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -193,6 +195,10 @@ public class Main {
 
     public static final String INCLUDES_PROPERTY = "${includes}";
 
+    public static final String KARAF_ACTIVATOR = "Karaf-Activator";
+
+    public static final String SECURITY_PROVIDERS = "org.apache.karaf.security.providers";
+
     Logger LOG = Logger.getLogger(this.getClass().getName());
 
     private File karafHome;
@@ -210,6 +216,8 @@ public class Main {
     private int shutdownTimeout = 5 * 60 * 1000;
     private boolean exiting = false;
     private ShutdownCallback shutdownCallback;
+    private List<BundleActivator> karafActivators = new ArrayList<BundleActivator>();
+
 
     public Main(String[] args) {
         this.args = args;
@@ -281,12 +289,54 @@ public class Main {
         loadStartupProperties(configProps);
         processAutoProperties(framework.getBundleContext());
         framework.start();
+        // Start custom activators
+        startKarafActivators(classLoader);
         // Start lock monitor
         new Thread() {
             public void run() {
                 lock(configProps);
             }
         }.start();
+    }
+
+    private void startKarafActivators(ClassLoader classLoader) throws IOException {
+        Enumeration<URL> urls = classLoader.getResources("META-INF/MANIFEST.MF");
+        while (urls != null && urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            String className = null;
+            InputStream is = url.openStream();
+            try {
+                Manifest mf = new Manifest(is);
+                className = mf.getMainAttributes().getValue(KARAF_ACTIVATOR);
+                if (className != null) {
+                    BundleActivator activator = (BundleActivator) classLoader.loadClass(className).newInstance();
+                    activator.start(framework.getBundleContext());
+                    karafActivators.add(activator);
+                }
+            } catch (Throwable e) {
+                if (className != null) {
+                    System.err.println("Error starting karaf activator " + className + ": " + e.getMessage());
+                    LOG.log(Level.WARNING, "Error starting karaf activator " + className + " from url " + url, e);
+                }
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
+
+    private void stopKarafActivators() {
+        for (BundleActivator activator : karafActivators) {
+            try {
+                activator.stop(framework.getBundleContext());
+            } catch (Throwable e) {
+                LOG.log(Level.WARNING, "Error stopping karaf activator " + activator.getClass().getName(), e);
+            }
+        }
     }
 
     public void awaitShutdown() throws Exception {
@@ -338,6 +388,7 @@ public class Main {
                 }
                 FrameworkEvent event = framework.waitForStop(step);
                 if (event.getType() != FrameworkEvent.WAIT_TIMEDOUT) {
+                    stopKarafActivators();
                     return true;
                 }
             }
@@ -457,7 +508,7 @@ public class Main {
                 }
             } catch (Throwable ex) {
                 main.setExitCode(-2);
-                System.err.println("Error occured shutting down framework: " + ex);
+                System.err.println("Error occurred shutting down framework: " + ex);
                 ex.printStackTrace();
             } finally {
                 if (!restart) {
@@ -468,7 +519,7 @@ public class Main {
     }
 
     private static void processSecurityProperties(Properties m_configProps) {
-        String prop = m_configProps.getProperty("org.apache.karaf.security.providers");
+        String prop = m_configProps.getProperty(SECURITY_PROVIDERS);
         if (prop != null) {
             String[] providers = prop.split(",");
             for (String provider : providers) {
@@ -1072,7 +1123,6 @@ public class Main {
      * Returns a path for an srtifact.
      * Input: path (no ':') returns path
      * Input: mvn:<groupId>/<artifactId>/<version>/<type>/<classifier> converts to default repo location path
-//     * Input:  <groupId>:<artifactId>:<version>:<type>:<classifier> converts to default repo location path
      * type and classifier are optional.
      *
      *
