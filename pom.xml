@@ -1294,8 +1294,10 @@
                         	<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         	<Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
                         	<_versionpolicy>${bnd.version.policy}</_versionpolicy>
+                        	<!--
                             <nsh_interface>org.apache.aries.blueprint.NamespaceHandler</nsh_interface>
                             <nsh_namespace>osgi.service.blueprint.namespace</nsh_namespace>
+                        	-->
                     	</instructions>
                     </configuration>
                 </plugin>
