@@ -18,23 +18,26 @@ package org.apache.karaf.shell.config;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
-
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "config", name = "proplist", description = "Lists properties from the currently edited configuration.")
-public class PropListCommand extends ConfigCommandSupport {
+public class PropListCommand extends ConfigPropertyCommandSupport {
 
-    protected void doExecute(ConfigurationAdmin admin) throws Exception {
-        Dictionary props = getEditedProps();
-        if (props == null) {
-            System.err.println("No configuration is being edited--run the edit command first");
-        } else {
-            for (Enumeration e = props.keys(); e.hasMoreElements();) {
-                Object key = e.nextElement();
-                System.out.println("   " + key + " = " + props.get(key));
-            }
+    @Override
+    public void propertyAction(Dictionary props) {
+        for (Enumeration e = props.keys(); e.hasMoreElements(); ) {
+            Object key = e.nextElement();
+            System.out.println("   " + key + " = " + props.get(key));
         }
     }
 
+    /**
+     * List commands never requires an update, so it always returns false.
+     * @param pid
+     * @return
+     */
+    @Override
+    protected boolean requiresUpdate(String pid) {
+        return false;
+    }
 }
