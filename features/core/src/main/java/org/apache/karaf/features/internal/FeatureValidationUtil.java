@@ -15,11 +15,9 @@
  */
 package org.apache.karaf.features.internal;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLConnection;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -61,7 +59,8 @@ public class FeatureValidationUtil {
         Document doc = dFactory.newDocumentBuilder().parse(stream);
 
         if ("features".equals(doc.getDocumentElement().getNodeName()) && doc.getDocumentElement().getNamespaceURI() == null) {
-            throw new IllegalArgumentException("Features repository without namespace is not allowed");
+            log.warn("Old style feature file without namespace found (URI: {}). This format is deprecated and support for it will soon be removed", uri);
+            return;
         }
 
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
