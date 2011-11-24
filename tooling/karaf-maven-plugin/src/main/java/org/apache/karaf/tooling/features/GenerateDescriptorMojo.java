@@ -66,7 +66,7 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
  * Generates the features XML file
  * NB this requires a recent maven-install-plugin such as 2.3.1
  *
- * @version $Revision: 1.1 $
+ * @version $Revision$
  * @goal features-generate-descriptor
  * @phase compile
  * @requiresDependencyResolution runtime
@@ -173,6 +173,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     private RepositorySystemSession repoSession;
 
     /**
+     * Flag indicating whether transitive dependencies should be included
+     * (<code>true</code>) or not (<code>false</code>).
+     *
+     * @parameter default-value="true"
+     */
+    private boolean includeTransitiveDependency;
+
+    /**
      * The project's remote repositories to use for the resolution of project dependencies.
      *
      * @parameter default-value="${project.remoteProjectRepositories}"
@@ -202,7 +210,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             DependencyHelper dependencyHelper = new DependencyHelper(pluginRepos, projectRepos, repoSession, repoSystem);
-            dependencyHelper.getDependencies(project, true);
+            dependencyHelper.getDependencies(project, includeTransitiveDependency);
             this.localDependencies = dependencyHelper.getLocalDependencies();
             this.treeListing = dependencyHelper.getTreeListing();
             File dir = outputFile.getParentFile();
