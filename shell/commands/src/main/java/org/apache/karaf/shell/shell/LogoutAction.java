@@ -14,14 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.commands.info;
+package org.apache.karaf.shell.shell;
 
-import java.util.Properties;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.console.AbstractAction;
+import org.apache.karaf.shell.console.CloseShellException;
 
-public interface InfoProvider {
+@Command(scope = "shell", name = "logout", description = "Disconnects shell from current session.")
+public class LogoutAction extends AbstractAction {
 
-	public String getName();
-
-	public Properties getProperties();
+    protected Object doExecute() throws Exception {
+        log.info("Disconnecting from current session...");
+        throw new CloseShellException();
+    }
 
 }

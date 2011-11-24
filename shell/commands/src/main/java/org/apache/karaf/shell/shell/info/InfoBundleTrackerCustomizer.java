@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.commands.info;
+package org.apache.karaf.shell.shell.info;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.commands;
+package org.apache.karaf.shell.shell;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,6 +25,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
 @Command(scope = "shell", name = "head", description = "Displays the first lines of a file.")
