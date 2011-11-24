@@ -33,9 +33,8 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
 
     @Override
     public Object execute(CommandSession session) throws Exception {
-        this.session = session;
         try {
-            return doExecute();
+            return super.execute(session);
         } finally {
             ungetServices();
         }
