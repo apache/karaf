@@ -19,8 +19,8 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="jaas/manage-realm">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.jaas.command.ManageRealmCommand">
                 <property name="realms" ref="realms"/>
             </action>
@@ -28,37 +28,37 @@
                 <ref component-id="realmCompleter" />
             </completers>
         </command>
-        <command name="jaas/update">
+        <command>
             <action class="org.apache.karaf.jaas.command.UpdateCommand">
                 <property name="backingEngineService" ref="engineService"/>
             </action>
         </command>
-        <command name="jaas/cancel">
+        <command>
             <action class="org.apache.karaf.jaas.command.CancelCommand"/>
         </command>
-        <command name="jaas/list-pending">
+        <command>
             <action class="org.apache.karaf.jaas.command.ListPendingCommand"/>
         </command>
-        <command name="jaas/list-user">
+        <command>
             <action class="org.apache.karaf.jaas.command.ListUsersCommand">
                 <property name="backingEngineService" ref="engineService"/>
             </action>
         </command>
-        <command name="jaas/list-realm">
+        <command>
             <action class="org.apache.karaf.jaas.command.ListRealmsCommand">
                 <property name="realms" ref="realms"/>
             </action>
         </command>
-        <command name="jaas/add-user">
+        <command>
             <action class="org.apache.karaf.jaas.command.UserAddCommand"/>
         </command>
-        <command name="jaas/delete-user">
+        <command>
             <action class="org.apache.karaf.jaas.command.UserDeleteCommand"/>
         </command>
-        <command name="jaas/add-role">
+        <command>
             <action class="org.apache.karaf.jaas.command.RoleAddCommand"/>
         </command>
-        <command name="jaas/delete-role">
+        <command>
             <action class="org.apache.karaf.jaas.command.RoleDeleteCommand"/>
         </command>
     </command-bundle>

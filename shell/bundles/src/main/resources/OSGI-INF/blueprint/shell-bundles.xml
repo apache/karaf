@@ -19,20 +19,20 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="bundle/start-level">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.bundles.StartLevel"/>
         </command>
-        <command name="bundle/headers">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Headers"/>
         </command>
-        <command name="bundle/info">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Info"/>
         </command>
-        <command name="bundle/install">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Install"/>
         </command>
-        <command name="bundle/list">
+        <command>
             <action class="org.apache.karaf.shell.bundles.ListBundles">
                 <property name="bundleStateListenerFactories">
                     <list xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
@@ -42,25 +42,25 @@
                 </property>
             </action>
         </command>
-        <command name="bundle/refresh">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Refresh"/>
         </command>
-        <command name="bundle/update">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Update"/>
         </command>
-        <command name="bundle/resolve">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Resolve"/>
         </command>
-        <command name="bundle/restart">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Restart"/>
         </command>
-        <command name="bundle/start">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Start"/>
         </command>
-        <command name="bundle/stop">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Stop"/>
         </command>
-        <command name="bundle/uninstall">
+        <command>
             <action class="org.apache.karaf.shell.bundles.Uninstall"/>
         </command>
     </command-bundle>

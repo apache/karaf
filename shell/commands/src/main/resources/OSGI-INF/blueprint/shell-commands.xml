@@ -19,67 +19,67 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="shell/cat">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.shell.CatAction"/>
         </command>
-        <command name="shell/clear">
+        <command>
             <action class="org.apache.karaf.shell.shell.ClearAction"/>
         </command>
-        <command name="shell/each">
+        <command>
             <action class="org.apache.karaf.shell.shell.EachAction"/>
         </command>
-        <command name="shell/echo">
+        <command>
             <action class="org.apache.karaf.shell.shell.EchoAction"/>
         </command>
-        <command name="shell/exec">
+        <command>
             <action class="org.apache.karaf.shell.shell.ExecuteAction"/>
         </command>
-        <command name="shell/grep">
+        <command>
             <action class="org.apache.karaf.shell.shell.GrepAction"/>
         </command>
-        <command name="shell/history">
+        <command>
             <action class="org.apache.karaf.shell.shell.HistoryAction"/>
         </command>
-        <command name="shell/head">
+        <command>
             <action class="org.apache.karaf.shell.shell.HeadAction"/>
         </command>
-        <command name="shell/if">
+        <command>
             <action class="org.apache.karaf.shell.shell.IfAction"/>
         </command>
-        <command name="shell/info">
+        <command>
             <action class="org.apache.karaf.shell.shell.InfoAction">
                 <property name="infoProviders" ref="infoProviders"/>
             </action>
         </command>
-        <command name="shell/java">
+        <command>
             <action class="org.apache.karaf.shell.shell.JavaAction"/>
         </command>
-        <command name="shell/more">
+        <command>
             <action class="org.apache.karaf.shell.shell.MoreAction"/>
         </command>
-        <command name="shell/new">
+        <command>
             <action class="org.apache.karaf.shell.shell.NewAction"/>
         </command>
-        <command name="shell/logout">
+        <command>
             <action class="org.apache.karaf.shell.shell.LogoutAction"/>
         </command>
-        <command name="shell/printf">
+        <command>
             <action class="org.apache.karaf.shell.shell.PrintfAction"/>
         </command>
-        <command name="shell/sleep">
+        <command>
             <action class="org.apache.karaf.shell.shell.SleepAction"/>
         </command>
-        <command name="shell/sort">
+        <command>
             <action class="org.apache.karaf.shell.shell.SortAction"/>
         </command>
-        <command name="shell/source">
+        <command>
             <action class="org.apache.karaf.shell.shell.SourceAction"/>
         </command>
-        <command name="shell/tac">
+        <command>
             <action class="org.apache.karaf.shell.shell.TacAction"/>
         </command>
-        <command name="shell/tail">
+        <command>
             <action class="org.apache.karaf.shell.shell.TailAction"/>
         </command>
     </command-bundle>

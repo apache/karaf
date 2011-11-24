@@ -44,15 +44,15 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="ssh/ssh">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.ssh.SshAction">
                 <property name="sshClientId">
                     <bp:idref component-id="sshClient"/>
                 </property>
             </action>
         </command>
-        <command name="ssh/sshd">
+        <command>
             <action class="org.apache.karaf.shell.ssh.SshServerAction">
                 <property name="sshServerId">
                     <bp:idref component-id="sshServer"/>

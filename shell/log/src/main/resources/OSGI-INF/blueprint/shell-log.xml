@@ -36,8 +36,8 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="log/display">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.log.DisplayLog">
                 <property name="events" ref="events"/>
                 <property name="pattern" value="${pattern}"/>
@@ -49,27 +49,27 @@
                 <property name="traceColor" value="${traceColor}"/>
             </action>
         </command>
-        <command name="log/display-exception">
+        <command>
             <action class="org.apache.karaf.shell.log.DisplayException">
                 <property name="events" ref="events"/>
             </action>
         </command>
-        <command name="log/clear">
+        <command>
             <action class="org.apache.karaf.shell.log.ClearLog">
                 <property name="events" ref="events"/>
             </action>
         </command>
-        <command name="log/get">
+        <command>
             <action class="org.apache.karaf.shell.log.GetLogLevel" />
         </command>
-        <command name="log/set">
+        <command>
             <action class="org.apache.karaf.shell.log.SetLogLevel" />
             <completers>
             	<ref component-id="logLevelCompleter"/>
             	<null/>
             </completers>
         </command>
-        <command name="log/tail">
+        <command>
             <action class="org.apache.karaf.shell.log.LogTail">
                 <property name="events" ref="events"/>
                 <property name="pattern" value="${pattern}"/>
