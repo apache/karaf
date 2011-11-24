@@ -16,35 +16,16 @@
  */
 package org.apache.karaf.shell.config;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Enumeration;
-
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
-import org.apache.karaf.util.Properties;
-import org.osgi.framework.Constants;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "update", description = "Saves and propagates changes from the configuration being edited.")
 public class UpdateCommand extends ConfigCommandSupport {
 
-    private final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
-
-    @Option(name = "-b", aliases = { "--bypass-storage" }, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")
-    private boolean bypassStorage;
-
-    private File storage;
-
-    public File getStorage() {
-        return storage;
-    }
-
-    public void setStorage(File storage) {
-        this.storage = storage;
-    }
+    @Option(name = "-b", aliases = {"--bypass-storage"}, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")
+    protected boolean bypassStorage;
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Dictionary props = getEditedProps();
@@ -54,70 +35,8 @@ public class UpdateCommand extends ConfigCommandSupport {
         }
 
         String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
-        if (!bypassStorage && storage != null) {
-            File storageFile = new File(storage, pid + ".cfg");
-            Configuration cfg = admin.getConfiguration(pid, null);
-            if (cfg != null && cfg.getProperties() != null) {
-                Object val = cfg.getProperties().get(FELIX_FILEINSTALL_FILENAME);
-                if (val instanceof String) {
-                    if (((String) val).startsWith("file:")) {
-                        val = ((String) val).substring("file:".length());
-                    }
-                    storageFile = new File((String) val);
-                }
-            }
-            Properties p = new Properties(storageFile);
-            for (Enumeration keys = props.keys(); keys.hasMoreElements();) {
-                Object key = keys.nextElement();
-                if (!Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    p.put((String) key, (String) props.get(key));
-                }
-            }
-            // remove "removed" properties from the file
-            ArrayList<String> propertiesToRemove = new ArrayList<String>();
-            for (Object key : p.keySet()) {
-                if (props.get(key) == null
-                        && !Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    propertiesToRemove.add(key.toString());
-                }
-            }
-            for (String key : propertiesToRemove) {
-                p.remove(key);
-            }
-            // save the cfg file
-            storage.mkdirs();
-            p.save();
-        } else {
-            Configuration cfg = admin.getConfiguration(pid, null);
-            if (cfg.getProperties() == null) {
-                String[] pids = parsePid(pid);
-                if (pids[1] != null) {
-                    cfg = admin.createFactoryConfiguration(pids[0], null);
-                }
-            }
-            if (cfg.getBundleLocation() != null) {
-                cfg.setBundleLocation(null);
-            }
-            cfg.update(props);
-        }
+        update(admin, pid, props, bypassStorage);
         this.session.put(PROPERTY_CONFIG_PID, null);
         this.session.put(PROPERTY_CONFIG_PROPS, null);
     }
-
-    private String[] parsePid(String pid) {
-        int n = pid.indexOf('-');
-        if (n > 0) {
-            String factoryPid = pid.substring(n + 1);
-            pid = pid.substring(0, n);
-            return new String[] { pid, factoryPid };
-        } else {
-            return new String[] { pid, null };
-        }
-    }
-
-
 }

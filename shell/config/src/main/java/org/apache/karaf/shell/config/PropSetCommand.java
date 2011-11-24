@@ -23,7 +23,7 @@ import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "propset", description = "Sets a property in the currently edited configuration.")
-public class PropSetCommand extends ConfigCommandSupport {
+public class PropSetCommand extends ConfigPropertyCommandSupport {
 
     @Argument(index = 0, name = "property", description = "The name of the property to set", required = true, multiValued = false)
     String prop;
@@ -31,13 +31,8 @@ public class PropSetCommand extends ConfigCommandSupport {
     @Argument(index = 1, name = "value", description = "The value of the property", required = true, multiValued = false)
     String value;
 
-    protected void doExecute(ConfigurationAdmin admin) throws Exception {
-        Dictionary props = getEditedProps();
-        if (props == null) {
-            System.err.println("No configuration is being edited. Run the edit command first");
-        } else {
-            props.put(prop, value);
-        }
+    @Override
+    public void propertyAction(Dictionary props) {
+        props.put(prop, value);
     }
-
 }
