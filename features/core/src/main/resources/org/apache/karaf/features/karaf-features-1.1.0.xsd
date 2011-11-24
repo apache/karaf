@@ -17,8 +17,8 @@
 
 -->
 <xs:schema elementFormDefault="qualified"
-    targetNamespace="http://karaf.apache.org/xmlns/features/v1.0.0"
-    xmlns:tns="http://karaf.apache.org/xmlns/features/v1.0.0"
+    targetNamespace="http://karaf.apache.org/xmlns/features/v1.1.0"
+    xmlns:tns="http://karaf.apache.org/xmlns/features/v1.1.0"
     xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
     <xs:annotation>
@@ -52,7 +52,7 @@ Feature definition.
                 </xs:annotation>
             </xs:element>
         </xs:choice>
-        <xs:attribute name="name" type="xs:string" />
+        <xs:attribute name="name" type="xs:string" use="required"/>
     </xs:complexType>
 
     <xs:complexType name="feature">

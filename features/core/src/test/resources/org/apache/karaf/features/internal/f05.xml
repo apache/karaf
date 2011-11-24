@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.1.0">
+    <feature name="spring" version="2.5.6.SEC02" resolver="(obr)">
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_4</bundle>
+        <bundle>mvn:org.springframework/spring-core/2.5.6.SEC02</bundle>
+        <bundle>mvn:org.springframework/spring-beans/2.5.6.SEC02</bundle>
+        <bundle>mvn:org.springframework/spring-aop/2.5.6.SEC02</bundle>
+        <bundle>mvn:org.springframework/spring-context/2.5.6.SEC02</bundle>
+        <bundle>mvn:org.springframework/spring-context-support/2.5.6.SEC02</bundle>
+    </feature>
+</features>
+
