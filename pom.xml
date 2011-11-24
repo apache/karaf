@@ -143,6 +143,7 @@
         <aries.proxy.version>0.4.1-SNAPSHOT</aries.proxy.version>
         <aries.transaction.version>0.3</aries.transaction.version>
         <aries.util.version>0.4</aries.util.version>
+        <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
         <jansi.version>1.7</jansi.version>
         <jline.version>2.5</jline.version>
         <jsw.version>3.2.3</jsw.version>
@@ -228,6 +229,18 @@
             </releases>
             <snapshots>
                 <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- Gemini Blueprint repository -->
+        <repository>
+            <id>zodiac-repository</id>
+            <name>Zodiac Release Repository</name>
+            <url>http://zodiac.springsource.com/maven/bundles/release</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
             </snapshots>
         </repository>
     </repositories>
@@ -779,6 +792,21 @@
                         <artifactId>com.springsource.org.objectweb.asm</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.gemini.blueprint</groupId>
+                <artifactId>gemini-blueprint-io</artifactId>
+                <version>${gemini.blueprint.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.gemini.blueprint</groupId>
+                <artifactId>gemini-blueprint-core</artifactId>
+                <version>${gemini.blueprint.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.gemini.blueprint</groupId>
+                <artifactId>gemini-blueprint-extender</artifactId>
+                <version>${gemini.blueprint.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
