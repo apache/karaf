@@ -28,20 +28,20 @@
 		interface="org.ops4j.pax.web.service.spi.WebListener"
 		ref="eaHandler" />
 		
-	<command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="web/list">
+	<command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.web.WebListCommand">
             	<property name="startLevelService" ref="slService" />
             	<property name="eventHandler" ref="eaHandler" />
             </action>
         </command>
-        <command name="web/deploy">
+        <command>
         	<action class="org.apache.karaf.shell.web.WebDeploymentCommand">
         		<property name="eventHandler" ref="eaHandler" />
         		<property name="warManager" ref="warManager" />
         	</action>
         </command>
-        <command name="web/undeploy">
+        <command>
         	<action class="org.apache.karaf.shell.web.WebUnDeploymentCommand">
         		<property name="eventHandler" ref="eaHandler" />
         		<property name="warManager" ref="warManager" />

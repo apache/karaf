@@ -22,11 +22,11 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="config/cancel">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.config.CancelCommand"/>
         </command>
-        <command name="config/delete">
+        <command>
             <action class="org.apache.karaf.shell.config.DeleteCommand">
                 <property name="storage" value="${storage}" />
             </action>
@@ -35,7 +35,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="config/edit">
+        <command>
             <action class="org.apache.karaf.shell.config.EditCommand">
                 <property name="storage" value="${storage}" />
             </action>
@@ -44,34 +44,34 @@
                 <null/>
             </completers>
         </command>
-        <command name="config/list">
+        <command>
             <action class="org.apache.karaf.shell.config.ListCommand"/>
         </command>
-        <command name="config/delete-property">
+        <command>
             <action class="org.apache.karaf.shell.config.PropDelCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
-        <command name="config/list-property">
+        <command>
             <action class="org.apache.karaf.shell.config.PropListCommand"/>
         </command>
-        <command name="config/set-property">
+        <command>
             <action class="org.apache.karaf.shell.config.PropSetCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
-        <command name="config/append-property">
+        <command>
             <action class="org.apache.karaf.shell.config.PropAppendCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
-        <command name="config/update">
+        <command>
             <action class="org.apache.karaf.shell.config.UpdateCommand">
                 <property name="storage" value="${storage}" />
             </action>

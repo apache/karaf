@@ -19,11 +19,11 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="service/list">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.services.ListServices"/>
         </command>
-        <command name="service/wait">
+        <command>
             <action class="org.apache.karaf.shell.services.Wait"/>
         </command>
     </command-bundle>

@@ -20,27 +20,35 @@ package org.apache.karaf.shell.console.commands;
 
 import java.net.URL;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
-import com.sun.org.apache.regexp.internal.RE;
-import org.apache.aries.blueprint.mutable.MutablePassThroughMetadata;
-import org.apache.felix.service.command.Function;
-import org.osgi.service.blueprint.reflect.*;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import org.apache.aries.blueprint.ParserContext;
 import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
+import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
 import org.apache.aries.blueprint.mutable.MutableIdRefMetadata;
+import org.apache.aries.blueprint.mutable.MutablePassThroughMetadata;
+import org.apache.aries.blueprint.mutable.MutableRefMetadata;
 import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
 import org.apache.aries.blueprint.mutable.MutableValueMetadata;
-import org.apache.aries.blueprint.mutable.MutableRefMetadata;
-import org.apache.aries.blueprint.mutable.MutableCollectionMetadata;
+import org.apache.felix.service.command.Function;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
+import org.osgi.service.blueprint.reflect.BeanArgument;
+import org.osgi.service.blueprint.reflect.BeanMetadata;
+import org.osgi.service.blueprint.reflect.BeanProperty;
+import org.osgi.service.blueprint.reflect.ComponentMetadata;
+import org.osgi.service.blueprint.reflect.IdRefMetadata;
+import org.osgi.service.blueprint.reflect.MapMetadata;
+import org.osgi.service.blueprint.reflect.Metadata;
+import org.osgi.service.blueprint.reflect.NullMetadata;
+import org.osgi.service.blueprint.reflect.RefMetadata;
+import org.osgi.service.blueprint.reflect.ValueMetadata;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHandler {
@@ -121,25 +129,14 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         command.addProperty(BLUEPRINT_CONTAINER, createRef(context, BLUEPRINT_CONTAINER));
         command.addProperty(BLUEPRINT_CONVERTER, createRef(context, BLUEPRINT_CONVERTER));
 
-        String location = element.getAttribute(NAME);
-        location = location.replace('/', ':');
-        String scope;
-        String function;
-        if (location.lastIndexOf(':') >= 0) {
-            scope = location.substring(0, location.lastIndexOf(':'));
-            function = location.substring(location.lastIndexOf(':') + 1);
-        } else {
-            scope = "";
-            function = location;
-        }
-
         NodeList children = element.getChildNodes();
+        MutableBeanMetadata action = null;
         for (int i = 0; i < children.getLength(); i++) {
             Node child  = children.item(i);
             if (child instanceof Element) {
                 Element childElement = (Element) child;
                 if (nodeNameEquals(childElement, ACTION)) {
-                    MutableBeanMetadata action = parseAction(context, command, childElement);
+                    action = parseAction(context, command, childElement);
                     action.setId(getName());
                     context.getComponentDefinitionRegistry().registerComponentDefinition(action);
                     command.addProperty(ACTION_ID, createIdRef(context, action.getId()));
@@ -161,11 +158,38 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         commandService.addInterface(CompletableFunction.class.getName());
         commandService.addInterface(Function.class.getName());
         commandService.setServiceComponent(command);
-        commandService.addServiceProperty(createStringValue(context, "osgi.command.scope"),
-                                          createStringValue(context, scope));
-        commandService.addServiceProperty(createStringValue(context, "osgi.command.function"),
-                                          createStringValue(context, function));
+
+        if (SHELL_NAMESPACE_1_0_0.equals(element.getNamespaceURI())) {
+            String location = element.getAttribute(NAME);
+            location = location.replace('/', ':');
+            String scope;
+            String function;
+            if (location.lastIndexOf(':') >= 0) {
+                scope = location.substring(0, location.lastIndexOf(':'));
+                function = location.substring(location.lastIndexOf(':') + 1);
+            } else {
+                scope = "";
+                function = location;
+            }
+            commandService.addServiceProperty(createStringValue(context, "osgi.command.scope"),
+                                              createStringValue(context, scope));
+            commandService.addServiceProperty(createStringValue(context, "osgi.command.function"),
+                                              createStringValue(context, function));
+        } else {
+            commandService.addServiceProperty(createStringValue(context, "osgi.command.scope"),
+                                              getInvocationValue(context, "getScope", action.getClassName()));
+            commandService.addServiceProperty(createStringValue(context, "osgi.command.function"),
+                                              getInvocationValue(context, "getName", action.getClassName()));
+        }
         context.getComponentDefinitionRegistry().registerComponentDefinition(commandService);
+    }
+
+    private MutableBeanMetadata getInvocationValue(ParserContext context, String method, String className) {
+        MutableBeanMetadata scope = context.createMetadata(MutableBeanMetadata.class);
+        scope.setRuntimeClass(NamespaceHandler.class);
+        scope.setFactoryMethod(method);
+        scope.addArgument(createStringValue(context, className), null, 0);
+        return scope;
     }
 
     private MutableBeanMetadata parseAction(ParserContext context, ComponentMetadata enclosingComponent, Element element) {
@@ -240,5 +264,15 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
 
     private static boolean nodeNameEquals(Node node, String name) {
         return (name.equals(node.getNodeName()) || name.equals(node.getLocalName()));
+    }
+
+    public static String getScope(Class<?> action) {
+        Command command = action.getAnnotation(Command.class);
+        return command.scope();
+    }
+
+    public static String getName(Class<?> action) {
+        Command command = action.getAnnotation(Command.class);
+        return command.name();
     }
 }

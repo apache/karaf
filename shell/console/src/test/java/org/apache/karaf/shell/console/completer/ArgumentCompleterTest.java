@@ -87,7 +87,7 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
     public void testCompleteOptions() throws Exception {
         CommandSession session = new DummyCommandSession();
         Completer comp = new ArgumentCompleter(session, new MyFunction(), "my:action");
-        assertEquals(Arrays.asList("--check", "--foo", "--help", "--string", "--integer", "-c", "-f","-s","-i"), complete(comp, "action -"));
+        assertEquals(Arrays.asList("--check", "--foo", "--help", "--integer", "--string", "-c", "-f","-i","-s"), complete(comp, "action -"));
         assertEquals(Arrays.asList(), complete(comp, "action --foo "));
         assertEquals(Arrays.asList("action "), complete(comp, "acti"));
         assertEquals(Arrays.asList("my:action "), complete(comp, "my:ac"));
@@ -98,7 +98,7 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
         assertEquals(Arrays.asList("foo1 "), complete(comp, "action -f 2 --check foo1"));
         assertEquals(Arrays.asList("bar1", "bar2"), complete(comp, "action -f 2 --check foo1 "));
         assertEquals(Arrays.asList("one", "two"), complete(comp, "action -s "));
-        assertEquals(Arrays.asList("one", "two"), complete(comp, "action -string "));
+        assertEquals(Arrays.asList("one", "two"), complete(comp, "action --string "));
         assertEquals(Arrays.asList("two "), complete(comp, "action -s t"));
         assertEquals(Arrays.asList("1", "2"), complete(comp, "action -i "));
         assertEquals(Arrays.asList("1", "2"), complete(comp, "action --integer "));
@@ -134,7 +134,7 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
         @Option(name = "-s", aliases = "--string")
         String string;
 
-        @Option(name = "-i", aliases = "--int")
+        @Option(name = "-i", aliases = "--integer")
         String integer;
 
         public Object execute(CommandSession session) throws Exception {

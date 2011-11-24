@@ -43,11 +43,7 @@
                 </xsd:documentation>
             </xsd:annotation>
             <xsd:sequence>
-                <xsd:choice minOccurs="0" maxOccurs="unbounded">
-					<xsd:element ref="command"/>
-					<xsd:element ref="alias"/>
-                    <xsd:element ref="link"/>
-				</xsd:choice>
+                <xsd:element ref="command" minOccurs="0" maxOccurs="unbounded"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -74,19 +70,6 @@
                 </xsd:choice>
                 <xsd:element ref="message-source" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
-            <xsd:attribute name="name" type="xsd:string" use="required"/>
-        </xsd:complexType>
-    </xsd:element>
-
-    <xsd:element name="link">
-        <xsd:complexType>
-            <xsd:annotation>
-                <xsd:documentation>
-                    Defines a link command.
-                </xsd:documentation>
-            </xsd:annotation>
-            <xsd:attribute name="name" type="xsd:string" use="required"/>
-            <xsd:attribute name="target" type="xsd:string" use="required"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -220,18 +203,6 @@
             <xsd:complexContent>
                 <xsd:extension base="commandComponent"/>
             </xsd:complexContent>
-        </xsd:complexType>
-    </xsd:element>
-
-    <xsd:element name="alias">
-        <xsd:complexType>
-            <xsd:annotation>
-                <xsd:documentation>
-                    Defines a command alias.
-                </xsd:documentation>
-            </xsd:annotation>
-            <xsd:attribute name="name" type="xsd:string" use="required"/>
-            <xsd:attribute name="alias" type="xsd:string" use="required"/>
         </xsd:complexType>
     </xsd:element>
 

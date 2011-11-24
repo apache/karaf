@@ -19,11 +19,11 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="system/shutdown">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.system.Shutdown"/>
         </command>
-        <command name="system/start-level">
+        <command>
             <action class="org.apache.karaf.shell.system.StartLevel"/>
         </command>
     </command-bundle>

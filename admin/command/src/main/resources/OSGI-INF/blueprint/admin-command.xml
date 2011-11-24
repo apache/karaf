@@ -21,7 +21,7 @@
            default-activation="lazy">
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-        <command name="admin/create">
+        <command>
             <action class="org.apache.karaf.admin.command.CreateCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -30,7 +30,7 @@
                    <entry key="-furl" value-ref="featureUrlCompleter"/>
             </optional-completers>
         </command>
-        <command name="admin/connect">
+        <command>
             <action class="org.apache.karaf.admin.command.ConnectCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -39,12 +39,12 @@
                 <null/>
             </completers>
         </command>
-        <command name="admin/list">
+        <command>
             <action class="org.apache.karaf.admin.command.ListCommand">
                 <property name="adminService" ref="adminService" />
             </action>
         </command>
-        <command name="admin/start">
+        <command>
             <action class="org.apache.karaf.admin.command.StartCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -53,7 +53,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="admin/stop">
+        <command>
             <action class="org.apache.karaf.admin.command.StopCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -62,7 +62,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="admin/destroy">
+        <command>
             <action class="org.apache.karaf.admin.command.DestroyCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -71,7 +71,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="admin/rename">
+        <command>
             <action class="org.apache.karaf.admin.command.RenameCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -80,7 +80,7 @@
                 <null />
             </completers>
         </command>
-        <command name="admin/clone">
+        <command>
             <action class="org.apache.karaf.admin.command.CloneCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -89,7 +89,7 @@
                 <null />
             </completers>
         </command>
-        <command name="admin/change-ssh-port">
+        <command>
             <action class="org.apache.karaf.admin.command.ChangeSshPortCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -98,7 +98,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="admin/change-rmi-registry-port">
+        <command>
             <action class="org.apache.karaf.admin.command.ChangeRmiRegistryPortCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -107,7 +107,7 @@
                 <null />
             </completers>
         </command>
-        <command name="admin/change-rmi-server-port">
+        <command>
             <action class="org.apache.karaf.admin.command.ChangeRmiServerPortCommand">
                 <property name="adminService" ref="adminService" />
             </action>
@@ -116,7 +116,7 @@
                 <null />
             </completers>
         </command>
-        <command name="admin/change-opts">
+        <command>
             <action class="org.apache.karaf.admin.command.ChangeOptsCommand">
                 <property name="adminService" ref="adminService" />
             </action>

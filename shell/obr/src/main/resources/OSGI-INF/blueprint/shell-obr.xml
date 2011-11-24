@@ -23,40 +23,40 @@
         interface="org.apache.felix.bundlerepository.RepositoryAdmin"
         availability="optional" />
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="obr/add-url">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.shell.obr.AddUrlCommand" />
         </command>
-        <command name="obr/deploy">
+        <command>
             <action class="org.apache.karaf.shell.obr.DeployCommand" />
         </command>
-        <command name="obr/find">
+        <command>
             <action class="org.apache.karaf.shell.obr.FindCommand" />
         </command>
-        <command name="obr/info">
+        <command>
             <action class="org.apache.karaf.shell.obr.InfoCommand" />
         </command>
-        <command name="obr/list">
+        <command>
             <action class="org.apache.karaf.shell.obr.ListCommand">
                 <property name="repoAdmin" ref="repoAdmin" />
             </action>
         </command>
-        <command name="obr/list-url">
+        <command>
             <action class="org.apache.karaf.shell.obr.ListUrlCommand" />
         </command>
-        <command name="obr/refresh-url">
+        <command>
             <action class="org.apache.karaf.shell.obr.RefreshUrlCommand" />
         </command>
-        <command name="obr/remove-url">
+        <command>
             <action class="org.apache.karaf.shell.obr.RemoveUrlCommand" />
         </command>
-        <command name="obr/resolve">
+        <command>
             <action class="org.apache.karaf.shell.obr.ResolveCommand" />
         </command>
-        <command name="obr/source">
+        <command>
             <action class="org.apache.karaf.shell.obr.SourceCommand" />
         </command>
-        <command name="obr/start">
+        <command>
             <action class="org.apache.karaf.shell.obr.StartCommand" />
         </command>
     </command-bundle>
