@@ -26,29 +26,23 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * Appends a value to the current property value.
  */
 @Command(scope = "config", name = "append-property", description = "Appends the given value to an existing property or creates the property with the specified name and value.")
-public class PropAppendCommand extends ConfigCommandSupport {
+public class PropAppendCommand extends ConfigPropertyCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the property", required = true, multiValued = false)
     String prop;
 
     @Argument(index = 1, name = "value", description = "The value to append to the property", required = true, multiValued = false)
     String value;
-    
-	@Override
-	protected void doExecute(ConfigurationAdmin admin) throws Exception {
-        Dictionary props = getEditedProps();
-        if (props == null) {
-            System.err.println("No configuration is being edited--run the edit command first");
-        } else {
-        	final Object currentValue = props.get(prop);
-        	if (currentValue == null) {
-        		props.put(prop, value);
-        	} else if (currentValue instanceof String) {
-        		props.put(prop, currentValue + value);
-        	} else {
-        		System.err.println("Append Failed: current value is not a String.");
-        	}
-        }
-	}
 
+    @Override
+    public void propertyAction(Dictionary props) {
+        final Object currentValue = props.get(prop);
+        if (currentValue == null) {
+            props.put(prop, value);
+        } else if (currentValue instanceof String) {
+            props.put(prop, currentValue + value);
+        } else {
+            System.err.println("Append Failed: current value is not a String.");
+        }
+    }
 }
