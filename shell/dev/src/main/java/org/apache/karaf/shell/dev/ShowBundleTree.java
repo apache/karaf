@@ -20,21 +20,16 @@ import static java.lang.String.format;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.dev.util.Bundles;
 import org.apache.karaf.shell.dev.util.Import;
 import org.apache.karaf.shell.dev.util.Node;
 import org.apache.karaf.shell.dev.util.Tree;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

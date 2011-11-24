@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.bundles.wikidoc.AnsiPrintingWikiVisitor;
 import org.apache.karaf.shell.bundles.wikidoc.WikiParser;
 import org.apache.karaf.shell.bundles.wikidoc.WikiVisitor;

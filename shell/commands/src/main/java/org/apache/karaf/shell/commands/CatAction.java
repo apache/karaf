@@ -26,9 +26,6 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Command;
 
 /**
  * Concatenate and print files and/or URLs.

@@ -19,8 +19,8 @@ package org.apache.karaf.shell.bundles;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "update", description = "Update bundle.")

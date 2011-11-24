@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands.converter;
+package org.apache.karaf.shell.commands.converter;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.osgi.framework.Bundle;
-import org.apache.felix.gogo.commands.converter.ReifiedType;
 
 public class GenericType extends ReifiedType {
 

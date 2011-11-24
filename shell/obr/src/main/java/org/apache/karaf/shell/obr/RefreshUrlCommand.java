@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "obr", name = "refresh-url", description = "Reloads the repositories to obtain a fresh list of bundles.")
 public class RefreshUrlCommand extends ObrCommandSupport {

@@ -23,7 +23,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
-import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
+import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 
 public class GrepTest extends TestCase {
 

@@ -18,13 +18,12 @@ package org.apache.karaf.shell.log;
 
 import java.io.PrintStream;
 
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.log.layout.PatternConverter;
 import org.apache.karaf.shell.log.layout.PatternParser;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Command;
-import org.ops4j.pax.logging.spi.PaxAppender;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**

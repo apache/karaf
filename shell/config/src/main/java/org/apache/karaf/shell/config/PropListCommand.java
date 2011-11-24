@@ -19,8 +19,8 @@ package org.apache.karaf.shell.config;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "config", name = "list-property", description = "Lists properties from the currently edited configuration.")
 public class PropListCommand extends ConfigCommandSupport {

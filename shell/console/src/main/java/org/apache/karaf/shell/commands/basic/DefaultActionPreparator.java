@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands.basic;
+package org.apache.karaf.shell.commands.basic;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,13 +32,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jline.Terminal;
-import org.apache.felix.gogo.commands.CommandException;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Action;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.converter.DefaultConverter;
-import org.apache.felix.gogo.commands.converter.GenericType;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.CommandException;
+import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.commands.converter.DefaultConverter;
+import org.apache.karaf.shell.commands.converter.GenericType;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.NameScoping;
 import org.fusesource.jansi.Ansi;

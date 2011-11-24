@@ -101,7 +101,7 @@
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
                             org.apache.felix.service.command,
-                            org.apache.felix.gogo.commands,
+                            org.apache.karaf.shell.commands,
                             org.apache.karaf.shell.console,
                             org.apache.sshd.server.keyprovider,
                             org.apache.sshd.server.jaas,

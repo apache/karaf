@@ -18,8 +18,6 @@ package org.apache.karaf.shell.commands;
 
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.apache.karaf.util.process.PumpStreamHandler;
 

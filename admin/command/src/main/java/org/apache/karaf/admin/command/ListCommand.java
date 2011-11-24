@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.admin.command;
 
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.admin.Instance;
 
 /**

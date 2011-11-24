@@ -16,31 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands;
+package org.apache.karaf.shell.commands;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.NullCompleter;
 
 /**
- * Used to mark an optional named command line option who's name typically starts with "--"
+ * Represents a positional argument on a command line (as opposed to an optional named {@link Option}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-public @interface Option
+public @interface Argument
 {
     public static final String DEFAULT_STRING= "DEFAULT";
 
-    String name();
+    String DEFAULT = "##default";
 
-    String[] aliases() default {};
+    String name() default DEFAULT;
 
     String description() default "";
 
     boolean required() default false;
+
+    int index() default 0;
 
     boolean multiValued() default false;
 

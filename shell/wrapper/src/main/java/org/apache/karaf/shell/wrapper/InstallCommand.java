@@ -28,9 +28,9 @@ import java.util.Scanner;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Command;
 import org.fusesource.jansi.Ansi;
 
 /**

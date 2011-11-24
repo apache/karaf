@@ -18,7 +18,7 @@ package org.apache.karaf.shell.web;
 
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.ops4j.pax.web.service.spi.WarManager;
 import org.ops4j.pax.web.service.spi.WebEvent;

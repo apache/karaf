@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.admin.command;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "admin", name = "change-ssh-port", description = "Changes the secure shell port of an existing container instance.")
 public class ChangeSshPortCommand extends AdminCommandSupport {

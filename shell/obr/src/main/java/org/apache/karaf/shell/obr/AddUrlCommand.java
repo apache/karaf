@@ -19,8 +19,8 @@ package org.apache.karaf.shell.obr;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "obr", name = "add-url", description = "Adds a list of repository URLs to the OBR service.")
 public class AddUrlCommand extends ObrCommandSupport {

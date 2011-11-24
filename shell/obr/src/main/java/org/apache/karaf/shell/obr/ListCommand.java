@@ -20,9 +20,9 @@ import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
-import org.apache.felix.gogo.commands.Action;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.felix.service.command.CommandSession;
 
 @Command(scope = "obr", name = "list", description = "Lists OBR bundles, optionally providing the given packages.")

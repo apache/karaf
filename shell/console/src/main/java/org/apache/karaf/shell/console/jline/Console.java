@@ -39,7 +39,7 @@ import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
 import jline.console.history.PersistentHistory;
-import org.apache.felix.gogo.commands.CommandException;
+import org.apache.karaf.shell.commands.CommandException;
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.gogo.runtime.Parser;
 import org.apache.felix.service.command.CommandProcessor;

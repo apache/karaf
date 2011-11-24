@@ -16,11 +16,9 @@
  */
 package org.apache.karaf.shell.commands;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.converter.DefaultConverter;
-import org.apache.felix.gogo.commands.converter.ReifiedType;
-import org.apache.felix.gogo.commands.converter.GenericType;
+import org.apache.karaf.shell.commands.converter.DefaultConverter;
+import org.apache.karaf.shell.commands.converter.GenericType;
+import org.apache.karaf.shell.commands.converter.ReifiedType;
 import org.apache.karaf.shell.console.AbstractAction;
 
 import java.lang.reflect.Constructor;

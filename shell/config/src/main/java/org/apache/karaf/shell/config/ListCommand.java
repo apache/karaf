@@ -19,10 +19,10 @@ package org.apache.karaf.shell.config;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "config", name = "list", description = "Lists existing configurations.")
 public class ListCommand extends ConfigCommandSupport {

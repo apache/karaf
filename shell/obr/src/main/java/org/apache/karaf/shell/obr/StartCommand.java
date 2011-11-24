@@ -17,7 +17,7 @@
 package org.apache.karaf.shell.obr;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "obr", name = "start", description = "Deploys and starts a list of bundles using OBR.")
 public class StartCommand extends DeployCommand {

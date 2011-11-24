@@ -18,7 +18,7 @@ package org.apache.karaf.shell.bundles;
 
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 

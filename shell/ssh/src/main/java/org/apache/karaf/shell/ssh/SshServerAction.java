@@ -19,11 +19,11 @@
 
 package org.apache.karaf.shell.ssh;
 
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.sshd.SshServer;
 import org.apache.karaf.shell.console.BlueprintContainerAware;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.osgi.service.blueprint.container.BlueprintContainer;

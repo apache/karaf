@@ -25,8 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jline.Terminal;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
 @Command(scope = "shell", name = "more", description = "File pager.")

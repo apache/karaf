@@ -17,11 +17,9 @@
 package org.apache.karaf.shell.dev;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;

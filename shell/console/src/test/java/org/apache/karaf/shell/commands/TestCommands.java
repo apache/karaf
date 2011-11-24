@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands;
+package org.apache.karaf.shell.commands;
 
 import java.util.List;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
-import org.apache.felix.gogo.commands.basic.SimpleCommand;
+import org.apache.karaf.shell.commands.basic.SimpleCommand;
 import org.apache.felix.service.command.CommandSession;
 
 public class TestCommands extends TestCase {

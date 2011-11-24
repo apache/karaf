@@ -16,10 +16,10 @@
  */
 package org.apache.karaf.shell.system;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 
 import java.util.Calendar;

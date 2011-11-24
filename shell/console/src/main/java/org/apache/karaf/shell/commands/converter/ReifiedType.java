@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.gogo.commands.converter;
+package org.apache.karaf.shell.commands.converter;
 
 /**
  * Provides access to a concrete type and its optional generic type arguments.

@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.shell.bundles;
 
-import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.commands.Option;
 import org.osgi.framework.Bundle;
 
 /**

@@ -19,9 +19,9 @@ package org.apache.karaf.shell.obr;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 
 @Command(scope = "obr", name = "deploy", description = "Deploys a list of bundles using OBR service.")
 public class DeployCommand extends ObrCommandSupport {

@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands.basic;
+package org.apache.karaf.shell.commands.basic;
 
 import java.util.List;
 
-import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
-import org.apache.felix.gogo.commands.basic.ActionPreparator;
-import org.apache.felix.gogo.commands.Action;
+import org.apache.karaf.shell.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 

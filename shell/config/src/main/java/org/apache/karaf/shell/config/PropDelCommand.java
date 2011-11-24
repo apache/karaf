@@ -18,8 +18,8 @@ package org.apache.karaf.shell.config;
 
 import java.util.Dictionary;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "delete-property", description = "Deletes a property from the configuration being edited.")

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands.converter;
+package org.apache.karaf.shell.commands.converter;
 
 import java.util.Collection;
 import java.util.Map;
@@ -50,8 +50,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.lang.reflect.InvocationTargetException;
-
-import org.apache.felix.gogo.commands.converter.ReifiedType;
 
 public class DefaultConverter
 {
