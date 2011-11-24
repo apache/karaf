@@ -1,7 +1,7 @@
 package org.apache.karaf.shell.config;
 
 import java.util.Dictionary;
-import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.commands.Option;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
