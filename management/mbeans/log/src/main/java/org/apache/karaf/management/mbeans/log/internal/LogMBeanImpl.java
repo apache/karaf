@@ -43,11 +43,48 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
         super(LogMBean.class);
     }
 
-    public void set(String level) throws Exception {
-        set(level, null);
+    public String getLevel() throws Exception {
+        return getLevel(null);
     }
 
-    public void set(String level, String logger) throws Exception {
+    public String getLevel(String logger) throws Exception {
+        ConfigurationAdmin cfgAdmin = getConfigAdmin();
+        Configuration cfg = cfgAdmin.getConfiguration(CONFIGURATION_PID, null);
+        Dictionary props = cfg.getProperties();
+
+        if (ROOT_LOGGER.equalsIgnoreCase(logger)) {
+            logger = null;
+        }
+
+        String val;
+        for (; ; ) {
+            String prop;
+            if (logger == null) {
+                prop = ROOT_LOGGER_PREFIX;
+            } else {
+                prop = LOGGER_PREFIX + logger;
+            }
+            val = (String) props.get(prop);
+            val = getLevelFromProperty(val);
+            if (val != null || logger == null) {
+                break;
+            }
+            int idx = logger.lastIndexOf('.');
+            if (idx < 0) {
+                logger = null;
+            } else {
+                logger = logger.substring(0, idx);
+            }
+        }
+        String st = "Level: " + val;
+        return st;
+    }
+
+    public void setLevel(String level) throws Exception {
+        setLevel(level, null);
+    }
+
+    public void setLevel(String level, String logger) throws Exception {
         if (ROOT_LOGGER.equalsIgnoreCase(logger)) {
             logger = null;
         }
@@ -102,43 +139,6 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
         cfg.update(props);
     }
 
-    public String get() throws Exception {
-        return get(null);
-    }
-
-    public String get(String logger) throws Exception {
-        ConfigurationAdmin cfgAdmin = getConfigAdmin();
-        Configuration cfg = cfgAdmin.getConfiguration(CONFIGURATION_PID, null);
-        Dictionary props = cfg.getProperties();
-
-        if (ROOT_LOGGER.equalsIgnoreCase(logger)) {
-            logger = null;
-        }
-
-        String val;
-        for (; ; ) {
-            String prop;
-            if (logger == null) {
-                prop = ROOT_LOGGER_PREFIX;
-            } else {
-                prop = LOGGER_PREFIX + logger;
-            }
-            val = (String) props.get(prop);
-            val = getLevel(val);
-            if (val != null || logger == null) {
-                break;
-            }
-            int idx = logger.lastIndexOf('.');
-            if (idx < 0) {
-                logger = null;
-            } else {
-                logger = logger.substring(0, idx);
-            }
-        }
-        String st = "Level: " + val;
-        return st;
-    }
-
     private boolean checkIfFromRequestedLog(PaxLoggingEvent event, String logger) {
         return (event.getLoggerName().lastIndexOf(logger) >= 0) ? true : false;
     }
@@ -154,7 +154,7 @@ public class LogMBeanImpl extends StandardMBean implements LogMBean {
         return sb.toString();
     }
 
-    private String getLevel(String prop) {
+    private String getLevelFromProperty(String prop) {
         if (prop == null) {
             return null;
         } else {

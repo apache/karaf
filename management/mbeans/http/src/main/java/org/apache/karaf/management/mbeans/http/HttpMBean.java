@@ -29,6 +29,6 @@ public interface HttpMBean {
      * @return a tabular view of the servlets information.
      * @throws Exception
      */
-    TabularData list() throws Exception;
+    TabularData getServlets() throws Exception;
 
 }

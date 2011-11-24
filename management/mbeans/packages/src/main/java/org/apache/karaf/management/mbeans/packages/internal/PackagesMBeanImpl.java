@@ -39,11 +39,15 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
         super(PackagesMBean.class);
     }
 
-    public List<String> exportedPackages() throws Exception {
-        return exportedPackages(-1);
+    public List<String> getExportedPackages() throws Exception {
+        return getExportedPackages(-1);
     }
 
-    public List<String> exportedPackages(long bundleId) throws Exception {
+    public List<String> getImportedPackages() throws Exception {
+        return getImportedPackages(-1);
+    }
+
+    public List<String> getExportedPackages(long bundleId) throws Exception {
         List<String> exportPackages = new ArrayList<String>();
         ServiceReference ref = bundleContext.getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
@@ -73,11 +77,7 @@ public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
         return exportPackages;
     }
 
-    public List<String> importedPackages() throws Exception {
-        return importedPackages(-1);
-    }
-
-    public List<String> importedPackages(long bundleId) throws Exception {
+    public List<String> getImportedPackages(long bundleId) throws Exception {
         List<String> importPackages = new ArrayList<String>();
         ServiceReference ref = bundleContext.getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {

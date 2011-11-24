@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.management.mbeans.config;
 
+import javax.management.openmbean.TabularData;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public interface ConfigMBean {
      * @return the list of all configuration PIDs.
      * @throws Exception
      */
-    List<String> getConfig() throws Exception;
+    List<String> getConfigs() throws Exception;
 
     /**
      * Create a new configuration for the given PID.
@@ -52,7 +53,7 @@ public interface ConfigMBean {
      * @return the list of properties.
      * @throws Exception
      */
-    Map<String, String> listProperty(String pid) throws Exception;
+    Map<String, String> listProperties(String pid) throws Exception;
 
     /**
      * Remove the configuration property identified by the given key.

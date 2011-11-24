@@ -23,10 +23,10 @@ import java.util.List;
  */
 public interface LogMBean {
 
-    void set(String level) throws Exception;
-    void set(String level, String logger) throws Exception;
+    String getLevel() throws Exception;
+    String getLevel(String logger) throws Exception;
 
-    String get() throws Exception;
-    String get(String logger) throws Exception;
+    void setLevel(String level) throws Exception;
+    void setLevel(String level, String logger) throws Exception;
 
 }

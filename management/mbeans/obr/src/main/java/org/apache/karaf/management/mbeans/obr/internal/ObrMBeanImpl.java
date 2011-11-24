@@ -52,18 +52,6 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         return urls;
     }
 
-    public void addUrl(String url) throws Exception {
-        repositoryAdmin.addRepository(url);
-    }
-
-    public void removeUrl(String url) throws Exception {
-        repositoryAdmin.removeRepository(url);
-    }
-
-    public void refreshUrl(String url) throws Exception {
-        repositoryAdmin.addRepository(url);
-    }
-
     public TabularData getBundles() throws Exception {
         CompositeType bundleType = new CompositeType("OBR Resource", "Bundle available in the OBR",
                 new String[]{ "presentationname", "symbolicname", "version" },
@@ -82,6 +70,18 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         }
 
         return table;
+    }
+
+    public void addUrl(String url) throws Exception {
+        repositoryAdmin.addRepository(url);
+    }
+
+    public void removeUrl(String url) throws Exception {
+        repositoryAdmin.removeRepository(url);
+    }
+
+    public void refreshUrl(String url) throws Exception {
+        repositoryAdmin.addRepository(url);
     }
 
     public void deployBundle(String bundle) throws Exception {
