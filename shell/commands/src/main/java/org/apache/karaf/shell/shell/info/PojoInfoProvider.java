@@ -1,4 +1,4 @@
-package org.apache.karaf.shell.commands.info;
+package org.apache.karaf.shell.shell.info;
 
 import java.util.Properties;
 

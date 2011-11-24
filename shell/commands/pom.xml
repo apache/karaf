@@ -97,7 +97,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            !${project.artifactId}*,
+                            !org.apache.karaf.shell.shell*,
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
@@ -106,8 +106,12 @@
                             org.apache.karaf.shell.console,
                             *
                         </Import-Package>
+                        <Export-Package>
+                            org.apache.karaf.shell.shell*
+                        </Export-Package>
                         <Private-Package>
-                            org.apache.karaf.util.process
+                            org.apache.karaf.util.process,
+                            !*
                         </Private-Package>
                     </instructions>
                 </configuration>

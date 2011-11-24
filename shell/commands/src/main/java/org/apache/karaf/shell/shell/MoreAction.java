@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.shell.commands;
+package org.apache.karaf.shell.shell;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,6 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jline.Terminal;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
 @Command(scope = "shell", name = "more", description = "File pager.")
