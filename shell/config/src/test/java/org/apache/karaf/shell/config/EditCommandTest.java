@@ -51,7 +51,7 @@ public class EditCommandTest extends TestCase {
         command.setBundleContext(context);
         
         ServiceReference reference = createMock(ServiceReference.class);
-        expect(context.getServiceReference(ConfigurationAdmin.class.getName())).andReturn(reference);
+        expect(context.getServiceReference(ConfigurationAdmin.class.getName())).andReturn(reference).anyTimes();
         
         admin = createMock(ConfigurationAdmin.class);
         expect(context.getService(reference)).andReturn(admin);
