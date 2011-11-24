@@ -50,13 +50,11 @@ public class CreateCommand extends AdminCommandSupport
     String javaOpts;
     
     @Option(name = "-f", aliases = {"--feature"},
-            description = "Initial features. This option can be specified multiple times to enable multiple initial features", required = false, multiValued = true,
-            completer = AllFeatureCompleter.class)
+            description = "Initial features. This option can be specified multiple times to enable multiple initial features", required = false, multiValued = true)
     List<String> features;
     
     @Option(name = "-furl", aliases = {"--featureURL"}, 
-            description = "Additional feature descriptor URLs. This option can be specified multiple times to add multiple URLs", required = false, multiValued = true,
-            completer = FeatureRepositoryCompleter.class)
+            description = "Additional feature descriptor URLs. This option can be specified multiple times to add multiple URLs", required = false, multiValued = true)
     List<String> featureURLs;
 
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)

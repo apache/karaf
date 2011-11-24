@@ -26,8 +26,8 @@
                 <property name="adminService" ref="adminService" />
             </action>
             <optional-completers>
-                <ref component-id="allFeatureCompleter"/>
-                <ref component-id="featureUrlCompleter"/>
+                   <entry key="-f" value-ref="allFeatureCompleter"/>
+                   <entry key="-furl" value-ref="featureUrlCompleter"/>
             </optional-completers>
         </command>
         <command name="admin/connect">

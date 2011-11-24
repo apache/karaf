@@ -41,7 +41,6 @@ import org.apache.felix.gogo.commands.converter.DefaultConverter;
 import org.apache.felix.gogo.commands.converter.GenericType;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.NameScoping;
-import org.apache.karaf.shell.console.completer.NullCompleter;
 import org.fusesource.jansi.Ansi;
 
 public class DefaultActionPreparator implements ActionPreparator {
@@ -80,11 +79,6 @@ public class DefaultActionPreparator implements ActionPreparator {
         public Class<? extends Annotation> annotationType()
         {
             return Option.class;
-        }
-
-        @Override
-        public Class completer() {
-            return NullCompleter.class;
         }
     };
 
