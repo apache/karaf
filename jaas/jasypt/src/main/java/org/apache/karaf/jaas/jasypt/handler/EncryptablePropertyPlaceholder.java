@@ -15,6 +15,7 @@
 package org.apache.karaf.jaas.jasypt.handler;
 
 import org.jasypt.encryption.StringEncryptor;
+import org.apache.aries.blueprint.ext.AbstractPropertyPlaceholder;
 
 public class EncryptablePropertyPlaceholder extends AbstractPropertyPlaceholder {
 
