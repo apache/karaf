@@ -25,11 +25,12 @@ import java.util.List;
 public interface ObrMBean {
 
     List<String> getUrls() throws Exception;
+    TabularData getBundles() throws Exception;
+
     void addUrl(String url) throws Exception;
     void removeUrl(String url) throws Exception;
     void refreshUrl(String url) throws Exception;
 
-    TabularData getBundles() throws Exception;
     void deployBundle(String bundle) throws Exception;
     void deployBundle(String bundle, boolean start) throws Exception;
 }

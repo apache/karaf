@@ -23,6 +23,6 @@ import javax.management.openmbean.TabularData;
  */
 public interface WebMBean {
 
-    TabularData list() throws Exception;
+    TabularData getWebBundles() throws Exception;
 
 }

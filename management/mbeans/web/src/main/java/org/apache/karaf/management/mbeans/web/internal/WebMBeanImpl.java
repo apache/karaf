@@ -37,7 +37,7 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
         super(WebMBean.class);
     }
 
-    public TabularData list() throws Exception {
+    public TabularData getWebBundles() throws Exception {
         CompositeType webType = new CompositeType("Web Bundle", "An OSGi Web bundle",
                 new String[]{ "ID", "Name", "Context" },
                 new String[]{ "ID of the bundle", "Name of the bundle", "Web Context" },

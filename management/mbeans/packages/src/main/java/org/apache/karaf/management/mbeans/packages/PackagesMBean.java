@@ -24,10 +24,10 @@ import java.util.List;
  */
 public interface PackagesMBean {
 
-    List<String> exportedPackages() throws Exception;
-    List<String> exportedPackages(long bundleId) throws Exception;
+    List<String> getExportedPackages() throws Exception;
+    List<String> getImportedPackages() throws Exception;
 
-    List<String> importedPackages() throws Exception;
-    List<String> importedPackages(long bundleId) throws Exception;
+    List<String> getExportedPackages(long bundleId) throws Exception;
+    List<String> getImportedPackages(long bundleId) throws Exception;
 
 }

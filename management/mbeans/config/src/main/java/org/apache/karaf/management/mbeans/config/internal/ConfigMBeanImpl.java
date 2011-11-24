@@ -54,7 +54,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         super(ConfigMBean.class);
     }
 
-    public List<String> getConfig() throws Exception {
+    public List<String> getConfigs() throws Exception {
         Configuration[] configurations = configurationAdmin.listConfigurations(null);
         List<String> pids = new ArrayList<String>();
         for (int i = 0; i < configurations.length; i++) {
@@ -79,7 +79,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         }
     }
 
-    public Map<String, String> listProperty(String pid) throws Exception {
+    public Map<String, String> listProperties(String pid) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(pid);
         if (configuration == null) {
             throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");

@@ -38,7 +38,7 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
         super(HttpMBean.class);
     }
 
-    public TabularData list() throws Exception {
+    public TabularData getServlets() throws Exception {
         Collection<ServletEvent> events = servletEventHandler.getServletEvents();
         CompositeType servletType = new CompositeType("Servlet", "HTTP Servlet",
                 new String[]{ "ID", "Servlet", "Servlet Name", "State", "Alias", "URL" },
