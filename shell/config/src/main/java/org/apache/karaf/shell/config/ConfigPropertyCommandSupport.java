@@ -1,7 +1,9 @@
 package org.apache.karaf.shell.config;
 
 import java.util.Dictionary;
+
 import org.apache.felix.gogo.commands.Option;
+import java.util.Properties;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -19,9 +21,12 @@ public abstract class ConfigPropertyCommandSupport extends ConfigCommandSupport 
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Dictionary props = getEditedProps();
-        if (props == null) {
+        if (props == null && pid == null) {
             System.err.println("No configuration is being edited--run the edit command first");
         } else {
+            if (props == null) {
+                props = new Properties();
+            }
             propertyAction(props);
             if(requiresUpdate(pid)) {
                 update(admin, pid, props, bypassStorage);
