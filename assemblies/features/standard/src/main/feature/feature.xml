@@ -109,6 +109,13 @@
         <bundle start-level="30">mvn:org.springframework/spring-webmvc-portlet/${spring.version}</bundle>
     </feature>
 
+    <feature name="gemini-blueprint" description="Gemini Blueprint Extender" version="${gemini.blueprint.version}" resolver="(obr)">
+        <feature version="${spring.version}">spring</feature>
+        <bundle start-level="30">mvn:org.eclipse.gemini.blueprint/gemini-blueprint-io/${gemini.blueprint.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.gemini.blueprint/gemini-blueprint-core/${gemini.blueprint.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.gemini.blueprint/gemini-blueprint-extender/${gemini.blueprint.version}</bundle>
+    </feature>
+
     <feature name="wrapper" description="Provide OS integration" version="${project.version}">
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
     </feature>
