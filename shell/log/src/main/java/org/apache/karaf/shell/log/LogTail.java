@@ -20,7 +20,7 @@ import java.io.PrintStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.log.layout.PatternConverter;
 import org.apache.karaf.shell.log.layout.PatternParser;
 import org.ops4j.pax.logging.spi.PaxAppender;

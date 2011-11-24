@@ -17,7 +17,6 @@
 package org.apache.karaf.shell.commands;
 
 import jline.console.history.History;
-import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.AbstractAction;
 import org.fusesource.jansi.Ansi;
 

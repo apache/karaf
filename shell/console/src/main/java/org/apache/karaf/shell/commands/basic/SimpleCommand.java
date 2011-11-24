@@ -16,15 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands.basic;
+package org.apache.karaf.shell.commands.basic;
 
 import java.util.Hashtable;
 
 import org.apache.felix.service.command.Function;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.BundleContext;
-import org.apache.felix.gogo.commands.Action;
-import org.apache.felix.gogo.commands.Command;
 
 /**
  * A very simple {@link Function} which creates {@link Action} based on a class name.

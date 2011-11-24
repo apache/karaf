@@ -16,10 +16,10 @@
  */
 package org.apache.karaf.shell.log;
 
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "log", name = "display-exception", description = "Displays the last occurred exception from the log.")
 public class DisplayException extends OsgiCommandSupport {

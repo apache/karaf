@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands;
+package org.apache.karaf.shell.commands;
 
 import org.fusesource.jansi.Ansi;
 

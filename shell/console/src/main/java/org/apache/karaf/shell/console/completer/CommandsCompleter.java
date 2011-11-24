@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.felix.gogo.commands.basic.AbstractCommand;
+import org.apache.karaf.shell.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.runtime.Closure;
 import org.apache.felix.gogo.runtime.CommandProxy;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;

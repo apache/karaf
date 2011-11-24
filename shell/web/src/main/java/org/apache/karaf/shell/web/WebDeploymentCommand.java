@@ -18,7 +18,7 @@ package org.apache.karaf.shell.web;
 
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "web", name = "deploy", description = "Starts/deploys the web context of the given bundle id.")
 public class WebDeploymentCommand extends WebManagerCommand {

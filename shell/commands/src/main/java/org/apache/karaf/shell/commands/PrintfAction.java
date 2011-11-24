@@ -19,8 +19,6 @@ package org.apache.karaf.shell.commands;
 import java.util.Collection;
 
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "shell", name = "printf", description = "Formats and prints arguments.")
 public class PrintfAction extends AbstractAction {

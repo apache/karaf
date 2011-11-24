@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.shell.bundles;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 

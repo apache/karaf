@@ -18,8 +18,8 @@ package org.apache.karaf.features.command;
 
 import java.net.URI;
 
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 

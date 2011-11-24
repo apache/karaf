@@ -20,16 +20,12 @@ import java.io.StringWriter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.File;
-import java.io.OutputStream;
 import java.io.BufferedWriter;
-import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Option;
 
 /**
  * Grab the text from the standard input and return it as a string.

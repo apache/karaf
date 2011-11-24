@@ -16,11 +16,10 @@
  */
 package org.apache.karaf.shell.dev;
 
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.shell.console.jline.Console;
-import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,22 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.commands;
+package org.apache.karaf.shell.commands.basic;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.List;
 
-/**
- * Represents a method which can return a List or Array of values used for a
- * {@link org.apache.karaf.shell.console.Completer}
- * which is associated with the index of an
- * {@link org.apache.felix.gogo.commands.Argument}
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.FIELD})
-public @interface CompleterValues
-{
-    int index() default 0;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.felix.service.command.CommandSession;
+
+public interface ActionPreparator {
+
+    boolean prepare(Action action, CommandSession session, List<Object> arguments) throws Exception;
+
 }

@@ -18,9 +18,6 @@ package org.apache.karaf.shell.commands;
 
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Argument;
 import org.apache.karaf.shell.console.AbstractAction;
 
 @Command(scope = "shell", name = "echo", description="Echoes or prints arguments to STDOUT.")

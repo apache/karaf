@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.felix.gogo.commands.Action;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 import org.apache.karaf.admin.command.*;
 import org.apache.karaf.admin.command.ChangeSshPortCommand;
 import org.apache.karaf.admin.internal.AdminServiceImpl;

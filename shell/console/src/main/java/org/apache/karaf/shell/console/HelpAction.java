@@ -26,11 +26,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import jline.Terminal;
-import org.apache.felix.gogo.commands.Action;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.basic.AbstractCommand;
-import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.basic.AbstractCommand;
+import org.apache.karaf.shell.commands.basic.DefaultActionPreparator;
 import org.apache.felix.service.command.Function;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.BundleContext;

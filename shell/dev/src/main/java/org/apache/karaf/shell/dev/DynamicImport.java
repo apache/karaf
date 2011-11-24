@@ -20,18 +20,11 @@ import java.io.IOException;
 import static java.lang.String.format;
 import java.net.URL;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.ops4j.pax.url.wrap.Handler;
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

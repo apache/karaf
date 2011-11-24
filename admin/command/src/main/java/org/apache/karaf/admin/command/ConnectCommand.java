@@ -20,9 +20,9 @@ package org.apache.karaf.admin.command;
 
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "admin", name = "connect", description = "Connects to an existing container instance.")
 public class ConnectCommand extends AdminCommandSupport {

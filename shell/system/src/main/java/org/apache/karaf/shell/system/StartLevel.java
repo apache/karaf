@@ -16,9 +16,9 @@
  */
 package org.apache.karaf.shell.system;
 
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.ServiceReference;
 
 @Command(scope = "system", name = "start-level", description = "Gets or sets the system start level.")

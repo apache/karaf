@@ -21,7 +21,7 @@ package org.apache.karaf.shell.console;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Action;
+import org.apache.karaf.shell.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

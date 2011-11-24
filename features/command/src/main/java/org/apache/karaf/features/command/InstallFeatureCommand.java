@@ -19,10 +19,10 @@ package org.apache.karaf.features.command;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "feature", name = "install", description = "Installs a feature with the specified name and version.")
 public class InstallFeatureCommand extends FeaturesCommandSupport {

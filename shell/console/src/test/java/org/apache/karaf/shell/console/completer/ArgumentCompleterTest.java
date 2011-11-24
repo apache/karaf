@@ -16,15 +16,14 @@
  */
 package org.apache.karaf.shell.console.completer;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.gogo.commands.Action;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.basic.SimpleCommand;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.commands.basic.SimpleCommand;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;

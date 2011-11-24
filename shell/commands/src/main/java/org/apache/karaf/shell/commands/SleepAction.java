@@ -17,8 +17,6 @@
 package org.apache.karaf.shell.commands;
 
 import org.apache.karaf.shell.console.AbstractAction;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "shell", name = "sleep", description = "Sleeps for a bit then wakes up.")
 public class SleepAction extends AbstractAction {

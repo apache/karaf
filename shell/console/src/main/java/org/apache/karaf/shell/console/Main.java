@@ -34,10 +34,10 @@ import java.util.Enumeration;
 import java.util.List;
 
 import jline.Terminal;
-import org.apache.felix.gogo.commands.Action;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.CommandException;
-import org.apache.felix.gogo.commands.basic.AbstractCommand;
+import org.apache.karaf.shell.commands.Action;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.CommandException;
+import org.apache.karaf.shell.commands.basic.AbstractCommand;
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;

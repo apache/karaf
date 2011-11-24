@@ -18,7 +18,7 @@
  */
 package org.apache.karaf.shell.console;
 
-import org.apache.felix.gogo.commands.Action;
+import org.apache.karaf.shell.commands.Action;
 import org.apache.felix.service.command.CommandSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

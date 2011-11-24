@@ -17,14 +17,13 @@
 package org.apache.karaf.shell.obr;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
-import org.apache.felix.gogo.commands.Option;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.obr.util.FileUtil;
 
 @Command(scope = "obr", name = "source", description = "Downloads the sources for an OBR bundle.")

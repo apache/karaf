@@ -34,7 +34,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.fusesource.jansi.Ansi;

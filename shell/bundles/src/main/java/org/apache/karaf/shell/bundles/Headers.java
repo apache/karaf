@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import jline.Terminal;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Option;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.felix.utils.manifest.Attribute;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Directive;

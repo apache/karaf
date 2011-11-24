@@ -18,8 +18,8 @@ package org.apache.karaf.shell.bundles;
 
 import java.util.List;
 
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
-import org.apache.felix.gogo.commands.Command;
 
 @Command(scope = "bundle", name = "stop", description = "Stop bundles.")
 public class Stop extends BundlesCommandWithConfirmation {

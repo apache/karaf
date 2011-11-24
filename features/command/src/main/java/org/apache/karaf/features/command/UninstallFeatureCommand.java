@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.features.command;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.features.FeaturesService;
 
 import java.util.List;
