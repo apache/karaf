@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.aries.blueprint.mutable.MutablePassThroughMetadata;
 import org.apache.felix.service.command.Function;
 import org.osgi.service.blueprint.reflect.*;
@@ -56,6 +57,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     public static final String BEAN = "bean";
     public static final String REF = "ref";
     public static final String NULL = "null";
+    public static final String MAP = "map";
     public static final String BLUEPRINT_CONTAINER = "blueprintContainer";
     public static final String BLUEPRINT_CONVERTER = "blueprintConverter";
 
@@ -144,7 +146,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
                 } else if (nodeNameEquals(childElement, COMPLETERS)) {
                     command.addProperty(COMPLETERS, parseCompleters(context, command, childElement));
                 } else if (nodeNameEquals(childElement, OPTIONAL_COMPLETERS)) {
-                    command.addProperty(OPTIONAL_COMPLETERS_PROPERTY, parseCompleters(context, command, childElement));
+                    command.addProperty(OPTIONAL_COMPLETERS_PROPERTY, parseOptionalCompleters(context, command, childElement));
                 }
                 else {
                     throw new ComponentDefinitionException("Bad xml syntax: unknown element '" + childElement.getNodeName() + "'");
@@ -186,12 +188,17 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         return action;
     }
 
+    private Metadata parseOptionalCompleters(ParserContext context, ComponentMetadata enclosingComponent, Element element) {
+        Metadata metadata = context.parseElement(MapMetadata.class, context.getEnclosingComponent(), (Element) element);
+        return metadata;
+    }
+
     private Metadata parseCompleters(ParserContext context, ComponentMetadata enclosingComponent, Element element) {
         MutableCollectionMetadata collection = context.createMetadata(MutableCollectionMetadata.class);
         collection.setCollectionClass(List.class);
         NodeList children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
-            Node child  = children.item(i);
+            Node child = children.item(i);
             if (child instanceof Element) {
                 Metadata metadata;
                 if (nodeNameEquals(child, REF)) {

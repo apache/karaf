@@ -198,13 +198,15 @@
                     These completers are used for option value completion.
                 </xsd:documentation>
             </xsd:annotation>
-            <xsd:sequence>
-                <xsd:choice minOccurs="1" maxOccurs="unbounded">
-                    <xsd:element name="bean" type="bp:Tbean"/>
-                    <xsd:element name="ref" type="bp:Tref"/>
-                    <xsd:element name="null" type="bp:Tnull"/>
-                </xsd:choice>
-            </xsd:sequence>
+            <xsd:complexContent>
+			<xsd:extension base="bp:TtypedCollection">
+				<xsd:sequence>
+					<xsd:element name="entry" type="bp:TmapEntry" minOccurs="0"
+						maxOccurs="unbounded" />
+				</xsd:sequence>
+				<xsd:attribute name="key-type" type="bp:Ttype" />
+			</xsd:extension>
+		</xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
 

@@ -44,7 +44,5 @@ public @interface Option
 
     boolean multiValued() default false;
 
-    Class<? extends Completer> completer() default NullCompleter.class;
-
     String valueToShowInHelp() default DEFAULT_STRING;
 }

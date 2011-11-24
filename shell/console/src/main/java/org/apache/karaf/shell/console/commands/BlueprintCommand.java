@@ -19,6 +19,7 @@ package org.apache.karaf.shell.console.commands;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.basic.AbstractCommand;
@@ -33,14 +34,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.osgi.service.blueprint.container.Converter;
 
-public class BlueprintCommand extends AbstractCommand implements CompletableFunction
+public class
+        BlueprintCommand extends AbstractCommand implements CompletableFunction
 {
 
     protected BlueprintContainer blueprintContainer;
     protected Converter blueprintConverter;
     protected String actionId;
     protected List<Completer> completers;
-    protected List<Completer> optionalCompleters;
+    protected Map<String,Completer> optionalCompleters;
 
     public void setBlueprintContainer(BlueprintContainer blueprintContainer) {
         this.blueprintContainer = blueprintContainer;
@@ -62,11 +64,11 @@ public class BlueprintCommand extends AbstractCommand implements CompletableFunc
         this.completers = completers;
     }
 
-    public List<Completer> getOptionalCompleters() {
+    public Map<String, Completer> getOptionalCompleters() {
         return optionalCompleters;
     }
 
-    public void setOptionalCompleters(List<Completer> optionalCompleters) {
+    public void setOptionalCompleters(Map<String, Completer> optionalCompleters) {
         this.optionalCompleters = optionalCompleters;
     }
 
