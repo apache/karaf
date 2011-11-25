@@ -36,8 +36,14 @@ public class RefreshUrlCommand extends FeaturesCommandSupport {
                 urls.add(repo.getURI().toString());
             }
         }
+        List<Exception> exceptions = new ArrayList<Exception>();
         for (String strUri : urls) {
-            refreshUrl(admin, strUri);
+            try {
+                refreshUrl(admin, strUri);
+            } catch (Exception e) {
+                exceptions.add(e);
+            }
         }
+        MultiException.throwIf("Unable to add repositories", exceptions);
     }
 }

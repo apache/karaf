@@ -53,16 +53,16 @@ public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
 	 * @throws Exception
 	 */
 	protected void refreshUrl(FeaturesService admin,String url) throws Exception {
-		try {
-                URI uri = new URI(url);
-                admin.removeRepository(uri);
-                admin.addRepository(uri);
-            } catch (Exception e) {
-                System.out.println("Could not refresh Feature Repository:\n" + e.getMessage() );
-                //get chance to restore previous, fix for KARAF-4
-                admin.restoreRepository(new URI(url));
-            }
-	}
+        try {
+            URI uri = new URI(url);
+            admin.removeRepository(uri);
+            admin.addRepository(uri);
+        } catch (Exception e) {
+            //get chance to restore previous, fix for KARAF-4
+            admin.restoreRepository(new URI(url));
+            throw new Exception("Unable to refresh features repository " + url, e);
+        }
+    }
 
     protected abstract void doExecute(FeaturesService admin) throws Exception;
 
