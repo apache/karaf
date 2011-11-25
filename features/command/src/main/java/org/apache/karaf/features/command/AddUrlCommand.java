@@ -24,6 +24,7 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.console.MultiException;
 
 @Command(scope = "feature", name = "add-url", description = "Adds a list of repository URLs to the features service.")
 public class AddUrlCommand extends FeaturesCommandSupport {
