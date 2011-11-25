@@ -48,7 +48,9 @@
             <action class="org.apache.karaf.shell.config.ListCommand"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.config.PropDelCommand"/>
+            <action class="org.apache.karaf.shell.config.PropDelCommand">
+                <property name="storage" value="${storage}" />
+            </action>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
@@ -58,14 +60,18 @@
             <action class="org.apache.karaf.shell.config.PropListCommand"/>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.config.PropSetCommand"/>
+            <action class="org.apache.karaf.shell.config.PropSetCommand">
+                <property name="storage" value="${storage}" />
+            </action>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.config.PropAppendCommand"/>
+            <action class="org.apache.karaf.shell.config.PropAppendCommand">
+                <property name="storage" value="${storage}" />
+            </action>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
