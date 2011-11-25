@@ -55,6 +55,9 @@
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
+            <optional-completers>
+                <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropListCommand"/>
@@ -67,6 +70,9 @@
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
+            <optional-completers>
+                <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropAppendCommand">
@@ -76,6 +82,9 @@
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
+            <optional-completers>
+                <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.UpdateCommand">
