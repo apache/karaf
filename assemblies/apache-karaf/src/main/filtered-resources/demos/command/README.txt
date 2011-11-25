@@ -44,7 +44,7 @@ To build the demo console command invoke the following command:
 To deploy the console command invoke the following command on the Karaf
 console: 
 
-  karaf@root> install -s mvn:org.apache.karaf.demos/org.apache.karaf.demos.command/${pom.version}
+  karaf@root> bundle:install -s mvn:org.apache.karaf.demos/org.apache.karaf.demos.command/${pom.version}
 
 Upon successful installation the bundle ID will be presented.
 
