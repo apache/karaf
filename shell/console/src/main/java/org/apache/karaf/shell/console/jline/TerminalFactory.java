@@ -18,18 +18,8 @@
  */
 package org.apache.karaf.shell.console.jline;
 
-import jline.Terminal;
-import jline.UnsupportedTerminal;
-import jline.AnsiWindowsTerminal;
 import jline.NoInterruptUnixTerminal;
-import org.fusesource.jansi.internal.WindowsSupport;
-
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
+import jline.Terminal;
 
 public class TerminalFactory {
 
@@ -43,27 +33,8 @@ public class TerminalFactory {
     }
 
     public void init() throws Exception {
-        if ("jline.UnsupportedTerminal".equals(System.getProperty("jline.terminal"))) {
-            term = new UnsupportedTerminal();
-            return;
-        }
-        
-        boolean windows = System.getProperty("os.name").toLowerCase().contains("windows");
-        try {
-            if (windows) {
-                AnsiWindowsTerminal t = new KarafWindowsTerminal();
-                t.setDirectConsole(true);
-                t.init();
-                term = t;
-            } else {
-                NoInterruptUnixTerminal t = new NoInterruptUnixTerminal();
-                t.init();
-                term = t;
-            }
-        } catch (Throwable e) {
-            System.out.println("Using an unsupported terminal: " + e.toString());
-            term = new UnsupportedTerminal();
-        }
+        jline.TerminalFactory.registerFlavor(jline.TerminalFactory.Flavor.UNIX, NoInterruptUnixTerminal.class);
+        term = jline.TerminalFactory.create();
     }
 
     public synchronized void destroy() throws Exception {
@@ -71,49 +42,6 @@ public class TerminalFactory {
             term.restore();
             term = null;
         }
-    }
-
-    public static class KarafWindowsTerminal extends AnsiWindowsTerminal {
-
-        public KarafWindowsTerminal() throws Exception {
-            super();
-        }
-
-        @Override
-        public int readCharacter(InputStream in) throws IOException {
-            if (isSystemIn(in)) {
-                return WindowsSupport.readByte();
-            }
-            else {
-                return super.readCharacter(in);
-            }
-        }
-
-        private boolean isSystemIn(InputStream in) throws IOException {
-            assert in != null;
-
-            if (in == System.in) {
-                return true;
-            }
-            while (in instanceof FilterInputStream) {
-                try {
-                    Field f = FilterInputStream.class.getDeclaredField("in");
-                    f.setAccessible(true);
-                    in = (InputStream) f.get(in);
-                } catch (Throwable t) {
-                    break;
-                }
-                if (in == System.in) {
-                    return true;
-                }
-            }
-            if (in instanceof FileInputStream && ((FileInputStream) in).getFD() == FileDescriptor.in) {
-                return true;
-            }
-
-            return false;
-        }
-
     }
 
 }

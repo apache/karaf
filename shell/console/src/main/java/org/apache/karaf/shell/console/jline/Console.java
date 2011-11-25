@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Map;
 import java.util.Properties;
@@ -39,12 +38,12 @@ import jline.Terminal;
 import jline.UnsupportedTerminal;
 import jline.console.ConsoleReader;
 import jline.console.history.PersistentHistory;
-import org.apache.karaf.shell.commands.CommandException;
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.gogo.runtime.Parser;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
+import org.apache.karaf.shell.commands.CommandException;
 import org.apache.karaf.shell.console.CloseShellException;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.CommandsCompleter;
@@ -79,7 +78,7 @@ public class Console implements Runnable
     private PrintStream err;
     private Thread thread;
 
-    public Console(CommandProcessor processor,
+        public Console(CommandProcessor processor,
                    InputStream in,
                    PrintStream out,
                    PrintStream err,
@@ -97,11 +96,9 @@ public class Console implements Runnable
         this.closeCallback = closeCallback;
 
         reader = new ConsoleReader(this.consoleInput,
-                                   new PrintWriter(this.out),
-                                   getClass().getResourceAsStream("keybinding.properties"),
+                                   this.out,
                                    this.terminal);
 
-        
 		final File file = getHistoryFile();
 		
         try {
@@ -110,13 +107,11 @@ public class Console implements Runnable
 		} catch (Exception e) {
 			LOGGER.error("Can not read history from file " + file + ". Using in memory history", e);
 		}
+        session.put(".jline.reader", reader);
         session.put(".jline.history", reader.getHistory());
         Completer completer = createCompleter();
         if (completer != null) {
             reader.addCompleter(new CompleterAsCompletor(completer));
-        }
-        if (Boolean.getBoolean("jline.nobell")) {
-            reader.setBellEnabled(false);
         }
         pipe = new Thread(new Pipe());
         pipe.setName("gogo shell pipe thread");
@@ -479,7 +474,7 @@ public class Console implements Runnable
                 {
                     try
                     {
-                        int c = terminal.readCharacter(in);
+                        int c = in.read();
                         if (c == -1)
                         {
                             return;
@@ -487,6 +482,7 @@ public class Console implements Runnable
                         else if (c == 4 && !getBoolean(IGNORE_INTERRUPTS))
                         {
                             err.println("^D");
+                            return;
                         }
                         else if (c == 3 && !getBoolean(IGNORE_INTERRUPTS))
                         {
