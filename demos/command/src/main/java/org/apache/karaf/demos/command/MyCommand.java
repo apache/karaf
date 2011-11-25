@@ -19,8 +19,8 @@
 
 package org.apache.karaf.demos.command;
 
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 @Command(scope = "mycommand", name = "hello", description="Says hello")
