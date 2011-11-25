@@ -285,8 +285,9 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             } else {
                 String bundleName = MvnUrlUtil.artifactToMvn(artifact);
                 File bundleFile = resolve(artifact);
+                Manifest manifest = getManifest(bundleFile);
 
-                if (!ManifestUtils.isBundle(getManifest(bundleFile))) {
+                if (manifest == null || !ManifestUtils.isBundle(getManifest(bundleFile))) {
                     bundleName = "wrap:" + bundleName;
                 }
 
@@ -319,7 +320,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     /**
      * Extract the MANIFEST from the give file.
      */
-    private Manifest getManifest(File file) throws ArtifactResolutionException, ArtifactNotFoundException, IOException {
+    private Manifest getManifest(File file) throws IOException {
         InputStream is = null;
         try {
             is = new BufferedInputStream(new FileInputStream(file));
@@ -332,7 +333,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             JarInputStream jar = new JarInputStream(is);
             Manifest m = jar.getManifest();
             if (m == null) {
-                throw new IOException("Manifest not present in the first entry of the zip");
+                getLogger().warn("Manifest not present in the first entry of the zip - " + file.getName());
             }
             return m;
         } finally {
