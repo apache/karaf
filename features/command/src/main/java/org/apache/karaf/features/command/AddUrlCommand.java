@@ -17,11 +17,13 @@
 package org.apache.karaf.features.command;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
+
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "feature", name = "add-url", description = "Adds a list of repository URLs to the features service.")
 public class AddUrlCommand extends FeaturesCommandSupport {
@@ -30,25 +32,31 @@ public class AddUrlCommand extends FeaturesCommandSupport {
     List<String> urls;
 
     protected void doExecute(FeaturesService admin) throws Exception {
+        List<Exception> exceptions = new ArrayList<Exception>();
         for (String url : urls) {
             try {
-	             Boolean alreadyInstalled = Boolean.FALSE;
-	             Repository[] repositories = admin.listRepositories();
-	             for(Repository repository:repositories) {
-		             String repositoryUrl = repository.getURI().toURL().toString();
-		             //Check if the repository is already installed.
-		             if(repositoryUrl.equals(url)) {
-		                 alreadyInstalled=Boolean.TRUE;
-		             }
-	             }
-	             if(!alreadyInstalled) {
-                    admin.addRepository(new URI(url));
-	             } else {
-		              refreshUrl(admin, url);
-	             }
+                Boolean alreadyInstalled = Boolean.FALSE;
+                Repository[] repositories = admin.listRepositories();
+                for (Repository repository : repositories) {
+                    String repositoryUrl = repository.getURI().toURL().toString();
+                    //Check if the repository is already installed.
+                    if (repositoryUrl.equals(url)) {
+                        alreadyInstalled = Boolean.TRUE;
+                    }
+                }
+                if (!alreadyInstalled) {
+                    try {
+                        admin.addRepository(new URI(url));
+                    } catch (Exception e) {
+                        throw new Exception("Unable to add features repository " + url, e);
+                    }
+                } else {
+                    refreshUrl(admin, url);
+                }
             } catch (Exception e) {
-                System.out.println("Could not add Feature Repository:\n" + e );  
+                exceptions.add(e);
             }
         }
+        MultiException.throwIf("Unable to add repositories", exceptions);
     }
 }
