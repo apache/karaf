@@ -41,12 +41,15 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.console.CompletableFunction;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.NameScoping;
+import org.apache.karaf.shell.console.jline.CommandSessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ArgumentCompleter implements Completer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArgumentCompleter.class);
+
+    public static final String ARGUMENTS_LIST = "ARGUMENTS_LIST";
 
     final Completer commandCompleter;
     final Completer optionsCompleter;
@@ -205,6 +208,12 @@ public class ArgumentCompleter implements Completer {
         ArgumentList list = delimit(buffer, cursor);
         int argpos = list.getArgumentPosition();
         int argIndex = list.getCursorArgumentIndex();
+
+        //Store the argument list so that it can be used by completers.
+        CommandSession commandSession = CommandSessionHolder.getSession();
+        if(commandSession != null) {
+            commandSession.put(ARGUMENTS_LIST,list);
+        }
 
         Completer comp = null;
         String[] args = list.getArguments();
