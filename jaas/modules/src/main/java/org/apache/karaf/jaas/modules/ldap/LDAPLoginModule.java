@@ -191,6 +191,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             logger.debug("Get the user DN.");
             SearchResult result = (SearchResult) namingEnumeration.next();
             userDN = (String) result.getName();
+            namingEnumeration.close();
         } catch (Exception e) {
             throw new LoginException("Can't connect to the LDAP server: " + e.getMessage());
         } finally {
