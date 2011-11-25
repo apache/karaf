@@ -49,7 +49,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.sonatype.jline</groupId>
+            <groupId>net.sf.jline</groupId>
             <artifactId>jline</artifactId>
             <exclusions>
                 <exclusion>

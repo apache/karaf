@@ -68,7 +68,7 @@ public class MoreAction extends AbstractAction {
                         System.out.flush();
                         System.out.print("--More--");
                         System.out.flush();
-                        c = term.readVirtualKey(session.getKeyboard());
+                        c = session.getKeyboard().read();
                         switch (c) {
                             case 'q':
                             case -1:

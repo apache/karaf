@@ -145,7 +145,7 @@
         <aries.util.version>0.4</aries.util.version>
         <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
         <jansi.version>1.7</jansi.version>
-        <jline.version>2.5</jline.version>
+        <jline.version>2.6-SNAPSHOT</jline.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.16</log4j.version>
         <maven.version>2.0.9</maven.version>
@@ -241,6 +241,18 @@
             </releases>
             <snapshots>
                 <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- OSSRH snapshots -->
+        <repository>
+            <id>ossrh.sonatype.snapshots.deploy</id>
+            <name>OSSRH snapshot repository</name>
+            <url>https://oss.sonatype.org/content/groups/public/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
@@ -875,7 +887,7 @@
                 <version>${log4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.sonatype.jline</groupId>
+                <groupId>net.sf.jline</groupId>
                 <artifactId>jline</artifactId>
                 <version>${jline.version}</version>
             </dependency>
