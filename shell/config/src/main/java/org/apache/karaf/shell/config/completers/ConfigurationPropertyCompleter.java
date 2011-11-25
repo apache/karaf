@@ -19,9 +19,20 @@
 
 package org.apache.karaf.shell.config.completers;
 
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.shell.config.ConfigCommandSupport;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.console.completer.StringsCompleter;
+import org.apache.karaf.shell.console.jline.CommandSessionHolder;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * {@link jline.Completor} for Configuration Admin properties.
@@ -31,22 +42,51 @@ import org.apache.karaf.shell.console.Completer;
  */
 public class ConfigurationPropertyCompleter implements Completer {
 
-    public int complete(final String buffer, final int cursor, final List candidates) {
-        // TODO: currently we have no way to access the session which is being run in this thread
-        return -1;
+    private final StringsCompleter delegate = new StringsCompleter();
 
-//        if (vars.get(ConfigCommandSupport.PROPERTY_CONFIG_PID) == null) {
-//            return -1;
-//        }
-//
-//        Dictionary props = (Dictionary) vars.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS);
-//        StringsCompleter delegate = new StringsCompleter();
-//
-//        for (Enumeration e = props.keys(); e.hasMoreElements();) {
-//            String key = (String) e.nextElement();
-//            delegate.getStrings().add(key);
-//        }
-//
-//        return delegate.complete(buffer, cursor, candidates);
+    private ConfigurationAdmin configAdmin;
+
+
+
+    public int complete(final String buffer, final int cursor, final List candidates) {
+        CommandSession session = CommandSessionHolder.getSession();
+        if (session != null) {
+            String pid = (String) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID);
+            Set<String> propertyNames = getPropertyNames(pid);
+            if (propertyNames != null && !propertyNames.isEmpty()) {
+                delegate.getStrings().addAll(propertyNames);
+            }
+        }
+        return delegate.complete(buffer,cursor,candidates);
+    }
+
+    private Set<String> getPropertyNames(String pid) {
+        Set<String> propertyNames = new HashSet<String>();
+        if (pid != null) {
+            Configuration configuration = null;
+            try {
+                configuration = configAdmin.getConfiguration(pid);
+                if (configuration != null) {
+                    Dictionary properties = configuration.getProperties();
+                    if (properties != null) {
+                        Enumeration keys = properties.keys();
+                        while (keys.hasMoreElements()) {
+                            propertyNames.add(String.valueOf(keys.nextElement()));
+                        }
+                    }
+                }
+            } catch (IOException e) {
+              //Ignore
+            }
+        }
+        return propertyNames;
+    }
+
+    public ConfigurationAdmin getConfigAdmin() {
+        return configAdmin;
+    }
+
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 }
