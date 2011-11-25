@@ -20,15 +20,16 @@
 package org.apache.karaf.shell.config.completers;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.config.ConfigCommandSupport;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.console.completer.ArgumentCompleter;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 import org.apache.karaf.shell.console.jline.CommandSessionHolder;
 import org.osgi.service.cm.Configuration;
@@ -44,22 +45,57 @@ public class ConfigurationPropertyCompleter implements Completer {
 
     private final StringsCompleter delegate = new StringsCompleter();
 
+    private static final String OPTION = "-p";
+    private static final String ALIAS = "--pid";
+
     private ConfigurationAdmin configAdmin;
-
-
 
     public int complete(final String buffer, final int cursor, final List candidates) {
         CommandSession session = CommandSessionHolder.getSession();
         if (session != null) {
-            String pid = (String) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID);
+            String pid = getPid(session);
             Set<String> propertyNames = getPropertyNames(pid);
             if (propertyNames != null && !propertyNames.isEmpty()) {
+                delegate.getStrings().clear();
                 delegate.getStrings().addAll(propertyNames);
             }
         }
         return delegate.complete(buffer,cursor,candidates);
     }
 
+    /**
+     * Retrieves the pid stored in the {@link CommandSession} or passed as an argument.
+     * Argument takes precedence from pid stored in the {@link CommandSession}.
+     * @param commandSession
+     * @return
+     */
+    private String getPid(CommandSession commandSession) {
+        String pid = (String) commandSession.get(ConfigCommandSupport.PROPERTY_CONFIG_PID);
+        ArgumentCompleter.ArgumentList list = (ArgumentCompleter.ArgumentList) commandSession.get(ArgumentCompleter.ARGUMENTS_LIST);
+        if (list != null && list.getArguments() != null && list.getArguments().length > 0) {
+            List<String> arguments = Arrays.asList(list.getArguments());
+            if (arguments.contains(OPTION)) {
+                int index = arguments.indexOf(OPTION);
+                if (arguments.size() > index) {
+                    return arguments.get(index + 1);
+                }
+            }
+
+            if (arguments.contains(ALIAS)) {
+                int index = arguments.indexOf(ALIAS);
+                if (arguments.size() > index) {
+                    return arguments.get(index + 1);
+                }
+            }
+        }
+        return pid;
+    }
+
+    /**
+     * Returns the property names for the given pid.
+     * @param pid
+     * @return
+     */
     private Set<String> getPropertyNames(String pid) {
         Set<String> propertyNames = new HashSet<String>();
         if (pid != null) {
