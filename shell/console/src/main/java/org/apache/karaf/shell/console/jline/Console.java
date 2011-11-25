@@ -146,12 +146,15 @@ public class Console implements Runnable
             }
         }
         running = false;
+        CommandSessionHolder.unset();
         pipe.interrupt();
     }
 
     public void run()
     {
+        ThreadLocal<CommandSessionHolder> consoleState = new ThreadLocal<CommandSessionHolder>();
         thread = Thread.currentThread();
+        CommandSessionHolder.setSession(session);
         running = true;
         pipe.start();
         welcome();
