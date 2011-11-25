@@ -89,7 +89,9 @@
     </bean>
     <service ref="configCompleter" interface="org.osgi.service.cm.ConfigurationListener" />
 
-    <bean id="configPropertyCompleter" class="org.apache.karaf.shell.config.completers.ConfigurationPropertyCompleter" />
+    <bean id="configPropertyCompleter" class="org.apache.karaf.shell.config.completers.ConfigurationPropertyCompleter">
+        <property name="configAdmin" ref="configAdmin"/>
+    </bean>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 
