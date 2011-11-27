@@ -16,34 +16,46 @@
  */
 package org.apache.karaf.shell.itests;
 
-import static org.apache.karaf.testing.Helper.felixProvisionalApis;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.equinox;
-import static org.ops4j.pax.exam.CoreOptions.felix;
-import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+
+import javax.inject.Inject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.testing.AbstractIntegrationTest;
-import org.apache.karaf.testing.Helper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.osgi.framework.Bundle;
+import org.ops4j.pax.exam.junit.ProbeBuilder;
+import org.osgi.framework.Constants;
 
 @RunWith(JUnit4TestRunner.class)
-public class CoreTest extends AbstractIntegrationTest {
+public class CoreTest {
+
+    @Inject
+    private CommandProcessor cp;
+
+    @ProbeBuilder
+    public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
+        probe.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*,org.apache.felix.service.*;status=provisional");
+        return probe;
+    }
+
+    @Configuration
+    public Option[] config() {
+        return new Option[]{ karafDistributionConfiguration().frameworkUrl(
+            maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip").versionAsInProject()) };
+    }
 
     @Test
     public void testHelp() throws Exception {
         Thread.sleep(10000);
 
-        CommandProcessor cp = getOsgiService(CommandProcessor.class);
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
         cs.execute("bundle:list --help");
         cs.close();
@@ -51,31 +63,29 @@ public class CoreTest extends AbstractIntegrationTest {
 
     @Test
     public void testInstallCommand() throws Exception {
+        assertTrue(true);
         Thread.sleep(12000);
 
-        CommandProcessor cp = getOsgiService(CommandProcessor.class);
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
 
         try {
-            cs.execute("log:display");
+            cs.execute("obr:list-url");
             fail("command should not exist");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().indexOf("Command not found") >= 0);
         }
 
-        Bundle b = getInstalledBundle("org.apache.karaf.shell.log");
-        b.start();
+        cs.execute("feature:install obr");
 
         Thread.sleep(1000);
+        cs.execute("obr:list-url");
 
-        cs.execute("log:display");
-
-        b.stop();
+        cs.execute("feature:uninstall obr");
 
         Thread.sleep(1000);
 
         try {
-            cs.execute("log:display");
+            cs.execute("obr:list-url");
             fail("command should not exist");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().indexOf("Command not found") >= 0);
@@ -83,54 +93,5 @@ public class CoreTest extends AbstractIntegrationTest {
 
         cs.close();
     }
-
-//    @Test
-//    public void testCommandGroup() throws Exception {
-//        Thread.sleep(5000);
-//
-//        Shell shell = getOsgiService(Shell.class);
-//        shell.execute("bundles");
-//        shell.execute("help");
-//        shell.execute("..");
-//    }
-//
-//    @Test
-//    public void testCommandGroupAfterInstall() throws Exception {
-//        Bundle b = getInstalledBundle("org.apache.karaf.shell.log");
-//        b.start();
-//
-//        Thread.sleep(5000);
-//
-//        Shell shell = getOsgiService(Shell.class);
-//        shell.execute("log");
-//        shell.execute("help");
-//        shell.execute("..");
-//    }
-//
-    @Configuration
-    public static Option[] configuration() throws Exception {
-        Option[] options = combine(
-            // Default karaf environment
-            Helper.getDefaultOptions(
-                // this is how you set the default log level when using pax logging (logProfile)
-                Helper.setLogLevel("TRACE")),
-
-            workingDirectory("target/paxrunner/core/"),
-
-            waitForFrameworkStartup(),
-
-            // Test on both equinox and felix
-            // TODO: pax-exam does not support the latest felix version :-(
-            // TODO: so we use the higher supported which should be the same
-            // TODO: as the one specified in itests/dependencies/pom.xml
-            equinox(), felix().version("3.0.2"),
-
-            felixProvisionalApis()
-        );
-        // Stop the shell log bundle
-        Helper.findMaven(options, "org.apache.karaf.shell", "org.apache.karaf.shell.log").noStart();
-        return options;
-    }
-
 
 }

@@ -37,38 +37,30 @@
     </properties>
 
     <dependencies>
-        <!-- This is required to be first so that pax-exam classloader is not messed up with a newer version of felix
-              which would lead to java.lang.NoSuchMethodError: org.apache.felix.framework.Logger.<init>(I)V -->
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
-            <version>1.0.0</version>
+            <groupId>org.apache.karaf.tooling.exam</groupId>
+            <artifactId>org.apache.karaf.tooling.exam.container</artifactId>
+            <scope>test</scope>
         </dependency>
-        <!-- This is required to be first so that pax-exam classloader is not messed up with a newer version of felix
-              which would lead to java.lang.RuntimeException: Could not create [service.obr] -->
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
-            <version>1.2.1</version>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-junit4</artifactId>
+            <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.karaf.tooling</groupId>
-            <artifactId>org.apache.karaf.tooling.testing</artifactId>
+            <groupId>org.apache.karaf.assemblies</groupId>
+            <artifactId>apache-karaf</artifactId>
+            <type>zip</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
             <scope>test</scope>
         </dependency>
    </dependencies>
 
     <build>
-        <testResources>
-            <testResource>
-                <directory>src/test/filtered-resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </testResource>
-        </testResources>
         <plugins>
             <!-- generate dependencies versions -->
             <plugin>
@@ -110,3 +102,4 @@
     </profiles>
 
 </project>
+

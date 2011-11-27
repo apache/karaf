@@ -16,64 +16,65 @@
  */
 package org.apache.karaf.shell.itests;
 
-import static org.apache.karaf.testing.Helper.felixProvisionalApis;
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFileExtend;
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.junit.Assert.assertNotNull;
-import static org.ops4j.pax.exam.CoreOptions.equinox;
-import static org.ops4j.pax.exam.CoreOptions.felix;
-import static org.ops4j.pax.exam.CoreOptions.waitForFrameworkStartup;
-import static org.ops4j.pax.exam.OptionUtils.combine;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.workingDirectory;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+
+import javax.inject.Inject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.testing.AbstractIntegrationTest;
-import org.apache.karaf.testing.Helper;
+import org.apache.karaf.tooling.exam.options.configs.FeaturesCfg;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.ops4j.pax.exam.junit.ProbeBuilder;
+import org.ops4j.pax.exam.util.Filter;
+import org.osgi.framework.Constants;
 import org.osgi.service.blueprint.container.BlueprintContainer;
 
 @RunWith(JUnit4TestRunner.class)
-public class FeaturesTest extends AbstractIntegrationTest {
+public class FeaturesTest {
+
+    @Inject
+    @Filter(value = "osgi.blueprint.container.symbolicname=org.apache.karaf.shell.obr", timeout = 20000)
+    private BlueprintContainer obrService;
+
+    @Inject
+    @Filter(value = "osgi.blueprint.container.symbolicname=org.apache.karaf.shell.wrapper", timeout = 20000)
+    private BlueprintContainer wrapperService;
+
+    @Inject
+    private CommandProcessor cp;
+
+    @ProbeBuilder
+    public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
+        probe.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*,org.apache.felix.service.*;status=provisional");
+        return probe;
+    }
+
+    @Configuration
+    public Option[] config() {
+        return new Option[]{
+            karafDistributionConfiguration().frameworkUrl(
+                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                    .versionAsInProject()), editConfigurationFileExtend(FeaturesCfg.BOOT, ",obr,wrapper") };
+    }
 
     @Test
     public void testFeatures() throws Exception {
         // Make sure the command services are available
-        assertNotNull(getOsgiService(BlueprintContainer.class, "osgi.blueprint.container.symbolicname=org.apache.karaf.shell.obr", 20000));
-        assertNotNull(getOsgiService(BlueprintContainer.class, "osgi.blueprint.container.symbolicname=org.apache.karaf.shell.wrapper", 20000));
+        assertNotNull(obrService);
+        assertNotNull(wrapperService);
         // Run some commands to make sure they are installed properly
-        CommandProcessor cp = getOsgiService(CommandProcessor.class);
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
         cs.execute("obr:list-url");
         cs.execute("wrapper:install --help");
         cs.close();
-    }
-
-    @Configuration
-    public static Option[] configuration() throws Exception{
-        return combine(
-            // Default karaf environment
-            Helper.getDefaultOptions(
-                // this is how you set the default log level when using pax logging (logProfile)
-                Helper.setLogLevel("DEBUG")),
-
-            // add two features
-            Helper.loadKarafStandardFeatures("obr", "wrapper"),
-
-            workingDirectory("target/paxrunner/features/"),
-
-            waitForFrameworkStartup(),
-
-            // Test on both equinox and felix
-            // TODO: pax-exam does not support the latest felix version :-(
-            // TODO: so we use the higher supported which should be the same
-            // TODO: as the one specified in itests/dependencies/pom.xml
-            equinox(), felix().version("3.0.2"),
-
-            felixProvisionalApis()
-        );
     }
 
 }

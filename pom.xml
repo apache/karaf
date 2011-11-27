@@ -49,7 +49,7 @@
         <module>scheduler</module>
         <module>assemblies</module>
         <module>demos</module>
-        <!--<module>itests</module>-->
+        <module>itests</module>
         <module>tooling</module>
         <module>archetypes</module>
         <module>diagnostic</module>
@@ -519,6 +519,11 @@
             <dependency>
                 <groupId>org.apache.karaf.demos</groupId>
                 <artifactId>web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.tooling.exam</groupId>
+                <artifactId>org.apache.karaf.tooling.exam.container</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
