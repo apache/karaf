@@ -34,9 +34,8 @@
     <name>Apache Karaf :: Integration Tests</name>
 
     <modules>
-        <module>dependencies</module>
         <module>tests</module>
-        <module>kittests</module>
+        <!--<module>kittests</module>-->
     </modules>
 
 </project>
