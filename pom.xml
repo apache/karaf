@@ -171,6 +171,10 @@
         <xbean.version>3.8</xbean.version>
         <javax.mail.version>1.4.4</javax.mail.version>
 
+        <!-- Furter used maven plugin versions; e.g. in the docs -->
+        <plugin.depends.version>1.2</plugin.depends.version>
+
+        <!-- General Settings -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
         <bnd.version.policy>[$(version;==;$(@)),$(version;+;$(@)))</bnd.version.policy>
@@ -1434,7 +1438,7 @@
                 <plugin>
                     <groupId>org.apache.servicemix.tooling</groupId>
                     <artifactId>depends-maven-plugin</artifactId>
-                    <version>1.2</version>
+                    <version>${plugin.depends.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
