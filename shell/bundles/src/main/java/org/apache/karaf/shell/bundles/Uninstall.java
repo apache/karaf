@@ -16,22 +16,30 @@
  */
 package org.apache.karaf.shell.bundles;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.console.MultiException;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "uninstall", description = "Uninstall bundles.")
 public class Uninstall extends BundlesCommandWithConfirmation {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
+        if (bundles.isEmpty()) {
+            System.err.println("No bundles specified.");
+            return;
+        }
+        List<Exception> exceptions = new ArrayList<Exception>();
         for (Bundle bundle : bundles) {
             try {
                 bundle.uninstall();
             } catch (Exception e) {
-                System.err.println(e.toString());
+                exceptions.add(new Exception("Unable to uninstall bundle " + bundle.getBundleId()));
             }
         }
+        MultiException.throwIf("Error uninstalling bundles", exceptions);
     }
 
 }
