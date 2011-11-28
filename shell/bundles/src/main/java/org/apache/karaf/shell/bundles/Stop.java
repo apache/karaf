@@ -16,22 +16,26 @@
  */
 package org.apache.karaf.shell.bundles;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.console.MultiException;
 import org.osgi.framework.Bundle;
 
 @Command(scope = "bundle", name = "stop", description = "Stop bundles.")
 public class Stop extends BundlesCommandWithConfirmation {
 	
 	protected void doExecute(List<Bundle> bundles) throws Exception {
+        List<Exception> exceptions = new ArrayList<Exception>();
         for (Bundle bundle : bundles) {
             try {
                 bundle.stop();
             } catch (Exception e) {
-                System.err.println(e.toString());
+                exceptions.add(new Exception("Unable to stop bundle " + bundle.getBundleId()));
             }
         }
+        MultiException.throwIf("Error stopping bundles", exceptions);
     }
 
 }
