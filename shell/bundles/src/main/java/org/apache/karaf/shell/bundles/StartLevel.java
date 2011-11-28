@@ -19,7 +19,7 @@ package org.apache.karaf.shell.bundles;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.startlevel.BundleStartLevel;
 
 @Command(scope = "bundle", name = "start-level", description = "Gets or sets the start level of a bundle.")
 public class StartLevel extends BundleCommand {
@@ -29,21 +29,15 @@ public class StartLevel extends BundleCommand {
 
     protected void doExecute(Bundle bundle) throws Exception {
         // Get package admin service.
-        ServiceReference ref = getBundleContext().getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName());
-        if (ref == null) {
+        BundleStartLevel bsl = bundle.adapt(BundleStartLevel.class);
+        if (bsl == null) {
             System.out.println("StartLevel service is unavailable.");
             return;
         }
-        org.osgi.service.startlevel.StartLevel sl = getService(org.osgi.service.startlevel.StartLevel.class, ref);
-        if (sl == null) {
-            System.out.println("StartLevel service is unavailable.");
-            return;
-        }
-
         if (level == null) {
-            System.out.println("Level " + sl.getBundleStartLevel(bundle));
+            System.out.println("Level " + bsl.getStartLevel());
         }
-        else if ((level < 50) && sl.getBundleStartLevel(bundle) > 50){
+        else if ((level < 50) && bsl.getStartLevel() > 50){
             for (;;) {
                 StringBuffer sb = new StringBuffer();
                 System.err.println("You are about to designate bundle as a system bundle.  Do you wish to continue (yes/no): ");
@@ -61,14 +55,14 @@ public class StartLevel extends BundleCommand {
                 }
                 String str = sb.toString();
                 if ("yes".equals(str)) {
-                    sl.setBundleStartLevel(bundle, level);
+                    bsl.setStartLevel(level);
                     break;
                 } else if ("no".equals(str)) {
                     break;
                 }
             }
         } else {
-            sl.setBundleStartLevel(bundle, level);
+            bsl.setStartLevel(level);
         }
     }
 

@@ -63,6 +63,12 @@
         <command>
             <action class="org.apache.karaf.shell.bundles.Uninstall"/>
         </command>
+        <command>
+            <action class="org.apache.karaf.shell.bundles.Capabilities"/>
+        </command>
+        <command>
+            <action class="org.apache.karaf.shell.bundles.Requirements"/>
+        </command>
     </command-bundle>
 
     <bean id="blueprintListener" class="org.apache.karaf.shell.bundles.BlueprintListener" />

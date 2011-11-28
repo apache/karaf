@@ -17,6 +17,7 @@
 package org.apache.karaf.shell.bundles;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -49,39 +50,18 @@ public class Headers extends BundlesCommand {
     protected final static String IMPORT_PACKAGES_ATTRIB = "Import-Package";
     protected final static String REQUIRE_BUNDLE_ATTRIB = "Require-Bundle";
 
-    private ServiceReference ref;
-    private PackageAdmin admin;
-
     @Option(name = "--indent", description = "Indentation method")
     int indent = -1;
 
+    private PackageAdmin admin;
+
     protected void doExecute(List<Bundle> bundles) throws Exception {
-        // Get package admin service.
-        ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
-        if (ref == null) {
-            System.out.println("PackageAdmin service is unavailable.");
-            return;
+        admin = getService(PackageAdmin.class);
+        if (bundles == null || bundles.isEmpty()) {
+            bundles = Arrays.asList(getBundleContext().getBundles());
         }
-
-        try {
-            admin = (PackageAdmin) getBundleContext().getService(ref);
-            if (admin == null) {
-                System.out.println("PackageAdmin service is unavailable.");
-                return;
-            }
-
-            if (bundles == null) {
-                Bundle[] allBundles = getBundleContext().getBundles();
-                for (int i = 0; i < allBundles.length; i++) {
-                    printHeaders(allBundles[i]);
-                }
-            } else {
-                for (Bundle bundle : bundles) {
-                    printHeaders(bundle);
-                }
-            }
-        } finally {
-            getBundleContext().ungetService(ref);
+        for (Bundle bundle : bundles) {
+            printHeaders(bundle);
         }
     }
 
@@ -176,7 +156,7 @@ public class Headers extends BundlesCommand {
         Map<String, ClauseFormatter> formatters = new HashMap<String, ClauseFormatter>();
         formatters.put(REQUIRE_BUNDLE_ATTRIB, new ClauseFormatter() {
             public void pre(Clause clause, StringBuilder output) {
-                boolean isSatisfied = checkBundle(clause.getName(), clause.getAttribute("version"));
+                boolean isSatisfied = checkBundle(clause.getName(), clause.getAttribute("bundle-version"));
                 Ansi.ansi(output).fg(isSatisfied ? Ansi.Color.DEFAULT : Ansi.Color.RED).a("");
             }
             public void post(Clause clause, StringBuilder output) {

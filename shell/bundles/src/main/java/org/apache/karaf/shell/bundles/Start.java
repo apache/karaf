@@ -27,6 +27,10 @@ import org.osgi.framework.Bundle;
 public class Start extends BundlesCommandWithConfirmation {
     
     protected void doExecute(List<Bundle> bundles) throws Exception {
+        if (bundles.isEmpty()) {
+            System.err.println("No bundles specified.");
+            return;
+        }
         List<Exception> exceptions = new ArrayList<Exception>();
         for (Bundle bundle : bundles) {
             try {
