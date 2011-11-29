@@ -36,7 +36,7 @@ public class Uninstall extends BundlesCommandWithConfirmation {
             try {
                 bundle.uninstall();
             } catch (Exception e) {
-                exceptions.add(new Exception("Unable to uninstall bundle " + bundle.getBundleId()));
+                exceptions.add(new Exception("Unable to uninstall bundle " + bundle.getBundleId() + ": " + e.getMessage(), e));
             }
         }
         MultiException.throwIf("Error uninstalling bundles", exceptions);
