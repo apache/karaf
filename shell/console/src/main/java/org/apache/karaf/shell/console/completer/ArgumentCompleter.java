@@ -59,7 +59,7 @@ public class ArgumentCompleter implements Completer {
     final Completer commandCompleter;
     final Completer optionsCompleter;
     final List<Completer> argsCompleters;
-    final List<Completer> optionalCompleters;
+    final Map<String, Completer> optionalCompleters;
     final AbstractCommand function;
     final Map<Option, Field> fields = new HashMap<Option, Field>();
     final Map<String, Option> options = new HashMap<String, Option>();
@@ -111,7 +111,7 @@ public class ArgumentCompleter implements Completer {
                 argsCompleters.add(NullCompleter.INSTANCE);
             }
         } else {
-            optionalCompleters = new ArrayList<Completer>();
+            optionalCompleters = new HashMap<String, Completer>();
             final Map<Integer, Method> methods = new HashMap<Integer, Method>();
             for (Class type = function.getActionClass(); type != null; type = type.getSuperclass()) {
                 for (Method method : type.getDeclaredMethods()) {
@@ -264,12 +264,21 @@ public class ArgumentCompleter implements Completer {
                 Field lastField = fields.get(lastOption);
                 if (lastField != null && lastField.getType() != boolean.class && lastField.getType() != Boolean.class) {
                     Option option = lastField.getAnnotation(Option.class);
-                    if (option != null && option.completer() != null) {
-                        Class<? extends Completer> type = option.completer();
-                        for (Completer optionValueCompleter : optionalCompleters) {
-                            if (optionValueCompleter.getClass().equals(type)) {
-                                comp = optionValueCompleter;
+                    if (option != null) {
+                        Completer optionValueCompleter = null;
+                        String name = option.name();
+                        optionValueCompleter = optionalCompleters.get(name);
+                        if(optionValueCompleter == null) {
+                            String[] aliases = option.aliases();
+                            if(aliases.length > 0 ) {
+                                for(int i=0; i < aliases.length && optionValueCompleter == null; i++) {
+                                    optionValueCompleter = optionalCompleters.get(option.aliases()[i]);
+                                }
                             }
+                        }
+
+                        if(optionValueCompleter != null) {
+                            comp = optionValueCompleter;
                         }
                     }
                 }

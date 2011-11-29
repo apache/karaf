@@ -18,7 +18,9 @@ package org.apache.karaf.shell.console.completer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.gogo.commands.Action;
 import org.apache.felix.gogo.commands.Option;
@@ -86,7 +88,7 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
     public void testCompleteOptions() throws Exception {
         CommandSession session = new DummyCommandSession();
         Completer comp = new ArgumentCompleter(session, new MyFunction(), "my:action");
-        assertEquals(Arrays.asList("--check", "--foo", "--help", "--string", "-c", "-f","-s"), complete(comp, "action -"));
+        assertEquals(Arrays.asList("--check", "--foo", "--help", "--string", "--integer", "-c", "-f","-s","-i"), complete(comp, "action -"));
         assertEquals(Arrays.asList(), complete(comp, "action --foo "));
         assertEquals(Arrays.asList("action "), complete(comp, "acti"));
         assertEquals(Arrays.asList("my:action "), complete(comp, "my:ac"));
@@ -97,7 +99,11 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
         assertEquals(Arrays.asList("foo1 "), complete(comp, "action -f 2 --check foo1"));
         assertEquals(Arrays.asList("bar1", "bar2"), complete(comp, "action -f 2 --check foo1 "));
         assertEquals(Arrays.asList("one", "two"), complete(comp, "action -s "));
+        assertEquals(Arrays.asList("one", "two"), complete(comp, "action -string "));
         assertEquals(Arrays.asList("two "), complete(comp, "action -s t"));
+        assertEquals(Arrays.asList("1", "2"), complete(comp, "action -i "));
+        assertEquals(Arrays.asList("1", "2"), complete(comp, "action --integer "));
+        assertEquals(Arrays.asList("2 "), complete(comp, "action -i 2"));
     }
 
     public static class MyFunction extends SimpleCommand implements CompletableFunction {
@@ -111,10 +117,11 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
             );
         }
 
-        public List<Completer> getOptionalCompleters() {
-            return Arrays.<Completer>asList(
-                    new StringsCompleter(Arrays.asList("one", "two"))
-            );
+        public Map<String,Completer> getOptionalCompleters() {
+            Map<String,Completer> completers = new HashMap<String,Completer>();
+            completers.put("-s",new StringsCompleter(Arrays.asList("one","two")));
+            completers.put("--integer",new StringsCompleter(Arrays.asList("1","2")));
+            return completers;
         }
     }
 
@@ -125,8 +132,11 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
         @Option(name = "-c", aliases = "--check")
         boolean check;
 
-        @Option(name = "-s", aliases = "--string", completer = StringsCompleter.class)
+        @Option(name = "-s", aliases = "--string")
         String string;
+
+        @Option(name = "-i", aliases = "--int")
+        String integer;
 
         public Object execute(CommandSession session) throws Exception {
             return null;
