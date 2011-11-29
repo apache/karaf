@@ -22,7 +22,7 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command name="config/cancel">
             <action class="org.apache.karaf.shell.config.CancelCommand"/>
         </command>
@@ -55,6 +55,9 @@
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
+            <optional-completers>
+                   <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
         </command>
         <command name="config/proplist">
             <action class="org.apache.karaf.shell.config.PropListCommand"/>
@@ -67,6 +70,9 @@
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
+            <optional-completers>
+                   <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
         </command>
         <command name="config/propappend">
             <action class="org.apache.karaf.shell.config.PropAppendCommand">
@@ -76,6 +82,9 @@
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
+            <optional-completers>
+                   <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
         </command>
         <command name="config/update">
             <action class="org.apache.karaf.shell.config.UpdateCommand">
