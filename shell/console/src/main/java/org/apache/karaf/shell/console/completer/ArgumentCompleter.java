@@ -59,6 +59,7 @@ public class ArgumentCompleter implements Completer {
     final Completer commandCompleter;
     final Completer optionsCompleter;
     final List<Completer> argsCompleters;
+    final List<Completer> optionalCompleters;
     final AbstractCommand function;
     final Map<Option, Field> fields = new HashMap<Option, Field>();
     final Map<String, Option> options = new HashMap<String, Option>();
@@ -98,7 +99,9 @@ public class ArgumentCompleter implements Completer {
         optionsCompleter = new StringsCompleter(options.keySet());
         // Build arguments completers
         argsCompleters = new ArrayList<Completer>();
+
         if (function instanceof CompletableFunction) {
+            optionalCompleters = ((CompletableFunction) function).getOptionalCompleters();
             List<Completer> fcl = ((CompletableFunction) function).getCompleters();
             if (fcl != null) {
                 for (Completer c : fcl) {
@@ -108,6 +111,7 @@ public class ArgumentCompleter implements Completer {
                 argsCompleters.add(NullCompleter.INSTANCE);
             }
         } else {
+            optionalCompleters = new ArrayList<Completer>();
             final Map<Integer, Method> methods = new HashMap<Integer, Method>();
             for (Class type = function.getActionClass(); type != null; type = type.getSuperclass()) {
                 for (Method method : type.getDeclaredMethods()) {
@@ -251,6 +255,27 @@ public class ArgumentCompleter implements Completer {
                 comp = optionsCompleter;
             }
         }
+        //Now check for if last Option has a completer
+        int lastAgurmentIndex = argIndex - 1;
+        if (lastAgurmentIndex >= 1) {
+            Option lastOption = options.get(args[lastAgurmentIndex]);
+            if (lastOption != null) {
+
+                Field lastField = fields.get(lastOption);
+                if (lastField != null && lastField.getType() != boolean.class && lastField.getType() != Boolean.class) {
+                    Option option = lastField.getAnnotation(Option.class);
+                    if (option != null && option.completer() != null) {
+                        Class<? extends Completer> type = option.completer();
+                        for (Completer optionValueCompleter : optionalCompleters) {
+                            if (optionValueCompleter.getClass().equals(type)) {
+                                comp = optionValueCompleter;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // Check arguments
         if (comp == null) {
             int indexArg = 0;

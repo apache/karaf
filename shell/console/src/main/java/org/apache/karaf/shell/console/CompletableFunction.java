@@ -25,5 +25,6 @@ import org.apache.felix.service.command.Function;
 public interface CompletableFunction extends Function {
 
     List<Completer> getCompleters();
+    List<Completer> getOptionalCompleters();
 
 }
