@@ -70,8 +70,8 @@
                 <xsd:choice minOccurs="0" maxOccurs="1">
                     <xsd:element ref="completer"/>
                     <xsd:element ref="completers"/>
-                    <xsd:element ref="optional-completers"/>
                 </xsd:choice>
+                <xsd:element ref="optional-completers" minOccurs="0" maxOccurs="1"/>
                 <xsd:element ref="message-source" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
             <xsd:attribute name="name" type="xsd:string" use="required"/>
