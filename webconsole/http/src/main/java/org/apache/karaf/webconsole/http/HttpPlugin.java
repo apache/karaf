@@ -112,7 +112,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin
         final PrintWriter pw = response.getWriter();
 
         String appRoot = ( String ) request
-            .getAttribute( "org.apache.felix.webconsole.internal.servlet.OsgiManager.appRoot" );
+            .getAttribute( "org.apache.felix.webconsole.wrapper.servlet.OsgiManager.appRoot" );
         final String featuresScriptTag = "<script src='" + appRoot + this.featuresJs
             + "' language='JavaScript'></script>";
         pw.println( featuresScriptTag );

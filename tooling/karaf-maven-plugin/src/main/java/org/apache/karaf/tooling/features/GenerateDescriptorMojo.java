@@ -85,14 +85,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     private File inputFile;
 
     /**
-     * (internal) The filtered input file
+     * (wrapper) The filtered input file
      *
      * @parameter default-value="${project.build.directory}/feature/filteredInputFeature.xml"
      */
     private File filteredInputFile;
 
     /**
-     * (internal) The file to generate
+     * (wrapper) The file to generate
      *
      * @parameter default-value="${project.build.directory}/feature/feature.xml"
      */
@@ -106,14 +106,14 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     private String resolver;
 
     /**
-     * (internal) The artifact type for attaching the generated file to the project
+     * (wrapper) The artifact type for attaching the generated file to the project
      *
      * @parameter default-value="xml"
      */
     private String attachmentArtifactType = "xml";
 
     /**
-     * (internal) The artifact classifier for attaching the generated file to the project
+     * (wrapper) The artifact classifier for attaching the generated file to the project
      *
      * @parameter default-value="features"
      */
@@ -137,7 +137,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     //new
 
     /**
-     * (internal) The maven project.
+     * (wrapper) The maven project.
      *
      * @parameter expression="${project}"
      * @required
@@ -422,7 +422,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
     private boolean overwriteChangedDependencies;
 
     /**
-     * (internal) Location of existing dependency file.
+     * (wrapper) Location of existing dependency file.
      *
      * @parameter expression="${basedir}/src/main/history/dependencies.xml"
      * @required

@@ -64,7 +64,7 @@ public final class KarafDistributionOption {
 
     /**
      * Configures which distribution options to use. Relevant are the frameworkURL, the frameworkName and the Karaf
-     * version since all of those params are relevant to decide which internal configurations to use.
+     * version since all of those params are relevant to decide which wrapper configurations to use.
      */
     public static KarafDistributionBaseConfigurationOption karafDistributionConfiguration(String frameworkURL, String name,
             String karafVersion) {
@@ -73,7 +73,7 @@ public final class KarafDistributionOption {
 
     /**
      * Configures which distribution options to use. Relevant are the frameworkURL, the frameworkName and the Karaf
-     * version since all of those params are relevant to decide which internal configurations to use.
+     * version since all of those params are relevant to decide which wrapper configurations to use.
      */
     public static KarafDistributionBaseConfigurationOption karafDistributionConfiguration() {
         return new KarafDistributionConfigurationOption();

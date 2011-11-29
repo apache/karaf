@@ -117,7 +117,8 @@
     </feature>
 
     <feature name="wrapper" description="Provide OS integration" version="${project.version}">
-        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.wrapper/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.commands/${project.version}</bundle>
     </feature>
 
     <feature name="obr" description="Provide OSGi Bundle Repository (OBR) support" version="${project.version}">
