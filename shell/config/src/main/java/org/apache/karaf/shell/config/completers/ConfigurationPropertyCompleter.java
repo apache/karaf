@@ -55,8 +55,8 @@ public class ConfigurationPropertyCompleter implements Completer {
         if (session != null) {
             String pid = getPid(session);
             Set<String> propertyNames = getPropertyNames(pid);
+            delegate.getStrings().clear();
             if (propertyNames != null && !propertyNames.isEmpty()) {
-                delegate.getStrings().clear();
                 delegate.getStrings().addAll(propertyNames);
             }
         }
