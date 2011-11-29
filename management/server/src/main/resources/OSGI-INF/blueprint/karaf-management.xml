@@ -69,6 +69,7 @@
         <property name="create" value="true"/>
         <property name="locate" value="true"/>
         <property name="port" value="${rmiRegistryPort}"/>
+        <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
 
     <!-- Create a JMX connector ServiceFactory -->
