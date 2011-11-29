@@ -36,14 +36,14 @@ public class Restart extends BundlesCommandWithConfirmation {
             try {
                 bundle.stop();
             } catch (Exception e) {
-                exceptions.add(new Exception("Unable to stop bundle " + bundle.getBundleId()));
+                exceptions.add(new Exception("Unable to stop bundle " + bundle.getBundleId() + ": " + e.getMessage(), e));
             }
         }
         for (Bundle bundle : bundles) {
             try {
                 bundle.start();
             } catch (Exception e) {
-                exceptions.add(new Exception("Unable to start bundle " + bundle.getBundleId()));
+                exceptions.add(new Exception("Unable to start bundle " + bundle.getBundleId() + ": " + e.getMessage(), e));
             }
         }
         MultiException.throwIf("Error restarting bundles", exceptions);
