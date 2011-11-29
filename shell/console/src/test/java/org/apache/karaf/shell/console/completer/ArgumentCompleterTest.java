@@ -86,7 +86,7 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
     public void testCompleteOptions() throws Exception {
         CommandSession session = new DummyCommandSession();
         Completer comp = new ArgumentCompleter(session, new MyFunction(), "my:action");
-        assertEquals(Arrays.asList("--check", "--foo", "--help", "-c", "-f"), complete(comp, "action -"));
+        assertEquals(Arrays.asList("--check", "--foo", "--help", "--string", "-c", "-f","-s"), complete(comp, "action -"));
         assertEquals(Arrays.asList(), complete(comp, "action --foo "));
         assertEquals(Arrays.asList("action "), complete(comp, "acti"));
         assertEquals(Arrays.asList("my:action "), complete(comp, "my:ac"));
@@ -96,6 +96,8 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
         assertEquals(Arrays.asList("--check "), complete(comp, "action -f 2 --c"));
         assertEquals(Arrays.asList("foo1 "), complete(comp, "action -f 2 --check foo1"));
         assertEquals(Arrays.asList("bar1", "bar2"), complete(comp, "action -f 2 --check foo1 "));
+        assertEquals(Arrays.asList("one", "two"), complete(comp, "action -s "));
+        assertEquals(Arrays.asList("two "), complete(comp, "action -s t"));
     }
 
     public static class MyFunction extends SimpleCommand implements CompletableFunction {
@@ -108,13 +110,23 @@ public class ArgumentCompleterTest extends CompleterTestSupport {
                     new StringsCompleter(Arrays.asList("bar1", "bar2"))
             );
         }
+
+        public List<Completer> getOptionalCompleters() {
+            return Arrays.<Completer>asList(
+                    new StringsCompleter(Arrays.asList("one", "two"))
+            );
+        }
     }
 
     public static class MyAction implements Action {
         @Option(name = "-f", aliases = { "--foo" })
         int f;
+
         @Option(name = "-c", aliases = "--check")
         boolean check;
+
+        @Option(name = "-s", aliases = "--string", completer = StringsCompleter.class)
+        String string;
 
         public Object execute(CommandSession session) throws Exception {
             return null;

@@ -21,7 +21,12 @@
 
     <service interface="org.apache.aries.blueprint.NamespaceHandler">
         <service-properties>
-            <entry key="osgi.service.blueprint.namespace" value="http://karaf.apache.org/xmlns/shell/v1.0.0"/>
+            <entry key="osgi.service.blueprint.namespace">
+                <array>
+                    <value>http://karaf.apache.org/xmlns/shell/v1.0.0</value>
+                    <value>http://karaf.apache.org/xmlns/shell/v1.1.0</value>
+                </array>
+            </entry>
         </service-properties>
         <bean class="org.apache.karaf.shell.console.commands.NamespaceHandler"/>
     </service>

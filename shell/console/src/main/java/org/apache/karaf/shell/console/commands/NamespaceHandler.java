@@ -50,16 +50,26 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     public static final String NAME = "name";
     public static final String COMMAND = "command";
     public static final String COMPLETERS = "completers";
+    public static final String OPTIONAL_COMPLETERS = "optional-completers";
+    public static final String OPTIONAL_COMPLETERS_PROPERTY = "optionalCompleters";
     public static final String BEAN = "bean";
     public static final String REF = "ref";
     public static final String NULL = "null";
     public static final String BLUEPRINT_CONTAINER = "blueprintContainer";
     public static final String BLUEPRINT_CONVERTER = "blueprintConverter";
 
+    public static final String SHELL_NAMESPACE_1_0_0 = "http://karaf.apache.org/xmlns/shell/v1.0.0";
+    public static final String SHELL_NAMESPACE_1_1_0 = "http://karaf.apache.org/xmlns/shell/v1.1.0";
+
     private int nameCounter = 0;
 
     public URL getSchemaLocation(String namespace) {
-        return getClass().getResource("karaf-shell.xsd");
+        if(SHELL_NAMESPACE_1_0_0.equals(namespace)) {
+            return getClass().getResource("karaf-shell-1.0.0.xsd");
+        } else if(SHELL_NAMESPACE_1_1_0.equals(namespace)) {
+            return getClass().getResource("karaf-shell-1.1.0.xsd");
+        }
+        return getClass().getResource("karaf-shell-1.1.0.xsd");
     }
 
 	public Set<Class> getManagedClasses() {
@@ -124,7 +134,10 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
                     command.addProperty(ACTION_ID, createIdRef(context, action.getId()));
                 } else if (nodeNameEquals(childElement, COMPLETERS)) {
                     command.addProperty(COMPLETERS, parseCompleters(context, command, childElement));
-                } else {
+                } else if (nodeNameEquals(childElement, OPTIONAL_COMPLETERS)) {
+                    command.addProperty(OPTIONAL_COMPLETERS_PROPERTY, parseCompleters(context, command, childElement));
+                }
+                else {
                     throw new ComponentDefinitionException("Bad xml syntax: unknown element '" + childElement.getNodeName() + "'");
                 }
             }
