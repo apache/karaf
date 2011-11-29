@@ -267,16 +267,17 @@ public class ArgumentCompleter implements Completer {
                     if (option != null) {
                         Completer optionValueCompleter = null;
                         String name = option.name();
-                        optionValueCompleter = optionalCompleters.get(name);
-                        if(optionValueCompleter == null) {
-                            String[] aliases = option.aliases();
-                            if(aliases.length > 0 ) {
-                                for(int i=0; i < aliases.length && optionValueCompleter == null; i++) {
-                                    optionValueCompleter = optionalCompleters.get(option.aliases()[i]);
+                        if (optionalCompleters != null && name != null) {
+                            optionValueCompleter = optionalCompleters.get(name);
+                            if (optionValueCompleter == null) {
+                                String[] aliases = option.aliases();
+                                if (aliases.length > 0) {
+                                    for (int i = 0; i < aliases.length && optionValueCompleter == null; i++) {
+                                        optionValueCompleter = optionalCompleters.get(option.aliases()[i]);
+                                    }
                                 }
                             }
                         }
-
                         if(optionValueCompleter != null) {
                             comp = optionValueCompleter;
                         }
