@@ -166,7 +166,7 @@
             <!--</executions>-->
             <!--<configuration>-->
             <!--<schemaDirectory>src/main/resources/org/apache/karaf/features</schemaDirectory>-->
-            <!--<packageName>org.apache.karaf.features.internal</packageName>-->
+            <!--<packageName>org.apache.karaf.features.wrapper</packageName>-->
             <!--<extension>true</extension>-->
             <!--</configuration>-->
             <!--</plugin>-->

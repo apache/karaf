@@ -28,7 +28,7 @@ import java.io.File;
 public class KarafSshFile extends NativeSshFile {
 
     /**
-     * Constructor, internal do not use directly.
+     * Constructor, wrapper do not use directly.
      */
     public KarafSshFile(String fileName, final File file) {
         super(fileName, file, null);

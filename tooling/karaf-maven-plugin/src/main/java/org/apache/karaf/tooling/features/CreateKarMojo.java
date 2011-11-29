@@ -106,7 +106,7 @@ public class CreateKarMojo extends MojoSupport {
 
 
     /**
-     * The internal repository in the kar.
+     * The wrapper repository in the kar.
      *
      * @parameter default-value="${repositoryPath}"
      */

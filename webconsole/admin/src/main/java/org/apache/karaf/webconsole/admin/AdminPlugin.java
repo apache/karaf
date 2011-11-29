@@ -80,7 +80,7 @@ public class AdminPlugin extends AbstractWebConsolePlugin {
     protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         final PrintWriter pw = res.getWriter();
 
-        String appRoot = (String) req.getAttribute("org.apache.felix.webconsole.internal.servlet.OsgiManager.appRoot");
+        String appRoot = (String) req.getAttribute("org.apache.felix.webconsole.wrapper.servlet.OsgiManager.appRoot");
         final String adminScriptTag = "<script src='" + appRoot + this.adminJs + "' language='JavaScript'></script>";
         pw.println(adminScriptTag);
 

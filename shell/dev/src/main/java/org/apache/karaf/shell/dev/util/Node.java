@@ -32,7 +32,7 @@ public class Node<T> {
     private List<Node<T>> children = new LinkedList<Node<T>>();
 
     /**
-     * Creates a new node. Only meant for internal use,
+     * Creates a new node. Only meant for wrapper use,
      * new nodes should be added using the {@link #addChild(Object)} method
      *
      * @param value the node value
@@ -43,7 +43,7 @@ public class Node<T> {
     }
 
     /**
-     * Creates a new node. Only meant for internal use,
+     * Creates a new node. Only meant for wrapper use,
      * new nodes should be added using the {@link #addChild(Object)} method
      *
      * @param value the node value

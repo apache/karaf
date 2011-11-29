@@ -45,8 +45,12 @@ public class FeaturesTest {
     private BlueprintContainer obrService;
 
     @Inject
-    @Filter(value = "osgi.blueprint.container.symbolicname=org.apache.karaf.shell.wrapper", timeout = 20000)
+    @Filter(value = "osgi.blueprint.container.symbolicname=org.apache.karaf.wrapper.core", timeout = 20000)
     private BlueprintContainer wrapperService;
+
+    @Inject
+    @Filter(value = "osgi.blueprint.container.symbolicname=org.apache.karaf.wrapper.commands", timeout = 20000)
+    private BlueprintContainer wrapperCommandsService;
 
     @Inject
     private CommandProcessor cp;

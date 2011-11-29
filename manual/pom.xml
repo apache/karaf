@@ -242,8 +242,8 @@
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.apache.karaf.shell</groupId>
-                        <artifactId>org.apache.karaf.shell.wrapper</artifactId>
+                        <groupId>org.apache.karaf.wrapper</groupId>
+                        <artifactId>org.apache.karaf.wrapper.commands</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
