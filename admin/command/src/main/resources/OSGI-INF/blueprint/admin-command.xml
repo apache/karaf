@@ -20,11 +20,15 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command name="admin/create">
             <action class="org.apache.karaf.admin.command.CreateCommand">
                 <property name="adminService" ref="adminService" />
             </action>
+            <optional-completers>
+                <ref component-id="allFeatureCompleter"/>
+                <ref component-id="featureUrlCompleter"/>
+            </optional-completers>
         </command>
         <command name="admin/connect">
             <action class="org.apache.karaf.admin.command.ConnectCommand">
@@ -115,9 +119,18 @@
     </command-bundle>
 
     <reference id="adminService" interface="org.apache.karaf.admin.AdminService" />
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
     <bean id="instanceCompleter" class="org.apache.karaf.admin.command.completers.InstanceCompleter">
         <property name="adminService" ref="adminService" />
     </bean>
-    
+
+    <bean id="allFeatureCompleter" class="org.apache.karaf.features.command.completers.AllFeatureCompleter">
+        <property name="featuresService" ref="featuresService" />
+    </bean>
+
+    <bean id="featureUrlCompleter" class="org.apache.karaf.features.command.completers.FeatureRepositoryCompleter">
+        <property name="featuresService" ref="featuresService" />
+    </bean>
+
 </blueprint>

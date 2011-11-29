@@ -22,6 +22,8 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.admin.InstanceSettings;
+import org.apache.karaf.features.command.completers.AllFeatureCompleter;
+import org.apache.karaf.features.command.completers.FeatureRepositoryCompleter;
 
 
 /**
@@ -47,12 +49,14 @@ public class CreateCommand extends AdminCommandSupport
     @Option(name = "-o", aliases = {"--java-opts"}, description = "JVM options to use when launching the instance", required = false, multiValued = false)
     String javaOpts;
     
-    @Option(name = "-f", aliases = {"--feature"}, 
-            description = "Initial features. This option can be specified multiple times to enable multiple initial features", required = false, multiValued = true)
+    @Option(name = "-f", aliases = {"--feature"},
+            description = "Initial features. This option can be specified multiple times to enable multiple initial features", required = false, multiValued = true,
+            completer = AllFeatureCompleter.class)
     List<String> features;
     
     @Option(name = "-furl", aliases = {"--featureURL"}, 
-            description = "Additional feature descriptor URLs. This option can be specified multiple times to add multiple URLs", required = false, multiValued = true)
+            description = "Additional feature descriptor URLs. This option can be specified multiple times to add multiple URLs", required = false, multiValued = true,
+            completer = FeatureRepositoryCompleter.class)
     List<String> featureURLs;
 
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
