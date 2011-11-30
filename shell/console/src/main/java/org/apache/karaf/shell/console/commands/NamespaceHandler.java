@@ -117,10 +117,13 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     }
 
     private void registerConverters(ParserContext context) {
-        MutablePassThroughMetadata cnv = context.createMetadata(MutablePassThroughMetadata.class);
-        cnv.setId("." + NumberToStringConverter.class.getName());
-        cnv.setObject(new NumberToStringConverter());
-        context.getComponentDefinitionRegistry().registerTypeConverter(cnv);
+        String converterName = "." + NumberToStringConverter.class.getName();
+        if (!context.getComponentDefinitionRegistry().containsComponentDefinition(converterName)) {
+            MutablePassThroughMetadata cnv = context.createMetadata(MutablePassThroughMetadata.class);
+            cnv.setId(converterName);
+            cnv.setObject(new NumberToStringConverter());
+            context.getComponentDefinitionRegistry().registerTypeConverter(cnv);
+        }
     }
 
     private void parseCommand(Element element, ParserContext context) {
