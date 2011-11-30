@@ -139,8 +139,12 @@
             <artifactId>org.apache.karaf.shell.services</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.system</artifactId>
+            <groupId>org.apache.karaf.system</groupId>
+            <artifactId>org.apache.karaf.system.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.system</groupId>
+            <artifactId>org.apache.karaf.system.commands</artifactId>
         </dependency>
         <!--<dependency>-->
             <!--<groupId>org.apache.karaf.shell</groupId>-->

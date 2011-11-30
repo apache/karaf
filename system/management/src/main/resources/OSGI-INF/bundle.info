@@ -1,0 +1,25 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle provides JMX MBeans related to the Karaf system service.
+
+In particular, a SystemMBean is provided that can be remotely administered using a JMX client (for instance
+JConsole).
+
+With this SystemMBean, you have the following operations available:
+* shutdown() - Shutdown the Karaf container.
+* shutdown(time) - Shutdown the Karaf container as a given time.
+* setStartLevel(startLevel) - Set the Karaf system start level.
+* getStartLevel() - Get the Karaf system start level.
+
+h1. See also
+
+Remote Management via JMX - in the Karaf User Guide.

@@ -40,11 +40,12 @@
         <module>features</module>
         <module>admin</module>
         <module>deployer</module>
-        <module>wrapper</module>
         <module>shell</module>
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
+        <module>system</module>
+        <module>wrapper</module>
         <module>webconsole</module>
         <module>exception</module>
         <module>scheduler</module>
@@ -417,13 +418,28 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.wrapper</groupId>
-                <artifactId>org.apache.karaf.wrapper.core</artifactId>
+                <groupId>org.apache.karaf.system</groupId>
+                <artifactId>org.apache.karaf.system.commands</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.system</groupId>
+                <artifactId>org.apache.karaf.system.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.system</groupId>
+                <artifactId>org.Apache.karaf.system.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.wrapper</groupId>
                 <artifactId>org.apache.karaf.wrapper.commands</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.wrapper</groupId>
+                <artifactId>org.apache.karaf.wrapper.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -449,11 +465,6 @@
             <dependency>
                 <groupId>org.apache.karaf.shell</groupId>
                 <artifactId>org.apache.karaf.shell.services</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.shell</groupId>
-                <artifactId>org.apache.karaf.shell.system</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

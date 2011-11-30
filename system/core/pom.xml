@@ -22,17 +22,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.wrapper</groupId>
-        <artifactId>wrapper</artifactId>
+        <groupId>org.apache.karaf.system</groupId>
+        <artifactId>system</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.wrapper.commands</artifactId>
+    <artifactId>org.apache.karaf.system.core</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Wrapper :: Shell Commands</name>
+    <name>Apache Karaf :: System :: Core</name>
     <description>
-        This bundle provides Karaf shell commands to manipulate the OS service wrapper.
+        This bundle provides services to manipulate the Karaf container itself (system).
     </description>
 
     <properties>
@@ -41,13 +41,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.wrapper</groupId>
-            <artifactId>org.apache.karaf.wrapper.core</artifactId>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -74,19 +74,16 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <Export-Package>
+                            org.apache.karaf.system;version=${project.version}
+                        </Export-Package>
                         <Import-Package>
-                            !org.apache.karaf.wrapper.internal,
-                            org.apache.karaf.wrapper,
-                            javax.management,
-                            javax.management.loading,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
+                            !org.apache.karaf.system*,
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.system.internal
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

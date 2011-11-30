@@ -36,7 +36,6 @@
     <modules>
         <module>bundles</module>
         <module>services</module>
-        <module>system</module>
         <module>packages</module>
         <module>config</module>
         <module>dev</module>
