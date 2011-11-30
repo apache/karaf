@@ -1,0 +1,24 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle provides JMX MBeans related to the Karaf wrapper service.
+
+In particular, an WrapperMBean is provided that can be remotely administered using a JMX client (for instance
+JConsole).
+
+With this WrapperMBean, you have the following operations available:
+* install() - Install the Operating System service wrapper.
+* install(String name, String displayName, String description, String startType) - Install the Operating System service
+  wrapper with explicit name, display name, description, and start type.
+
+h1. See also
+
+Remote Management via JMX - in the Karaf User Guide.
