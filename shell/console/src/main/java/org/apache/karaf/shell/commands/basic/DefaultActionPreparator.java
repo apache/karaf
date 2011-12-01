@@ -186,6 +186,8 @@ public class DefaultActionPreparator implements ActionPreparator {
                                     .a(param)
                                     .a(Ansi.Attribute.INTENSITY_BOLD_OFF)
                                     .fg(Ansi.Color.DEFAULT)
+                                    .newline()
+                                    .a("Try '" + command.scope() + ":" + command.name() + " --help' for more information.")
                                     .toString(),
                             "Undefined option: " + param
                     );
