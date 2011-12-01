@@ -40,7 +40,10 @@ public class BootstrapLogManager {
 
     private static Properties configProps;
 
-    public static Handler getDefaultHandler () {
+    public static synchronized Handler getDefaultHandler () {
+        if (handler != null) {
+            return handler;
+        }
         String filename;
         File log;
         Properties props = new Properties();
