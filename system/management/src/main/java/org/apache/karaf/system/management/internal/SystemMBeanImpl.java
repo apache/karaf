@@ -41,12 +41,20 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         return this.systemService;
     }
 
-    public void shutdown() throws Exception {
-        systemService.shutdown();
+    public void halt() throws Exception {
+        systemService.halt();
     }
 
-    public void shutdown(String time) throws Exception {
-        systemService.shutdown(time);
+    public void halt(String time) throws Exception {
+        systemService.halt(time);
+    }
+
+    public void reboot() throws Exception {
+        systemService.reboot();
+    }
+
+    public void reboot(String time, boolean clean) throws Exception {
+        systemService.reboot(time, clean);
     }
 
     public void setStartLevel(int startLevel) throws Exception {

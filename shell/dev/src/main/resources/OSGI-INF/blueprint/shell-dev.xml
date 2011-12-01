@@ -33,9 +33,6 @@
             <action class="org.apache.karaf.shell.dev.PrintStackTraces" />
         </command>
         <command>
-            <action class="org.apache.karaf.shell.dev.Restart" />
-        </command>
-        <command>
             <action class="org.apache.karaf.shell.dev.SystemProperty" />
         </command>
         <command>
