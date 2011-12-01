@@ -31,6 +31,15 @@ public class Shutdown extends OsgiCommandSupport {
     @Option(name = "-f", aliases = "--force", description = "Force the shutdown without confirmation message.", required = false, multiValued = false)
     boolean force = false;
 
+    @Option(name = "-r", aliases = "--reboot", description = "Reboot the Karaf container.", required = false, multiValued = false)
+    boolean reboot = false;
+
+    @Option(name = "-h", aliases = "--halt", description = "Halt the Karaf container.", required = false, multiValued = false)
+    boolean halt = false;
+
+    @Option(name = "-c", aliases = "--clean", description = "Clean the Karaf container (working directory) during reboot.", required = false, multiValued = false)
+    boolean clean = false;
+
     @Argument(name = "time", index = 0, description = "Shutdown after a specified delay. The time argument can have different" +
             " formats. First, it can be an abolute time in the format hh:mm, in which hh is the hour (1 or 2 digits) and mm" +
             " is the minute of the hour (in two digits). Second, it can be in the format +m, in which m is the number of minutes" +
@@ -44,15 +53,24 @@ public class Shutdown extends OsgiCommandSupport {
     }
 
     protected Object doExecute() throws Exception {
+
         if (force) {
-            systemService.shutdown(time);
+            if (reboot) {
+                systemService.reboot(time, clean);
+            } else {
+                systemService.halt(time);
+            }
             return null;
         }
 
         for (; ; ) {
             StringBuffer sb = new StringBuffer();
             String karafName = System.getProperty("karaf.name");
-            System.err.println(String.format("Confirm: shutdown instance %s (yes/no): ",karafName));
+            if (reboot) {
+                System.err.println(String.format("Confirm: reboot instance %s (yes/no): ",karafName));
+            } else {
+                System.err.println(String.format("Confirm: halt instance %s (yes/no): ",karafName));
+            }
             System.err.flush();
             for (; ; ) {
                 int c = session.getKeyboard().read();
@@ -68,7 +86,11 @@ public class Shutdown extends OsgiCommandSupport {
             }
             String str = sb.toString();
             if (str.equals("yes")) {
-                systemService.shutdown(time);
+                if (reboot) {
+                    systemService.reboot(time, clean);
+                } else {
+                    systemService.halt(time);
+                }
             }
             return null;
         }
