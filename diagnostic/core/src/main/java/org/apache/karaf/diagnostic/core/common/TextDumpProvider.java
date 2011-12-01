@@ -43,10 +43,16 @@ public abstract class TextDumpProvider implements DumpProvider {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void createDump(DumpDestination destination) throws Exception {
         OutputStream outputStream = destination.add(name);
-        writeDump(new OutputStreamWriter(outputStream));
-        outputStream.close();
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+        try {
+            writeDump(outputStreamWriter);
+        } finally {
+            outputStreamWriter.close();
+            outputStream.close();
+        }
     }
 
     /**
