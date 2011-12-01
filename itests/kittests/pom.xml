@@ -64,6 +64,11 @@
             <scope>test</scope>
         </dependency>
 
+         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf.admin</groupId>
             <artifactId>org.apache.karaf.admin.core</artifactId>
