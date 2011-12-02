@@ -30,8 +30,17 @@
         <bundle start="true" start-level="11">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <bundle start="true" start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm.bundle.version}</bundle>
         <bundle start="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
-        <bundle start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
-        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy.api/${aries.proxy.api.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy.impl/${aries.proxy.impl.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.quiesce/org.apache.aries.quiesce.api/${aries.quiesce.api.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.quiesce/org.apache.aries.quiesce.manager/${aries.quiesce.manager.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.api/${aries.blueprint.annotation.api.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.impl/${aries.blueprint.annotation.impl.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.api/${aries.blueprint.api.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.cm/${aries.blueprint.cm.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core.compatibility/${aries.blueprint.core.compatibility.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.core/${aries.blueprint.core.version}</bundle>
+        <bundle start="true" start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.jexl.evaluator/${aries.blueprint.jexl.evaluator.version}</bundle>
         <bundle start="true" start-level="30">mvn:org.eclipse.equinox/region/1.0.0.v20110506</bundle>
         <bundle start="true" start-level="30">mvn:org.apache.karaf.region/org.apache.karaf.region.persist/${project.version}</bundle>
         <bundle start="true" start-level="25">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
