@@ -43,7 +43,12 @@
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.modules</artifactId>    
         </dependency>
-        
+        <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.boot</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
@@ -57,13 +62,19 @@
 
         <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint</artifactId>
+            <artifactId>org.apache.aries.blueprint.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint.core</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -88,7 +99,12 @@
 
         <dependency>
             <groupId>org.apache.aries.proxy</groupId>
-            <artifactId>org.apache.aries.proxy</artifactId>
+            <artifactId>org.apache.aries.proxy.api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.proxy</groupId>
+            <artifactId>org.apache.aries.proxy.impl</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
