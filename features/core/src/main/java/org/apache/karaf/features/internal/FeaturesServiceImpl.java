@@ -66,6 +66,7 @@ import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.features.Resolver;
+import org.apache.karaf.region.persist.RegionsPersistence;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -101,6 +102,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
+    private RegionsPersistence regionsPersistence;
     private PackageAdmin packageAdmin;
     private StartLevel startLevel;
     private long resolverTimeout = 5000;
@@ -133,6 +135,14 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
+    }
+
+    public RegionsPersistence getRegionsPersistence() {
+        return regionsPersistence;
+    }
+
+    public void setRegionsPersistence(RegionsPersistence regionsPersistence) {
+        this.regionsPersistence = regionsPersistence;
     }
 
     public PackageAdmin getPackageAdmin() {
@@ -484,10 +494,15 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         			,verbose);
         }
         Set<Long> bundles = new TreeSet<Long>();
+        String region = feature.getRegion();
+
         for (BundleInfo bInfo : resolve(feature)) {
             Bundle b = installBundleIfNeeded(state, bInfo, feature.getStartLevel(), verbose);
             bundles.add(b.getBundleId());
             state.bundleInfos.put(b.getBundleId(), bInfo);
+            if (region != null && state.installed.contains(b)) {
+                regionsPersistence.install(b, region);
+            }
         }
         state.features.put(feature, bundles);
     }

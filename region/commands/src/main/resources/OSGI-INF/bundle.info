@@ -1,0 +1,18 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle provides Karaf shell commands to manipulate the Karaf embedded Region service.
+
+The following commands are available:
+* region:addbundle - Adds specified bundles (by id) to a region.
+* region:addfilter - Adds a filter between two regions containing bundles (by id) and packages (with attributes including version).
+* region:addregion - adds regions.
+* region:info - Prints information about region digraph.

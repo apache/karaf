@@ -38,6 +38,7 @@
         <property name="configAdmin" ref="configAdmin" />
         <property name="packageAdmin" ref="packageAdmin" />
         <property name="startLevel" ref="startLevel" />
+        <property name="regionsPersistence" ref="regionsPersistence" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 
@@ -52,7 +53,9 @@
     <reference id="packageAdmin" interface="org.osgi.service.packageadmin.PackageAdmin" />
 
     <reference id="startLevel" interface="org.osgi.service.startlevel.StartLevel" />
-    
+
+    <reference id="regionsPersistence" interface="org.apache.karaf.region.persist.RegionsPersistence" />
+
     <service ref="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
 </blueprint>

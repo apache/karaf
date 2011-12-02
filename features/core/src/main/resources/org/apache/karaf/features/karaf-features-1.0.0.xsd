@@ -103,6 +103,7 @@ from the default start level defined in Karaf's config.properties.
                 </xs:documentation>
              </xs:annotation>
          </xs:attribute>
+         <xs:attribute name="region" type="xs:string"/>
     </xs:complexType>
 
     <xs:complexType name="bundle">

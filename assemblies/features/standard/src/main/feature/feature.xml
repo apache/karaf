@@ -135,6 +135,10 @@
         <bundle start-level="30" start="true">mvn:org.apache.karaf.shell/org.apache.karaf.shell.config/${project.version}</bundle>
     </feature>
 
+    <feature name="region" description="Provide Region commands" version="${project.version}">
+        <bundle start-level="30" start="true">mvn:org.apache.karaf.region/org.apache.karaf.region.commands/${project.version}</bundle>
+    </feature>
+
     <feature name="jetty" description="Provide Jetty engine support" version="${jetty.version}" resolver="(obr)">
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-activation_1.1_spec/${geronimo.activation.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>

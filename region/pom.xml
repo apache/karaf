@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+
+        Licensed to the Apache Software Foundation (ASF) under one or more
+        contributor license agreements.  See the NOTICE file distributed with
+        this work for additional information regarding copyright ownership.
+        The ASF licenses this file to You under the Apache License, Version 2.0
+        (the "License"); you may not use this file except in compliance with
+        the License.  You may obtain a copy of the License at
+
+           http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    -->
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache.karaf</groupId>
+        <artifactId>karaf</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.apache.karaf.region</groupId>
+    <artifactId>region</artifactId>
+    <packaging>pom</packaging>
+    <name>Apache Karaf :: Region</name>
+
+    <modules>
+        <module>commands</module>
+        <module>persist</module>
+    </modules>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>commands</module>
+                <module>persist</module>
+            </modules>
+
+        </profile>
+
+        <profile>
+            <id>fetch-external</id>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>ossrh</id>
+                    <name>Sonatype OSS Repository</name>
+                    <url>http://oss.sonatype.org/content/groups/public</url>
+                    <layout>default</layout>
+                </pluginRepository>
+            </pluginRepositories>
+
+
+            <build>
+                <plugins>
+
+                    <!-- EXTERNAL DEPENDENCY RESOLVER -->
+
+                    <plugin>
+                        <groupId>com.savage7.maven.plugins</groupId>
+                        <artifactId>maven-external-dependency-plugin</artifactId>
+                        <version>0.5-SNAPSHOT</version>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <createChecksum>true</createChecksum>
+                            <skipChecksumVerification>false</skipChecksumVerification>
+                            <force>false</force>
+                            <artifactItems>
+<!--     used in aries subsystem but not here
+                                <artifactItem>
+                                    <groupId>org.eclipse</groupId>
+                                    <artifactId>osgi</artifactId>
+                                    <version>3.8.0-SNAPSHOT</version>
+                                    <packaging>jar</packaging>
+                                    <downloadUrl>http://www.eclipse.org/downloads/download.php?file=/equinox/drops/I20111018-0850/org.eclipse.osgi_3.8.0.v20111017-1643.jar&amp;url=http://download.eclipse.org/equinox/drops/I20111018-0850/org.eclipse.osgi_3.8.0.v20111017-1643.jar&amp;mirror_id=1</downloadUrl>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.equinox</groupId>
+                                    <artifactId>coordinator</artifactId>
+                                    <version>1.0.0.v20110314</version>
+                                    <packaging>jar</packaging>
+                                    <downloadUrl>http://ftp.osuosl.org/pub/eclipse/equinox/drops/R-3.7.1-201109091335/org.eclipse.equinox.coordinator_1.0.0.v20110502.jar</downloadUrl>
+                                </artifactItem>
+-->
+                                <artifactItem>
+                                    <groupId>org.eclipse.equinox</groupId>
+                                    <artifactId>region</artifactId>
+                                    <version>1.0.0.v20110506</version>
+                                    <packaging>jar</packaging>
+                                    <downloadUrl>http://ftp.osuosl.org/pub/eclipse/equinox/drops/R-3.7.1-201109091335/org.eclipse.equinox.region_1.0.0.v20110524.jar</downloadUrl>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>clean-external-dependencies</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>clean-external</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>resolve-install-external-dependencies</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>resolve-external</goal>
+                                    <goal>install-external</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+           </build>
+        </profile>
+    </profiles>
+
+</project>
+

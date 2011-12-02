@@ -26,6 +26,7 @@ import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.bundles.BundleSelector;
 import org.apache.karaf.util.ShellUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 @Command(scope = "service", name = "list", description = "Lists OSGi services.")
@@ -40,10 +41,11 @@ public class ListServices extends OsgiCommandSupport {
     boolean inUse;
 
     protected Object doExecute() throws Exception {
-        BundleSelector selector = new BundleSelector(getBundleContext(), session);
+        BundleContext bundleContext = getBundleContext();
+        BundleSelector selector = new BundleSelector(bundleContext, session);
         List<Bundle> bundles = selector.selectBundles(ids, true);
         if (bundles == null || bundles.isEmpty()) {
-            Bundle[] allBundles = getBundleContext().getBundles();
+            Bundle[] allBundles = bundleContext.getBundles();
             printBundles(allBundles, false);
         } else {
             printBundles(bundles.toArray(new Bundle[]{}), true);

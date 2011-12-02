@@ -38,6 +38,7 @@
         <module>util</module>
         <module>main</module>
         <module>features</module>
+        <module>region</module>
         <module>admin</module>
         <module>deployer</module>
         <module>shell</module>
@@ -141,14 +142,17 @@
         <felix.eventadmin.version>1.2.12</felix.eventadmin.version>
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
-        <aries.application.version>0.3</aries.application.version>
-        <aries.blueprint.version>0.4.1-SNAPSHOT</aries.blueprint.version>
-        <aries.jmx.version>0.3</aries.jmx.version>
-        <aries.jpa.version>0.3</aries.jpa.version>
-        <aries.jndi.version>0.3</aries.jndi.version>
-        <aries.proxy.version>0.4.1-SNAPSHOT</aries.proxy.version>
-        <aries.transaction.version>0.3</aries.transaction.version>
-        <aries.util.version>0.4</aries.util.version>
+        <aries.application.version>0.3.1-SNAPSHOT</aries.application.version>
+        <aries.blueprint.version>0.4</aries.blueprint.version>
+        <aries.blueprint.annotation.version>0.3.2</aries.blueprint.annotation.version>
+        <aries.blueprint.cm.version>0.3.2</aries.blueprint.cm.version>
+        <aries.jmx.version>0.3.1-SNAPSHOT</aries.jmx.version>
+        <aries.jpa.version>0.3.1-SNAPSHOT</aries.jpa.version>
+        <aries.jndi.version>0.3.1-SNAPSHOT</aries.jndi.version>
+        <aries.proxy.version>0.4</aries.proxy.version>
+        <aries.quiesce.version>0.3.2</aries.quiesce.version>
+        <aries.transaction.version>0.3.1-SNAPSHOT</aries.transaction.version>
+        <aries.util.version>0.4-SNAPSHOT</aries.util.version>
         <gemini.blueprint.version>1.0.0.RELEASE</gemini.blueprint.version>
         <jansi.version>1.7</jansi.version>
         <jline.version>2.6-SNAPSHOT</jline.version>
@@ -445,6 +449,16 @@
             <dependency>
                 <groupId>org.apache.karaf.wrapper</groupId>
                 <artifactId>org.apache.karaf.wrapper.management</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.region</groupId>
+                <artifactId>org.apache.karaf.region.commands</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.region</groupId>
+                <artifactId>org.apache.karaf.region.persist</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

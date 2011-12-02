@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<!-- $Rev: 699828 $ $Date: 2008-09-28 16:35:27 +0200 (Sun, 28 Sep 2008) $ -->
+
+<xsd:schema xmlns="http://karaf.apache.org/xmlns/region/v1.0.0"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://karaf.apache.org/xmlns/region/v1.0.0"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified">
+
+
+    <xsd:annotation>
+        <xsd:documentation>
+            Defines the configuration elements for Apache Karaf region xml configuration.
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:element name="regions" type="regionsType"/>
+
+
+    <xsd:complexType name="regionsType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Regions element
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="region" type="regionType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="filter" type="filterType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="regionType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Region element
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="bundle" type="regionBundleType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="regionBundleType">
+        <xsd:sequence/>
+        <xsd:attribute name="id" type="xsd:long"/>
+        <xsd:attribute name="location" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="filterBundleType">
+        <xsd:sequence>
+            <xsd:element name="attribute" type="filterAttributeType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:long"/>
+        <xsd:attribute name="symbolic-name" type="xsd:string"/>
+        <xsd:attribute name="version" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="filterType">
+        <xsd:sequence>
+            <xsd:element name="bundle" type="filterBundleType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="package" type="filterPackageType" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="namespace" type="filterNamespaceType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="from" type="xsd:string" use="required"/>
+        <xsd:attribute name="to" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="filterPackageType">
+        <xsd:sequence>
+            <xsd:element name="attribute" type="filterAttributeType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="version" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="filterAttributeType">
+        <xsd:sequence/>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="value" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="filterNamespaceType">
+        <xsd:sequence>
+            <xsd:element name="attribute" type="filterAttributeType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+    </xsd:complexType>
+</xsd:schema>

@@ -17,7 +17,7 @@
 -->
 <features name="test" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
     <repository>urn:r1</repository>
-    <feature name="f1">
+    <feature name="f1" region="foo">
         <config name="c1">
             k=v
         </config>

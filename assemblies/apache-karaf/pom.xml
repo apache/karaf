@@ -139,6 +139,7 @@
                         <feature>ssh</feature>
                         <feature>config</feature>
                         <feature>kar</feature>
+                        <feature>region</feature>
                     </bootFeatures>
                 </configuration>
             </plugin>

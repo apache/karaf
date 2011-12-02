@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.shell.commands.Action;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -42,7 +43,8 @@ public abstract class OsgiCommandSupport extends AbstractAction implements Actio
     }
 
     public BundleContext getBundleContext() {
-        return bundleContext;
+        Bundle framework = bundleContext.getBundle(0);
+        return framework == null? bundleContext: framework.getBundleContext();
     }
 
     public void setBundleContext(BundleContext bundleContext) {
