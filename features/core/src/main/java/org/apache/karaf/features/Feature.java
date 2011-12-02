@@ -49,4 +49,6 @@ public interface Feature {
     List<ConfigFileInfo> getConfigurationFiles();
     
     int getStartLevel();
+
+    String getRegion();
 }

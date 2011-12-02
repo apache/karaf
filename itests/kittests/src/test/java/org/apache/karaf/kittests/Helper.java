@@ -304,7 +304,7 @@ public final class Helper {
             }
         }
         if (!Instance.STARTED.equals(karaf.getState())) {
-            throw new Exception("Karaf did not start correctly");
+            throw new Exception("Karaf did not start correctly: state " + karaf.getState());
         }
     }
 

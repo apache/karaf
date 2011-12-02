@@ -56,6 +56,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.region</groupId>
+            <artifactId>org.apache.karaf.region.persist</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>

@@ -22,6 +22,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 import org.apache.felix.service.command.CommandSession;
 import org.easymock.EasyMock;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
@@ -42,7 +43,7 @@ public class EditCommandTest extends TestCase {
     private BundleContext context;
     private ConfigurationAdmin admin;
     private CommandSession session;
-    
+
     @Override
     protected void setUp() throws Exception {
         command = new EditCommand();
@@ -55,6 +56,7 @@ public class EditCommandTest extends TestCase {
         
         admin = createMock(ConfigurationAdmin.class);
         expect(context.getService(reference)).andReturn(admin);
+        expect(context.getBundle(0)).andReturn(null).anyTimes();
         expect(context.ungetService(reference)).andReturn(Boolean.TRUE);
         
         replay(context);

@@ -30,7 +30,7 @@
         <bundle start-level='30'>mvn:org.apache.aries.transaction/org.apache.aries.transaction.wrappers/${aries.transaction.version}</bundle>
     </feature>
 
-    <feature name='jpa' description='OSGi Persistence Container' version='${aries.jpa.version}' resolver='(obr)'>
+    <feature name='jpa' description='OSGi Persistence Container' version='${aries.jpa.version}' resolver='(obr)' region="org.apache.karaf.region.application">
         <details>JPA implementation provided by Apache Aries JPA ${aries.jpa.version}. NB: this feature doesn't provide the JPA engine, you have to install one by yourself (OpenJPA for instance)</details>
         <bundle dependency='true' start-level='30'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency='true' start-level='30'>mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
@@ -41,7 +41,7 @@
         <bundle start-level='30'>mvn:org.apache.aries.jpa/org.apache.aries.jpa.container.context/${aries.jpa.version}</bundle>
     </feature>
 
-    <feature name='jndi' description='OSGi Service Registry JNDI access' version='${aries.jndi.version}' resolver='(obr)'>
+    <feature name='jndi' description='OSGi Service Registry JNDI access' version='${aries.jndi.version}' resolver='(obr)' region="org.apache.karaf.region.application">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}</details>
         <bundle start-level='30'>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.jndi/org.apache.aries.jndi.api/${aries.jndi.version}</bundle>
@@ -66,8 +66,6 @@
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.utils/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.modeller/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.default.local.platform/${aries.application.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.noop.platform.repo/${aries.application.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.noop.postresolve.process/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.deployment.management/${aries.application.version}</bundle>
         <!-- without isolation -->
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.runtime/${aries.application.version}</bundle>

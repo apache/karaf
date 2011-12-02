@@ -45,9 +45,9 @@ public class ExtendedFeature implements Feature
         }
     }
 
-    protected State state;
-    protected String repository;
-    protected Feature feature;
+    protected final State state;
+    protected final String repository;
+    protected final Feature feature;
 
 
     //
@@ -138,5 +138,10 @@ public class ExtendedFeature implements Feature
     
     public int getStartLevel() {
         return 0;
+    }
+
+    @Override
+    public String getRegion() {
+        return feature.getRegion();
     }
 }

@@ -198,7 +198,15 @@
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.asm</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>region</artifactId>
+            <version>1.0.0.v20110506</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.region</groupId>
+            <artifactId>org.apache.karaf.region.persist</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <resources>

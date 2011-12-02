@@ -100,6 +100,8 @@ public class Feature implements org.apache.karaf.features.Feature {
     protected String install;
     @XmlAttribute(name = "start-level")
     protected Integer startLevel;
+    @XmlAttribute
+    protected String region;
 
     public Feature() {
     }
@@ -418,6 +420,15 @@ public class Feature implements org.apache.karaf.features.Feature {
      */
     public void setStartLevel(Integer value) {
         this.startLevel = value;
+    }
+
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public String toString() {

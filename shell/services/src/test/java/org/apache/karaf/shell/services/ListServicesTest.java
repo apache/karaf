@@ -48,6 +48,7 @@ public class ListServicesTest {
     private BundleContext createBundleContext() {
         BundleContext bundleContext = createMock(BundleContext.class);
         Bundle[] bundles = createBundles();
+        expect(bundleContext.getBundle(0)).andReturn(null);
         expect(bundleContext.getBundles()).andReturn(bundles);
         expect(bundleContext.getBundle(1)).andReturn(bundles[0]);
         expect(bundleContext.getBundle(2)).andReturn(bundles[1]);

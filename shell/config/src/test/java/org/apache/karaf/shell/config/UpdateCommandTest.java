@@ -55,6 +55,7 @@ public class UpdateCommandTest extends TestCase {
 
         admin = createMock(ConfigurationAdmin.class);
         expect(context.getService(reference)).andReturn(admin);
+        expect(context.getBundle(0)).andReturn(null).anyTimes();
         expect(context.ungetService(reference)).andReturn(Boolean.TRUE);
 
         replay(context);
