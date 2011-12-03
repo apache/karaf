@@ -32,6 +32,7 @@
     <artifactId>standard</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Standard</name>
+    <description>Standard providing core Karaf features</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../../../etc/appended-resources</appendedResourcesDirectory>
@@ -61,6 +62,18 @@
                     <artifactId>org.apache.karaf.features.core</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.admin</groupId>
+            <artifactId>org.apache.karaf.admin.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.admin</groupId>
+            <artifactId>org.apache.karaf.admin.command</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.admin</groupId>
+            <artifactId>org.apache.karaf.admin.management</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.diagnostic</groupId>

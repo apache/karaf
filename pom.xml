@@ -601,7 +601,7 @@
             </dependency>
             <dependency>
               <groupId>org.apache.karaf.features</groupId>
-              <artifactId>standard</artifactId>
+              <artifactId>enterprise</artifactId>
               <type>xml</type>
               <classifier>features</classifier>
               <version>${project.version}</version>
@@ -614,7 +614,14 @@
             </dependency>
             <dependency>
               <groupId>org.apache.karaf.features</groupId>
-              <artifactId>enterprise</artifactId>
+              <artifactId>spring</artifactId>
+              <type>xml</type>
+              <classifier>features</classifier>
+              <version>${project.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.karaf.features</groupId>
+              <artifactId>standard</artifactId>
               <type>xml</type>
               <classifier>features</classifier>
               <version>${project.version}</version>
