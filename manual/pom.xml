@@ -242,8 +242,13 @@
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.apache.karaf.shell</groupId>
-                        <artifactId>org.apache.karaf.shell.web</artifactId>
+                        <groupId>org.apache.karaf.web</groupId>
+                        <artifactId>org.apache.karaf.web.commands</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.karaf.web</groupId>
+                        <artifactId>org.apache.karaf.web.core</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>

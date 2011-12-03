@@ -235,16 +235,6 @@
             <artifactId>org.apache.servicemix.bundles.asm</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-jexl</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>region</artifactId>
             <version>1.0.0.v20110506</version>
