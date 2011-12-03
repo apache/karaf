@@ -262,8 +262,15 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
             feature = objectFactory.createFeature();
             feature.setName(project.getArtifactId());
         }
-        feature.setVersion(project.getArtifact().getBaseVersion());
-        feature.setResolver(resolver);
+        if (feature.getVersion() == null) {
+            feature.setVersion(project.getArtifact().getBaseVersion());
+        }
+        if (feature.getDescription() == null) {
+            feature.setDescription(project.getDescription());
+        }
+        if (resolver != null) {
+            feature.setResolver(resolver);
+        }
         for (Map.Entry<Artifact, String> entry : localDependencies.entrySet()) {
             Artifact artifact = entry.getKey();
             if (DependencyHelper.isFeature(artifact)) {
