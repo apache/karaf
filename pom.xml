@@ -46,6 +46,7 @@
         <module>client</module>
         <module>management</module>
         <module>system</module>
+        <module>web</module>
         <module>wrapper</module>
         <module>webconsole</module>
         <module>exception</module>
@@ -443,7 +444,17 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.system</groupId>
-                <artifactId>org.Apache.karaf.system.management</artifactId>
+                <artifactId>org.apache.karaf.system.management</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.web</groupId>
+                <artifactId>org.apache.karaf.web.commands</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.web</groupId>
+                <artifactId>org.apache.karaf.web.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

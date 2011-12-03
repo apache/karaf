@@ -42,7 +42,6 @@
         <module>http</module>
         <module>log</module>
         <module>obr</module>
-        <module>web</module>
     </modules>
 
 </project>

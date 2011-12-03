@@ -1,0 +1,21 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+The Web MBean management bundle exposes a Web MBean that can be used with any JMX client (for instance JConsole).
+
+The Web MBean allows quite the same action that can be performed using web:* commands:
+  * list() - list detailed information about web bundles
+  * start(bundleIds) - start the web context of the given web bundles
+  * stop(bundleIds) - stop the web context of the given web bundles
+
+h1. See also
+
+  * Monitoring and Administration using JMX - section of the Karaf User Guide
