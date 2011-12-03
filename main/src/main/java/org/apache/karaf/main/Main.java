@@ -54,9 +54,11 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.karaf.info.ServerInfo;
 import org.apache.karaf.main.lock.Lock;
 import org.apache.karaf.main.lock.SimpleFileLock;
 import org.apache.karaf.main.util.BootstrapLogManager;
+import org.apache.karaf.main.util.ServerInfoImpl;
 import org.apache.karaf.main.util.StringMap;
 import org.apache.karaf.main.util.Utils;
 import org.osgi.framework.Bundle;
@@ -289,6 +291,10 @@ public class Main {
         loadStartupProperties(configProps);
         processAutoProperties(framework.getBundleContext());
         framework.start();
+
+        ServerInfo serverInfo = new ServerInfoImpl(args, karafBase, karafData, karafHome, karafInstances);
+        framework.getBundleContext().registerService(ServerInfo.class, serverInfo, null);
+
         // Start custom activators
         startKarafActivators(classLoader);
         // Start lock monitor
