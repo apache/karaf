@@ -99,7 +99,9 @@
                         <Main-Class>org.apache.karaf.main.Main</Main-Class>
                         <Bundle-Name>Apache Karaf</Bundle-Name>
                         <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-                        <Export-Package />
+                        <Export-Package>
+                            org.apache.karaf.info
+                        </Export-Package>
                         <!--
                         <Private-Package>
                             org.apache.felix.*;-split-package:=merge-first,
