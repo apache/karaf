@@ -298,15 +298,24 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                     bundleName = "wrap:" + bundleName;
                 }
 
-                Bundle bundle = objectFactory.createBundle();
-                bundle.setLocation(bundleName);
+                Bundle bundle = null;
+                for (Bundle b: feature.getBundle()) {
+                    if (bundleName.equals(b.getLocation())) {
+                        bundle = b;
+                        break;
+                    }
+                }
+                if (bundle == null) {
+                    bundle = objectFactory.createBundle();
+                    bundle.setLocation(bundleName);
+                    feature.getBundle().add(bundle);
+                }
                 if ("runtime".equals(entry.getValue())) {
                     bundle.setDependency(true);
                 }
-                if (startLevel != null) {
+                if (startLevel != null && bundle.getStartLevel() == 0) {
                     bundle.setStartLevel(startLevel);
                 }
-                feature.getBundle().add(bundle);
 
             }
         }
