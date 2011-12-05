@@ -36,6 +36,7 @@
     <modules>
         <module>command</module>
         <module>feature</module>
+        <module>kar</module>
     </modules>
 
     <profiles>
