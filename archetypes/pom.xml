@@ -34,6 +34,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>assembly</module>
         <module>command</module>
         <module>feature</module>
         <module>kar</module>
