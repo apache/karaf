@@ -44,12 +44,6 @@ if "%JAVA_MIN_MEM%" == "" (
 if "%JAVA_MAX_MEM%" == "" (
     set JAVA_MAX_MEM=512M
 )
-if "%JAVA_PERM_MEM%" == "" (
-    set JAVA_PERM_MEM=16M
-)
-if "%JAVA_MAX_PERM_MEM%" == "" (
-    set JAVA_MAX_PERM_MEM=64M
-)
 
 goto BEGIN
 
@@ -92,6 +86,15 @@ if "%KARAF_DATA%" == "" (
 
 set LOCAL_CLASSPATH=%CLASSPATH%
 set DEFAULT_JAVA_OPTS=-server -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -XX:PermSize=%JAVA_PERM_MEM% -XX:MaxPermSize=%JAVA_MAX_PERM_MEM% -Dderby.system.home="%KARAF_DATA%\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote
+
+rem Check some easily accessible MIN/MAX params for JVM mem usage
+if not "%JAVA_PERM_MEM%" == "" (
+    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:PermSize=%JAVA_PERM_MEM%
+)
+if not "%JAVA_MAX_PERM_MEM%" == "" (
+    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:MaxPermSize=%JAVA_MAX_PERM_MEM%
+)
+
 set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
 set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
 
