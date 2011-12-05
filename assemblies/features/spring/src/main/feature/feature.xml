@@ -29,6 +29,7 @@
         <bundle start-level="30">mvn:org.springframework/spring-aop/${spring.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-context/${spring.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-context-support/${spring.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
     </feature>
 
     <feature name="spring-aspects" description="Spring AOP support" version="${spring.version}" resolver="(obr)">

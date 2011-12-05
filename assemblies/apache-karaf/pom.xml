@@ -145,7 +145,7 @@
                         <feature>management</feature>
                         <feature>ssh</feature>
                         <feature>config</feature>
-                        <feature>kar</feature>
+                        <feature>deployers</feature>
                         <feature>region</feature>
                     </bootFeatures>
                 </configuration>

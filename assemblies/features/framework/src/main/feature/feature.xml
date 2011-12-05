@@ -46,11 +46,6 @@
         <bundle start="true" start-level="30">mvn:org.eclipse.equinox/region/1.0.0.v20110506</bundle>
         <bundle start="true" start-level="30">mvn:org.apache.karaf.region/org.apache.karaf.region.persist/${project.version}</bundle>
         <bundle start="true" start-level="25">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.blueprint/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.features/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.kar/${project.version}</bundle>
-        <bundle start="true" start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
     </feature>
 
 </features>
