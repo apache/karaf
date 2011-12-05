@@ -26,6 +26,7 @@ import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.bundles.BundleSelector;
 import org.apache.karaf.util.ShellUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -69,7 +70,7 @@ public class ListServices extends OsgiCommandSupport {
         }
 
         for (ServiceReference<?> serviceRef : refs) {
-            String[] objectClass = (String[]) serviceRef.getProperty("objectClass");
+            String[] objectClass = (String[]) serviceRef.getProperty(Constants.OBJECTCLASS);
 
             boolean print = showAll || !isCommand(objectClass);
 
@@ -84,7 +85,7 @@ public class ListServices extends OsgiCommandSupport {
 
             if (print) {
                 // Print service separator if necessary.
-                if (needSeparator) {
+                if (needSeparator && showProperties) {
                     System.out.println("----");
                 }
 
