@@ -44,12 +44,6 @@ if "%JAVA_MIN_MEM%" == "" (
 if "%JAVA_MAX_MEM%" == "" (
     set JAVA_MAX_MEM=512M
 )
-if "%JAVA_PERM_MEM%" == "" (
-    set JAVA_PERM_MEM=16M
-)
-if "%JAVA_MAX_PERM_MEM%" == "" (
-    set JAVA_MAX_PERM_MEM=64M
-)
 
 goto BEGIN
 
