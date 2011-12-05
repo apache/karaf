@@ -48,12 +48,12 @@ public class FeaturesScannerProvisionTest {
                     .versionAsInProject()),
             scanFeatures(
                 maven().groupId("org.apache.karaf.assemblies.features").artifactId("standard").type("xml")
-                    .classifier("features").version("2.2.4"), "kar", "wrapper").start() };
+                    .classifier("features").version("2.2.4"), "deployers", "wrapper").start() };
     }
 
     @Test
     public void test() throws Exception {
-        assertTrue(featuresService.isInstalled(featuresService.getFeature("kar")));
+        assertTrue(featuresService.isInstalled(featuresService.getFeature("deployers")));
         assertTrue(featuresService.isInstalled(featuresService.getFeature("wrapper")));
     }
 
