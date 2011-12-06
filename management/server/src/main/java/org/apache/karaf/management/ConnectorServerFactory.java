@@ -212,7 +212,6 @@ public class ConnectorServerFactory {
         }
 
         if ( this.secured ) {
-            Thread.sleep( 5000 );//give jass.keystores bundle time to init
             this.setupSsl();
         }
 
