@@ -16,88 +16,110 @@
  */
 package org.apache.karaf.shell.services;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.apache.felix.service.command.Function;
-import org.apache.karaf.shell.bundles.BundleSelector;
 import org.apache.karaf.util.ShellUtil;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 @Command(scope = "service", name = "list", description = "Lists OSGi services.")
 public class ListServices extends OsgiCommandSupport {
-    @Argument(index = 0, name = "ids", description = "The list of bundle (identified by IDs or name or name/version) separated by whitespaces", required = false, multiValued = true)
-    List<String> ids;
-
+    @Argument(index = 0, name = "objectClass", description = "Name of service objectClass to filter for", required = false, 
+        multiValued = false)
+    String objectClass;
+    
     @Option(name = "-a", aliases = {}, description = "Shows all services. (By default Karaf commands are hidden)", required = false, multiValued = false)
     boolean showAll;
-
-    @Option(name = "-u", aliases = {}, description = "Shows the services each bundle uses. (By default the provided services are shown)", required = false, multiValued = false)
-    boolean inUse;
+    
+    @Option(name = "-n", aliases = {}, description = "Shows only service class names", required = false, multiValued = false)
+    boolean onlyNames;
 
     protected Object doExecute() throws Exception {
-        BundleContext bundleContext = getBundleContext();
-        BundleSelector selector = new BundleSelector(bundleContext, session);
-        List<Bundle> bundles = selector.selectBundles(ids, true);
-        if (bundles == null || bundles.isEmpty()) {
-            Bundle[] allBundles = bundleContext.getBundles();
-            printBundles(allBundles, false);
-        } else {
-            printBundles(bundles.toArray(new Bundle[]{}), true);
+        if (onlyNames) {
+            listNames();
+            return null;
+        }
+        List<ServiceReference<?>> serviceRefs = new ArrayList<ServiceReference<?>>();
+        Bundle[] bundles = getBundleContext().getBundles();
+        for (Bundle bundle : bundles) {
+            ServiceReference<?>[] services = bundle.getRegisteredServices();
+            if (services != null) {
+                for (ServiceReference<?> ref : services) {
+                    String[] objectClasses = (String[])ref.getProperty(Constants.OBJECTCLASS);
+                    if (objectClass == null || ObjectClassMatcher.matchesAtLeastOneName(objectClasses, objectClass)) {
+                        serviceRefs.add(ref);
+                    }
+                } 
+            }
+        }
+        
+        Collections.sort(serviceRefs, new ServiceClassComparator());
+        
+        for (ServiceReference<?> serviceRef : serviceRefs) {
+            if (!isCommand((String[])serviceRef.getProperty(Constants.OBJECTCLASS))) {
+                printServiceRef(serviceRef);
+            }
         }
         return null;
     }
-
-    private void printBundles(Bundle[] bundles, boolean showProperties) {
-        for (Bundle bundle : bundles) {
-            ServiceReference<?>[] refs = (inUse) ? bundle.getServicesInUse() : bundle.getRegisteredServices();
-            printServices(bundle, refs, showProperties);
+    
+    private void listNames() {
+        Map<String, Integer> serviceNames = getServiceNamesMap(getBundleContext());
+        ArrayList<String> serviceNamesList = new ArrayList<String>(serviceNames.keySet());
+        Collections.sort(serviceNamesList);
+        for (String name : serviceNamesList) {
+            System.out.println(name + " (" + serviceNames.get(name) + ")");
         }
     }
     
-    private void printServices(Bundle bundle, ServiceReference<?>[] refs, boolean showProperties) {
-        boolean headerPrinted = false;
-        boolean needSeparator = false;
+    public static Map<String, Integer> getServiceNamesMap(BundleContext bundleContext) {
+        Map<String, Integer> serviceNames = new HashMap<String, Integer>();
+        Bundle[] bundles = bundleContext.getBundles();
+        for (Bundle bundle : bundles) {
+            ServiceReference<?>[] services = bundle.getRegisteredServices();
+            if (services != null) {
+                for (ServiceReference<?> serviceReference : services) {
+                    String[] names = (String[])serviceReference.getProperty(Constants.OBJECTCLASS);
+                    for (String name : names) {
+                        int curCount = (serviceNames.containsKey(name)) ? serviceNames.get(name) : 0;
+                        serviceNames.put(name, curCount + 1);
+                    }
+                }
+            }
+        }
+        return serviceNames;
+    }
+
+    private void printServiceRef(ServiceReference<?> serviceRef) {
+        String[] objectClass = (String[]) serviceRef.getProperty(Constants.OBJECTCLASS);
+        String serviceClasses = ShellUtil.getValueString(objectClass);
+        System.out.println(serviceClasses);
+        System.out.println(ShellUtil.getUnderlineString(serviceClasses));
         
-        if (refs == null) {
-            return;
-        }
-
-        for (ServiceReference<?> serviceRef : refs) {
-            String[] objectClass = (String[]) serviceRef.getProperty(Constants.OBJECTCLASS);
-
-            boolean print = showAll || !isCommand(objectClass);
-
-            // Print header if we have not already done so.
-            if (!headerPrinted) {
-                headerPrinted = true;
-                System.out.println("");
-                String title = ShellUtil.getBundleName(bundle) + ((inUse) ? " uses:" : " provides:");
-                System.out.println(title);
-                System.out.println(ShellUtil.getUnderlineString(title));
-            }
-
-            if (print) {
-                // Print service separator if necessary.
-                if (needSeparator && showProperties) {
-                    System.out.println("----");
-                }
-
-                if (showProperties) {
-                    printProperties(serviceRef);
-                } else {
-                    System.out.println(ShellUtil.getValueString(objectClass));
-                }
-
-                needSeparator = true;
+        printProperties(serviceRef);
+        
+        String bundleName = ShellUtil.getBundleName(serviceRef.getBundle());
+        System.out.println("Provided by : ");
+        System.out.println(" " + bundleName);
+        if (serviceRef.getUsingBundles() != null) {
+        System.out.println("Used by: ");
+            for (Bundle bundle : serviceRef.getUsingBundles()) {
+                System.out.println(" " + ShellUtil.getBundleName(bundle));
             }
         }
+        System.out.println();
     }
 
     private boolean isCommand(String[] objectClasses) {
@@ -111,8 +133,19 @@ public class ListServices extends OsgiCommandSupport {
 
     private void printProperties(ServiceReference<?> serviceRef) {
         for (String key : serviceRef.getPropertyKeys()) {
-            System.out.println(key + " = " + ShellUtil.getValueString(serviceRef.getProperty(key)));
+            if (!Constants.OBJECTCLASS.equals(key)) {
+                System.out.println(" " + key + " = " + ShellUtil.getValueString(serviceRef.getProperty(key)));
+            }
         }
     }
 
+    public final class ServiceClassComparator implements Comparator<ServiceReference<?>> {
+        @Override
+        public int compare(ServiceReference<?> o1, ServiceReference<?> o2) {
+            String[] classes1 = (String[])o1.getProperty(Constants.OBJECTCLASS);
+            String[] classes2 = (String[])o2.getProperty(Constants.OBJECTCLASS);
+            return classes1[0].compareTo(classes2[0]);
+        }
+    }
+    
 }

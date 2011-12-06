@@ -16,20 +16,28 @@
  */
 package org.apache.karaf.shell.services;
 
-import org.junit.Test;
-
-public class ListServicesTest {
-
-    public ListServicesTest() {
-        
+public class ObjectClassMatcher {
+    private ObjectClassMatcher() {
     }
     
-    @Test
-    public void listAll() throws Exception {
-        ListServices listServices = new ListServices();
-        listServices.setBundleContext(new TestBundleFactory().createBundleContext());
-        listServices.doExecute();
+    static boolean matchesAtLeastOneName(String[] names, String pattern) {
+        for (String objectClass : names) {
+            if (matchesName(objectClass, pattern)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean matchesName(String name, String pattern) {
+        return name.equals(pattern) || getShortName(name).equals(pattern);
     }
     
-
+    static String getShortName(String name) {
+        int idx = name.lastIndexOf(".");
+        if (idx + 1 > name.length()) {
+            idx = 0;
+        }
+        return name.substring(idx + 1);
+    }
 }

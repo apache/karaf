@@ -12,7 +12,7 @@ h1. Description
 This bundle provides the shell commands to manipulate OSGi services.
 
 The following commands are available:
-* services:list - Gets the list of OSGi services available.
+* services:list - Gets the list of OSGi services available
 * service:wait - Wait for a given OSGi service
 
 h1. See also
