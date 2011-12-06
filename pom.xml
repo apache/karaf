@@ -125,7 +125,7 @@
         <felix.fileinstall.version>3.1.10</felix.fileinstall.version>
         <felix.framework.version>3.0.9</felix.framework.version>
         <felix.gogo.version>0.10.0</felix.gogo.version>
-        <felix.plugin.version>2.3.4</felix.plugin.version>
+        <felix.plugin.version>2.3.6</felix.plugin.version>
         <felix.utils.version>1.1.0</felix.utils.version>
         <felix.webconsole.version>3.1.8</felix.webconsole.version>
         <felix.metatype.version>1.0.4</felix.metatype.version>
