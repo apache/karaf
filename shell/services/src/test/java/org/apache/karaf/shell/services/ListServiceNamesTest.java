@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 package org.apache.karaf.shell.services;
-
 import org.junit.Test;
 
-public class ListServicesTest {
+public class ListServiceNamesTest {
 
-    public ListServicesTest() {
+    public ListServiceNamesTest() {
         
     }
     
@@ -28,8 +27,8 @@ public class ListServicesTest {
     public void listAll() throws Exception {
         ListServices listServices = new ListServices();
         listServices.setBundleContext(new TestBundleFactory().createBundleContext());
+        listServices.onlyNames = true;
         listServices.doExecute();
     }
-    
 
 }

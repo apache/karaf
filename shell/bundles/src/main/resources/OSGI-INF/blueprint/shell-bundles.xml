@@ -43,6 +43,9 @@
             </action>
         </command>
         <command>
+            <action class="org.apache.karaf.shell.bundles.ListBundleServices"/>
+        </command>
+        <command>
             <action class="org.apache.karaf.shell.bundles.Refresh"/>
         </command>
         <command>
