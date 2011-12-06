@@ -32,7 +32,7 @@
     <name>Apache Karaf :: Demos :: Branding</name>
 
     <modules>
-        <module>src/main/resources/resources/shell</module>
+        <module>src/main/resources/resources/demos/shell</module>
         <!--<module>branding-package</module>-->
     </modules>
     <build>
