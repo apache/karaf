@@ -210,7 +210,6 @@ public class ConnectorServerFactory {
         }
 
         if (this.secured) {
-            Thread.sleep(500); // give jaas.keystores bundle time to init
             this.setupSsl();
         }
 
