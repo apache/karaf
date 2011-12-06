@@ -119,7 +119,7 @@
         <commons-io.version>1.3.2</commons-io.version>
         <commons-jexl.version>2.0</commons-jexl.version>
         <commons-lang.bundle.version>2.4_5</commons-lang.bundle.version>
-        <jasypt.bundle.version>1.7_3</jasypt.bundle.version>
+        <jasypt.bundle.version>1.8_1-SNAPSHOT</jasypt.bundle.version>
         <jetty.version>7.5.4.v20111024</jetty.version>
         <junit.bundle.version>4.7_3</junit.bundle.version>
         <junit.version>4.7</junit.version>
