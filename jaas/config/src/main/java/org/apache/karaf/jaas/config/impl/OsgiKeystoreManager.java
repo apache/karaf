@@ -128,19 +128,19 @@ public class OsgiKeystoreManager implements KeystoreManager {
     private void checkForKeystoresAvailability(  String keyStore, String keyAlias, String trustStore, long timeout ) {
         for (int i = 0 ; i < timeout/1000; ++i) {
             KeystoreInstance keyInstance = getKeystore(keyStore);
-            if (keyInstance != null && keyInstance.isKeystoreLocked()) {
+            if (keyInstance == null || (keyInstance != null && keyInstance.isKeystoreLocked())) {
                 sleep(1000);
                 logger.info( "Looking for keystore: {}...", keyStore );
                 continue;
             }
-            if (keyInstance != null && keyInstance.isKeyLocked(keyAlias)) {
+            if (keyInstance == null || (keyInstance != null && keyInstance.isKeyLocked(keyAlias))) {
                 sleep(1000);
                 logger.info( "Looking for keystore's key: {}...", keyAlias );
                 continue;
             }
 
             KeystoreInstance trustInstance = trustStore == null ? null : getKeystore(trustStore);
-            if (trustInstance != null && trustInstance.isKeystoreLocked()) {
+            if (trustInstance == null || (trustInstance != null && trustInstance.isKeystoreLocked())) {
                 sleep(1000);
                 logger.info( "Looking for truststore: {}...", trustStore );
                 continue;
