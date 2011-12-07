@@ -158,7 +158,7 @@
         <aries.jpa.version>0.3</aries.jpa.version>
         <aries.jndi.version>0.3</aries.jndi.version>
         <aries.proxy.api.version>0.4</aries.proxy.api.version>
-        <aries.proxy.impl.version>0.4</aries.proxy.impl.version>
+        <aries.proxy.impl.version>0.4.1-SNAPSHOT</aries.proxy.impl.version>
         <aries.quiesce.api.version>0.3</aries.quiesce.api.version>
         <aries.quiesce.manager.version>0.3.1</aries.quiesce.manager.version>
         <aries.transaction.version>0.3</aries.transaction.version>
