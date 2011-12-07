@@ -72,6 +72,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.demos</groupId>
+            <artifactId>org.apache.karaf.demos.command.custom</artifactId>
+            <version>${project.version}</version>
+            <type>kar</type>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.demos</groupId>
             <artifactId>org.apache.karaf.demos.deployer</artifactId>
             <version>${project.version}</version>
             <type>kar</type>
