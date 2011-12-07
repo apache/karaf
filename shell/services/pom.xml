@@ -92,17 +92,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>
-                            !${project.artifactId}*,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
-                            org.apache.karaf.shell.bundles,
-                            *
-                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.util
                         </Private-Package>
