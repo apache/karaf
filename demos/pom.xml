@@ -37,6 +37,7 @@
         <module>web</module>
         <module>branding</module>
         <module>dump</module>
+        <module>deployer</module>
     </modules>
 
 </project>
