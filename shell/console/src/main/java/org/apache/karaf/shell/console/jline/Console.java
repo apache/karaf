@@ -78,7 +78,7 @@ public class Console implements Runnable
     private PrintStream err;
     private Thread thread;
 
-        public Console(CommandProcessor processor,
+    public Console(CommandProcessor processor,
                    InputStream in,
                    PrintStream out,
                    PrintStream err,
