@@ -79,7 +79,8 @@ public class ConsoleFactory {
     }
 
     protected void doStart(String user) throws Exception {
-        InputStream in = unwrap(System.in);
+        final Terminal terminal = terminalFactory.getTerminal();
+        InputStream in = unwrap(terminal.wrapInIfNeeded(System.in));
         PrintStream out = unwrap(System.out);
         PrintStream err = unwrap(System.err);
         Runnable callback = new Runnable() {
@@ -91,7 +92,6 @@ public class ConsoleFactory {
                 }
             }
         };
-        final Terminal terminal = terminalFactory.getTerminal();
         this.console = new Console(commandProcessor,
                                    in,
                                    wrap(out),
