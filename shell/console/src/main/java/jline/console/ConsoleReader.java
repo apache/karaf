@@ -361,8 +361,19 @@ public class ConsoleReader
      */
     final String expandEvents(String str) throws IOException {
         StringBuilder sb = new StringBuilder();
+        boolean escaped = false;
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
+            if (escaped) {
+                sb.append(c);
+                escaped = false;
+                continue;
+            } else if (c == '\\') {
+                escaped = true;
+                continue;
+            } else {
+                escaped = false;
+            }
             switch (c) {
                 case '!':
                     if (i + 1 < str.length()) {
