@@ -55,10 +55,7 @@
         <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->
         <feature version="${project.version}">obr</feature>
-        <bundle start-level='30'>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint/${aries.blueprint.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
-        <bundle start-level='30'>mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
-        <!-- commom -->
+        <!-- common -->
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.resolver.obr/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.install/${aries.application.version}</bundle>
         <bundle start-level='30'>mvn:org.apache.aries.application/org.apache.aries.application.api/${aries.application.version}</bundle>
