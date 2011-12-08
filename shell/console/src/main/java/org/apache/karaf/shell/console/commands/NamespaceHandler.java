@@ -32,9 +32,7 @@ import org.apache.aries.blueprint.mutable.MutablePassThroughMetadata;
 import org.apache.aries.blueprint.mutable.MutableRefMetadata;
 import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
 import org.apache.aries.blueprint.mutable.MutableValueMetadata;
-import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.console.CompletableFunction;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.osgi.service.blueprint.reflect.BeanArgument;
 import org.osgi.service.blueprint.reflect.BeanMetadata;
@@ -45,6 +43,7 @@ import org.osgi.service.blueprint.reflect.MapMetadata;
 import org.osgi.service.blueprint.reflect.Metadata;
 import org.osgi.service.blueprint.reflect.NullMetadata;
 import org.osgi.service.blueprint.reflect.RefMetadata;
+import org.osgi.service.blueprint.reflect.ServiceMetadata;
 import org.osgi.service.blueprint.reflect.ValueMetadata;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -157,9 +156,9 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         MutableServiceMetadata commandService = context.createMetadata(MutableServiceMetadata.class);
         commandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
         commandService.setId(getName());
-        //commandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
-        commandService.addInterface(CompletableFunction.class.getName());
-        commandService.addInterface(Function.class.getName());
+        commandService.setAutoExport(ServiceMetadata.AUTO_EXPORT_ALL_CLASSES);
+//        commandService.addInterface(CompletableFunction.class.getName());
+//        commandService.addInterface(Function.class.getName());
         commandService.setServiceComponent(command);
 
         if (SHELL_NAMESPACE_1_0_0.equals(element.getNamespaceURI())) {
