@@ -371,20 +371,20 @@ public abstract class MojoSupport extends AbstractMojo {
         return null;
     }
 
-    protected Artifact bundleToArtifact(String bundle, boolean skipNonMavenProtocols) throws MojoExecutionException {
-        bundle = bundle.replace("\r\n", "").replace("\n", "").replace(" ", "").replace("\t", "");
-        final int index = bundle.indexOf("mvn:");
+    protected Artifact resourceToArtifact(String resourceLocation, boolean skipNonMavenProtocols) throws MojoExecutionException {
+        resourceLocation = resourceLocation.replace("\r\n", "").replace("\n", "").replace(" ", "").replace("\t", "");
+        final int index = resourceLocation.indexOf("mvn:");
         if (index < 0) {
             if (skipNonMavenProtocols) {
                 return null;
             }
-            throw new MojoExecutionException("Bundle url is not a maven url: " + bundle);
+            throw new MojoExecutionException("Resource URL is not a maven URL: " + resourceLocation);
         } else {
-            bundle = bundle.substring(index + "mvn:".length());
+            resourceLocation = resourceLocation.substring(index + "mvn:".length());
         }
         // Truncate the URL when a '#', a '?' or a '$' is encountered
-        final int index1 = bundle.indexOf('?');
-        final int index2 = bundle.indexOf('#');
+        final int index1 = resourceLocation.indexOf('?');
+        final int index2 = resourceLocation.indexOf('#');
         int endIndex = -1;
         if (index1 > 0) {
             if (index2 > 0) {
@@ -396,27 +396,27 @@ public abstract class MojoSupport extends AbstractMojo {
             endIndex = index2;
         }
         if (endIndex >= 0) {
-            bundle = bundle.substring(0, endIndex);
+            resourceLocation = resourceLocation.substring(0, endIndex);
         }
-        final int index3 = bundle.indexOf('$');
+        final int index3 = resourceLocation.indexOf('$');
         if (index3 > 0) {
-            bundle = bundle.substring(0, index3);
+            resourceLocation = resourceLocation.substring(0, index3);
         }
 
-        //check if the bundle descriptor contains also remote repository information.
+        //check if the resourceLocation descriptor contains also remote repository information.
         ArtifactRepository repo = null;
-        if (bundle.startsWith("http://")) {
-            final int repoDelimIntex = bundle.indexOf('!');
-            String repoUrl = bundle.substring(0, repoDelimIntex);
+        if (resourceLocation.startsWith("http://")) {
+            final int repoDelimIntex = resourceLocation.indexOf('!');
+            String repoUrl = resourceLocation.substring(0, repoDelimIntex);
 
             repo = new DefaultArtifactRepository(
                     repoUrl,
                     repoUrl,
                     new DefaultRepositoryLayout());
-            bundle = bundle.substring(repoDelimIntex + 1);
+            resourceLocation = resourceLocation.substring(repoDelimIntex + 1);
 
         }
-        String[] parts = bundle.split("/");
+        String[] parts = resourceLocation.split("/");
         String groupId = parts[0];
         String artifactId = parts[1];
         String version = null;
@@ -442,7 +442,7 @@ public abstract class MojoSupport extends AbstractMojo {
             }
         }
         if (version == null || version.length() == 0) {
-            throw new MojoExecutionException("Cannot find version for: " + bundle);
+            throw new MojoExecutionException("Cannot find version for: " + resourceLocation);
         }
         Artifact artifact = factory.createArtifactWithClassifier(groupId, artifactId, version, type, classifier);
         artifact.setRepository(repo);
