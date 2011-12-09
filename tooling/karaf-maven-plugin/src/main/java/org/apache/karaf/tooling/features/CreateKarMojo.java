@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.karaf.tooling.features;
 
 import java.io.File;
@@ -28,6 +26,7 @@ import java.util.List;
 
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
@@ -118,9 +117,9 @@ public class CreateKarMojo extends MojoSupport {
     //
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        List<Artifact> bundles = readBundles();
+        List<Artifact> resources = readResources();
         // Build the archive
-        File archive = createArchive(bundles);
+        File archive = createArchive(resources);
 
         // Attach the generated archive for install/deploy
         Artifact artifact = factory.createArtifact(project.getGroupId(), project.getArtifactId(), project.getVersion(), null, "kar");
@@ -129,8 +128,13 @@ public class CreateKarMojo extends MojoSupport {
         project.addAttachedArtifact(artifact);
     }
 
-    private List<Artifact> readBundles() throws MojoExecutionException {
-        List<Artifact> bundles = new ArrayList<Artifact>();
+    /**
+     * Read bundles and configuration files in the features file.
+     * @return
+     * @throws MojoExecutionException
+     */
+    private List<Artifact> readResources() throws MojoExecutionException {
+        List<Artifact> resources = new ArrayList<Artifact>();
         try {
             InputStream in = new FileInputStream(featuresFile);
             try {
@@ -138,11 +142,14 @@ public class CreateKarMojo extends MojoSupport {
                 for (Feature feature : features.getFeature()) {
                     for (BundleInfo bundle : feature.getBundles()) {
                         if (!bundle.isDependency()) {
-                            bundles.add(bundleToArtifact(bundle.getLocation(), false));
+                            resources.add(resourceToArtifact(bundle.getLocation(), false));
                         }
                     }
+                    for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
+                        resources.add(resourceToArtifact(configFile.getLocation(), false));
+                    }
                 }
-                return bundles;
+                return resources;
             } finally {
                 in.close();
             }
