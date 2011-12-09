@@ -126,7 +126,7 @@ public class AddToRepositoryMojo extends MojoSupport {
             karafVersion = p.getImplementationVersion();
         }
         String karafCoreEnterpriseFeatureUrl = String.format(KARAF_CORE_ENTERPRISE_FEATURE_URL, karafVersion);
-        Artifact enterpriseFeatureDescriptor = bundleToArtifact(karafCoreEnterpriseFeatureUrl, true);
+        Artifact enterpriseFeatureDescriptor = resourceToArtifact(karafCoreEnterpriseFeatureUrl, true);
         if (enterpriseFeatureDescriptor != null) {
             try {
                 resolveBundle(enterpriseFeatureDescriptor, remoteRepos);
@@ -137,7 +137,7 @@ public class AddToRepositoryMojo extends MojoSupport {
             }
         }
         String karafCoreStandardFeatureUrl = String.format(KARAF_CORE_STANDARD_FEATURE_URL, karafVersion);
-        Artifact standardFeatureDescriptor = bundleToArtifact(karafCoreStandardFeatureUrl, true);
+        Artifact standardFeatureDescriptor = resourceToArtifact(karafCoreStandardFeatureUrl, true);
         if (standardFeatureDescriptor != null) {
             try {
                 resolveBundle(standardFeatureDescriptor, remoteRepos);
@@ -182,7 +182,7 @@ public class AddToRepositoryMojo extends MojoSupport {
 
             getLog().info("Base repo: " + localRepo.getUrl());
             for (String bundle : bundles) {
-                Artifact artifact = bundleToArtifact(bundle, skipNonMavenProtocols);
+                Artifact artifact = resourceToArtifact(bundle, skipNonMavenProtocols);
                 if (artifact == null) {
                     continue;
                 }
@@ -218,7 +218,7 @@ public class AddToRepositoryMojo extends MojoSupport {
     private void retrieveDescriptorsRecursively(String uri, Set<String> bundles, Map<String, Feature> featuresMap)
         throws Exception {
         // let's ensure a mvn: based url is sitting in the local repo before we try reading it
-        Artifact descriptor = bundleToArtifact(uri, true);
+        Artifact descriptor = resourceToArtifact(uri, true);
         if (descriptor != null) {
             resolveBundle(descriptor, remoteRepos);
         }
