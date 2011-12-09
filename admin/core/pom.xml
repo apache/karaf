@@ -91,12 +91,17 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>${project.version}</version>
+            </plugin>
+            <!--
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>copy-config-properties</id>
-                        <!-- here the phase you need -->
                         <phase>compile</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -124,17 +129,66 @@
                                         <include>*.cfg</include>
                                     </includes>
                                 </resource>
-                                <resource>
-                                    <directory>${project.basedir}/src/test/resources/etc</directory>
-                                    <includes>
-                                        <include>startup.properties</include>
-                                    </includes>
-                                </resource>
                             </resources>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-unix</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.karaf.features</groupId>
+                                    <artifactId>framework</artifactId>
+                                    <type>kar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${basedir}/target/framework/org/apache/karaf/admin</outputDirectory>
+                                    <includes>resources/etc/*.properties,resources/etc/*.cfg</includes>
+                                    <excludes>resources/etc/org.apache.karaf.management.cfg,resources/etc/org.apache.karaf.shell.cfg,resources/etc/org.ops4j.pax.url.mvn.cfg,resources/etc/system.properties</excludes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.karaf.tooling</groupId>
+                        <artifactId>karaf-maven-plugin</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+	      <plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>build-helper-maven-plugin</artifactId>
+	        <version>1.7</version>
+	        <executions>
+	          <execution>
+	            <id>add-resource</id>
+	            <phase>generate-resources</phase>
+	            <goals>
+	              <goal>add-resource</goal>
+	            </goals>
+	            <configuration>
+	              <resources>
+	                <resource>
+	                  <directory>${basedir}/target/framework</directory>
+	                </resource>
+	              </resources>
+	            </configuration>
+	          </execution>
+	        </executions>
+	      </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>

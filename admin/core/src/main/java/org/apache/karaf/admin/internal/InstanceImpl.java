@@ -16,13 +16,20 @@
  */
 package org.apache.karaf.admin.internal;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Set;
 
-import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.admin.Instance;
 import org.apache.karaf.jpm.Process;
@@ -186,23 +193,8 @@ public class InstanceImpl implements Instance {
      * @throws Exception in case of read failure.
      */
     private String getConfiguration(File configurationFile, String propertyName) throws Exception {
-        InputStream is = null;
-        try {
-            is = new FileInputStream(configurationFile);
-            Properties props = new Properties();
-            props.load(is);
-            return (String) props.get(propertyName);
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-        }
+        Properties props = loadPropertiesFile(configurationFile.toURI().toURL());
+        return (String) props.get(propertyName);
     }
 
     public String getJavaOpts() {
@@ -318,14 +310,7 @@ public class InstanceImpl implements Instance {
             File file = new File(new File(location, "etc"), CONFIG_PROPERTIES_FILE_NAME);
             URL configPropURL = file.toURI().toURL();
             Properties props = loadPropertiesFile(configPropURL);
-            props.put("karaf.base", new File(location).getCanonicalPath());
-            props.put("karaf.home", System.getProperty("karaf.home"));
-            props.put("karaf.data", new File(new File(location), "data").getCanonicalPath());
-            for (String name : (Set<String>) props.keySet()) {
-                props.put(name,
-                        InterpolationHelper.substVars((String) props.get(name), name, null, props, null));
-            }
-            
+
             String host = "localhost";
             if (props.get(KARAF_SHUTDOWN_HOST) != null)
                 host = (String) props.get(KARAF_SHUTDOWN_HOST);
@@ -400,11 +385,14 @@ public class InstanceImpl implements Instance {
         return result;
     }
 
-    protected static Properties loadPropertiesFile(URL configPropURL) throws Exception {
+    protected Properties loadPropertiesFile(URL configPropURL) throws Exception {
         // Read the properties file.
         Properties configProps = new Properties();
         InputStream is = null;
         try {
+            configProps.put("karaf.base", new File(location).getCanonicalPath());
+            configProps.put("karaf.home", System.getProperty("karaf.home"));
+            configProps.put("karaf.data", new File(new File(location), "data").getCanonicalPath());
             is = configPropURL.openConnection().getInputStream();
             configProps.load(is);
             return configProps;

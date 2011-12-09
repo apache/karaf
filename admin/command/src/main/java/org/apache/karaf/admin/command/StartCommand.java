@@ -23,7 +23,10 @@ import org.apache.karaf.admin.Instance;
 
 @Command(scope = "admin", name = "start", description = "Starts an existing container instance.")
 public class StartCommand extends AdminCommandSupport {
-
+                      
+    @Option(name = "-d", aliases = { "--debug"}, description = "Start the instance in debug mode", required = false, multiValued = false)
+    private boolean debug; 
+    
     @Option(name = "-o", aliases = { "--java-opts"}, description = "Java options when launching the instance", required = false, multiValued = false)
     private String javaOpts;
 
@@ -33,12 +36,25 @@ public class StartCommand extends AdminCommandSupport {
     @Argument(index = 0, name = "name", description = "The name of the container instance", required = true, multiValued = false)
     private String instance = null;
 
+    static final String DEBUG_OPTS = " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005";
+    static final String DEFAULT_OPTS = "-server -Xmx512M -Dcom.sun.management.jmxremote";
+
     protected Object doExecute() throws Exception {
         Instance child = getExistingInstance(instance);
+        String opts = javaOpts;
+        if (opts == null) {
+            opts = child.getJavaOpts();
+        }
+        if (opts == null) {
+            opts = DEFAULT_OPTS;
+        }
+        if (debug) {
+            opts += DEBUG_OPTS;
+        }
         if (wait) {
             String state = child.getState();
             if (Instance.STOPPED.equals(state)) {
-                child.start(javaOpts);
+                child.start(opts);
             }
             if (!Instance.STARTED.equals(state)) {
                 do {
@@ -47,7 +63,7 @@ public class StartCommand extends AdminCommandSupport {
                 } while (Instance.STARTING.equals(state));
             }
         } else {
-            child.start(javaOpts);
+            child.start(opts);
         }
         return null;
     }
