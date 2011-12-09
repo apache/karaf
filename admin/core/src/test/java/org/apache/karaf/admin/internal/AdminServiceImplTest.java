@@ -72,6 +72,8 @@ public class AdminServiceImplTest extends TestCase {
         AdminServiceImpl service = new AdminServiceImpl();
         service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
 
+        System.setProperty("karaf.base", new File("target/test-classes/").getAbsolutePath());
+        
         InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         Instance instance = service.createInstance(getName(), settings);
 
@@ -96,6 +98,8 @@ public class AdminServiceImplTest extends TestCase {
     public void testRenameInstance() throws Exception {
         AdminServiceImpl service = new AdminServiceImpl();
         service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
+
+        System.setProperty("karaf.base", new File("target/test-classes/").getAbsolutePath());
 
         InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
         Instance instance = service.createInstance(getName(), settings);
