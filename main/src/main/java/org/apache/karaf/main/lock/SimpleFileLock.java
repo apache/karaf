@@ -33,6 +33,7 @@ public class SimpleFileLock implements Lock {
     private static final String PROPERTY_LOCK_DIR = "karaf.lock.dir";
     private static final String PROP_KARAF_BASE = "karaf.base";
     private RandomAccessFile lockFile;
+    private File lockPath;
     private FileLock lock;
 
     public SimpleFileLock(Properties props) {
@@ -49,23 +50,29 @@ public class SimpleFileLock implements Lock {
             }
 
             File base = new File(props.getProperty(PROPERTY_LOCK_DIR));
-            lockFile = new RandomAccessFile(new File(base, "lock"), "rw");
+            lockPath = new File(base, "lock"); 
+            lockFile = new RandomAccessFile(lockPath, "rw");
         } catch (IOException e) {
             throw new RuntimeException("Could not create file lock", e);
         }
     }
 
     public boolean lock() throws Exception {
-        LOG.info("locking");
+        LOG.info("Trying to lock " + lockPath.getPath());
         if (lock == null) {
             lock = lockFile.getChannel().tryLock();
+        }
+        if (lock != null) {
+            LOG.info("Lock acquired");
+        } else {
+            LOG.info("Lock failed");
         }
         return lock != null;
     }
 
     public void release() throws Exception {
-        LOG.info("releasing");
         if (lock != null && lock.isValid()) {
+            LOG.info("Releasing lock " + lockPath.getPath());
             lock.release();
             lock.channel().close();
         }
