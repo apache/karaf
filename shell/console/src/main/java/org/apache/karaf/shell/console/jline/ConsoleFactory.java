@@ -77,10 +77,32 @@ public class ConsoleFactory {
             });
         }
     }
+    
+    public static Object invokePrivateMethod(Object o, String methodName, Object[] params) throws Exception {
+        final Method methods[] = o.getClass().getDeclaredMethods();
+        for (int i = 0; i < methods.length; ++i) {
+            if (methodName.equals(methods[i].getName())) {
+                methods[i].setAccessible(true);
+                return methods[i].invoke(o, params);
+            }
+        }
+        return null;
+    }
+    
+    private static <T> T unwrapBIS(T stream) {
+        try {
+            return (T) invokePrivateMethod(stream, "getInIfOpen", null);
+        } catch (Throwable t) {
+            return stream;
+        }
+    }
 
     protected void doStart(String user) throws Exception {
         final Terminal terminal = terminalFactory.getTerminal();
-        InputStream in = unwrap(terminal.wrapInIfNeeded(System.in));
+        // unwrap stream so it can be recognized by the terminal and wrapped to get 
+        // special keys in windows
+        InputStream unwrappedIn = unwrapBIS(unwrap(System.in));
+        InputStream in = terminal.wrapInIfNeeded(unwrappedIn);
         PrintStream out = unwrap(System.out);
         PrintStream err = unwrap(System.err);
         Runnable callback = new Runnable() {
