@@ -21,6 +21,7 @@ package org.apache.karaf.tooling.features;
 
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.internal.RepositoryImpl;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
@@ -104,9 +105,9 @@ public class CreateKarMojo extends MojoSupport {
     private String repositoryPath = "repository/";
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        List<Artifact> bundles = readBundles();
+        List<Artifact> resources = readResources();
         // build the archive
-        File archive = createArchive(bundles);
+        File archive = createArchive(resources);
 
         // attach the generated archive to install/deploy
         Artifact artifact = factory.createArtifact(project.getGroupId(), project.getArtifactId(), project.getVersion(), null, "kar");
@@ -115,19 +116,28 @@ public class CreateKarMojo extends MojoSupport {
         project.addAttachedArtifact(artifact);
     }
 
-    private List<Artifact> readBundles() throws MojoExecutionException {
-        List<Artifact> bundles = new ArrayList<Artifact>();
+    /**
+     * Read and load the bundles and configuration files contained in the features file.
+     *
+     * @return a list of resources artifact.
+     * @throws MojoExecutionException
+     */
+    private List<Artifact> readResources() throws MojoExecutionException {
+        List<Artifact> resources = new ArrayList<Artifact>();
         try {
             RepositoryImpl featuresRepo = new RepositoryImpl(featuresFile.toURI());
             Feature[] features = featuresRepo.getFeatures();
             for (Feature feature : features) {
                 for (BundleInfo bundle : feature.getBundles()) {
                     if (!bundle.isDependency()) {
-                        bundles.add(bundleToArtifact(bundle.getLocation(), false));
+                        resources.add(resourceToArtifact(bundle.getLocation(), false));
                     }
                 }
+                for (ConfigFileInfo configFile : feature.getConfigurationFiles()) {
+                    resources.add(resourceToArtifact(configFile.getLocation(), false));
+                }
             }
-            return bundles;
+            return resources;
         } catch (MojoExecutionException e) {
             throw e;
         } catch (Exception e) {

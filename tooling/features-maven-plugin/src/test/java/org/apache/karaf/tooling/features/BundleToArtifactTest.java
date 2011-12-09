@@ -55,7 +55,7 @@ public class BundleToArtifactTest extends MojoSupport {
     
     @Test
     public void testSimpleURL() throws Exception {
-        Artifact artifact = bundleToArtifact("mvn:org.foo/bar/1.0/kar", false);
+        Artifact artifact = resourceToArtifact("mvn:org.foo/bar/1.0/kar", false);
         assert artifact.getGroupId().equals("org.foo");
         assert artifact.getArtifactId().equals("bar");
         assert artifact.getBaseVersion().equals("1.0");
@@ -66,7 +66,7 @@ public class BundleToArtifactTest extends MojoSupport {
 
     @Test
     public void testURLWithClassifier() throws Exception {
-        Artifact artifact = bundleToArtifact("mvn:org.foo/bar/1.0/kar/type", false);
+        Artifact artifact = resourceToArtifact("mvn:org.foo/bar/1.0/kar/type", false);
         assert artifact.getGroupId().equals("org.foo");
         assert artifact.getArtifactId().equals("bar");
         assert artifact.getBaseVersion().equals("1.0");
@@ -77,7 +77,7 @@ public class BundleToArtifactTest extends MojoSupport {
 
     @Test
     public void testRemoteRepoURL() throws Exception {
-        Artifact artifact = bundleToArtifact("mvn:http://baz.com!org.foo/bar/1.0/kar", false);
+        Artifact artifact = resourceToArtifact("mvn:http://baz.com!org.foo/bar/1.0/kar", false);
         assert artifact.getGroupId().equals("org.foo");
         assert artifact.getArtifactId().equals("bar");
         assert artifact.getBaseVersion().equals("1.0");
