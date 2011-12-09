@@ -118,16 +118,16 @@ public class CreateKarMojo extends MojoSupport {
     private List<Artifact> readBundles() throws MojoExecutionException {
         List<Artifact> bundles = new ArrayList<Artifact>();
         try {
-                RepositoryImpl featuresRepo = new RepositoryImpl(featuresFile.toURI());
-                Feature[] features = featuresRepo.getFeatures();
-                for (Feature feature : features) {
-                    for (BundleInfo bundle : feature.getBundles()) {
-                        if (!bundle.isDependency()) {
-                            bundles.add(bundleToArtifact(bundle.getLocation(), false));
-                        }
+            RepositoryImpl featuresRepo = new RepositoryImpl(featuresFile.toURI());
+            Feature[] features = featuresRepo.getFeatures();
+            for (Feature feature : features) {
+                for (BundleInfo bundle : feature.getBundles()) {
+                    if (!bundle.isDependency()) {
+                        bundles.add(bundleToArtifact(bundle.getLocation(), false));
                     }
                 }
-                return bundles;
+            }
+            return bundles;
         } catch (MojoExecutionException e) {
             throw e;
         } catch (Exception e) {
@@ -140,6 +140,7 @@ public class CreateKarMojo extends MojoSupport {
         File archiveFile = getArchiveFile(outputDirectory, finalName, null);
 
         MavenArchiver archiver = new MavenArchiver();
+        MavenArchiveConfiguration configuration = new MavenArchiveConfiguration();
         archiver.setArchiver(jarArchiver);
         archiver.setOutputFile(archiveFile);
 
@@ -161,6 +162,8 @@ public class CreateKarMojo extends MojoSupport {
             if (resourcesDir.isDirectory()) {
                 archiver.getArchiver().addDirectory(resourcesDir);
             }
+
+            archiver.createArchive(project, configuration);
 
             return archiveFile;
         } catch (Exception e) {
