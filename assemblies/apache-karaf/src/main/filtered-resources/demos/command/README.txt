@@ -58,4 +58,4 @@ To test the command completer press tab after typing the first few
 characters of 'mycommand'.
 
 For more information on Extending Karaf Console Commands please visit:
-http://karaf.apache.org/manual/${pom.version}/developers-guide/extending-console.html
+http://karaf.apache.org/manual/latest-2.2.x/developers-guide/extending-console.html
