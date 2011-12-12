@@ -170,10 +170,12 @@ public class AddToRepositoryMojo extends MojoSupport {
             // features to the bundles list
             if (addTransitiveFeatures) {
                 for (String feature : transitiveFeatures) {
+                    // transitiveFeatures contains name/version
+                    Feature f = featuresMap.get(feature);
                     getLog().info("Adding contents of transitive feature: " + feature);
-                    bundles.addAll(featuresMap.get(feature).getBundles());
+                    bundles.addAll(f.getBundles());
                     // Treat the config files as bundles, since it is only copying
-                    bundles.addAll(featuresMap.get(feature).getConfigFiles());
+                    bundles.addAll(f.getConfigFiles());
                 }
             }
 
@@ -227,7 +229,7 @@ public class AddToRepositoryMojo extends MojoSupport {
         }
         Repository repo = new Repository(URI.create(translateFromMaven(uri.replaceAll(" ", "%20"))));
         for (Feature f : repo.getFeatures()) {
-            featuresMap.put(f.getName(), f);
+            featuresMap.put(f.getName() + "/" + f.getVersion(), f);
         }
         if (resolveDefinedRepositoriesRecursively) {
             for (String r : repo.getDefinedRepositories()) {
@@ -271,20 +273,42 @@ public class AddToRepositoryMojo extends MojoSupport {
     private void addFeatures(List<String> features, Set<String> featuresBundles, Set<String> transitiveFeatures,
             Map<String, Feature> featuresMap) {
         for (String feature : features) {
-            Feature f = featuresMap.get(feature);
+
+            // feature could be only the name or name/version
+            int delimIndex = feature.indexOf('/');
+            String version = null;
+            if (delimIndex > 0) {
+                version = feature.substring(delimIndex + 1);
+                feature = feature.substring(0, delimIndex);
+            }
+
+            Feature f = null;
+            if (version != null) {
+                // looking for a specific feature with name and version
+                f = featuresMap.get(feature + "/" + version);
+            } else {
+                // looking for the first feature name (whatever the version is)
+                for (String key : featuresMap.keySet()) {
+                    String[] nameVersion = key.split("/");
+                    if (feature.equals(nameVersion[0])) {
+                        f = featuresMap.get(key);
+                        break;
+                    }
+                }
+            }
             if (f == null) {
                 throw new IllegalArgumentException("Unable to find the feature '" + feature + "'");
             }
             // only add the feature to transitives if it is not
             // listed in the features list defined by the config
-            if (!this.features.contains(feature)) {
-                transitiveFeatures.add(feature);
+            if (!this.features.contains(f.getName() + "/" + f.getVersion())) {
+                transitiveFeatures.add(f.getName() + "/" + f.getVersion());
             } else {
                 // add the bundles of the feature to the bundle set
-                getLog().info("Adding contents for feature: " + feature);
-                featuresBundles.addAll(featuresMap.get(feature).getBundles());
+                getLog().info("Adding contents for feature: " + f.getName() + "/" + f.getVersion());
+                featuresBundles.addAll(f.getBundles());
                 // Treat the config files as bundles, since it is only copying
-                featuresBundles.addAll(featuresMap.get(feature).getConfigFiles());
+                featuresBundles.addAll(f.getConfigFiles());
             }
             addFeatures(f.getDependencies(), featuresBundles, transitiveFeatures, featuresMap);
         }
@@ -322,6 +346,7 @@ public class AddToRepositoryMojo extends MojoSupport {
     public static class Feature {
 
         private String name;
+        private String version;
         private List<String> dependencies = new ArrayList<String>();
         private List<String> bundles = new ArrayList<String>();
         private Map<String, Map<String, String>> configs = new HashMap<String, Map<String, String>>();
@@ -333,6 +358,14 @@ public class AddToRepositoryMojo extends MojoSupport {
 
         public String getName() {
             return name;
+        }
+        
+        public String getVersion() {
+            return version;
+        }
+        
+        public void setVersion(String version) {
+            this.version = version;
         }
 
         public List<String> getDependencies() {
@@ -430,7 +463,9 @@ public class AddToRepositoryMojo extends MojoSupport {
                     }
                     Element e = (Element) nodes.item(i);
                     String name = e.getAttribute("name");
+                    String version = e.getAttribute("version");
                     Feature f = new Feature(name);
+                    f.setVersion(version);
                     NodeList featureNodes = e.getElementsByTagName("feature");
                     for (int j = 0; j < featureNodes.getLength(); j++) {
                         Element b = (Element) featureNodes.item(j);
