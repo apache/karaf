@@ -15,6 +15,76 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 2.2.5
+                    ==================
+
+  Overview
+  --------
+  This release of Apache Karaf is based off of the 2.2.x series branch, representing an
+ update to Apache Karaf 2.2.4. It contains bug fixes identified in the prior release,
+ and introduces improvements including; multiple JAAS support improvements, better support 
+ for Linux systems with certain versions of libc, SCP support, and demos for extending 
+ Karaf's console commands and using Karaf Archives (KARs). Several dependencies were also 
+ updated, bringing Pax Web to version 1.0.8, Jetty to 7.5.4.v20111024, and Jasypt to 1.8.
+  For more detail please see the change log below.
+
+  Changelog
+  ---------
+
+** Bug
+    * [KARAF-867] - Inconsistent deployment behavior between bundle installer and feature installer 
+    * [KARAF-926] - JAAS: Properties backing engine doesn't respect encryptor prefix and suffix
+    * [KARAF-939] - the realm set for JAASLoginService in jetty.xml should be karaf but not the default
+    * [KARAF-951] - dev:create-dump raises a NullPointerException
+    * [KARAF-952] - config:propdel doesn't delete the property in the cfg file
+    * [KARAF-954] - Double quotes missing in generated karaf-wrapper.conf
+    * [KARAF-959] - features:create-kar goal doesn't create a valid kar
+    * [KARAF-985] - LDAPLoginModule generates a large number of DirContext objects
+    * [KARAF-1003] - Karaf fails to start on a linux 32 bit system who's libc version is 2.3.4.
+    * [KARAF-1015] - ConfigMBean should use a different config pid than the config shell
+    * [KARAF-1020] - BundleWatcher should look for SNAPSHOT
+    * [KARAF-1030] - Grep command breaks existing line formating
+    * [KARAF-1064] - BootstrapLogManager does not reuse the instantiated Handler
+    * [KARAF-1065] - TextDumpProvider.createDump(DumpDestination) does not flush OutputStreamWriter
+    * [KARAF-1104] - Add plexus-utils dependency to features-maven-plugin to allow it to work with Maven 2.2.x to create KARs
+    * [KARAF-1105] - Fix url in Command Demo Readme file.
+
+** Dependency upgrade
+    * [KARAF-997] - Upgrade to Pax Web 1.0.8
+    * [KARAF-998] - upgrade to jetty 7.5.4.v20111024
+    * [KARAF-1092] - Upgrade to Jasypt 1.8
+
+** Improvement
+    * [KARAF-606] - JAAS: Allow LDAPLoginModule to supply role "DN" from LDAP group search
+    * [KARAF-936] - Features info command should display the start level of a bundle if available.
+    * [KARAF-940] - Align various bat and sh scripts
+    * [KARAF-945] - Use singular for shell commands
+    * [KARAF-956] - jaas module should throw generic FailedLoginException 
+    * [KARAF-965] - Allow features-maven-plugin to handle multiple versions of the same feature
+    * [KARAF-968] - Features file should require name attribute on features element
+    * [KARAF-971] - Add support for version ranges in features descriptor <repository/> element
+    * [KARAF-981] - Set kar as a boot feature
+    * [KARAF-1013] - Less verbose in log when mistyped commands at INFO level
+    * [KARAF-1019] - Set java memory options only when required
+    * [KARAF-1022] - java.io.tmpdir system property should use $KARAF_DATA/tmp in place of $KARAF_BASE/tmp
+    * [KARAF-1032] - Text improvements to Features XSD
+    * [KARAF-1041] - create-kar goal should handle configfile
+    * [KARAF-1057] - Update the list of supported execution environments
+    * [KARAF-1091] - Upgrade maven bundle plugin to 2.3.6
+
+** New Feature
+    * [KARAF-541] - Support JMX SSL via etc/org.apache.karaf.management.cfg 
+    * [KARAF-934] - Provide a way to select which features are to be installed when dropping a descriptor to the deploy folder.
+    * [KARAF-977] - config propset, propappend & propdel could use some autocompletion
+    * [KARAF-980] - Add demo for extending Karaf's console commands
+    * [KARAF-987] - Add scp support
+    * [KARAF-1029] - Add completer support on option values
+    * [KARAF-1085] - Add Kar deployer demo using features-maven-plugin
+
+** Task
+    * [KARAF-976] - Update Apache Karaf 2.2.x documentation for Child Instances
+
+
                     Apache karaf 2.2.4
                     ==================
 
