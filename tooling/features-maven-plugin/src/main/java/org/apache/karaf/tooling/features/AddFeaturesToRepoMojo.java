@@ -169,9 +169,9 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             // features to the bundles list
             if (addTransitiveFeatures) {
                 for (String feature : transitiveFeatures) {
-                    
+                    // transitiveFeatures contains name/version
                     Feature f = featuresMap.get(feature);
-                    getLog().info("Adding contents of transitive feature: " + f.getName() + "/" + f.getVersion());
+                    getLog().info("Adding contents of transitive feature: " + feature);
                     bundles.addAll(f.getBundles());
                     // Treat the config files as bundles, since it is only copying
                     bundles.addAll(f.getConfigFiles());
@@ -304,7 +304,7 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 transitiveFeatures.add(f.getName() + "/" + f.getVersion());
             } else {
                 // add the bundles of the feature to the bundle set
-                getLog().info("Adding contents for feature: " + feature);
+                getLog().info("Adding contents for feature: " + f.getName() + "/" + f.getVersion());
                 featuresBundles.addAll(f.getBundles());
                 // Treat the config files as bundles, since it is only copying
                 featuresBundles.addAll(f.getConfigFiles());
