@@ -99,9 +99,17 @@ public class ArgumentCompleter implements Completer {
         optionsCompleter = new StringsCompleter(options.keySet());
         // Build arguments completers
         argsCompleters = new ArrayList<Completer>();
+        optionalCompleters = new HashMap<String, Completer>();
 
         if (function instanceof CompletableFunction) {
-            optionalCompleters = ((CompletableFunction) function).getOptionalCompleters();
+            try {
+                Map completers = ((CompletableFunction) function).getOptionalCompleters();
+                if (completers != null) {
+                    optionalCompleters.putAll(completers);
+                }
+            } catch (AbstractMethodError err) {
+                // Allow old commands to not break the completers
+            }
             List<Completer> fcl = ((CompletableFunction) function).getCompleters();
             if (fcl != null) {
                 for (Completer c : fcl) {
@@ -111,7 +119,6 @@ public class ArgumentCompleter implements Completer {
                 argsCompleters.add(NullCompleter.INSTANCE);
             }
         } else {
-            optionalCompleters = new HashMap<String, Completer>();
             final Map<Integer, Method> methods = new HashMap<Integer, Method>();
             for (Class type = function.getActionClass(); type != null; type = type.getSuperclass()) {
                 for (Method method : type.getDeclaredMethods()) {
@@ -267,7 +274,7 @@ public class ArgumentCompleter implements Completer {
                     if (option != null) {
                         Completer optionValueCompleter = null;
                         String name = option.name();
-                        if (optionalCompleters != null && name != null) {
+                        if (name != null) {
                             optionValueCompleter = optionalCompleters.get(name);
                             if (optionValueCompleter == null) {
                                 String[] aliases = option.aliases();
