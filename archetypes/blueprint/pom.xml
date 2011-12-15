@@ -18,49 +18,39 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-    
+
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.apache.karaf</groupId>
-        <artifactId>karaf</artifactId>
+        <artifactId>archetypes</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>archetypes</artifactId>
+    <groupId>org.apache.karaf.archetypes</groupId>
+    <artifactId>karaf-blueprint-archetype</artifactId>
+    <packaging>maven-archetype</packaging>
+    <name>Apache Karaf :: Archetypes :: Blueprint Archetype</name>
 
-    <name>Apache Karaf :: Archetypes</name>
-    <packaging>pom</packaging>
+    <build>
 
-    <modules>
-        <module>assembly</module>
-        <module>command</module>
-        <module>feature</module>
-        <module>kar</module>
-        <module>bundle</module>
-        <module>blueprint</module>
-    </modules>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.archetype</groupId>
+                <artifactId>archetype-packaging</artifactId>
+                <version>2.2</version>
+            </extension>
+        </extensions>
 
-    <profiles>
-        <profile>
-            <id>maven-3</id>
-            <activation>
-                <file>
-                    <!--  This employs that the basedir expression is only recognized by Maven 3.x (see MNG-2363) -->
-                    <exists>${basedir}</exists>
-                </file>
-            </activation>
-        </profile>
-        <profile>
-            <id>maven-2</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>itests</module>
-            </modules>
-        </profile>
-    </profiles>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-archetype-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>
