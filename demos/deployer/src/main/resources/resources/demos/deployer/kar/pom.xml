@@ -39,9 +39,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.commons-collections</artifactId>
-            <version>3.2.1_1</version>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

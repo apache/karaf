@@ -2,7 +2,7 @@
 <features>
 
     <feature name="my-kar" version="1.0">
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-collections/3.2.1_1</bundle>
+        <bundle>mvn:commons-collections/commons-collections/3.2.1</bundle>
     </feature>
 
 </features>
