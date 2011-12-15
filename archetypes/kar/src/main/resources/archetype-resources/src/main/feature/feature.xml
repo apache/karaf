@@ -19,8 +19,10 @@
 -->
 
 <features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
-    <feature name='${project.artifactId}' description='${project.name}' version='${project.version}'>
+
+    <feature name='${project.artifactId}' description='${project.name}' version='${project.version}' resolver="${resolver}">
         <details>${project.description}</details>
         <config>foo=bar</config>
     </feature>
+
 </features>
