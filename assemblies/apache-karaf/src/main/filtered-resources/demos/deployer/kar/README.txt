@@ -66,7 +66,7 @@ Now you can use any commands available on features:
   Feature has no configuration files
   Feature has no dependencies.
   Feature contains followed bundles:
-    mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-collections/3.2.1_1
+    mvn:commons-collections/commons-collections/3.2.1
 
 For more information on Karaf Archives please visit:
 http://karaf.apache.org/manual/latest-2.2.x/users-guide/kar.html
