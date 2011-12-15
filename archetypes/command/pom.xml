@@ -29,7 +29,7 @@
     </parent>
 
     <groupId>org.apache.karaf.archetypes</groupId>
-    <artifactId>archetypes-command</artifactId>
+    <artifactId>karaf-command-archetype</artifactId>
     <name>Apache Karaf :: Archetypes :: Command Archetype</name>
 
     <build>
