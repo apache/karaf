@@ -25,7 +25,7 @@ public class CommandArchetypeTest extends AbstractArchetypeTest {
         commandArchetypeParameters.setProperty("scope", "testscope");
         commandArchetypeParameters.setProperty("command", "testcommand");
         commandArchetypeParameters.setProperty("description", "testdescription");
-        testKarafArchetype("archetypes-command", commandArchetypeParameters);
+        testKarafArchetype("karaf-command-archetype", commandArchetypeParameters);
     }
 
 }
