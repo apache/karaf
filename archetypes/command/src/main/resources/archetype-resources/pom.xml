@@ -21,13 +21,14 @@
     <artifactId>${artifactId}</artifactId>
     <packaging>bundle</packaging>
     <version>${version}</version>
-    <name>Apache Karaf :: Shell ${scope} Commands</name>
+    <name>Apache Karaf :: Shell ${scope}/${command} Commands</name>
 
     <description>Provides the OSGi ${scope} commands</description>
 
     <properties>
-        <junit.version>^junit.bundle.version^</junit.version>
+        <junit.bundle.version>^junit.bundle.version^</junit.bundle.version>
         <osgi.version>^osgi.version^</osgi.version>
+        <osgi.compendium.version>^osgi.compendium.version^</osgi.compendium.version>
         <karaf.version>^project.version^</karaf.version>
         <maven-bundle-plugin.version>^felix.plugin.version^</maven-bundle-plugin.version>
     </properties>
@@ -49,14 +50,14 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>${osgi.version}</version>
+            <version>${osgi.compendium.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <version>${junit.version}</version>
+            <version>${junit.bundle.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -66,6 +67,7 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <inherited>true</inherited>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
@@ -80,7 +82,8 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>${package}*;version=${project.version}</Export-Package>
-                        <Import-Package>!${project.artifactId}*,
+                        <Import-Package>
+                            !${package}*,
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
@@ -95,4 +98,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

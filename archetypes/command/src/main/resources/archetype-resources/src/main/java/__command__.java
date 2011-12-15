@@ -21,18 +21,24 @@
 
 package ${package};
 
-import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.commands.Argument;
 
-
-/**
- * Displays the last log entries
- */
 @Command(scope = "${scope}", name = "${cmd}", description = "${description}")
 public class ${command} extends OsgiCommandSupport {
 
+    @Option(name = "-o", aliases = { "--option" }, description = "An option to the command", required = false, multiValued = false)
+    private String option;
+
+    @Argument(name = "argument", description = "Argument to the command", required = false, multiValued = false)
+    private String argument;
+
     protected Object doExecute() throws Exception {
          System.out.println("Executing command ${cmd}");
+         System.out.println("Option: " + option);
+         System.out.println("Argument: " + argument);
          return null;
     }
 }
