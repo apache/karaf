@@ -52,12 +52,6 @@
         <include>pom.xml</include>
       </includes>
     </fileSet>
-    <fileSet encoding="UTF-8">
-      <directory></directory>
-      <includes>
-        <include>NOTICE</include>
-      </includes>
-    </fileSet>
   </fileSets>
 
 </archetype-descriptor>
