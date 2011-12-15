@@ -30,6 +30,7 @@
 
     <groupId>org.apache.karaf.archetypes</groupId>
     <artifactId>karaf-command-archetype</artifactId>
+    <packaging>maven-archetype</packaging>
     <name>Apache Karaf :: Archetypes :: Command Archetype</name>
 
     <build>
