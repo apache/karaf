@@ -115,7 +115,7 @@
 
     <feature name="spring-struts" version="${spring.version}" resolver="(obr)">
         <feature version="${spring.version}">spring-web</feature>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-beanutils/${commons-beanutils.bundle.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-struts/${spring.version}</bundle>
     </feature>
 
@@ -270,8 +270,8 @@
     </feature>
 
     <feature name="jasypt-encryption" version="${project.version}" resolver="(obr)">
-        <bundle dependency='true' start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-codec/${commons-codec.bundle.version}</bundle>
-        <bundle dependency='true' start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/${commons-lang.bundle.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
+        <bundle dependency='true' start-level="30">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle dependency='true' start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
     </feature>
