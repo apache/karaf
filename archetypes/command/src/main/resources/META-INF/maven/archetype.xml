@@ -18,5 +18,5 @@
 
 -->
 <archetype>
-  <id>karaf-command-archetype</id>
+    <id>karaf-command-archetype</id>
 </archetype>

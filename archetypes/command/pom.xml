@@ -29,9 +29,9 @@
     </parent>
 
     <groupId>org.apache.karaf.archetypes</groupId>
-    <artifactId>archetypes-command</artifactId>
+    <artifactId>karaf-command-archetype</artifactId>
     <packaging>maven-archetype</packaging>
-    <name>Apache Karaf :: Command Archetype</name>
+    <name>Apache Karaf :: Archetypes :: Command Archetype</name>
 
     <build>
         <resources>
