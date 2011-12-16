@@ -34,7 +34,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.archetypes</groupId>
-            <artifactId>archetypes-command</artifactId>
+            <artifactId>karaf-command-archetype</artifactId>
         </dependency>
 
         <dependency> 

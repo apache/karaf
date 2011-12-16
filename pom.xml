@@ -479,7 +479,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.archetypes</groupId>
-                <artifactId>archetypes-command</artifactId>
+                <artifactId>karaf-command-archetype</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
