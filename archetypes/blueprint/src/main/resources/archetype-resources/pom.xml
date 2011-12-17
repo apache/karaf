@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
+    <packaging>bundle</packaging>
+
+    <name>${artifactId} Blueprint Bundle</name>
+    <description>
+        ${artifactId} OSGi blueprint bundle project.
+    </description>
+
+    <properties>
+        <maven-bundle-plugin.version>2.3.6</maven-bundle-plugin.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${maven-bundle-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    <Bundle-Version>${project.version}</Bundle-Version>
+                    <Export-Package>
+                        ${package}*;version=${project.version}
+                    </Export-Package>
+                    <Import-Package>
+                        *
+                    </Import-Package>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
