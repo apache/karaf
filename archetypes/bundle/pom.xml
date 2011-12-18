@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
+
         Licensed to the Apache Software Foundation (ASF) under one or more
         contributor license agreements.  See the NOTICE file distributed with
         this work for additional information regarding copyright ownership.
@@ -17,27 +18,39 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-    
+
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.apache.karaf</groupId>
-        <artifactId>karaf</artifactId>
+        <artifactId>archetypes</artifactId>
         <version>2.2.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>archetypes</artifactId>
+    <groupId>org.apache.karaf.archetypes</groupId>
+    <artifactId>karaf-bundle-archetype</artifactId>
+    <packaging>maven-archetype</packaging>
+    <name>Apache Karaf :: Archetypes :: Bundle Archetype</name>
 
-    <name>Apache Karaf :: Archetypes</name>
-    <packaging>pom</packaging>
+    <build>
 
-    <modules>
-        <module>assembly</module>
-        <module>blueprint</module>
-        <module>bundle</module>
-        <module>command</module>
-        <module>itests</module>
-    </modules>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.archetype</groupId>
+                <artifactId>archetype-packaging</artifactId>
+                <version>2.2</version>
+            </extension>
+        </extensions>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-archetype-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>
