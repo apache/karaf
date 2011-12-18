@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="${project.artifactId}-${project.version}">
+    <feature name="${project.artifactId}" description="${project.name}" version="${project.version}" resolver="(obr)">
+        <details>${project.description}</details>
+        <!-- Put here the bundles and configuration files -->
+        <!-- <bundle>mvn:commons-lang/commons-lang/2.6</bundle> -->
+    </feature>
+</features>
