@@ -23,14 +23,14 @@ import org.apache.karaf.shell.console.AbstractAction;
 @Command(scope = "shell", name = "sleep", description = "Sleeps for a bit then wakes up.")
 public class SleepAction extends AbstractAction {
 
-    @Argument(index = 0, name = "duration", description = "The amount of millis to sleep", required = true, multiValued = false)
+    @Argument(index = 0, name = "duration", description = "The amount of seconds to sleep", required = true, multiValued = false)
     private long time = -1;
 
     protected Object doExecute() throws Exception {
-        log.info("Sleeping for {}", time);
+        log.info("Sleeping for {} second(s)", time);
 
         try {
-            Thread.sleep(time);
+            Thread.sleep(time * 1000);
         }
         catch (InterruptedException ignore) {
             log.debug("Sleep was interrupted... :-(");
