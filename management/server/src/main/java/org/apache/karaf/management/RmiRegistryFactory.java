@@ -22,6 +22,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Hashtable;
 
 public class RmiRegistryFactory {
 
@@ -99,7 +100,9 @@ public class RmiRegistryFactory {
         }
         if (registry != null) {
             // register the registry as an OSGi service
-            bundleContext.registerService(Registry.class.getName(), registry, null);
+            Hashtable<String, Object> props = new Hashtable<String, Object>();
+            props.put("port", getPort());
+            bundleContext.registerService(Registry.class, registry, props);
         }
     }
 
