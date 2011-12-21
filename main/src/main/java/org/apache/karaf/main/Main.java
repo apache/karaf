@@ -990,8 +990,7 @@ public class Main {
                         Properties props = loadPropertiesFile(url, false);
                         configProps.putAll(props);
                     }
-                }
-                while (location != null);
+                } while (location != null);
             }
             configProps.remove(OPTIONALS_PROPERTY);
         }
