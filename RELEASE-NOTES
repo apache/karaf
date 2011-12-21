@@ -48,11 +48,17 @@
     * [KARAF-1065] - TextDumpProvider.createDump(DumpDestination) does not flush OutputStreamWriter
     * [KARAF-1104] - Add plexus-utils dependency to features-maven-plugin to allow it to work with Maven 2.2.x to create KARs
     * [KARAF-1105] - Fix url in Command Demo Readme file.
+    * [KARAF-1106] - Jetty feature should use ServiceMix Spec for activation
+    * [KARAF-1108] - Features should use correct start-level
+    * [KARAF-1110] - Archetypes don't work
+    * [KARAF-1111] - Add documentation about archetypes
+    * [KARAF-1114] - osgi shell blueprint bundle shouldn't use lazy default-activation
 
 ** Dependency upgrade
     * [KARAF-997] - Upgrade to Pax Web 1.0.8
     * [KARAF-998] - upgrade to jetty 7.5.4.v20111024
     * [KARAF-1092] - Upgrade to Jasypt 1.8
+    * [KARAF-1107] - Karaf should use directly commons-* bundles
 
 ** Improvement
     * [KARAF-606] - JAAS: Allow LDAPLoginModule to supply role "DN" from LDAP group search
@@ -62,15 +68,19 @@
     * [KARAF-956] - jaas module should throw generic FailedLoginException 
     * [KARAF-965] - Allow features-maven-plugin to handle multiple versions of the same feature
     * [KARAF-968] - Features file should require name attribute on features element
-    * [KARAF-971] - Add support for version ranges in features descriptor <repository/> element
     * [KARAF-981] - Set kar as a boot feature
     * [KARAF-1013] - Less verbose in log when mistyped commands at INFO level
+    * [KARAF-1014] - Make files specified by ${includes} optional
     * [KARAF-1019] - Set java memory options only when required
     * [KARAF-1022] - java.io.tmpdir system property should use $KARAF_DATA/tmp in place of $KARAF_BASE/tmp
     * [KARAF-1032] - Text improvements to Features XSD
     * [KARAF-1041] - create-kar goal should handle configfile
     * [KARAF-1057] - Update the list of supported execution environments
+    * [KARAF-1087] - kar archetype
+    * [KARAF-1088] - assembly archetype
     * [KARAF-1091] - Upgrade maven bundle plugin to 2.3.6
+    * [KARAF-1112] - shell:sleep should be in seconds
+    * [KARAF-1115] - Add a jre.properties.cxf with all changes required to run cxf
 
 ** New Feature
     * [KARAF-541] - Support JMX SSL via etc/org.apache.karaf.management.cfg 
@@ -80,6 +90,7 @@
     * [KARAF-987] - Add scp support
     * [KARAF-1029] - Add completer support on option values
     * [KARAF-1085] - Add Kar deployer demo using features-maven-plugin
+    * [KARAF-1109] - Provide archetypes for bundle, bundle-blueprint, web-bundle, war
 
 ** Task
     * [KARAF-976] - Update Apache Karaf 2.2.x documentation for Child Instances
