@@ -178,7 +178,9 @@ public class Main {
 
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
-    public static final String INCLUDES_PROPERTY = "${includes}";
+    public static final String INCLUDES_PROPERTY = "${includes}"; // mandatory includes
+
+    public static final String OPTIONALS_PROPERTY = "${optionals}"; // optionals includes
 
     Logger LOG = Logger.getLogger(this.getClass().getName());
 
@@ -915,13 +917,13 @@ public class Main {
             is = configPropURL.openConnection().getInputStream();
             configProps.load(is);
             is.close();
-        }
-        catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             if (failIfNotFound) {
                 throw ex;
+            } else {
+                System.err.println("WARN: " + configPropURL + " is not found, so not loaded");
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             System.err.println("Error loading config properties from " + configPropURL);
             System.err.println("Main: " + ex);
             return configProps;
@@ -951,6 +953,22 @@ public class Main {
                 while (location != null);
             }
             configProps.remove(INCLUDES_PROPERTY);
+        }
+        String optionals = configProps.getProperty(OPTIONALS_PROPERTY);
+        if (optionals != null) {
+            StringTokenizer st = new StringTokenizer(optionals, "\" ", true);
+            if (st.countTokens() > 0) {
+                String location;
+                do {
+                    location = nextLocation(st);
+                    if (location != null) {
+                        URL url = new URL(configPropURL, location);
+                        Properties props = loadPropertiesFile(url, false);
+                        configProps.putAll(props);
+                    }
+                } while (location != null);
+            }
+            configProps.remove(OPTIONALS_PROPERTY);
         }
         for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
             Object key = e.nextElement();
