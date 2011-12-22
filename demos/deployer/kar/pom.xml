@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0           http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
 
@@ -22,10 +22,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache</groupId>
-        <artifactId>apache</artifactId>
-        <version>10</version>
-        <relativePath />
+        <groupId>org.apache.karaf.demos</groupId>
+        <artifactId>org.apache.karaf.demos.deployer</artifactId>
+        <version>2.2.5</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>org.apache.karaf.demos.deployer.kar</groupId>
@@ -63,11 +63,4 @@
             </plugin>
         </plugins>
     </build>
-
-
-  <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/pom/tags/karaf-2.2.5/tags/apache-10/my-kar</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/pom/tags/karaf-2.2.5/tags/apache-10/my-kar</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/pom/tags/karaf-2.2.5/tags/apache-10/my-kar</url>
-  </scm>
 </project>
