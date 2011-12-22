@@ -762,7 +762,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         InputStream is = null;
         FileOutputStream fop = null;
         try {
-            URL fileLocationURL = new URL(fileLocation);
             is = new BufferedInputStream(new URL(fileLocation).openStream());
 
             if (!file.exists()) {
