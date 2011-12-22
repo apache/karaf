@@ -56,12 +56,12 @@ The KAR Deployer creates a repository dedicated to your kar
 You can now see your feature available for installation:
 
   karaf@root> feature:list | grep -i my-kar
-  [installed] [1.0             ] my-kar                        repo-0
+  [installed] [${pom.version}             ] my-kar                        repo-0
 
 Now you can use any commands available on features:
 
   karaf@root> feature:info my-kar
-  Feature my-kar 1.0
+  Feature my-kar ${pom.version}
   Feature has no configuration
   Feature has no configuration files
   Feature has no dependencies.

@@ -30,7 +30,6 @@
 
     <groupId>org.apache.karaf.demos.deployer.kar</groupId>
     <artifactId>my-kar</artifactId>
-    <version>2.2.5</version>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Demos :: Deployer :: Kar</name>
 
