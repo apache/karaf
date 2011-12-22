@@ -731,17 +731,21 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     		LOGGER.info("configFile already exist, don't override it");
     		return;
     	}
-    	if (!file.exists()) {
-    		File parentFile = file.getParentFile();
-    		if (parentFile != null)
-    			parentFile.mkdirs();
-    		file.createNewFile();
-    	}
-    	
-    	FileOutputStream fop = new FileOutputStream(file);
+
         InputStream is = null;
+        FileOutputStream fop = null;
         try {
             is = new BufferedInputStream(new URL(fileLocation).openStream());
+            
+            if (!file.exists()) {
+                File parentFile = file.getParentFile();
+                if (parentFile != null) {
+                    parentFile.mkdirs();
+                }
+                file.createNewFile();
+            }
+
+            fop = new FileOutputStream(file);
         
             int bytesRead = 0;
             byte[] buffer = new byte[1024];
@@ -758,8 +762,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 		} finally {
 			if (is != null)
 				is.close();
-			fop.flush();
-			fop.close();
+            if (fop != null) {
+			    fop.flush();
+			    fop.close();
+            }
 		}
             
     }
