@@ -52,18 +52,18 @@ if not "%KARAF_HOME%" == "" (
 )
 set KARAF_HOME=%DIRNAME%..
 if not exist "%KARAF_HOME%" (
-    call :warn KARAF_HOME is not valid: %KARAF_HOME%
+    call :warn KARAF_HOME is not valid: "%KARAF_HOME%"
     goto END
 )
 
 if not "%KARAF_BASE%" == "" (
     if not exist "%KARAF_BASE%" (
-       call :warn KARAF_BASE is not valid: %KARAF_BASE%
+       call :warn KARAF_BASE is not valid: "%KARAF_BASE%"
        goto END
     )
 )
 if "%KARAF_BASE%" == "" (
-  set KARAF_BASE=%KARAF_HOME%
+  set "KARAF_BASE=%KARAF_HOME%"
 )
 
 :EXECUTE
