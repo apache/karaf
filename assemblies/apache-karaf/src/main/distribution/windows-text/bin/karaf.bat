@@ -60,28 +60,28 @@ if not "%KARAF_HOME%" == "" (
 )
 set KARAF_HOME=%DIRNAME%..
 if not exist "%KARAF_HOME%" (
-    call :warn KARAF_HOME is not valid: %KARAF_HOME%
+    call :warn KARAF_HOME is not valid: "%KARAF_HOME%"
     goto END
 )
 
 if not "%KARAF_BASE%" == "" (
     if not exist "%KARAF_BASE%" (
-       call :warn KARAF_BASE is not valid: %KARAF_BASE%
+       call :warn KARAF_BASE is not valid: "%KARAF_BASE%"
        goto END
     )
 )
 if "%KARAF_BASE%" == "" (
-  set KARAF_BASE=%KARAF_HOME%
+  set "KARAF_BASE=%KARAF_HOME%"
 )
 
 if not "%KARAF_DATA%" == "" (
     if not exist "%KARAF_DATA%" (
-        call :warn KARAF_DATA is not valid: %KARAF_DATA%
+        call :warn KARAF_DATA is not valid: "%KARAF_DATA%"
         goto END
     )
 )
 if "%KARAF_DATA%" == "" (
-    set KARAF_DATA=%KARAF_BASE%\data
+    set "KARAF_DATA=%KARAF_BASE%\data"
 )        
 
 set LOCAL_CLASSPATH=%CLASSPATH%
