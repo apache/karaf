@@ -215,7 +215,7 @@ public class ValidateDescriptorMojo extends MojoSupport {
             repositories = new ArrayList<String>();
         }
         if (karafVersion == null) {
-            Package p = Package.getPackage("org.apache.karaf.tooling");
+            Package p = Package.getPackage("org.apache.karaf.tooling.features");
             karafVersion = p.getImplementationVersion();
         }
         String karafCoreStandardFeaturesUrl = String.format(KARAF_CORE_STANDARD_FEATURE_URL, karafVersion);
