@@ -21,12 +21,9 @@
 
 	<ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
 	
-	<bean id="karArtifactInstaller" class="org.apache.karaf.deployer.kar.KarArtifactInstaller"
-		init-method="init" destroy-method="destroy" activation="lazy">
-			<property name="basePath" value="$[karaf.base]"/>
-			<property name="localRepoPath" value="$[karaf.base]/system"/>
-	        <property name="featuresService">
-	            <reference interface="org.apache.karaf.features.FeaturesService"/>
+	<bean id="karArtifactInstaller" class="org.apache.karaf.deployer.kar.KarArtifactInstaller" activation="lazy">
+	        <property name="karService">
+	            <reference interface="org.apache.karaf.kar.KarService"/>
 	        </property>
 	</bean>
 			
