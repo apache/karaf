@@ -47,6 +47,7 @@ import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.kar.internal.KarServiceImpl;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
@@ -191,21 +192,26 @@ public class InstallKarsMojo extends MojoSupport {
                 startupPropertiesFile.getParentFile().mkdirs();
             }
         }
-        KarArtifactInstaller installer = new KarArtifactInstaller();
-        installer.setBasePath(workDirectory);
+        KarServiceImpl karService = new KarServiceImpl();
         FeaturesService featuresService = new OfflineFeaturesService();
-        installer.setFeaturesService(featuresService);
-        installer.init();
+        karService.setFeaturesService(featuresService);
+        karService.setBase(workDirectory);
+        try {
+            karService.init();
+        } catch (Exception e) {
+            throw new MojoExecutionException("Can't init the KAR service", e);
+        }
+        
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
         StringBuilder buf = new StringBuilder();
         byte[] buffer = new byte[4096];
         for (Artifact artifact: dependencies) {
             dontAddToStartup = "runtime".equals(artifact.getScope());
-            installer.setLocalRepoPath(system.getPath());
+            karService.setLocalRepo(system.getPath());
             if ("kar".equals(artifact.getType()) && acceptScope(artifact)) {
                 File file = artifact.getFile();
                 try {
-                    installer.install(file);
+                    karService.install(file.toURI());
                 } catch (Exception e) {
                     buf.append("Could not install kar: ").append(artifact.toString()).append("\n");
                     buf.append(e.getMessage()).append("\n\n");

@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.deployer</groupId>
-        <artifactId>deployer</artifactId>
+        <groupId>org.apache.karaf.kar</groupId>
+        <artifactId>kar</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.deployer.kar</artifactId>
+    <artifactId>org.apache.karaf.kar.core</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Deployer :: Karaf Archive (.kar)</name>
-    <description>This deployer can deploy .kar archives on the fly</description>
+    <name>Apache Karaf :: KAR :: Core</name>
+    <description>This bundle provides core implementation of the KAR management service.</description>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
@@ -39,41 +39,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf.kar</groupId>
-            <artifactId>org.apache.karaf.kar.core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.fileinstall</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -99,18 +72,21 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <!-- Set the blueprint.graceperiod flag to false to allow the bundle to start
-                             See the blueprint config file -->
-                        <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=false</Bundle-SymbolicName>
+                        <Export-Package>
+                            org.apache.karaf.kar;version=${project.version}
+                        </Export-Package>
                         <Import-Package>
-                            !${project.artifactId}*,
-                            org.apache.felix.service.command;version=${felix.gogo.version};status=provisional;mandatory:=status,
-                            org.apache.aries.blueprint,
-                            org.osgi.service.blueprint.container,
-                            org.osgi.service.blueprint.reflect,
-                            *
+                            !org.apache.karaf.kar,
+                            javax.xml.parsers,
+                            org.apache.karaf.features;version=${project.version},
+                            org.slf4j;resolution:=optional,
+                            org.w3c.dom,
+                            org.xml.sax,
+                            org.osgi.service.blueprint
                         </Import-Package>
-                        <Private-Package>org.apache.karaf.deployer.features</Private-Package>
+                        <Private-Package>
+                            org.apache.karaf.kar.internal
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
