@@ -32,6 +32,7 @@
     <!-- Property place holder -->
     <cm:property-placeholder persistent-id="org.apache.karaf.management" update-strategy="reload">
         <cm:default-properties>
+            <cm:property name="rmiRegistryHost" value=""/>
             <cm:property name="rmiRegistryPort" value="1099"/>
             <cm:property name="rmiServerPort" value="44444"/>
             <cm:property name="jmxRealm" value="karaf"/>
@@ -68,6 +69,7 @@
           destroy-method="destroy">
         <property name="create" value="true"/>
         <property name="locate" value="true"/>
+        <property name="host" value="${rmiRegistryHost}"/>
         <property name="port" value="${rmiRegistryPort}"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
