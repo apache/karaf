@@ -21,15 +21,15 @@ Building Apache Karaf
 Initial Setup
 -------------
 
-1) Install J2SE 5.0 SDK (or later), which can be downloaded from 
-   http://www.oracle.com/technetwork/java/javase/downloads/index-jdk5-jsp-142662.html. 
-   Use version of "JDK 5.0 Update 22" (or later).
+1) Install J2SE 6.0 SDK (or later), which can be downloaded from 
+   http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html
+   Use version of "JDK 6.0 Update 29" (or later).
 
 2) Make sure that your JAVA_HOME environment variable is set to the newly installed 
    JDK location, and that your PATH includes %JAVA_HOME%\bin (windows) or 
    $JAVA_HOME$/bin (unix).
 
-3) Install Maven 2.2.1 (or later), which can be downloaded from 
+3) Install Maven 3.0.3 (or later), which can be downloaded from 
    http://maven.apache.org/download.html. Make sure that your PATH includes 
    the MVN_HOME/bin directory. 
 
