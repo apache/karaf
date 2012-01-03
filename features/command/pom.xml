@@ -90,18 +90,6 @@
             <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
         </dependency>
-		<dependency>
-            <groupId>org.sonatype.aether</groupId>
-            <artifactId>aether-api</artifactId>
-            <version>${aether.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.sonatype.aether</groupId>
-            <artifactId>aether-util</artifactId>
-            <version>${aether.version}</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -136,7 +124,6 @@
                             *
                         </Import-Package>
                         <Private-Package>
-                            org.sonatype.*,
                             !*
 						</Private-Package>
                     </instructions>

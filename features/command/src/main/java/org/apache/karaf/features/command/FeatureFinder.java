@@ -24,8 +24,6 @@ import java.util.Map;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 public class FeatureFinder implements ManagedService {
     Map<String, String> nameToArtifactMap = new HashMap<String, String>();
@@ -33,30 +31,13 @@ public class FeatureFinder implements ManagedService {
         return nameToArtifactMap.keySet().toArray(new String[] {});
     }
 
-    private Artifact getArtifactWithVersion(Artifact artifact, String version) {
-        return new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), artifact.getClassifier(), artifact.getExtension(), version);
-    }
-
     public URI getUriFor(String name, String version) {
         String coords = nameToArtifactMap.get(name);
         if (coords == null) {
             return null;
         }
-        Artifact artifact = new DefaultArtifact(coords);
-        Artifact resultArtifact = getArtifactWithVersion(artifact, version);
-        URI uri = getPaxUrlForArtifact(resultArtifact);
-        return uri;
-    }
-
-    private URI getPaxUrlForArtifact(Artifact resultArtifact) {
-        String uriSt = "mvn:" + resultArtifact.getGroupId() + "/" + resultArtifact.getArtifactId()
-            + "/" + resultArtifact.getVersion()
-            + "/" + resultArtifact.getExtension() + "/" + resultArtifact.getClassifier();
-        try {
-            return new URI(uriSt);
-        } catch (Exception e) {
-            return null;
-        }
+        Artifact artifact = new Artifact(coords);
+        return artifact.getPaxUrlForArtifact(version);
     }
 
     @SuppressWarnings("rawtypes")
