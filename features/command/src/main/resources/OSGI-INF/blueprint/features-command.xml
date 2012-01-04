@@ -74,7 +74,30 @@
                 <ref component-id="allFeatureCompleter" />
             </completers>
         </command>
+        <command>
+            <action class="org.apache.karaf.features.command.ChooseUrlCommand">
+                <property name="featureFinder" ref="featureFinder" />
+                <property name="featuresService" ref="featuresService" />
+            </action>
+            <completers>
+                <ref component-id="featureRepoCompleter" />
+                <null/>
+            </completers>
+        </command>
     </command-bundle>
+
+    <bean id="featureRepoCompleter" class="org.apache.karaf.features.command.completers.FeatureRepoNameCompleter">
+        <property name="featureFinder" ref="featureFinder" />
+    </bean>
+
+    <bean id="featureFinder" class="org.apache.karaf.features.command.FeatureFinder">
+    </bean> 
+
+    <service ref="featureFinder" interface="org.osgi.service.cm.ManagedService" >
+        <service-properties>
+            <entry key="service.pid" value="org.apache.karaf.features.repos" />
+        </service-properties>
+    </service>
 
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService" />
 
