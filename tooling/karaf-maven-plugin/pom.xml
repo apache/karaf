@@ -128,6 +128,10 @@
             <artifactId>org.apache.karaf.deployer.kar</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.kar</groupId>
+            <artifactId>org.apache.karaf.kar.core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.ant</artifactId>
         </dependency>
