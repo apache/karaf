@@ -71,6 +71,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- 4.2.0 is needed in order to have aries util work correctly within pojosr -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -87,7 +88,7 @@
         <dependency>
             <groupId>com.googlecode.pojosr</groupId>
             <artifactId>de.kalpatec.pojosr.framework</artifactId>
-            <version>0.1.4</version>
+            <version>0.1.6</version>
             <scope>test</scope>
         </dependency>
 

@@ -39,6 +39,7 @@
     </properties>
 
     <dependencies>
+        <!--
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>osgi</artifactId>
@@ -49,6 +50,7 @@
             <artifactId>org.apache.felix.framework</artifactId>
             <scope>provided</scope>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
