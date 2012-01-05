@@ -20,7 +20,6 @@ import java.io.File;
 
 import junit.framework.TestCase;
 import org.apache.karaf.jpm.impl.ScriptUtils;
-import org.apache.karaf.jpm.ProcessBuilder;
 
 public class ProcessTest extends TestCase {
 
@@ -28,7 +27,7 @@ public class ProcessTest extends TestCase {
         String javaPath = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath();
         System.err.println(javaPath);
         StringBuilder command = new StringBuilder();
-        command.append(javaPath);
+        command.append("\"" + javaPath + "\"");
         command.append(" -Dprop=\"key\"");
         command.append(" -classpath ");
         String clRes = getClass().getName().replace('.', '/') + ".class";
