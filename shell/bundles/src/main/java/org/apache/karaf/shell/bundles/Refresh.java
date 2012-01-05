@@ -39,7 +39,7 @@ public class Refresh extends BundlesCommandWithConfirmation {
                 System.out.println("PackageAdmin service is unavailable.");
                 return;
             }
-            if (bundles == null) {
+            if (bundles == null || bundles.size() == 0) {
                 pa.refreshPackages(null);
             } else {
                 pa.refreshPackages(bundles.toArray(new Bundle[bundles.size()]));
