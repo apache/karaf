@@ -295,10 +295,6 @@ public class Main {
         framework.start();
 
         ServerInfo serverInfo = new ServerInfoImpl(args, karafBase, karafData, karafHome, karafInstances);
-
-        URL url = framework.getClass().getClassLoader().getResource(framework.getClass().getName().replace(".", "/") + ".class");
-        System.err.println("Framework: " + url.toExternalForm());
-
         framework.getBundleContext().registerService(ServerInfo.class, serverInfo, null);
 
         // Start custom activators
