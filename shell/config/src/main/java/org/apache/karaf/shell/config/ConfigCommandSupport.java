@@ -46,22 +46,19 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
     private static final String FACTORY_SEPARATOR = "-";
     private static final String FILEINSTALL_FILE_NAME="felix.fileinstall.filename";
 
+    private ConfigurationAdmin configurationAdmin;
     protected File storage;
 
-    protected Object doExecute() throws Exception {
-        // Get config admin service.
-        ServiceReference ref = getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
-        if (ref == null) {
-            System.out.println("ConfigurationAdmin service is unavailable.");
-            return null;
-        }
-        ConfigurationAdmin admin = getConfigurationAdmin();
-        if (admin == null) {
-            System.out.println("ConfigAdmin service is unavailable.");
-            return null;
-        }
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
+    }
 
-        doExecute(admin);
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
+
+    protected Object doExecute() throws Exception {
+        doExecute(getConfigurationAdmin());
         return null;
     }
 
@@ -69,22 +66,6 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
         return (Dictionary) this.session.get(PROPERTY_CONFIG_PROPS);
     }
 
-    protected ConfigurationAdmin getConfigurationAdmin() {
-        ServiceReference ref = getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
-        if (ref == null) {
-            return null;
-        }
-        try {
-            ConfigurationAdmin admin = (ConfigurationAdmin) getBundleContext().getService(ref);
-            if (admin == null) {
-                return null;
-            } else {
-                return admin;
-            }
-        } finally {
-            getBundleContext().ungetService(ref);
-        }
-    }
 
     protected abstract void doExecute(ConfigurationAdmin admin) throws Exception;
 
