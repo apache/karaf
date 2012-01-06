@@ -106,6 +106,15 @@ public class Node<T> {
             return value.equals(parent.value) || parent.hasAncestor(value);
         }
     }
+    
+    public boolean hasChild(T value) {
+        for (Node<T> child : getChildren()) {
+            if (value.equals(child.getValue())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /*
      * Write this node to the PrintWriter.  It should be indented one step

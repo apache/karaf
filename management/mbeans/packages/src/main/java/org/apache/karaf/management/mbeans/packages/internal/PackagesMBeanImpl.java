@@ -16,6 +16,11 @@
  */
 package org.apache.karaf.management.mbeans.packages.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+
 import org.apache.karaf.management.mbeans.packages.PackagesMBean;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -23,14 +28,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Packages MBean implementation.
  */
+@Deprecated
 public class PackagesMBeanImpl extends StandardMBean implements PackagesMBean {
 
     private BundleContext bundleContext;

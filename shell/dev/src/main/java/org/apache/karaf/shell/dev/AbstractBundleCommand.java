@@ -17,14 +17,16 @@
 package org.apache.karaf.shell.dev;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleRevisions;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * Base class for a dev: command that takes a bundle id as an argument
@@ -36,20 +38,8 @@ public abstract class AbstractBundleCommand extends OsgiCommandSupport {
     @Argument(index = 0, name = "id", description = "The bundle ID", required = true)
     Long id;
 
-    private PackageAdmin admin;
-
     @Override
     protected Object doExecute() throws Exception {
-        // Get package admin service.
-        ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
-        if (ref == null) {
-            System.out.println("PackageAdmin service is unavailable.");
-            return null;
-        }
-
-        // using the getService call ensures that the reference will be released at the end
-        admin = getService(PackageAdmin.class, ref);
-
         Bundle bundle = getBundleContext().getBundle(id);
         if (bundle == null) {
             System.err.println("Bundle ID " + id + " is invalid");
@@ -70,14 +60,16 @@ public abstract class AbstractBundleCommand extends OsgiCommandSupport {
         // the set of bundles from which the bundle imports packages
         Map<String, Bundle> exporters = new HashMap<String, Bundle>();
 
-        for (ExportedPackage pkg : getPackageAdmin().getExportedPackages((Bundle) null)) {
-            Bundle[] bundles = pkg.getImportingBundles();
-            if (bundles != null) {
-                for (Bundle importingBundle : bundles) {
-                    if (bundle.equals(importingBundle)
-                            && !(pkg.getExportingBundle().getBundleId() == 0)
-                            && !(pkg.getExportingBundle().equals(bundle))) {
-                        exporters.put(pkg.getName(), pkg.getExportingBundle());
+        for (BundleRevision revision : bundle.adapt(BundleRevisions.class).getRevisions()) {
+            BundleWiring wiring = revision.getWiring();
+            if (wiring != null) {
+                List<BundleWire> wires = wiring.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
+                if (wires != null) {
+                    for (BundleWire wire : wires) {
+                        if (wire.getProviderWiring().getBundle().getBundleId() != 0) {
+                            exporters.put(wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE).toString(),
+                                          wire.getProviderWiring().getBundle());
+                        }
                     }
                 }
             }
@@ -85,7 +77,4 @@ public abstract class AbstractBundleCommand extends OsgiCommandSupport {
         return exporters;
     }
 
-    protected PackageAdmin getPackageAdmin() {
-        return admin;    
-    }
 }

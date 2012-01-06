@@ -16,19 +16,25 @@
  */
 package org.apache.karaf.management.mbeans.bundles.internal;
 
-import org.apache.karaf.management.mbeans.bundles.BundlesMBean;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
-
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import javax.management.openmbean.*;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
+
+import org.apache.karaf.management.mbeans.bundles.BundlesMBean;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 /**
  * Bundles MBean implementation.
@@ -42,12 +48,6 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public TabularData getBundles() throws Exception {
-        ServiceReference startLevelReference = bundleContext.getServiceReference(StartLevel.class.getName());
-        StartLevel startLevel = null;
-        if (startLevelReference != null) {
-            startLevel = (StartLevel) bundleContext.getService(startLevelReference);
-        }
-
         CompositeType bundleType = new CompositeType("Bundle", "OSGi Bundle",
                 new String[]{ "ID", "Name", "Version", "Start Level", "State" },
                 new String[]{ "ID of the Bundle", "Name of the Bundle", "Version of the Bundle", "Start Level of the Bundle", "Current State of the Bundle" },
@@ -58,10 +58,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         Bundle[] bundles = bundleContext.getBundles();
 
         for (int i = 0; i < bundles.length; i++) {
-            int bundleStartLevel = 1;
-            if (startLevel != null) {
-                bundleStartLevel = startLevel.getBundleStartLevel(bundles[i]);
-            }
+            int bundleStartLevel = getBundleStartLevel(bundles[i]).getStartLevel();
             int bundleState = bundles[i].getState();
             String bundleStateString;
             if (bundleState == Bundle.ACTIVE)
@@ -80,22 +77,10 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
                     new Object[]{ bundles[i].getBundleId(), bundles[i].getSymbolicName(), bundles[i].getVersion().toString(), bundleStartLevel, bundleStateString });
             table.put(data);
         }
-
-        bundleContext.ungetService(startLevelReference);
-
         return table;
     }
 
     public int getStartLevel(String bundleId) throws Exception {
-        ServiceReference startLevelReference = bundleContext.getServiceReference(StartLevel.class.getName());
-        if (startLevelReference == null) {
-            throw new IllegalStateException("StartLevel service is not available");
-        }
-        StartLevel startLevel = (StartLevel) bundleContext.getService(startLevelReference);
-        if (startLevel == null) {
-            throw new IllegalStateException("StartLevel service is not available");
-        }
-
         BundlesSelector selector = new BundlesSelector(bundleContext);
         List<Bundle> bundles = selector.selectBundles(bundleId);
 
@@ -103,60 +88,30 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
             throw new IllegalArgumentException("Provided bundle Id doesn't return any bundle or more than one bundle selected");
         }
 
-        int bundleStartLevel = startLevel.getBundleStartLevel(bundles.get(0));
-        bundleContext.ungetService(startLevelReference);
-        return bundleStartLevel;
+        return getBundleStartLevel(bundles.get(0)).getStartLevel();
     }
 
     public void setStartLevel(String bundleId, int bundleStartLevel) throws Exception {
-        ServiceReference startLevelReference = bundleContext.getServiceReference(StartLevel.class.getName());
-        if (startLevelReference == null) {
-            throw new IllegalStateException("StartLevel service is not available");
-        }
-        StartLevel startLevel = (StartLevel) bundleContext.getService(startLevelReference);
-        if (startLevel == null) {
-            throw new IllegalStateException("StartLevel service is not available");
-        }
-
         BundlesSelector selector = new BundlesSelector(bundleContext);
         List<Bundle> bundles = selector.selectBundles(bundleId);
 
         for (Bundle bundle : bundles) {
-            startLevel.setBundleStartLevel(bundle, bundleStartLevel);
+            getBundleStartLevel(bundle).setStartLevel(bundleStartLevel);
         }
+    }
 
-        bundleContext.ungetService(startLevelReference);
+    private BundleStartLevel getBundleStartLevel(Bundle bundle) {
+        return bundle.adapt(BundleStartLevel.class);
     }
 
     public void refresh() throws Exception {
-        ServiceReference packageAdminReference = getBundleContext().getServiceReference(PackageAdmin.class.getName());
-        if (packageAdminReference == null) {
-            throw new IllegalStateException("PackageAdmin service is not available");
-        }
-        PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(packageAdminReference);
-        if (packageAdmin == null) {
-            throw new IllegalStateException("PackageAdmin service is not available");
-        }
-        packageAdmin.refreshPackages(null);
-        getBundleContext().ungetService(packageAdminReference);
+        getFrameworkWiring().refreshBundles(null);
     }
 
     public void refresh(String bundleId) throws Exception {
-        ServiceReference packageAdminReference = getBundleContext().getServiceReference(PackageAdmin.class.getName());
-        if (packageAdminReference == null) {
-            throw new IllegalStateException("PackageAdmin service is not available");
-        }
-        PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(packageAdminReference);
-        if (packageAdmin == null) {
-            throw new IllegalStateException("PackageAdmin service is not available");
-        }
-
-        BundlesSelector selector = new BundlesSelector(bundleContext);
+        BundlesSelector selector = new BundlesSelector(getBundleContext());
         List<Bundle> bundles = selector.selectBundles(bundleId);
-
-        Bundle[] bundlesArray = new Bundle[bundles.size()];
-        packageAdmin.refreshPackages(bundles.toArray(bundlesArray));
-        getBundleContext().ungetService(packageAdminReference);
+        getFrameworkWiring().refreshBundles(bundles);
     }
 
     public void update(String bundleId) throws Exception {
@@ -184,35 +139,17 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
     }
 
     public void resolve() throws Exception {
-        ServiceReference packageAdminReference = getBundleContext().getServiceReference(PackageAdmin.class.getName());
-        if (packageAdminReference == null) {
-            throw new IllegalStateException("PackageAdmin service is not available");
-        }
-        PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(packageAdminReference);
-        if (packageAdmin == null) {
-            throw new IllegalStateException("PackageAdmin service is not available");
-        }
-        packageAdmin.resolveBundles(null);
-        getBundleContext().ungetService(packageAdminReference);
+        getFrameworkWiring().resolveBundles(null);
     }
 
     public void resolve(String bundleId) throws Exception {
-        ServiceReference packageAdminReference = getBundleContext().getServiceReference(PackageAdmin.class.getName());
-        if (packageAdminReference == null) {
-            throw new IllegalStateException("PackageAdmin service is not available");
-        }
-        PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(packageAdminReference);
-        if (packageAdmin == null) {
-            throw new IllegalStateException("PackageAdmin service is not available");
-        }
-
-        BundlesSelector selector = new BundlesSelector(bundleContext);
+        BundlesSelector selector = new BundlesSelector(getBundleContext());
         List<Bundle> bundles = selector.selectBundles(bundleId);
+        getFrameworkWiring().resolveBundles(bundles);
+    }
 
-        Bundle[] bundlesArray = new Bundle[bundles.size()];
-        packageAdmin.resolveBundles(bundles.toArray(bundlesArray));
-
-        getBundleContext().ungetService(packageAdminReference);
+    private FrameworkWiring getFrameworkWiring() {
+        return getBundleContext().getBundle(0).adapt(FrameworkWiring.class);
     }
 
     public void restart(String bundleId) throws Exception {

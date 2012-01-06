@@ -23,7 +23,7 @@ import org.ops4j.pax.web.service.spi.WebEvent;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.service.startlevel.StartLevel;
+import org.osgi.framework.startlevel.BundleStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,6 @@ import java.util.Map;
 public class WebContainerServiceImpl implements WebContainerService {
     
     private BundleContext bundleContext;
-    private StartLevel startLevelService;
     private WebEventHandler webEventHandler;
     private WarManager warManager;
     
@@ -45,10 +44,6 @@ public class WebContainerServiceImpl implements WebContainerService {
     
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-    }
-    
-    public void setStartLevelService(StartLevel startLevelService) {
-        this.startLevelService = startLevelService;
     }
     
     public void setWebEventHandler(WebEventHandler webEventHandler) {
@@ -88,10 +83,7 @@ public class WebContainerServiceImpl implements WebContainerService {
                 String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
                 name = ((version != null)) ? name + " (" + version + ")" : name;
                 long bundleId = bundle.getBundleId();
-                int level = -1;
-                if (startLevelService != null) {
-                    level = startLevelService.getBundleStartLevel(bundle);
-                }
+                int level = bundle.adapt(BundleStartLevel.class).getStartLevel();
                 if (!contextPath.startsWith("/")) {
                     contextPath = "/" + contextPath;
                 }

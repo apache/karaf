@@ -26,13 +26,13 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Formatter;
 
+import org.apache.felix.service.command.Converter;
+import org.apache.felix.service.command.Function;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.apache.felix.service.command.Converter;
-import org.apache.felix.service.command.Function;
-import org.osgi.service.startlevel.StartLevel;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 public class Converters implements Converter
 {
@@ -46,21 +46,7 @@ public class Converters implements Converter
     private CharSequence print(Bundle bundle)
     {
         // [ ID ] [STATE      ] [ SL ] symname
-        StartLevel sl = null;
-        ServiceReference ref = context.getServiceReference(StartLevel.class.getName());
-        if (ref != null)
-        {
-            sl = (StartLevel) context.getService(ref);
-        }
-
-        if (sl == null)
-        {
-            return String.format("%5d|%-11s|%s (%s)", bundle.getBundleId(),
-                getState(bundle), bundle.getSymbolicName(), bundle.getVersion());
-        }
-
-        int level = sl.getBundleStartLevel(bundle);
-        context.ungetService(ref);
+        int level = bundle.adapt(FrameworkStartLevel.class).getStartLevel();
 
         return String.format("%5d|%-11s|%5d|%s (%s)", bundle.getBundleId(),
             getState(bundle), level, bundle.getSymbolicName(), bundle.getVersion());

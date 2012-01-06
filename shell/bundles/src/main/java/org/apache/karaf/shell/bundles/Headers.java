@@ -17,7 +17,6 @@
 package org.apache.karaf.shell.bundles;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -27,17 +26,21 @@ import java.util.List;
 import java.util.Map;
 
 import jline.Terminal;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
 import org.apache.felix.utils.manifest.Attribute;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Directive;
 import org.apache.felix.utils.manifest.Parser;
 import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.util.ShellUtil;
 import org.fusesource.jansi.Ansi;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -53,10 +56,7 @@ public class Headers extends BundlesCommand {
     @Option(name = "--indent", description = "Indentation method")
     int indent = -1;
 
-    private PackageAdmin admin;
-
     protected void doExecute(List<Bundle> bundles) throws Exception {
-        admin = getService(PackageAdmin.class);
         if (bundles == null || bundles.isEmpty()) {
             bundles = Arrays.asList(getBundleContext().getBundles());
         }
@@ -287,27 +287,42 @@ public class Headers extends BundlesCommand {
     }
 
 
-   private boolean checkBundle(String bundleName, String version) {
-        if (admin != null) {
-            Bundle[] bundles = admin.getBundles(bundleName, version);
-            return bundles != null && bundles.length > 0;
+    private boolean checkBundle(String bundleName, String version) {
+        VersionRange vr = VersionRange.parseVersionRange(version);
+        Bundle[] bundles = bundleContext.getBundles();
+        for (int i = 0; (bundles != null) && (i < bundles.length); i++) {
+            String sym = bundles[i].getSymbolicName();
+            if ((sym != null) && sym.equals(bundleName)) {
+                if (vr.contains(bundles[i].getVersion())) {
+                    return true;
+                }
+            }
         }
         return false;
     }
 
     private boolean checkPackage(String packageName, String version) {
         VersionRange range = VersionRange.parseVersionRange(version);
-        if (admin != null) {
-            ExportedPackage[] packages = admin.getExportedPackages(packageName);
-            if (packages != null) {
-                for (ExportedPackage export : packages) {
-                    if (range.contains(export.getVersion())) {
+        Bundle[] bundles = bundleContext.getBundles();
+        for (int i = 0; (bundles != null) && (i < bundles.length); i++) {
+            BundleWiring wiring = bundles[i].adapt(BundleWiring.class);
+            List<BundleCapability> caps = wiring != null ? wiring.getCapabilities(BundleRevision.PACKAGE_NAMESPACE) : null;
+            if (caps != null) {
+                for (BundleCapability cap : caps) {
+                    String n = getAttribute(cap, BundleRevision.PACKAGE_NAMESPACE);
+                    String v = getAttribute(cap, Constants.VERSION_ATTRIBUTE);
+                    if (packageName.equals(n) && range.contains(VersionTable.getVersion(v))) {
                         return true;
                     }
                 }
             }
         }
         return false;
+    }
+    
+    private String getAttribute(BundleCapability cap, String name)  {
+        Object obj = cap.getAttributes().get(name);
+        return obj != null ? obj.toString() : null;
     }
 
 }

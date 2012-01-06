@@ -20,33 +20,13 @@ import java.util.List;
 
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 @Command(scope = "bundle", name = "refresh", description = "Refresh bundles.")
 public class Refresh extends BundlesCommandWithConfirmation {
 
     protected void doExecute(List<Bundle> bundles) throws Exception {
-        // Get package admin service.
-        ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
-        if (ref == null) {
-            System.out.println("PackageAdmin service is unavailable.");
-            return;
-        }
-        try {
-            PackageAdmin pa = (PackageAdmin) getBundleContext().getService(ref);
-            if (pa == null) {
-                System.out.println("PackageAdmin service is unavailable.");
-                return;
-            }
-            if (bundles == null || bundles.size() == 0) {
-                pa.refreshPackages(null);
-            } else {
-                pa.refreshPackages(bundles.toArray(new Bundle[bundles.size()]));
-            }
-        }
-        finally {
-            getBundleContext().ungetService(ref);
-        }
+        FrameworkWiring wiring = getBundleContext().getBundle(0).adapt(FrameworkWiring.class);
+        wiring.refreshBundles(bundles == null || bundles.isEmpty() ? null : bundles);
     }
 }

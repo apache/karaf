@@ -16,15 +16,15 @@
 */
 package org.apache.karaf.system.internal;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import org.apache.karaf.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * Implementation of the system service.
@@ -97,37 +97,11 @@ public class SystemServiceImpl implements SystemService {
     }
 
     public void setStartLevel(int startLevel) throws Exception {
-        // get start level service
-        ServiceReference ref = bundleContext.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName());
-        if (ref == null) {
-            throw new IllegalStateException("StartLevel service is unavailable");
-        }
-        try {
-            org.osgi.service.startlevel.StartLevel startLevelService = (org.osgi.service.startlevel.StartLevel) bundleContext.getService(ref);
-            if (startLevelService == null) {
-                throw new IllegalStateException("StartLevel service is unavailable");
-            }
-            startLevelService.setStartLevel(startLevel);
-        } finally {
-            bundleContext.ungetService(ref);
-        }
+        getBundleContext().getBundle(0).adapt(FrameworkStartLevel.class).setStartLevel(startLevel);
     }
 
     public int getStartLevel() throws Exception {
-        // get start level service
-        ServiceReference ref = bundleContext.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName());
-        if (ref == null) {
-            throw new IllegalStateException("StartLevel service is unavailable");
-        }
-        try {
-            org.osgi.service.startlevel.StartLevel startLevelService = (org.osgi.service.startlevel.StartLevel) bundleContext.getService(ref);
-            if (startLevelService == null) {
-                throw new IllegalStateException("StartLevel service is unavailable");
-            }
-            return startLevelService.getStartLevel();
-        } finally {
-            bundleContext.ungetService(ref);
-        }
+        return getBundleContext().getBundle(0).adapt(FrameworkStartLevel.class).getStartLevel();
     }
 
     /**

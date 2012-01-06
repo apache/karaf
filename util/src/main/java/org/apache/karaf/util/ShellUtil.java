@@ -27,8 +27,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.startlevel.StartLevel;
+import org.osgi.framework.startlevel.BundleStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,25 +134,18 @@ public class ShellUtil {
      * @return true if the bundle has start level minor than 50
      */
     public static boolean isASystemBundle(BundleContext bundleContext, Bundle bundle) {
-        ServiceReference ref = bundleContext.getServiceReference(StartLevel.class.getName());
-        if (ref != null) {
-            StartLevel sl = (StartLevel) bundleContext.getService(ref);
-            if (sl != null) {
-                int level = sl.getBundleStartLevel(bundle);
-                int sbsl = 49;
-                final String sbslProp = bundleContext.getProperty( "karaf.systemBundlesStartLevel" );
-                if (sbslProp != null) {
-                    try {
-                       sbsl = Integer.valueOf( sbslProp );
-                    }
-                    catch( Exception ignore ) {
-                      // ignore
-                    }
-                }
-                return level <= sbsl;
+        int level = bundle.adapt(BundleStartLevel.class).getStartLevel();
+        int sbsl = 49;
+        final String sbslProp = bundleContext.getProperty( "karaf.systemBundlesStartLevel" );
+        if (sbslProp != null) {
+            try {
+               sbsl = Integer.valueOf( sbslProp );
+            }
+            catch( Exception ignore ) {
+              // ignore
             }
         }
-        return false;
+        return level <= sbsl;
     }
 
     /**
