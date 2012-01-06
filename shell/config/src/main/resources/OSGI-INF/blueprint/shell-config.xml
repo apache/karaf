@@ -24,10 +24,13 @@
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
-            <action class="org.apache.karaf.shell.config.CancelCommand"/>
+            <action class="org.apache.karaf.shell.config.CancelCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
+            </action>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.DeleteCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
                 <property name="storage" value="${storage}" />
             </action>
             <completers>
@@ -37,6 +40,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.EditCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
                 <property name="storage" value="${storage}" />
             </action>
             <completers>
@@ -45,10 +49,13 @@
             </completers>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.config.ListCommand"/>
+            <action class="org.apache.karaf.shell.config.ListCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
+            </action>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropDelCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
                 <property name="storage" value="${storage}" />
             </action>
             <completers>
@@ -60,10 +67,13 @@
             </optional-completers>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.config.PropListCommand"/>
+            <action class="org.apache.karaf.shell.config.PropListCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
+            </action>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropSetCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
                 <property name="storage" value="${storage}" />
             </action>
             <completers>
@@ -76,6 +86,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropAppendCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
                 <property name="storage" value="${storage}" />
             </action>
             <completers>
@@ -88,6 +99,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.UpdateCommand">
+                <property name="configurationAdmin" ref="configAdmin"/>
                 <property name="storage" value="${storage}" />
             </action>
         </command>
