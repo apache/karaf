@@ -67,10 +67,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.service.startlevel.StartLevel;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 /**
  * <p>
@@ -618,8 +618,7 @@ public class Main {
 
         // Retrieve the Start Level service, since it will be needed
         // to set the start level of the installed bundles.
-        StartLevel sl = (StartLevel) context.getService(
-                context.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName()));
+        FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
 
         // Set the default bundle start level
         int ibsl = 60;
@@ -652,7 +651,7 @@ public class Main {
         }
     }
 
-    private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, StartLevel sl, boolean convertToMavenUrls, boolean start) {
+    private List<Bundle> autoInstall(String propertyPrefix, BundleContext context, FrameworkStartLevel sl, boolean convertToMavenUrls, boolean start) {
         Map<Integer, String> autoStart = new TreeMap<Integer, String>();
         List<Bundle> bundles = new ArrayList<Bundle>();
         for (Object o : configProps.keySet()) {
@@ -684,7 +683,7 @@ public class Main {
                         try {
                             String[] parts = Utils.convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
                             Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
-                            sl.setBundleStartLevel(b, startLevel);
+                            b.adapt(BundleStartLevel.class).setStartLevel(startLevel);
                             bundles.add(b);
                         }
                         catch (Exception ex) {
@@ -1386,10 +1385,7 @@ public class Main {
     }
 
     protected void setStartLevel(int level) throws Exception {
-        BundleContext ctx = framework.getBundleContext();
-        ServiceReference[] refs = ctx.getServiceReferences(StartLevel.class.getName(), null);
-        StartLevel sl = (StartLevel) ctx.getService(refs[0]);
-        sl.setStartLevel(level);
+        framework.adapt(FrameworkStartLevel.class).setStartLevel(level);
     }
 
 

@@ -16,22 +16,32 @@
  */
 package org.apache.karaf.shell.dev;
 
-import static java.lang.String.format;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.utils.manifest.Clause;
+import org.apache.felix.utils.manifest.Parser;
+import org.apache.felix.utils.version.VersionRange;
+import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.dev.util.Bundles;
-import org.apache.karaf.shell.dev.util.Import;
 import org.apache.karaf.shell.dev.util.Node;
 import org.apache.karaf.shell.dev.util.Tree;
 import org.osgi.framework.Bundle;
-import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleRevisions;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 /**
  * Command for showing the full tree of bundles that have been used to resolve
@@ -91,13 +101,19 @@ public class ShowBundleTree extends AbstractBundleCommand {
         Map<String, Set<Bundle>> exports = new HashMap<String, Set<Bundle>>();
 
         for (Bundle bundle : bundles) {
-            ExportedPackage[] packages = getPackageAdmin().getExportedPackages(bundle);
-            if (packages != null) {
-                for (ExportedPackage p : packages) {
-                    if (exports.get(p.getName()) == null) {
-                        exports.put(p.getName(), new HashSet<Bundle>());
+            for (BundleRevision revision : bundle.adapt(BundleRevisions.class).getRevisions()) {
+                BundleWiring wiring = revision.getWiring();
+                if (wiring != null) {
+                    List<BundleWire> wires = wiring.getProvidedWires(BundleRevision.PACKAGE_NAMESPACE);
+                    if (wires != null) {
+                        for (BundleWire wire : wires) {
+                            String name = wire.getCapability().getAttributes().get(BundleRevision.PACKAGE_NAMESPACE).toString();
+                            if (exports.get(name) == null) {
+                                exports.put(name, new HashSet<Bundle>());
+                            }
+                            exports.get(name).add(bundle);
+                        }
                     }
-                    exports.get(p.getName()).add(bundle);
                 }
             }
         }
@@ -121,6 +137,7 @@ public class ShowBundleTree extends AbstractBundleCommand {
             createNode(tree);
         } else {
             createNodesForImports(tree, bundle);
+            System.out.print("\nWarning: the below tree is a rough approximation of a possible resolution");
         }
     }
 
@@ -128,28 +145,47 @@ public class ShowBundleTree extends AbstractBundleCommand {
      * Creates nodes for the imports of the bundle (instead of reporting wiring information
      */
     private void createNodesForImports(Node node, Bundle bundle) {
-        for (Import i : Import.parse(String.valueOf(bundle.getHeaders().get("Import-Package")),
-                                     String.valueOf(bundle.getHeaders().get("Export-Package")))) {
-            createNodeForImport(node, bundle, i);
+        Clause[] imports = Parser.parseHeader(bundle.getHeaders().get("Import-Package"));
+        Clause[] exports = Parser.parseHeader(bundle.getHeaders().get("Export-Package"));
+        for (Clause i : imports) {
+            boolean exported = false;
+            for (Clause e : exports) {
+                if (e.getName().equals(i.getName())) {
+                    exported = true;
+                    break;
+                }
+            }
+            if (!exported) {
+                createNodeForImport(node, bundle, i);
+            }
         }
     }
 
     /*
      * Create a child node for a given import (by finding a matching export in the currently installed bundles)
      */
-    private void createNodeForImport(Node node, Bundle bundle, Import i) {
-        ExportedPackage[] exporters = getPackageAdmin().getExportedPackages(i.getPackage());
+    private void createNodeForImport(Node node, Bundle bundle, Clause i) {
+        VersionRange range = VersionRange.parseVersionRange(i.getAttribute(Constants.VERSION_ATTRIBUTE));
         boolean foundMatch = false;
-        if (exporters != null) {
-            for (ExportedPackage ep : exporters) {
-                if (i.getVersion().contains(ep.getVersion())) {
-                    if (bundle.equals(ep.getExportingBundle())) {
-                        foundMatch = true;
-                    } else {
-                        Node child = node.addChild(ep.getExportingBundle());
-                        System.out.printf("- import %s: resolved using %s%n", i, ep.getExportingBundle());
-                        foundMatch = true;
-                        createNode(child);
+        for (Bundle b : bundleContext.getBundles()) {
+            BundleWiring wiring = b.adapt(BundleWiring.class);
+            if (wiring != null) {
+                List<BundleCapability> caps = wiring.getCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+                if (caps != null) {
+                    for (BundleCapability cap : caps) {
+                        String n = getAttribute(cap, BundleRevision.PACKAGE_NAMESPACE);
+                        String v = getAttribute(cap, Constants.VERSION_ATTRIBUTE);
+                        if (i.getName().equals(n) && range.contains(VersionTable.getVersion(v))) {
+                            boolean existing = tree.flatten().contains(b);
+                            System.out.printf("- import %s: resolved using %s%n", i, b);
+                            foundMatch = true;
+                            if (!node.hasChild(b)) {
+                                Node child = node.addChild(b);
+                                if (!existing) {
+                                    createNode(child);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -159,9 +195,14 @@ public class ShowBundleTree extends AbstractBundleCommand {
         }
     }
 
+    private String getAttribute(BundleCapability capability, String name) {
+        Object o = capability.getAttributes().get(name);
+        return o != null ? o.toString() : null;
+    }
+
     /*
-     * Creates a node in the bundle tree
-     */
+    * Creates a node in the bundle tree
+    */
     private void createNode(Node<Bundle> node) {
         Bundle bundle = node.getValue();
         Collection<Bundle> exporters = new HashSet<Bundle>();

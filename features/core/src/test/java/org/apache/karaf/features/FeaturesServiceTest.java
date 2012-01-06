@@ -16,14 +16,6 @@
  */
 package org.apache.karaf.features;
 
-import static org.easymock.EasyMock.aryEq;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -43,16 +35,16 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.jar.JarInputStream;
 
 import junit.framework.TestCase;
-
 import org.apache.karaf.features.internal.FeaturesServiceImpl;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.service.log.LogService;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.xml.sax.SAXParseException;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.service.blueprint.container.BlueprintContainer;
+import org.slf4j.LoggerFactory;
 
 import static org.easymock.EasyMock.*;
 
@@ -66,7 +58,7 @@ public class FeaturesServiceTest extends TestCase {
 
     public void testInstallFeature() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -133,7 +125,7 @@ public class FeaturesServiceTest extends TestCase {
 
     public void testUninstallFeature() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -151,18 +143,19 @@ public class FeaturesServiceTest extends TestCase {
         
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+        Bundle framework = EasyMock.createMock(Bundle.class);
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        replay(bundleContext, installedBundle, framework);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
         svc.addRepository(uri);
         
-        verify(bundleContext, installedBundle);
+        verify(bundleContext, installedBundle, framework);
 
-        reset(bundleContext, installedBundle);
+        reset(bundleContext, installedBundle, framework);
 
         // Installs f1 and 0.1
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -196,7 +189,10 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
+        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
+
+        replay(bundleContext, installedBundle, framework);
 
         try {
             svc.uninstallFeature("f1");
@@ -222,7 +218,7 @@ public class FeaturesServiceTest extends TestCase {
     // Tests Add and Remove Repository
     public void testAddAndRemoveRepository() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -262,7 +258,7 @@ public class FeaturesServiceTest extends TestCase {
     // all features in a repo
     public void testInstallUninstallAllFeatures() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -282,7 +278,8 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-        Bundle installedBundle = EasyMock.createMock(Bundle.class);        
+        Bundle installedBundle = EasyMock.createMock(Bundle.class);
+        Bundle framework = EasyMock.createMock(Bundle.class);
 
         // Installs first feature name = f1, version = 0.1
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -337,7 +334,10 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
+        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
+
+        replay(bundleContext, installedBundle, framework);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
@@ -354,7 +354,7 @@ public class FeaturesServiceTest extends TestCase {
     // Tests uninstall of features
     public void testInstallFeatureWithDependantFeatures() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -373,6 +373,7 @@ public class FeaturesServiceTest extends TestCase {
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+        Bundle framework = EasyMock.createMock(Bundle.class);
 
         // Installs feature f1 with dependency on f2
         // so will install f2 first
@@ -407,7 +408,10 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
+        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
+
+        replay(bundleContext, installedBundle, framework);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
@@ -424,7 +428,7 @@ public class FeaturesServiceTest extends TestCase {
     // Tests install of a Repository that includes a feature with a feature dependency
     public void testInstallFeatureWithDependantFeaturesAndVersionWithoutPreinstall() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -459,7 +463,7 @@ public class FeaturesServiceTest extends TestCase {
     // Tests install of a Repository that includes a feature with a feature dependency
     public void testInstallFeatureWithDependantFeaturesAndNoVersionWithoutPreinstall() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -493,7 +497,7 @@ public class FeaturesServiceTest extends TestCase {
 
     public void testInstallFeatureWithDependantFeaturesAndRangeWithoutPreinstall() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -527,7 +531,7 @@ public class FeaturesServiceTest extends TestCase {
 
     public void testInstallFeatureWithDependantFeaturesAndRangeWithPreinstall() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -547,6 +551,7 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle framework = EasyMock.createMock(Bundle.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
 
         // Installs feature f1 with dependency on f2
@@ -569,7 +574,10 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
+        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
+
+        replay(bundleContext, installedBundle, framework);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setBundleContext(bundleContext);
@@ -585,7 +593,7 @@ public class FeaturesServiceTest extends TestCase {
 
     public void testGetFeaturesShouldHandleDifferentVersionPatterns() throws Exception {
 
-        String name = getJarUrl(Bundle.class);
+        String name = getJarUrl(BlueprintContainer.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -626,6 +634,7 @@ public class FeaturesServiceTest extends TestCase {
     private BundleContext prepareBundleContextForInstallUninstall() throws Exception {
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+        Bundle framework = EasyMock.createMock(Bundle.class);
 
         // Installs feature f1 with dependency on f2
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
@@ -644,13 +653,16 @@ public class FeaturesServiceTest extends TestCase {
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(bundleContext, installedBundle);
+        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
+        expect(framework.adapt(FrameworkWiring.class)).andReturn(null).anyTimes();
+
+        replay(bundleContext, installedBundle, framework);
         return bundleContext;
     }
 
     public void testInstallBatchFeatureWithContinueOnFailureNoClean() throws Exception {
-        String bundle1 = getJarUrl(Bundle.class);
-        String bundle2 = getJarUrl(LogService.class);
+        String bundle1 = getJarUrl(BlueprintContainer.class);
+        String bundle2 = getJarUrl(LoggerFactory.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -701,8 +713,8 @@ public class FeaturesServiceTest extends TestCase {
     }
 
     public void testInstallBatchFeatureWithContinueOnFailureClean() throws Exception {
-        String bundle1 = getJarUrl(Bundle.class);
-        String bundle2 = getJarUrl(LogService.class);
+        String bundle1 = getJarUrl(BlueprintContainer.class);
+        String bundle2 = getJarUrl(LoggerFactory.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -754,8 +766,8 @@ public class FeaturesServiceTest extends TestCase {
     }
 
     public void testInstallBatchFeatureWithoutContinueOnFailureNoClean() throws Exception {
-        String bundle1 = getJarUrl(Bundle.class);
-        String bundle2 = getJarUrl(LogService.class);
+        String bundle1 = getJarUrl(BlueprintContainer.class);
+        String bundle2 = getJarUrl(LoggerFactory.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -811,8 +823,8 @@ public class FeaturesServiceTest extends TestCase {
     }
 
     public void testInstallBatchFeatureWithoutContinueOnFailureClean() throws Exception {
-        String bundle1 = getJarUrl(Bundle.class);
-        String bundle2 = getJarUrl(LogService.class);
+        String bundle1 = getJarUrl(BlueprintContainer.class);
+        String bundle2 = getJarUrl(LoggerFactory.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -869,8 +881,8 @@ public class FeaturesServiceTest extends TestCase {
     }
 
     public void testInstallFeatureWithHostToRefresh() throws Exception {
-        String bundle1 = getJarUrl(LogService.class);
-        String bundle2 = getJarUrl(Bundle.class);
+        String bundle1 = getJarUrl(BlueprintContainer.class);
+        String bundle2 = getJarUrl(LoggerFactory.class);
 
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));
@@ -891,8 +903,9 @@ public class FeaturesServiceTest extends TestCase {
         }
 
         // loads the state
-        PackageAdmin packageAdmin = EasyMock.createMock(PackageAdmin.class);
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle framework = EasyMock.createMock(Bundle.class);
+        FrameworkWiring wiring = EasyMock.createMock(FrameworkWiring.class);
         Bundle installedBundle1 = EasyMock.createMock(Bundle.class);
         Bundle installedBundle2 = EasyMock.createMock(Bundle.class);
 
@@ -922,14 +935,15 @@ public class FeaturesServiceTest extends TestCase {
         //
         // This is the real test to make sure the host is actually refreshed
         //
-        packageAdmin.refreshPackages(aryEq(new Bundle[] { installedBundle1 }));
+        expect(bundleContext.getBundle()).andReturn(framework).anyTimes();
+        expect(framework.adapt(FrameworkWiring.class)).andReturn(wiring).anyTimes();
+        wiring.refreshBundles(eq(Collections.singleton(installedBundle1)), (FrameworkListener) anyObject());
 
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
-        replay(packageAdmin, bundleContext, installedBundle1, installedBundle2);
+        replay(wiring, framework, bundleContext, installedBundle1, installedBundle2);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
-        svc.setPackageAdmin(packageAdmin);
         svc.setBundleContext(bundleContext);
         svc.addRepository(uri);
 
@@ -957,7 +971,9 @@ public class FeaturesServiceTest extends TestCase {
         URI uri = tmp.toURI();
 
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
-
+        Bundle bundle = EasyMock.createMock(Bundle.class);
+        expect(bundleContext.getBundle()).andReturn(bundle);
+        expect(bundle.adapt(FrameworkWiring.class)).andReturn(null);
         expect(bundleContext.getDataFile(EasyMock.<String>anyObject())).andReturn(dataFile).anyTimes();
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
@@ -974,8 +990,8 @@ public class FeaturesServiceTest extends TestCase {
      * This test checks feature service behavior with old, non namespaced descriptor.
      */
     public void testLoadOldFeatureFile() throws Exception {
-        String bundle1 = getJarUrl(LogService.class);
-        String bundle2 = getJarUrl(Bundle.class);
+        String bundle1 = getJarUrl(BlueprintContainer.class);
+        String bundle2 = getJarUrl(LoggerFactory.class);
         
         File tmp = File.createTempFile("karaf", ".feature");
         PrintWriter pw = new PrintWriter(new FileWriter(tmp));

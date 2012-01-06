@@ -19,8 +19,6 @@
 -->        
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <reference id="startLevelService" interface="org.osgi.service.startlevel.StartLevel" availability="optional" />
-
     <reference id="warManager" interface="org.ops4j.pax.web.service.spi.WarManager" />
 
     <bean id="webEventHandler" class="org.apache.karaf.web.internal.WebEventHandler" />
@@ -30,7 +28,6 @@
     
     <bean id="webContainerService" class="org.apache.karaf.web.internal.WebContainerServiceImpl">
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="startLevelService" ref="startLevelService"/>
         <property name="webEventHandler" ref="webEventHandler"/>
         <property name="warManager" ref="warManager"/>
     </bean>

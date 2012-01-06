@@ -16,12 +16,12 @@
  */
 package org.apache.karaf.management.mbeans.packages;
 
-import javax.management.openmbean.TabularData;
 import java.util.List;
 
 /**
  * Packages MBean
  */
+@Deprecated
 public interface PackagesMBean {
 
     List<String> getExportedPackages() throws Exception;

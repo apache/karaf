@@ -76,10 +76,10 @@ import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
+import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,8 +103,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
     private RegionsPersistence regionsPersistence;
-    private PackageAdmin packageAdmin;
-    private StartLevel startLevel;
     private long resolverTimeout = 5000;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
@@ -143,22 +141,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void setRegionsPersistence(RegionsPersistence regionsPersistence) {
         this.regionsPersistence = regionsPersistence;
-    }
-
-    public PackageAdmin getPackageAdmin() {
-        return packageAdmin;
-    }
-
-    public void setPackageAdmin(PackageAdmin packageAdmin) {
-        this.packageAdmin = packageAdmin;
-    }
-
-    public StartLevel getStartLevel() {
-        return startLevel;
-    }
-
-    public void setStartLevel(StartLevel startLevel) {
-        this.startLevel = startLevel;
     }
 
     public long getResolverTimeout() {
@@ -341,7 +323,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
                     }
                     if (refresh) {
                         LOGGER.info("Refreshing bundles: {}", sb.toString());
-                        refreshPackages(bundlesToRefresh.toArray(new Bundle[bundlesToRefresh.size()]));
+                        refreshPackages(bundlesToRefresh);
                     }
                 }
             }
@@ -383,7 +365,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 		    // do not start bundles that are persistently stopped
 		    if (state.installed.contains(b)
 		            || (b.getState() != Bundle.STARTING && b.getState() != Bundle.ACTIVE
-		                    && getStartLevel().isBundlePersistentlyStarted(b))) {
+		                    && b.adapt(BundleStartLevel.class).isPersistentlyStarted())) {
 		    	// do no start bundles when user request it
 		    	Long bundleId = b.getBundleId();
 		    	BundleInfo bundleInfo = state.bundleInfos.get(bundleId);
@@ -724,9 +706,9 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             // Define the startLevel for the bundle when defined
             int ibsl = bundleInfo.getStartLevel();
             if (ibsl > 0) {
-                getStartLevel().setBundleStartLevel(b, ibsl);
+                b.adapt(BundleStartLevel.class).setStartLevel(ibsl);
             } else if (defaultStartLevel > 0) {
-                getStartLevel().setBundleStartLevel(b, defaultStartLevel);
+                b.adapt(BundleStartLevel.class).setStartLevel(defaultStartLevel);
             }
 
             state.bundles.add(b);
@@ -1034,10 +1016,11 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
         }
     }
 
-    protected void refreshPackages(Bundle[] bundles) throws InterruptedException {
-        if (getPackageAdmin() != null) {
+    protected void refreshPackages(Collection<Bundle> bundles) throws InterruptedException {
+        FrameworkWiring wiring = bundleContext.getBundle().adapt(FrameworkWiring.class);
+        if (wiring != null) {
             synchronized (refreshLock) {
-                getPackageAdmin().refreshPackages(bundles);
+                wiring.refreshBundles(bundles, this);
                 refreshLock.wait(refreshTimeout);
             }
         }

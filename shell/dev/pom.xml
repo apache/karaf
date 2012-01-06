@@ -121,6 +121,7 @@
                             *
                         </Import-Package>
                         <Private-Package>
+                            org.apache.felix.utils.manifest,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.properties,
                             org.ops4j.pax.url.mvn,

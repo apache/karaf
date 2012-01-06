@@ -17,16 +17,19 @@
 package org.apache.karaf.shell.dev;
 
 import java.io.IOException;
-import static java.lang.String.format;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 /**
  * Command for enabling/disabling debug logging on a bundle and calculating the difference in
@@ -71,7 +74,7 @@ public class DynamicImport extends AbstractBundleCommand {
 
         URL url = new URL(location);
         bundle.update(url.openStream());
-        getPackageAdmin().refreshPackages(new Bundle[] {bundle});
+        bundleContext.getBundle(0).adapt(FrameworkWiring.class).refreshBundles(Collections.singleton(bundle));
     }
 
     /*

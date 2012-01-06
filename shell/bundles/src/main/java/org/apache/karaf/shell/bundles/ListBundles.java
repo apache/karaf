@@ -25,7 +25,9 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleRevisions;
+import org.osgi.framework.wiring.BundleWire;
 
 @Command(scope = "bundle", name = "list", description = "Lists all installed bundles.")
 public class ListBundles extends OsgiCommandSupport {
@@ -44,14 +46,11 @@ public class ListBundles extends OsgiCommandSupport {
 
     private List<BundleStateListener.Factory> bundleStateListenerFactories;
 
-    private PackageAdmin admin;
-
     public void setBundleStateListenerFactories(List<BundleStateListener.Factory> bundleStateListenerFactories) {
         this.bundleStateListenerFactories = bundleStateListenerFactories;
     }
 
     protected Object doExecute() throws Exception {
-        admin = getService(PackageAdmin.class);
         Bundle[] bundles = getBundleContext().getBundles();
         if (bundles != null) {
             // Determine threshold
@@ -145,37 +144,56 @@ public class ListBundles extends OsgiCommandSupport {
 	                line += " [" + level + "] " + name;
 	                System.out.println(line);
 
-	                if (admin != null) {
-	                    Bundle[] fragments = admin.getFragments(bundles[i]);
-	                    Bundle[] hosts = admin.getHosts(bundles[i]);
-	
-	                    if (fragments != null) {
-	                        System.out.print("                                       Fragments: ");
-	                        int ii = 0;
-	                        for (Bundle fragment : fragments) {
-	                            ii++;
-	                            System.out.print(fragment.getBundleId());
-	                            if ((fragments.length > 1) && ii < (fragments.length)) {
-	                                System.out.print(",");
-	                            }
-	                        }
-	                        System.out.println();
-	                    }
-	
-	                    if (hosts != null) {
-	                        System.out.print("                                       Hosts: ");
-	                        int ii = 0;
-	                        for (Bundle host : hosts) {
-	                            ii++;
-	                            System.out.print(host.getBundleId());
-	                            if ((hosts.length > 1) && ii < (hosts.length)) {
-	                                System.out.print(",");
-	                            }
-	                        }
-	                        System.out.println();
-	                    }
-	
-	                }
+                    boolean isFragment = bundles[i].getHeaders().get(Constants.FRAGMENT_HOST) != null;
+                    if (!isFragment) {
+                        int nb = 0;
+                        for (BundleRevision revision : bundles[i].adapt(BundleRevisions.class).getRevisions()) {
+                            if (revision.getWiring() != null) {
+                                List<BundleWire> wires = revision.getWiring().getProvidedWires(null);
+                                if (wires != null) {
+                                    for (BundleWire w : wires) {
+                                        if (w.getCapability().getNamespace().equals(BundleRevision.HOST_NAMESPACE)) {
+                                            Bundle b = w.getRequirerWiring().getBundle();
+                                            if (nb == 0) {
+                                                System.out.print("                                       Fragments: ");
+                                            } else {
+                                                System.out.print(",");
+                                            }
+                                            System.out.print(b.getBundleId());
+                                            nb++;
+                                        }
+                                    }
+                                }
+                             }
+                        }
+                        if (nb > 0) {
+                            System.out.println();
+                        }
+                    } else {
+                        int nb = 0;
+                        for (BundleRevision revision : bundles[i].adapt(BundleRevisions.class).getRevisions()) {
+                            if (revision.getWiring() != null) {
+                                List<BundleWire> wires = revision.getWiring().getRequiredWires(null);
+                                if (wires != null) {
+                                    for (BundleWire w : wires) {
+                                        Bundle b = w.getProviderWiring().getBundle();
+                                        if (b != null) {
+                                            if (nb == 0) {
+                                                System.out.print("                                       Hosts: ");
+                                            } else {
+                                                System.out.println(",");
+                                            }
+                                            System.out.print(b.getBundleId());
+                                            nb++;
+                                        }                                        
+                                    }
+                                }
+                            }
+                        }
+                        if (nb > 0) {
+                            System.out.println();
+                        }
+                    }
 	            }
             }
         }
