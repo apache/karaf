@@ -134,6 +134,8 @@
         <easymock.version>2.5.2</easymock.version>
         <equinox.version>3.7.1.R37x_v20110808-1106</equinox.version>
 
+        <bndlib.version>1.50.0</bndlib.version>
+
         <felix.bundlerepository.version>1.6.4</felix.bundlerepository.version>
         <felix.configadmin.version>1.2.8</felix.configadmin.version>
         <felix.fileinstall.version>3.1.10</felix.fileinstall.version>
@@ -146,6 +148,8 @@
         <felix.eventadmin.version>1.2.12</felix.eventadmin.version>
         <felix.eventadmin-plugin.version>1.0.2</felix.eventadmin-plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
+        <felix.scr.version>1.6.0</felix.scr.version>
+        <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
 
         <aries.application.version>0.3</aries.application.version>
         <aries.blueprint.annotation.api.version>0.3.2</aries.blueprint.annotation.api.version>
@@ -590,6 +594,23 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.karaf.scr</groupId>
+                <artifactId>org.apache.karaf.scr.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.scr</groupId>
+                <artifactId>org.apache.karaf.scr.management</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.scr</groupId>
+                <artifactId>org.apache.karaf.scr.feature</artifactId>
+                <type>xml</type>
+                <classifier>features</classifier>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.karaf.demos</groupId>
                 <artifactId>web</artifactId>
                 <version>${project.version}</version>
@@ -786,6 +807,21 @@
                         <artifactId>concurrent</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.scr</artifactId>
+                <version>${felix.scr.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.metatype</artifactId>
+                <version>${felix.metatype.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>biz.aQute</groupId>
+                <artifactId>bndlib</artifactId>
+                <version>${bndlib.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

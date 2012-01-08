@@ -10,10 +10,10 @@
     This bundle provides the Karaf shell commands to manipulate DS Components.
 
     The following commands are available:
-    \u001B[36mscr:activate\u001B[0m Adds a list of repository URLs to the features service.
-    \u001B[36mscr:deactivate\u001B[0m Shows information about selected information.
-    \u001B[36mscr:details\u001B[0m Installs a feature with the specified name and version.
-    \u001B[36mscr:list\u001B[0m Lists all existing features available from the defined repositories.
+    \u001B[36mscr:activate\u001B[0m Activates a component for the given component name.
+    \u001B[36mscr:deactivate\u001B[0m Deactivates a component for the given component name.
+    \u001B[36mscr:details\u001B[0m Shows details for the component with the given component name.
+    \u001B[36mscr:list\u001B[0m Gets the list of the currently available components.
 
 \u001B[1mSEE ALSO\u001B[0m
     \u001B[36mCommands\u001B[0m and \u001B[36mDeclarative Services\u001B[0m sections of the Karaf User Guide.

@@ -33,13 +33,6 @@
     <packaging>pom</packaging>
     <name>Apache Karaf :: Declarative Services (DS)</name>
 
-    <properties>
-        <scr.packages></scr.packages>
-        <felix.scr.version>1.6.0</felix.scr.version>
-        <felix.scr.annotation.version>1.6.0</felix.scr.annotation.version>
-        <bndlib.version>1.50.0</bndlib.version>
-        <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
-    </properties>
 
     <modules>
         <module>command</module>
@@ -48,54 +41,4 @@
         <module>examples</module>
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.scr</artifactId>
-                <version>${felix.scr.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.metatype</artifactId>
-                <version>${felix.metatype.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>biz.aQute</groupId>
-                <artifactId>bndlib</artifactId>
-                <version>${bndlib.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.info</include>
-                </includes>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <inherited>true</inherited>
-                <configuration>
-                    <instructions>
-                        <Service-Component>${scr.packages}</Service-Component>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
