@@ -50,18 +50,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.gogo.runtime</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -74,21 +64,5 @@
             <artifactId>bndlib</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.fusesource.jansi</groupId>
-            <artifactId>jansi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.sonatype.jline</groupId>-->
-            <!--<artifactId>jline</artifactId>-->
-            <!--<scope>provided</scope>-->
-            <!--<exclusions>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.fusesource.jansi</groupId>-->
-                    <!--<artifactId>jansi</artifactId>-->
-                <!--</exclusion>-->
-            <!--</exclusions>-->
-        <!--</dependency>-->
     </dependencies>
 </project>

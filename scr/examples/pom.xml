@@ -51,21 +51,6 @@
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
         </dependency>
-        <dependency>
-        	<groupId>org.apache.felix</groupId>
-        	<artifactId>org.apache.felix.metatype</artifactId>
-        	<version>1.0.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.osgi.core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.osgi.compendium</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
