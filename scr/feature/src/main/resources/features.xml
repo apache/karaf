@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="org.apache.karaf.scr.feature-${project.version}">
+    <repository>mvn:org.apache.karaf.assemblies.features/standard/${project.version}/xml/features</repository>
+    <feature version="${project.version}" name="scr">
+        <feature>eventadmin</feature>
+        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.command/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/${project.version}</bundle>
+    </feature>
+    <feature version="${project.version}" name="scr-webconsole">
+        <feature version="${project.version}">scr</feature>
+        <feature version="${project.version}">webconsole</feature>
+    </feature>
+</features>
