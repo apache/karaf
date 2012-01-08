@@ -32,7 +32,7 @@
     <name>Apache Karaf :: SCR :: Examples</name>
     <description>Building SCR Components using the BND Annotation Libraries</description>
     <properties>
-        <scr.packages>*</scr.packages>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
     <dependencies>
         <dependency>
@@ -74,7 +74,7 @@
                             ${project.artifactId}.component,
                             ${project.artifactId}.service.provider
                         </Private-Package>
-                        <Service-Component>${scr.packages}</Service-Component>
+                        <Service-Component>*</Service-Component>
                     </instructions>
                 </configuration>
             </plugin>

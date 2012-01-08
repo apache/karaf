@@ -36,7 +36,7 @@
     <description>This bundle provides MBeans to manipulate Service Components via JMX.</description>
 
     <properties>
-        <scr.packages>*</scr.packages>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
@@ -65,14 +65,24 @@
             <artifactId>org.apache.karaf.management.server</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-        	<groupId>biz.aQute</groupId>
-        	<artifactId>bndlib</artifactId>
-        	<scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -80,18 +90,18 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            ${project.artifactId}
+                            org.apache.karaf.scr.management
                         </Export-Package>
                         <Import-Package>
-                            !${project.artifactId},
+                            !org.apache.karaf.scr.management,
                             javax.management,
                             javax.management.loading,
                             *
                         </Import-Package>
                         <Private-Package>
-                            ${project.artifactId}.internal
+                            org.apache.karaf.scr.management.internal
                         </Private-Package>
-                        <Service-Component>${scr.packages}</Service-Component>
+                        <Service-Component>*</Service-Component>
                     </instructions>
                 </configuration>
             </plugin>
