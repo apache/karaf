@@ -52,6 +52,7 @@
         <module>webconsole</module>
         <module>exception</module>
         <module>scheduler</module>
+        <module>scr</module>
         <module>assemblies</module>
         <module>demos</module>
         <module>itests</module>
