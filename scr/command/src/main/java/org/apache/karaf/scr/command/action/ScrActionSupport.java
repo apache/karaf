@@ -45,12 +45,8 @@ public abstract class ScrActionSupport extends AbstractAction {
     protected abstract Object doScrAction(ScrService scrService)
             throws Exception;
 
-    public String getPrettyString(String value, Ansi.Color color) {
-        return Ansi.ansi().fg(color).a(value).toString();
-    }
-
-    public String getPrettyBoldString(String value, Ansi.Color color) {
-        return Ansi.ansi().fg(color).a(Ansi.Attribute.INTENSITY_BOLD).a(value)
+    public String getBoldString(String value) {
+        return Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a(value)
                 .a(Ansi.Attribute.INTENSITY_BOLD_OFF).toString();
     }
 

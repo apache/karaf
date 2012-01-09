@@ -16,12 +16,11 @@
  */
 package org.apache.karaf.scr.command.action;
 
-import org.apache.karaf.shell.commands.Command;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.commands.Command;
 
 /**
  * Lists all the components currently installed.
@@ -37,22 +36,16 @@ public class ListAction extends ScrActionSupport {
         if(logger.isDebugEnabled()){
             logger.debug("Executing the List Action");
         }
-        System.out.println(getPrettyBoldString(
-                "   ID   State             Component Name",
-                Ansi.Color.WHITE));
+        System.out.println(getBoldString(
+                "   ID   State             Component Name"));
         Component[] components = scrService.getComponents();
         for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
             String name = component.getName();
             String id = buildLeftPadBracketDisplay(component.getId() + "", 4);
             String state = buildRightPadBracketDisplay(
                     ScrUtils.getState(component.getState()), 16);
-            System.out.println(getPrettyString("[", Ansi.Color.WHITE)
-                    + getPrettyString(id, Ansi.Color.YELLOW)
-                    + getPrettyString("] [", Ansi.Color.WHITE)
-                    + getPrettyString(state, Ansi.Color.YELLOW)
-                    + getPrettyString("] ", Ansi.Color.WHITE)
-                    + getPrettyString(name, Ansi.Color.YELLOW)
-                    + Ansi.ansi().a(Ansi.Attribute.RESET).toString());
+            System.out.println(
+            		"[" + id + "] [" + state + "] " + name);
         }
         return null;
     }

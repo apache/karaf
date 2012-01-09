@@ -16,14 +16,13 @@
  */
 package org.apache.karaf.scr.command.action;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
 import org.apache.karaf.scr.command.ScrCommandConstants;
 import org.apache.karaf.scr.command.ScrUtils;
-import org.fusesource.jansi.Ansi;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
@@ -40,20 +39,19 @@ public class DetailsAction extends ScrActionSupport {
     @Argument(index = 0, name = "name", description = "The name of the Component to display the detials of", required = true, multiValued = false)
     String name;
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     protected Object doScrAction(ScrService scrService) throws Exception {
         if(logger.isDebugEnabled()){
             logger.debug("Executing the Details Action");
         }
-        System.out.println(getPrettyBoldString("Component Details",
-                Ansi.Color.WHITE));
+        System.out.println(getBoldString("Component Details"));
         Component[] components = scrService.getComponents(name);
         for (Component component : ScrUtils.emptyIfNull(Component.class, components)) {
             printDetail("  Name                : ", component.getName());
             printDetail("  State               : ", ScrUtils.getState(component.getState()));
             Reference[] references = component.getReferences();
-            System.out.println(getPrettyBoldString("References", Ansi.Color.WHITE)
-                    + Ansi.ansi().a(Ansi.Attribute.RESET).toString());
+            System.out.println(getBoldString("References"));
 
             for (Reference reference : ScrUtils.emptyIfNull(Reference.class,references)) {
                 printDetail("  Reference           : ", reference.getName());
@@ -63,7 +61,7 @@ public class DetailsAction extends ScrActionSupport {
                 printDetail("    Policy            : ", (reference.isStatic() ? "static" : "dynamic" ));
 
                 // list bound services
-                ServiceReference[] boundRefs = reference.getServiceReferences();
+				ServiceReference[] boundRefs = reference.getServiceReferences();
                 for (ServiceReference serviceReference : ScrUtils.emptyIfNull(ServiceReference.class, boundRefs)) {
                     final StringBuffer b = new StringBuffer();
                     b.append( "Bound Service ID " );
@@ -100,8 +98,6 @@ public class DetailsAction extends ScrActionSupport {
 
 
     private void printDetail(String header, String value) {
-        System.out.print(getPrettyBoldString(header, Ansi.Color.WHITE));
-        System.out.println(getPrettyString(value, Ansi.Color.YELLOW)
-                + Ansi.ansi().a(Ansi.Attribute.RESET).toString());
+        System.out.println(getBoldString(header) + value);
     }
 }
