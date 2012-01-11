@@ -80,6 +80,7 @@ import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,6 +158,10 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void setRefreshTimeout(long refreshTimeout) {
         this.refreshTimeout = refreshTimeout;
+    }
+
+    //dependency, not used directly
+    public void setMvnUrlHandler(URLStreamHandlerService mvnUrlHandler) {
     }
 
     public void registerListener(FeaturesListener listener) {
