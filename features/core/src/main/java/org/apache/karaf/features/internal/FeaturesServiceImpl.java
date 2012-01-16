@@ -47,6 +47,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
@@ -113,10 +115,12 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     AtomicBoolean bootFeaturesInstalled = new AtomicBoolean();
     private List<FeaturesListener> listeners = new CopyOnWriteArrayList<FeaturesListener>();
     private Queue<RegionsPersistence> regionsPersistenceQueue = new LinkedList<RegionsPersistence>();
+    private CountDownLatch regionsPersistenceLatch = new CountDownLatch(1);
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
     private final Object refreshLock = new Object();
     private long refreshTimeout = 5000;
+    private long regionsPersistenceTimeout = 5000;
 
     public FeaturesServiceImpl() {
     }
@@ -172,8 +176,27 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     }
 
 
+    /**
+     * Returns a RegionsPersistence service.
+     * @param timeout
+     * @return
+     */
+    protected RegionsPersistence getRegionsPersistence(long timeout) {
+        if (!regionsPersistenceQueue.isEmpty()) {
+            return regionsPersistenceQueue.peek();
+        } else {
+            try {
+                regionsPersistenceLatch.await(timeout, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                LOGGER.warn("Interrupted while waittng for RegionsPersistence service",e);
+            }
+            return regionsPersistenceQueue.peek();
+        }
+    }
+
     public void registerRegionsPersistence(RegionsPersistence regionsPersistence) {
         regionsPersistenceQueue.add(regionsPersistence);
+        regionsPersistenceLatch.countDown();
     }
 
     public void unregisterRegionsPersistence(RegionsPersistence regionsPersistence) {
@@ -489,9 +512,13 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             Bundle b = installBundleIfNeeded(state, bInfo, feature.getStartLevel(), verbose);
             bundles.add(b.getBundleId());
             state.bundleInfos.put(b.getBundleId(), bInfo);
-            RegionsPersistence regionsPersistence = regionsPersistenceQueue.peek();
-            if (region != null && state.installed.contains(b) && regionsPersistence != null) {
-                regionsPersistence.install(b, region);
+            if (region != null && state.installed.contains(b)) {
+                RegionsPersistence regionsPersistence = getRegionsPersistence(regionsPersistenceTimeout);
+                if (regionsPersistence != null) {
+                    regionsPersistence.install(b, region);
+                } else {
+                    throw new Exception("Unable to find RegionsPersistence service, while installing "+ feature.getName());
+                }
             }
         }
         state.features.put(feature, bundles);
