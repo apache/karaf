@@ -133,9 +133,8 @@
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
         <easymock.version>2.5.2</easymock.version>
         <equinox.version>3.7.1.R37x_v20110808-1106</equinox.version>
-
         <bndlib.version>1.50.0</bndlib.version>
-
+        <equinox.region.version>1.0.0.v20110506</equinox.region.version>
         <felix.bundlerepository.version>1.6.4</felix.bundlerepository.version>
         <felix.configadmin.version>1.2.8</felix.configadmin.version>
         <felix.fileinstall.version>3.1.10</felix.fileinstall.version>
@@ -291,6 +290,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>manual</artifactId>
@@ -486,6 +491,11 @@
             <dependency>
                 <groupId>org.apache.karaf.wrapper</groupId>
                 <artifactId>org.apache.karaf.wrapper.management</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.region</groupId>
+                <artifactId>org.apache.karaf.region.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

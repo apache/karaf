@@ -112,6 +112,7 @@
                             !org.apache.log,
                             !org.apache.xerces.xni,
                             !org.apache.xerces.xni.parser,
+                            !org.objectweb.asm*,
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,

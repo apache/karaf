@@ -33,9 +33,11 @@
     <name>Apache Karaf :: Region</name>
 
     <modules>
+        <module>core</module>
         <module>commands</module>
         <module>persist</module>
     </modules>
+
     <profiles>
         <profile>
             <id>default</id>
