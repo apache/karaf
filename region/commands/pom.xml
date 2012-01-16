@@ -29,7 +29,7 @@
 
     <artifactId>org.apache.karaf.region.commands</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: Shell :: Region Commands</name>
+    <name>Apache Karaf :: Region :: Shell Commands</name>
     <description>This bundle provides Karaf shell commands to manipulate the Region service.</description>
 
     <properties>

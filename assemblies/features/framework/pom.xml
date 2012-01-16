@@ -102,10 +102,10 @@
             <!--<artifactId>org.apache.karaf.features.core</artifactId>-->
         <!--</dependency>-->
 
-        <!--<dependency>-->
-            <!--<groupId>org.apache.karaf.features</groupId>-->
-            <!--<artifactId>org.apache.karaf.features.command</artifactId>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.command</artifactId>
+        </dependency>
         <!--<dependency>-->
             <!--<groupId>org.apache.karaf.features</groupId>-->
             <!--<artifactId>org.apache.karaf.features.management</artifactId>-->
@@ -184,14 +184,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.annotation.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.annotation.impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
             <artifactId>org.apache.aries.blueprint.api</artifactId>
         </dependency>
         <dependency>
@@ -207,10 +199,6 @@
             <artifactId>org.apache.aries.blueprint.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.blueprint</groupId>
-            <artifactId>org.apache.aries.blueprint.jexl.evaluator</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.aries.proxy</groupId>
             <artifactId>org.apache.aries.proxy.api</artifactId>
         </dependency>
@@ -219,29 +207,25 @@
             <artifactId>org.apache.aries.proxy.impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.aries.quiesce</groupId>
-            <artifactId>org.apache.aries.quiesce.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.aries.quiesce</groupId>
-            <artifactId>org.apache.aries.quiesce.manager</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.aries</groupId>
             <artifactId>org.apache.aries.util</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.asm</artifactId>
         </dependency>
+       -->
+       <!--
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>region</artifactId>
             <version>1.0.0.v20110506</version>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.karaf.region</groupId>
-            <artifactId>org.apache.karaf.region.persist</artifactId>
+            <artifactId>org.apache.karaf.region.core</artifactId>
         </dependency>
     </dependencies>
     <build>

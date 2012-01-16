@@ -43,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -103,7 +104,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
-    private RegionsPersistence regionsPersistence;
     private long resolverTimeout = 5000;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
@@ -112,6 +112,7 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
     private String boot;
     AtomicBoolean bootFeaturesInstalled = new AtomicBoolean();
     private List<FeaturesListener> listeners = new CopyOnWriteArrayList<FeaturesListener>();
+    private Queue<RegionsPersistence> regionsPersistenceQueue = new LinkedList<RegionsPersistence>();
     private ThreadLocal<Repository> repo = new ThreadLocal<Repository>();
     private EventAdminListener eventAdminListener;
     private final Object refreshLock = new Object();
@@ -134,14 +135,6 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
-    }
-
-    public RegionsPersistence getRegionsPersistence() {
-        return regionsPersistence;
-    }
-
-    public void setRegionsPersistence(RegionsPersistence regionsPersistence) {
-        this.regionsPersistence = regionsPersistence;
     }
 
     public long getResolverTimeout() {
@@ -176,6 +169,15 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
 
     public void unregisterListener(FeaturesListener listener) {
         listeners.remove(listener);
+    }
+
+
+    public void registerRegionsPersistence(RegionsPersistence regionsPersistence) {
+        regionsPersistenceQueue.add(regionsPersistence);
+    }
+
+    public void unregisterRegionsPersistence(RegionsPersistence regionsPersistence) {
+        regionsPersistenceQueue.remove(regionsPersistence);
     }
 
     public void setUrls(String uris) throws URISyntaxException {
@@ -487,7 +489,8 @@ public class FeaturesServiceImpl implements FeaturesService, FrameworkListener {
             Bundle b = installBundleIfNeeded(state, bInfo, feature.getStartLevel(), verbose);
             bundles.add(b.getBundleId());
             state.bundleInfos.put(b.getBundleId(), bInfo);
-            if (region != null && state.installed.contains(b)) {
+            RegionsPersistence regionsPersistence = regionsPersistenceQueue.peek();
+            if (region != null && state.installed.contains(b) && regionsPersistence != null) {
                 regionsPersistence.install(b, region);
             }
         }

@@ -38,10 +38,23 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.karaf.region</groupId>
+            <artifactId>org.apache.karaf.region.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
@@ -97,9 +110,10 @@
                         <Bundle-Activator>org.apache.karaf.region.persist.internal.Activator</Bundle-Activator>
                         <Import-Package>
                             !${project.artifactId}*,
+                            !org.apache.karaf.region;version="${project.version}",
                             *
                         </Import-Package>
-                        <Private-Package>!*</Private-Package>
+                        <Private-Package>org.apache.karaf.region.internal,org.apache.karaf.region.model</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

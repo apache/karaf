@@ -36,7 +36,6 @@
         <property name="boot" value="$[featuresBoot]" />
         <property name="resolverTimeout" value="$[resolverTimeout]" />
         <property name="configAdmin" ref="configAdmin" />
-        <property name="regionsPersistence" ref="regionsPersistence" />
         <property name="mvnUrlHandler" ref="mvnUrlHandler" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
@@ -49,10 +48,15 @@
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
 
-    <reference id="regionsPersistence" interface="org.apache.karaf.region.persist.RegionsPersistence" />
 
     <reference id="mvnUrlHandler" interface="org.osgi.service.url.URLStreamHandlerService" filter="(url.handler.protocol=mvn)" />
 
     <service ref="featuresService" interface="org.apache.karaf.features.FeaturesService" />
+
+    <reference id="regionsPersistence" availability="optional" interface="org.apache.karaf.region.persist.RegionsPersistence" >
+        <reference-listener ref="featuresService"
+                            bind-method="registerRegionsPersistence"
+                            unbind-method="unregisterRegionsPersistence" />
+    </reference>
 
 </blueprint>
