@@ -23,6 +23,7 @@ import org.apache.felix.gogo.commands.converter.ReifiedType;
 import org.apache.felix.gogo.commands.converter.GenericType;
 import org.apache.karaf.shell.console.AbstractAction;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -54,6 +55,14 @@ public class NewAction extends AbstractAction {
     protected Object doExecute() throws Exception {
         if (args == null) {
             args = Collections.emptyList();
+        }
+        // Handle arrays
+        if (clazz.isArray()) {
+            Object obj = Array.newInstance(clazz.getComponentType(), args.size());
+            for (int i = 0; i < args.size(); i++) {
+                Array.set(obj, i, convert(args.get(i), clazz.getComponentType()));
+            }
+            return obj;
         }
         // Map of matching constructors
         Map<Constructor, List<Object>> matches = findMatchingConstructors(clazz, args, Arrays.asList(new ReifiedType[args.size()]));
