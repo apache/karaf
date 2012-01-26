@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
 
@@ -25,33 +28,78 @@
         <groupId>org.apache.karaf.demos</groupId>
         <artifactId>demos</artifactId>
         <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>dump</artifactId>
-    <packaging>bundle</packaging>
+    <artifactId>org.apache.karaf.demos.dump</artifactId>
+    <packaging>pom</packaging>
     <name>Apache Karaf :: Demos :: Demo Dump provider</name>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.karaf.diagnostic</groupId>
-            <artifactId>org.apache.karaf.diagnostic.core</artifactId>
-        </dependency>
-    </dependencies>
-
+    <modules>
+        <module>src/main/resources/resources/demos/dump</module>
+        <!--<module>branding-package</module>-->
+    </modules>
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/target/**</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/filtered-resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <!--<configuration>-->
+                    <!--<resources>-->
+                        <!--<resource>src/main/resources</resource>-->
+                    <!--</resources>-->
+                <!--</configuration>-->
+                <executions>
+                    <execution>
+                        <id>process-resources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>${project.version}</version>
                 <configuration>
-                    <instructions>
-                        <Import-Package>*</Import-Package>
-                        <Private-Package>!*</Private-Package>
-                    </instructions>
+                    <startLevel>60</startLevel>
+                    <!--<checkDependencyChange>true</checkDependencyChange>-->
+                    <!--<overwriteChangedDependencies>true</overwriteChangedDependencies>-->
+                    <!--<warnOnDependencyChange>true</warnOnDependencyChange>-->
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>features-generate-descriptor</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>package</id>
+                        <goals>
+                            <goal>features-create-kar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-
 </project>
