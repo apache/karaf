@@ -88,6 +88,12 @@
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.url</groupId>
+                    <artifactId>pax-url-maven-commons</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
