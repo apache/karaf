@@ -22,6 +22,10 @@
               including the correct start-level for the generation of the startup.propertie file -->
 
     <feature version="${project.version}" description="Karaf core feature" name="framework">
+        <bundle start="true" start-level="5">mvn:org.ops4j.base/ops4j-base-lang/${pax.base.version}</bundle>
+        <bundle start="true" start-level="5">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.junit/${junit3.bundle.version}</bundle>
+        <bundle start="true" start-level="5">mvn:biz.aQute/bndlib/${bndlib.version}</bundle>
+        <bundle start="true" start-level="5">mvn:org.ops4j.pax.swissbox/pax-swissbox-bnd/${pax.swissbox.version}</bundle>
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}</bundle>
         <bundle start="true" start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
