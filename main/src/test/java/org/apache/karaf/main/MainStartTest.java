@@ -25,12 +25,12 @@ import junit.framework.Assert;
 import org.apache.karaf.main.util.Utils;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
+import org.ops4j.pax.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 public class MainStartTest {
 
@@ -84,7 +84,7 @@ public class MainStartTest {
         Framework framework = main.getFramework();
         String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
         Bundle bundle = framework.getBundleContext().installBundle("foo",
-                TinyBundles.newBundle()
+                TinyBundles.bundle()
                     .set( Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName() )
                     .add( activatorName, getClass().getClassLoader().getResourceAsStream( activatorName ) )
                     .build( withBnd() )

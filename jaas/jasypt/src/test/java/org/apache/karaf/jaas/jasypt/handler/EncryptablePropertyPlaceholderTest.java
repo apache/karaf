@@ -41,7 +41,7 @@ import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.swissbox.tinybundles.core.TinyBundle;
+import org.ops4j.pax.tinybundles.core.TinyBundle;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -51,7 +51,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 
 public class EncryptablePropertyPlaceholderTest extends TestCase {
 
@@ -76,14 +76,14 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
         List<BundleDescriptor> bundles = new ClasspathScanner().scanForBundles("(Bundle-SymbolicName=*)");
         bundles.add(getBundleDescriptor(
                 "target/jasypt.jar",
-                newBundle().add("OSGI-INF/blueprint/karaf-jaas-jasypt.xml", getClass().getResource("/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
+                bundle().add("OSGI-INF/blueprint/karaf-jaas-jasypt.xml", getClass().getResource("/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
                            .set("Manifest-Version", "2")
                            .set("Bundle-ManifestVersion", "2")
                            .set("Bundle-SymbolicName", "jasypt")
                            .set("Bundle-Version", "0.0.0")));
         bundles.add(getBundleDescriptor(
                 "target/test.jar",
-                newBundle().add("OSGI-INF/blueprint/test.xml", getClass().getResource("test.xml"))
+                bundle().add("OSGI-INF/blueprint/test.xml", getClass().getResource("test.xml"))
                            .set("Manifest-Version", "2")
                            .set("Bundle-ManifestVersion", "2")
                            .set("Bundle-SymbolicName", "test")
