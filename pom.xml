@@ -185,6 +185,7 @@
         <pax.url.version>1.4-SNAPSHOT</pax.url.version>
         <pax.web.version>1.1.2-SNAPSHOT</pax.web.version>
         <pax.swissbox.version>1.5.0-SNAPSHOT</pax.swissbox.version>
+        <pax.tinybundle.version>1.0.0</pax.tinybundle.version>
         <servlet.api.version>2.5</servlet.api.version>
         <slf4j.version>1.6.1</slf4j.version>
         <servicemix.specs.version>1.9.0</servicemix.specs.version>
@@ -1235,9 +1236,9 @@
                 <version>${pax.swissbox.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.ops4j.pax.swissbox</groupId>
-                <artifactId>pax-swissbox-tinybundles</artifactId>
-                <version>${pax.swissbox.version}</version>
+                <groupId>org.ops4j.pax.tinybundles</groupId>
+                <artifactId>tinybundles</artifactId>
+                <version>${pax.tinybundle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse</groupId>
