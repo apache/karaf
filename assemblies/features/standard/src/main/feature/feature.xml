@@ -42,6 +42,8 @@
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.obr/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.obr/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.management.mbeans/org.apache.karaf.management.mbeans.obr/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-lifecycle/${pax.swissbox.version}</bundle>
+        <bundle start-level="30">mvn:org.ops4j.pax.swissbox/pax-swissbox-tracker/${pax.swissbox.version}</bundle>
         <bundle start-level="30">mvn:org.ops4j.pax.url/pax-url-obr/${pax.url.version}</bundle>
     </feature>
 
