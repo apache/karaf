@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.shell.dev.watch;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -64,7 +63,7 @@ public class BundleWatcher implements Runnable, BundleListener {
 
 
     /**
-     * Construcotr
+     * Constructor
      */
     public BundleWatcher() {
     }
@@ -77,9 +76,7 @@ public class BundleWatcher implements Runnable, BundleListener {
     }
 
     public void run() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Bundle watcher thread started");
-        }
+        logger.debug("Bundle watcher thread started");
         int oldCounter = -1;
         Set<Bundle> watchedBundles = new HashSet<Bundle>();
         while (running.get() && watchURLs.size()>0) {
@@ -252,6 +249,9 @@ public class BundleWatcher implements Runnable, BundleListener {
 
 
     public void start() {
+        // register the bundle listener
+        bundleContext.addBundleListener(this);
+        // start the watch thread
         if (running.compareAndSet(false, true)) {
             if (watchURLs.size()>0) {
                 Thread thread = new Thread(this);
@@ -265,6 +265,8 @@ public class BundleWatcher implements Runnable, BundleListener {
      */
     public void stop() {
         running.set(false);
+        // unregister the bundle listener
+        bundleContext.removeBundleListener(this);
     }
 
     public ConfigurationAdmin getConfigurationAdmin() {
