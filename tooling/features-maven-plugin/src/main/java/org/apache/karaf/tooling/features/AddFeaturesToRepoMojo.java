@@ -280,18 +280,19 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 version = feature.substring(delimIndex + 1);
                 feature = feature.substring(0, delimIndex);
             }
-            
+ 
             Feature f = null;
             if (version != null) {
                 // looking for a specific feature with name and version
                 f = featuresMap.get(feature + "/" + version);
             } else {
-                // looking for the first feature name (whatever the version is)
+                // looking for the feature name (with the greatest version)
                 for (String key : featuresMap.keySet()) {
                     String[] nameVersion = key.split("/");
                     if (feature.equals(nameVersion[0])) {
-                        f = featuresMap.get(key);
-                        break;
+                        if (f == null || f.getVersion().compareTo(featuresMap.get(key).getVersion()) < 0) {
+                            f = featuresMap.get(key);
+                        }
                     }
                 }
             }
