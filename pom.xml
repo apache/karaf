@@ -187,7 +187,7 @@
         <pax.swissbox.version>1.5.0-SNAPSHOT</pax.swissbox.version>
         <pax.tinybundle.version>1.0.0</pax.tinybundle.version>
         <servlet.api.version>2.5</servlet.api.version>
-        <slf4j.version>1.6.1</slf4j.version>
+        <slf4j.version>1.6.4</slf4j.version>
         <servicemix.specs.version>1.9.0</servicemix.specs.version>
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring.version>3.1.0.RELEASE</spring.version>
