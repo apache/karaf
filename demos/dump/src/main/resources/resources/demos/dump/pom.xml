@@ -46,8 +46,14 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>
+                            org.apache.karaf.diagnostic.core,
+                            *
+                        </Import-Package>
                         <Private-Package>!*</Private-Package>
+                        <Export-Package>
+                            org.apache.karaf.diagnostic.demo
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
