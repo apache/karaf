@@ -18,19 +18,28 @@ package org.apache.karaf.shell.shell;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.AbstractAction;
 
 @Command(scope = "shell", name = "sleep", description = "Sleeps for a bit then wakes up.")
 public class SleepAction extends AbstractAction {
 
-    @Argument(index = 0, name = "duration", description = "The amount of seconds to sleep", required = true, multiValued = false)
+    @Argument(index = 0, name = "duration", description = "The amount of time to sleep. The default time unit is millisecond, use -s option to use second instead.", required = true, multiValued = false)
     private long time = -1;
+    
+    @Option(name = "-s", aliases = { "--second" }, description = "Use a duration time in seconds instead of milliseconds.", required = false, multiValued = false)
+    private boolean second = false;
 
     protected Object doExecute() throws Exception {
-        log.info("Sleeping for {} second(s)", time);
+        if (second) {
+            log.info("Sleeping for {} second(s)", time);
+            time = time * 1000;
+        } else {
+            log.info("Sleeping for {} millisecond(s)", time);
+        }
 
         try {
-            Thread.sleep(time * 1000);
+            Thread.sleep(time);
         }
         catch (InterruptedException ignore) {
             log.debug("Sleep was interrupted... :-(");
