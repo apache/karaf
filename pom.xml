@@ -112,7 +112,7 @@
         <icu4j.version>4.8.1.1</icu4j.version>
         <jasypt.bundle.version>1.8_1</jasypt.bundle.version>
         <jetty.version>7.5.4.v20111024</jetty.version>
-        <junit.bundle.version>4.7_3</junit.bundle.version>
+        <junit.bundle.version>4.10_1</junit.bundle.version>
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
@@ -1017,7 +1017,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.7</version>
+            <version>4.10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
