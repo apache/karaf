@@ -20,6 +20,10 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.karaf.web.WebContainerService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 
 @Command(scope = "web", name = "stop", description = "Stop the web context of given bundles.")
 public class Stop extends OsgiCommandSupport {
@@ -28,6 +32,8 @@ public class Stop extends OsgiCommandSupport {
     java.util.List<Long> ids;
 
     private WebContainerService webContainerService;
+    
+    
 
     public void setWebContainerService(WebContainerService webContainerService) {
         this.webContainerService = webContainerService;

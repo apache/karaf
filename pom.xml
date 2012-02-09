@@ -122,16 +122,20 @@
         <commons-jexl.version>2.0</commons-jexl.version>
         <commons-lang.version>2.6</commons-lang.version>
         <jasypt.bundle.version>1.8_1</jasypt.bundle.version>
-        <jetty.version>7.5.4.v20111024</jetty.version>
+        <jetty.version>8.0.4.v20111024</jetty.version>
+		<servlet.spec.groupId>org.mortbay.jetty</servlet.spec.groupId>
+		<servlet.spec.artifactId>servlet-api</servlet.spec.artifactId>
+		<servlet.spec.version>3.0.20100224</servlet.spec.version>
         <junit3.bundle.version>3.8.2_4</junit3.bundle.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
         <junit.version>4.10</junit.version>
         <injection.bundle.version>1.0</injection.bundle.version>
 
-        <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jpa-spec.version>1.1</geronimo.jpa-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
+        <geronimo.annotation-spec.version>1.1.1</geronimo.annotation-spec.version>
+        <geronimo.jaspic-spec.version>1.0</geronimo.jaspic-spec.version>
         <easymock.version>2.5.2</easymock.version>
         <equinox.version>3.7.1.R37x_v20110808-1106</equinox.version>
         <bndlib.version>1.50.0</bndlib.version>
@@ -182,11 +186,11 @@
         <pax.logging.version>1.6.5-SNAPSHOT</pax.logging.version>
         <pax.runner.version>1.7.5</pax.runner.version>
         <pax.base.version>1.3.0-SNAPSHOT</pax.base.version>
-        <pax.url.version>1.4-SNAPSHOT</pax.url.version>
-        <pax.web.version>1.1.2</pax.web.version>
+        <pax.url.version>1.4.0.RC1</pax.url.version>
+        <pax.web.version>2.0.0-SNAPSHOT</pax.web.version>
         <pax.swissbox.version>1.5.0-SNAPSHOT</pax.swissbox.version>
         <pax.tinybundle.version>1.0.0</pax.tinybundle.version>
-        <servlet.api.version>2.5</servlet.api.version>
+        <servlet.api.version>3.0</servlet.api.version>
         <slf4j.version>1.6.4</slf4j.version>
         <servicemix.specs.version>1.9.0</servicemix.specs.version>
         <spring.osgi.version>1.2.1</spring.osgi.version>
@@ -965,44 +969,19 @@
                 <version>${junit.bundle.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-util</artifactId>
+                <groupId>org.eclipse.jetty.aggregate</groupId>
+				<artifactId>jetty-all-server</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-io</artifactId>
-                <version>${jetty.version}</version>
+            	<groupId>org.apache.geronimo.specs</groupId>
+            	<artifactId>geronimo-annotation_1.0_spec</artifactId>
+            	<version>${geronimo.annotation-spec.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-http</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-continuation</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-server</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-security</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-xml</artifactId>
-                <version>${jetty.version}</version>
+            	<groupId>org.apache.geronimo.specs</groupId>
+            	<artifactId>geronimo-jaspic_1.0_spec</artifactId>
+            	<version>${geronimo.jaspic-spec.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
@@ -1155,14 +1134,14 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>${servlet.spec.groupId}</groupId>
+                <artifactId>${servlet.spec.artifactId}</artifactId>
+                <version>${servlet.spec.version}</version>
+	    </dependency>
+            <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-wrap</artifactId>
                 <version>${pax.url.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-servlet_2.5_spec</artifactId>
-                <version>${geronimo.servlet.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.easymock</groupId>
@@ -1934,5 +1913,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>

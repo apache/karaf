@@ -33,7 +33,7 @@ public class List extends OsgiCommandSupport {
     public Object doExecute() throws Exception {
         java.util.List<WebBundle> webBundles = webContainerService.list();
         if (webBundles != null && !webBundles.isEmpty()) {
-            String headers = String.format("%d4 %s6 %s6 %s6 %d4 %s30 %s30", "ID", "State", "Web-State", "Level", "Web-ContextPath", "Name");
+            String headers = String.format("%d4 %s6 %s6 %s6 %s4 %s30 %s30", "ID", "State", "Web-State", "Level", "Web-ContextPath", "Name");
             System.out.println(headers);
             for (WebBundle webBundle : webBundles) {
                 String display = String.format("%d4 %s6 %s6 %s6 %d4 %s30 %s30",
