@@ -25,6 +25,8 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestCase;
 
@@ -134,6 +136,8 @@ public class FeaturesServiceImplTest extends TestCase {
         Map<String, Feature> versions2 = new HashMap<String, Feature>();
         versions2.put("1.0.0", new FeatureImpl("ssh", "1.0.0"));
         features.put("ssh", versions2);
+        
+        final CountDownLatch latch = new CountDownLatch(2);
 
         final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
             protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
@@ -147,6 +151,8 @@ public class FeaturesServiceImplTest extends TestCase {
             }
             @Override
             protected void saveState() {
+                // this method will be invoked twice while features service is starting
+                latch.countDown();
             }
         };
         impl.setBundleContext(bundleContext);
@@ -156,9 +162,12 @@ public class FeaturesServiceImplTest extends TestCase {
             impl.setBoot("transaction;version=1.2,ssh;version=1.0.0");
             impl.start();
 
+            // waiting for the features service installation thread to finish its work
+            latch.await(2, TimeUnit.SECONDS);
+
             assertFalse("Feature transaction 1.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "1.0.0")));
             assertFalse("Feature transaction 2.0.0 should not be installed", impl.isInstalled(impl.getFeature("transaction", "2.0.0")));
-            assertFalse("Feature ssh should be installed", impl.isInstalled(impl.getFeature("ssh", "1.0.0")));
+            assertTrue("Feature ssh should be installed", impl.isInstalled(impl.getFeature("ssh", "1.0.0")));
         } catch (Exception e) {
             fail(String.format("Service should not throw start-up exception but log the error instead: %s", e));
         }
