@@ -18,26 +18,14 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
+
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
 import org.apache.karaf.features.BundleInfo;
@@ -51,8 +39,11 @@ import org.apache.karaf.kar.internal.KarServiceImpl;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.artifact.repository.metadata.*;
+import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.repository.RemoteRepository;
@@ -107,7 +98,6 @@ public class InstallKarsMojo extends MojoSupport {
     /**
      * if false, unpack to system and add bundles to startup.properties
      * if true, unpack to system and add feature to features config
-     *
      */
     protected boolean dontAddToStartup;
 
@@ -201,11 +191,11 @@ public class InstallKarsMojo extends MojoSupport {
         } catch (Exception e) {
             throw new MojoExecutionException("Can't init the KAR service", e);
         }
-        
+
         Collection<Artifact> dependencies = project.getDependencyArtifacts();
         StringBuilder buf = new StringBuilder();
         byte[] buffer = new byte[4096];
-        for (Artifact artifact: dependencies) {
+        for (Artifact artifact : dependencies) {
             dontAddToStartup = "runtime".equals(artifact.getScope());
             karService.setLocalRepo(system.getPath());
             if ("kar".equals(artifact.getType()) && acceptScope(artifact)) {
@@ -226,19 +216,53 @@ public class InstallKarsMojo extends MojoSupport {
                 //remove timestamp version
                 artifact = factory.createArtifactWithClassifier(artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion(), artifact.getType(), artifact.getClassifier());
                 File target = new File(system.resolve(layout.pathOf(artifact)));
+
                 if (!target.exists()) {
                     target.getParentFile().mkdirs();
                     try {
                         InputStream is = new FileInputStream(source);
                         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(target));
                         int count = 0;
-                        while ((count = is.read(buffer)) > 0)
-                        {
+                        while ((count = is.read(buffer)) > 0) {
                             bos.write(buffer, 0, count);
                         }
                         bos.close();
                     } catch (IOException e) {
                         getLog().error("Could not copy features " + uri + " from source file " + source, e);
+                    }
+
+                    // for snapshot, generate the repository metadata in order to avoid override of snapshot from remote repositories
+                    if (artifact.isSnapshot()) {
+                        getLog().debug("Feature " + uri + " is a SNAPSHOT, generate the maven-metadata-local.xml file");
+                        File metadataTarget = new File(target.getParentFile(), "maven-metadata-local.xml");
+                        Metadata metadata = new Metadata();
+                        metadata.setGroupId(artifact.getGroupId());
+                        metadata.setArtifactId(artifact.getArtifactId());
+                        metadata.setVersion(artifact.getVersion());
+                        metadata.setModelVersion("1.1.0");
+
+                        Versioning versioning = new Versioning();
+                        versioning.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
+                        Snapshot snapshot = new Snapshot();
+                        snapshot.setLocalCopy(true);
+                        versioning.setSnapshot(snapshot);
+                        SnapshotVersion snapshotVersion = new SnapshotVersion();
+                        snapshotVersion.setClassifier(artifact.getClassifier());
+                        snapshotVersion.setVersion(artifact.getVersion());
+                        snapshotVersion.setExtension(artifact.getType());
+                        snapshotVersion.setUpdated(versioning.getLastUpdated());
+                        versioning.addSnapshotVersion(snapshotVersion);
+
+                        metadata.setVersioning(versioning);
+
+                        MetadataXpp3Writer metadataWriter = new MetadataXpp3Writer();
+                        try {
+                            Writer writer = new FileWriter(metadataTarget);
+                            metadataWriter.write(writer, metadata);
+                        } catch (Exception e) {
+                            getLog().warn("Could not create maven-metadata-local.xml", e);
+                            getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                        }
                     }
 
                 }
@@ -252,7 +276,7 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         //install bundles listed in startup properties that weren't in kars into the system dir
-        for (String key: (Set<String>) startupProperties.keySet()) {
+        for (String key : (Set<String>) startupProperties.keySet()) {
             String path = MvnUrlUtil.pathFromMaven(key);
             File target = new File(system.resolve(path));
             if (!target.exists()) {
@@ -261,8 +285,8 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         //install bundles listed in install features not in system into local-repo
-        for (Feature feature: localRepoFeatures) {
-            for (Bundle bundle: feature.getBundle()) {
+        for (Feature feature : localRepoFeatures) {
+            for (Bundle bundle : feature.getBundle()) {
                 if (!bundle.isDependency()) {
                     String key = bundle.getLocation();
                     String path = MvnUrlUtil.pathFromMaven(key);
@@ -299,8 +323,7 @@ public class InstallKarsMojo extends MojoSupport {
             InputStream is = new FileInputStream(source);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(target));
             int count = 0;
-            while ((count = is.read(buffer)) > 0)
-            {
+            while ((count = is.read(buffer)) > 0) {
                 bos.write(buffer, 0, count);
             }
             bos.close();
@@ -355,23 +378,23 @@ public class InstallKarsMojo extends MojoSupport {
                     } finally {
                         in.close();
                     }
-                    String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES) && !((String) properties.get(FEATURES_REPOSITORIES)).isEmpty()? properties.get(FEATURES_REPOSITORIES) + ",": "";
-                    if(!existingFeatureRepos.contains(uri.toString())) {
-                       existingFeatureRepos = existingFeatureRepos + uri.toString();
-                       properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
+                    String existingFeatureRepos = properties.containsKey(FEATURES_REPOSITORIES) && !((String) properties.get(FEATURES_REPOSITORIES)).isEmpty() ? properties.get(FEATURES_REPOSITORIES) + "," : "";
+                    if (!existingFeatureRepos.contains(uri.toString())) {
+                        existingFeatureRepos = existingFeatureRepos + uri.toString();
+                        properties.put(FEATURES_REPOSITORIES, existingFeatureRepos);
                     }
                     Features repo = readFeatures(uri);
-                    for (Feature feature: repo.getFeature()) {
+                    for (Feature feature : repo.getFeature()) {
                         if (startupFeatures != null && startupFeatures.contains(feature.getName())) {
                             installFeature(feature, null);
                         } else if (bootFeatures != null && bootFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
-                            String existingBootFeatures = properties.containsKey(FEATURES_BOOT) && !((String) properties.get(FEATURES_BOOT)).isEmpty()? properties.get(FEATURES_BOOT) + ",": "";
-                            if(!existingBootFeatures.contains(feature.getName())) {
+                            String existingBootFeatures = properties.containsKey(FEATURES_BOOT) && !((String) properties.get(FEATURES_BOOT)).isEmpty() ? properties.get(FEATURES_BOOT) + "," : "";
+                            if (!existingBootFeatures.contains(feature.getName())) {
                                 existingBootFeatures = existingBootFeatures + feature.getName();
                                 properties.put(FEATURES_BOOT, existingBootFeatures);
                             }
-                        }  else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
+                        } else if (installedFeatures != null && installedFeatures.contains(feature.getName())) {
                             localRepoFeatures.add(feature);
                         }
                     }
@@ -385,7 +408,7 @@ public class InstallKarsMojo extends MojoSupport {
             } else {
                 getLog().info("Installing feature " + uri + " to system and startup.properties");
                 Features features = readFeatures(uri);
-                for (Feature feature: features.getFeature()) {
+                for (Feature feature : features.getFeature()) {
                     installFeature(feature, null);
                 }
             }
@@ -429,10 +452,10 @@ public class InstallKarsMojo extends MojoSupport {
         }
 
         public void installFeature(org.apache.karaf.features.Feature feature, EnumSet<Option> options) throws Exception {
-            List<String> comment = Arrays.asList(new String[] {"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
-            for (BundleInfo bundle: feature.getBundles()) {
+            List<String> comment = Arrays.asList(new String[]{"", "# feature: " + feature.getName() + " version: " + feature.getVersion()});
+            for (BundleInfo bundle : feature.getBundles()) {
                 String location = bundle.getLocation();
-                String startLevel = Integer.toString(bundle.getStartLevel() == 0? defaultStartLevel: bundle.getStartLevel());
+                String startLevel = Integer.toString(bundle.getStartLevel() == 0 ? defaultStartLevel : bundle.getStartLevel());
                 if (startupProperties.containsKey(location)) {
                     int oldStartLevel = Integer.decode((String) startupProperties.get(location));
                     if (oldStartLevel > bundle.getStartLevel()) {
@@ -490,7 +513,7 @@ public class InstallKarsMojo extends MojoSupport {
             storage = (Map<String, String>) getField("storage");
         }
 
-        private Object getField(String fieldName)  {
+        private Object getField(String fieldName) {
             try {
                 Field l = Properties.class.getDeclaredField(fieldName);
                 boolean old = l.isAccessible();
@@ -511,13 +534,13 @@ public class InstallKarsMojo extends MojoSupport {
             if (valueLines.isEmpty()) {
                 valueLines.add(escapedKey + "=");
             } else if (!valueLines.get(0).trim().startsWith(escapedKey)) {
-                valueLines.set(0, escapedKey + " = " + escapeJava(valueLines.get(0)) + (0 < lastLine? "\\": ""));
+                valueLines.set(0, escapedKey + " = " + escapeJava(valueLines.get(0)) + (0 < lastLine ? "\\" : ""));
             }
             for (int i = 1; i < valueLines.size(); i++) {
-                valueLines.set(i, escapeJava(valueLines.get(i)) + (i < lastLine? "\\": ""));
+                valueLines.set(i, escapeJava(valueLines.get(i)) + (i < lastLine ? "\\" : ""));
             }
             StringBuilder value = new StringBuilder();
-            for (String line: valueLines) {
+            for (String line : valueLines) {
                 value.append(line);
             }
             this.layout.put(key, new Layout(commentLines, valueLines));
@@ -547,33 +570,33 @@ public class InstallKarsMojo extends MojoSupport {
             return result;
         }
 
-        /** The list of possible key/value separators */
-        private static final char[] SEPARATORS = new char[] {'=', ':'};
+        /**
+         * The list of possible key/value separators
+         */
+        private static final char[] SEPARATORS = new char[]{'=', ':'};
 
-        /** The white space characters used as key/value separators. */
-        private static final char[] WHITE_SPACE = new char[] {' ', '\t', '\f'};
+        /**
+         * The white space characters used as key/value separators.
+         */
+        private static final char[] WHITE_SPACE = new char[]{' ', '\t', '\f'};
+
         /**
          * Escape the separators in the key.
          *
          * @param key the key
          * @return the escaped key
          */
-        private static String escapeKey(String key)
-        {
+        private static String escapeKey(String key) {
             StringBuffer newkey = new StringBuffer();
 
-            for (int i = 0; i < key.length(); i++)
-            {
+            for (int i = 0; i < key.length(); i++) {
                 char c = key.charAt(i);
 
-                if (contains(SEPARATORS, c) || contains(WHITE_SPACE, c))
-                {
+                if (contains(SEPARATORS, c) || contains(WHITE_SPACE, c)) {
                     // escape the separator
                     newkey.append('\\');
                     newkey.append(c);
-                }
-                else
-                {
+                } else {
                     newkey.append(c);
                 }
             }
