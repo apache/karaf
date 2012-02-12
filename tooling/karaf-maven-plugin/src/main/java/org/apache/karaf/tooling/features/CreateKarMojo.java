@@ -18,10 +18,9 @@
  */
 package org.apache.karaf.tooling.features;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.karaf.deployer.kar.KarArtifactInstaller;
@@ -36,6 +35,11 @@ import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.artifact.repository.metadata.Metadata;
+import org.apache.maven.artifact.repository.metadata.Snapshot;
+import org.apache.maven.artifact.repository.metadata.SnapshotVersion;
+import org.apache.maven.artifact.repository.metadata.Versioning;
+import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
@@ -51,7 +55,6 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
  * @description Assemble a kar archive from a features.xml file
  */
 public class CreateKarMojo extends MojoSupport {
-
 
     /**
      * The maven archive configuration to use.
@@ -111,7 +114,7 @@ public class CreateKarMojo extends MojoSupport {
      */
     private String repositoryPath = "repository/";
 
-    
+
     //
     // Mojo
     //
@@ -130,6 +133,7 @@ public class CreateKarMojo extends MojoSupport {
 
     /**
      * Read bundles and configuration files in the features file.
+     *
      * @return
      * @throws MojoExecutionException
      */
@@ -162,6 +166,7 @@ public class CreateKarMojo extends MojoSupport {
 
     /**
      * Generates the configuration archive.
+     *
      * @param bundles
      */
     private File createArchive(List<Artifact> bundles) throws MojoExecutionException {
@@ -194,9 +199,88 @@ public class CreateKarMojo extends MojoSupport {
             Artifact featureArtifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), "xml", KarArtifactInstaller.FEATURE_CLASSIFIER);
             jarArchiver.addFile(featuresFile, repositoryPath + layout.pathOf(featureArtifact));
 
-            for (Artifact artifact: bundles) {
+            if (featureArtifact.isSnapshot()) {
+                // the artifact is a snapshot, create the maven-metadata-local.xml
+                getLog().debug("Feature artifact is a SNAPSHOT, handling the maven-metadata-local.xml");
+                File metadataTarget = new File(featuresFile.getParentFile(), "maven-metadata-local.xml");
+                getLog().debug("Looking for " + metadataTarget.getAbsolutePath());
+                if (!metadataTarget.exists()) {
+                    // the maven-metadata-local.xml doesn't exist, create it
+                    getLog().debug(metadataTarget.getAbsolutePath() + " doesn't exist, create it");
+                    Metadata metadata = new Metadata();
+                    metadata.setGroupId(featureArtifact.getGroupId());
+                    metadata.setArtifactId(featureArtifact.getArtifactId());
+                    metadata.setVersion(featureArtifact.getVersion());
+                    metadata.setModelVersion("1.1.0");
+
+                    Versioning versioning = new Versioning();
+                    versioning.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
+                    Snapshot snapshot = new Snapshot();
+                    snapshot.setLocalCopy(true);
+                    versioning.setSnapshot(snapshot);
+                    SnapshotVersion snapshotVersion = new SnapshotVersion();
+                    snapshotVersion.setClassifier(featureArtifact.getClassifier());
+                    snapshotVersion.setVersion(featureArtifact.getVersion());
+                    snapshotVersion.setExtension(featureArtifact.getType());
+                    snapshotVersion.setUpdated(versioning.getLastUpdated());
+                    versioning.addSnapshotVersion(snapshotVersion);
+
+                    metadata.setVersioning(versioning);
+
+                    MetadataXpp3Writer metadataWriter = new MetadataXpp3Writer();
+                    try {
+                        Writer writer = new FileWriter(metadataTarget);
+                        metadataWriter.write(writer, metadata);
+                    } catch (Exception e) {
+                        getLog().warn("Could not create maven-metadata-local.xml", e);
+                        getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                    }
+                }
+                getLog().debug("Adding file " + metadataTarget.getAbsolutePath() + " in the jar path " + repositoryPath + layout.pathOf(featureArtifact).substring(0, layout.pathOf(featureArtifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
+                jarArchiver.addFile(metadataTarget, repositoryPath + layout.pathOf(featureArtifact).substring(0, layout.pathOf(featureArtifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
+            }
+
+            for (Artifact artifact : bundles) {
                 resolver.resolve(artifact, remoteRepos, localRepo);
                 File localFile = artifact.getFile();
+
+                if (artifact.isSnapshot()) {
+                    // the artifact is a snapshot, create the maven-metadata-local.xml
+                    File metadataTarget = new File(localFile.getParentFile(), "maven-metadata-local.xml");
+                    if (!metadataTarget.exists()) {
+                        // the maven-metadata-local.xml doesn't exist, create it
+                        Metadata metadata = new Metadata();
+                        metadata.setGroupId(artifact.getGroupId());
+                        metadata.setArtifactId(artifact.getArtifactId());
+                        metadata.setVersion(artifact.getVersion());
+                        metadata.setModelVersion("1.1.0");
+
+                        Versioning versioning = new Versioning();
+                        versioning.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
+                        Snapshot snapshot = new Snapshot();
+                        snapshot.setLocalCopy(true);
+                        versioning.setSnapshot(snapshot);
+                        SnapshotVersion snapshotVersion = new SnapshotVersion();
+                        snapshotVersion.setClassifier(artifact.getClassifier());
+                        snapshotVersion.setVersion(artifact.getVersion());
+                        snapshotVersion.setExtension(artifact.getType());
+                        snapshotVersion.setUpdated(versioning.getLastUpdated());
+                        versioning.addSnapshotVersion(snapshotVersion);
+
+                        metadata.setVersioning(versioning);
+
+                        MetadataXpp3Writer metadataWriter = new MetadataXpp3Writer();
+                        try {
+                            Writer writer = new FileWriter(metadataTarget);
+                            metadataWriter.write(writer, metadata);
+                        } catch (Exception e) {
+                            getLog().warn("Could not create maven-metadata-local.xml", e);
+                            getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
+                        }
+                    }
+                    jarArchiver.addFile(metadataTarget, repositoryPath + layout.pathOf(artifact).substring(0, layout.pathOf(artifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
+                }
+
                 //TODO this may not be reasonable, but... resolved snapshot artifacts have timestamped versions
                 //which do not work in startup.properties.
                 artifact.setVersion(artifact.getBaseVersion());

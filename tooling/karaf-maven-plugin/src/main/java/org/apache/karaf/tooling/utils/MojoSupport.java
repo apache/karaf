@@ -206,7 +206,6 @@ public abstract class MojoSupport extends AbstractMojo {
         return finalIncludes;
     }
 
-
     protected Map createManagedVersionMap(String projectId,
             DependencyManagement dependencyManagement) throws ProjectBuildingException {
         Map map;
