@@ -41,7 +41,7 @@
     <dependencies>
         <!-- The assembly and all the dependencies -->
         <dependency>
-            <groupId>org.apache.karaf.assemblies</groupId>
+            <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
             <type>zip</type>
         </dependency>

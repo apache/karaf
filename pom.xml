@@ -53,10 +53,10 @@
         <module>exception</module>
         <module>scheduler</module>
         <module>scr</module>
+        <module>tooling</module>
         <module>assemblies</module>
         <module>demos</module>
         <module>itests</module>
-        <module>tooling</module>
         <module>archetypes</module>
         <module>diagnostic</module>
         <module>manual</module>
@@ -637,25 +637,25 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.assemblies</groupId>
+                <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf</artifactId>
                 <type>tar.gz</type>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.assemblies</groupId>
+                <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf</artifactId>
                 <type>zip</type>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.assemblies</groupId>
+                <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf-minimal</artifactId>
                 <type>tar.gz</type>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.assemblies</groupId>
+                <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf-minimal</artifactId>
                 <type>zip</type>
                 <version>${project.version}</version>

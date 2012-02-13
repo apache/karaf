@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="org.apache.karaf.scr.feature-${project.version}">
-    <repository>mvn:org.apache.karaf.assemblies.features/standard/${project.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
     <feature version="${project.version}" name="scr">
         <feature>eventadmin</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>

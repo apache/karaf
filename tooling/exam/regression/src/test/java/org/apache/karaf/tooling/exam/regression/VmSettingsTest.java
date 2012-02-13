@@ -38,7 +38,7 @@ public class VmSettingsTest {
     public Option[] config() {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
-                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                     .versionAsInProject()), new VMOption("-Xmx1024m"), new VMOption("-XX:MaxPermSize=56m") };
     }
 

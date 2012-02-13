@@ -28,6 +28,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <groupId>org.apache.karaf</groupId>
     <artifactId>apache-karaf</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Default Distribution</name>

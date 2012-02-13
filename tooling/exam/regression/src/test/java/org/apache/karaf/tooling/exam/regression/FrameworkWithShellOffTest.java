@@ -38,7 +38,7 @@ public class FrameworkWithShellOffTest {
     public Option[] config() {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
-                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                     .versionAsInProject()), configureConsole().ignoreLocalConsole().ignoreRemoteShell() };
     }
 

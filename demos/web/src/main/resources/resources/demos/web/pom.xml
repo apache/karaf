@@ -53,7 +53,7 @@
             <artifactId>org.apache.karaf.jaas.boot</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.assemblies</groupId>
+            <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
             <type>zip</type>
             <scope>provided</scope>
@@ -123,7 +123,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.karaf.assemblies</groupId>
+                                    <groupId>org.apache.karaf</groupId>
                                     <artifactId>apache-karaf</artifactId>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>

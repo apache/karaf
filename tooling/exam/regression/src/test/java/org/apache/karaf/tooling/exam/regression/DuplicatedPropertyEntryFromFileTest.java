@@ -50,7 +50,7 @@ public class DuplicatedPropertyEntryFromFileTest {
     public Option[] config() {
         Option[] base =
             new Option[]{ karafDistributionConfiguration().frameworkUrl(
-                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                     .versionAsInProject()) };
         base =
             combine(

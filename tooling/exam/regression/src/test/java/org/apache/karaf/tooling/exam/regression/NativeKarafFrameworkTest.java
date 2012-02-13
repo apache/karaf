@@ -37,10 +37,10 @@ public class NativeKarafFrameworkTest {
     @Configuration
     public Option[] config() {
         return new Option[]{
-            new KarafDistributionKitConfigurationOption(maven().groupId("org.apache.karaf.assemblies")
+            new KarafDistributionKitConfigurationOption(maven().groupId("org.apache.karaf")
                 .artifactId("apache-karaf").type("zip").versionAsInProject(), Platform.WINDOWS).executable(
                 "bin\\karaf.bat").filesToMakeExecutable("bin\\admin.bat"),
-            new KarafDistributionKitConfigurationOption(maven().groupId("org.apache.karaf.assemblies")
+            new KarafDistributionKitConfigurationOption(maven().groupId("org.apache.karaf")
                 .artifactId("apache-karaf").type("zip").versionAsInProject(), Platform.NIX).executable("bin/karaf")
                 .filesToMakeExecutable("bin/admin") };
     }
