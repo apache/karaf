@@ -122,18 +122,42 @@ public class KarServiceImpl implements KarService {
     }
     
     public void uninstall(String karName) throws Exception {
+        uninstall(karName, false);
+    }
+    
+    public void uninstall(String karName, boolean clean) throws Exception {
         File karStorage = new File(storage);
         File karFile = new File(karStorage, karName);
         
         if (!karFile.exists()) {
             throw new IllegalArgumentException("The KAR " + karName + " is not installed");
         }
-
+        
+        if (clean) {
+            LOGGER.debug("Looking for KAR entries to purge the local repository");
+            ZipFile zipFile = new ZipFile(karFile);
+            Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String repoEntryName = getRepoEntryName(entry);
+                if (repoEntryName != null) {
+                    File toDelete = new File(base + File.separator + repoEntryName);
+                    if (toDelete.exists()) {
+                        toDelete.delete();
+                    }
+                }
+                if (entry.getName().startsWith("resource")) {
+                    String resourceEntryName = entry.getName().substring("resource/".length());
+                    File toDelete = new File(base + File.separator + resourceEntryName);
+                    if (toDelete.exists()) {
+                        toDelete.delete();
+                    }
+                }
+            }
+            zipFile.close();
+        }
+        
         karFile.delete();
-    }
-    
-    public void uninstall(String karName, boolean clean) throws Exception {
-        // TODO
     }
     
     public List<String> list() throws Exception {
