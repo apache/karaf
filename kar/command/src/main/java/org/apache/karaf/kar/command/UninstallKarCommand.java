@@ -30,8 +30,7 @@ public class UninstallKarCommand extends KarCommandSupport {
     private boolean clean = false;
     
     public Object doExecute() throws Exception {
-        //TODO use the clean flag
-        this.getKarService().uninstall(name);
+        this.getKarService().uninstall(name, clean);
         return null;
     }
     
