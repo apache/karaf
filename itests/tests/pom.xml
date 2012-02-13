@@ -53,7 +53,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.assemblies</groupId>
+            <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
             <type>zip</type>
             <scope>test</scope>

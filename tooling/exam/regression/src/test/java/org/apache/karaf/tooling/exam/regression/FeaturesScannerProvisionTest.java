@@ -44,10 +44,10 @@ public class FeaturesScannerProvisionTest {
     public Option[] config() {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
-                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                     .versionAsInProject()),
             scanFeatures(
-                maven().groupId("org.apache.karaf.assemblies.features").artifactId("standard").type("xml")
+                maven().groupId("org.apache.karaf.features").artifactId("standard").type("xml")
                     .classifier("features").version("2.2.4"), "deployers", "wrapper").start() };
     }
 

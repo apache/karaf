@@ -39,7 +39,7 @@ public class EquinoxFrameworkTest {
     public Option[] config() {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
-                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                     .versionAsInProject()), editConfigurationFilePut(CustomProperties.KARAF_FRAMEWORK, "equinox") };
     }
 

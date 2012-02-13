@@ -40,7 +40,7 @@ public class BootClasspathLibraryOptionTest {
     public Option[] config() {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
-                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                     .versionAsInProject()),
             bootClasspathLibrary("mvn:commons-naming/commons-naming-core/20031116.223527") };
     }

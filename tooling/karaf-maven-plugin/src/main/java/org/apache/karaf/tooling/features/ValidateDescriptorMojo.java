@@ -74,8 +74,8 @@ public class ValidateDescriptorMojo extends MojoSupport {
     private static final String MVN_URI_PREFIX = "mvn:";
     private static final String MVN_REPO_SEPARATOR = "!";
 
-    private static final String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/standard/%s/xml/features";
-    private static final String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.assemblies.features/enterprise/%s/xml/features";
+    private static final String KARAF_CORE_STANDARD_FEATURE_URL = "mvn:org.apache.karaf.features/standard/%s/xml/features";
+    private static final String KARAF_CORE_ENTERPRISE_FEATURE_URL = "mvn:org.apache.karaf.features/enterprise/%s/xml/features";
 
     /**
      * The dependency tree builder to use.

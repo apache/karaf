@@ -47,7 +47,7 @@ public class DuplicatedPropertyEntryTest {
     public Option[] config() {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
-                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                     .versionAsInProject()), editConfigurationFileExtend("etc/tests.cfg", "mykey", "myvalue1"),
             editConfigurationFileExtend("etc/tests.cfg", "mykey", "myvalue2") };
     }

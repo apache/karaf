@@ -84,7 +84,7 @@
 
     <feature name="http" version="${project.version}" resolver="(obr)" description="Implementation of the OSGI HTTP Service">
         <details>Allows to publish servlets using pax web and jetty</details>
-    	<configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf.assemblies/apache-karaf/${project.version}/xml/jettyconfig</configfile>
+    	<configfile finalname="/etc/jetty.xml">mvn:org.apache.karaf/apache-karaf/${project.version}/xml/jettyconfig</configfile>
 		<config name="org.ops4j.pax.web">
             org.osgi.service.http.port=8181
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp

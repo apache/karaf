@@ -42,7 +42,7 @@ public class LogLevelTest {
     public Option[] config() {
         return new Option[]{
             karafDistributionConfiguration().frameworkUrl(
-                maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                     .versionAsInProject()).unpackDirectory(new File("target/paxexam/log/")), keepRuntimeFolder(),
             logLevel(LogLevel.ERROR) };
     }

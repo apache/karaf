@@ -53,7 +53,7 @@ public class ReplaceConfigFileTest {
         Option[] base =
             new Option[]{
                 karafDistributionConfiguration().frameworkUrl(
-                    maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip")
+                    maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip")
                         .versionAsInProject()).unpackDirectory(new File("target/paxexam/unpack/")),
                 KarafDistributionOption.editConfigurationFilePut(CustomProperties.KARAF_FRAMEWORK, "equinox"),
                 KarafDistributionOption.keepRuntimeFolder() };

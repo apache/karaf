@@ -36,7 +36,7 @@ public class BaseKarafDefaultFrameworkTest {
     @Configuration
     public Option[] config() {
         return new Option[]{ karafDistributionConfiguration().frameworkUrl(
-            maven().groupId("org.apache.karaf.assemblies").artifactId("apache-karaf").type("zip").versionAsInProject()) };
+            maven().groupId("org.apache.karaf").artifactId("apache-karaf").type("zip").versionAsInProject()) };
     }
 
     @Test
