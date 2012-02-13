@@ -206,7 +206,7 @@ public class InstallKarsMojo extends MojoSupport {
                 }
             }
             if ("features".equals(artifact.getClassifier()) && acceptScope(artifact)) {
-                String uri = MvnUrlUtil.artifactToMvn(artifact);
+                String uri = MavenUtil.artifactToMvn(artifact);
 
                 File source = artifact.getFile();
                 DefaultRepositoryLayout layout = new DefaultRepositoryLayout();
@@ -233,30 +233,8 @@ public class InstallKarsMojo extends MojoSupport {
                     if (artifact.isSnapshot()) {
                         getLog().debug("Feature " + uri + " is a SNAPSHOT, generate the maven-metadata-local.xml file");
                         File metadataTarget = new File(target.getParentFile(), "maven-metadata-local.xml");
-                        Metadata metadata = new Metadata();
-                        metadata.setGroupId(artifact.getGroupId());
-                        metadata.setArtifactId(artifact.getArtifactId());
-                        metadata.setVersion(artifact.getVersion());
-                        metadata.setModelVersion("1.1.0");
-
-                        Versioning versioning = new Versioning();
-                        versioning.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
-                        Snapshot snapshot = new Snapshot();
-                        snapshot.setLocalCopy(true);
-                        versioning.setSnapshot(snapshot);
-                        SnapshotVersion snapshotVersion = new SnapshotVersion();
-                        snapshotVersion.setClassifier(artifact.getClassifier());
-                        snapshotVersion.setVersion(artifact.getVersion());
-                        snapshotVersion.setExtension(artifact.getType());
-                        snapshotVersion.setUpdated(versioning.getLastUpdated());
-                        versioning.addSnapshotVersion(snapshotVersion);
-
-                        metadata.setVersioning(versioning);
-
-                        MetadataXpp3Writer metadataWriter = new MetadataXpp3Writer();
                         try {
-                            Writer writer = new FileWriter(metadataTarget);
-                            metadataWriter.write(writer, metadata);
+                            MavenUtil.generateMavenMetadata(artifact, metadataTarget);
                         } catch (Exception e) {
                             getLog().warn("Could not create maven-metadata-local.xml", e);
                             getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");
@@ -275,7 +253,7 @@ public class InstallKarsMojo extends MojoSupport {
 
         //install bundles listed in startup properties that weren't in kars into the system dir
         for (String key : (Set<String>) startupProperties.keySet()) {
-            String path = MvnUrlUtil.pathFromMaven(key);
+            String path = MavenUtil.pathFromMaven(key);
             File target = new File(system.resolve(path));
             if (!target.exists()) {
                 install(buffer, key, target);
@@ -287,7 +265,7 @@ public class InstallKarsMojo extends MojoSupport {
             for (Bundle bundle : feature.getBundle()) {
                 if (!bundle.isDependency()) {
                     String key = bundle.getLocation();
-                    String path = MvnUrlUtil.pathFromMaven(key);
+                    String path = MavenUtil.pathFromMaven(key);
                     File test = new File(system.resolve(path));
                     if (!test.exists()) {
                         File target = new File(system.resolve(path));
@@ -336,7 +314,7 @@ public class InstallKarsMojo extends MojoSupport {
 
 
     public File resolve(String id) {
-        id = MvnUrlUtil.mvnToAether(id);
+        id = MavenUtil.mvnToAether(id);
         ArtifactRequest request = new ArtifactRequest();
         request.setArtifact(new DefaultArtifact(id));
         request.setRepositories(remoteRepos);
@@ -415,7 +393,7 @@ public class InstallKarsMojo extends MojoSupport {
         private Features readFeatures(URI uri) throws XMLStreamException, JAXBException, IOException {
             File repoFile;
             if (uri.toString().startsWith("mvn:")) {
-                URI featuresPath = system.resolve(MvnUrlUtil.pathFromMaven(uri.toString()));
+                URI featuresPath = system.resolve(MavenUtil.pathFromMaven(uri.toString()));
                 repoFile = new File(featuresPath);
             } else {
                 repoFile = new File(uri);

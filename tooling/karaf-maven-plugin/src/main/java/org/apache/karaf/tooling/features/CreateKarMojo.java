@@ -249,30 +249,8 @@ public class CreateKarMojo extends MojoSupport {
                     File metadataTarget = new File(localFile.getParentFile(), "maven-metadata-local.xml");
                     if (!metadataTarget.exists()) {
                         // the maven-metadata-local.xml doesn't exist, create it
-                        Metadata metadata = new Metadata();
-                        metadata.setGroupId(artifact.getGroupId());
-                        metadata.setArtifactId(artifact.getArtifactId());
-                        metadata.setVersion(artifact.getVersion());
-                        metadata.setModelVersion("1.1.0");
-
-                        Versioning versioning = new Versioning();
-                        versioning.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
-                        Snapshot snapshot = new Snapshot();
-                        snapshot.setLocalCopy(true);
-                        versioning.setSnapshot(snapshot);
-                        SnapshotVersion snapshotVersion = new SnapshotVersion();
-                        snapshotVersion.setClassifier(artifact.getClassifier());
-                        snapshotVersion.setVersion(artifact.getVersion());
-                        snapshotVersion.setExtension(artifact.getType());
-                        snapshotVersion.setUpdated(versioning.getLastUpdated());
-                        versioning.addSnapshotVersion(snapshotVersion);
-
-                        metadata.setVersioning(versioning);
-
-                        MetadataXpp3Writer metadataWriter = new MetadataXpp3Writer();
                         try {
-                            Writer writer = new FileWriter(metadataTarget);
-                            metadataWriter.write(writer, metadata);
+                            MavenUtil.generateMavenMetadata(artifact, metadataTarget);
                         } catch (Exception e) {
                             getLog().warn("Could not create maven-metadata-local.xml", e);
                             getLog().warn("It means that this SNAPSHOT could be overwritten by an older one present on remote repositories");

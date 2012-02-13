@@ -293,7 +293,7 @@ public class GenerateDescriptorMojo extends AbstractLogEnabled implements Mojo {
                     feature.getFeature().add(dependency);
                 }
             } else {
-                String bundleName = MvnUrlUtil.artifactToMvn(artifact);
+                String bundleName = MavenUtil.artifactToMvn(artifact);
                 File bundleFile = resolve(artifact);
                 Manifest manifest = getManifest(bundleFile);
 

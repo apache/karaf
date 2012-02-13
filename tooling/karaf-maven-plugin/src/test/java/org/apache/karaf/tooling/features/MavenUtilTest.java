@@ -20,21 +20,20 @@
 
 package org.apache.karaf.tooling.features;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 
-import static org.apache.karaf.tooling.features.MvnUrlUtil.aetherToMvn;
-import static org.apache.karaf.tooling.features.MvnUrlUtil.artifactToMvn;
-import static org.apache.karaf.tooling.features.MvnUrlUtil.mvnToAether;
-import static org.apache.karaf.tooling.features.MvnUrlUtil.pathFromAether;
-import static org.apache.karaf.tooling.features.MvnUrlUtil.pathFromMaven;
+import static org.apache.karaf.tooling.features.MavenUtil.aetherToMvn;
+import static org.apache.karaf.tooling.features.MavenUtil.artifactToMvn;
+import static org.apache.karaf.tooling.features.MavenUtil.mvnToAether;
+import static org.apache.karaf.tooling.features.MavenUtil.pathFromAether;
+import static org.apache.karaf.tooling.features.MavenUtil.pathFromMaven;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @version $Rev:$ $Date:$
  */
-public class MvnUrlUtilTest {
+public class MavenUtilTest {
 
     @Test
     public void testMvnToAether() throws Exception {
