@@ -994,7 +994,7 @@
                 <version>${log4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.sf.jline</groupId>
+                <groupId>jline</groupId>
                 <artifactId>jline</artifactId>
                 <version>${jline.version}</version>
             </dependency>

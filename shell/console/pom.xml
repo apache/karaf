@@ -49,7 +49,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.sf.jline</groupId>
+            <groupId>jline</groupId>
             <artifactId>jline</artifactId>
             <exclusions>
                 <exclusion>
