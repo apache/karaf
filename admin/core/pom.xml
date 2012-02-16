@@ -34,7 +34,7 @@
     <description>Core implementation of the admin feature to manipulate Karaf child instances.</description>
 
     <properties>
-        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <appendedResourcesDirectory>${project.basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
     <dependencies>
@@ -92,42 +92,37 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>karaf-maven-plugin</artifactId>
-                <version>${project.version}</version>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-config-files</id>
+                        <id>copy-resources</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/framework/org/apache/karaf/admin/etc</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/org/apache/karaf/admin/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../../assemblies/features/framework/src/main/resources/resources/etc</directory>
+                                    <directory>${project.basedir}/../../assemblies/features/framework/src/main/resources</directory>
                                     <includes>
-                                        <include>*.properties</include>
-                                        <include>*.cfg</include>
+                                        <include>**/*.properties</include>
+                                        <include>**/*.cfg</include>
                                     </includes>
                                     <excludes>
-                                        <exclude>org.apache.karaf.management.cfg</exclude>
-                                        <exclude>org.apache.karaf.shell.cfg</exclude>
-                                        <exclude>org.ops4j.pax.url.mvn.cfg</exclude>
-                                        <exclude>system.properties</exclude>
+                                        <exclude>**/org.apache.karaf.management.cfg</exclude>
+                                        <exclude>**/org.apache.karaf.shell.cfg</exclude>
+                                        <exclude>**/org.ops4j.pax.url.mvn.cfg</exclude>
+                                        <exclude>**/system.properties</exclude>
                                     </excludes>
                                 </resource>
                                 <resource>
-                                    <directory>../../assemblies/features/framework/src/main/filtered-resources/resources/etc</directory>
+                                    <directory>${project.basedir}/../../assemblies/features/framework/src/main/filtered-resources</directory>
                                     <filtering>true</filtering>
                                     <includes>
-                                        <include>*.properties</include>
-                                        <include>*.cfg</include>
+                                        <include>**/*.properties</include>
+                                        <include>**/*.cfg</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -135,27 +130,6 @@
                     </execution>
                 </executions>
             </plugin>
-	      <plugin>
-	        <groupId>org.codehaus.mojo</groupId>
-	        <artifactId>build-helper-maven-plugin</artifactId>
-	        <version>1.7</version>
-	        <executions>
-	          <execution>
-	            <id>add-resource</id>
-	            <phase>generate-resources</phase>
-	            <goals>
-	              <goal>add-resource</goal>
-	            </goals>
-	            <configuration>
-	              <resources>
-	                <resource>
-	                  <directory>${basedir}/target/framework</directory>
-	                </resource>
-	              </resources>
-	            </configuration>
-	          </execution>
-	        </executions>
-	      </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
