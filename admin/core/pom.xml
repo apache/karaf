@@ -106,10 +106,6 @@
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/../../assemblies/features/framework/src/main/resources</directory>
-                                    <includes>
-                                        <include>**/*.properties</include>
-                                        <include>**/*.cfg</include>
-                                    </includes>
                                     <excludes>
                                         <exclude>**/org.apache.karaf.management.cfg</exclude>
                                         <exclude>**/org.apache.karaf.shell.cfg</exclude>
@@ -154,8 +150,7 @@
                         </Import-Package>
                         <Private-Package>
                             org.apache.felix.utils.properties,
-                            org.apache.karaf.admin.bin,
-                            org.apache.karaf.admin.etc,
+                            org.apache.karaf.admin.resources*,
                             org.apache.karaf.admin.internal,
                             org.apache.karaf.jpm.impl,
                         </Private-Package>
