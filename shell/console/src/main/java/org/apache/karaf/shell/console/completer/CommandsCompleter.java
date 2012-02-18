@@ -96,17 +96,20 @@ public class CommandsCompleter implements Completer {
     }
 
     protected Function unProxy(Function function) {
-    	if (function instanceof CommandProxy) {
-        	CommandProxy proxy = (CommandProxy) function;
-        	Object target = proxy.getTarget();
-       		if (target instanceof Function) {
-       			return (Function) target;
-       		} else {
-       			return function;
-       		}
-    	} else {	
-    		return function;
-    	}
+        if (function instanceof CommandProxy) {
+            CommandProxy proxy = (CommandProxy) function;
+            Object target = proxy.getTarget();
+            Function result;
+            if (target instanceof Function) {
+                result = (Function) target;
+            } else {
+                result = function;
+            }
+            proxy.ungetTarget();
+            return result;
+        } else {
+            return function;
+        }
     }
 
 }
