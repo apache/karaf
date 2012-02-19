@@ -91,10 +91,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class KarafTestContainer implements TestContainer {
-    private static final String KARAF_TEST_CONTAINER = "KarafTestContainer.start";
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(KarafTestContainer.class);
 
+    private static final String KARAF_TEST_CONTAINER = "KarafTestContainer.start";
+    private static final String EXAM_INVOKER_PROPERTY = "pax.exam.invoker";
+    private static final String EXAM_INJECT_PROPERTY = "pax.exam.inject";
+    
     private final Runner runner;
     private final RMIRegistry registry;
     private final ExamSystem system;
@@ -126,8 +129,8 @@ public class KarafTestContainer implements TestContainer {
                     systemProperty(RMI_HOST_PROPERTY).value(registry.getHost()),
                     systemProperty(RMI_PORT_PROPERTY).value("" + registry.getPort()),
                     systemProperty(RMI_NAME_PROPERTY).value(name),
-                    systemProperty("pax.exam.invoker").value("junit"),
-                    systemProperty("pax.exam.inject").value("true")
+                    systemProperty(EXAM_INVOKER_PROPERTY).value("junit"),
+                    systemProperty(EXAM_INJECT_PROPERTY).value("true")
                 ));
             target = new RBCRemoteTarget(name, registry.getPort(), subsystem.getTimeout());
 
