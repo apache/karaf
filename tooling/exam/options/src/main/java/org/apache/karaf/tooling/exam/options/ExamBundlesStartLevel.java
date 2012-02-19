@@ -15,14 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.karaf.tooling.exam.container.internal;
+package org.apache.karaf.tooling.exam.options;
 
-public interface Constants {
+import org.ops4j.pax.exam.Option;
 
-    static final String FEATURES_CFG_LOCATION = "/etc/org.apache.karaf.features.cfg";
-
-    static final int SYSTEM_BUNDLE = 0;
+/**
+ * This option allows to configure the start level of the bundles in the exam features descriptor.
+ */
+public class ExamBundlesStartLevel implements Option {
     
-    static final int DEFAULT_START_LEVEL = 5;
+    private final int startLevel;
 
+    /**
+     * Sets the start level of the bundles in the generated exam features descriptor.
+     */
+    public ExamBundlesStartLevel(int startLevel) {
+        this.startLevel = startLevel;
+    }
+
+    public int getStartLevel() {
+        return startLevel;
+    }
 }

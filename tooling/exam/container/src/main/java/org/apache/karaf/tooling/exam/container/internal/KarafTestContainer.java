@@ -57,6 +57,7 @@ import org.apache.karaf.tooling.exam.container.internal.adaptions.KarafManipulat
 import org.apache.karaf.tooling.exam.container.internal.adaptions.KarafManipulatorFactory;
 import org.apache.karaf.tooling.exam.container.internal.runner.Runner;
 import org.apache.karaf.tooling.exam.options.DoNotModifyLogOption;
+import org.apache.karaf.tooling.exam.options.ExamBundlesStartLevel;
 import org.apache.karaf.tooling.exam.options.KarafDistributionBaseConfigurationOption;
 import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationConsoleOption;
 import org.apache.karaf.tooling.exam.options.KarafDistributionConfigurationFileExtendOption;
@@ -181,13 +182,19 @@ public class KarafTestContainer implements TestContainer {
             setupExamProperties(karafHome, subsystem);
             makeScriptsInBinExec(karafBin);
 
+             int startLevel = Constants.DEFAULT_START_LEVEL;
+             ExamBundlesStartLevel examBundlesStartLevel = system.getSingleOption(ExamBundlesStartLevel.class);
+             if (examBundlesStartLevel != null) {
+                 startLevel = examBundlesStartLevel.getStartLevel();
+             }
+            
             ExamFeaturesFile examFeaturesFile;
             if (framework.isUseDeployFolder()) {
                 copyReferencedArtifactsToDeployFolder(deploy, subsystem, fileEndings);
-                examFeaturesFile = new ExamFeaturesFile();
+                examFeaturesFile = new ExamFeaturesFile("", startLevel);
             } else {
                 StringBuilder extension = extractExtensionString(subsystem);
-                examFeaturesFile = new ExamFeaturesFile(extension.toString());
+                examFeaturesFile = new ExamFeaturesFile(extension.toString(), startLevel);
             }
             examFeaturesFile.writeToFile(featuresXmlFile);
 

@@ -53,6 +53,13 @@ public final class KarafDistributionOption {
     public static Option doNotModifyLogConfiguration() {
         return new DoNotModifyLogOption();
     }
+    
+    /**
+     * This option allows to configure the start level of the bundles in the exam features descriptor.
+     */
+    public static Option useOwnExamBundlesStartLevel(int startLevel) {
+        return new ExamBundlesStartLevel(startLevel);
+    }
 
     /**
      * Returns an option object which can be used to configure the -Dkaraf.startLocalConsole and
