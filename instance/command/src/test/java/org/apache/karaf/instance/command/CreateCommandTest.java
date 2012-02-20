@@ -41,12 +41,13 @@ public class CreateCommandTest extends TestCase {
         cc.features = Arrays.asList("abc", "def");
         cc.featureURLs = Collections.singletonList("http://something");
         cc.instance = "myInstance";
+        cc.verbose = true;
         
         EasyMock.verify(instanceService); // check precondition
         EasyMock.reset(instanceService);
         InstanceSettings expectedIS =
             new InstanceSettings(9941, 1122, 44444, "top", "foo", Collections.singletonList("http://something"), Arrays.asList("abc", "def"));
-        EasyMock.expect(instanceService.createInstance("myInstance", expectedIS)).andReturn(null);
+        EasyMock.expect(instanceService.createInstance("myInstance", expectedIS, true)).andReturn(null);
         EasyMock.replay(instanceService);
         
         cc.doExecute();

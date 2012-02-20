@@ -42,15 +42,19 @@ public class CloneCommand extends InstanceCommandSupport {
     @Option(name = "-o", aliases = {"--java-opts"}, description = "JVM options to use when launching the cloned instance", required = false, multiValued = false)
     String javaOpts;
 
+    @Option(name = "-v", aliases = {"--verbose"}, description = "Display actions performed by the command (disabled by default)", required = false, multiValued = false)
+    boolean verbose = false;
+
     @Argument(index = 0, name = "name", description = "The name of the source container instance", required = true, multiValued = false)
     String name;
 
     @Argument(index = 1, name = "cloneName", description = "The name of the cloned container instance", required = true, multiValued = false)
     String cloneName;
 
+
     protected Object doExecute() throws Exception {
         InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, null, null);
-        getInstanceService().cloneInstance(name, cloneName, settings);
+        getInstanceService().cloneInstance(name, cloneName, settings, verbose);
         return null;
     }
 

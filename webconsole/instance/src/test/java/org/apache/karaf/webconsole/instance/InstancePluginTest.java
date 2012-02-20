@@ -56,7 +56,7 @@ public class InstancePluginTest extends TestCase {
         InstanceSettings instanceSettings =
             new InstanceSettings(123, 456, 789,  null, null, Collections.singletonList("http://someURL"), Arrays.asList("abc", "def"));
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
-        EasyMock.expect(instanceService.createInstance("instance1", instanceSettings)).andReturn(null);
+        EasyMock.expect(instanceService.createInstance("instance1", instanceSettings, false)).andReturn(null);
         EasyMock.expect(instanceService.getInstances()).andReturn(new Instance[]{}).anyTimes();
         EasyMock.replay(instanceService);
         
