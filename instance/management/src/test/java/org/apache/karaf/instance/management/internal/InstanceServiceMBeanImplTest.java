@@ -40,7 +40,7 @@ public class InstanceServiceMBeanImplTest extends TestCase {
         EasyMock.replay(inst);
 
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
-        EasyMock.expect(instanceService.createInstance("t1", instanceSettings)).andReturn(inst);
+        EasyMock.expect(instanceService.createInstance("t1", instanceSettings, false)).andReturn(inst);
         EasyMock.replay(instanceService);
         
         InstanceServiceMBeanImpl ab = new InstanceServiceMBeanImpl();
@@ -55,7 +55,7 @@ public class InstanceServiceMBeanImplTest extends TestCase {
                 Collections.<String>emptyList(), Collections.<String>emptyList());
         
         InstanceService instanceService = EasyMock.createMock(InstanceService.class);
-        EasyMock.expect(instanceService.createInstance("t1", instanceSettings)).andReturn(null);
+        EasyMock.expect(instanceService.createInstance("t1", instanceSettings, false)).andReturn(null);
         EasyMock.replay(instanceService);
         
         InstanceServiceMBeanImpl ab = new InstanceServiceMBeanImpl();

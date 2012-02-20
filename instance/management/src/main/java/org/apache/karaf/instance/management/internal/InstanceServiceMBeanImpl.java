@@ -58,7 +58,7 @@ public class InstanceServiceMBeanImpl extends StandardMBean implements InstanceS
         InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts,
                 parseStringList(featureURLs), parseStringList(features));
 
-        Instance inst = instanceService.createInstance(name, settings);
+        Instance inst = instanceService.createInstance(name, settings, false);
         if (inst != null) {
             return inst.getPid();
         } else {
@@ -95,7 +95,7 @@ public class InstanceServiceMBeanImpl extends StandardMBean implements InstanceS
     }
 
     public void renameInstance(String originalName, String newName) throws Exception {
-        instanceService.renameInstance(originalName, newName);
+        instanceService.renameInstance(originalName, newName, false);
     }
 
     public TabularData getInstances() throws Exception {

@@ -52,12 +52,15 @@ public class CreateCommand extends InstanceCommandSupport
             description = "Additional feature descriptor URLs. This option can be specified multiple times to add multiple URLs", required = false, multiValued = true)
     List<String> featureURLs;
 
+    @Option(name = "-v", aliases = {"--verbose"}, description = "Display actions performed by the command (disabled by default)", required = false, multiValued = false)
+    boolean verbose = false;
+
     @Argument(index = 0, name = "name", description="The name of the new container instance", required = true, multiValued = false)
     String instance = null;
 
     protected Object doExecute() throws Exception {
         InstanceSettings settings = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features);
-        getInstanceService().createInstance(instance, settings);
+        getInstanceService().createInstance(instance, settings, verbose);
         return null;
     }
 

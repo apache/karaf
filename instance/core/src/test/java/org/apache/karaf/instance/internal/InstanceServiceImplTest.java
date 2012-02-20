@@ -75,7 +75,7 @@ public class InstanceServiceImplTest extends TestCase {
         System.setProperty("karaf.base", new File("target/test-classes/").getAbsolutePath());
         
         InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
-        Instance instance = service.createInstance(getName(), settings);
+        Instance instance = service.createInstance(getName(), settings, true);
 
         assertFileExists(instance.getLocation(), "etc/config.properties");
         assertFileExists(instance.getLocation(), "etc/users.properties");
@@ -102,9 +102,9 @@ public class InstanceServiceImplTest extends TestCase {
         System.setProperty("karaf.base", new File("target/test-classes/").getAbsolutePath());
 
         InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
-        Instance instance = service.createInstance(getName(), settings);
+        Instance instance = service.createInstance(getName(), settings, true);
 
-        service.renameInstance(getName(), getName() + "b");
+        service.renameInstance(getName(), getName() + "b", true);
         assertNotNull(service.getInstance(getName() + "b"));
     }
 

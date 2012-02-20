@@ -18,12 +18,16 @@ package org.apache.karaf.instance.command;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 
 /**
  * Rename an existing Karaf container instance.
  */
 @Command(scope = "instance", name = "rename", description = "Rename an existing container instance.")
 public class RenameCommand extends InstanceCommandSupport {
+
+    @Option(name = "-v", aliases = {"--verbose"}, description = "Display actions performed by the command (disabled by default)", required = false, multiValued = false)
+    boolean verbose = false;
 
     @Argument(index = 0, name = "name", description = "The name of the container instance to rename", required = true, multiValued = false)
     String instance = null;
@@ -32,7 +36,7 @@ public class RenameCommand extends InstanceCommandSupport {
     String newName = null;
 
     protected Object doExecute() throws Exception {
-        getInstanceService().renameInstance(instance, newName);
+        getInstanceService().renameInstance(instance, newName, verbose);
         return null;
     }
 

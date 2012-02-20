@@ -317,7 +317,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
 
     private boolean createInstance(String name, InstanceSettings settings) {
         try {
-            instanceService.createInstance(name, settings);
+            instanceService.createInstance(name, settings, false);
             return true;
         } catch (Exception ex) {
             Logger.getLogger(InstancePlugin.class.getName()).log(Level.SEVERE, null, ex);
