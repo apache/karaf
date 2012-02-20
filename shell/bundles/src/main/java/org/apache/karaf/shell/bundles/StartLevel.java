@@ -28,7 +28,7 @@ public class StartLevel extends BundleCommand {
     Integer level;
 
     protected void doExecute(Bundle bundle) throws Exception {
-        // Get package admin service.
+        // Get package instance service.
         BundleStartLevel bsl = bundle.adapt(BundleStartLevel.class);
         if (bsl == null) {
             System.out.println("StartLevel service is unavailable.");

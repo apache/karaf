@@ -31,9 +31,9 @@ public class MBeanRegistererTest extends TestCase {
     public void testRegistration() throws Exception {
         IMocksControl control = createNiceControl();
         MBeanServer mbeanServer = control.createMock(MBeanServer.class);
-        String rawName = "org.apache.karaf:type=admin,name=${karaf.name}";
+        String rawName = "org.apache.karaf:type=instance,name=${karaf.name}";
         AdminServiceMBean mbean = control.createMock(AdminServiceMBean.class);
-        ObjectName name = new ObjectName("org.apache.karaf:type=admin,name=foobar");
+        ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=foobar");
         expect(mbeanServer.registerMBean(isA(AdminServiceMBean.class), eq(name))).andReturn(null);
         mbeanServer.unregisterMBean(eq(name));
         expectLastCall();

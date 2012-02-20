@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 
 /**
  *
- * TODO: use event admin to receive WAIT topics notifications from blueprint extender
+ * TODO: use event instance to receive WAIT topics notifications from blueprint extender
  *
  */
 public class BlueprintListener implements org.osgi.service.blueprint.container.BlueprintListener, BundleListener,

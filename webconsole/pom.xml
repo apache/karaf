@@ -40,7 +40,7 @@
         <module>features</module>
         <module>gogo</module>
         <module>http</module>
-        <module>admin</module>
+        <module>instance</module>
     </modules>
 
 </project>

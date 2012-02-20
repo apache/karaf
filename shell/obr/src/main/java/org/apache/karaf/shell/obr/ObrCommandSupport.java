@@ -43,7 +43,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
     protected static final char VERSION_DELIM = ',';
 
     protected Object doExecute() throws Exception {
-        // Get repository admin service.
+        // Get repository instance service.
         ServiceReference ref = getBundleContext().getServiceReference(RepositoryAdmin.class.getName());
         if (ref == null) {
             System.out.println("RepositoryAdmin service is unavailable.");

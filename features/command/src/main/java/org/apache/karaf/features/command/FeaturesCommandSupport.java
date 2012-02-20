@@ -24,7 +24,7 @@ import org.osgi.framework.ServiceReference;
 public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
 
     protected Object doExecute() throws Exception {
-        // Get repository admin service.
+        // Get repository instance service.
         ServiceReference ref = getBundleContext().getServiceReference(FeaturesService.class.getName());
         if (ref == null) {
             System.out.println("FeaturesService service is unavailable.");

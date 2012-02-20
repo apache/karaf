@@ -262,8 +262,8 @@
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.apache.karaf.admin</groupId>
-                        <artifactId>org.apache.karaf.admin.command</artifactId>
+                        <groupId>org.apache.karaf.instance</groupId>
+                        <artifactId>org.apache.karaf.instance.command</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>

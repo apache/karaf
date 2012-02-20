@@ -21,7 +21,7 @@
         <reference-listener ref="mbeanRegistrer" bind-method="registerMBeanServer" unbind-method="unregisterMBeanServer"/>
     </reference>
 
-    <!-- Reference to the configuration admin -->
+    <!-- Reference to the configuration instance -->
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 
     <!-- Config MBean -->
