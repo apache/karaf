@@ -1,0 +1,30 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle provides JMX MBeans related to the Karaf instance feature.
+
+In particular, an InstanceServiceMBean is provided that can be remotely administered using a JMX client (for instance
+JConsole).
+
+With this InstanceServiceMBean, you have the following operations available:
+* createInstance(name, sshPort, rmiPort, location, javaOpts, features, featureURLs) - Creates a new Karaf instance.
+* changeSshPort(name, port) - Changes the SSH port number of an existing Karaf instance.
+* changeRmiRegistryPort(name, port) - Changes the RMI registry port number of an existing Karaf instance.
+* changeRmiServerPort(name, port) - Changes the RMI server port number of an existing Karaf instance.
+* changeJavaOpts(name, javaopts) - Changes the Java options of an existing Karaf instance.
+* destroyInstance(name) - Destroys an existing Karaf instance.
+* startInstance(name) - Starts an existing Karaf instance.
+* stopInstance(name) - Stops an existing Karaf instance.
+* renameInstance(originalName, newName) - Renames an existing Karaf instance.
+
+h1. See also
+
+Remote Management via JMX - in the Karaf User Guide.

@@ -39,10 +39,10 @@ public class NativeKarafFrameworkTest {
         return new Option[]{
             new KarafDistributionKitConfigurationOption(maven().groupId("org.apache.karaf")
                 .artifactId("apache-karaf").type("zip").versionAsInProject(), Platform.WINDOWS).executable(
-                "bin\\karaf.bat").filesToMakeExecutable("bin\\admin.bat"),
+                "bin\\karaf.bat").filesToMakeExecutable("bin\\instance.bat"),
             new KarafDistributionKitConfigurationOption(maven().groupId("org.apache.karaf")
                 .artifactId("apache-karaf").type("zip").versionAsInProject(), Platform.NIX).executable("bin/karaf")
-                .filesToMakeExecutable("bin/admin") };
+                .filesToMakeExecutable("bin/instance") };
     }
 
     @Test

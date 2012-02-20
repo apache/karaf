@@ -33,7 +33,7 @@ import org.osgi.service.cm.ConfigurationListener;
 /**
  * {@link jline.Completor} for Configuration Admin configurations.
  *
- * Displays a list of existing config admin configurations for completion.
+ * Displays a list of existing config instance configurations for completion.
  *
  */
 public class ConfigurationCompleter implements Completer, ConfigurationListener {

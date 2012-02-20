@@ -29,7 +29,7 @@ public abstract class RegionCommandSupport extends OsgiCommandSupport {
     protected static final char VERSION_DELIM = ',';
 
     protected Object doExecute() throws Exception {
-        // Get repository admin service.
+        // Get repository instance service.
         ServiceReference ref = getBundleContext().getServiceReference(RegionDigraph.class.getName());
         if (ref == null) {
             System.out.println("RegionDigraph service is unavailable.");

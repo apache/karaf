@@ -40,7 +40,7 @@
         <module>features</module>
         <module>kar</module>
         <module>region</module>
-        <module>admin</module>
+        <module>instance</module>
         <module>deployer</module>
         <module>shell</module>
         <module>jaas</module>
@@ -445,18 +445,18 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.admin</groupId>
-                <artifactId>org.apache.karaf.admin.core</artifactId>
+                <groupId>org.apache.karaf.instance</groupId>
+                <artifactId>org.apache.karaf.instance.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.admin</groupId>
-                <artifactId>org.apache.karaf.admin.command</artifactId>
+                <groupId>org.apache.karaf.instance</groupId>
+                <artifactId>org.apache.karaf.instance.command</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.admin</groupId>
-                <artifactId>org.apache.karaf.admin.management</artifactId>
+                <groupId>org.apache.karaf.instance</groupId>
+                <artifactId>org.apache.karaf.instance.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

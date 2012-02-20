@@ -65,8 +65,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.karaf.admin</groupId>
-            <artifactId>org.apache.karaf.admin.core</artifactId>
+            <groupId>org.apache.karaf.instance</groupId>
+            <artifactId>org.apache.karaf.instance.core</artifactId>
             <scope>test</scope>
         </dependency>
 

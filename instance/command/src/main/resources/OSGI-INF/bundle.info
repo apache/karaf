@@ -1,0 +1,29 @@
+h1. Synopsis
+
+${project.name}
+
+${project.description}
+
+Maven URL:
+[mvn:${project.groupId}/${project.artifactId}/${project.version}]
+
+h1. Description
+
+This bundle contains all Karaf shell commands related to the instance feature.
+
+The following commands are available:
+* instance:create - Creates a new container instance.
+* instance:connect - Connects to an existing container instance.
+* instance:list - Lists all existing container instances.
+* instance:start - Starts an existing container instance.
+* instance:stop - Stops an existing container instance.
+* instance:destroy - Destroys an existing container instance.
+* instance:rename - Renames an existing container instance.
+* instance:change-ssh-port - Changes the secure shell port of an existing container instance.
+* instance:change-rmi-registry-port - Changes the RMI registry port (used by management layer) of an existing container instance.
+* instance:change-rmi-server-port - Changes the RMI server port (used by management layer) of an existing container instance.
+* instance:change-opts - Changes the java options of an existing container instance.
+
+h1. See also
+
+Commands - section of the Karaf User Guide.
