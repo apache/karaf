@@ -194,7 +194,7 @@ public class InstanceImpl implements Instance {
      */
     private String getConfiguration(File configurationFile, String propertyName) throws Exception {
         Properties props = loadPropertiesFile(configurationFile.toURI().toURL());
-        return (String) props.get(propertyName);
+        return props.getProperty(propertyName);
     }
 
     public String getJavaOpts() {
@@ -311,13 +311,9 @@ public class InstanceImpl implements Instance {
             URL configPropURL = file.toURI().toURL();
             Properties props = loadPropertiesFile(configPropURL);
 
-            String host = "localhost";
-            if (props.get(KARAF_SHUTDOWN_HOST) != null)
-                host = (String) props.get(KARAF_SHUTDOWN_HOST);
+            String host = props.getProperty(KARAF_SHUTDOWN_HOST, "localhost");
             
-            String shutdown = DEFAULT_SHUTDOWN_COMMAND;
-            if (props.get(KARAF_SHUTDOWN_COMMAND) != null)
-                shutdown = (String) props.get(KARAF_SHUTDOWN_COMMAND);
+            String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
             
             int port = getShutDownPort(props);
 
@@ -344,11 +340,11 @@ public class InstanceImpl implements Instance {
 
 	private int getShutDownPort(Properties props) throws FileNotFoundException,
 			IOException {
-		int port = 0;
-		if (props.get(KARAF_SHUTDOWN_PORT) != null)
-		    port = Integer.parseInt((String) props.get(KARAF_SHUTDOWN_PORT));
+        
+        int port = Integer.parseInt(props.getProperty(KARAF_SHUTDOWN_PORT, "0"));
+
 		// Try to get port from port file
-		String portFile = (String) props.get(KARAF_SHUTDOWN_PORT_FILE);
+		String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
 		if (port == 0 && portFile != null) {
 		    BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
 		    String portStr = r.readLine();
