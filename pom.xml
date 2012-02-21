@@ -123,9 +123,9 @@
         <commons-lang.version>2.6</commons-lang.version>
         <jasypt.bundle.version>1.8_1</jasypt.bundle.version>
         <jetty.version>8.0.4.v20111024</jetty.version>
-		<servlet.spec.groupId>org.mortbay.jetty</servlet.spec.groupId>
-		<servlet.spec.artifactId>servlet-api</servlet.spec.artifactId>
-		<servlet.spec.version>3.0.20100224</servlet.spec.version>
+        <servlet.spec.groupId>org.mortbay.jetty</servlet.spec.groupId>
+        <servlet.spec.artifactId>servlet-api</servlet.spec.artifactId>
+        <servlet.spec.version>3.0.20100224</servlet.spec.version>
         <junit3.bundle.version>3.8.2_4</junit3.bundle.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
         <junit.version>4.10</junit.version>
@@ -970,18 +970,18 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty.aggregate</groupId>
-				<artifactId>jetty-all-server</artifactId>
+                <artifactId>jetty-all-server</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
-            	<groupId>org.apache.geronimo.specs</groupId>
-            	<artifactId>geronimo-annotation_1.0_spec</artifactId>
-            	<version>${geronimo.annotation-spec.version}</version>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-annotation_1.0_spec</artifactId>
+                <version>${geronimo.annotation-spec.version}</version>
             </dependency>
             <dependency>
-            	<groupId>org.apache.geronimo.specs</groupId>
-            	<artifactId>geronimo-jaspic_1.0_spec</artifactId>
-            	<version>${geronimo.jaspic-spec.version}</version>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jaspic_1.0_spec</artifactId>
+                <version>${geronimo.jaspic-spec.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
@@ -1137,7 +1137,7 @@
                 <groupId>${servlet.spec.groupId}</groupId>
                 <artifactId>${servlet.spec.artifactId}</artifactId>
                 <version>${servlet.spec.version}</version>
-	    </dependency>
+            </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-wrap</artifactId>
@@ -1527,15 +1527,15 @@
                     <version>${felix.plugin.version}</version>
                     <extensions>true</extensions>
                     <configuration>
-                    	<instructions>                    	
-                        	<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        	<Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
-                        	<_versionpolicy>${bnd.version.policy}</_versionpolicy>
-                        	<!--
+                        <instructions>
+                            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                            <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
+                            <_versionpolicy>${bnd.version.policy}</_versionpolicy>
+                            <!--
                             <nsh_interface>org.apache.aries.blueprint.NamespaceHandler</nsh_interface>
                             <nsh_namespace>osgi.service.blueprint.namespace</nsh_namespace>
-                        	-->
-                    	</instructions>
+                            -->
+                        </instructions>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1914,3 +1914,4 @@
         </profile>
     </profiles>
 </project>
+
