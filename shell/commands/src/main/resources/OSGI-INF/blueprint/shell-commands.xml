@@ -83,7 +83,7 @@
             <action class="org.apache.karaf.shell.commands.TailAction"/>
         </command>
         <command name="shell/command-watch">
-            <action class="org.apache.karaf.shell.shell.WatchAction">
+            <action class="org.apache.karaf.shell.commands.WatchAction">
                 <property name="commandProcessor" ref="commandProcessor"/>
             </action>
             <completers>
