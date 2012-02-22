@@ -31,6 +31,7 @@ import org.apache.felix.gogo.runtime.CommandSessionImpl;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.karaf.shell.console.Completer;
+import org.apache.karaf.shell.console.jline.CommandSessionHolder;
 
 /**
  * Like the {@link org.apache.karaf.shell.console.completer.CommandsCompleter} but does not use OSGi but is
@@ -42,12 +43,19 @@ public class CommandsCompleter implements Completer {
     private final List<Completer> completers = new ArrayList<Completer>();
     private final Set<String> commands = new HashSet<String>();
 
+    public CommandsCompleter() {
+        this(CommandSessionHolder.getSession());
+    }
+
     public CommandsCompleter(CommandSession session) {
         this.session = session;
     }
 
 
     public int complete(String buffer, int cursor, List<String> candidates) {
+        if (session == null) {
+            session = CommandSessionHolder.getSession();
+        }
         checkData();
         int res = new AggregateCompleter(completers).complete(buffer, cursor, candidates);
         Collections.sort(candidates);

@@ -82,7 +82,18 @@
         <command>
             <action class="org.apache.karaf.shell.shell.TailAction"/>
         </command>
+        <command>
+            <action class="org.apache.karaf.shell.shell.WatchAction">
+                <property name="commandProcessor" ref="commandProcessor"/>
+            </action>
+            <completers>
+                <ref component-id="commandCompleter" />
+                <null/>
+            </completers>
+        </command>
     </command-bundle>
+
+   <bean id="commandCompleter" class="org.apache.karaf.shell.console.completer.CommandsCompleter"/>
 
    <bean class="org.osgi.util.tracker.BundleTracker" init-method="open"
         destroy-method="close">
@@ -98,5 +109,7 @@
     <reference-list id="infoProviders" interface="org.apache.karaf.shell.shell.info.InfoProvider"
         availability="optional">
     </reference-list>
+
+    <reference id="commandProcessor" interface="org.apache.felix.service.command.CommandProcessor"/>
  
 </blueprint>
