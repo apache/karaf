@@ -61,6 +61,9 @@
         </command>
         <command name="config/proplist">
             <action class="org.apache.karaf.shell.config.PropListCommand"/>
+                <optional-completers>
+                   <entry key="-p" value-ref="configCompleter"/>
+                </optional-completers>
         </command>
         <command name="config/propset">
             <action class="org.apache.karaf.shell.config.PropSetCommand">
