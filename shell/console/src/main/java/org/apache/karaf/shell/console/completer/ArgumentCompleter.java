@@ -325,7 +325,8 @@ public class ArgumentCompleter implements Completer {
          *  enter "f bar" into the buffer, and move to after the "f"
          *  and hit TAB, we want "foo bar" instead of "foo  bar".
          */
-        if ((cursor != buffer.length()) && isDelimiter(buffer, cursor)) {
+
+        if ((buffer != null) && (cursor != buffer.length()) && isDelimiter(buffer, cursor)) {
             for (int i = 0; i < candidates.size(); i++) {
                 String val = candidates.get(i);
 
