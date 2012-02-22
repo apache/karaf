@@ -49,9 +49,10 @@
             </completers>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.config.ListCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
-            </action>
+            <action class="org.apache.karaf.shell.config.ListCommand"/>
+            <optional-completers>
+                <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropDelCommand">
@@ -70,6 +71,9 @@
             <action class="org.apache.karaf.shell.config.PropListCommand">
                 <property name="configurationAdmin" ref="configAdmin"/>
             </action>
+            <optional-completers>
+                <entry key="-p" value-ref="configCompleter"/>
+            </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropSetCommand">
