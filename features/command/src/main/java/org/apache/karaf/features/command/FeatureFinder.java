@@ -42,12 +42,14 @@ public class FeatureFinder implements ManagedService {
 
     @SuppressWarnings("rawtypes")
     public void updated(Dictionary properties) throws ConfigurationException {
-        nameToArtifactMap.clear();
-        Enumeration keys = properties.keys();
-        while (keys.hasMoreElements()) {
-            String key = (String)keys.nextElement();
-            if (!"felix.fileinstall.filename".equals(key) && !"service.pid".equals(key)) {
-                nameToArtifactMap.put(key, (String)properties.get(key));
+        if (properties != null) {
+            nameToArtifactMap.clear();
+            Enumeration keys = properties.keys();
+            while (keys.hasMoreElements()) {
+                String key = (String)keys.nextElement();
+                if (!"felix.fileinstall.filename".equals(key) && !"service.pid".equals(key)) {
+                    nameToArtifactMap.put(key, (String)properties.get(key));
+                }
             }
         }
     }
