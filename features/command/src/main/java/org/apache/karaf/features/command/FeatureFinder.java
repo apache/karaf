@@ -26,7 +26,9 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 
 public class FeatureFinder implements ManagedService {
+
     Map<String, String> nameToArtifactMap = new HashMap<String, String>();
+
     public String[] getNames() {
         return nameToArtifactMap.keySet().toArray(new String[] {});
     }
@@ -42,12 +44,14 @@ public class FeatureFinder implements ManagedService {
 
     @SuppressWarnings("rawtypes")
     public void updated(Dictionary properties) throws ConfigurationException {
-        nameToArtifactMap.clear();
-        Enumeration keys = properties.keys();
-        while (keys.hasMoreElements()) {
-            String key = (String)keys.nextElement();
-            if (!"felix.fileinstall.filename".equals(key) && !"service.pid".equals(key)) {
-                nameToArtifactMap.put(key, (String)properties.get(key));
+        if (properties != null) {
+            nameToArtifactMap.clear();
+            Enumeration keys = properties.keys();
+            while (keys.hasMoreElements()) {
+                String key = (String)keys.nextElement();
+                if (!"felix.fileinstall.filename".equals(key) && !"service.pid".equals(key)) {
+                    nameToArtifactMap.put(key, (String)properties.get(key));
+                }
             }
         }
     }
