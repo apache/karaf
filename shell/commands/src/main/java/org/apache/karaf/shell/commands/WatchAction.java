@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.karaf.shell.shell;
+package org.apache.karaf.shell.commands;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
