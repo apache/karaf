@@ -17,6 +17,7 @@
 
 package org.apache.karaf.tooling.exam.container.internal;
 
+import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFileExtend;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.ops4j.pax.exam.rbc.Constants.RMI_HOST_PROPERTY;
@@ -131,7 +132,8 @@ public class KarafTestContainer implements TestContainer {
                     systemProperty(RMI_PORT_PROPERTY).value("" + registry.getPort()),
                     systemProperty(RMI_NAME_PROPERTY).value(name),
                     systemProperty(EXAM_INVOKER_PROPERTY).value("junit"),
-                    systemProperty(EXAM_INJECT_PROPERTY).value("true")
+                    systemProperty(EXAM_INJECT_PROPERTY).value("true"),
+                    editConfigurationFileExtend("etc/system.properties", "jline.shutdownhook", "true")
                 ));
             target = new RBCRemoteTarget(name, registry.getPort(), subsystem.getTimeout());
 
