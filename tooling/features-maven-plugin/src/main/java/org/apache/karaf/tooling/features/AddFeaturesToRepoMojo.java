@@ -182,8 +182,17 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
             List<Artifact> explicitRepoBundles = new ArrayList<Artifact>();
 
             getLog().info("Base repo: " + localRepo.getUrl());
+            int currentBundle = 0;
             for (String bundle : bundles) {
                 Artifact artifact = resourceToArtifact(bundle, skipNonMavenProtocols);
+
+                // Maven ArtifactResolver leaves file handles around so need to clean up
+                // or we will run out of file descriptors
+                if (currentBundle++ % 100 == 0) {
+                    System.gc();
+                    System.runFinalization();
+                }
+
                 if (artifact == null) {
                     continue;
                 }
