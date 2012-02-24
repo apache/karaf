@@ -56,10 +56,7 @@ public class WatchAction extends AbstractAction {
             WatchTask watchTask = new WatchTask(commandProcessor, command.toString().trim());
             executorService.scheduleAtFixedRate(watchTask, 0, interval, TimeUnit.SECONDS);
             try {
-                int c = ' ';
-                while (c != 'q' && c != 'Q') {
-                    c = System.in.read();
-                }
+                session.getKeyboard().read();
             } finally {
                 executorService.shutdownNow();
                 watchTask.close();
