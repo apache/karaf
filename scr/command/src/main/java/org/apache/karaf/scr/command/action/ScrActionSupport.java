@@ -55,7 +55,7 @@ public abstract class ScrActionSupport extends AbstractAction {
     }
 
     public String buildLeftPadBracketDisplay(String s, int max) {
-        return String.format("%1$#" + max + "s", s);
+        return String.format("%1$-" + max + "s", s);
     }
 
     /**

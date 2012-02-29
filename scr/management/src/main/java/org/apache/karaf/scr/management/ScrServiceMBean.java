@@ -17,6 +17,7 @@
 package org.apache.karaf.scr.management;
 
 public interface ScrServiceMBean {
+
     String[] listComponents() throws Exception;
     
     boolean isComponentActive(String componentName) throws Exception;
@@ -24,4 +25,5 @@ public interface ScrServiceMBean {
     void activateComponent(String componentName) throws Exception;
 
     void deactiveateComponent(String componentName) throws Exception;
+
 }

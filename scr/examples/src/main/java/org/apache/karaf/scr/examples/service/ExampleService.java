@@ -13,26 +13,12 @@
  */
 package org.apache.karaf.scr.examples.service;
 
-/**
- * 
- * 
- */
 public interface ExampleService {
 
-	/**
-	 * 
-	 */
 	void printGreetings();
 
-	/**
-	 * @param salutation
-	 *            the salutation to set
-	 */
 	void setSalutation(String salutation);
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
 	void setName(String name);
+
 }

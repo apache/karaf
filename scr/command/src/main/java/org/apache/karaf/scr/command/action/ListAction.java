@@ -25,10 +25,7 @@ import org.apache.karaf.shell.commands.Command;
 /**
  * Lists all the components currently installed.
  */
-@Command(
-        scope = ScrCommandConstants.SCR_COMMAND,
-        name = ScrCommandConstants.LIST_FUNCTION, 
-        description = "Displays a list of available components")
+@Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.LIST_FUNCTION, description = "Displays a list of available components")
 public class ListAction extends ScrActionSupport {
 
     @Override
@@ -49,4 +46,5 @@ public class ListAction extends ScrActionSupport {
         }
         return null;
     }
+
 }

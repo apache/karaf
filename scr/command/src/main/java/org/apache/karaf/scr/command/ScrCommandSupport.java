@@ -32,11 +32,7 @@ import org.apache.karaf.shell.console.Completer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- */
-public abstract class ScrCommandSupport extends AbstractCommand implements
-        CompletableFunction {
+public abstract class ScrCommandSupport extends AbstractCommand implements CompletableFunction {
     
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName());
 
@@ -65,11 +61,6 @@ public abstract class ScrCommandSupport extends AbstractCommand implements
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.karaf.shell.console.CompletableFunction#getCompleters()
-     */
     public List<Completer> getCompleters() {
         List<Completer> completers = null;
 

@@ -18,9 +18,6 @@ package org.apache.karaf.scr.command.completer;
 
 import org.apache.felix.scr.Component;
 
-/**
- *
- */
 public class DeactivateCompleter extends ScrCompleterSupport {
 
     /**

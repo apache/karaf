@@ -17,6 +17,7 @@
 package org.apache.karaf.scr.command;
 
 public class ScrCommandConstants {
+
     public static final String OSGI_COMMAND_SCOPE_KEY = "osgi.command.scope";
 
     public static final String OSGI_COMMAND_FUNCTION_KEY = "osgi.command.function";
@@ -30,4 +31,5 @@ public class ScrCommandConstants {
     public static final String DEACTIVATE_FUNCTION = "deactivate";
 
     public static final String DETAILS_FUNCTION = "details";
+
 }

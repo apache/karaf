@@ -26,10 +26,7 @@ import org.apache.karaf.scr.command.ScrCommandConstants;
  * Deactivates the given component by supplying its component name.
  *
  */
-@Command(
-        scope = ScrCommandConstants.SCR_COMMAND,
-        name = ScrCommandConstants.DEACTIVATE_FUNCTION, 
-        description = "Deactivates a Component for the given name")
+@Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.DEACTIVATE_FUNCTION, description = "Deactivates a Component for the given name")
 public class DeactivateAction extends ScrActionSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the Component to deactivate ", required = true, multiValued = false)

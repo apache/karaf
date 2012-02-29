@@ -621,13 +621,6 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.karaf.scr</groupId>
-                <artifactId>org.apache.karaf.scr.feature</artifactId>
-                <type>xml</type>
-                <classifier>features</classifier>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.karaf.demos</groupId>
                 <artifactId>web</artifactId>
                 <version>${project.version}</version>

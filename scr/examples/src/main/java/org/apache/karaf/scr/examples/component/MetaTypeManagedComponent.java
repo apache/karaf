@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.karaf.scr.examples.component;
 
 import java.util.Map;
@@ -12,9 +28,7 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 
-@Component( 
-        name = MetaTypeManagedComponent.COMPONENT_NAME,
-        designateFactory = MetaTypeManagedComponentConfig.class)
+@Component(name = MetaTypeManagedComponent.COMPONENT_NAME, designateFactory = MetaTypeManagedComponentConfig.class)
 public class MetaTypeManagedComponent {
 
     public static final String COMPONENT_NAME = "MetaTypeManagedComponent";
@@ -27,16 +41,13 @@ public class MetaTypeManagedComponent {
 
     /**
      * Called when all of the SCR Components required dependencies have been
-     * satisfied
-     * 
+     * satisfied.
      */
     @Activate
     public void activate(final Map<String, ?> properties, ComponentContext componentContext) {
-        logService
-                .log(LogService.LOG_INFO, "Activating the " + COMPONENT_LABEL);
+        logService.log(LogService.LOG_INFO, "Activating the " + COMPONENT_LABEL);
         
-        MetaTypeManagedComponentConfig config = Configurable.createConfigurable(
-        		MetaTypeManagedComponentConfig.class, properties);
+        MetaTypeManagedComponentConfig config = Configurable.createConfigurable(MetaTypeManagedComponentConfig.class, properties);
         
         exampleService.setName(config.name());
         exampleService.setSalutation(config.salutation());
@@ -47,13 +58,11 @@ public class MetaTypeManagedComponent {
 
     /**
      * Called when any of the SCR Components required dependencies become
-     * unsatisfied
-     * 
+     * unsatisfied.
      */
     @Deactivate
     public void deactivate() {
-        logService.log(LogService.LOG_INFO, "Dectivating the "
-                + COMPONENT_LABEL);
+        logService.log(LogService.LOG_INFO, "Deactivating the " + COMPONENT_LABEL);
     }
 
     @Reference
@@ -73,4 +82,5 @@ public class MetaTypeManagedComponent {
     protected void unsetLogService(LogService logService) {
         this.logService = null;
     }
+
 }
