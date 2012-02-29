@@ -109,9 +109,8 @@
     </prerequisites>
 
     <properties>
-        <!-- Apache ServiceMix Bundles -->
         <aopalliance.bundle.version>1.0_5</aopalliance.bundle.version>
-        <asm.bundle.version>3.3.1_1</asm.bundle.version>
+        <asm.version>4.0</asm.version>
         <cglib.bundle.version>2.1_3_7</cglib.bundle.version>
         <commons-beanutils.version>1.8.3</commons-beanutils.version>
         <commons-codec.version>1.6</commons-codec.version>
@@ -823,6 +822,13 @@
                 <artifactId>org.apache.felix.scr</artifactId>
                 <version>${felix.scr.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-all</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>biz.aQute</groupId>
                 <artifactId>bndlib</artifactId>
@@ -976,11 +982,6 @@
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-jaspic_1.0_spec</artifactId>
                 <version>${geronimo.jaspic-spec.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.asm</artifactId>
-                <version>${asm.bundle.version}</version>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>

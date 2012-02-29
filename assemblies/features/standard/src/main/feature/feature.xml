@@ -19,8 +19,8 @@
 <features name="standard-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
     <feature name="aries-annotation" description="Aries Annotations" version="${project.version}">
-        <bundle start-level="20">mvn:org.apache.commons/commons-jexl/${commons-jexl.version}</bundle>
-        <bundle start-level="20">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.asm/${asm.bundle.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.commons/commons-jexl/${commons-jexl.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.api/${aries.blueprint.annotation.api.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.annotation.impl/${aries.blueprint.annotation.impl.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.jexl.evaluator/${aries.blueprint.jexl.evaluator.version}</bundle>
