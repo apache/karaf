@@ -64,21 +64,6 @@
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.0_spec/${geronimo.annotation-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlets/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-webapp/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jndi/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle> -->
-<!--         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-websocket/${jetty.version}</bundle> -->
         <bundle start-level="30">mvn:org.eclipse.jetty.aggregate/jetty-all-server/${jetty.version}</bundle>
     </feature>
 
@@ -186,6 +171,14 @@
         <bundle dependency="true" start-level="30">mvn:commons-lang/commons-lang/${commons-lang.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
+    </feature>
+
+    <feature name="scr" description="Declarative Service support" version="${project.version}" resolver="(obr)">
+        <feature>eventadmin</feature>
+        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.command/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.scr/org.apache.karaf.scr.management/${project.version}</bundle>
     </feature>
 
 </features>

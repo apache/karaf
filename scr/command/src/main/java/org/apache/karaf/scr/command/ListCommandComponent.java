@@ -30,23 +30,14 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
 /**
- * Karaf Shell Command that lists the available Declarative Service Components.
+ * Shell Command that lists the available Declarative Service Components.
  */
-@Component(
-		provide=CompletableFunction.class,
-        name = ListCommandComponent.COMPONENT_NAME, 
-        enabled = true, 
-        immediate = true,
-        properties={
-        		ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND,
-        		ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.LIST_FUNCTION})
+@Component(provide=CompletableFunction.class, name = ListCommandComponent.COMPONENT_NAME, enabled = true, immediate = true,
+        properties={ ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.LIST_FUNCTION})
 public class ListCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "ListCommand";
-    public static final String COMPONENT_LABEL =
-            "Apache Karaf SCR List Command";
-
-    
+    public static final String COMPONENT_LABEL = "Apache Karaf SCR List Command";
 
     @Override
     public Class<? extends Action> getActionClass() {

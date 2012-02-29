@@ -35,15 +35,8 @@ import org.slf4j.LoggerFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Deactivate;
 
-/**
- *
- */
-@aQute.bnd.annotation.component.Component(
-        name = ScrServiceMBeanImpl.COMPONENT_NAME,
-        enabled = true, 
-        immediate = true)
-public class ScrServiceMBeanImpl extends StandardMBean implements
-        ScrServiceMBean {
+@aQute.bnd.annotation.component.Component(name = ScrServiceMBeanImpl.COMPONENT_NAME, enabled = true, immediate = true)
+public class ScrServiceMBeanImpl extends StandardMBean implements ScrServiceMBean {
 
     public static final String COMPONENT_NAME = "ScrServiceMBean";
 
@@ -96,10 +89,6 @@ public class ScrServiceMBeanImpl extends StandardMBean implements
         }
     }
 
-    /**
-     * 
-     * @see org.apache.karaf.scr.management.ScrServiceMBean#listComponents()
-     */
     public String[] listComponents() throws Exception {
         Component[] components = safe(scrService.getComponents());
         String[] componentNames = new String[components.length];
@@ -108,11 +97,7 @@ public class ScrServiceMBeanImpl extends StandardMBean implements
         }
         return componentNames;
     }
-    
-    /**
-     * 
-     * @see org.apache.karaf.scr.management.ScrServiceMBean#componentState(java.lang.String)
-     */
+
     public boolean isComponentActive(String componentName) throws Exception {
         boolean state = false;
         Component[] components = scrService.getComponents(componentName);
@@ -122,10 +107,6 @@ public class ScrServiceMBeanImpl extends StandardMBean implements
         return state;
     }
 
-    /**
-     * 
-     * @see org.apache.karaf.scr.management.ScrServiceMBean#activateComponent(java.lang.String)
-     */
     public void activateComponent(String componentName) throws Exception {
         if (scrService.getComponents(componentName) != null) {
             Component[] components = scrService.getComponents(componentName);
@@ -135,10 +116,6 @@ public class ScrServiceMBeanImpl extends StandardMBean implements
         }
     }
 
-    /**
-     * 
-     * @see org.apache.karaf.scr.management.ScrServiceMBean#deactiveateComponent(java.lang.String)
-     */
     public void deactiveateComponent(String componentName) throws Exception {
         if (scrService.getComponents(componentName) != null) {
             Component[] components = scrService.getComponents(componentName);

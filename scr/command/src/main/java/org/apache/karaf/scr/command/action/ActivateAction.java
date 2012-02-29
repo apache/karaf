@@ -27,10 +27,7 @@ import org.apache.karaf.scr.command.ScrUtils;
  * Activates the given component by supplying its component name.
  *
  */
-@Command(
-        scope = ScrCommandConstants.SCR_COMMAND,
-        name = ScrCommandConstants.ACTIVATE_FUNCTION, 
-        description = "Activates a Component for the given name")
+@Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.ACTIVATE_FUNCTION, description = "Activates a Component for the given name")
 public class ActivateAction extends ScrActionSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the Component to activate ", required = true, multiValued = false)

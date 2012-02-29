@@ -23,16 +23,14 @@ import org.apache.felix.scr.ScrService;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 
-/**
- *
- */
 public abstract class ScrCompleterSupport implements Completer {
+
     private ScrService scrService;
 
     /**
      * Overrides the super method noted below. See super documentation for
      * details.
-     * 
+     *
      * @see org.apache.karaf.shell.console.Completer#complete(java.lang.String,
      *      int, java.util.List)
      */
@@ -56,7 +54,7 @@ public abstract class ScrCompleterSupport implements Completer {
     /**
      * Get the scrService Object associated with this instance of
      * ScrCompleterSupport.
-     * 
+     *
      * @return the scrService
      */
     public ScrService getScrService() {
@@ -65,9 +63,8 @@ public abstract class ScrCompleterSupport implements Completer {
 
     /**
      * Sets the scrService Object for this ScrCompleterSupport instance.
-     * 
-     * @param scrService
-     *            the scrService to set
+     *
+     * @param scrService the scrService to set
      */
     public void setScrService(ScrService scrService) {
         this.scrService = scrService;

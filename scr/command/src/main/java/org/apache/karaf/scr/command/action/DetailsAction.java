@@ -30,10 +30,7 @@ import org.osgi.service.component.ComponentConstants;
 /**
  * Displays the details associated with a given component by supplying its component name.
  */
-@Command(
-        scope = ScrCommandConstants.SCR_COMMAND,
-        name = ScrCommandConstants.DETAILS_FUNCTION, 
-        description = "Displays a list of available components")
+@Command(scope = ScrCommandConstants.SCR_COMMAND, name = ScrCommandConstants.DETAILS_FUNCTION, description = "Displays a list of available components")
 public class DetailsAction extends ScrActionSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the Component to display the detials of", required = true, multiValued = false)
@@ -96,8 +93,8 @@ public class DetailsAction extends ScrActionSupport {
         return null;
     }
 
-
     private void printDetail(String header, String value) {
         System.out.println(getBoldString(header) + value);
     }
+
 }

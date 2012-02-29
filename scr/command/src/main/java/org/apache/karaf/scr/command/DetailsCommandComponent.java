@@ -32,23 +32,16 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
 /**
- * Karaf Shell Command that prints the current state details of a given 
+ * Shell Command that prints the current state details of a given
  * Declarative Service Component.
  */
-@Component(
-		provide=CompletableFunction.class,
-        name = DetailsCommandComponent.COMPONENT_NAME, 
-        enabled = true, 
-        immediate = true,
-        properties={
-        		ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND,
-        		ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.DETAILS_FUNCTION})
+@Component(provide=CompletableFunction.class, name = DetailsCommandComponent.COMPONENT_NAME, enabled = true, immediate = true,
+        properties={ ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.DETAILS_FUNCTION})
 public class DetailsCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "DetailsCommand";
 
     public static final String COMPONENT_LABEL = "Apache Karaf SCR Details Command";
-
 
     @Override
     public Class<? extends Action> getActionClass() {
@@ -77,4 +70,5 @@ public class DetailsCommandComponent extends ScrCommandSupport {
     public void setScrService(ScrService scrService) {
     	super.setScrService(scrService);
     }
+
 }

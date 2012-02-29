@@ -32,16 +32,10 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
 /**
- * Karaf Shell Command used to deactivate a Declarative Service Component.
+ * Shell Command used to deactivate a Declarative Service Component.
  */
-@Component(
-		provide=CompletableFunction.class,
-        name = DeactivateCommandComponent.COMPONENT_NAME, 
-        enabled = true, 
-        immediate = true,
-        properties={
-        		ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND,
-        		ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.DEACTIVATE_FUNCTION})
+@Component(provide=CompletableFunction.class, name = DeactivateCommandComponent.COMPONENT_NAME, enabled = true, immediate = true,
+        properties={ ScrCommandConstants.OSGI_COMMAND_SCOPE_KEY+"="+ScrCommandConstants.SCR_COMMAND, ScrCommandConstants.OSGI_COMMAND_FUNCTION_KEY+"="+ScrCommandConstants.DEACTIVATE_FUNCTION})
 public class DeactivateCommandComponent extends ScrCommandSupport {
 
     public static final String COMPONENT_NAME = "DeactivateCommand";
@@ -75,4 +69,5 @@ public class DeactivateCommandComponent extends ScrCommandSupport {
     public void setScrService(ScrService scrService) {
     	super.setScrService(scrService);
     }
+
 }

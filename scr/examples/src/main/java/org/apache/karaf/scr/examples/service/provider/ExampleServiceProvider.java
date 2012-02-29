@@ -19,10 +19,6 @@ import org.osgi.service.log.LogService;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 
-
-/**
- *
- */
 @Component
 public class ExampleServiceProvider implements ExampleService {
 
