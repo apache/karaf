@@ -29,7 +29,7 @@
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-    <manifest>
+    <manifest xmlns="http://karaf.apache.org/xmlns/deployer/spring/v1.0.0">
         RequireBundle=org.osgi
         Header=value
     </manifest>
