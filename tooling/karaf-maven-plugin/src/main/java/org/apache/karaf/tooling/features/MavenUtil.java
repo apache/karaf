@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
 
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.factory.DefaultArtifactFactory;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.repository.metadata.Metadata;
 import org.apache.maven.artifact.repository.metadata.Snapshot;
@@ -174,6 +176,13 @@ public class MavenUtil {
 
     private static boolean isEmpty(String classifier) {
         return classifier == null || classifier.length() == 0;
+    }
+    
+    static Artifact mvnToArtifact(String name) {
+        name = mvnToAether(name);
+        DefaultArtifact artifact = new DefaultArtifact(name);
+        Artifact mavenArtifact = RepositoryUtils.toArtifact(artifact);
+        return mavenArtifact;
     }
 
     /**
