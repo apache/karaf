@@ -271,6 +271,25 @@ public class InstallKarsMojo extends MojoSupport {
                         File target = new File(system.resolve(path));
                         if (!target.exists()) {
                             install(buffer, key, target);
+                            Artifact artifact = MavenUtil.mvnToArtifact(key);
+                            if (artifact.isSnapshot()) {
+                                // generate maven-metadata-local.xml for the artifact
+                                File metadataSource = new File(resolve(key).getParentFile(), "maven-metadata-local.xml");
+                                File metadataTarget = new File(target.getParentFile(), "maven-metadata-local.xml");
+                                metadataTarget.getParentFile().mkdirs();
+                                try {
+                                    if (!metadataSource.exists()) {
+                                        // the maven-metadata-local.xml doesn't exist in the local repo, generate one
+                                        MavenUtil.generateMavenMetadata(artifact, metadataTarget);
+                                    } else {
+                                        // copy the metadata to the target
+                                        copy(buffer, metadataSource, metadataTarget);
+                                    }
+                                } catch (IOException ioException) {
+                                    getLog().warn(ioException);
+                                    getLog().warn("Unable to copy the maven-metadata-local.xml, it means that this SNAPSHOT will be overwritten by a remote one (if exist)");
+                                }
+                            }
                         }
                     }
                 }
@@ -296,22 +315,26 @@ public class InstallKarsMojo extends MojoSupport {
         File source = resolve(key);
         target.getParentFile().mkdirs();
         try {
-            InputStream is = new FileInputStream(source);
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(target));
-            int count = 0;
-            while ((count = is.read(buffer)) > 0) {
-                bos.write(buffer, 0, count);
-            }
-            bos.close();
+            copy(buffer, source, target);
         } catch (IOException e) {
             getLog().error("Could not copy bundle " + key, e);
         }
+    }
+    
+    private void copy(byte[] buffer, File source, File target) throws IOException {
+        target.getParentFile().mkdirs();
+        InputStream is = new FileInputStream(source);
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(target));
+        int count = 0;
+        while ((count = is.read(buffer)) > 0) {
+            bos.write(buffer, 0, count);
+        }
+        bos.close();      
     }
 
     private boolean acceptScope(Artifact artifact) {
         return "compile".equals(artifact.getScope()) || "runtime".equals(artifact.getScope());
     }
-
 
     public File resolve(String id) {
         id = MavenUtil.mvnToAether(id);
