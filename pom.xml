@@ -586,7 +586,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.webconsole</groupId>
-                <artifactId>org.apache.karaf.webconsole.admin</artifactId>
+                <artifactId>org.apache.karaf.webconsole.instance</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
