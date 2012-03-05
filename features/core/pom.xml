@@ -115,8 +115,6 @@
                         <Export-Package>org.apache.karaf.features;version=${project.version}</Export-Package>
                         <Import-Package>
                             !org.apache.karaf.features,
-                            javax.management,
-                            javax.management.loading,
                             org.apache.aries.blueprint,
                             org.osgi.service.blueprint.container,
                             org.osgi.service.blueprint.reflect,
