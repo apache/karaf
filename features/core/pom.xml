@@ -117,11 +117,6 @@
                         <Export-Package>org.apache.karaf.features;version=${project.version}</Export-Package>
                         <Import-Package>
                             !org.apache.karaf.features,
-                            javax.management,
-                            javax.management.loading,
-                            org.apache.felix.service.command,
-                            org.apache.felix.gogo.commands,
-                            org.apache.karaf.shell.console,
                             org.osgi.service.event*;resolution:=optional,
                             *
                         </Import-Package>
