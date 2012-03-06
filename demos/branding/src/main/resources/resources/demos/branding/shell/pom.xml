@@ -21,10 +21,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache</groupId>
-        <artifactId>apache</artifactId>
-        <version>10</version>
-        <relativePath/>
+        <groupId>org.apache.karaf.demos</groupId>
+        <artifactId>demos</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../../../../../../../../pom.xml</relativePath>
     </parent>
 
     <groupId>org.apache.karaf.demos</groupId>
