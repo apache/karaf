@@ -98,7 +98,6 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>pax-url-aether</Embed-Dependency>
                         <Import-Package>
                             !${project.artifactId}.*,
                             !junit.framework,
@@ -119,13 +118,15 @@
                             org.apache.felix.service.command,
                             org.apache.karaf.shell.commands,
                             org.apache.karaf.shell.console,
+                            org.ops4j.pax.url.mvn,
+                            org.ops4j.pax.url.maven.commons,
+                            org.ops4j.util.property,
                             *
                         </Import-Package>
                         <Private-Package>
                             org.apache.felix.utils.manifest,
                             org.apache.felix.utils.version,
                             org.apache.felix.utils.properties,
-                            org.ops4j.pax.url.mvn,
                             !*
                         </Private-Package>
                     </instructions>
