@@ -23,7 +23,6 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "edit", description = "Creates or edits a configuration.", detailedDescription="classpath:edit.txt")
 public class EditCommand extends ConfigCommandSupport {
@@ -37,25 +36,26 @@ public class EditCommand extends ConfigCommandSupport {
 	@Option(name = "-f", aliases = {"--use-file"}, description = "Configuration lookup using the filename instead of the pid", required = false, multiValued = false)
     boolean useFile;
 
-    protected void doExecute(ConfigurationAdmin admin) throws Exception {
+    @SuppressWarnings("rawtypes")
+    protected Object doExecute() throws Exception {
         String oldPid = (String) this.session.get(PROPERTY_CONFIG_PID);
         if (oldPid != null && !oldPid.equals(pid) && !force) {
             System.err.println("Another config is being edited.  Cancel / update first, or use the --force option");
-            return;
+            return null;
         }
 	    Dictionary props;
 
 	    //User selected to use file instead.
         if (useFile) {
-		    Configuration configuration = this.findConfigurationByFileName(admin, pid);
+		    Configuration configuration = this.configRepository.findConfigurationByFileName(pid);
 		    if(configuration == null) {
 			    System.err.println("Could not find configuration with file install property set to: " + pid);
-			    return;
+			    return null;
 		    }
 		    props = configuration.getProperties();
 		    pid = configuration.getPid();
 	    } else {
-            Configuration configuration = admin.getConfiguration(pid, null);
+            Configuration configuration = this.configRepository.getConfigAdmin().getConfiguration(pid, null);
             props = configuration.getProperties();
             if (props == null) {
                 props = new Properties();
@@ -63,6 +63,7 @@ public class EditCommand extends ConfigCommandSupport {
         }
         this.session.put(PROPERTY_CONFIG_PID, pid);
         this.session.put(PROPERTY_CONFIG_PROPS, props);
+        return null;
     }
 
 }

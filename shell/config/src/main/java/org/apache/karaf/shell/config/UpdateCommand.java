@@ -20,7 +20,6 @@ import java.util.Dictionary;
 
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "update", description = "Saves and propagates changes from the configuration being edited.")
 public class UpdateCommand extends ConfigCommandSupport {
@@ -28,16 +27,18 @@ public class UpdateCommand extends ConfigCommandSupport {
     @Option(name = "-b", aliases = { "--bypass-storage" }, multiValued = false, required = false, description = "Do not store the configuration in a properties file, but feed it directly to ConfigAdmin")
     protected boolean bypassStorage;
 
-    protected void doExecute(ConfigurationAdmin admin) throws Exception {
+    @SuppressWarnings("rawtypes")
+    protected Object doExecute() throws Exception {
         Dictionary props = getEditedProps();
         if (props == null) {
             System.err.println("No configuration is being edited--run the edit command first");
-            return;
+            return null;
         }
 
         String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
-        update(admin, pid, props, bypassStorage);
+        this.configRepository.update(pid, props, bypassStorage);
         this.session.put(PROPERTY_CONFIG_PID, null);
         this.session.put(PROPERTY_CONFIG_PROPS, null);
+        return null;
     }
 }

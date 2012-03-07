@@ -20,7 +20,6 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "delete", description = "Delete a configuration.")
 public class DeleteCommand extends ConfigCommandSupport {
@@ -37,32 +36,33 @@ public class DeleteCommand extends ConfigCommandSupport {
     @Option(name = "-f", aliases = {"--use-file"}, description = "Configuration lookup using the filename instead of the pid", required = false, multiValued = false)
     boolean useFile;
 
-    protected void doExecute(ConfigurationAdmin admin) throws Exception {
+    protected Object doExecute() throws Exception {
         String oldPid = (String) this.session.get(PROPERTY_CONFIG_PID);
         if (oldPid != null && oldPid.equals(pid) && !force) {
             System.err.println("This config is being edited.  Cancel / update first, or use the --force option");
-            return;
+            return null;
         }
 
         // User selected to use file instead.
         if (useFile) {
-            Configuration configuration = this.findConfigurationByFileName(admin, pid);
+            Configuration configuration = this.configRepository.findConfigurationByFileName(pid);
             if(configuration == null) {
                 System.err.println("Could not find configuration with file install property set to: " + pid);
-                return;
+                return null;
             }
             configuration.delete();
         } else {
-            Configuration configuration = admin.getConfiguration(pid);
+            Configuration configuration = this.configRepository.getConfigAdmin().getConfiguration(pid);
             configuration.delete();
         }
         if (!noDeleteCfgFile) {
-            deleteStorage(pid);
+            this.configRepository.deleteStorage(pid);
         }
         if (oldPid != null && oldPid.equals(pid) && !force) {
             this.session.put(PROPERTY_CONFIG_PID, null);
             this.session.put(PROPERTY_CONFIG_PROPS, null);
         }
+        return null;
     }
 
 }

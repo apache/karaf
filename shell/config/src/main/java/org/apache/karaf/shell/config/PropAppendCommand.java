@@ -20,7 +20,6 @@ import java.util.Dictionary;
 
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Appends a value to the current property value.
@@ -34,6 +33,7 @@ public class PropAppendCommand extends ConfigPropertyCommandSupport {
     @Argument(index = 1, name = "value", description = "The value to append to the property", required = true, multiValued = false)
     String value;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void propertyAction(Dictionary props) {
         final Object currentValue = props.get(prop);

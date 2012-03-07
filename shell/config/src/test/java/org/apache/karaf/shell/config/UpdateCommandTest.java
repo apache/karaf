@@ -17,19 +17,19 @@
 package org.apache.karaf.shell.config;
 
 
-import java.util.Properties;
-
-import junit.framework.TestCase;
-import org.apache.felix.service.command.CommandSession;
-import org.easymock.EasyMock;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
+
+import java.util.Properties;
+
+import junit.framework.TestCase;
+
+import org.apache.felix.service.command.CommandSession;
+import org.easymock.EasyMock;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Test cases for {@link EditCommand}
@@ -51,7 +51,7 @@ public class UpdateCommandTest extends TestCase {
         command.setBundleContext(context);
 
         admin = createMock(ConfigurationAdmin.class);
-        command.setConfigurationAdmin(admin);
+        command.setConfigRepository(new ConfigRepository(null, admin));
         expect(context.getBundle(0)).andReturn(null).anyTimes();
 
         replay(context);

@@ -24,6 +24,7 @@ import org.apache.karaf.shell.commands.Command;
 @Command(scope = "config", name = "list-property", description = "Lists properties from the currently edited configuration.")
 public class PropListCommand extends ConfigPropertyCommandSupport {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void propertyAction(Dictionary props) {
         for (Enumeration e = props.keys(); e.hasMoreElements(); ) {

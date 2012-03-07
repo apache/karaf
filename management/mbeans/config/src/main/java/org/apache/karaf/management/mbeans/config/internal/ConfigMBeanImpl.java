@@ -13,49 +13,57 @@
  */
 package org.apache.karaf.management.mbeans.config.internal;
 
-import org.apache.felix.utils.properties.Properties;
-import org.apache.karaf.management.mbeans.config.ConfigMBean;
-import org.osgi.framework.Constants;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import java.io.File;
-import java.util.*;
+
+import org.apache.karaf.management.mbeans.config.ConfigMBean;
+import org.apache.karaf.shell.config.ConfigRepository;
+import org.osgi.service.cm.Configuration;
 
 /**
  * Implementation of the ConfigMBean.
  */
 public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
 
-    private final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
-
-    private ConfigurationAdmin configurationAdmin;
-    private File storage;
-
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return this.configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    public File getStorage() {
-        return this.storage;
-    }
-
-    public void setStorage(File storage) {
-        this.storage = storage;
-    }
+    private ConfigRepository configRepo;
 
     public ConfigMBeanImpl() throws NotCompliantMBeanException {
         super(ConfigMBean.class);
     }
 
+    private Configuration getConfiguration(String pid) throws IOException {
+        Configuration configuration = configRepo.getConfigAdmin().getConfiguration(pid);
+        if (configuration == null) {
+            throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
+        }
+        return configuration;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private Dictionary getConfigProperties(String pid) throws IOException {
+        Configuration configuration = getConfiguration(pid);
+
+        Dictionary dictionary = configuration.getProperties();
+        if (dictionary == null) {
+            dictionary = new java.util.Properties();
+        }
+        return dictionary;
+    }
+
+    /**
+     * Get all config pids
+     */
     public List<String> getConfigs() throws Exception {
-        Configuration[] configurations = configurationAdmin.listConfigurations(null);
+        Configuration[] configurations = this.configRepo.getConfigAdmin().listConfigurations(null);
         List<String> pids = new ArrayList<String>();
         for (int i = 0; i < configurations.length; i++) {
             pids.add(configurations[i].getPid());
@@ -63,32 +71,30 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         return pids;
     }
 
+    @SuppressWarnings("rawtypes")
     public void create(String pid) throws Exception {
-        store(pid, new Hashtable(), false);
+        configRepo.update(pid, new Hashtable());
+    }
+    
+
+    public void update(String pid, Map<String, String> properties) throws IOException {
+        if (properties == null) {
+            properties = new HashMap<String, String>();
+        }
+        Dictionary<String, String> dictionary = new Hashtable<String, String>();
+        for (String key : properties.keySet()) {
+            dictionary.put(key, properties.get(key));
+        }
+        configRepo.update(pid, dictionary);
     }
 
     public void delete(String pid) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
-        if (configuration == null) {
-            throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
-        }
-        configuration.delete();
-        if (storage != null) {
-            File cfgFile = new File(storage, pid + ".cfg");
-            cfgFile.delete();
-        }
+        this.configRepo.delete(pid);
     }
 
+    @SuppressWarnings("rawtypes")
     public Map<String, String> listProperties(String pid) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
-        if (configuration == null) {
-            throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
-        }
-
-        Dictionary dictionary = configuration.getProperties();
-        if (dictionary == null) {
-            dictionary = new java.util.Properties();
-        }
+        Dictionary dictionary = getConfigProperties(pid);
 
         Map<String, String> propertiesMap = new HashMap<String, String>();
         for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
@@ -99,32 +105,16 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         return propertiesMap;
     }
 
+    @SuppressWarnings("rawtypes")
     public void deleteProperty(String pid, String key) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
-        if (configuration == null) {
-            throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
-        }
-
-        Dictionary dictionary = configuration.getProperties();
-        if (dictionary == null) {
-            dictionary = new java.util.Properties();
-        }
-
+        Dictionary dictionary = getConfigProperties(pid);
         dictionary.remove(key);
-        store(pid, dictionary, false);
+        configRepo.update(pid, dictionary, false);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void appendProperty(String pid, String key, String value) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
-        if (configuration == null) {
-            throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
-        }
-
-        Dictionary dictionary = configuration.getProperties();
-        if (dictionary == null) {
-            dictionary = new java.util.Properties();
-        }
-
+        Dictionary dictionary = getConfigProperties(pid);
         Object currentValue = dictionary.get(key);
         if (currentValue == null) {
             dictionary.put(key, value);
@@ -133,94 +123,18 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         } else {
             throw new IllegalStateException("Current value is not a String");
         }
-        store(pid, dictionary, false);
+        configRepo.update(pid, dictionary, false);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public void setProperty(String pid, String key, String value) throws Exception {
-        Configuration configuration = configurationAdmin.getConfiguration(pid);
-        if (configuration == null) {
-            throw new IllegalArgumentException("Configuration PID " + pid + " doesn't exist");
-        }
-
-        Dictionary dictionary = configuration.getProperties();
-        if (dictionary == null) {
-            dictionary = new java.util.Properties();
-        }
-
+        Dictionary dictionary = getConfigProperties(pid);
         dictionary.put(key, value);
-        store(pid, dictionary, false);
+        configRepo.update(pid, dictionary, false);
     }
 
-    /**
-     * Store/flush a configuration PID into the configuration file.
-     *
-     * @param pid        the configuration PID.
-     * @param properties the configuration properties.
-     * @throws Exception
-     */
-    private void store(String pid, Dictionary properties, boolean bypassStorage) throws Exception {
-        if (!bypassStorage && storage != null) {
-            File storageFile = new File(storage, pid + ".cfg");
-            Configuration configuration = configurationAdmin.getConfiguration(pid, null);
-            if (configuration != null && configuration.getProperties() != null) {
-                Object val = configuration.getProperties().get(FELIX_FILEINSTALL_FILENAME);
-                if (val instanceof String) {
-                    if (((String) val).startsWith("file:")) {
-                        val = ((String) val).substring("file:".length());
-                    }
-                    storageFile = new File((String) val);
-                }
-            }
-            Properties p = new Properties(storageFile);
-            p.clear();
-            for (Enumeration keys = properties.keys(); keys.hasMoreElements(); ) {
-                Object key = keys.nextElement();
-                if (!Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    p.put((String) key, (String) properties.get(key));
-                }
-            }
-            // remove "removed" properties from the file
-            ArrayList<String> propertiesToRemove = new ArrayList<String>();
-            for (Object key : p.keySet()) {
-                if (properties.get(key) == null
-                        && !Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    propertiesToRemove.add(key.toString());
-                }
-            }
-            for (String key : propertiesToRemove) {
-                p.remove(key);
-            }
-            // save the cfg file
-            storage.mkdirs();
-            p.save();
-        } else {
-            Configuration cfg = configurationAdmin.getConfiguration(pid, null);
-            if (cfg.getProperties() == null) {
-                String[] pids = parsePid(pid);
-                if (pids[1] != null) {
-                    cfg = configurationAdmin.createFactoryConfiguration(pids[0], null);
-                }
-            }
-            if (cfg.getBundleLocation() != null) {
-                cfg.setBundleLocation(null);
-            }
-            cfg.update(properties);
-        }
-    }
-
-    private String[] parsePid(String pid) {
-        int n = pid.indexOf('-');
-        if (n > 0) {
-            String factoryPid = pid.substring(n + 1);
-            pid = pid.substring(0, n);
-            return new String[] { pid, factoryPid };
-        } else {
-            return new String[] { pid, null };
-        }
+    public void setConfigRepo(ConfigRepository configRepo) {
+        this.configRepo = configRepo;
     }
 
 }

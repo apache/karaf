@@ -17,14 +17,14 @@
 package org.apache.karaf.shell.config;
 
 import org.apache.karaf.shell.commands.Command;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "cancel", description = "Cancels the changes to the configuration being edited.")
 public class CancelCommand extends ConfigCommandSupport {
 
-    protected void doExecute(ConfigurationAdmin admin) throws Exception {
+    protected Object doExecute() throws Exception {
         session.put(PROPERTY_CONFIG_PID, null);
         session.put(PROPERTY_CONFIG_PROPS, null);
+        return null;
     }
 
 }

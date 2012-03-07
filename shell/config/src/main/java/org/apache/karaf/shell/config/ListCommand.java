@@ -22,7 +22,6 @@ import java.util.Enumeration;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 @Command(scope = "config", name = "list", description = "Lists existing configurations.")
 public class ListCommand extends ConfigCommandSupport {
@@ -30,8 +29,9 @@ public class ListCommand extends ConfigCommandSupport {
     @Argument(index = 0, name = "query", description = "Specify a LDAP query", required = false, multiValued = false)
     String query;
 
-    protected void doExecute(ConfigurationAdmin admin) throws Exception {
-        Configuration[] configs = admin.listConfigurations(query);
+    @SuppressWarnings("rawtypes")
+    protected Object doExecute() throws Exception {
+        Configuration[] configs = configRepository.getConfigAdmin().listConfigurations(query);
         if (configs != null) {
             for (Configuration config : configs) {
                 System.out.println("----------------------------------------------------------------");
@@ -50,5 +50,6 @@ public class ListCommand extends ConfigCommandSupport {
                 }
             }
         }
+        return null;
     }
 }

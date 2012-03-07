@@ -25,13 +25,12 @@
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.apache.karaf.shell.config.CancelCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
+                <property name="configRepository" ref="configRepo"/>
             </action>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.DeleteCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
-                <property name="storage" value="${storage}" />
+                <property name="configRepository" ref="configRepo"/>
             </action>
             <completers>
                 <ref component-id="configCompleter" />
@@ -40,8 +39,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.EditCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
-                <property name="storage" value="${storage}" />
+                <property name="configRepository" ref="configRepo"/>
             </action>
             <completers>
                 <ref component-id="configCompleter" />
@@ -49,15 +47,16 @@
             </completers>
         </command>
         <command>
-            <action class="org.apache.karaf.shell.config.ListCommand"/>
+            <action class="org.apache.karaf.shell.config.ListCommand">
+                <property name="configRepository" ref="configRepo"/>
+            </action>
             <optional-completers>
                 <entry key="-p" value-ref="configCompleter"/>
             </optional-completers>
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropDelCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
-                <property name="storage" value="${storage}" />
+                <property name="configRepository" ref="configRepo"/>
             </action>
             <completers>
                 <ref component-id="configPropertyCompleter" />
@@ -69,7 +68,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropListCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
+                <property name="configRepository" ref="configRepo"/>
             </action>
             <optional-completers>
                 <entry key="-p" value-ref="configCompleter"/>
@@ -77,8 +76,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropSetCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
-                <property name="storage" value="${storage}" />
+                <property name="configRepository" ref="configRepo"/>
             </action>
             <completers>
                 <ref component-id="configPropertyCompleter" />
@@ -90,8 +88,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.PropAppendCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
-                <property name="storage" value="${storage}" />
+                <property name="configRepository" ref="configRepo"/>
             </action>
             <completers>
                 <ref component-id="configPropertyCompleter" />
@@ -103,8 +100,7 @@
         </command>
         <command>
             <action class="org.apache.karaf.shell.config.UpdateCommand">
-                <property name="configurationAdmin" ref="configAdmin"/>
-                <property name="storage" value="${storage}" />
+                <property name="configRepository" ref="configRepo"/>
             </action>
         </command>
     </command-bundle>
@@ -117,6 +113,13 @@
     <bean id="configPropertyCompleter" class="org.apache.karaf.shell.config.completers.ConfigurationPropertyCompleter">
         <property name="configAdmin" ref="configAdmin"/>
     </bean>
+
+    <bean id="configRepo" class="org.apache.karaf.shell.config.ConfigRepository">
+        <argument value="${storage}"/>
+        <argument ref="configAdmin"/>
+    </bean>
+    
+    <service interface="org.apache.karaf.shell.config.ConfigRepository" ref="configRepo"/>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 

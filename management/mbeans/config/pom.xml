@@ -52,6 +52,15 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
         </dependency>
+        
+        <!--  
+            Temporally depend on shell.config to reuse the ConfigRepository.
+            This will be moved to a config-core project in for karaf 3
+         -->
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.config</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
